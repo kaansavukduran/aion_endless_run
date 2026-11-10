@@ -6,6 +6,7 @@ import shutil
 import stat
 import subprocess
 import urllib.request
+import time
 import zipfile
 from pathlib import Path
 
@@ -16,8 +17,23 @@ system = platform.system()
 suffix = {"Linux": "linux.x86_64.zip", "Windows": "win64.exe.zip", "Darwin": "macos.universal.zip"}[system]
 base = f'https://github.com/godotengine/godot/releases/download/{VERSION}-stable/'
 names = [f'Godot_v{VERSION}-stable_{suffix}', f'Godot_v{VERSION}-stable_export_templates.tpz']
-with urllib.request.urlopen(base + 'SHA512-SUMS.txt') as response:
-    sums = response.read().decode()
+def download(url, target):
+    partial = target.with_suffix(target.suffix + '.partial')
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(url, timeout=60) as response, partial.open('wb') as output:
+                shutil.copyfileobj(response, output)
+            partial.replace(target)
+            return
+        except (OSError, urllib.error.URLError):
+            partial.unlink(missing_ok=True)
+            if attempt == 4: raise
+            print('Official download interrupted; retrying', target.name, flush=True)
+            time.sleep(2 ** attempt)
+
+sums_file = root / 'SHA512-SUMS.txt'
+download(base + 'SHA512-SUMS.txt', sums_file)
+sums = sums_file.read_text()
 checksums = {}
 for line in sums.splitlines():
     parts = line.split()
@@ -26,7 +42,7 @@ for line in sums.splitlines():
 for name in names:
     target = root / name
     if not target.exists():
-        urllib.request.urlretrieve(base + name, target)
+        download(base + name, target)
     with target.open('rb') as stream:
         actual = hashlib.file_digest(stream, 'sha512').hexdigest()
     if actual != checksums[name]:

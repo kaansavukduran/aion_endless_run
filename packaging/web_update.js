@@ -28,6 +28,7 @@
   }
   navigator.serviceWorker.addEventListener('message', event => showUpdate(event.data));
   navigator.serviceWorker.register('./index.service.worker.js', {updateViaCache:'none'}).then(registration => {
+    if (!registration) return; // Browsers/privacy tools may disable worker installation.
     const check = () => {
       registration.update().catch(() => {}); // Offline is an expected condition.
       if (registration.active) registration.active.postMessage({type:'aion-version'});

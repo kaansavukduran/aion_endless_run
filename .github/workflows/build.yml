@@ -62,7 +62,8 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y desktop-file-utils
           godot --headless --export-release Linux
-          GODOT_BIN=godot python3 packaging/build_web.py
+          godot --headless --export-release Web
+          python3 packaging/web_updates.py
           curl -fL https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-x86_64.AppImage -o /tmp/appimagetool
           chmod +x /tmp/appimagetool
           sudo cp /tmp/appimagetool /usr/local/bin/appimagetool

@@ -45,3 +45,7 @@ def prepare_web_export(root: Path) -> None:
     worker = (root / 'packaging/web_worker.js').read_text().replace('__BUILD__', build).replace('__VERSION__', version).replace('__FILES__', json.dumps(files))
     (output / 'index.service.worker.js').write_text(worker)
     print(f'Offline export v{version}, immutable build {build}', flush=True)
+
+
+if __name__ == '__main__':
+    prepare_web_export(Path(__file__).resolve().parents[1])
