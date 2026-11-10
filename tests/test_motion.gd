@@ -38,7 +38,7 @@ func run() -> void:
 	check(w.adventure.level == 3,"Each subsequent level needs a new distance segment")
 	var x: float = w.adventure.celebration_x(w)
 	w.distance += 200
-	check(is_equal_approx(w.adventure.celebration_x(w),x-140),"The background spectator scrolls left with world travel")
+	check(is_equal_approx(w.adventure.celebration_x(w),x-90),"The background spectator scrolls left with world travel")
 	w.state = "paused"
 	var elapsed: float = w.adventure.level_elapsed
 	w.step(0.1)

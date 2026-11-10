@@ -175,7 +175,7 @@ func level_progress(world) -> float:
 	return LEVEL_DISTANCE * minf(clampf(level_distance(world)/LEVEL_DISTANCE,0,1),clampf(level_elapsed/MIN_LEVEL_TIME,0,1))
 
 func celebration_x(world, moving: bool = true) -> float:
-	return celebration_origin - (world.distance-celebration_spawn_distance)*0.70 if moving else celebration_origin
+	return celebration_origin - (world.distance-celebration_spawn_distance)*0.45 if moving else celebration_origin
 
 func choose_power(world) -> String:
 	var eligible: bool = world.time >= 20.0 and world.time - last_mushroom_at >= 45.0
@@ -525,7 +525,7 @@ func after_step(world, dt: float, movement: float, previous_y: float) -> void:
 				hit_enemy(world, enemy, 2 if giant() or (world.character == "wolf" and attack_variant == 1) else 1, false)
 				if enemy.hp <= 0: continue
 		if body.intersects(rect) and world.invulnerable <= 0.0 and enemy.hurt <= 0.0:
-			world.take_hit("bonk")
+			world.take_hit("bonk","enemy")
 			if world.state != "running": break
 	enemies = enemies.filter(func(e): return e.x > -120 and (e.hp > 0 or e.defeat < 0.65))
 	update_goal(world)

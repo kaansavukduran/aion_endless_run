@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3}
-const GAME_VERSION = "0.9.0"
+const GAME_VERSION = "0.10.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -79,6 +79,7 @@ var ui_theme: Theme
 var portrait := false
 var web_stamp := ""
 var web_update_callback: JavaScriptObject
+var gamepad := preload("res://scripts/gamepad.gd").new()
 var effects_enabled := true
 var canvas_layer: CanvasLayer
 var screen_transform := Transform2D.IDENTITY
@@ -105,6 +106,8 @@ func _ready() -> void:
 	if OS.has_feature("web") and JavaScriptBridge.eval("matchMedia('(prefers-reduced-motion: reduce)').matches"):
 		motion = false
 		effects_enabled = false
+	gamepad.host = self
+	Input.joy_connection_changed.connect(on_gamepad_connection)
 	load_settings()
 	evolution_view = preload("res://scripts/evolution_view.gd").new()
 	evolution_view.host = self
@@ -200,8 +203,9 @@ func load_settings() -> void:
 	fullscreen = bool(cfg.get_value("prefs", "fullscreen", false))
 
 func save_settings() -> void:
-	best = maxi(best, world.score)
-	best_level = maxi(best_level, world.adventure.level)
+	if not world.practice:
+		best = maxi(best, world.score)
+		best_level = maxi(best_level, world.adventure.level)
 	var cfg := ConfigFile.new()
 	cfg.set_value("prefs", "language", language)
 	cfg.set_value("prefs", "language_override", language_override)
@@ -469,6 +473,7 @@ func build_page() -> void:
 		first = button(text("play"), start_run, true)
 		column.add_child(first)
 		column.add_child(button(text("characters"), func(): open_subpage("characters")))
+		column.add_child(button(text("boss_training"), func(): show_page("bosses")))
 		column.add_child(button(text("settings"), func(): open_subpage("settings")))
 		column.add_child(label("SPACE / ENTER", 10, "99abc8"))
 		build_start_roster()
@@ -487,14 +492,23 @@ func build_page() -> void:
 		column.add_child(result)
 		result.add_child(label("%05d" % world.score, 54, "b6f0d9"))
 		result.add_child(label(text("score"), 13, "adbbd4"))
-		if world.score > best_at_start:
+		if not world.practice and world.score > best_at_start:
 			column.add_child(label(text("new_best"), 14, "ffda93"))
 		column.add_child(wrap_label(text("runstats") % [world.passed, world.gems]))
 		column.add_child(wrap_label(text("level_record") % [world.adventure.level,best_level],13))
-		first = button(text("again"), start_run, true)
+		first = button(text("again"), retry_run, true)
 		column.add_child(first)
 		column.add_child(button(text("menu"), main_menu))
 		column.add_child(button(text("settings"), func(): open_subpage("settings")))
+	elif page == "bosses":
+		column.add_child(label(text("boss_training"),25,"c1f1e2"))
+		column.add_child(wrap_label(text("boss_training_help"),14))
+		for kind in 3:
+			var entry := button(text(["boss_name","boss_ray","boss_root"][kind]),start_boss_practice.bind(kind))
+			entry.name = "PracticeBoss_"+str(kind)
+			column.add_child(entry)
+			if kind==0: first = entry
+		column.add_child(button(text("menu"),main_menu))
 	elif page == "settings":
 		column.add_child(label(text("settings"), 28))
 		column.add_child(label(text("language"), 13, "a8bcd8"))
@@ -541,6 +555,7 @@ func build_page() -> void:
 		column.add_child(wrap_label(text("help"), 13))
 		column.add_child(wrap_label(text("boss_help"),13))
 		column.add_child(wrap_label(text("motion_help"),13))
+		column.add_child(wrap_label(text("gamepad_help"),13))
 		column.add_child(label(text("discoveries") % world.adventure.discoveries.size(), 16))
 		for power in world.adventure.POWER_NAMES:
 			column.add_child(wrap_label(("✓ " if world.adventure.discoveries.has(power) else "○ ") + text("power_" + power) + " · " + text("desc_" + power), 12))
@@ -793,6 +808,7 @@ func select_character(id: String) -> void:
 	rebuild()
 
 func clear_held_controls() -> void:
+	gamepad.clear()
 	jump_sources.clear()
 	boost_sources.clear()
 	duck_sources.clear()
@@ -977,28 +993,13 @@ func _input(event: InputEvent) -> void:
 			fullscreen = not fullscreen
 			apply_fullscreen()
 			save_settings()
-	if event is InputEventJoypadButton:
-		if not event.pressed:
-			if event.button_index == JOY_BUTTON_A: release_jump("pad")
-			if event.button_index == JOY_BUTTON_X: release_attack("pad")
-			if event.button_index == JOY_BUTTON_RIGHT_SHOULDER: release_shoot("pad")
-			if event.button_index == JOY_BUTTON_B: release_duck("pad")
-			if event.button_index == JOY_BUTTON_LEFT_SHOULDER: release_boost("pad")
-			return
-		if event.button_index == JOY_BUTTON_START:
-			if page == "": pause_run()
-			elif page == "paused": resume_run()
-		elif event.button_index == JOY_BUTTON_A:
-			if page == "": press_jump("pad")
-			elif page == "main": start_run()
-		elif event.button_index == JOY_BUTTON_RIGHT_SHOULDER:
-			press_shoot("pad")
-		elif event.button_index == JOY_BUTTON_X:
-			press_attack("pad")
-		elif event.button_index == JOY_BUTTON_B:
-			press_duck("pad")
-		elif event.button_index == JOY_BUTTON_LEFT_SHOULDER:
-			press_boost("pad")
+	if gamepad.handle(event): get_viewport().set_input_as_handled()
+
+func on_gamepad_connection(id: int,connected: bool) -> void:
+	if not connected and gamepad.device==id:
+		clear_held_controls()
+		gamepad.clear()
+		if page=="": pause_run()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if page != "": return
@@ -1016,6 +1017,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _physics_process(dt: float) -> void:
+	gamepad.step(dt)
 	world.character = character
 	if page == "" or (world.state in ["fire", "ice", "bonk", "fall"] and page == "finished"):
 		world.step(dt)
@@ -1030,7 +1032,7 @@ func _physics_process(dt: float) -> void:
 		save_settings()
 		show_page("finished")
 	if world.state == "running":
-		best = maxi(best, world.score)
+		if not world.practice: best = maxi(best, world.score)
 		notice_time = maxf(0.0, notice_time - dt)
 	if page == "main" and motion:
 		menu_clock += dt
@@ -1051,6 +1053,9 @@ func _physics_process(dt: float) -> void:
 	queue_redraw()
 
 func handle_event(value: String) -> void:
+	if value == "boss_return" and world.practice:
+		world.state = "ready"
+		show_page("bosses")
 	if value == "level_up":
 		best_level = maxi(best_level,world.adventure.level)
 		notice = text("level_up") % world.adventure.level
@@ -1175,8 +1180,8 @@ func update_hud() -> void:
 	boss_bar.max_value = maxi(1,boss.max_hp)
 	boss_bar.value = boss.hp
 	footer_label.text = text("boss_fight") if boss.active() else text("hint")
-	boss_label.text = text("boss_name") + "  ·  %d/%d  ·  " % [boss.hp,boss.max_hp] + text("boss_hearts") % boss.player_hp
-	if boss.warning != "": boss_label.text += " · " + text("boss_dodge_"+boss.warning)
+	boss_label.text = text(["boss_name","boss_ray","boss_root"][boss.boss_kind]) + "  ·  %d/%d  ·  " % [boss.hp,boss.max_hp] + text("boss_hearts") % boss.player_hp
+	if boss.warning != "": boss_label.text += " · " + text("boss_pattern_"+boss.pattern) + " · " + text("boss_dodge_"+boss.warning)
 	var ids: Array = ["jump","duck","shoot"] if boss.active() else ["jump","attack","duck"]
 	for id in action_buttons:
 		var index: int = ids.find(id)
@@ -1215,6 +1220,8 @@ func publish_web_status() -> void:
 	stamp += ":%.2f:%s:%s:%d:%d" % [world.time, world.adventure.ducking(world), world.adventure.giant(), world.adventure.kills, friend_combat]
 	for scroll in ui.find_children("*", "VScrollBar", true, false): stamp += ":" + str(scroll.value)
 	for field in settings_inputs.values(): stamp += ":" + str(field.get_global_rect())
+	var focused: Control = get_viewport().gui_get_focus_owner()
+	stamp += ":"+str(focused.get_instance_id()) if is_instance_valid(focused) else ":none"
 	if stamp == web_stamp: return
 	web_stamp = stamp
 	var document = JavaScriptBridge.get_interface("document")
@@ -1233,6 +1240,15 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-source-row",str(friend_sprite.get_meta("source_row",0)))
 	canvas.setAttribute("data-boss-active",str(world.frontier.active()))
 	canvas.setAttribute("data-boss-phase",world.frontier.phase)
+	canvas.setAttribute("data-boss-kind",str(world.frontier.boss_kind))
+	canvas.setAttribute("data-boss-pattern",world.frontier.pattern)
+	canvas.setAttribute("data-boss-attacks",str(world.frontier.attacks_cast))
+	canvas.setAttribute("data-practice",str(world.practice))
+	canvas.setAttribute("data-death-cause",world.death_cause)
+	canvas.setAttribute("data-follower-visible",JSON.stringify([followers[0].visible,followers[1].visible]))
+	canvas.setAttribute("data-girl-ground",str(ground-58))
+	var focus: Control = get_viewport().gui_get_focus_owner()
+	canvas.setAttribute("data-focused",str(focus.name) if is_instance_valid(focus) else "")
 	canvas.setAttribute("data-boss-hp",str(world.frontier.hp))
 	canvas.setAttribute("data-boss-max-hp",str(world.frontier.max_hp))
 	canvas.setAttribute("data-boss-player-hp",str(world.frontier.player_hp))
@@ -1415,18 +1431,26 @@ func update_friend() -> void:
 		var combat_count := frames.count("rolls",COMBAT_ROWS[character]) if friend_combat >= 4 else frames.count("owl-peck" if a.attack_airborne else "strikes",0 if a.attack_airborne else COMBAT_ROWS[character]*2+a.attack_variant)
 		var combat_frame: int = (a.attack_frame(combat_count) if friend_combat < 4 else a.roll_frame(combat_count)) if motion else combat_count/2
 		place_combat(friend_sprite, character, friend_combat, combat_frame, Vector2(World.PLAYER_X, ground + world.y), visual_size, friend_combat >= 4 or a.ducking(world))
-	if world.frontier.active() and not a.ducking(world) and (world.frontier.phase != "intro" or world.frontier.stage_time > 0.75):
-		var shooting: int = frames.progress("heroes",COMBAT_ROWS[character],0.25+(0.16-world.frontier.shot_flash)/0.16*0.55) if world.frontier.shot_flash > 0.0 else posmod(int(world.frontier.clock*7),3)
-		frames.place(friend_sprite,"heroes",COMBAT_ROWS[character],shooting,Vector2(World.PLAYER_X,ground+world.y))
+	if world.state in ["running","paused"] and world.frontier.active() and not a.ducking(world) and (world.frontier.phase != "intro" or world.frontier.stage_time > 0.75):
+		var firing: bool = world.frontier.shot_flash>0
+		var key := "gun-fire" if firing else "gun-run"
+		var row: int = COMBAT_ROWS[character]
+		var shooting: int = world.frontier.gun_frame(frames.count(key,row)) if firing else frames.cycle(key,row,world.travel_distance(),174.0)
+		if not motion: shooting = 3 if firing else 0
+		frames.place(friend_sprite,key,row,shooting,Vector2(World.PLAYER_X,ground+world.y))
+	if world.state == "bonk":
+		var row: int = COMBAT_ROWS[character]*2+(1 if world.death_cause=="enemy" else 0)
+		frames.place(friend_sprite,"deaths",row,frames.progress("deaths",row,world.hit_time/1.25) if motion else frames.count("deaths",row)-1,Vector2(World.PLAYER_X,ground+world.y),visual_size)
+
 	friend_sprite.modulate = Color.WHITE
 	if character == "sheep":
 		for i in 2:
-			followers[i].visible = not world.frontier.active() and world.sheep_count > i + 1 and world.state not in ["fire", "ice", "bonk", "fall"]
+			followers[i].visible = world.sheep_count > i + 1 and world.state not in ["fire", "ice", "bonk", "fall"]
 			var pose: Dictionary = world.flock_pose(i)
 			var in_air: bool = float(pose.y) < -0.01
 			var landing: bool = float(pose.landing_time) > 0.0
 			var row := 2 if in_air or landing else (0 if world.state == "ready" else 1)
-			var frame := flight_frame(float(pose.velocity), float(pose.air_time), frames.count("runner-sheep",2)) if in_air else (frames.count("runner-sheep",2)-1 if landing else frames.cycle("runner-sheep",1,world.distance-World.FLOCK_GAP*(i+1),174.0))
+			var frame := flight_frame(float(pose.velocity), float(pose.air_time), frames.count("runner-sheep",2)) if in_air else (frames.count("runner-sheep",2)-1 if landing else frames.cycle("runner-sheep",1,world.travel_distance()-World.FLOCK_GAP*(i+1),174.0))
 			place_companion(followers[i], "sheep", row, frame if motion else 0, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), 0.62 * FOLLOWER_RATIO, in_air or landing)
 			if float(pose.get("duck", 0.0)) > 0.5:
 				place_combat(followers[i], "sheep", 6, posmod(int(float(pose.get("roll_phase",0.0))/0.68*frames.count("rolls",2)),frames.count("rolls",2)) if motion else 4, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
@@ -1584,6 +1608,7 @@ func draw_scenery() -> void:
 			if weights[3] > 0:
 				for row in 3:
 					for col in 3: draw_rect(Rect2(x+68+col*15,base-height+15+row*19,6,9),Color(0.92,0.74,0.48,float(weights[3])*(0.35+night*0.35)))
+	evolution_view.draw_scene(self,true)
 	for kind in 4:
 		var alpha: float = weights[kind]
 		if alpha <= 0: continue
@@ -1631,3 +1656,13 @@ func draw_scenery() -> void:
 			var x := fposmod(float(i*109)-scroll*0.15,view_w)
 			var y := 150.0+fposmod(float(i*73)+(time*24.0 if motion else 0.0),maxf(1,ground-150))
 			draw_rect(Rect2(x,y,3,3),Color(0.88,0.96,1.0,float(weights[1])*0.5))
+
+func start_boss_practice(kind: int) -> void:
+	start_run()
+	world.practice = true
+	if character=="sheep": world.sheep_count = 3
+	world.frontier.request_boss((clampi(kind,0,2)+1)*10)
+
+func retry_run() -> void:
+	if world.practice: start_boss_practice(world.frontier.boss_kind)
+	else: start_run()

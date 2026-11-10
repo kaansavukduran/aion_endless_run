@@ -105,7 +105,7 @@ func run() -> void:
 	check(w.adventure.enemies.is_empty() and w.obstacles.is_empty() and w.adventure.items.is_empty(),"The isolated chase cannot spawn ordinary encounters")
 	w.frontier.shoot_held = true
 	advance(w,0.6)
-	check(w.frontier.shots_fired >= 3 and w.frontier.projectiles.any(func(p):return p.owner == "hero" and p.vx > 0),"Held fire launches real forward energy bolts at a limited cadence")
+	check(w.frontier.shots_fired >= 2 and w.frontier.projectiles.any(func(p):return p.owner == "hero" and p.vx > 0),"Held fire launches real forward energy bolts at a limited cadence")
 	var hp: int = w.frontier.hp
 	advance(w,1.1)
 	check(w.frontier.hp < hp and w.frontier.hits > 0,"Projectile collision actually reduces boss health")
@@ -139,7 +139,7 @@ func run() -> void:
 	check(w.frontier.phase == "victory" and w.frontier.wins == 1 and w.adventure.bonus_score == 600,"The final hit wins exactly once and grants the real milestone reward")
 	advance(w,1.7)
 	check(not w.frontier.active() and w.frontier.projectiles.is_empty() and w.adventure.powers.shield > 8.8,"Victory restores the suspended powers and clears combat")
-	check(w.obstacle_wait > 2 and w.invulnerable > 1 and w.trail.size() < 25,"Return has a safe runway and resets stationary chase follower history")
+	check(w.obstacle_wait > 2 and w.invulnerable > 1 and w.trail.size() < 120,"Return has a safe runway and rebases bounded moving chase follower history")
 	w = arena()
 	w.frontier.request_boss(10)
 	w.step(0.01)

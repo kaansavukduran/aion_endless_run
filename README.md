@@ -31,6 +31,20 @@ Aion varsayılan karakter. Başlangıç kartlarından Baykuş Ömer, Melun Bilge
 
 Rekor, keşfedilen güçler ve tercihler yereldir. Geçici güçler yalnızca o koşuda sürer. Normal kayıt konumu Godot'un `app_userdata/Aion Endless Run/save.cfg` klasörüdür: Windows `%APPDATA%\Godot\app_userdata\Aion Endless Run`, Linux `~/.local/share/godot/app_userdata/Aion Endless Run`, macOS `~/Library/Application Support/Godot/app_userdata/Aion Endless Run`. Portable burada kurulum gerektirmeyen sürüm anlamındadır; kayıtlar işletim sisteminin kullanıcı veri klasöründe tutulur. Canlı koşu uygulama kapatılınca geri yüklenmez; rekor, seçili karakter ve ayarlar korunur.
 
+## 0.10.0 · Sürüyle boss savaşı ve çalışan gamepad menüleri
+
+**Sürü kaybolmaz:** Boss sırasında küçük koyunlar liderin arkasında görünür kalır. Takip gecikmesi boss kovalamacasının gerçek ilerleme mesafesinden hesaplanır; zıplama ve takla sırayla takip edilir. Koşuya dönüşte izler yeni mesafeye taşınır, koyunlar ışınlanmaz. Boss’un üç savaş canı normal sürü sayısını tüketmez.
+
+**Üç boss:** Kül Muhafızı’nın yüksek/alçak/seri atışlarına Fırtına Vatozu’nun kanatlı dalışı, ikili akımı ve elektrik şeridi; Kök Motoru’nun tohum salvosu, sarmaşık süpürüşü ve sıçrayışı eklendi. Tasarımlar 10/20/30 seviyelerde sırayla gelir, sonra döngü sürer. Her tasarım üç saldırı dizisi ve canı yarıya düşünce daha kısa bekleme kullanır. Önce hangi hattan kaçılacağı görünür; aynı salvoda çelişen yüksek/alçak zorunluluk üretilmez. Ana menüde **Boss antrenmanı** ile seçili kahramanınla üç tasarımı hemen deneyebilirsin. Antrenman normal rekoru ve seviye ilerlemesini değiştirmez; koyuna iki küçük arkadaş verilir.
+
+**Düzeltilen silah:** Koşarak nişan alma ve tek atışın hazırlık/parlama/geri tepme/toparlanması ayrı 12 karelik dizilerdir. Koyun tabancayı iki ön toynağıyla tutar; kurt kürklüdür, yalnızca Aion önlük giyer. Mermi, namlunun ölçülmüş ön konumundan parlama anında çıkar. Silah pozu, ölüm animasyonunun üstünü örtmez.
+
+**Gamepad:** Xbox ve standart PlayStation eşlemelerinde menü yön tuşları/sol çubukla gezilir; **A/Cross veya X/Square seçer**, B/Circle geri döner. Sonuç ekranındaki Yeniden Oyna / Ana Menü / Ayarlar ve duraklatma menüsü çalışır. Oynanışta A/Cross zıpla, X/Square vur, B/Circle takla, LB/L1 depar, RB/R1 veya RT/R2 ateş, Start/Options duraklat. Kol ayrılırsa basılı durumlar temizlenir ve koşu duraklar. Fiziksel cihaz listesi tarayıcı/işletim sisteminin standart eşleme desteğine bağlıdır.
+
+**Gerçek arka katman:** Kutlama karakteri koşu yolunda durmaz. Yolun arkasındaki yükseltilmiş zemine basar; yakın ağaç/nesneler onun önünde çizilir, dünya noktasından paralaksla geride kalır. Saydamlaştırma derinlik yerine kullanılmaz. On seviyelik sarılma için ön kata gelme korunur.
+
+**Ölüm nedenleri:** Ateş, buz ve çukura düşmenin yanında dört kahraman için ayrı 12 karelik engelde sarsılıp düşme ve düşmana çarpıp yüzüstü kapanma dizileri var. Havada darbe alan karakter yere iner. **Üç yeni orijinal pafta, 300 çizilmiş kare**: 96 silah, 108 boss, 96 darbe/yüzüstü düşme. Eski kaynak paftalar korunur.
+
 ## 0.9.0 · Daha akıcı hareket ve anlamlı parkur
 
 **Seviye temposu:** Her yeni seviye için önceki seviye sonrasından en az **30 saniye aktif normal koşu** ve **12.000 yeni mesafe** gerekir. İkisinin de dolması gerekir; düşük hızda daha uzun sürer. Duraklama, sarılma ve boss süresi bu süreye eklenmez. Biriken puan/mesafe arka arkaya seviye atlatmaz. Gösterge iki koşulu da gösterir.

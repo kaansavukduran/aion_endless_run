@@ -40,6 +40,8 @@ var passed := 0
 var gems := 0
 var combo := 0
 var hit_time := 0.0
+var death_cause := ""
+var practice := false
 var obstacle_wait := 2.1
 var obstacles: Array[Dictionary] = []
 var pickups: Array[Dictionary] = []
@@ -63,6 +65,8 @@ func reset() -> void:
 	gems = 0
 	combo = 0
 	hit_time = 0.0
+	death_cause = ""
+	practice = false
 	obstacle_wait = 2.1
 	jump_buffer = 0.0
 	jumps_used = 0
@@ -127,7 +131,7 @@ func event(value: String) -> void:
 	pending_events.append(value)
 	if pending_events.size() > 24: pending_events.pop_front()
 
-func take_hit(kind: String) -> bool:
+func take_hit(kind: String,cause: String = "") -> bool:
 	if invulnerable > 0.0: return false
 	if frontier.active(): return frontier.hit_player(self)
 	if adventure.absorb_hit(self): return true
@@ -137,6 +141,7 @@ func take_hit(kind: String) -> bool:
 		event("sheep_saved")
 		return true
 	state = kind
+	death_cause = cause if cause != "" else kind
 	hit_time = 0.0
 	event(kind)
 	recompute_score()
@@ -145,7 +150,7 @@ func take_hit(kind: String) -> bool:
 # Sample the leader's actual path at the follower's world coordinate. A fixed
 # spatial gap stays correct as speed changes, including mid-jump speed changes.
 func flock_pose(index: int) -> Dictionary:
-	var target := distance - FLOCK_GAP * (index + 1)
+	var target := travel_distance() - FLOCK_GAP * (index + 1)
 	if trail.is_empty(): return {"y":0.0, "velocity":0.0, "air_time":0.0, "landing_time":0.0, "duck":0.0, "roll_phase":0.0}
 	if target <= float(trail[0].distance): return trail[0].duplicate()
 	for i in range(1, trail.size()):
@@ -163,9 +168,12 @@ func flock_pose(index: int) -> Dictionary:
 		return pose
 	return trail[-1].duplicate()
 
+func travel_distance() -> float:
+	return frontier.chase_distance if frontier.active() else distance
+
 func record_trail() -> void:
-	trail.append({"distance":distance, "y":y, "velocity":velocity, "air_time":air_time, "landing_time":landing_time, "duck":1.0 if adventure.ducking(self) else 0.0, "roll_phase":adventure.roll_elapsed})
-	while trail.size() > 2 and float(trail[1].distance) < distance - FLOCK_GAP * 2.0 - 32.0:
+	trail.append({"distance":travel_distance(), "y":y, "velocity":velocity, "air_time":air_time, "landing_time":landing_time, "duck":1.0 if adventure.ducking(self) else 0.0, "roll_phase":adventure.roll_elapsed})
+	while trail.size() > 2 and float(trail[1].distance) < travel_distance() - FLOCK_GAP * 2.0 - 32.0:
 		trail.pop_front()
 
 func gust_strength() -> float:
@@ -203,6 +211,9 @@ func step(dt: float) -> void:
 		riding_gust = false
 		hit_time += dt
 		if state == "fall": y += (250.0+hit_time*650.0)*dt
+		if state == "bonk" and y<0:
+			velocity += GRAVITY*dt
+			y = minf(0.0,y+maxf(80.0,velocity)*dt)
 		return
 	if state != "running" or dt <= 0.0 or dt > 0.05:
 		return
@@ -255,6 +266,7 @@ func step(dt: float) -> void:
 			event("land")
 	if frontier.active():
 		frontier.step_boss(self,dt)
+		if frontier.active(): record_trail()
 		recompute_score()
 		return
 	if character == "sheep" and sheep_count < 3:

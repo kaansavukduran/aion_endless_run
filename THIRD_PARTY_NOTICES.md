@@ -54,3 +54,7 @@ No new or altered PNG artwork. `assets/SPRITE-REGISTRATION.json` records largest
 ## Motion atlases (0.9.0)
 
 Ten new AI-generated original PNG sheets contain 997 physically drawn frames. `assets/MOTION-PROVENANCE.json` records original output identity, SHA-256, actual gutters, silhouette spans and common sheet scales. `packaging/register_motion.py` reads alpha without modifying PNGs. The eleven-column world sheet is registered honestly as eleven, without duplicated padding. Hero/art source originals and all historical notices remain. Static ground objects use the prior parkour sheet; active animated poses use the new registry. New future animation sheets require at least ten actual drawn columns; static props are exempt.
+
+## Encounters (0.10.0)
+
+Three new original AI-generated PNGs / 300 drawn frames: 12×8 weapon poses, 12×9 bosses, 12×8 physical defeats. `assets/ENCOUNTERS-PROVENANCE.json` records original output identities, SHA-256, real gutters, silhouette spans, common per-character pair scales and measured muzzle anchors. `packaging/register_encounters.py` reads original alpha; no source PNG is rewritten. The final weapon atlas corrects the preliminary Aion identity to its cyan-tipped gills/blue eyes; only the final atlas is shipped. Historical motion sheets remain.

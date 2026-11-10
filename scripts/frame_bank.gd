@@ -3,10 +3,14 @@ extends RefCounted
 
 const META = preload("res://assets/FRONTIER-PROVENANCE.json")
 const MOTION = preload("res://assets/MOTION-PROVENANCE.json")
+const ENCOUNTERS = preload("res://assets/ENCOUNTERS-PROVENANCE.json")
 var images := {}
 var frames := {}
 
 func descriptor(key: String,row: int) -> Dictionary:
+	if ENCOUNTERS.data.aliases.has(key):
+		var alias: Dictionary = ENCOUNTERS.data.aliases[key][row]
+		return {"key":alias.atlas,"row":int(alias.row),"data":ENCOUNTERS.data.atlases[alias.atlas]}
 	if MOTION.data.aliases.has(key):
 		var alias: Dictionary = MOTION.data.aliases[key][row]
 		return {"key":alias.atlas,"row":int(alias.row),"data":MOTION.data.atlases[alias.atlas]}
@@ -51,7 +55,7 @@ func pose(key: String, row: int, column: int) -> Dictionary:
 			var bounds: Array = d.frames[row][n].bounds
 			largest = maxf(largest,maxf(bounds[2]-bounds[0],bounds[3]-bounds[1]))
 		factor = 64.0/largest
-	var result := {"texture":ImageTexture.create_from_image(isolated),"offset":Vector2(float(b[0])-float(f.get("anchor_x",d.anchor_x[row]))-2.0,float(b[1])-float(b[3])-2.0),"scale":factor,"height":float(b[3]-b[1])*factor,"head":float(d.head_spans[row])*factor if d.has("head_spans") else 0.0,"source_key":key,"source_row":row,"source_frame":column,"cell_width":float(d.width)/float(d.columns),"cell_height":float(d.height)/float(d.rows),"top":float(b[1]),"left":float(b[0]),"baseline":float(d.baselines[row]) if d.has("baselines") else float(b[3])}
+	var result := {"texture":ImageTexture.create_from_image(isolated),"offset":Vector2(float(b[0])-float(f.get("anchor_x",d.anchor_x[row]))-2.0,float(b[1])-float(b[3])-2.0),"scale":factor,"height":float(b[3]-b[1])*factor,"head":float(d.head_spans[row])*factor if d.has("head_spans") else 0.0,"source_key":key,"source_row":row,"source_frame":column,"cell_width":float(d.width)/float(d.columns),"cell_height":float(d.height)/float(d.rows),"center_y":float(f.get("anchor_y",float(d.height)/float(d.rows)*0.5)),"top":float(b[1]),"left":float(b[0]),"baseline":float(d.baselines[row]) if d.has("baselines") else float(b[3])}
 	frames[cache_key] = result
 	return result
 

@@ -1,3 +1,15 @@
+# Current handoff · 0.10.0
+
+Authoritative main. Three new unchanged original PNGs / 300 frames registered in ENCOUNTERS-PROVENANCE. Current frame bank adds gun-run/gun-fire/deaths/boss-designs while preserving 0.9 motion sources. Gun anticipation0.075s emits at the measured muzzle; 0.30s animation, 0.32s cadence. All heroes keep a single pair scale. Death cause is separate from legacy bonk state; enemy selects prone row, solid/projectile selects impact row. Fatal airborne impacts descend; gun poses never cover defeat.
+
+Boss designs rotate with milestone10/20/30. Three patterns each, one required dodge lane per salvo, half-health faster phase, moving X/Y. Training is an explicit main-menu option, separate from normal progression/records; selected hero retained, sheep gets3 for practice. Never call it a naturally reached level10 browser run. Boss flock uses chase_distance with spatial history and rebases history on return. No follower hiding in boss mode.
+
+Gamepad handler is scripts/gamepad.gd: actual UI activation A/X (Cross/Square), direction/left-stick navigation/repeat, B back, Start pause, RT/R2 fire; disconnect clears held controls. Existing keyboard/touch preserved. Source tests1344; browser virtual standard-controller tests do not prove physical hardware. Background celebrants are drawn inside scenery BEFORE foreground trees at ground-58, fully opaque on a bank, parallax.45; hug moves forward.
+
+Keep all old releases. Increment Android stable-signed versionCode10. APK transfer uses <=40 MiB same-repo temporary parts with hashes, never private signing material. Verify native CI and public files then delete transfer branch. Owner Apple signing/notarization remains outstanding. Delivery details append when complete.
+
+Historical handoff follows.
+
 # Current handoff · 0.9.0
 
 Repository main is authoritative. Current motion release work: ten new unmodified original PNGs / 997 physical frames; dynamic count registry; one common scale per hero sheet; isolated padded textures. Future animation sheets require >=10 actually drawn columns, no duplicated/interpolated padding. Static props exempt.
