@@ -21,6 +21,7 @@ parser.add_argument('--evidence', default='work/upgrade-evidence', type=Path)
 args = parser.parse_args()
 args.evidence.mkdir(parents=True, exist_ok=True)
 results = []
+version = json.loads((args.current/'build.json').read_text())['version']
 
 def check(value, message):
     assert value, message
@@ -75,14 +76,18 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         page.reload()
         ready()
         check(page.locator('canvas').get_attribute('data-character') == 'owl', 'Legacy PWA really opens offline with its saved owl')
-        check(page.locator('canvas').get_attribute('data-version') is None, 'Reproduced the legacy export before migration')
+        legacy_version = page.locator('canvas').get_attribute('data-version')
+        check(legacy_version != version, 'Reproduced the previous export before migration')
         page.screenshot(path=str(args.evidence/'legacy-offline.png'))
         context.set_offline(False)
         server_root[0] = args.current.resolve()
         # What the browser's native registration update check does on revisit.
         # This updates the real old registration, without unregistering it.
         page.evaluate('navigator.serviceWorker.getRegistration().then(r => r.update())')
-        page.wait_for_selector('canvas[data-version="0.3.0"]', timeout=90000)
+        if legacy_version is not None:
+            page.wait_for_selector('#aion-update', timeout=90000)
+            page.locator('#aion-update').click()
+        page.wait_for_selector(f'canvas[data-version="{version}"]', timeout=90000)
         check('build=' in page.url, 'Old cached shell migrates to the current build automatically')
         canvas = page.locator('canvas')
         check(canvas.get_attribute('data-character') == 'owl' and canvas.get_attribute('lang') == 'en', 'Migration preserves character and language in IndexedDB')
@@ -100,7 +105,7 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         context.set_offline(True)
         page.reload()
         ready()
-        check(canvas.get_attribute('data-version') == '0.3.0', 'New full export reloads offline after migration')
+        check(canvas.get_attribute('data-version') == version, 'New full export reloads offline after migration')
         page.screenshot(path=str(args.evidence/'upgraded-offline.png'))
         context.set_offline(False)
         # Simulate the next deployment with identical game bytes but a new shell
@@ -109,7 +114,7 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         shutil.copytree(args.current, future)
         original_build = json.loads((future/'build.json').read_text())['build']
         for name in ['index.html','index.service.worker.js']:
-            text = (future/name).read_text().replace("const BUILD = '"+original_build+"'", "const BUILD = 'test-next-build'").replace("const VERSION = '0.3.0'", "const VERSION = '0.3.1-test'")
+            text = (future/name).read_text().replace("const BUILD = '"+original_build+"'", "const BUILD = 'test-next-build'").replace("const VERSION = '"+version+"'", "const VERSION = '"+version+"-next-test'")
             (future/name).write_text(text)
         server_root[0] = future
         page.keyboard.press('Space')

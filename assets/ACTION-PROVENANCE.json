@@ -1,0 +1,46 @@
+{
+  "source": "Unmodified imagegen output, referenced the three 0.3 character sheets; additional wind dash, updraft wingstroke and sheep jump/landing silhouettes.",
+  "width": 1774,
+  "height": 887,
+  "columns": 6,
+  "rows": 3,
+  "sha256": "87d2205bde4fe6607039345dd37aa257d7ef410270d54c590d19173a40488c6e",
+  "characters": {
+    "wolf": {
+      "row": 0,
+      "baseline": [
+        250,
+        250,
+        250,
+        250,
+        250,
+        250
+      ],
+      "scale": 0.4829
+    },
+    "owl": {
+      "row": 1,
+      "baseline": [
+        252,
+        252,
+        252,
+        252,
+        252,
+        252
+      ],
+      "scale": 0.4724
+    },
+    "sheep": {
+      "row": 2,
+      "baseline": [
+        263,
+        258,
+        240,
+        199,
+        241,
+        263
+      ],
+      "scale": 0.4619
+    }
+  }
+}

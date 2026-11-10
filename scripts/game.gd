@@ -6,7 +6,9 @@ const SHEET = preload("res://assets/aion-runner.png")
 const FONT = preload("res://assets/Lexend.ttf")
 const RUNNER_SHEETS = {"wolf":preload("res://assets/wolf-runner.png"), "sheep":preload("res://assets/sheep-runner.png"), "owl":preload("res://assets/owl-runner.png")}
 const RUNNER_DATA = preload("res://assets/FULL-RUNNER-PROVENANCE.json")
-const GAME_VERSION = "0.3.0"
+const ACTION_SHEET = preload("res://assets/companion-actions.png")
+const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
+const GAME_VERSION = "0.4.0"
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
 const NAMES := {"aion":"Aion", "owl":"Baykuş Ömer", "wolf":"Accursed Wise Wolf", "sheep":"Blessed Ignorant Sheep"}
 const FRIENDS := ["aion", "owl", "wolf", "sheep"]
@@ -39,6 +41,7 @@ var sheep_collectible: Sprite2D
 var friend_row := 0
 var friend_frame := 0
 var friend_character := ""
+var friend_action := false
 var jump_sources := {}
 var boost_sources := {}
 var ability_label: Label
@@ -630,6 +633,11 @@ func handle_event(value: String) -> void:
 		notice_time = 1.6
 		burst(Vector2(World.PLAYER_X - 64, ground - 45), Color("c1f5da"), 14)
 		tone(920 if value == "sheep_join" else 260, 0.14)
+	if value == "updraft":
+		notice = text("updraft")
+		notice_time = 1.25
+		burst(Vector2(World.PLAYER_X, ground + world.y - 40), Color("c5f7f1"), 10)
+		tone(1150, 0.16)
 	if value == "land": burst(Vector2(World.PLAYER_X, ground), Color("b9c4d1"), 6)
 	if value in ["gem", "clear", "biome"]:
 		notice = text(value)
@@ -678,6 +686,7 @@ func update_hud() -> void:
 	if is_instance_valid(ability_label):
 		ability_label.text = text("ability_" + character)
 		if character == "sheep": ability_label.text = text("flock") % world.sheep_count
+		elif world.riding_gust: ability_label.text = text("riding_gust")
 		elif world.gliding: ability_label.text = text("gliding")
 		elif world.boosting(): ability_label.text = text("boosting")
 	publish_web_status()
@@ -685,6 +694,8 @@ func update_hud() -> void:
 func publish_web_status() -> void:
 	if not OS.has_feature("web"): return
 	var stamp := "%s:%s:%d:%s:%s:%s:%d:%s:%s:%d" % [world.state, page, world.score, character, language, world.y < 0.0, world.jumps_used, world.gliding, world.boosting(), world.sheep_count]
+	stamp += ":%.2f:%s:%d:%d:%s" % [world.y, world.riding_gust, friend_row, friend_frame, friend_action]
+	if character == "sheep": stamp += ":%.2f:%.2f" % [world.flock_pose(0).y, world.flock_pose(1).y]
 	if stamp == web_stamp: return
 	web_stamp = stamp
 	var document = JavaScriptBridge.get_interface("document")
@@ -706,6 +717,14 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-flock", str(world.sheep_count))
 	canvas.setAttribute("data-sprite-row", str(friend_row))
 	canvas.setAttribute("data-sprite-frame", str(friend_frame))
+	canvas.setAttribute("data-action-sheet", str(friend_action))
+	canvas.setAttribute("data-wind-head", str(wolf_wind_ribbons()[0].points[0]) if world.boosting() and motion else "")
+	canvas.setAttribute("data-player-y", str(world.y))
+	canvas.setAttribute("data-riding-gust", str(world.riding_gust))
+	canvas.setAttribute("data-follower-1-y", str(world.flock_pose(0).y))
+	canvas.setAttribute("data-follower-2-y", str(world.flock_pose(1).y))
+	canvas.setAttribute("data-next-gust", str(world.gusts[0].x) if not world.gusts.is_empty() else "-1")
+	canvas.setAttribute("data-gust-width", str(world.gusts[0].width) if not world.gusts.is_empty() else "0")
 	var next_x := -1.0
 	for obstacle in world.obstacles:
 		if obstacle.x > World.PLAYER_X - 35 and (next_x < 0 or obstacle.x < next_x): next_x = obstacle.x
@@ -736,38 +755,110 @@ func update_friend() -> void:
 		friend_character = character
 		friend_row = 0
 		friend_frame = 0
+		friend_action = false
 	if world.state == "running":
+		friend_action = world.boosting() or world.riding_gust
 		friend_row = 6 if world.boosting() else 1
 		# Strides follow distance so feet accelerate with the world and freeze on pause.
 		friend_frame = int(world.distance / 29.0) % 6
 		if world.y < 0.0:
 			friend_row = 6 if world.gliding else 2
 			if world.gliding: friend_frame = int(animation_clock() * 6) % 6
-			else: friend_frame = 0 if world.air_time < 0.045 else (1 if world.velocity < -250 else (2 if world.velocity < -50 else (3 if world.velocity < 120 else (4 if world.velocity < 400 else 5))))
+			else: friend_frame = flight_frame(world.velocity, world.air_time, character == "sheep")
+			if character == "sheep": friend_action = true
+			if character == "wolf": friend_action = false
+		elif world.landing_time > 0.0:
+			friend_row = 2 if character == "sheep" else 7
+			friend_frame = 5 if character == "sheep" else mini(2, int((0.14 - world.landing_time) * 20))
+			friend_action = character == "sheep"
 	elif world.state == "ready":
+		friend_action = false
 		friend_row = 0
 		friend_frame = int(animation_clock() * 4) % 6
 	elif world.state == "ice":
+		friend_action = false
 		friend_row = 3
 		friend_frame = mini(5, int(world.hit_time * 8)) if motion else 5
 	elif world.state == "fire":
+		friend_action = false
 		friend_row = 4 if world.hit_time < 0.75 and motion else 5
 		friend_frame = mini(5, int(world.hit_time * 8)) if friend_row == 4 else (int(world.hit_time * 5) % 6 if motion else 0)
 	if not motion and world.state not in ["ice", "fire"]: friend_frame = 0
-	place_companion(friend_sprite, character, friend_row, friend_frame, Vector2(World.PLAYER_X, ground + world.y))
+	place_companion(friend_sprite, character, friend_row, friend_frame, Vector2(World.PLAYER_X, ground + world.y), 0.62, friend_action)
 	friend_sprite.modulate = Color.WHITE
 	if character == "sheep":
 		for i in 2:
 			followers[i].visible = world.sheep_count > i + 1 and world.state not in ["fire", "ice"]
-			place_companion(followers[i], "sheep", friend_row, (friend_frame + (i + 1) * 2) % 6 if world.y >= 0.0 and motion else friend_frame, Vector2(World.PLAYER_X - 64 * (i + 1), ground + world.y))
+			var pose: Dictionary = world.flock_pose(i)
+			var in_air: bool = float(pose.y) < -0.01
+			var landing: bool = float(pose.landing_time) > 0.0
+			var row := 2 if in_air or landing else (0 if world.state == "ready" else 1)
+			var frame := flight_frame(float(pose.velocity), float(pose.air_time), true) if in_air else (5 if landing else posmod(int((world.distance - World.FLOCK_GAP * (i + 1)) / 29.0), 6))
+			place_companion(followers[i], "sheep", row, frame if motion else 0, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), 0.62, in_air or landing)
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
 
-func place_companion(item: Sprite2D, id: String, row: int, frame: int, anchor: Vector2, scale_value: float = 0.62) -> void:
-	item.texture = RUNNER_SHEETS[id]
-	item.region_rect = runner_region(id, row, frame)
-	item.scale = Vector2(scale_value, scale_value)
-	item.offset = Vector2(-90.5, -float(RUNNER_DATA.data.characters[id].baselines[row][frame]))
+func flight_frame(velocity: float, air_time: float, sheep: bool = false) -> int:
+	if air_time < 0.045: return 0
+	if sheep: return 1 if velocity < -450 else (2 if velocity < -120 else (3 if velocity < 140 else 4))
+	return 1 if velocity < -250 else (2 if velocity < -50 else (3 if velocity < 120 else (4 if velocity < 400 else 5)))
+
+func place_companion(item: Sprite2D, id: String, row: int, frame: int, anchor: Vector2, scale_value: float = 0.62, action: bool = false) -> void:
+	if action:
+		var data: Dictionary = ACTION_DATA.data.characters[id]
+		var sheet_w: float = ACTION_DATA.data.width
+		var sheet_h: float = ACTION_DATA.data.height
+		var left := roundf(frame * sheet_w / 6.0)
+		var top := roundf(float(data.row) * sheet_h / 3.0)
+		var width := roundf((frame + 1) * sheet_w / 6.0) - left
+		item.texture = ACTION_SHEET
+		item.region_rect = Rect2(left, top, width, roundf((float(data.row) + 1) * sheet_h / 3.0) - top)
+		item.scale = Vector2.ONE * float(data.scale) * scale_value / 0.62
+		item.offset = Vector2(-width * 0.5, -float(data.baseline[frame]))
+	else:
+		item.texture = RUNNER_SHEETS[id]
+		item.region_rect = runner_region(id, row, frame)
+		item.scale = Vector2(scale_value, scale_value)
+		item.offset = Vector2(-90.5, -float(RUNNER_DATA.data.characters[id].baselines[row][frame]))
 	item.position = anchor.round()
+
+# Moving ribbons flow away from the wolf with independent offsets, curved paths,
+# lengths and fade envelopes. Derived from the paused simulation clock, not FPS.
+func wolf_wind_ribbons() -> Array[Dictionary]:
+	var ribbons: Array[Dictionary] = []
+	if not motion: return ribbons
+	var clock := animation_clock()
+	for i in 12:
+		var phase := fposmod(clock * (2.0 + i * 0.09) + i * 0.173, 1.0)
+		var origin := Vector2(World.PLAYER_X - 34.0 - phase * 145.0, ground + world.y - 44.0 + float(i % 5 - 2) * 14.0 + sin(clock * 4.0 + i) * 7.0)
+		var length := 16.0 + 27.0 * sin(phase * PI)
+		var points := PackedVector2Array()
+		for j in 6:
+			var portion := float(j) / 5.0
+			points.append((origin - Vector2(portion * length, sin(portion * PI + clock * 5 + i) * 6.0)).round())
+		ribbons.append({"points":points, "alpha":sin(phase * PI) * 0.72, "width":2.0 if i % 3 else 3.0})
+	return ribbons
+
+func draw_wind() -> void:
+	if character == "wolf" and (world.boosting() or (world.state == "paused" and friend_row == 6)):
+		for ribbon in wolf_wind_ribbons():
+			var color := Color("d5d0ff")
+			color.a = ribbon.alpha
+			draw_polyline(ribbon.points, color, ribbon.width)
+	# Updraft markers are gameplay cues, so they remain visible with motion off.
+	for gust in world.gusts:
+		var center: float = gust.x
+		var width: float = gust.width
+		draw_rect(Rect2(center - width * 0.5, ground - 255, width, 218), Color(0.58, 0.93, 0.89, 0.045))
+		for i in 14:
+			var phase := fposmod(animation_clock() * (0.55 + i * 0.027) + i * 0.231, 1.0)
+			var x := center + sin(animation_clock() * 2.0 + i * 1.7) * width * 0.35
+			var y := ground - 35 - phase * 216.0
+			var color := Color("c5f7f1")
+			color.a = 0.25 + sin(phase * PI) * 0.45
+			var points := PackedVector2Array([Vector2(x - 12, y + 7).round(), Vector2(x, y).round(), Vector2(x + 12, y + 7).round()])
+			draw_polyline(points, color, 2.0)
+		if character == "owl":
+			draw_string(FONT, Vector2(center - 46, ground - 273), text("gust_marker"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("b5e8dd"))
 
 func sprite(row: int, frame: int, x: float, bottom: float, width: float) -> void:
 	var sy := roundf(float(row) * 1254.0 / 8.0)
@@ -777,9 +868,7 @@ func sprite(row: int, frame: int, x: float, bottom: float, width: float) -> void
 func _draw() -> void:
 	if not is_instance_valid(ui): return
 	draw_scenery()
-	if world.boosting() and motion:
-		for i in 3:
-			draw_rect(Rect2(World.PLAYER_X - 130 - i * 16, ground + world.y - 26 - i * 16, 42 - i * 5, 3), Color("c5b8ff"))
+	draw_wind()
 	if character == "sheep" and not world.sheep_pickups.is_empty() and world.sheep_count < 3:
 		var x: float = world.sheep_pickups[0].x
 		draw_rect(Rect2(x - 10, ground - 104, 20, 20), Color("9ce4cc"))
@@ -797,6 +886,9 @@ func _draw() -> void:
 		draw_line(point + Vector2(0, -8), point + Vector2(-5, 0), Color("e0fff0"), 3)
 	# Soft pixel shadow remains on the floor while the character jumps.
 	draw_rect(Rect2(World.PLAYER_X - 35, ground - 2, 70, 5), Color(0.02, 0.04, 0.09, 0.4))
+	if character == "sheep":
+		for i in maxi(0, world.sheep_count - 1):
+			draw_rect(Rect2(World.PLAYER_X - World.FLOCK_GAP * (i + 1) - 30, ground - 2, 60, 5), Color(0.02, 0.04, 0.09, 0.3))
 	if character == "aion":
 		var row := 0
 		var f := int(animation_clock() * 4.0) % 6

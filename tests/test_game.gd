@@ -132,8 +132,101 @@ func ability_tests() -> void:
 	sheep.reset()
 	check(sheep.sheep_count == 1 and sheep.sheep_pickups.is_empty() and sheep.invulnerable == 0.0, "A new run resets the flock and protection")
 
+func flock_and_wind_tests() -> void:
+	var flock := World.new()
+	flock.character = "sheep"
+	flock.reset()
+	flock.sheep_count = 3
+	flock.obstacle_wait = 999.0
+	flock.jump()
+	flock.step(1.0 / 120)
+	check(flock.y < 0.0 and flock.flock_pose(0).y == 0.0 and flock.flock_pose(1).y == 0.0, "Only the leader takes off on the Space press")
+	var takeoffs := [-1.0, -1.0]
+	var crossing_heights := [0.0, 0.0, 0.0]
+	for tick in 180:
+		flock.step(1.0 / 120)
+		for i in 2:
+			if takeoffs[i] < 0.0 and float(flock.flock_pose(i).y) < -0.01: takeoffs[i] = flock.distance
+		for i in 3:
+			var target := 100.0 + World.FLOCK_GAP * i
+			if absf(flock.distance - target) < flock.speed() / 120.0:
+				crossing_heights[i] = flock.y if i == 0 else float(flock.flock_pose(i - 1).y)
+	check(takeoffs[0] >= World.FLOCK_GAP and takeoffs[0] < World.FLOCK_GAP + 6.0, "Second sheep takes off at the leader's original world coordinate")
+	check(takeoffs[1] >= World.FLOCK_GAP * 2 and takeoffs[1] < World.FLOCK_GAP * 2 + 6.0, "Third sheep follows after its own spatial gap")
+	check(crossing_heights.all(func(height): return height < -90.0), "All three sheep clear an obstacle at the same world position")
+	check(absf(crossing_heights[0] - crossing_heights[2]) < 6.0, "Follower paths preserve the leader's obstacle clearance height")
+	flock.state = "paused"
+	var old_pose := flock.flock_pose(0)
+	var old_trail_size := flock.trail.size()
+	flock.step(0.02)
+	check(flock.flock_pose(0) == old_pose and flock.trail.size() == old_trail_size, "Pause freezes every delayed flock pose and its trail")
+	flock.state = "running"
+	for i in 500: flock.step(1.0 / 60)
+	check(flock.trail.size() < 100, "Long runs retain only the short spatial history needed for followers")
+	flock.reset()
+	check(flock.trail.size() == 1 and flock.flock_pose(1).y == 0.0, "Retry clears the previous run's delayed jumps")
+	for base_distance in [0.0, 150000.0]:
+		flock.reset()
+		flock.obstacle_wait = 999.0
+		flock.distance = base_distance
+		flock.trail[0].distance = base_distance
+		flock.jump()
+		while float(flock.flock_pose(0).y) >= 0.0: flock.step(1.0 / 240)
+		check(absf(flock.distance - base_distance - World.FLOCK_GAP) < 5.0, "Spatial follower timing stays correct at speed " + str(flock.speed()))
+	var owl := World.new()
+	owl.character = "owl"
+	owl.reset()
+	owl.obstacle_wait = 999.0
+	owl.y = -90.0
+	owl.velocity = 40.0
+	owl.jumps_used = 1
+	owl.jump_held = true
+	owl.gusts = [{"x":World.PLAYER_X + 50.0, "width":400.0}]
+	for i in 20: owl.step(1.0 / 120)
+	check(owl.riding_gust and owl.gliding and owl.velocity < 0.0 and owl.y < -90.0, "An airborne gliding owl gains real upward height in an updraft")
+	owl.jump()
+	owl.step(1.0 / 120)
+	check(owl.jumps_used == 1, "Catching wind never grants the owl another jump")
+	var rising_velocity := owl.velocity
+	owl.release_controls()
+	owl.step(1.0 / 120)
+	check(not owl.riding_gust and not owl.gliding and owl.velocity > rising_velocity, "Release exits lift immediately and restores normal gravity")
+	owl.jump_held = true
+	owl.gliding = true
+	for i in 500: owl.step(1.0 / 120)
+	check(owl.y == 0.0 and not owl.riding_gust and owl.jumps_used == 0, "A finite passing gust still lets the owl land and reset its jump")
+	owl.reset()
+	owl.obstacle_wait = 999.0
+	owl.jump_held = true
+	owl.gusts = [{"x":World.PLAYER_X, "width":50000.0}]
+	owl.step(0.02)
+	check(owl.y == 0.0 and not owl.riding_gust, "Ground wind cannot launch an owl without a jump")
+	owl.y = -260.0
+	owl.velocity = 0.0
+	owl.jumps_used = 1
+	for i in 180: owl.step(1.0 / 120)
+	check(owl.y >= World.WIND_CEILING and owl.riding_gust, "Even a very wide wind respects the ceiling without toggling lift")
+	var events_at_ceiling := owl.event_id
+	for i in 60: owl.step(1.0 / 120)
+	check(owl.event_id == events_at_ceiling, "A steady updraft emits one catch event instead of a burst every frame")
+	owl.state = "paused"
+	var gust_x: float = owl.gusts[0].x
+	var wind_y: float = owl.y
+	owl.step(0.02)
+	check(owl.gusts[0].x == gust_x and owl.y == wind_y, "Pause freezes both the passing wind and lifted owl")
+	for id in ["aion", "wolf", "sheep"]:
+		owl.reset()
+		owl.character = id
+		owl.y = -90.0
+		owl.velocity = 50.0
+		owl.jump_held = true
+		owl.gusts = [{"x":World.PLAYER_X, "width":300.0}]
+		owl.step(0.02)
+		check(not owl.riding_gust and owl.velocity > 50.0, "Updraft lift is exclusive to owl: " + id)
+
 func run() -> void:
 	ability_tests()
+	flock_and_wind_tests()
 	var world := World.new()
 	world.rng.seed = 44
 	world.reset()
@@ -313,6 +406,22 @@ func run() -> void:
 	second.world.sheep_count = 3
 	second.update_friend()
 	check(second.followers[0].visible and second.followers[1].visible, "Three lives render as three running sheep")
+	second.world.reset()
+	second.world.character = "sheep"
+	second.world.sheep_count = 3
+	second.world.jump()
+	second.world.step(0.02)
+	second.update_friend()
+	check(second.friend_sprite.position.y < second.followers[0].position.y and second.followers[0].position.y == second.followers[1].position.y, "Real follower sprites stay grounded while the leading sheep takes off")
+	check(second.friend_sprite.texture == second.ACTION_SHEET and second.followers[0].texture == second.RUNNER_SHEETS.sheep, "Sheep jump uses new squash/flight frames while its follower still runs")
+	second.select_character("wolf")
+	second.world.time = 0.5
+	var ribbon_a: Array = second.wolf_wind_ribbons()
+	second.world.time = 0.6
+	var ribbon_b: Array = second.wolf_wind_ribbons()
+	check(ribbon_a[0].points != ribbon_b[0].points and ribbon_a[0].alpha != ribbon_b[0].alpha, "Wolf wind physically flows and fades instead of staying as three fixed lines")
+	second.motion = false
+	check(second.wolf_wind_ribbons().is_empty(), "Reduced motion removes decorative wind ribbons without disabling abilities")
 	game.queue_free()
 	second.queue_free()
 	await process_frame
