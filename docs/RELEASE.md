@@ -7,7 +7,7 @@
 - Ters U kemerler kaldırıldı. Yerdeki dört biyom hız şeridi 3,5 saniye %18 hız verir. Havada iki karga iplerle gerçek boru/tahta taşır; altından takla at veya havadan vurarak kır.
 - Önceki dört biyom, çevrimdışı çalışma/kayıt/güncelleme, üç dil, nadir mantar, boss kovalamacası, hava olayları, rüzgâr ve gecikmeli sürü korunur.
 
-1.200 kaynak/sahne kontrolü geçti. Gerçek tarayıcı, native paket ve yayın doğrulama sonuçları `docs/VALIDATION.md` içinde teslim sırasında kaydedilir.
+1.200 kaynak/sahne kontrolü ve 96 yerel/canlı/PWA akış yürütmesi geçti. Tam başarılı native paket CI: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42907853628 . Kapsam, sınırlamalar ve gerçek kayıtlar `docs/VALIDATION.md` / `docs/evidence-v09/` içindedir. Önceki sürümler korunur.
 
 ## İndir ve aç
 

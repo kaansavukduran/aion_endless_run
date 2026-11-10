@@ -4,7 +4,7 @@ No game setters, forced spawns, RNG replacement, shortcuts or synthetic levels.
 import argparse,json,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-p=argparse.ArgumentParser();p.add_argument('--url',default='http://127.0.0.1:8779');p.add_argument('--endurance',action='store_true');p.add_argument('--evidence',type=Path,default=Path('work/frontier-evidence'));a=p.parse_args();out=a.evidence;out.mkdir(parents=True,exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--url',default='http://127.0.0.1:8779');p.add_argument('--endurance',action='store_true');p.add_argument('--route-only',action='store_true');p.add_argument('--evidence',type=Path,default=Path('work/frontier-evidence'));a=p.parse_args();out=a.evidence;out.mkdir(parents=True,exist_ok=True)
 results=[];errors=[]
 def check(value,message):
  assert value,message
@@ -27,14 +27,14 @@ with sync_playwright() as p:
   main();click(name='StartSelect_'+hero);page.wait_for_selector('canvas[data-character="'+hero+'"]');ready();page.keyboard.press('Space');page.wait_for_selector('canvas[data-state="running"]');ready()
  page.goto(a.url);page.wait_for_selector('canvas[data-state="ready"][data-version="0.9.0"]',timeout=90000);ready()
  check(d()['lang']=='tr','The actual 0.9 entry retains browser-language selection')
- for hero in ['aion','owl','sheep','wolf']:
+ for hero in ([] if a.route_only else ['aion','owl','sheep','wolf']):
   run(hero);head=float(d()['heroHeadSize']);check(d()['isolatedFrame']=='true',hero+': running uses a separate padded frame texture')
   if hero=='wolf':
    page.keyboard.down('Shift');page.wait_for_selector('canvas[data-boosting="true"]');check(abs(float(d()['heroHeadSize'])-head)<.01,'Wolf sprint preserves its actual calibrated head size');page.screenshot(path=str(out/'wolf-anatomical-dash.png'));page.keyboard.up('Shift')
   run(hero);head=float(d()['heroHeadSize']);page.keyboard.press('Space');page.wait_for_selector('canvas[data-airborne="true"]');check(abs(float(d()['heroHeadSize'])-head)<.01,hero+': jumping does not enlarge the character anatomy')
   run(hero);page.mouse.click(**point(600,270));page.wait_for_selector('canvas[data-attacking="true"]');check(d()['isolatedFrame']=='true' and abs(float(d()['heroHeadSize'])-head)<.01,hero+': a strike is isolated from adjacent atlas pixels and keeps the same head span');page.screenshot(path=str(out/(hero+'-isolated-strike.png')))
  # Normal player controls only. Survive the actual generated route and chase.
- level_spacings=[];spectator_scroll=False;rush_seen=False;carrier_seen=False;last_level=1;last_level_time=0;party_sample=None
+ level_spacings=[];spectator_scroll=False;spectator_captured=False;rush_seen=False;carrier_seen=False;last_level=1;last_level_time=0;party_sample=None
  biomes=set();captured_biomes=set();fight_capture=False;gaps=False;plant_seen=False;plant_bolt=False;boss_seen=False;boss_damage=False;boss_won=False;mobile_shoot=False;arena_clean=True;level_frozen=True;boss_distance=None;shooting=False;timelines=[];won_capture=set()
  for attempt in range(4):
   run('sheep');started=time.monotonic();shooting=False;boss_distance=None;last_level=1;last_level_time=0;party_sample=None
@@ -49,6 +49,8 @@ with sync_playwright() as p:
     if party_sample and party_sample[0]==v['level'] and float(v['worldDistance'])>party_sample[1]+100:
      spectator_scroll=spectator_scroll or abs(float(v['celebrationX'])-(party_sample[2]-(float(v['worldDistance'])-party_sample[1])*.7))<1
     if party_sample is None or party_sample[0]!=v['level']:party_sample=(v['level'],float(v['worldDistance']),float(v['celebrationX']))
+   if spectator_scroll and not spectator_captured and float(v['celebrationTime'])>0 and v['bossPhase']=='run':
+    page.keyboard.press('Escape');page.wait_for_selector('canvas[data-state="paused"]');page.screenshot(path=str(out/'left-facing-background-celebration.png'));page.keyboard.press('Escape');page.wait_for_selector('canvas[data-state="running"]');page.screenshot(path=str(out/'background-celebration-in-world.png'));spectator_captured=True
    rush_seen=rush_seen or float(v['rushTime'])>0
    carrier_seen=carrier_seen or any(o['kind'].startswith('carrier') for o in json.loads(v['obstacles']))
    if int(v['biome'])==0 or float(v['worldDistance'])%6500>700:biomes.add(int(v['biome']))
@@ -86,11 +88,11 @@ with sync_playwright() as p:
    else:
     boss_distance=None
     if shooting:page.mouse.up(button='right');shooting=False
-    obstacles=[o for o in json.loads(v['obstacles']) if o['x']>player-float(o.get('width',160))/2-45]
+    obstacles=[o for o in json.loads(v['obstacles']) if o['x']>player-(120 if o['kind'].startswith('carrier') else float(o.get('width',160))/2+45)]
     nearest=min(obstacles,key=lambda o:o['x'],default=None)
     enemies=[e for e in json.loads(v['enemies']) if e['hp']>0 and e['x']>player-60]
     low_crow=any(e['kind']=='crow' and -115<e['y']<-45 and -65<e['x']-player<speed*.65+100 for e in enemies)
-    arch=nearest and nearest['kind'].startswith('carrier') and -90<nearest['x']-player<speed*.70+90
+    arch=nearest and nearest['kind'].startswith('carrier') and -120<nearest['x']-player<speed*.70+90
     if (arch or low_crow) and not giant:page.keyboard.down('s')
     else:page.keyboard.up('s')
     floor=nearest and not nearest['kind'].startswith(('carrier','gate','arch')) and 0<nearest['x']-player<speed*.40+(float(nearest.get('width',64))*.25 if nearest['kind'].startswith('pit') else 25)

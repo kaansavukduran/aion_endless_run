@@ -22,3 +22,5 @@ godot --headless --export-release Web
 For Android set `JAVA_HOME`, `ANDROID_HOME`, `AION_KEYSTORE`, `AION_KEY_ALIAS`, `AION_KEY_PASSWORD`, run `python3 packaging/android_config.py`, then `godot --headless --export-release Android`. Build-tools 35.0.0, Android platform 35 and platform-tools are required. Credentials are not printed.
 
 The web archive is an additional preview, not a substitute for native packages. Serve it over localhost/HTTPS, e.g. `python3 -m http.server 8000 --directory build/web`, then open `http://localhost:8000`. Its service worker can cache the game after the first complete load. Native games work offline immediately after installation/extraction.
+
+From 0.9, a signed APK can exceed GitHub's 100 MiB blob limit. Transfer it as <=40 MiB parts with APK-PARTS.json in a temporary same-repository release-assets/version branch, Vercel deployment disabled. `packaging/restore_staged_apk.py` checks each part and final length/SHA-256 before publication. Delete the staging branch after public asset verification. Signing material never enters this branch.
