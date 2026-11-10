@@ -1,0 +1,41 @@
+(() => {
+  'use strict';
+  const BUILD = '__BUILD__';
+  const VERSION = '__VERSION__';
+  window.AION_BUILD = {build: BUILD, version: VERSION};
+  const url = new URL(location.href);
+  url.searchParams.set('build', BUILD);
+  history.replaceState(null, '', url);
+  if (!('serviceWorker' in navigator)) return;
+  function showUpdate(data) {
+    if (!data || data.type !== 'aion-version' || data.build === BUILD) return;
+    const show = () => {
+      if (document.getElementById('aion-update')) return;
+      const button = document.createElement('button');
+      button.id = 'aion-update';
+      button.textContent = (navigator.language.startsWith('tr') ? 'Yeni sürüm hazır · Güncelle' : 'New version ready · Update') + ' v' + data.version;
+      Object.assign(button.style, {position:'fixed', bottom:'16px', right:'16px', zIndex:'100', background:'#b1eddb', color:'#102b30', border:'2px solid #e0fff0', borderRadius:'10px', padding:'14px 18px', font:'bold 14px sans-serif', cursor:'pointer'});
+      button.onclick = () => {
+        button.disabled = true;
+        button.textContent = navigator.language.startsWith('tr') ? 'Kaydediliyor…' : 'Saving…';
+        if (typeof window.aionSaveForUpdate === 'function') window.aionSaveForUpdate();
+        // Godot automatically flushes its IDBFS persistence once a second.
+        setTimeout(() => { location.href = './?build=' + encodeURIComponent(data.build); }, 2200);
+      };
+      document.body.appendChild(button);
+    };
+    if (document.body) show(); else addEventListener('DOMContentLoaded', show, {once:true});
+  }
+  navigator.serviceWorker.addEventListener('message', event => showUpdate(event.data));
+  navigator.serviceWorker.register('./index.service.worker.js', {updateViaCache:'none'}).then(registration => {
+    const check = () => {
+      registration.update().catch(() => {}); // Offline is an expected condition.
+      if (registration.active) registration.active.postMessage({type:'aion-version'});
+    };
+    navigator.serviceWorker.addEventListener('controllerchange', check);
+    addEventListener('online', check);
+    document.addEventListener('visibilitychange', () => {if (!document.hidden) check();});
+    setInterval(check, 60000);
+    check();
+  }).catch(error => console.info('Aion offline cache unavailable:', error.message));
+})();

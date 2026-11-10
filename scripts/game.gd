@@ -4,9 +4,10 @@ const World = preload("res://scripts/world.gd")
 const Words = preload("res://scripts/text.gd")
 const SHEET = preload("res://assets/aion-runner.png")
 const FONT = preload("res://assets/Lexend.ttf")
-const COMPANION_SHEET = preload("res://assets/companions-runner.png")
-const COMPANION_BASELINES := [[207,208,208,190,209,207],[201,206,202,187,204,203],[196,198,196,183,196,196],[200,191,165,150,178,199],[203,190,172,150,180,202],[185,166,160,151,160,181]]
-const COMPANION_RUN_ROWS := {"wolf":0,"sheep":1,"owl":2}
+const RUNNER_SHEETS = {"wolf":preload("res://assets/wolf-runner.png"), "sheep":preload("res://assets/sheep-runner.png"), "owl":preload("res://assets/owl-runner.png")}
+const RUNNER_DATA = preload("res://assets/FULL-RUNNER-PROVENANCE.json")
+const GAME_VERSION = "0.3.0"
+const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
 const NAMES := {"aion":"Aion", "owl":"Baykuş Ömer", "wolf":"Accursed Wise Wolf", "sheep":"Blessed Ignorant Sheep"}
 const FRIENDS := ["aion", "owl", "wolf", "sheep"]
 const COLORS := [Color("f4a7cd"), Color("ffca84"), Color("b8baf0"), Color("b8ebd3")]
@@ -56,10 +57,14 @@ var ground := 493.0
 var ui_theme: Theme
 var portrait := false
 var web_stamp := ""
+var web_update_callback: JavaScriptObject
 
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("0a1222"))
 	load_settings()
+	if OS.has_feature("web"):
+		web_update_callback = JavaScriptBridge.create_callback(prepare_web_update)
+		JavaScriptBridge.get_interface("window").aionSaveForUpdate = web_update_callback
 	for i in 2:
 		followers.append(make_companion_sprite())
 	sheep_collectible = make_companion_sprite()
@@ -81,7 +86,7 @@ func _ready() -> void:
 
 func make_companion_sprite() -> Sprite2D:
 	var item := Sprite2D.new()
-	item.texture = COMPANION_SHEET
+	item.texture = RUNNER_SHEETS["owl"]
 	item.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	item.region_enabled = true
 	item.region_filter_clip_enabled = true
@@ -201,7 +206,7 @@ func rebuild() -> void:
 	var brand := label("AION  /  ENDLESS RUN", 19, "e9e9f5")
 	hud.add_child(brand)
 	brand.position = Vector2(32, 27)
-	var offline_label := label(text("offline"), 11, "94d4bf")
+	var offline_label := label(text("offline") + " · v" + GAME_VERSION, 11, "94d4bf")
 	hud.add_child(offline_label)
 	offline_label.position = Vector2(32, 58)
 	var score_box := HBoxContainer.new()
@@ -411,8 +416,8 @@ func build_characters() -> void:
 		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		var atlas := AtlasTexture.new()
-		atlas.atlas = SHEET if id == "aion" else COMPANION_SHEET
-		atlas.region = Rect2(0, 0, 209, 157) if id == "aion" else Rect2(0, COMPANION_RUN_ROWS[id] * 209, 209, 209)
+		atlas.atlas = SHEET if id == "aion" else RUNNER_SHEETS[id]
+		atlas.region = Rect2(0, 0, 209, 157) if id == "aion" else runner_region(id, 1, 0)
 		picture.texture = atlas
 		if id != "aion":
 			var mat := ShaderMaterial.new()
@@ -685,6 +690,8 @@ func publish_web_status() -> void:
 	var document = JavaScriptBridge.get_interface("document")
 	var canvas = document.getElementById("canvas")
 	if canvas == null: return
+	canvas.setAttribute("data-version", GAME_VERSION)
+	canvas.setAttribute("data-best", str(best))
 	canvas.setAttribute("role", "application")
 	canvas.setAttribute("lang", language)
 	canvas.setAttribute("aria-label", "Aion Endless Run. " + text("hint") + ". " + text("score") + " " + str(world.score))
@@ -709,42 +716,57 @@ func animation_clock() -> float:
 	if not motion: return 0.0
 	return menu_clock if world.state == "ready" else world.time
 
+func prepare_web_update(_arguments: Array) -> void:
+	if world.state == "running": pause_run()
+	save_settings()
+
+func runner_region(id: String, row: int, frame: int) -> Rect2:
+	var data: Dictionary = RUNNER_DATA.data.characters[id]
+	var ys: Array = data.row_y
+	return Rect2(frame * 181, ys[row], 181, ys[row + 1] - ys[row])
+
 func update_friend() -> void:
 	friend_sprite.visible = character != "aion"
 	for item in followers: item.visible = false
 	sheep_collectible.visible = character == "sheep" and not world.sheep_pickups.is_empty() and world.sheep_count < 3
 	if sheep_collectible.visible:
-		place_companion(sheep_collectible, 1, int(animation_clock() * 9) % 6, Vector2(world.sheep_pickups[0].x, ground), 0.4)
+		place_companion(sheep_collectible, "sheep", 7, int(animation_clock() * 7) % 6, Vector2(world.sheep_pickups[0].x, ground), 0.46)
 	if character == "aion": return
 	if friend_character != character:
 		friend_character = character
-		friend_row = COMPANION_RUN_ROWS[character]
+		friend_row = 0
 		friend_frame = 0
 	if world.state == "running":
-		friend_row = COMPANION_RUN_ROWS[character]
-		friend_frame = int(animation_clock() * (17 if world.boosting() else 11)) % 6
+		friend_row = 6 if world.boosting() else 1
+		# Strides follow distance so feet accelerate with the world and freeze on pause.
+		friend_frame = int(world.distance / 29.0) % 6
 		if world.y < 0.0:
-			friend_row = 5 if character == "owl" else (3 if character == "wolf" else 4)
-			if character == "owl": friend_frame = int(animation_clock() * (5 if world.gliding else 12)) % 6
-			else: friend_frame = 0 if world.air_time < 0.06 else (1 if world.velocity < -250 else (2 if world.velocity < -50 else (3 if world.velocity < 120 else (4 if world.velocity < 400 else 5))))
+			friend_row = 6 if world.gliding else 2
+			if world.gliding: friend_frame = int(animation_clock() * 6) % 6
+			else: friend_frame = 0 if world.air_time < 0.045 else (1 if world.velocity < -250 else (2 if world.velocity < -50 else (3 if world.velocity < 120 else (4 if world.velocity < 400 else 5))))
 	elif world.state == "ready":
-		friend_row = COMPANION_RUN_ROWS[character]
-		friend_frame = 0
-	if not motion: friend_frame = 0
-	place_companion(friend_sprite, friend_row, friend_frame, Vector2(World.PLAYER_X, ground + world.y))
-	friend_sprite.modulate = Color("91ddff") if world.state == "ice" else Color.WHITE
+		friend_row = 0
+		friend_frame = int(animation_clock() * 4) % 6
+	elif world.state == "ice":
+		friend_row = 3
+		friend_frame = mini(5, int(world.hit_time * 8)) if motion else 5
+	elif world.state == "fire":
+		friend_row = 4 if world.hit_time < 0.75 and motion else 5
+		friend_frame = mini(5, int(world.hit_time * 8)) if friend_row == 4 else (int(world.hit_time * 5) % 6 if motion else 0)
+	if not motion and world.state not in ["ice", "fire"]: friend_frame = 0
+	place_companion(friend_sprite, character, friend_row, friend_frame, Vector2(World.PLAYER_X, ground + world.y))
+	friend_sprite.modulate = Color.WHITE
 	if character == "sheep":
 		for i in 2:
 			followers[i].visible = world.sheep_count > i + 1 and world.state not in ["fire", "ice"]
-			place_companion(followers[i], friend_row, (friend_frame + (i + 1) * 2) % 6 if world.y >= 0.0 and motion else friend_frame, Vector2(World.PLAYER_X - 64 * (i + 1), ground + world.y))
+			place_companion(followers[i], "sheep", friend_row, (friend_frame + (i + 1) * 2) % 6 if world.y >= 0.0 and motion else friend_frame, Vector2(World.PLAYER_X - 64 * (i + 1), ground + world.y))
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
-	if world.state == "fire" and world.hit_time > 0.5:
-		friend_sprite.visible = false
 
-func place_companion(item: Sprite2D, row: int, frame: int, anchor: Vector2, scale_value: float = 0.5) -> void:
-	item.region_rect = Rect2(frame * 209, row * 209, 209, 209)
+func place_companion(item: Sprite2D, id: String, row: int, frame: int, anchor: Vector2, scale_value: float = 0.62) -> void:
+	item.texture = RUNNER_SHEETS[id]
+	item.region_rect = runner_region(id, row, frame)
 	item.scale = Vector2(scale_value, scale_value)
-	item.offset = Vector2(-104.5, -float(COMPANION_BASELINES[row][frame]))
+	item.offset = Vector2(-90.5, -float(RUNNER_DATA.data.characters[id].baselines[row][frame]))
 	item.position = anchor.round()
 
 func sprite(row: int, frame: int, x: float, bottom: float, width: float) -> void:
@@ -788,30 +810,10 @@ func _draw() -> void:
 			row = 4 if world.hit_time < 0.75 and motion else 5
 			f = mini(5, int(world.hit_time * 8)) if row == 4 else (int(world.hit_time * 5) % 6 if motion else 0)
 		sprite(row, f, World.PLAYER_X - 65, ground + world.y + 3, 130)
-	else:
-		draw_companion_effect()
 	for p in particles:
 		var c: Color = p.color
 		c.a = minf(1.0, p.life * 3.0)
 		draw_rect(Rect2(p.position.round(), Vector2(4, 4)), c)
-
-func draw_companion_effect() -> void:
-	var pos := Vector2(World.PLAYER_X, ground + world.y)
-	if world.state == "ice":
-		var c := Color(0.4, 0.8, 1.0, 0.25)
-		draw_rect(Rect2(pos + Vector2(-46, -91), Vector2(92, 93)), c)
-		draw_rect(Rect2(pos + Vector2(-46, -91), Vector2(92, 93)), Color("a6eaff"), false, 3)
-		draw_line(pos + Vector2(-39, -62), pos + Vector2(-15, -84), Color("e0faff"), 5)
-	elif world.state == "fire":
-		if world.hit_time < 0.75 and motion:
-			for i in 8:
-				var x := sin(float(i) * 6.3) * 38.0
-				var y := -20.0 - float(i % 3) * 20 - world.hit_time * 18.0
-				draw_rect(Rect2(pos + Vector2(x, y), Vector2(23, 23)), Color("ffb269") if i % 2 else Color("8d7d8d"))
-		else:
-			draw_colored_polygon(PackedVector2Array([pos + Vector2(-40, 0), pos + Vector2(-25, -17), pos + Vector2(-4, -29), pos + Vector2(14, -24), pos + Vector2(41, 0)]), Color("6e758c"))
-			for x in [-9, 9]:
-				draw_rect(Rect2(pos + Vector2(x, -15), Vector2(5, 7)), COLORS[FRIENDS.find(character)])
 
 func draw_scenery() -> void:
 	var time := world.time

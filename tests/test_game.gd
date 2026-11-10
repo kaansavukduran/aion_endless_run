@@ -276,11 +276,39 @@ func run() -> void:
 		second.world.state = "running"
 		second.world.y = 0.0
 		second.world.time = 0.0
+		second.world.distance = 0.0
 		second.update_friend()
 		var region: Rect2 = second.friend_sprite.region_rect
 		second.world.time = 0.15
+		second.world.distance = 45.0
 		second.update_friend()
 		check(second.friend_row == second.COMPANION_RUN_ROWS[id] and second.friend_sprite.region_rect != region, "Right-facing run atlas advances actual frames: " + id)
+		for state in ["ice", "fire"]:
+			second.world.state = state
+			second.world.hit_time = 0.4
+			second.update_friend()
+			check(second.friend_row == (3 if state == "ice" else 4) and second.friend_sprite.visible, "Species-specific collision animation remains visible: " + id + "/" + state)
+		second.world.state = "fire"
+		second.world.hit_time = 1.2
+		second.update_friend()
+		check(second.friend_row == 5 and second.friend_sprite.visible and second.friend_sprite.texture == second.RUNNER_SHEETS[id], "Ash preserves the actual species artwork: " + id)
+	second.select_character("owl")
+	second.world.state = "running"
+	second.world.y = -80.0
+	second.world.gliding = true
+	second.update_friend()
+	check(second.friend_row == 6, "Owl glide uses its dedicated extended-wing artwork")
+	second.select_character("wolf")
+	second.world.y = 0.0
+	second.world.boost_held = true
+	second.update_friend()
+	check(second.friend_row == 6, "Wolf boost uses a different forward-leaning dash cycle")
+	second.pause_run()
+	var paused_region: Rect2 = second.friend_sprite.region_rect
+	second.world.time += 1.0
+	second.update_friend()
+	check(second.friend_sprite.region_rect == paused_region, "Pausing preserves the exact animation pose")
+	second.world.state = "running"
 	second.select_character("sheep")
 	second.world.sheep_count = 3
 	second.update_friend()

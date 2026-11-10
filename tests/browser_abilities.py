@@ -1,4 +1,4 @@
-"""Real input tests for the 0.2 character abilities. Reads state, never injects it."""
+"""Real input tests for the character abilities. Reads state, never injects it."""
 import argparse
 import json
 import time
@@ -48,10 +48,10 @@ with sync_playwright() as p:
     page.keyboard.press('Space')
     page.wait_for_selector('canvas[data-jumps="2"]')
     check(canvas.get_attribute('data-airborne') == 'true', 'Aion performs the second jump in mid-air')
-    page.screenshot(path=str(out / 'aion-double-jump.png'))
     page.keyboard.press('Space')
-    page.wait_for_timeout(150)
+    page.wait_for_timeout(60)
     check(canvas.get_attribute('data-jumps') == '2', 'Third press does not grant a third jump')
+    page.screenshot(path=str(out / 'aion-double-jump.png'))
     page.wait_for_selector('canvas[data-airborne="false"]')
     page.keyboard.press('Space')
     page.wait_for_selector('canvas[data-jumps="1"]')
@@ -60,7 +60,7 @@ with sync_playwright() as p:
     canvas = game('owl')
     page.keyboard.down('Space')
     page.wait_for_selector('canvas[data-gliding="true"]')
-    check(canvas.get_attribute('data-jumps') == '1' and canvas.get_attribute('data-sprite-row') == '5', 'Owl uses one jump and the new wing/glide frames')
+    check(canvas.get_attribute('data-jumps') == '1' and canvas.get_attribute('data-sprite-row') == '6', 'Owl uses one jump and the new wing/glide frames')
     page.screenshot(path=str(out / 'owl-glide.png'))
     page.keyboard.up('Space')
     page.wait_for_selector('canvas[data-gliding="false"]')
@@ -69,7 +69,7 @@ with sync_playwright() as p:
     canvas = game('wolf')
     page.keyboard.down('Shift')
     page.wait_for_selector('canvas[data-boosting="true"]')
-    check(canvas.get_attribute('data-sprite-row') == '0', 'Shift boosts the wolf with actual right-facing run frames')
+    check(canvas.get_attribute('data-sprite-row') == '6', 'Shift boosts the wolf with actual right-facing run frames')
     page.screenshot(path=str(out / 'wolf-boost.png'))
     page.keyboard.up('Shift')
     page.wait_for_selector('canvas[data-boosting="false"]')

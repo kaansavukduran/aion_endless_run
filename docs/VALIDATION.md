@@ -1,5 +1,13 @@
 # Verification
 
+## 0.3.0 full character sheets and cached-web migration
+
+96 Godot physics/main-scene checks passed. New checks cover species-specific freeze/fire/ash visibility, dedicated glide/dash poses and paused-frame preservation. Original character abilities remain covered. 12 base browser flows, 12 ability/touch flows and 11 real PWA upgrade flows passed (35 browser checks). Runtime captures are in `docs/evidence-v03/`.
+
+`tests/browser_upgrade.py` serves the published 0.1 web archive, really installs its worker/cache, earns a score, saves owl/English and verifies an offline legacy reload. Without unregistering workers or clearing IndexedDB, it switches the same HTTP origin to 0.3, updates the existing registration and verifies automatic migration, saved best/character/language, actual running/gliding sprite rows and another offline reload. A simulated subsequent shell update verifies that an active run remains uninterrupted until the update button is pressed; the button pauses/saves and reloads with preferences intact. This closes the old-profile upgrade gap left by the previous fresh-context/live test.
+
+The three original generated PNGs are unchanged on disk; explicit atlas row boundaries prevent clipping from nonuniform generation spacing. Their SHA-256 values, state mapping and baseline metadata are in `assets/FULL-RUNNER-PROVENANCE.json`. The shader discards near-transparent matte pixels at render time. Native/public deployment results are recorded after CI below.
+
 ## 0.2.0 character update
 
 84 physics/main-scene checks passed, including double-jump limits and landing reset, finite hold/release glide, actual wolf movement speed, capped contact-based flock collection, one life per fire/ice contact, final-life death, held-input cancellation, independent two-finger controls, animation row/frame selection and visible followers. The existing 12 real Web flows and 12 additional real-input ability flows passed. Real ground pickups produced three visible sheep and a real obstacle removed one sheep while gameplay continued. Chromium touch events verified boost and jump together on an 844×390 view.

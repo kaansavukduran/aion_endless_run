@@ -61,6 +61,7 @@ if not engine:
             # Do not retain the 1.2GB multi-platform archive in deployment cache.
             archive.unlink()
 
+shutil.rmtree(root / "build/web", ignore_errors=True)
 (root / "build" / "web").mkdir(parents=True, exist_ok=True)
 (root / "build" / ".gdignore").touch()
 for arguments in [["--editor", "--import", "--quit"], ["--export-release", "Web"]]:
@@ -68,4 +69,6 @@ for arguments in [["--editor", "--import", "--quit"], ["--export-release", "Web"
 for name in ["index.html", "index.js", "index.wasm", "index.pck"]:
     if not (root / "build/web" / name).is_file():
         raise RuntimeError("Missing Web export file: " + name)
+from web_updates import prepare_web_export
+prepare_web_export(root)
 print("Web export ready: build/web/index.html", flush=True)

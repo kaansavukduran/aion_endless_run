@@ -15,10 +15,10 @@ GitHub listesi boşsa Vercel'de **Adjust GitHub App Permissions** bağlantısıy
 
 ## Çevrimdışı ve güncelleme
 
-Web sürümü ilk tam yüklemede dosyaları HTTPS üzerinden indirir; servis çalışanı bu dosyaları çevrimdışı kullanım için önbelleğe alır. Kurulabilir oyun paketleri ilk açılışta da internete ihtiyaç duymaz. Yeni web sürümü gelince sayfayı yeniden yükle. Rekor ve tercihler alan adına ait yerel kayıtta saklanır; farklı alan adı veya tarayıcı ayrı kayıt kullanır.
+Web sürümü ilk tam yüklemede dosyaları HTTPS üzerinden indirir; servis çalışanı bu dosyaları çevrimdışı kullanım için önbelleğe alır. Kurulabilir oyun paketleri ilk açılışta da internete ihtiyaç duymaz. 0.3.0 eski servis çalışanının önbelleğinden otomatik geçiş yapar. İlk ziyaretinde güncelleme kontrolü için internet açık olsun. Sonraki sürümlerde koşuyu bölmeden **Yeni sürüm hazır · Güncelle** düğmesi belirir; düğme önce oyunu duraklatıp kaydeder, ardından yeni sürümü açar. Rekor ve ayarlar silinmez. Sol üstte sürüm numarası görünür. Oyun motoru/paftalar içerik kimliğine göre ayrı dosya adları kullanır. Rekor ve tercihler alan adına ait yerel kayıtta saklanır; farklı alan adı veya tarayıcı ayrı kayıt kullanır.
 
 İlk yayının başarılı olması, oyun kontrolleri ve çevrimdışı yüklemesi gerçek `.vercel.app` adresinde de doğrulanmalıdır. Depoda yapılandırmanın bulunması tek başına yayımlanmış bir Vercel adresi olduğu anlamına gelmez.
 
 ## Bu proje için tamamlanan bağlantı
 
-Canlı oyun: https://aionendlessrun.vercel.app/ . Kullanıcı GitHub erişimini bağladı ve proje Other + kaynak derleme komutuyla yayımlandı. 0.2.0 main gönderimi Vercel tarafından otomatik yayımlandı. Yeni sürümler aynı adreste açılır; indirme paketleri GitHub Releases içindedir.
+Canlı oyun: https://aionendlessrun.vercel.app/ . Kullanıcı GitHub erişimini bağladı ve proje Other + kaynak derleme komutuyla yayımlandı. Yeni main gönderimleri Vercel tarafından otomatik yayımlandı. Yeni sürümler aynı adreste açılır; indirme paketleri GitHub Releases içindedir.
