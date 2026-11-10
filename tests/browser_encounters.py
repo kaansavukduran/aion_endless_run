@@ -19,7 +19,7 @@ with sync_playwright() as pw:
   page.evaluate('i=>padButton(i,1)',i);page.wait_for_timeout(140);page.evaluate('i=>padButton(i,0)',i);page.wait_for_timeout(140)
  def click(name=None,text=None):
   wait('[data-ui-ready="true"]');v=d();b=next(b for b in json.loads(v['ui']) if (b['name']==name if name else text in b['text']));t=json.loads(v['screenTransform']);r=page.locator('canvas').bounding_box();x=b['x']+b['w']/2;y=b['y']+b['h']/2;page.mouse.click(r['x']+(t[0]*x+t[2]*y+t[4])/float(v['rawWidth'])*r['width'],r['y']+(t[1]*x+t[3]*y+t[5])/float(v['rawHeight'])*r['height'])
- page.goto(a.url);wait('[data-version="0.10.0"][data-state="ready"][data-ui-ready="true"]')
+ page.goto(a.url);wait('[data-version="0.11.0"][data-state="ready"][data-ui-ready="true"]')
  button(0);wait('[data-state="running"]');check(True,'Virtual Xbox A activates the actual focused Start action')
  button(9);wait('[data-page="paused"]');check(True,'Start opens Pause')
  button(13);button(2);wait('[data-page="main"]');check(True,'D-pad and X activate Main menu from Pause')

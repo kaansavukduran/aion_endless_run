@@ -1,3 +1,13 @@
+# Current handoff · 0.11.0
+
+Canonical hero identity release. assets/CANONICAL-PROVENANCE.json takes alias priority. Five new original unchanged PNGs contain 449 drawn poses: 14 rows per hero with actual counts7/8, plus four8-pose compact clockwise roll rows. Original T-pose references linked in provenance were read from owner-authorized Drive. Aion is pink external feathery gills/blue eyes/labcoat/DNA tail; wolf gray-lavender bare fur/curse; sheep ivory wool/gold halo; owl brown feathers/amber eyes. Do not substitute generic aquatic fins, beam attacks, wolf clothing or random anatomy.
+
+Common scale per hero, iris-based anatomical origins for run/jump/melee/weapon poses; authored smooth lunges separate from frame placement. Independent padded textures prevent neighboring fragments. Roll source order is visually reviewed right/down-right/down/down-left/left/up-left/up/up-right, fixed center32px above road. Use dedicated canonical-rolls, not the mixed prep/recovery rows. Wolf incorrectly generated icy row6 is excluded; boost uses bare-fur running plus existing moving wind. Owl ashes retain the prior correct sheet. Physical attack rows3/4, gun7/8, impact9/prone10, airborne owl beak13.
+
+Fresh motion/effects/audio/celebrations true even with browser reduced-motion setting, per explicit owner instruction; explicit saved false remains false. Accessible On/Off labels supplement CheckButton icon. Eight source/scene suites1773 checks after observed frame counts replace older count quotas. Future art prioritizes identity, alignment and pose quality over frame count. Build/sign/package0.11, Android code11; same stable signer. Prior boss/flock/gamepad/languages/offline features preserved. Release verification details follow in docs.
+
+Historical handoff follows.
+
 # Current handoff · 0.10.0
 
 Authoritative main. Three new unchanged original PNGs / 300 frames registered in ENCOUNTERS-PROVENANCE. Current frame bank adds gun-run/gun-fire/deaths/boss-designs while preserving 0.9 motion sources. Gun anticipation0.075s emits at the measured muzzle; 0.30s animation, 0.32s cadence. All heroes keep a single pair scale. Death cause is separate from legacy bonk state; enemy selects prone row, solid/projectile selects impact row. Fatal airborne impacts descend; gun poses never cover defeat.

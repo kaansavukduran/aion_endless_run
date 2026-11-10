@@ -58,3 +58,7 @@ Ten new AI-generated original PNG sheets contain 997 physically drawn frames. `a
 ## Encounters (0.10.0)
 
 Three new original AI-generated PNGs / 300 drawn frames: 12×8 weapon poses, 12×9 bosses, 12×8 physical defeats. `assets/ENCOUNTERS-PROVENANCE.json` records original output identities, SHA-256, real gutters, silhouette spans, common per-character pair scales and measured muzzle anchors. `packaging/register_encounters.py` reads original alpha; no source PNG is rewritten. The final weapon atlas corrects the preliminary Aion identity to its cyan-tipped gills/blue eyes; only the final atlas is shipped. Historical motion sheets remain.
+
+## 0.11 canonical hero animation artwork
+
+Five new original AI-assisted PNG outputs are included unchanged as canonical-aion/owl/sheep/wolf/rolls.png. The owner explicitly requested fidelity to the four existing character designs. Authorized Drive turnaround references and accepted original runner references are identified in assets/CANONICAL-PROVENANCE.json, which also records source hashes and actual per-row frame boundaries. Runtime crops use silhouette spans, a shared scale per character and anatomical origins; no source PNG is retouched. The dedicated compact roll atlas has eight visually reviewed clockwise angles per hero. Prior artwork remains for provenance and historical fallback.

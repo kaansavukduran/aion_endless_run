@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3}
-const GAME_VERSION = "0.10.0"
+const GAME_VERSION = "0.11.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -103,9 +103,6 @@ var layout_generation := 0
 
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("0a1222"))
-	if OS.has_feature("web") and JavaScriptBridge.eval("matchMedia('(prefers-reduced-motion: reduce)').matches"):
-		motion = false
-		effects_enabled = false
 	gamepad.host = self
 	Input.joy_connection_changed.connect(on_gamepad_connection)
 	load_settings()
@@ -702,13 +699,24 @@ func build_characters() -> void:
 	focus_later.call_deferred(back)
 
 func add_toggle(column: VBoxContainer, key: String, value: bool, callback: Callable) -> void:
+	var row := HBoxContainer.new()
+	column.add_child(row)
 	var toggle := CheckButton.new()
+	toggle.name = "Setting_"+key
 	toggle.text = text(key)
 	toggle.button_pressed = value
 	toggle.custom_minimum_size.y = 46
+	toggle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	toggle.add_theme_font_size_override("font_size", 14)
-	toggle.toggled.connect(callback)
-	column.add_child(toggle)
+	row.add_child(toggle)
+	var status := label(text("setting_on" if value else "setting_off"),13,"a8efd4" if value else "a6b8d1")
+	status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	status.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(status)
+	toggle.toggled.connect(func(enabled):
+		status.text = text("setting_on" if enabled else "setting_off")
+		status.modulate = Color("a8efd4") if enabled else Color("a6b8d1")
+		callback.call(enabled))
 
 func add_range_setting(column: VBoxContainer,key: String,value: float,callback: Callable,id: String) -> void:
 	column.add_child(wrap_label(text(key),14))
@@ -1214,7 +1222,7 @@ func publish_web_status() -> void:
 	stamp += ":" + str(world.adventure.hug_time) + ":" + str(world.adventure.attack_variant) + ":" + str(world.adventure.mushroom_chance) + ":" + str(prism_intensity)
 	stamp += ":" + world.frontier.phase + ":" + str(world.frontier.hp) + ":" + str(world.frontier.shot_flash)
 	stamp += ":" + str(language_picker_open)
-	stamp += ":" + str(effects_enabled) + ":" + str(motion)
+	stamp += ":" + str(effects_enabled) + ":" + str(motion) + ":" + str(audio_enabled) + ":" + str(world.adventure.celebrations_enabled)
 	stamp += ":%.2f:%s:%d:%d:%s" % [world.y, world.riding_gust, friend_row, friend_frame, friend_action]
 	if character == "sheep": stamp += ":%.2f:%.2f" % [world.flock_pose(0).y, world.flock_pose(1).y]
 	stamp += ":%.2f:%s:%s:%d:%d" % [world.time, world.adventure.ducking(world), world.adventure.giant(), world.adventure.kills, friend_combat]
@@ -1262,6 +1270,9 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-hero-head-size",str(friend_sprite.get_meta("head_size",0)))
 	canvas.setAttribute("data-isolated-frame",str(not friend_sprite.region_enabled))
 	canvas.setAttribute("data-version", GAME_VERSION)
+	canvas.setAttribute("data-audio-enabled",str(audio_enabled))
+	canvas.setAttribute("data-motion-enabled",str(motion))
+	canvas.setAttribute("data-celebrations-enabled",str(world.adventure.celebrations_enabled))
 	canvas.setAttribute("data-player-x", str(World.PLAYER_X))
 	canvas.setAttribute("data-ducking", str(world.adventure.ducking(world)))
 	canvas.setAttribute("data-combat-row", str(friend_combat))
@@ -1402,7 +1413,7 @@ func update_friend() -> void:
 				friend_row = 6
 				friend_frame = frames.progress("runner-aion",6,world.air_time/0.4)
 		elif world.landing_time > 0.0:
-			friend_row = 0 if character == "aion" else (2 if character == "sheep" else 7)
+			friend_row = 2
 			friend_frame = frames.count("runner-"+character,2)-1
 			friend_action = character == "sheep"
 	elif world.state == "ready":
@@ -1430,7 +1441,13 @@ func update_friend() -> void:
 	if friend_combat >= 0:
 		var combat_count := frames.count("rolls",COMBAT_ROWS[character]) if friend_combat >= 4 else frames.count("owl-peck" if a.attack_airborne else "strikes",0 if a.attack_airborne else COMBAT_ROWS[character]*2+a.attack_variant)
 		var combat_frame: int = (a.attack_frame(combat_count) if friend_combat < 4 else a.roll_frame(combat_count)) if motion else combat_count/2
-		place_combat(friend_sprite, character, friend_combat, combat_frame, Vector2(World.PLAYER_X, ground + world.y), visual_size, friend_combat >= 4 or a.ducking(world))
+		var combat_anchor := Vector2(World.PLAYER_X,ground+world.y)
+		if friend_combat<4:
+			var phase: float = clampf((a.ATTACK_DURATION-a.attack_time)/a.ATTACK_DURATION,0,1)
+			var lunge := sin(phase*PI)
+			if (character=="wolf" and a.attack_variant==1) or (character=="sheep" and a.attack_variant==0): combat_anchor += Vector2(6,5)*lunge
+			elif character=="sheep" and a.attack_variant==1: combat_anchor.x -= 24*lunge
+		place_combat(friend_sprite, character, friend_combat, combat_frame, combat_anchor, visual_size, friend_combat >= 4 or a.ducking(world))
 	if world.state in ["running","paused"] and world.frontier.active() and not a.ducking(world) and (world.frontier.phase != "intro" or world.frontier.stage_time > 0.75):
 		var firing: bool = world.frontier.shot_flash>0
 		var key := "gun-fire" if firing else "gun-run"

@@ -110,7 +110,7 @@ func run() -> void:
 		for key_row in [["runner-"+hero,1],["runner-"+hero,2],["strikes",hero_index*2],["strikes",hero_index*2+1],["heroes",hero_index],["rolls",hero_index]]:
 			var key: String = key_row[0]
 			var row: int = key_row[1]
-			check(bank.count(key,row) == 12,"Every hero run, jump, strike, gun and roll has twelve drawn poses: "+hero+"/"+key+"/"+str(row))
+			check(bank.count(key,row) == (8 if key=="rolls" or hero=="wolf" or (hero=="owl" and key=="heroes") else 7),"Every animation uses its observed drawn poses: "+hero+"/"+key+"/"+str(row))
 			var scale := -1.0
 			var textures := {}
 			for column in bank.count(key,row):
@@ -123,9 +123,9 @@ func run() -> void:
 				for px in image.get_width(): clear = clear and image.get_pixel(px,0).a == 0 and image.get_pixel(px,image.get_height()-1).a == 0
 				for py in image.get_height(): clear = clear and image.get_pixel(0,py).a == 0 and image.get_pixel(image.get_width()-1,py).a == 0
 				check(clear,"Each drawn frame has independent transparent boundaries: "+hero+"/"+key+"/"+str(column))
-			check(textures.size() == 12,"All twelve registered poses are distinct artwork: "+hero+"/"+key+"/"+str(row))
-	check(bank.pose("heroes",3,5).source_key == "motion-wolf" and bank.pose("heroes",3,5).source_row == 7,"The wolf gun animation uses its own bare-fur sheet")
-	check(bank.count("owl-peck") == 12 and bank.pose("owl-peck",0,5).source_row == 8,"Airborne beak attacks use their own twelve-pose row")
+			check(textures.size() == bank.count(key,row),"All registered poses are distinct artwork: "+hero+"/"+key+"/"+str(row))
+	check(bank.pose("heroes",3,5).source_key == "canonical-wolf" and bank.pose("heroes",3,5).source_row == 7,"The wolf gun animation uses its own bare-fur sheet")
+	check(bank.count("owl-peck") == 8 and bank.pose("owl-peck",0,5).source_row == 13,"Airborne beak attacks use their own eight-pose row")
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
 	await process_frame
@@ -133,7 +133,7 @@ func run() -> void:
 	game.world.character = "owl"
 	game.world.adventure.attack_airborne = true
 	game.place_combat(game.friend_sprite,"owl",0,5,Vector2.ZERO,1,false)
-	check(game.friend_sprite.get_meta("source_key") == "motion-owl" and game.friend_sprite.get_meta("source_row") == 8,"The actual renderer selects beak artwork for the airborne owl")
+	check(game.friend_sprite.get_meta("source_key") == "canonical-owl" and game.friend_sprite.get_meta("source_row") == 13,"The actual renderer selects beak artwork for the airborne owl")
 	game.queue_free()
 	await process_frame
 	print("RESULT: %d motion checks, %d failures" % [checks,failures])

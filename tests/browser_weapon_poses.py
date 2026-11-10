@@ -19,12 +19,12 @@ with sync_playwright() as pw:
   page.evaluate('i=>padButton(i,1)',i);page.wait_for_timeout(140);page.evaluate('i=>padButton(i,0)',i);page.wait_for_timeout(140)
  def click(name=None,text=None):
   wait('[data-ui-ready="true"]');v=d();b=next(b for b in json.loads(v['ui']) if (b['name']==name if name else text in b['text']));t=json.loads(v['screenTransform']);r=page.locator('canvas').bounding_box();x=b['x']+b['w']/2;y=b['y']+b['h']/2;page.mouse.click(r['x']+(t[0]*x+t[2]*y+t[4])/float(v['rawWidth'])*r['width'],r['y']+(t[1]*x+t[3]*y+t[5])/float(v['rawHeight'])*r['height'])
- page.goto(a.url);wait('[data-version="0.10.0"][data-state="ready"][data-ui-ready="true"]')
- page.evaluate("""() => {window.gunPoses={};new MutationObserver(()=>{const c=document.querySelector('canvas').dataset;if(c.poseSource==='encounter-weapons'&&c.state==='running'&&Number(c.sourceRow)%2===1){(window.gunPoses[c.character]??=new Set()).add(Number(c.sourceFrame));}}).observe(document.querySelector('canvas'),{attributes:true});}""")
+ page.goto(a.url);wait('[data-version="0.11.0"][data-state="ready"][data-ui-ready="true"]')
+ page.evaluate("""() => {window.gunPoses={};new MutationObserver(()=>{const c=document.querySelector('canvas').dataset;if(c.poseSource==='canonical-'+c.character&&c.state==='running'&&Number(c.sourceRow)===8){(window.gunPoses[c.character]??=new Set()).add(Number(c.sourceFrame));}}).observe(document.querySelector('canvas'),{attributes:true});}""")
  for i,hero in enumerate(['aion','owl','sheep','wolf']):
   click(name='StartSelect_'+hero);wait('[data-character="'+hero+'"]');click(text='Boss antrenmanı');wait('[data-page="bosses"]');click(name='PracticeBoss_0');wait('[data-boss-phase="fight"]')
-  page.evaluate('padButton(7,1)');wait('[data-pose-source="encounter-weapons"][data-source-row="'+str(i*2+1)+'"]');check(True,hero+': actual firing uses the dedicated coherent weapon row')
-  page.wait_for_function('id=>window.gunPoses[id]?.size===12',arg=hero,timeout=20000);check(True,hero+': actual trigger fire plays all twelve separate anticipation/recoil/recovery poses')
+  page.evaluate('padButton(7,1)');wait('[data-pose-source="canonical-'+hero+'"][data-source-row="8"]');check(True,hero+': actual firing uses the dedicated coherent weapon row')
+  page.wait_for_function('id=>window.gunPoses[id]?.size===(['aion','sheep'].includes(id)?7:8)',arg=hero,timeout=20000);check(True,hero+': actual trigger fire plays all separate anticipation/recoil/recovery poses')
   page.screenshot(path=str(a.evidence/(hero+'-new-gun.png')));page.evaluate('padButton(7,0)');button(9);wait('[data-page="paused"]');button(13);button(2);wait('[data-page="main"]')
  check(not errors,'No browser or Godot errors during four-hero weapon playback');browser.close()
 (a.evidence/'weapon-results.json').write_text(json.dumps(results,ensure_ascii=False,indent=2)+'\n');print(len(results),'weapon browser checks passed')

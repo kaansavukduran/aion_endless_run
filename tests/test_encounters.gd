@@ -139,7 +139,7 @@ func run() -> void:
 	check(game.best==old_best,"Practice never changes the saved normal-run record")
 	game.world.frontier.shot_flash = 0.19
 	game.update_friend()
-	check(game.friend_sprite.get_meta("pose_key")=="gun-fire" and game.friend_sprite.get_meta("source_row")==5,"The actual sheep uses its own two-hoof firing row")
+	check(game.friend_sprite.get_meta("pose_key")=="gun-fire" and game.friend_sprite.get_meta("source_row")==8,"The actual sheep uses its own two-hoof firing row")
 	game.world.frontier.shot_flash = 0
 	game.update_friend()
 	check(game.friend_sprite.get_meta("pose_key")=="gun-run","Aiming resumes the complete gun-running cycle")
@@ -147,10 +147,10 @@ func run() -> void:
 	game.world.death_cause = "enemy"
 	game.world.hit_time = 1.3
 	game.update_friend()
-	check(game.friend_sprite.get_meta("pose_key")=="deaths" and game.friend_sprite.get_meta("source_row")==5,"An enemy faceplant overrides the held gun even in a lost boss fight")
+	check(game.friend_sprite.get_meta("pose_key")=="deaths" and game.friend_sprite.get_meta("source_row")==10,"An enemy faceplant overrides the held gun even in a lost boss fight")
 	game.world.death_cause = "bonk"
 	game.update_friend()
-	check(game.friend_sprite.get_meta("source_row")==4,"Obstacle impact uses a different settling animation")
+	check(game.friend_sprite.get_meta("source_row")==9,"Obstacle impact uses a different settling animation")
 	for hero in 4:
 		for key in ["gun-run","gun-fire"]:
 			var scale := -1.0
@@ -160,7 +160,7 @@ func run() -> void:
 				unique[hash(f.texture.get_image().get_data())] = true
 				if scale<0: scale=f.scale
 				check(is_equal_approx(scale,f.scale),"Gun frame preserves one body scale: "+str(hero)+key+str(frame))
-			check(unique.size()==12,"All twelve actual gun poses are independently drawn: "+str(hero)+key)
+			check(unique.size()==(7 if hero in [0,2] else 8),"All actual gun poses are independently drawn: "+str(hero)+key)
 	game.queue_free()
 	await process_frame
 	print("RESULT: %d encounter/gamepad checks, %d failures" % [checks,failures])

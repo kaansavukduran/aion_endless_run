@@ -4,10 +4,14 @@ extends RefCounted
 const META = preload("res://assets/FRONTIER-PROVENANCE.json")
 const MOTION = preload("res://assets/MOTION-PROVENANCE.json")
 const ENCOUNTERS = preload("res://assets/ENCOUNTERS-PROVENANCE.json")
+const CANONICAL = preload("res://assets/CANONICAL-PROVENANCE.json")
 var images := {}
 var frames := {}
 
 func descriptor(key: String,row: int) -> Dictionary:
+	if CANONICAL.data.aliases.has(key):
+		var alias: Dictionary = CANONICAL.data.aliases[key][row]
+		return {"key":alias.atlas,"row":int(alias.row),"data":CANONICAL.data.atlases[alias.atlas]}
 	if ENCOUNTERS.data.aliases.has(key):
 		var alias: Dictionary = ENCOUNTERS.data.aliases[key][row]
 		return {"key":alias.atlas,"row":int(alias.row),"data":ENCOUNTERS.data.atlases[alias.atlas]}
@@ -17,7 +21,8 @@ func descriptor(key: String,row: int) -> Dictionary:
 	return {"key":key,"row":row,"data":META.data.atlases[key]}
 
 func count(key: String,row: int = 0) -> int:
-	return int(descriptor(key,row).data.columns)
+	var spec := descriptor(key,row)
+	return spec.data.frames[int(spec.row)].size()
 
 func cycle(key: String,row: int,clock: float,seconds: float) -> int:
 	return posmod(int(clock/maxf(0.01,seconds)*count(key,row)),count(key,row))
@@ -30,7 +35,7 @@ func pose(key: String, row: int, column: int) -> Dictionary:
 	key = str(spec.key)
 	row = int(spec.row)
 	var d: Dictionary = spec.data
-	column = clampi(column,0,int(d.columns)-1)
+	column = clampi(column,0,d.frames[row].size()-1)
 	var cache_key := "%s:%d:%d" % [key,row,column]
 	if frames.has(cache_key): return frames[cache_key]
 	var f: Dictionary = d.frames[row][column]
@@ -56,6 +61,10 @@ func pose(key: String, row: int, column: int) -> Dictionary:
 			largest = maxf(largest,maxf(bounds[2]-bounds[0],bounds[3]-bounds[1]))
 		factor = 64.0/largest
 	var result := {"texture":ImageTexture.create_from_image(isolated),"offset":Vector2(float(b[0])-float(f.get("anchor_x",d.anchor_x[row]))-2.0,float(b[1])-float(b[3])-2.0),"scale":factor,"height":float(b[3]-b[1])*factor,"head":float(d.head_spans[row])*factor if d.has("head_spans") else 0.0,"source_key":key,"source_row":row,"source_frame":column,"cell_width":float(d.width)/float(d.columns),"cell_height":float(d.height)/float(d.rows),"center_y":float(f.get("anchor_y",float(d.height)/float(d.rows)*0.5)),"top":float(b[1]),"left":float(b[0]),"baseline":float(d.baselines[row]) if d.has("baselines") else float(b[3])}
+	if f.has("origin"):
+		result.offset = Vector2(float(b[0])-float(f.origin[0])-2.0,float(b[1])-float(f.origin[1])-2.0)
+		result["registration"] = "head" if f.eye != null and row not in [5,9,10,12,13] else ("roll-center" if key=="canonical-rolls" or row==5 else "floor")
+		result["source_column"] = int(f.source_column)
 	frames[cache_key] = result
 	return result
 

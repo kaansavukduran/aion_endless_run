@@ -5,6 +5,8 @@ const LANGUAGES := ["tr", "en", "cs"]
 const LANGUAGE_NAMES := {"tr":"Türkçe", "en":"English", "cs":"Čeština"}
 const STRINGS := {
 	"tr": {
+		"setting_on": "Açık",
+		"setting_off": "Kapalı",
 		"boss_training": "Boss antrenmanı",
 		"boss_training_help": "Seçili kahramanınla üç boss’u dene. Antrenman rekorunu ve normal seviye ilerlemeni değiştirmez. Koyunda iki küçük arkadaşın da koşar.",
 		"boss_ray": "FIRTINA VATOZU",
@@ -120,7 +122,7 @@ const STRINGS := {
 		"saved_error": "Kayıt yazılamadı. Disk alanını kontrol et.",
 		"pause": "Duraklat",
 		"new_best": "YENİ REKOR!",
-		"version": "Sürüm 0.10.0 · Hesap yok. İnternet yok.",
+		"version": "Sürüm 0.11.0 · Hesap yok. İnternet yok.",
 		"portrait": "Daha geniş bir manzara için cihazını çevirebilirsin.",
 		"return": "Koşuya dön",
 		"controls": "Kontroller",
@@ -164,6 +166,8 @@ const STRINGS := {
 		"riding_diagonal": "ÇAPRAZ AKIM · İleri ve yukarı süzül"
 	},
 	"en": {
+		"setting_on": "On",
+		"setting_off": "Off",
 		"boss_training": "Boss training",
 		"boss_training_help": "Try all three bosses with your selected hero. Training does not change your record or normal level progress. Sheep brings two small friends.",
 		"boss_ray": "STORM RAY",
@@ -279,7 +283,7 @@ const STRINGS := {
 		"saved_error": "Could not save. Check free disk space.",
 		"pause": "Pause",
 		"new_best": "NEW PERSONAL BEST!",
-		"version": "Version 0.10.0 · No account. No internet.",
+		"version": "Version 0.11.0 · No account. No internet.",
 		"portrait": "Turn your device for a wider view.",
 		"return": "Return to run",
 		"controls": "Controls",
@@ -323,6 +327,8 @@ const STRINGS := {
 		"riding_diagonal": "DIAGONAL FLOW · Rise and glide forward"
 	},
 	"cs": {
+		"setting_on": "Zapnuto",
+		"setting_off": "Vypnuto",
 		"boss_training": "Trénink bossů",
 		"boss_training_help": "Vyzkoušej všechny tři bosse s vybranou postavou. Trénink nemění rekord ani postup úrovní. Ovečka má dva malé přátele.",
 		"boss_ray": "BOUŘKOVÝ REJNOK",
@@ -438,7 +444,7 @@ const STRINGS := {
 		"saved_error": "Uložení se nezdařilo. Zkontroluj volné místo.",
 		"pause": "Pozastavit",
 		"new_best": "NOVÝ OSOBNÍ REKORD!",
-		"version": "Verze 0.10.0 · Bez účtu. Bez internetu.",
+		"version": "Verze 0.11.0 · Bez účtu. Bez internetu.",
 		"portrait": "Pro širší výhled otoč zařízení.",
 		"return": "Zpět do běhu",
 		"controls": "Ovládání",

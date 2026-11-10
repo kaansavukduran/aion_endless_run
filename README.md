@@ -6,6 +6,10 @@ Sevimli bir piksel macerası. **Space ile zıpla, Esc ile mola ver.** Kargalara 
 
 **[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Sürüm ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/VALIDATION.md)
 
+## 0.11.0 · Özgün karakterler ve sabit kare hizası
+
+Dört kahraman kendi orijinal model referanslarına göre yeniden çizildi. Aion’un pembe dış solungaçları, mavi gözleri ve DNA kuyruğu; kurdun çıplak gri/mor kürkü ve lanet izi; koyunun altın halesi; baykuşun kahverengi tüyleri korunur. Yumruk, kanat/gaga, kafa/çifte, ısırık/kafa hareketleri ayrı fiziksel saldırılardır. Aion’da küçük mavi yumruk parlaması vardır. Yüz hizası ve karakter başına sabit ölçek, koşu/zıplama/saldırı/silah kareleri arasındaki sıçramaları azaltır. Sağ yönlü takla sekiz ayrı pozla saat yönünde döner. Yeni paftalar toplam 449 çizilmiş poz içerir; animasyon başına zorla kare çoğaltılmaz. Hareket, kamera/şimşek, ses ve kutlamalar ilk açılışta açıktır; açık/kapalı durumları yazıyla gösterilir, kaydedilen tercihler korunur.
+
 ## Oyna
 
 1. Releases sayfasından cihazına uygun dosyayı indir.
@@ -21,7 +25,7 @@ Ana menüde **Koşuya başla** veya **Space**. Koşarken **Space**, Zıpla düğ
 
 Koyunların aralığı 112/224 piksele çıkarıldı; ilk hızda yaklaşık 0,35/0,70 saniye sonra, öndekinin zıpladığı noktada sırayla havalanırlar. Önceki 0.4 özelliklerinde koyunlar öndekinin izlediği zıplama yolunu mesafeye bağlı gecikmeyle sırayla takip eder. Kurt deparında kıvrılan rüzgâr izleri akar. Baykuş, görünür yükselen hava akımında basılı tutarak biraz yükselebilir. Bu hareketler için yeni 18 karelik ek pafta vardır.
 
-Önceki 48 karelik paftalar kaynak geçmişinde korunur; aktif animasyonlar 0.9’un daha kapsamlı paftalarını kullanır. Web ve indirilebilir sürümün numarası sol üstte görünür. Eski web önbelleğinden geçiş otomatik yapılır; sonraki güncellemeler oyun içindeki düğmeyle açılır.
+Önceki 48 karelik paftalar kaynak geçmişinde korunur; ana karakter animasyonları 0.11’in özgün tasarıma bağlı paftalarını kullanır. Web ve indirilebilir sürümün numarası sol üstte görünür. Eski web önbelleğinden geçiş otomatik yapılır; sonraki güncellemeler oyun içindeki düğmeyle açılır.
 
 Her atlanan engel **+10**, her toplanan kristal **+25** puan. Mesafe de skor kazandırır. Hız zamanla artar ve sınırlandırılır. Kehribar Çölü ile Ayaz Vadisi mesafeye göre yer değiştirir; gündüz ve gece bir döngü oluşturur.
 
