@@ -2,7 +2,7 @@
 
 Sevimli bir piksel macerası. **Space ile zıpla, Esc ile mola ver.** Kargalara vur, engellerin altından takla at, dev mantar ve tılsımları topla, kendi rekorunu geç. Bağımsız Godot oyunu; Firefox veya eklenti gerektirmez. Oyun internete bağlanmaz.
 
-![Özgün tasarımlarına göre dört karakter](docs/evidence-v011/android-first-launch.png)
+![Melun Bilge Kurt dört ayakla depar atarken](docs/evidence-v012/wolf-four-legged-sprint.png)
 
 **[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Sürüm ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/VALIDATION.md)
 

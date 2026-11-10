@@ -1,0 +1,11 @@
+[
+  "aion: actual firing uses the dedicated coherent weapon row",
+  "aion: actual trigger fire plays all separate anticipation/recoil/recovery poses",
+  "owl: actual firing uses the dedicated coherent weapon row",
+  "owl: actual trigger fire plays all separate anticipation/recoil/recovery poses",
+  "sheep: actual firing uses the dedicated coherent weapon row",
+  "sheep: actual trigger fire plays all separate anticipation/recoil/recovery poses",
+  "wolf: actual firing uses the dedicated coherent weapon row",
+  "wolf: actual trigger fire plays all separate anticipation/recoil/recovery poses",
+  "No browser or Godot errors during four-hero weapon playback"
+]

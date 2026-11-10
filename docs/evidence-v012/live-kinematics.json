@@ -1,0 +1,10 @@
+{
+  "sprintMax": 48,
+  "biteMax": 34,
+  "peckMax": 18,
+  "glideMin": 302,
+  "glideMax": 302,
+  "airPeck": true,
+  "wingMin": 302,
+  "wingMax": 302
+}
