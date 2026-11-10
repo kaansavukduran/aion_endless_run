@@ -6,7 +6,7 @@
 - Baykuş yerde kanatlarını sırayla öne savurur; havadayken açık kanat ve toplanmış ayaklarla gagasını ileri uzatır.
 - Yeni kareler gerçek yakın gözden hizalanır. Altın tüy/gaga veya uzak gözü yanlışlıkla merkez seçme sorunu düzeltildi. İki özgün PNG, 64 çizilmiş poz. Aion ve koyunun beğenilen çizimleri korunur.
 
-Dokuz kaynak/sahne dizisinde 1.975 kontrol, 55 yerel/canlı/PWA akış yürütmesi ve bütün native işler geçti. Native CI: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42926160897 . Kayıtlar docs/evidence-v012 içindedir. Önceki boss, gamepad, dil, sürü ve çevrimdışı özellikleri korunur.
+Dokuz kaynak/sahne dizisinde 1.975 kontrol, 55 yerel/canlı/PWA akış yürütmesi ve bütün native işler geçti. Native CI: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42926160897 . Dokuz paket ve iki bütünlük dosyası yayımlandı; paket özetleri, aynı imzalı APK ve indirilen Mac arşivi doğrulandı. Kayıtlar docs/evidence-v012 içindedir. Önceki boss, gamepad, dil, sürü ve çevrimdışı özellikleri korunur.
 
 ## İndir ve aç
 

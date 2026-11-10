@@ -6,6 +6,8 @@ Sprint attack posture snapshots on attack start, so releasing Shift mid-swing ca
 
 Nine source/scene suites1975 assertions. Maintained browser driver uses passive real rendered sprite X and registered eye observations, without world setters. Stable Android versionCode12. Retain Mac explicit DMG capacity sizing/verify. Package and publication results append once verified; keep prior releases.
 
+0.12 delivery: final application1532cb787fe034760ef41bf37771c085c97b282b, successful nativeCI42926160897, release source4d2f079 and publisher42927273447. Source1975 and browser55 checks. Actual live sprite displacements48/34/18px; registered near-eye X302 remains constant in glide and ground-wing. Nine public packages plus receipt/sums verified; downloaded Mac ZIP CRC/version12/universal and stable APK bytesa0ba8c60bb1f53a5543a158787ed273f4f8774c60a1181bf4d72929323ceaf8c verified. APK transfer branch deleted. Prior releases retained. docs/evidence-v012 records scope/limits and full playback.
+
 Historical handoff follows.
 
 # Current handoff · 0.11.0

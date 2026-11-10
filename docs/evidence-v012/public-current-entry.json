@@ -1,0 +1,15 @@
+{
+  "url": "https://aionendlessrun.vercel.app/?build=c6f5ca6c01a0ebd1",
+  "build": {
+    "build": "c6f5ca6c01a0ebd1",
+    "version": "0.12.0"
+  },
+  "version": "0.12.0",
+  "state": "ready",
+  "settings": {
+    "motion": "true",
+    "effects": "true",
+    "audio": "true",
+    "celebrations": "true"
+  }
+}
