@@ -26,3 +26,7 @@ Original procedural scenery and synthesized game sounds are part of this project
 ## Companion runner atlas (0.2.0)
 
 `assets/companions-runner.png` is a newly generated owner-authorized derivative of the existing wolf/sheep/owl identities, with Aion as the pixel-art style reference. Six columns × six rows contain sequential right-facing running, jumping and gliding poses. It is not the old idle sheet translated across the screen. The generated PNG is unchanged; runtime source rectangles, registered baselines and alpha discard handle alignment/transparency. Provenance and SHA-256: `assets/COMPANION-RUNNER-PROVENANCE.json`. Same MPL-2.0 artwork terms and AI-output limitations apply.
+
+## Full companion sheets (0.3.0)
+
+`assets/owl-runner.png`, `assets/wolf-runner.png` and `assets/sheep-runner.png` are newly generated, owner-authorized derivatives of the same existing character identities with Aion's runner as the pixel-art style reference. Each contains 48 frames: idle, run, jump, freeze, fire/smoke, species-specific ash, ability and landing. Original generated PNG bytes are preserved; atlas rectangles and alpha-discard rendering handle grid spacing/transparency. Provenance, row boundaries, baselines and SHA-256 are in `assets/FULL-RUNNER-PROVENANCE.json`. The same MPL-2.0 artwork terms and AI-output limitations above apply.

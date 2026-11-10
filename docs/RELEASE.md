@@ -1,4 +1,4 @@
-# Aion Endless Run 0.3.0 · Koşu arkadaşları ve karakter yetenekleri
+# Aion Endless Run 0.3.0 · Yeni animasyonlar ve web güncellemeleri
 
 Baykuş, kurt ve koyunun her biri için Aion tarzında ayrı 48 karelik pafta: bekleme, altı gerçek koşu adımı, zıplama, donma, ateş/duman, türe özgü kül, özel yetenek ve iniş. Koşu kareleri mesafeyle ilerler; duraklatınca poz korunur. Baykuşta açık kanatlı süzülme, kurtta öne yatık depar döngüsü kullanılır.
 
