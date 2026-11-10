@@ -2,6 +2,8 @@
 
 Sevimli bir piksel macerası. **Space ile zıpla, Esc ile mola ver.** Ateşi ve buzu aş, kristalleri topla, kendi rekorunu geç. Bağımsız Godot oyunu; Firefox veya eklenti gerektirmez. Oyun internete bağlanmaz.
 
+![Aion Endless Run](docs/evidence/01-menu-tr.png)
+
 **[İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Sürüm ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/VALIDATION.md)
 
 ## Oyna

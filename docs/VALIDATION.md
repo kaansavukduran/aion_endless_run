@@ -4,7 +4,7 @@ This file records evidence, not a promise of identical behavior on every device.
 
 ## Automated game tests
 
-Godot 4.6.3, actual main scene and deterministic physics: **39 checks passed**. Grounded jump, double-jump rejection, pause freezing time/distance/height, fire/ice collisions, genuine pickups and obstacle clears without double awards, a long generated run through both biomes, retry counters, Space/Esc at the real scene entry, character selection, pause/resume preservation, on-screen language switching, disk persistence of best/character/settings, gameplay with sound/animation disabled.
+Godot 4.6.3, actual main scene and deterministic physics: **40 checks passed**. Grounded jump, double-jump rejection, pause freezing time/distance/height, fire/ice collisions, genuine pickups and obstacle clears without double awards, a long generated run through both biomes, retry counters, Space/Esc at the real scene entry, character selection, pause/resume preservation, on-screen language switching, disk persistence of best/character/settings, gameplay with sound/animation disabled.
 
 The test uses a separate local data directory. It does not infer successful device installation from a source import or archive creation.
 
@@ -16,8 +16,14 @@ Screenshots in `docs/evidence/` are runtime captures, not generated mockups. The
 
 ## Native packages
 
-Linux x64 embedded executable started successfully with the native engine in headless mode. Android release APK was produced locally and verified by `apksigner` (v2 and v3 signatures; RSA 3072, one signer). `aapt` confirms package `com.kaansavukduran.aionendlessrun`, version 0.1.0 / code 1, ARM64/x86_64 and no INTERNET permission. This is APK structure/signature verification, not a physical phone installation test.
+Linux x64 embedded executable started successfully with the native engine in headless mode. Android release APK was produced locally and verified by `apksigner` (v2 and v3 signatures; RSA 3072, one signer). `aapt` confirms package `com.kaansavukduran.aionendlessrun`, version 0.1.0 / code 1, ARM64/x86_64 and no INTERNET permission. The released APK has its own stable local signing identity. CI builds an otherwise equivalent test APK with a disposable test key, installs it in an Android API 30 x86_64 emulator, disables Wi-Fi/mobile data, launches the game, taps Start, sends Space/Esc and captures both the real menu and paused game. Screenshots are inspected and blank frames, shader linking errors, Java/GDScript exceptions and control-tree errors fail CI. ANGLE over SwiftShader is required on this headless runner; the legacy emulator GLES translator produced blank frames and was rejected. This remains an emulator test, not a physical phone test.
 
-macOS CI produced the universal application and DMG and started its native executable in headless mode on an Apple Silicon runner. Development ad-hoc signing is used; there is no Developer ID or notarization. Windows and Linux installer/portable results are recorded after the final CI run. Interactive UI verification here is the Web export; headless native startup alone does not prove GPU rendering, sound or touch behavior on a particular device.
+macOS CI produced the universal application and DMG and started its native executable in headless mode on an Apple Silicon runner. Development ad-hoc signing is used; there is no Developer ID or notarization. Windows x64: NSIS Setup and portable ZIP were produced; both the portable executable and the installed executable started successfully. Linux x64: DEB installed through APT and started; the portable binary and AppImage (extract-and-run mode) also started successfully. Evidence: [desktop install verification run](https://github.com/kaansavukduran/aion_endless_run/actions/runs/42823067265). Interactive UI verification here is the Web export; headless native startup alone does not prove GPU rendering, sound or touch behavior on a particular device.
 
 Physical Windows/macOS/Android interaction and iPhone installation have not been tested. iOS App Store/TestFlight installation and macOS Developer ID/notarization require the owner's Apple distribution setup.
+
+All four packaged PNGs were byte-compared against the donor; original SHA-256 values match. Official local export templates were verified against upstream SHA-512. Portable ZIP CRCs, tar archives and DEB metadata were checked after downloading the actual CI artifacts. Engine/font licenses are included in the native resource payloads.
+
+A real exported play session reached Frost Valley, collected 11 crystals and scored 612 through keyboard jumps; the runtime image is `docs/evidence/09-snow-biome.png`. The final Android and desktop CI run is linked in the release build receipt.
+
+Final complete CI: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42825770482 . Application source commit: `c36b105`. All test, Windows, Linux, macOS and Android emulator jobs passed. The release APK is signed locally with the original release key; the emulated CI test uses its disposable key.

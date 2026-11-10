@@ -6,6 +6,12 @@ Yeni bağımsız Godot 4.6.3 oyunu. FireAxolotl kaynaklarına değişiklik yapı
 
 Ana akış: Space/sol tık/dokunma zıplama, Esc duraklatma; karakter seçimi, ayarlar, gerçek skor ve kristaller, kalıcı rekor/tercihler, ateş/buz sonlanması, iki biyom, gündüz/gece. Ses yerel sentezlenir. Ağ çağrısı/telemetri yok.
 
-`tests/test_game.gd`: 39 anlamlı fizik ve gerçek sahne/menü/kayıt kontrolü. Son platform ve görsel doğrulama: `docs/VALIDATION.md`. Release kapsamı: `docs/RELEASE.md`. Paketleme: `.github/workflows/build.yml`, `packaging/`, `docs/BUILD.md`. Özel anahtarları kaynağa veya arşive ekleme.
+`tests/test_game.gd`: 40 anlamlı fizik ve gerçek sahne/menü/kayıt kontrolü. Son platform ve görsel doğrulama: `docs/VALIDATION.md`. Release kapsamı: `docs/RELEASE.md`. Paketleme: `.github/workflows/build.yml`, `packaging/`, `docs/BUILD.md`. Özel anahtarları kaynağa veya arşive ekleme.
 
 Öncelikli sonraki işler: fiziksel dokunmatik cihaz deneyimi, arkadaşlar için kullanıcı onaylı yan profil koşu/zıplama paftaları, Apple Developer ID/noter onayı ve iOS TestFlight kurulumu. Kaynak projenin iOS hedefinin varlığı iPhone'da kurulabilir paket üretildiği anlamına gelmez. Mevcut ilk beta paketlerini ve etiketlerini koru.
+
+İlk teslim 0.1.0 beta: Windows NSIS+ZIP, Linux DEB+AppImage+tar.gz, macOS universal DMG+ZIP, Android release APK ve ek Web arşivi. 40 kaynak/gerçek sahne kontrolü ve 12 gerçek tarayıcı kontrolü. Native Android emülatör testi ANGLE/SwiftShader ile ekran içeriğini ve offline başlangıç/Space/Esc akışını denetler; eski GLES çeviricisinin boş ekranı başarısız kabul edilir. Windows ve Linux kurulumdan sonra da açılır; macOS native ilk açılışı CI’da geçti.
+
+Android release imza anahtarı `/workspace/work/signing` özel derleme alanındadır, kaynakta veya Release içinde değildir. GitHub secrets yazma denemesi 403 döndürdü. İleriki imzalı güncellemeler için aynı anahtarın güvenli saklanması ve sahibinin GitHub Actions secret ayarını tamamlaması gerekir; `docs/BUILD.md` izlenir. iOS App Store/TestFlight ve macOS Developer ID/noter onayı tamamlanmadı.
+
+Son doğrulanmış oyun kodu: `c36b105`. Tam başarılı CI: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42825770482 . Sonraki yalnızca belge/ekran görüntüsü kaydı oyun kaynaklarını değiştirmez. Release içindeki BUILD-RECEIPT.json ile SHA256SUMS gerçek yüklenen dosyaları tanımlar.

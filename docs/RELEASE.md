@@ -26,3 +26,7 @@ Windows kurulum dosyasına çift tıkla. Portable ZIP'i tamamen çıkart ve EXE'
 **Sınırlar:** Windows paketi Authenticode, macOS paketi Developer ID imzasına sahip değil. macOS Developer ID/notarization tamamlanmadığı için Gatekeeper uygulamayı engelleyebilir. Android paket imzası bütünlük ve güncelleme kimliği içindir, Play Store yayını değildir. iPhone için Apple Developer hesabı, Xcode imzası ve TestFlight/App Store süreci henüz yok. Fiziksel Android, Windows ve macOS cihaz testlerinin kapsamı `docs/VALIDATION.md` içinde ayrıca belirtilir.
 
 Kaynak kodu bu etiketin GitHub kaynak arşividir. `SHA256SUMS` indirilen varlıkları karşılaştırmak içindir. İlk beta olduğu için kararlı sürüm olarak sunulmaz; sonraki sürümler önceki Release dosyalarını koruyacaktır.
+
+## Doğrulama
+
+40 fizik/gerçek sahne kontrolü ve 12 tarayıcı akışı geçti. Windows kurulum ve portable açılışı, Linux DEB kurulumu/AppImage/portable açılışı ve macOS universal uygulamanın ilk açılışı CI üzerinde denendi. Android, ağ bağlantıları kapalı bir emülatörde kuruldu; ana menü ve duraklatılmış oyun gerçek ekran görüntülerinde kontrol edildi. Fiziksel cihaz testleri ayrıca yapılmalıdır. İndirilen gerçek arşivlerin bütünlüğü ve Android APK imzası kontrol edildi. `BUILD-RECEIPT.json` derleme kaydı ve dosya boyutlarını içerir.

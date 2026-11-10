@@ -2,7 +2,7 @@
 
 Engine and export templates: official Godot 4.6.3 standard build, verified against upstream SHA-512 by `packaging/setup_godot.py` in CI. Project is GDScript and GL Compatibility; no .NET runtime needed.
 
-Desktop exports embed the PCK in the executable. Windows: NSIS per-user installer (no admin elevation) and ZIP. Linux: AppImage, DEB and tar.gz. macOS: universal app ZIP and DMG on a macOS runner. macOS Developer ID and notarization are not configured; packages use development ad-hoc signing only. Windows Authenticode is not configured.
+Windows and Linux exports embed the PCK in the executable; macOS keeps it inside the application bundle. Windows: NSIS per-user installer (no admin elevation) and ZIP. Linux: AppImage, DEB and tar.gz. macOS: universal app ZIP and DMG on a macOS runner. macOS Developer ID and notarization are not configured; packages use development ad-hoc signing only. Windows Authenticode is not configured.
 
 Android uses the stock release template, stable package ID `com.kaansavukduran.aionendlessrun`, ARM64 and x86_64. No network permission. CI signing requires repository Actions secrets `AION_ANDROID_KEYSTORE_B64` and `AION_ANDROID_KEY_PASSWORD`; alias is `aionrelease`. The initial key was created outside the repository in the private build workspace; the current GitHub integration cannot write repository secrets (HTTP 403). The first APK is built locally. To enable later CI Android builds, the owner must configure these two secrets and the repository variable `AION_ANDROID_SIGNING_READY=true`. Back up the original key securely; do not replace the key for an update. Increment `version/code` and `version/name` for each later release. Do not commit the keystore or `.godot/export_credentials.cfg`.
 
