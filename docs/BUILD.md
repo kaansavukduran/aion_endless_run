@@ -24,3 +24,9 @@ For Android set `JAVA_HOME`, `ANDROID_HOME`, `AION_KEYSTORE`, `AION_KEY_ALIAS`, 
 The web archive is an additional preview, not a substitute for native packages. Serve it over localhost/HTTPS, e.g. `python3 -m http.server 8000 --directory build/web`, then open `http://localhost:8000`. Its service worker can cache the game after the first complete load. Native games work offline immediately after installation/extraction.
 
 From 0.9, a signed APK can exceed GitHub's 100 MiB blob limit. Transfer it as <=40 MiB parts with APK-PARTS.json in a temporary same-repository release-assets/version branch, Vercel deployment disabled. `packaging/restore_staged_apk.py` checks each part and final length/SHA-256 before publication. Delete the staging branch after public asset verification. Signing material never enters this branch.
+
+## 0.11 character registration and Mac image sizing
+
+Run the eight suites including `godot --headless --script tests/test_fidelity.gd`. Canonical rows use observed7/8 pose counts, not requested grid widths. `packaging/register_canonical.py` reads bundled original PNGs when generation workspace paths are unavailable; it requires Pillow, NumPy and SciPy for maintainer registration only, never in the game runtime. Preserve original files and anatomical origins.
+
+macOS packaging uses `packaging/macos_dmg.py` to reserve explicit HFS+ capacity (at least128MiB beyond source allocation, minimum384MiB) before compression, and runs `hdiutil verify`. This avoids a full mounted image while copying the universal game PCK.

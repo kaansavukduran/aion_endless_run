@@ -1,0 +1,19 @@
+[
+  "Fresh browser defaults all four options ON, even when the OS requests reduced motion",
+  "All four actual switches can be explicitly turned OFF",
+  "Explicit OFF choices persist across real IndexedDB reload",
+  "aion: actual run selects its own faithful sheet",
+  "aion: actual roll plays the dedicated clockwise compact atlas",
+  "aion: jump/strike preserves the same character source",
+  "owl: actual run selects its own faithful sheet",
+  "owl: actual roll plays the dedicated clockwise compact atlas",
+  "owl: jump/strike preserves the same character source",
+  "sheep: actual run selects its own faithful sheet",
+  "sheep: actual roll plays the dedicated clockwise compact atlas",
+  "sheep: jump/strike preserves the same character source",
+  "wolf: actual run selects its own faithful sheet",
+  "wolf: actual roll plays the dedicated clockwise compact atlas",
+  "wolf: jump/strike preserves the same character source",
+  "Explicit ON choices also persist on reload",
+  "No browser or Godot errors during defaults and four-hero playback"
+]

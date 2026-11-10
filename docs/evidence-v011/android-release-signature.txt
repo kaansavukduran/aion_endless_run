@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Aion Endless Run, OU=Games, O=Kaan Savukduran, C=TR
+Signer #1 certificate SHA-256 digest: 50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36
+Signer #1 certificate SHA-1 digest: 70d93cf726a67d0ae5361780eae292f332b64aac
+Signer #1 certificate MD5 digest: f2cb5240f087aaf8a0a52ddd3472c08e
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 3072
+Signer #1 public key SHA-256 digest: 3793f320d92972a4aaf58c86a5aa0506d204475e0d214771de994c0eb13e747c
+Signer #1 public key SHA-1 digest: c0845cef00044f026ea6cf2d0b283787d3af5f0c
+Signer #1 public key MD5 digest: 6e9a7b7749f66da8299561115e56cd54

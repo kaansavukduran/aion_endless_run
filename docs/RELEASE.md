@@ -7,7 +7,7 @@
 - Hareket, kamera/şimşek, ses ve kutlamalar ilk açılışta açık. Açık/Kapalı yazıları eklendi. Oyuncunun kaydettiği kapalı tercihler güncellemede zorla açılmaz.
 - Beş yeni orijinal PNG / toplam 449 çizilmiş poz. Kalite için zorla kare çoğaltma yok. Bosslar, gecikmeli koyun sürüsü, gamepad menüleri, üç dil ve çevrimdışı özellikler korunur.
 
-Sekiz kaynak/sahne dizisinde 1.773 kontrol geçti. Tarayıcı, native paket ve yayın doğrulama kayıtları tamamlandıkça docs/evidence-v011 içine eklenir. Fiziksel kol ve Apple sahibi imzalama kapsamı önceki sürümle aynıdır.
+Sekiz kaynak/sahne dizisinde 1.773 kontrol ve 91 yerel/canlı/PWA akış yürütmesi geçti. Native CI başarılı: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42921167868 . macOS DMG kapasite hesabı düzeltildi; disk kalıbı ve uygulama açılışı doğrulandı. Kayıtlar docs/evidence-v011 içindedir. Fiziksel kol ve Apple sahibi imzalama kapsamı önceki sürümle aynıdır.
 
 ## İndir ve aç
 
