@@ -10,7 +10,7 @@
 
 541 kaynak/sahne kontrolü ve 152 yerel/canlı/PWA akış yürütmesi geçti. Native paket doğrulaması: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42898132230 .
 
-Doğrulama kapsamı ve gerçek kayıtlar [docs/VALIDATION.md](https://github.com/kaansavukduran/aion_endless_run/blob/main/docs/VALIDATION.md) içindedir. Önceki sürümler korunur. Paket kimliklerini `BUILD-RECEIPT.json` ve `SHA256SUMS` tanımlar.
+Doğrulama kapsamı ve gerçek kayıtlar [docs/VALIDATION.md](https://github.com/kaansavukduran/aion_endless_run/blob/main/docs/VALIDATION.md) içindedir. Önceki sürümler korunur. Dokuz yayımlanmış paketin boyutu/SHA-256 özeti, Android imzası ve indirilen Mac ZIP’in bütünlüğü/iki mimarisi doğrulandı. Paket kimliklerini `BUILD-RECEIPT.json` ve `SHA256SUMS` tanımlar.
 
 ## İndir ve aç
 
