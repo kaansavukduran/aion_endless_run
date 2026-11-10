@@ -9,7 +9,7 @@
 
 316 kaynak/sahne kontrolü ve toplam 133 yerel/canlı/PWA akış yürütmesi geçti. Windows kurulum/portable, Linux DEB/AppImage/portable, Mac universal ve çevrimdışı Android emülatör kontrolleri başarılı: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42890445749 .
 
-Doğrulama kapsamı ve gerçek test kayıtları [docs/VALIDATION.md](https://github.com/kaansavukduran/aion_endless_run/blob/main/docs/VALIDATION.md) içindedir. Paketleri `BUILD-RECEIPT.json` ve `SHA256SUMS` tanımlar; önceki sürümler korunur.
+Doğrulama kapsamı ve gerçek test kayıtları [docs/VALIDATION.md](https://github.com/kaansavukduran/aion_endless_run/blob/main/docs/VALIDATION.md) içindedir. Dokuz yayımlanmış paketin SHA-256/uzunlukları, Android imzası ve indirilen Mac ZIP’in bütünlüğü/iki mimarisi doğrulandı. Paketleri `BUILD-RECEIPT.json` ve `SHA256SUMS` tanımlar; önceki sürümler korunur.
 
 ## İndir ve aç
 
