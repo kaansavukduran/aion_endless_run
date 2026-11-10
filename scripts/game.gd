@@ -174,7 +174,8 @@ func rebuild() -> void:
 	ground = view_h - (190.0 if portrait else 132.0)
 	world.field_width = view_w
 	for child in ui.get_children():
-		ui.remove_child(child)
+		# Keep the pressed control in the tree until Godot finishes GUI dispatch.
+		child.hide()
 		child.queue_free()
 	hud = Control.new()
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -357,7 +358,7 @@ func build_page() -> void:
 		focus_later.call_deferred(first)
 
 func focus_later(item: Control) -> void:
-	if is_instance_valid(item) and item.is_inside_tree():
+	if is_instance_valid(item) and item.is_inside_tree() and item.is_visible_in_tree() and not item.is_queued_for_deletion():
 		item.grab_focus()
 
 func build_characters() -> void:
@@ -449,7 +450,10 @@ func resume_run() -> void:
 
 func main_menu() -> void:
 	save_settings()
+	world.reset()
 	world.state = "ready"
+	particles.clear()
+	notice_time = 0.0
 	show_page("main")
 
 func quit_game() -> void:

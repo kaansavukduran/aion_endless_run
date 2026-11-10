@@ -123,6 +123,8 @@ func run() -> void:
 	key(second, KEY_SPACE)
 	second.world.step(1.0 / 60)
 	check(second.world.y < 0.0, "Gameplay works with sound and animation disabled")
+	second.main_menu()
+	check(second.world.state == "ready" and second.world.y == 0.0 and second.world.score == 0 and second.world.obstacles.is_empty(), "Main menu resets airborne pose and previous hazards while preserving the best")
 	game.queue_free()
 	second.queue_free()
 	await process_frame
