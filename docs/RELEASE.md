@@ -9,7 +9,7 @@
 - Engelde sarsılıp düşme ve düşmanda yüzüstü kapanma, her kahramana ayrı 12 kare. Ateş, buz ve çukur animasyonları korunur.
 - 3 yeni orijinal PNG / 300 çizilmiş kare. Önceki tüm sürümler, üç dil, çevrimdışı kayıt/güncelleme ve en az 30 saniyelik seviye temposu korunur.
 
-Yedi kaynak/sahne dizisinde 1.344 kontrol ve 91 yerel/canlı/PWA akış yürütmesi geçti. Native CI başarılı: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42913367815 . Sanal standart Xbox/PS4/PS5 eşlemeleriyle gerçek menüler ve üç antrenman savaşı doğrulandı; fiziksel kol donanımıyla test iddiası yoktur. Kapsam ve özgün kayıtlar `docs/VALIDATION.md` / `docs/evidence-v010/` içindedir.
+Yedi kaynak/sahne dizisinde 1.344 kontrol ve 91 yerel/canlı/PWA akış yürütmesi geçti. Native CI başarılı: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42913367815 . Sanal standart Xbox/PS4/PS5 eşlemeleriyle gerçek menüler ve üç antrenman savaşı doğrulandı; fiziksel kol donanımıyla test iddiası yoktur. Dokuz paket ve iki doğrulama dosyası yayımlandı; paket özetleri, aynı imzalı APK ve indirilen universal Mac ZIP doğrulandı. Kapsam ve özgün kayıtlar `docs/VALIDATION.md` / `docs/evidence-v010/` içindedir.
 
 ## İndir ve aç
 
