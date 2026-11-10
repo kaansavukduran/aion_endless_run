@@ -46,35 +46,28 @@ func run() -> void:
 	game.main_menu()
 	game.select_character("sheep")
 	check(game.character == "sheep", "A new pre-run selection is allowed")
-	# Test actual source opacity registration across every moving atlas frame,
-	# including crossings between normal and separate action sheets.
+	# Head/ear span remains anatomically constant when poses lean or extend.
+	# Whole-pose height intentionally varies with bent knees and outstretched wings.
 	for id in ["owl","wolf","sheep"]:
 		var sizes_ok := true
 		for row in [0,1,2,6,7]:
 			for frame in 6:
 				game.place_companion(game.friend_sprite,id,row,frame,Vector2.ZERO)
-				var b: Array = game.REGISTRATION.data.runner[id].bounds[row][frame]
-				sizes_ok = sizes_ok and is_equal_approx((b[3]-b[1])*game.friend_sprite.scale.y,90.0)
+				sizes_ok = sizes_ok and is_equal_approx(float(game.friend_sprite.get_meta("head_size")),65.0) and not game.friend_sprite.region_enabled
 		for frame in 6:
 			game.place_companion(game.friend_sprite,id,6,frame,Vector2.ZERO,0.62,true)
-			var row: int = game.ACTION_DATA.data.characters[id].row
-			var b: Array = game.REGISTRATION.data.actions.bounds[row][frame]
-			sizes_ok = sizes_ok and is_equal_approx((b[3]-b[1])*game.friend_sprite.scale.y,90.0)
-		check(sizes_ok,"Run/jump/glide/updraft/dash opacity heights stay fixed across sheets: " + id)
+			sizes_ok = sizes_ok and is_equal_approx(float(game.friend_sprite.get_meta("head_size")),65.0)
+		check(sizes_ok,"Run/jump/glide/updraft/dash use one anatomical head span across independent frames: " + id)
 	game.world.state = "running"
 	game.world.character = "sheep"
 	game.world.sheep_count = 3
 	game.world.y = 0.0
 	game.update_friend()
-	var b: Array = game.REGISTRATION.data.runner.sheep.bounds[1][game.friend_frame]
-	check(is_equal_approx((b[3]-b[1])*game.friend_sprite.scale.y,90.0), "Leader sheep remains normal size")
+	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),65.0),"Leader sheep keeps its normal anatomical size")
 	for item in game.followers:
-		var frame := int(item.region_rect.position.x / 181.0)
-		b = game.REGISTRATION.data.runner.sheep.bounds[1][frame]
-		check(is_equal_approx((b[3]-b[1])*item.scale.y,64.8), "Each following sheep is 72 percent of normal size")
+		check(is_equal_approx(float(item.get_meta("head_size")),65.0*0.72),"Each following sheep is 72 percent of normal anatomical size")
 	game.place_companion(game.friend_sprite,"owl",6,2,Vector2.ZERO,0.62*1.65,true)
-	b = game.REGISTRATION.data.actions.bounds[1][2]
-	check(is_equal_approx((b[3]-b[1])*game.friend_sprite.scale.y,148.5), "Explicit mushroom growth remains intentional and independent of pose")
+	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),65.0*1.65),"Explicit mushroom growth remains independent of pose")
 	game.set_language("cs")
 	game.save_settings()
 	var restored = load("res://main.tscn").instantiate()

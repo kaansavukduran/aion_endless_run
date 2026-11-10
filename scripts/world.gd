@@ -10,6 +10,7 @@ const BOOST_MULTIPLIER := 1.55
 const FLOCK_GAP := 112.0
 const WIND_CEILING := -270.0
 const WIND_RISE_SPEED := -155.0
+var frontier = preload("res://scripts/frontier.gd").new()
 var adventure = preload("res://scripts/adventure.gd").new()
 var pending_events: Array[String] = []
 var character := "aion"
@@ -50,6 +51,8 @@ var field_width := 1152.0
 func reset() -> void:
 	state = "running"
 	adventure.reset()
+	frontier.reset()
+	frontier.plant_wait = rng.randf_range(26.0,42.0)
 	pending_events.clear()
 	time = 0.0
 	distance = 0.0
@@ -96,6 +99,7 @@ func max_jumps() -> int:
 func release_controls() -> void:
 	jump_held = false
 	boost_held = false
+	frontier.shoot_held = false
 	gliding = false
 	riding_gust = false
 	adventure.attack_held = false
@@ -104,7 +108,7 @@ func release_controls() -> void:
 	jump_buffer = 0.0
 
 func biome() -> int:
-	return int(distance / BIOME_DISTANCE) % 2
+	return int(distance / BIOME_DISTANCE) % 4
 
 func jump() -> void:
 	if state != "running" or adventure.hugging(): return
@@ -125,6 +129,7 @@ func event(value: String) -> void:
 
 func take_hit(kind: String) -> bool:
 	if invulnerable > 0.0: return false
+	if frontier.active(): return frontier.hit_player(self)
 	if adventure.absorb_hit(self): return true
 	if character == "sheep" and sheep_count > 1:
 		sheep_count -= 1
@@ -193,16 +198,18 @@ func advance_gusts(movement: float) -> void:
 		gust_wait = rng.randf_range(900.0, 2400.0) if adventure.enabled else rng.randf_range(1350.0, 2150.0)
 
 func step(dt: float) -> void:
-	if state in ["ice", "fire", "bonk"]:
+	if state in ["ice", "fire", "bonk", "fall"]:
 		gliding = false
 		riding_gust = false
 		hit_time += dt
+		if state == "fall": y += (250.0+hit_time*650.0)*dt
 		return
 	if state != "running" or dt <= 0.0 or dt > 0.05:
 		return
 	if adventure.hugging():
 		adventure.advance_hug(self, dt)
 		return
+	if frontier.pending_level > 0 and y >= 0.0 and not frontier.active(): frontier.begin(self)
 	adventure.before_step(self, dt)
 	var previous_y := y
 	time += dt
@@ -210,7 +217,7 @@ func step(dt: float) -> void:
 	var wind := wind_components() if character == "owl" and gliding else Vector2.ZERO
 	wind_push = move_toward(wind_push, wind.x, dt * 0.7)
 	var movement := speed() * dt
-	advance_gusts(movement)
+	if not frontier.active(): advance_gusts(movement)
 	invulnerable = maxf(0.0, invulnerable - dt)
 	if jump_buffer > 0.0 and y >= 0.0:
 		velocity = JUMP_SPEED
@@ -246,6 +253,10 @@ func step(dt: float) -> void:
 		if was_air:
 			landing_time = 0.14
 			event("land")
+	if frontier.active():
+		frontier.step_boss(self,dt)
+		recompute_score()
+		return
 	if character == "sheep" and sheep_count < 3:
 		sheep_wait -= movement
 		if sheep_wait <= 0.0 and sheep_pickups.is_empty():
@@ -273,16 +284,19 @@ func step(dt: float) -> void:
 			obstacle_wait = rng.randf_range(1.30, 1.95)
 			pickups.append({"x":field_width + 65.0, "y":-113.0, "taken":false})
 	adventure.after_step(self, dt, movement, previous_y)
+	if adventure.enabled: frontier.step_plants(self,dt,movement)
 	record_trail()
 	if state != "running" or adventure.hugging(): return
 	for obstacle in obstacles:
 		obstacle.x -= movement
 		var collides := false
-		if str(obstacle.kind).begins_with("arch"):
+		if str(obstacle.kind).begins_with("pit"):
+			collides = absf(obstacle.x-PLAYER_X) < float(obstacle.get("width",150.0))*0.5-5.0 and y > -20.0
+		elif str(obstacle.kind).begins_with("arch"):
 			collides = adventure.body_rect(self).intersects(Rect2(obstacle.x - 54, -174, 108, 106))
 		else:
 			collides = obstacle.x + 20.0 > PLAYER_X - 15.0 and obstacle.x - 20.0 < PLAYER_X + 15.0 and y > -49.0
-		if collides and adventure.giant():
+		if collides and adventure.giant() and not str(obstacle.kind).begins_with("pit"):
 			obstacle.x = -1000.0
 			if not obstacle.counted:
 				obstacle.counted = true
@@ -290,10 +304,16 @@ func step(dt: float) -> void:
 				event("smash")
 			continue
 		if collides and invulnerable <= 0.0:
-			if take_hit("bonk" if str(obstacle.kind).begins_with("arch") else obstacle.kind): obstacle.counted = true
+			var kind: String = str(obstacle.kind)
+			if take_hit("fall" if kind.begins_with("pit") else ("bonk" if kind.begins_with("arch") or kind.begins_with("block") else kind)):
+				obstacle.counted = true
+				if kind.begins_with("pit") and state == "running":
+					y = -30.0
+					velocity = -550.0
+					jumps_used = 1
 			if state != "running": return
 			continue
-		if not obstacle.counted and obstacle.x + 20.0 < PLAYER_X - 15.0:
+		if not obstacle.counted and obstacle.x + (float(obstacle.get("width",150))*0.5 if str(obstacle.kind).begins_with("pit") else 20.0) < PLAYER_X - 15.0:
 			obstacle.counted = true
 			passed += 1
 			combo += 1

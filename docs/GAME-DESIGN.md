@@ -1,3 +1,15 @@
+# 0.8.0 · Dört biyom, parkur ve izole boss sahnesi
+
+- Ana koşu mesafesi dört biyomda döner; geniş ve okunur zemin boşlukları tek karşılaşma olarak ayrılmış güvenli aralıklarda üretilir. Ekranda yalnızca boyanmış karanlık bir alan değildir: yerdeki ayak gerçekten düşer, bir can kurtarırsa fiziksel kurtarma sıçraması olur.
+- Bitkiler başlangıçta zorunlu eğitim eşyası gibi gelmez. Uzun, rastgele koşu aralıkları vardır; kalabalık noktada doğmaz. Ağız uyarısı 0,9 saniye, ardından tek ateş topu. Vurmak veya üstüne basmak işe yarar.
+- Her 10. seviyedeki sarılma tamamlanınca `intro → fight → victory → run` geçişi gelir. Kutlamayı kapatan oyuncu da boss ile karşılaşır. Girerken normal karşılaşmalar ve mermiler temizlenir, güçler kalan süreleriyle saklanır. Sahne kayar ama ana mesafe durur; ikinci bir kilometre taşı aynı savaşta tetiklenmez.
+- Robot 36 canla başlar; sonraki kilometre taşlarında sınırlı artış olur. Gerçek enerji mermileri can barını azaltır. Oyuncunun üç savaş canı ve darbe sonrası kısa koruması vardır. Uyarılı yüksek atış takla, alçak küre zıplama ister. Atışlar namludan çıkarak hedef yüksekliğine yaklaşır; karşıt kaçınma hareketleri aynı anda zorlanmaz.
+- Her 0,19 saniyede en fazla bir enerji atışı; sağ tık/F/RB veya mobil Ateş et tutulabilir. Önceki tek basış yumruk kuralı normal koşuda sürer. Boss’ta görünmez normal yumruk hasarı çalışmaz.
+- Zafer 500 + kilometre taşı seviyesi×10 puan verir; mermiler temizlenir, normal üretim için güvenli boşluk ayrılır, güçler geri gelir. Koyunların iz kaydı arenanın sabit ana mesafesinde şişmez; koşuya dönüşte yeniden başlatılır.
+- Yeni karakter ölçüsü toplam poz yüksekliği değildir: ayrı dokulara alınan her siluet aynı anatomik baş/kulak referansıyla yerleştirilir. Yatay deparın başı büyütmesi ve atlas kenarında komşu kare parçalarının görünmesi giderilir. Kanat/ayak hareketi doğal sınır değişimi olarak kalır.
+
+## Önceki sürüm notları
+
 # 0.7.0 · Koşu ve savaşın tasarımı
 
 ## Güncel davranış

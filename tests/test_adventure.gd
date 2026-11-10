@@ -163,12 +163,12 @@ func run() -> void:
 	var kinds := {}
 	var min_gap := 99999.0
 	var max_gap := 0.0
-	for i in 30:
+	for i in 300:
 		w.adventure.spawn_encounter(w)
 		kinds[w.adventure.last_encounter] = true
 		min_gap = minf(min_gap, w.adventure.spawn_gap)
 		max_gap = maxf(max_gap, w.adventure.spawn_gap)
-	check(kinds.size() == 8, "Encounter bags include ground hazards, four overhead variants and both crow heights")
+	check(kinds.size() >= 10 and kinds.has("pit") and kinds.has("block_log"), "Encounter bags retain old hazards and add varied jump obstacles and real gaps")
 	check(min_gap >= 680 and max_gap - min_gap > 400, "Random encounter distances vary broadly while retaining safe clearance")
 	w = arena()
 	w.character = "sheep"

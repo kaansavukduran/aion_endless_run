@@ -285,7 +285,7 @@ func run() -> void:
 		visited[world.biome()] = true
 		if world.state != "running": break
 	check(world.state == "running", "Generated obstacles remain jumpable through a long run")
-	check(visited.size() == 2 and world.distance > 13000, "Both biomes transition during real progress")
+	check(visited.size() == 4 and world.distance > 26000, "All four biomes transition during real progress")
 	check(world.passed > 30 and world.gems > 15, "Long run records real obstacles and pickups")
 	world.reset()
 	check(world.score == 0 and world.gems == 0 and world.obstacles.is_empty(), "Retry resets run counters")
@@ -385,11 +385,11 @@ func run() -> void:
 		second.world.time = 0.0
 		second.world.distance = 0.0
 		second.update_friend()
-		var region: Rect2 = second.friend_sprite.region_rect
+		var region: int = int(second.friend_sprite.get_meta("pose_frame"))
 		second.world.time = 0.15
 		second.world.distance = 45.0
 		second.update_friend()
-		check(second.friend_row == second.COMPANION_RUN_ROWS[id] and second.friend_sprite.region_rect != region, "Right-facing run atlas advances actual frames: " + id)
+		check(second.friend_row == second.COMPANION_RUN_ROWS[id] and int(second.friend_sprite.get_meta("pose_frame")) != region, "Right-facing run atlas advances actual frames: " + id)
 		for state in ["ice", "fire"]:
 			second.world.state = state
 			second.world.hit_time = 0.4
@@ -398,7 +398,7 @@ func run() -> void:
 		second.world.state = "fire"
 		second.world.hit_time = 1.2
 		second.update_friend()
-		check(second.friend_row == 5 and second.friend_sprite.visible and second.friend_sprite.texture == second.RUNNER_SHEETS[id], "Ash preserves the actual species artwork: " + id)
+		check(second.friend_row == 5 and second.friend_sprite.visible and second.friend_sprite.get_meta("pose_key") == "runner-"+id, "Ash preserves the actual species artwork: " + id)
 	second.main_menu()
 	second.select_character("owl")
 	second.world.state = "running"
@@ -414,10 +414,10 @@ func run() -> void:
 	second.update_friend()
 	check(second.friend_row == 6, "Wolf boost uses a different forward-leaning dash cycle")
 	second.pause_run()
-	var paused_region: Rect2 = second.friend_sprite.region_rect
+	var paused_region: Texture2D = second.friend_sprite.texture
 	second.world.time += 1.0
 	second.update_friend()
-	check(second.friend_sprite.region_rect == paused_region, "Pausing preserves the exact animation pose")
+	check(second.friend_sprite.texture == paused_region, "Pausing preserves the exact animation pose")
 	second.world.state = "running"
 	second.main_menu()
 	second.select_character("sheep")
@@ -432,7 +432,7 @@ func run() -> void:
 	second.world.step(0.02)
 	second.update_friend()
 	check(second.friend_sprite.position.y < second.followers[0].position.y and second.followers[0].position.y == second.followers[1].position.y, "Real follower sprites stay grounded while the leading sheep takes off")
-	check(second.friend_sprite.texture == second.ACTION_SHEET and second.followers[0].texture == second.RUNNER_SHEETS.sheep, "Sheep jump uses new squash/flight frames while its follower still runs")
+	check(second.friend_sprite.get_meta("pose_key") == "actions" and second.followers[0].get_meta("pose_key") == "runner-sheep", "Sheep jump uses new squash/flight frames while its follower still runs")
 	second.main_menu()
 	second.select_character("wolf")
 	second.start_run()

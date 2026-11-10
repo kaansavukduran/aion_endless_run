@@ -125,7 +125,7 @@ func run() -> void:
 	check(w.adventure.hug_time == hug_left,"Esc/focus pause also freezes the hug itself")
 	w.state = "running"
 	advance(w,0.55)
-	check(not w.adventure.hugging() and w.adventure.heart_time > 1 and w.distance > distance and w.invulnerable > 0,"After one second, real play resumes with hearts and grace time")
+	check(not w.adventure.hugging() and w.adventure.heart_time > 1 and w.frontier.active() and w.invulnerable > 0,"After one second, hearts and grace transition into the requested boss handoff")
 	w.adventure.update_level(w)
 	check(w.adventure.hug_count == 1,"Repeated level checks cannot duplicate a milestone hug")
 	w = arena()
@@ -186,10 +186,10 @@ func run() -> void:
 			game.world.adventure.attack_variant = variant
 			for frame in 6:
 				game.place_combat(game.friend_sprite,id,0,frame,Vector2.ZERO,1.0,false)
-				check(game.friend_sprite.scale.x == game.friend_sprite.scale.y and game.friend_sprite.region_rect.size.x > 0,"A cropped alternate strike uses a uniform scale: "+id+"/"+str(variant)+"/"+str(frame))
+				check(game.friend_sprite.scale.x == game.friend_sprite.scale.y and not game.friend_sprite.region_enabled and game.friend_sprite.texture.get_width() > 4,"A cropped alternate strike uses a uniform scale: "+id+"/"+str(variant)+"/"+str(frame))
 		for frame in range(1,6):
 			game.place_combat(game.friend_sprite,id,4,frame,Vector2.ZERO,1.0,true)
-			check(game.friend_sprite.texture == game.ROLL_SHEET and game.friend_sprite.scale.x == game.friend_sprite.scale.y,"Roll is drawn rotation, never a vertically squashed pose: "+id+"/"+str(frame))
+			check(game.friend_sprite.get_meta("pose_key") == "rolls" and game.friend_sprite.scale.x == game.friend_sprite.scale.y,"Roll is drawn rotation, never a vertically squashed pose: "+id+"/"+str(frame))
 	game.queue_free()
 	await process_frame
 	print("RESULT: %d evolution checks, %d failures" % [checks,failures])

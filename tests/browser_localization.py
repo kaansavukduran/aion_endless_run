@@ -46,9 +46,9 @@ with sync_playwright() as p:
  choose_language('tr');check(data()['state']=='paused' and data()['character']=='wolf' and data()['characterName']=='Melun Bilge Kurt','Language can change during a paused run without changing the character')
  page.keyboard.press('Escape');page.wait_for_selector('canvas[data-state="running"]');check(data()['character']=='wolf','Resume preserves the locked running character')
  # Observe real opaque atlas dimensions through genuine jump/boost/glide inputs.
- start_character('wolf');page.keyboard.down('Shift');page.wait_for_selector('canvas[data-boosting="true"][data-action-sheet="true"]');check(abs(float(data()['heroOpaqueHeight'])-90)<.1,'Grounded wolf dash keeps the normal visible height')
- page.keyboard.press('Space');page.wait_for_selector('canvas[data-airborne="true"]');check(abs(float(data()['heroOpaqueHeight'])-90)<.1 and data()['giant']=='false','Wolf jump keeps the same normal visible height');page.screenshot(path=str(out/'wolf-fixed-jump.png'));page.keyboard.up('Shift')
- start_character('sheep');page.keyboard.press('Space');page.wait_for_selector('canvas[data-airborne="true"]');check(abs(float(data()['heroOpaqueHeight'])-90)<.1 and data()['giant']=='false','Leader sheep jump keeps the normal size');page.screenshot(path=str(out/'sheep-fixed-jump.png'))
+ start_character('wolf');page.keyboard.down('Shift');page.wait_for_selector('canvas[data-boosting="true"][data-action-sheet="true"]');check(abs(float(data()['heroHeadSize'])-65)<.1,'Grounded wolf dash keeps the normal calibrated head size')
+ page.keyboard.press('Space');page.wait_for_selector('canvas[data-airborne="true"]');check(abs(float(data()['heroHeadSize'])-65)<.1 and data()['giant']=='false','Wolf jump keeps the same normal calibrated head size');page.screenshot(path=str(out/'wolf-fixed-jump.png'));page.keyboard.up('Shift')
+ start_character('sheep');page.keyboard.press('Space');page.wait_for_selector('canvas[data-airborne="true"]');check(abs(float(data()['heroHeadSize'])-65)<.1 and data()['giant']=='false','Leader sheep jump keeps the normal size');page.screenshot(path=str(out/'sheep-fixed-jump.png'))
  # Catch a naturally spawned updraft while deliberately leaping over the first
  # mushroom, so intentional giant power cannot hide a pose-scale regression.
  caught=False
@@ -70,7 +70,7 @@ with sync_playwright() as p:
   if caught:break
   page.keyboard.up('Space');page.keyboard.up('j')
  check(caught,'A normal-sized owl catches an actual naturally spawned updraft')
- check(abs(float(d['heroOpaqueHeight'])-90)<.1 and d['actionSheet']=='true','Owl updraft wingstroke keeps the same normal visible height');page.screenshot(path=str(out/'owl-fixed-updraft.png'));page.keyboard.up('Space');page.keyboard.up('j')
+ check(abs(float(d['heroHeadSize'])-65)<.1 and d['actionSheet']=='true','Owl updraft wingstroke keeps the same normal calibrated head size');page.screenshot(path=str(out/'owl-fixed-updraft.png'));page.keyboard.up('Space');page.keyboard.up('j')
  # The same dropdown uses rotated canvas controls on a portrait phone.
  new_context('cs-CZ',True);click(name='LanguageMenu',touch=True);page.wait_for_selector('canvas[data-language-picker="true"]');page.screenshot(path=str(out/'phone-czech-dropdown.png'));click(name='Language_tr',touch=True);page.wait_for_selector('canvas[lang="tr"]');check(data()['orientation']=='landscape','Touch language dropdown works in the always-landscape phone layout')
  click(name='StartSelect_sheep',touch=True);page.wait_for_selector('canvas[data-character="sheep"]');check(data()['characterName']=='Kutsanmış Cahil Koyun','Touch starting-screen choice uses the exact Turkish sheep name')

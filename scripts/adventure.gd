@@ -144,7 +144,7 @@ func press_roll(world) -> void:
 	roll_time = maxf(roll_time, 0.68)
 
 func request_attack(world) -> bool:
-	if attack_held or hugging() or world.state != "running": return false
+	if attack_held or hugging() or world.frontier.active() or world.state != "running": return false
 	attack_held = true
 	if ducking(world): return false
 	if attack_cooldown > 0.0:
@@ -183,7 +183,7 @@ func choose_girl(world) -> void:
 	last_girl = next
 
 func update_level(world) -> void:
-	if not enabled: return
+	if not enabled or world.frontier.active(): return
 	var reached := 1 + int(world.distance / LEVEL_DISTANCE)
 	while level < reached:
 		heart_time = 0.0
@@ -194,6 +194,7 @@ func update_level(world) -> void:
 		if celebration_style == previous_style: celebration_style = (celebration_style+1)%4
 		celebration_time = 2.8
 		world.event("level_up")
+		if level % 10 == 0 and not celebrations_enabled: world.frontier.request_boss(level)
 		if level % 10 == 0 and celebrations_enabled:
 			hug_queue.append({"level":level,"girl":girl_index,"style":celebration_style})
 			last_hug_girl = girl_index
@@ -222,6 +223,7 @@ func advance_hug(world, dt: float) -> void:
 		celebration_time = 2.0
 		world.invulnerable = maxf(world.invulnerable, 0.65)
 		world.event("hug_end")
+		world.frontier.request_boss(hug_level)
 
 func body_height(world) -> float:
 	return (52.0 if ducking(world) else 82.0) * size_multiplier()
@@ -234,7 +236,7 @@ func speed_multiplier() -> float:
 	return factor
 
 func attack(world) -> bool:
-	if not enabled or world.state != "running" or attack_cooldown > 0.0 or hugging() or ducking(world): return false
+	if not enabled or world.state != "running" or attack_cooldown > 0.0 or hugging() or ducking(world) or world.frontier.active(): return false
 	swing_id += 1
 	attack_variant = (swing_id - 1) % 2
 	attack_time = ATTACK_DURATION
@@ -299,6 +301,11 @@ func shuffled_pick(world, bag: Array[String], values: Array[String]) -> String:
 func spawn_encounter(world) -> void:
 	var kind := shuffled_pick(world, encounter_bag, ["fire", "ice", "crow", "crow_high", "arch", "arch_ice", "arch_stone", "arch_cap"])
 	if kind == last_encounter: kind = "crow" if kind != "crow" else "ice"
+	if world.rng.randf() < 0.38:
+		kind = ["block_crate","block_log","block_road","block_rock","block_vent","block_barrel","pit","pit_city"][world.rng.randi_range(0,7)]
+	if kind.begins_with("arch"):
+		if world.biome() == 2: kind = "arch_root"
+		elif world.biome() == 3: kind = "arch_pipe"
 	last_encounter = kind
 	last_spawn_distance = world.distance
 	spawn_gap = world.rng.randf_range(680.0, 1550.0)
@@ -310,7 +317,7 @@ func spawn_encounter(world) -> void:
 	elif kind.begins_with("crow"):
 		spawn_enemy(world, "crow", -1.0, -154.0 if kind == "crow_high" else -86.0)
 	else:
-		world.obstacles.append({"x":world.field_width + 70.0, "kind":kind, "counted":false, "broken":false})
+		world.obstacles.append({"x":world.field_width + 70.0, "kind":kind, "counted":false, "broken":false,"width":clampf(world.speed()*0.42,135.0,210.0) if kind.begins_with("pit") else 64.0})
 	# A broad gap distribution creates bursts and breathing spaces. Distances
 	# also reserve enough clearance for a full jump at the future speed cap.
 	world.obstacle_wait = world.rng.randf_range(0.8, 2.7)

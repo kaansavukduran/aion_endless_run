@@ -45,7 +45,7 @@ func _draw() -> void:
 		var bolt := PackedVector2Array([Vector2(a.thunder_x, 147), Vector2(a.thunder_x - 20, 185), Vector2(a.thunder_x + 8, 181), Vector2(a.thunder_x - 24, 236)])
 		draw_polyline(bolt, Color(0.87, 0.91, 1.0, minf(0.7, a.thunder_time * 1.4)), 4)
 	for obstacle in world.obstacles:
-		if str(obstacle.kind).begins_with("arch"):
+		if str(obstacle.kind).begins_with("arch") and obstacle.kind not in ["arch_root","arch_pipe"]:
 			var row: int = {"arch":0,"arch_ice":1,"arch_stone":2,"arch_cap":3}.get(obstacle.kind,0)
 			var d: Dictionary = EVOLUTION.data.atlases.barriers
 			var frame := int(clock*5)%6
