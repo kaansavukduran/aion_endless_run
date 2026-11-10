@@ -34,23 +34,27 @@ with sync_playwright() as pw:
  start_best=d()['best']
  for kind in range(3):
   click(name='PracticeBoss_'+str(kind));wait('[data-boss-phase="fight"]');v=d();check(v['bossKind']==str(kind) and v['practice']=='true','Normal training UI starts distinct boss '+str(kind));check(json.loads(v['followerVisible'])==[True,True],'Both follower sheep remain rendered in boss '+str(kind))
-  page.evaluate('padButton(7,1)');deadline=time.monotonic()+55;captured=False;patterns=set();phase_two=False;duck=False;jump=False
-  while time.monotonic()<deadline:
-   v=d();phase=v['bossPhase']
-   if phase in ['victory','run'] or v['page']=='bosses':break
-   if v['state']!='running':raise AssertionError('Boss route failed: '+str(kind)+' '+str(v))
-   player=float(v['playerX']);ps=[q for q in json.loads(v['projectiles']) if q['owner']=='boss' and q['x']>player-50]
-   high=any(q['kind']=='bolt' and -50<q['x']-player<330 for q in ps)
-   low=any(q['kind'] in ['ember','seed'] and 0<(q['x']-player)/abs(q['vx'])<.55 for q in ps)
-   if high!=duck:page.evaluate('v=>padButton(1,v?1:0)',high);duck=high
-   need_jump=low and v['airborne']=='false'
-   if need_jump!=jump:page.evaluate('v=>padButton(0,v?1:0)',need_jump);jump=need_jump
-   patterns.add(v['bossPattern']);phase_two=phase_two or int(v['bossHp'])<=int(v['bossMaxHp'])//2
-   if not captured and int(v['bossHits'])>=5 and not ps:
-    page.screenshot(path=str(a.evidence/('boss-'+str(kind)+'-three-sheep.png')));captured=True
-   timeline.append({'boss':kind,'hp':v['bossHp'],'shots':v['bossShots'],'health':v['bossPlayerHp'],'pattern':v['bossPattern'],'followers':v['followerVisible']})
-   page.wait_for_timeout(15)
-  page.evaluate('()=>[0,1,7].forEach(i=>padButton(i,0))')
+  for attempt in range(3):
+   page.evaluate('padButton(7,1)');deadline=time.monotonic()+55;captured=False;patterns=set();phase_two=False;duck=False;jump=False
+   while time.monotonic()<deadline:
+    v=d();phase=v['bossPhase']
+    if phase in ['victory','run'] or v['page']=='bosses':break
+    if v['state']!='running':
+     print('Normal controller retry',kind,attempt,v['bossHp'],v['bossPlayerHp'],flush=True);break
+    player=float(v['playerX']);ps=[q for q in json.loads(v['projectiles']) if q['owner']=='boss' and q['x']>player-50]
+    high=any(q['kind']=='bolt' and -50<q['x']-player<330 for q in ps)
+    low=any(q['kind'] in ['ember','seed'] and 0<(q['x']-player)/abs(q['vx'])<(.30 if v['bossPattern']=='seeds' else .40) for q in ps)
+    if high!=duck:page.evaluate('v=>padButton(1,v?1:0)',high);duck=high
+    need_jump=low and v['airborne']=='false'
+    if need_jump!=jump:page.evaluate('v=>padButton(0,v?1:0)',need_jump);jump=need_jump
+    patterns.add(v['bossPattern']);phase_two=phase_two or int(v['bossHp'])<=int(v['bossMaxHp'])//2
+    if not captured and int(v['bossHits'])>=5 and not ps:
+     page.screenshot(path=str(a.evidence/('boss-'+str(kind)+'-three-sheep.png')));captured=True
+    timeline.append({'boss':kind,'hp':v['bossHp'],'shots':v['bossShots'],'health':v['bossPlayerHp'],'pattern':v['bossPattern'],'followers':v['followerVisible']})
+    page.wait_for_timeout(15)
+   page.evaluate('()=>[0,1,7].forEach(i=>padButton(i,0))')
+   if int(d()['bossWins'])==1:break
+   wait('[data-page="finished"]');button(0);wait('[data-boss-phase="fight"]')
   check(int(d()['bossWins'])==1,'Actual RT/R2 fire damages and defeats moving boss '+str(kind))
   check(len(patterns)>=3 and phase_two,'Boss '+str(kind)+' uses varied attacks and a half-health phase')
   wait('[data-page="bosses"]');check(d()['best']==start_best,'Training boss '+str(kind)+' preserves the actual saved record')

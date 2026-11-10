@@ -1,0 +1,10 @@
+[
+  "The actual 0.10 entry retains browser-language selection",
+  "Real-input level interval is at least 30 active seconds: 39.13",
+  "A real generated route visits desert, snow, marsh and city",
+  "A real jump clears a naturally generated floor gap",
+  "In the actual generated route, celebrations move through the background",
+  "The generated route contains real speed pads and crow-supported overhead loads",
+  "The expanded game continues offline after normal generated encounters",
+  "No uncaught browser or Godot script errors in the full normal-entry frontier run"
+]

@@ -1,4 +1,4 @@
-"""Real-input 0.9 anatomy, isolated frames, four biomes, gaps/plants and boss chase.
+"""Real-input 0.10 anatomy, isolated frames, four biomes, gaps/plants and boss chase.
 No game setters, forced spawns, RNG replacement, shortcuts or synthetic levels.
 """
 import argparse,json,time
@@ -25,8 +25,8 @@ with sync_playwright() as p:
   if d()['page']!='main':click(text='Ana menü');page.wait_for_selector('canvas[data-page="main"]');ready()
  def run(hero):
   main();click(name='StartSelect_'+hero);page.wait_for_selector('canvas[data-character="'+hero+'"]');ready();page.keyboard.press('Space');page.wait_for_selector('canvas[data-state="running"]');ready()
- page.goto(a.url);page.wait_for_selector('canvas[data-state="ready"][data-version="0.9.0"]',timeout=90000);ready()
- check(d()['lang']=='tr','The actual 0.9 entry retains browser-language selection')
+ page.goto(a.url);page.wait_for_selector('canvas[data-state="ready"][data-version="0.10.0"]',timeout=90000);ready()
+ check(d()['lang']=='tr','The actual 0.10 entry retains browser-language selection')
  for hero in ([] if a.route_only else ['aion','owl','sheep','wolf']):
   run(hero);head=float(d()['heroHeadSize']);check(d()['isolatedFrame']=='true',hero+': running uses a separate padded frame texture')
   if hero=='wolf':
@@ -47,7 +47,7 @@ with sync_playwright() as p:
     spacing=t-last_level_time;level_spacings.append(spacing);check(spacing>=29.99,'Real-input level interval is at least 30 active seconds: '+str(round(spacing,2)));last_level=int(v['level']);last_level_time=t
    if float(v['celebrationTime'])>0 and v['hugging']=='false' and boss_distance is None:
     if party_sample and party_sample[0]==v['level'] and float(v['worldDistance'])>party_sample[1]+100:
-     spectator_scroll=spectator_scroll or abs(float(v['celebrationX'])-(party_sample[2]-(float(v['worldDistance'])-party_sample[1])*.7))<1
+     spectator_scroll=spectator_scroll or abs(float(v['celebrationX'])-(party_sample[2]-(float(v['worldDistance'])-party_sample[1])*.45))<1
     if party_sample is None or party_sample[0]!=v['level']:party_sample=(v['level'],float(v['worldDistance']),float(v['celebrationX']))
    if spectator_scroll and not spectator_captured and float(v['celebrationTime'])>0 and v['bossPhase']=='run':
     page.keyboard.press('Escape');page.wait_for_selector('canvas[data-state="paused"]');page.screenshot(path=str(out/'left-facing-background-celebration.png'));page.keyboard.press('Escape');page.wait_for_selector('canvas[data-state="running"]');page.screenshot(path=str(out/'background-celebration-in-world.png'));spectator_captured=True
