@@ -1,0 +1,21 @@
+[
+  "Aion performs the second jump in mid-air",
+  "Third press does not grant a third jump",
+  "Landing replenishes the double jump",
+  "Owl uses one jump and the new wing/glide frames",
+  "Releasing the key exits glide",
+  "A naturally spawned visible updraft catches the held owl glide",
+  "Wind gives real upward travel and uses the new wingstroke atlas",
+  "Releasing held glide also releases updraft lift",
+  "Shift boosts the wolf with actual right-facing run frames",
+  "Wolf uses new dash poses with moving wind geometry",
+  "Releasing Shift stops boost",
+  "Pointer hold on the wolf releases correctly away from the character",
+  "Real ground pickups build a visible flock of three",
+  "Space launches only the leading sheep",
+  "Second sheep takes off while the third is still running on the ground",
+  "Third sheep takes off last along the same world path",
+  "One sheep absorbs a real obstacle hit and the run continues",
+  "Two mobile fingers can boost on the wolf and jump elsewhere",
+  "Ending native touch contacts clears boost"
+]

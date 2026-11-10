@@ -1,0 +1,12 @@
+{
+  "version": "0.4.0",
+  "packages": 9,
+  "integrity_files": 2,
+  "mac_archive_crc": "passed",
+  "mac_macho_cpus": [
+    "x86_64",
+    "arm64"
+  ],
+  "apk_sha256": "f58d419581e6e6139c13e03cc1c7cf63469e6fca7f63b8d5e41e9df6b0f22775",
+  "release": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.4.0"
+}

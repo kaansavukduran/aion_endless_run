@@ -1,4 +1,4 @@
-# Aion Endless Run 0.4.0 · Yeni animasyonlar ve web güncellemeleri
+# Aion Endless Run 0.4.0 · Sıralı sürü, depar rüzgârı ve yükselen hava
 
 Bu sürüm, sürü zıplamasını ve rüzgârı oynanışa bağlar. Yeni 18 karelik ek pafta; kurdun daha belirgin deparını, baykuşun yükselen hava kanat çırpışını ve koyunun esneyen zıplama/yumuşak inişini içerir. Önceki koşu, donma ve kül paftaları korunur.
 
