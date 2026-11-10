@@ -1,5 +1,13 @@
 # Verification
 
+## 0.2.0 character update
+
+84 physics/main-scene checks passed, including double-jump limits and landing reset, finite hold/release glide, actual wolf movement speed, capped contact-based flock collection, one life per fire/ice contact, final-life death, held-input cancellation, independent two-finger controls, animation row/frame selection and visible followers. The existing 12 real Web flows and 12 additional real-input ability flows passed. Real ground pickups produced three visible sheep and a real obstacle removed one sheep while gameplay continued. Chromium touch events verified boost and jump together on an 844×390 view.
+
+The Vercel web build was tested from a cold cache with official SHA-512-verified downloads, and with the installed engine. This is build verification; the actual public deployment and native packages are verified separately below.
+
+## 0.1.0 original release history
+
 This file records evidence, not a promise of identical behavior on every device.
 
 ## Automated game tests

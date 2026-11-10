@@ -6,3 +6,6 @@ work/
 *.jks
 export_credentials.cfg
 *.tmp
+
+__pycache__/
+*.pyc

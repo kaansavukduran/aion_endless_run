@@ -2,6 +2,10 @@ name: Publish verified packages
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: New version, preserving previously published releases
+        required: true
+        default: "0.2.0"
       artifact_run_id:
         description: Successful test/package workflow run ID
         required: true
@@ -17,6 +21,8 @@ on:
 permissions:
   contents: write
   actions: read
+env:
+  RELEASE_VERSION: ${{ inputs.version }}
 jobs:
   publish:
     runs-on: ubuntu-24.04
@@ -30,6 +36,7 @@ jobs:
           RUN_ID: ${{ inputs.artifact_run_id }}
         run: |
           test "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID --jq .conclusion)" = success
+          echo "VERIFIED_SHA=$(gh api repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID --jq .head_sha)" >> "$GITHUB_ENV"
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
@@ -43,8 +50,8 @@ jobs:
           APK_SHA256: ${{ inputs.apk_sha256 }}
         run: |
           git fetch --no-tags --depth=1 origin "$APK_REF"
-          git show FETCH_HEAD:AionEndlessRun-0.1.0-android-arm64-x64.apk > release/AionEndlessRun-0.1.0-android-arm64-x64.apk
-          printf '%s  %s\n' "$APK_SHA256" release/AionEndlessRun-0.1.0-android-arm64-x64.apk | sha256sum -c -
+          git show "FETCH_HEAD:AionEndlessRun-${RELEASE_VERSION}-android-arm64-x64.apk" > "release/AionEndlessRun-${RELEASE_VERSION}-android-arm64-x64.apk"
+          printf '%s  %s\n' "$APK_SHA256" "release/AionEndlessRun-${RELEASE_VERSION}-android-arm64-x64.apk" | sha256sum -c -
       - name: Create receipt and publish all packages together
         env:
           GH_TOKEN: ${{ github.token }}
@@ -61,7 +68,7 @@ jobs:
                   digest=hashlib.file_digest(stream,'sha256').hexdigest()
               packages[f.name]={'bytes':f.stat().st_size,'sha256':digest}
           assert len(packages)==9, f'Expected 9 platform packages, got {len(packages)}'
-          receipt={'version':'0.1.0','source_commit':os.environ['SOURCE_SHA'],'verified_application_commit':'c36b105','verification_run':f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["RUN_ID"]}','source_and_scene_checks':40,'browser_checks':12,'android_native':'API 30 emulator; Wi-Fi/mobile data off; real rendered menu and paused game checked','android_signer_sha256':'50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36','apple_status':'macOS ad-hoc signing only, no Developer ID/notarization; iOS App Store/TestFlight pending owner signing','files':packages}
+          receipt={'version':os.environ['RELEASE_VERSION'],'source_commit':os.environ['SOURCE_SHA'],'verified_application_commit':os.environ['VERIFIED_SHA'],'verification_run':f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["RUN_ID"]}','source_and_scene_checks':84,'browser_checks':len(json.loads(Path('docs/evidence-v02/browser-results.json').read_text())),'android_native':'API 30 emulator; Wi-Fi/mobile data off; real rendered menu and paused game checked','android_signer_sha256':'50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36','apple_status':'macOS ad-hoc signing only, no Developer ID/notarization; iOS App Store/TestFlight pending owner signing','files':packages}
           (p/'BUILD-RECEIPT.json').write_text(json.dumps(receipt,indent=2)+'\n')
           with (p/'SHA256SUMS').open('w') as out:
               for f in sorted(p.iterdir()):
@@ -69,5 +76,11 @@ jobs:
                   with f.open('rb') as stream: digest=hashlib.file_digest(stream,'sha256').hexdigest()
                   out.write(digest+'  '+f.name+'\n')
           PY
-          gh release upload v0.1.0 release/*
-          gh release edit v0.1.0 --target "$SOURCE_SHA" --notes-file docs/RELEASE.md --draft=false --prerelease
+          tag="v$RELEASE_VERSION"
+          if gh release view "$tag" --json isDraft --jq .isDraft > /tmp/aion-release-state; then
+            test "$(cat /tmp/aion-release-state)" = true
+          else
+            gh release create "$tag" --target "$SOURCE_SHA" --draft --prerelease --title "Aion Endless Run $tag" --notes-file docs/RELEASE.md
+          fi
+          gh release upload "$tag" release/* --clobber
+          gh release edit "$tag" --target "$SOURCE_SHA" --notes-file docs/RELEASE.md --draft=false --prerelease

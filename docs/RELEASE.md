@@ -1,32 +1,28 @@
-# Aion Endless Run 0.1.0 · İlk oynanabilir beta
+# Aion Endless Run 0.2.0 · Koşu arkadaşları ve karakter yetenekleri
 
-FireAxolotl'daki sevimli Aion koşusu artık bağımsız bir oyun. Firefox/eklenti veya hesap gerekmez; oyunun kendisi çevrimdışı çalışır.
+Diğer karakterlerin bekleme kareleri yerine sağa bakan yeni piksel koşu paftası kullanılır. Wolf/koyun adımları ve baykuş kanatları kare kare değişir; zıplamada ayrı hava pozları vardır.
 
-- Space, tıklama veya dokunma ile zıpla. Esc ile duraklat ve kaldığın yerden devam et.
-- Orijinal Aion koşu, zıplama, donma, ateş ve kül kareleri.
-- Aion, Baykuş Ömer, Accursed Wise Wolf ve Blessed Ignorant Sheep. Arkadaşlar mevcut paftalardan piksel görünümüyle çizilir; aynı hız ve çarpışma kuralları.
-- Katmanlı piksel manzaralar, Kehribar Çölü/Ayaz Vadisi ve gündüz/gece döngüsü.
-- Mesafe, engel ve kristal puanları; cihazda saklanan rekor ve tercihler.
-- Türkçe/English, kapatılabilir ses ve dekoratif animasyon.
+- **Aion:** Space veya dokunmayı bırakıp tekrar basarak havada bir kez daha zıpla. Yere inene kadar en fazla iki zıplama.
+- **Baykuş Ömer:** Tek zıpla, Space/ekran dokunmasını basılı tutarak düşüşte süzül. Bırakınca normal düşüş. Süzülme yükseltmez ve sonsuz uçuş sağlamaz.
+- **Blessed Ignorant Sheep:** Belirli mesafelerden sonra yerde beliren koyunları gerçekten temas ederek topla. Toplam en fazla üç koyun birlikte koşar. Her koyun bir can; çarpışma bir koyunu eksiltir, son koyunda koşu biter. Aynı temas arka arkaya iki can eksiltmez.
+- **Accursed Wise Wolf:** Shift'e veya karakterin üstüne basılı tutarak hızlan. Bırakınca normal hız. Mobilde bir parmakla kurdu tutarken ikinci parmakla başka yere dokunup zıplayabilirsin. Kumandada X hızlandırır; A zıplatır/süzdürür.
+- Duraklatma, odak kaybı ve karakter değiştirme basılı kontrolleri temizler. Rekorlar ve ayarlar korunur. Azaltılmış animasyonda da yetenekler çalışır.
+- Vercel için kaynak koddan web derleme ayarı eklendi. Framework: Other; Build Command: `python3 packaging/build_web.py`; Output Directory: `build/web`. Kurulum anlatımı: `docs/VERCEL.md`.
 
-## İndirme ve kurulum
+## İndir ve aç
 
-Bu Release'ın **Assets** bölümündeki dosyalardan seç:
+**Assets** bölümünden cihazına uygun dosyayı seç:
 
 | Cihaz | Kurulum | Taşınabilir |
 | --- | --- | --- |
-| Windows x64 | `AionEndlessRun-0.1.0-windows-x64-Setup.exe` | `AionEndlessRun-0.1.0-windows-x64-portable.zip` |
-| Linux x64 | `AionEndlessRun-0.1.0-linux-x64.deb` | `.AppImage` veya `-portable.tar.gz` |
-| macOS Intel / Apple Silicon | `AionEndlessRun-0.1.0-macos-universal.dmg` | `-macos-universal-portable.zip` |
-| Android ARM64 / x64 | `AionEndlessRun-0.1.0-android-arm64-x64.apk` | APK kurulur; masaüstü portable biçimi uygulanmaz |
-| iPhone | Apple imzası ve App Store/TestFlight dağıtımı bekliyor | Yerel iPhone portable paketi yok |
+| Windows x64 | `AionEndlessRun-0.2.0-windows-x64-Setup.exe` | `AionEndlessRun-0.2.0-windows-x64-portable.zip` |
+| Linux x64 | `AionEndlessRun-0.2.0-linux-x64.deb` | `.AppImage` veya `-portable.tar.gz` |
+| macOS Intel / Apple Silicon | `AionEndlessRun-0.2.0-macos-universal.dmg` | `-macos-universal-portable.zip` |
+| Android ARM64 / x64 | `AionEndlessRun-0.2.0-android-arm64-x64.apk` | APK normal yoldan kurulur |
+| iPhone | Apple hesabı, imzalama ve TestFlight/App Store dağıtımı bekliyor | Yerel portable iPhone paketi yok |
 
-Windows kurulum dosyasına çift tıkla. Portable ZIP'i tamamen çıkart ve EXE'yi aç. Linux AppImage için dosyaya çalıştırma izni ver; DEB'i paket yöneticisiyle kur. macOS DMG içindeki uygulamayı Applications'a taşı veya ZIP'i çıkart. APK'yı Android'de açıp sistemin kurulum adımlarını izle. İlk ekranda **Koşuya başla** düğmesini görmelisin.
+Windows'ta Setup dosyasını aç veya ZIP'i tamamen çıkartıp EXE'yi aç. Linux AppImage'e çalıştırma izni ver ya da DEB'i kur. Mac DMG'deki uygulamayı Applications'a taşı. Android APK, önceki sürümle aynı uygulama kimliği ve imza anahtarını kullanır; versionCode 2'dir.
 
-**Sınırlar:** Windows paketi Authenticode, macOS paketi Developer ID imzasına sahip değil. macOS Developer ID/notarization tamamlanmadığı için Gatekeeper uygulamayı engelleyebilir. Android paket imzası bütünlük ve güncelleme kimliği içindir, Play Store yayını değildir. iPhone için Apple Developer hesabı, Xcode imzası ve TestFlight/App Store süreci henüz yok. Fiziksel Android, Windows ve macOS cihaz testlerinin kapsamı `docs/VALIDATION.md` içinde ayrıca belirtilir.
+Oyun ve varlıklar çevrimdışıdır. Web sürümünde ilk tam yükleme internet ister; önbellekleme sonrası çevrimdışı açılabilir. `SHA256SUMS` ve `BUILD-RECEIPT.json` gerçek paketleri tanımlar.
 
-Kaynak kodu bu etiketin GitHub kaynak arşividir. `SHA256SUMS` indirilen varlıkları karşılaştırmak içindir. İlk beta olduğu için kararlı sürüm olarak sunulmaz; sonraki sürümler önceki Release dosyalarını koruyacaktır.
-
-## Doğrulama
-
-40 fizik/gerçek sahne kontrolü ve 12 tarayıcı akışı geçti. Windows kurulum ve portable açılışı, Linux DEB kurulumu/AppImage/portable açılışı ve macOS universal uygulamanın ilk açılışı CI üzerinde denendi. Android, ağ bağlantıları kapalı bir emülatörde kuruldu; ana menü ve duraklatılmış oyun gerçek ekran görüntülerinde kontrol edildi. Fiziksel cihaz testleri ayrıca yapılmalıdır. İndirilen gerçek arşivlerin bütünlüğü ve Android APK imzası kontrol edildi. `BUILD-RECEIPT.json` derleme kaydı ve dosya boyutlarını içerir.
+Windows Authenticode ve macOS Developer ID/noter onayı yoktur. macOS geliştirme amaçlı ad-hoc imzalıdır; Gatekeeper açılışı engelleyebilir. Fiziksel cihaz kapsamı ve gerçek test kayıtları `docs/VALIDATION.md` içindedir. 0.1.0 sürümü ve dosyaları korunmuştur.

@@ -17,6 +17,8 @@ work = root / "work" / "web-build"
 work.mkdir(parents=True, exist_ok=True)
 (root / "work" / ".gdignore").touch()
 env = dict(os.environ)
+env.setdefault("ANDROID_USER_HOME", str(work / "android"))
+env.setdefault("ANDROID_SDK_HOME", str(work / "android"))
 for key, child in [("XDG_DATA_HOME", "data"), ("XDG_CONFIG_HOME", "config"), ("XDG_CACHE_HOME", "cache")]:
     env.setdefault(key, str(work / child))
     Path(env[key]).mkdir(parents=True, exist_ok=True)

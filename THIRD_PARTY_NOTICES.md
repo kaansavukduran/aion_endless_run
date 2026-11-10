@@ -22,3 +22,7 @@ Lexend, SIL Open Font License 1.1. The unchanged local font and its license are 
 Godot Engine 4.6.3, MIT license, https://godotengine.org/license/ . Native and web exports embed the Godot runtime and its third-party components. Full engine copyright/license notices: https://github.com/godotengine/godot/blob/4.6.3-stable/COPYRIGHT.txt and https://github.com/godotengine/godot/blob/4.6.3-stable/LICENSE.txt . A copy is included as `assets/GODOT-COPYRIGHT.txt` and `assets/GODOT-LICENSE.txt` in this source and game resources.
 
 Original procedural scenery and synthesized game sounds are part of this project's MPL-2.0 source. No downloaded audio or paid asset pack is used.
+
+## Companion runner atlas (0.2.0)
+
+`assets/companions-runner.png` is a newly generated owner-authorized derivative of the existing wolf/sheep/owl identities, with Aion as the pixel-art style reference. Six columns × six rows contain sequential right-facing running, jumping and gliding poses. It is not the old idle sheet translated across the screen. The generated PNG is unchanged; runtime source rectangles, registered baselines and alpha discard handle alignment/transparency. Provenance and SHA-256: `assets/COMPANION-RUNNER-PROVENANCE.json`. Same MPL-2.0 artwork terms and AI-output limitations apply.

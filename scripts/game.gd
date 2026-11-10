@@ -4,6 +4,9 @@ const World = preload("res://scripts/world.gd")
 const Words = preload("res://scripts/text.gd")
 const SHEET = preload("res://assets/aion-runner.png")
 const FONT = preload("res://assets/Lexend.ttf")
+const COMPANION_SHEET = preload("res://assets/companions-runner.png")
+const COMPANION_BASELINES := [[207,208,208,190,209,207],[201,206,202,187,204,203],[196,198,196,183,196,196],[200,191,165,150,178,199],[203,190,172,150,180,202],[185,166,160,151,160,181]]
+const COMPANION_RUN_ROWS := {"wolf":0,"sheep":1,"owl":2}
 const NAMES := {"aion":"Aion", "owl":"Baykuş Ömer", "wolf":"Accursed Wise Wolf", "sheep":"Blessed Ignorant Sheep"}
 const FRIENDS := ["aion", "owl", "wolf", "sheep"]
 const COLORS := [Color("f4a7cd"), Color("ffca84"), Color("b8baf0"), Color("b8ebd3")]
@@ -30,7 +33,14 @@ var footer_label: Label
 var notice_label: Label
 var pause_button: Button
 var friend_sprite: Sprite2D
-var companion_textures := {}
+var followers: Array[Sprite2D] = []
+var sheep_collectible: Sprite2D
+var friend_row := 0
+var friend_frame := 0
+var friend_character := ""
+var jump_sources := {}
+var boost_sources := {}
+var ability_label: Label
 var last_event := 0
 var notice := ""
 var notice_time := 0.0
@@ -50,15 +60,10 @@ var web_stamp := ""
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("0a1222"))
 	load_settings()
-	for id in ["owl", "wolf", "sheep"]:
-		companion_textures[id] = load("res://assets/" + id + ".png")
-	friend_sprite = Sprite2D.new()
-	friend_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	friend_sprite.region_enabled = true
-	var material := ShaderMaterial.new()
-	material.shader = preload("res://scripts/pixel.gdshader")
-	friend_sprite.material = material
-	add_child(friend_sprite)
+	for i in 2:
+		followers.append(make_companion_sprite())
+	sheep_collectible = make_companion_sprite()
+	friend_sprite = make_companion_sprite()
 	player_sound = AudioStreamPlayer.new()
 	add_child(player_sound)
 	var canvas := CanvasLayer.new()
@@ -73,6 +78,19 @@ func _ready() -> void:
 	get_tree().auto_accept_quit = false
 	apply_fullscreen()
 	rebuild()
+
+func make_companion_sprite() -> Sprite2D:
+	var item := Sprite2D.new()
+	item.texture = COMPANION_SHEET
+	item.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	item.region_enabled = true
+	item.region_filter_clip_enabled = true
+	item.centered = false
+	var material := ShaderMaterial.new()
+	material.shader = preload("res://scripts/companion_alpha.gdshader")
+	item.material = material
+	add_child(item)
+	return item
 
 func text(key: String) -> String:
 	return Words.get_text(language, key)
@@ -235,6 +253,9 @@ func rebuild() -> void:
 	var footer_name := label(NAMES[character], 13, "b0e1d2")
 	ui.add_child(footer_name)
 	footer_name.position = Vector2(view_w - 265, view_h - 70)
+	ability_label = label("", 11, "b8e6d6")
+	ui.add_child(ability_label)
+	position_control(ability_label, Vector2(view_w - 360, view_h - 43), Vector2(330, 25))
 	if portrait:
 		var rotate_hint := wrap_label(text("portrait"), 38, "c5d1e7")
 		rotate_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -390,20 +411,20 @@ func build_characters() -> void:
 		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		var atlas := AtlasTexture.new()
-		atlas.atlas = SHEET if id == "aion" else companion_textures[id]
-		atlas.region = Rect2(0, 0, 209, 157) if id == "aion" else Rect2(0, 0, 256, 288)
+		atlas.atlas = SHEET if id == "aion" else COMPANION_SHEET
+		atlas.region = Rect2(0, 0, 209, 157) if id == "aion" else Rect2(0, COMPANION_RUN_ROWS[id] * 209, 209, 209)
 		picture.texture = atlas
 		if id != "aion":
 			var mat := ShaderMaterial.new()
-			mat.shader = preload("res://scripts/pixel.gdshader")
+			mat.shader = preload("res://scripts/companion_alpha.gdshader")
 			picture.material = mat
 		row.add_child(picture)
 		var details := VBoxContainer.new()
 		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(details)
 		details.add_child(wrap_label(NAMES[id], 17, "eef3ff"))
-		details.add_child(wrap_label(text("friend_" + id), 11))
-		details.add_child(button(text("selected" if character == id else "select"), func(): character = id; save_settings(); rebuild(), character == id))
+		details.add_child(wrap_label(text("ability_" + id), 11, "b6e6d7"))
+		details.add_child(button(text("selected" if character == id else "select"), func(): select_character(id), character == id))
 	focus_later.call_deferred(back)
 
 func add_toggle(column: VBoxContainer, key: String, value: bool, callback: Callable) -> void:
@@ -430,7 +451,9 @@ func open_subpage(value: String) -> void:
 
 func start_run() -> void:
 	best_at_start = best
+	world.character = character
 	world.reset()
+	clear_held_controls()
 	particles.clear()
 	finished_panel = false
 	notice = ""
@@ -440,6 +463,7 @@ func start_run() -> void:
 
 func pause_run() -> void:
 	if world.state == "running":
+		clear_held_controls()
 		world.state = "paused"
 		save_settings()
 		show_page("paused")
@@ -451,6 +475,7 @@ func resume_run() -> void:
 func main_menu() -> void:
 	save_settings()
 	world.reset()
+	clear_held_controls()
 	world.state = "ready"
 	particles.clear()
 	notice_time = 0.0
@@ -464,9 +489,58 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		quit_game()
 	if what in [NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_WM_GO_BACK_REQUEST]:
+		clear_held_controls()
 		pause_run()
 
+func select_character(id: String) -> void:
+	if id not in FRIENDS: return
+	character = id
+	world.character = id
+	clear_held_controls()
+	save_settings()
+	rebuild()
+
+func clear_held_controls() -> void:
+	jump_sources.clear()
+	boost_sources.clear()
+	world.release_controls()
+
+func press_jump(source: String) -> void:
+	if page != "" or world.state != "running" or jump_sources.has(source): return
+	world.character = character
+	jump_sources[source] = true
+	world.jump_held = true
+	world.jump()
+
+func release_jump(source: String) -> void:
+	jump_sources.erase(source)
+	world.jump_held = not jump_sources.is_empty()
+
+func press_boost(source: String) -> void:
+	if page != "" or world.state != "running": return
+	world.character = character
+	boost_sources[source] = true
+	world.boost_held = true
+
+func release_boost(source: String) -> void:
+	boost_sources.erase(source)
+	world.boost_held = not boost_sources.is_empty()
+
+func on_wolf(point: Vector2) -> bool:
+	return character == "wolf" and Rect2(World.PLAYER_X - 65, ground + world.y - 115, 130, 130).has_point(point)
+
 func _input(event: InputEvent) -> void:
+	# Releases are observed before GUI dispatch so dragging away from a control
+	# or opening a menu can never leave glide/boost latched on.
+	if event is InputEventKey and not event.pressed:
+		if event.keycode == KEY_SPACE: release_jump("key")
+		if event.keycode == KEY_SHIFT: release_boost("shift")
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		release_jump("mouse")
+		release_boost("mouse")
+	if event is InputEventScreenTouch and not event.pressed:
+		release_jump("touch:" + str(event.index))
+		release_boost("touch:" + str(event.index))
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE:
 			if page == "": pause_run()
@@ -475,7 +549,10 @@ func _input(event: InputEvent) -> void:
 			elif page == "finished": main_menu()
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_SPACE and page == "":
-			world.jump()
+			press_jump("key")
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_SHIFT and page == "":
+			press_boost("shift")
 			get_viewport().set_input_as_handled()
 		elif event.keycode in [KEY_SPACE, KEY_ENTER] and page == "main":
 			start_run()
@@ -484,20 +561,35 @@ func _input(event: InputEvent) -> void:
 			fullscreen = not fullscreen
 			apply_fullscreen()
 			save_settings()
-	if event is InputEventJoypadButton and event.pressed:
+	if event is InputEventJoypadButton:
+		if not event.pressed:
+			if event.button_index == JOY_BUTTON_A: release_jump("pad")
+			if event.button_index == JOY_BUTTON_X: release_boost("pad")
+			return
 		if event.button_index == JOY_BUTTON_START:
 			if page == "": pause_run()
 			elif page == "paused": resume_run()
 		elif event.button_index == JOY_BUTTON_A:
-			if page == "": world.jump()
+			if page == "": press_jump("pad")
 			elif page == "main": start_run()
+		elif event.button_index == JOY_BUTTON_X:
+			press_boost("pad")
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and page == "":
-		world.jump()
+	if page != "": return
+	if event is InputEventScreenTouch and event.pressed:
+		if is_instance_valid(pause_button) and pause_button.get_global_rect().has_point(event.position): return
+		var source := "touch:" + str(event.index)
+		if on_wolf(event.position): press_boost(source)
+		else: press_jump(source)
+		get_viewport().set_input_as_handled()
+	if event is InputEventMouseButton and event.device != -1 and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if on_wolf(event.position): press_boost("mouse")
+		else: press_jump("mouse")
 		get_viewport().set_input_as_handled()
 
 func _physics_process(dt: float) -> void:
+	world.character = character
 	if page == "" or (world.state in ["fire", "ice"] and page == "finished"):
 		world.step(dt)
 	if world.event_id != last_event:
@@ -518,13 +610,21 @@ func _physics_process(dt: float) -> void:
 			p.velocity.y += 190.0 * dt
 			p.life -= dt
 	particles = particles.filter(func(p): return p.life > 0.0)
-	update_hud()
 	update_friend()
+	update_hud()
 	queue_redraw()
 
 func handle_event(value: String) -> void:
 	if value == "": return
 	if value == "jump": tone(580, 0.07)
+	if value == "double_jump":
+		burst(Vector2(World.PLAYER_X, ground + world.y), Color("99e6ff"), 14)
+		tone(860, 0.1)
+	if value in ["sheep_join", "sheep_saved"]:
+		notice = text(value)
+		notice_time = 1.6
+		burst(Vector2(World.PLAYER_X - 64, ground - 45), Color("c1f5da"), 14)
+		tone(920 if value == "sheep_join" else 260, 0.14)
 	if value == "land": burst(Vector2(World.PLAYER_X, ground), Color("b9c4d1"), 6)
 	if value in ["gem", "clear", "biome"]:
 		notice = text(value)
@@ -535,6 +635,7 @@ func handle_event(value: String) -> void:
 		elif value == "biome": tone(740, 0.18)
 		elif world.combo % 5 == 0: tone(840, 0.1)
 	if value in ["ice", "fire"]:
+		clear_held_controls()
 		save_settings()
 		burst(Vector2(World.PLAYER_X, ground - 40), Color("a5eafa") if value == "ice" else Color("ffb46b"), 22)
 		tone(170, 0.22)
@@ -569,11 +670,16 @@ func update_hud() -> void:
 	progress.value = fmod(world.distance, World.BIOME_DISTANCE)
 	pause_button.visible = page == "" and world.state == "running"
 	notice_label.text = text("saved_error") if save_failed else (notice if notice_time > 0.0 and page == "" else "")
+	if is_instance_valid(ability_label):
+		ability_label.text = text("ability_" + character)
+		if character == "sheep": ability_label.text = text("flock") % world.sheep_count
+		elif world.gliding: ability_label.text = text("gliding")
+		elif world.boosting(): ability_label.text = text("boosting")
 	publish_web_status()
 
 func publish_web_status() -> void:
 	if not OS.has_feature("web"): return
-	var stamp := "%s:%s:%d:%s:%s:%s" % [world.state, page, world.score, character, language, world.y < 0.0]
+	var stamp := "%s:%s:%d:%s:%s:%s:%d:%s:%s:%d" % [world.state, page, world.score, character, language, world.y < 0.0, world.jumps_used, world.gliding, world.boosting(), world.sheep_count]
 	if stamp == web_stamp: return
 	web_stamp = stamp
 	var document = JavaScriptBridge.get_interface("document")
@@ -587,6 +693,17 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-score", str(world.score))
 	canvas.setAttribute("data-character", character)
 	canvas.setAttribute("data-airborne", str(world.y < 0.0))
+	canvas.setAttribute("data-jumps", str(world.jumps_used))
+	canvas.setAttribute("data-gliding", str(world.gliding))
+	canvas.setAttribute("data-boosting", str(world.boosting()))
+	canvas.setAttribute("data-flock", str(world.sheep_count))
+	canvas.setAttribute("data-sprite-row", str(friend_row))
+	canvas.setAttribute("data-sprite-frame", str(friend_frame))
+	var next_x := -1.0
+	for obstacle in world.obstacles:
+		if obstacle.x > World.PLAYER_X - 35 and (next_x < 0 or obstacle.x < next_x): next_x = obstacle.x
+	canvas.setAttribute("data-next-obstacle", str(next_x))
+	canvas.setAttribute("data-next-sheep", str(world.sheep_pickups[0].x) if not world.sheep_pickups.is_empty() else "-1")
 
 func animation_clock() -> float:
 	if not motion: return 0.0
@@ -594,16 +711,41 @@ func animation_clock() -> float:
 
 func update_friend() -> void:
 	friend_sprite.visible = character != "aion"
+	for item in followers: item.visible = false
+	sheep_collectible.visible = character == "sheep" and not world.sheep_pickups.is_empty() and world.sheep_count < 3
+	if sheep_collectible.visible:
+		place_companion(sheep_collectible, 1, int(animation_clock() * 9) % 6, Vector2(world.sheep_pickups[0].x, ground), 0.4)
 	if character == "aion": return
-	friend_sprite.texture = companion_textures[character]
-	var frame := int(animation_clock() * (8 if world.state == "running" else 4)) % 4
-	friend_sprite.region_rect = Rect2(frame * 256, 0, 256, 288)
-	friend_sprite.scale = Vector2(0.32, 0.32)
-	var bob := (float([0, -3, 0, -2][frame]) if world.state == "running" and world.y >= 0.0 and motion else 0.0)
-	friend_sprite.position = Vector2(World.PLAYER_X, ground + world.y - 42 + bob)
+	if friend_character != character:
+		friend_character = character
+		friend_row = COMPANION_RUN_ROWS[character]
+		friend_frame = 0
+	if world.state == "running":
+		friend_row = COMPANION_RUN_ROWS[character]
+		friend_frame = int(animation_clock() * (17 if world.boosting() else 11)) % 6
+		if world.y < 0.0:
+			friend_row = 5 if character == "owl" else (3 if character == "wolf" else 4)
+			if character == "owl": friend_frame = int(animation_clock() * (5 if world.gliding else 12)) % 6
+			else: friend_frame = 0 if world.air_time < 0.06 else (1 if world.velocity < -250 else (2 if world.velocity < -50 else (3 if world.velocity < 120 else (4 if world.velocity < 400 else 5))))
+	elif world.state == "ready":
+		friend_row = COMPANION_RUN_ROWS[character]
+		friend_frame = 0
+	if not motion: friend_frame = 0
+	place_companion(friend_sprite, friend_row, friend_frame, Vector2(World.PLAYER_X, ground + world.y))
 	friend_sprite.modulate = Color("91ddff") if world.state == "ice" else Color.WHITE
+	if character == "sheep":
+		for i in 2:
+			followers[i].visible = world.sheep_count > i + 1 and world.state not in ["fire", "ice"]
+			place_companion(followers[i], friend_row, (friend_frame + (i + 1) * 2) % 6 if world.y >= 0.0 and motion else friend_frame, Vector2(World.PLAYER_X - 64 * (i + 1), ground + world.y))
+		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
 	if world.state == "fire" and world.hit_time > 0.5:
 		friend_sprite.visible = false
+
+func place_companion(item: Sprite2D, row: int, frame: int, anchor: Vector2, scale_value: float = 0.5) -> void:
+	item.region_rect = Rect2(frame * 209, row * 209, 209, 209)
+	item.scale = Vector2(scale_value, scale_value)
+	item.offset = Vector2(-104.5, -float(COMPANION_BASELINES[row][frame]))
+	item.position = anchor.round()
 
 func sprite(row: int, frame: int, x: float, bottom: float, width: float) -> void:
 	var sy := roundf(float(row) * 1254.0 / 8.0)
@@ -613,6 +755,14 @@ func sprite(row: int, frame: int, x: float, bottom: float, width: float) -> void
 func _draw() -> void:
 	if not is_instance_valid(ui): return
 	draw_scenery()
+	if world.boosting() and motion:
+		for i in 3:
+			draw_rect(Rect2(World.PLAYER_X - 130 - i * 16, ground + world.y - 26 - i * 16, 42 - i * 5, 3), Color("c5b8ff"))
+	if character == "sheep" and not world.sheep_pickups.is_empty() and world.sheep_count < 3:
+		var x: float = world.sheep_pickups[0].x
+		draw_rect(Rect2(x - 10, ground - 104, 20, 20), Color("9ce4cc"))
+		draw_line(Vector2(x - 5, ground - 94), Vector2(x + 5, ground - 94), Color("102b30"), 3)
+		draw_line(Vector2(x, ground - 99), Vector2(x, ground - 89), Color("102b30"), 3)
 	var frame := int(animation_clock() * 10.0) % 6
 	for o in world.obstacles:
 		sprite(6 if o.kind == "ice" else 7, frame, o.x - 40, ground + 3, 80)

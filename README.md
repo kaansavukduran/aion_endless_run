@@ -4,7 +4,7 @@ Sevimli bir piksel macerası. **Space ile zıpla, Esc ile mola ver.** Ateşi ve 
 
 ![Aion Endless Run](docs/evidence/01-menu-tr.png)
 
-**[İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Sürüm ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/VALIDATION.md)
+**[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Sürüm ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/VALIDATION.md)
 
 ## Oyna
 
@@ -19,7 +19,7 @@ Ana menüde **Koşuya başla** veya **Space**. Koşarken **Space**, sol tıklama
 
 Her atlanan engel **+10**, her toplanan kristal **+25** puan. Mesafe de skor kazandırır. Hız zamanla artar ve sınırlandırılır. Kehribar Çölü ile Ayaz Vadisi mesafeye göre yer değiştirir; gündüz ve gece bir döngü oluşturur.
 
-Aion varsayılan karakter. **Karakterler** menüsünden Baykuş Ömer, Accursed Wise Wolf veya Blessed Ignorant Sheep seçilebilir. Hepsi ilk açılışta kullanılabilir ve aynı çarpışma kutusuna/hıza sahiptir. Duraklatma menüsünden karakter değiştirmek açık koşuyu korur.
+Aion varsayılan karakter. **Karakterler** menüsünden Baykuş Ömer, Accursed Wise Wolf veya Blessed Ignorant Sheep seçilebilir. Hepsi ilk açılışta kullanılabilir. Aion iki kez zıplar; Baykuş Ömer tek zıplamadan sonra Space/dokunmayı basılı tutarak süzülür; koyun yerdeki arkadaşları toplayıp en fazla üç koyunluk sürü oluşturur ve her koyun bir can sağlar; kurt Shift veya karakterin üstüne basılı tutarak hızlanır. Kurtta basılı tutan parmak hızlanmayı sürdürürken ikinci parmakla başka bir yere dokunup zıplayabilirsin. Bir temasta bir koyun eksilir; son koyunda çarpışma koşuyu bitirir. Duraklatma menüsünden karakter değiştirmek açık koşuyu korur.
 
 **Ayarlar** menüsünde Türkçe/English, bağımsız ses ve dekoratif hareket seçenekleri ile ses düzeyi bulunur. Hareket kapalıyken karakter sabit poz kullanır, parçacıklar ve arka plan kaydırması kapanır; zıplama ve engellerin hareketi oynanış için sürer. Düğmeler Tab/Shift+Tab ve Enter ile kullanılabilir. Fare, dokunma ve klavye desteklenir.
 
@@ -45,10 +45,14 @@ Resmi export templates kuruluyken `export_presets.cfg` içindeki Linux, Windows,
 
 ## Görsel kaynaklar
 
-FireAxolotl ve FireAxolotl Extension'da kullanılan Aion koşu paftası ve arkadaş paftaları PNG içerikleri değiştirilmeden dahil edildi. Aion'un 6×8 koşu paftası kendi animasyonlarını kullanır. Arkadaşların özgün bekleme/göz kırpma kareleri 48 piksel genişliğinde örneklenen bir shader ile çizilir; yeni yan profil koşu paftaları oldukları iddia edilmez. Donma, ateş ve kül durumları arkadaşlar için oyun içinde ortak piksel efektleriyle gösterilir.
+FireAxolotl ve FireAxolotl Extension'da kullanılan Aion koşu paftası ve arkadaş paftaları PNG içerikleri değiştirilmeden dahil edildi. Aion'un 6×8 koşu paftası kendi animasyonlarını kullanır. 0.2.0 sürümünde arkadaşların kimliklerini koruyan yeni, sağa bakan 6×6 piksel koşu/zıplama/süzülme paftası eklendi. Kollar, bacaklar ve kanatlar ayrı çizilmiş karelerle hareket eder; kaynak paftalar da korunur. Yeni paftanın kare sırası, hizalama noktaları ve kaynağı `assets/COMPANION-RUNNER-PROVENANCE.json` dosyasındadır. Donma, ateş ve kül durumları arkadaşlar için oyun içinde ortak piksel efektleriyle gösterilir.
 
 [Kaynak ve lisans kayıtları](THIRD_PARTY_NOTICES.md). Chrome dinozorunun görseli veya kodu alınmadı. Hesap, reklam, telemetri, çevrimiçi puan tablosu veya ücretli kilit yok.
 
 ## English
 
-A standalone offline Godot runner. **Space / tap to jump, Esc to pause.** Four available characters, fire and ice collisions, local best score, collectible crystals, two scrolling biomes and a day/night cycle. Choose **Settings → English**. Download installers and portable editions from Releases. This first release is a playable beta. macOS builds use development ad-hoc signing, without Developer ID/notarization; native iPhone distribution requires the owner's Apple Developer signing and App Store/TestFlight setup. See the release notes for actual platform verification, rather than assuming every produced package was device-tested.
+A standalone offline Godot runner. **Space / tap to jump, Esc to pause.** Four available characters, fire and ice collisions, local best score, collectible crystals, two scrolling biomes and a day/night cycle. Choose **Settings → English**. Download installers and portable editions from Releases. Version 0.2.0 adds right-facing companion run frames, Aion double jump, hold-to-glide owl, collectible sheep lives (up to three) and hold-to-boost wolf. This remains a playable beta. macOS builds use development ad-hoc signing, without Developer ID/notarization; native iPhone distribution requires the owner's Apple Developer signing and App Store/TestFlight setup. See the release notes for actual platform verification, rather than assuming every produced package was device-tested.
+
+## Vercel
+
+[Adım adım Vercel kurulumu](docs/VERCEL.md). GitHub deposunu Vercel hesabında içe aktar, **Other** seç ve **Deploy** düğmesine bas. `vercel.json` derleme komutunu ve çıktı klasörünü belirler. MCP, API anahtarı veya veritabanı gerekmez. Vercel web oyunu içindir; kurulum paketleri Releases bölümündedir.
