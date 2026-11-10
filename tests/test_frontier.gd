@@ -71,14 +71,18 @@ func run() -> void:
 	w.step(0.01)
 	check(w.frontier.plants.is_empty() and w.adventure.kills == 1,"A second strike defeats and scores the plant")
 	w = arena()
-	w.distance = 8100
+	w.adventure.level = 9
+	w.adventure.level_elapsed = 30
+	w.distance = w.adventure.LEVEL_DISTANCE
 	w.adventure.update_level(w)
 	check(w.adventure.hugging() and not w.frontier.active(),"The tenth level hugs before combat begins")
 	advance(w,1.05)
 	check(w.frontier.phase == "intro" and w.frontier.milestone == 10,"Hug completion enters the weapon handoff and boss introduction")
 	w = arena()
 	w.adventure.celebrations_enabled = false
-	w.distance = 8100
+	w.adventure.level = 9
+	w.adventure.level_elapsed = 30
+	w.distance = w.adventure.LEVEL_DISTANCE
 	w.adventure.update_level(w)
 	w.step(0.01)
 	check(w.frontier.active() and not w.adventure.hugging(),"Turning off cosmetic celebrations does not disable boss gameplay")
@@ -171,7 +175,9 @@ func run() -> void:
 			game.frames.place(game.friend_sprite,"heroes",game.COMBAT_ROWS[id],frame,Vector2.ZERO)
 			check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),target),"Gun poses retain the running character head size: "+id+"/"+str(frame))
 	game.start_run()
-	game.world.distance = 8100
+	game.world.adventure.level = 9
+	game.world.adventure.level_elapsed = 30
+	game.world.distance = game.world.adventure.LEVEL_DISTANCE
 	game.world.adventure.update_level(game.world)
 	game.pause_run()
 	game.open_subpage("settings")

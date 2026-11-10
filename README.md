@@ -21,7 +21,7 @@ Ana menüde **Koşuya başla** veya **Space**. Koşarken **Space**, Zıpla düğ
 
 Koyunların aralığı 112/224 piksele çıkarıldı; ilk hızda yaklaşık 0,35/0,70 saniye sonra, öndekinin zıpladığı noktada sırayla havalanırlar. Önceki 0.4 özelliklerinde koyunlar öndekinin izlediği zıplama yolunu mesafeye bağlı gecikmeyle sırayla takip eder. Kurt deparında kıvrılan rüzgâr izleri akar. Baykuş, görünür yükselen hava akımında basılı tutarak biraz yükselebilir. Bu hareketler için yeni 18 karelik ek pafta vardır.
 
-Baykuş, kurt ve koyunun koşu/zıplama/donma/kül animasyonları ayrı 48 karelik paftalar kullanır. Web ve indirilebilir sürümün numarası sol üstte görünür. Eski web önbelleğinden geçiş otomatik yapılır; sonraki güncellemeler oyun içindeki düğmeyle açılır.
+Önceki 48 karelik paftalar kaynak geçmişinde korunur; aktif animasyonlar 0.9’un daha kapsamlı paftalarını kullanır. Web ve indirilebilir sürümün numarası sol üstte görünür. Eski web önbelleğinden geçiş otomatik yapılır; sonraki güncellemeler oyun içindeki düğmeyle açılır.
 
 Her atlanan engel **+10**, her toplanan kristal **+25** puan. Mesafe de skor kazandırır. Hız zamanla artar ve sınırlandırılır. Kehribar Çölü ile Ayaz Vadisi mesafeye göre yer değiştirir; gündüz ve gece bir döngü oluşturur.
 
@@ -30,6 +30,16 @@ Aion varsayılan karakter. Başlangıç kartlarından Baykuş Ömer, Melun Bilge
 **TR / EN / CS** açılır dil menüsü başlangıç, duraklatma ve ayar ekranlarında bulunur. İlk açılış tarayıcı/cihazın ana dilini kullanır: Türkçe `tr`, İngilizce `en`, Çekçe `cs`; diğer diller İngilizce açılır. Otomatik seçim, oyuncu açıkça bir dil seçene kadar cihazı izler. Oyuncunun seçimi sonraki açılışlar için kaydedilir; eski geçerli dil tercihleri de korunur. **Ayarlar** menüsünde de üç dil, bağımsız ses, ekran efektleri ve dekoratif hareket seçenekleri ile ses düzeyi bulunur. Hareket kapalıyken karakter sabit poz kullanır, parçacıklar ve arka plan kaydırması kapanır; zıplama ve engellerin hareketi oynanış için sürer. Düğmeler Tab/Shift+Tab ve Enter ile kullanılabilir. Fare, dokunma ve klavye desteklenir.
 
 Rekor, keşfedilen güçler ve tercihler yereldir. Geçici güçler yalnızca o koşuda sürer. Normal kayıt konumu Godot'un `app_userdata/Aion Endless Run/save.cfg` klasörüdür: Windows `%APPDATA%\Godot\app_userdata\Aion Endless Run`, Linux `~/.local/share/godot/app_userdata/Aion Endless Run`, macOS `~/Library/Application Support/Godot/app_userdata/Aion Endless Run`. Portable burada kurulum gerektirmeyen sürüm anlamındadır; kayıtlar işletim sisteminin kullanıcı veri klasöründe tutulur. Canlı koşu uygulama kapatılınca geri yüklenmez; rekor, seçili karakter ve ayarlar korunur.
+
+## 0.9.0 · Daha akıcı hareket ve anlamlı parkur
+
+**Seviye temposu:** Her yeni seviye için önceki seviye sonrasından en az **30 saniye aktif normal koşu** ve **12.000 yeni mesafe** gerekir. İkisinin de dolması gerekir; düşük hızda daha uzun sürer. Duraklama, sarılma ve boss süresi bu süreye eklenmez. Biriken puan/mesafe arka arkaya seviye atlatmaz. Gösterge iki koşulu da gösterir.
+
+**Arka plan kutlaması:** Kutlama beş saniyelik bir arka plan karşılaşmasıdır; karakter dünyanın bir noktasında durur, ilerledikçe sağdan sola kayarak geçilir. Sekiz farklı yetişkin anime karakteri sola, kahramanın gelişine bakar. Her on seviyedeki sarılma, sağdan yaklaşma ve silah verme geçişi korunur.
+
+**Yeni hareket paftaları:** On orijinal PNG’de **997 gerçek çizilmiş kare** var. Kahraman koşu/zıplama/iki saldırı/yetenek/silah/takla döngüleri 12 kare, dünya düşmanları ve robot dizileri 11 kare kullanır. Kutlamalar altı kutlama ve altı sarılma karesi içerir. Donma/ateş/kül, eşyalar ve yeni parkur da yenilendi. Kare sayısı kayıttan okunur; gelecekteki animasyon paftalarında en az 10 gerçek çizilmiş sütun gerekir. Kopya kare veya yapay ara görüntü eklenmez. Kaynaklar değiştirilmeden ve özetleriyle korunur; ayrı saydam paylı dokular komşu kare taşmasını önler. Her kahramanın paftası tek bir ölçek kullanır.
+
+**Tutarlı karakter ve engeller:** Kurt silah tutarken de mor/kremsi kürklüdür, Aion’un önlüğünü giymez. Baykuş yerde sırayla kanat, havada ileri gaga saldırısı yapar. Eski ters U kemerler kaldırıldı; yerde dört biyoma uygun, geçildiğinde 3,5 saniye %18 hız veren şeritler var. Havada boru veya tahtayı iplerle iki karga taşır; altından takla atılabilir, havadan vurularak kırılabilir. Çukurlar, yer engelleri, kargalar, cüceler, seyrek ateş bitkileri ve boss korunur.
 
 ## 0.8.0 · Dört biyom ve Kül Muhafızı
 
@@ -47,7 +57,7 @@ Rekor, keşfedilen güçler ve tercihler yereldir. Geçici güçler yalnızca o 
 
 **164 yeni çizilmiş karelik dört özgün pafta:** sekiz saldırı dizisi, dört takla döngüsü, sekiz farklı yetişkin anime kutlama karakteri ve dört hareketli üst engel. Aion iki eliyle sırayla yumruk, baykuş sağ/sol kanat, kurt ısırık/kafa, koyun kafa/çifte kullanır. Her basış tek vuruştur; bir sonraki basış diğer harekete geçer. Sağdaki hedefe vururken komşu kareden arkaya taşan piksel parçası sıkı kare sınırlarıyla giderilir.
 
-Her **900 mesafede seviye** artar. Farklı saç/kıyafetli sekiz karakter tekrar etmeyen bir torbadan seçilir; konfeti, yıldız, kalp veya baloncuklarla kutlar. Her **10 seviyede**, kahraman yere inince **1 saniyelik sarılma** olur: dünya, düşmanlar ve güç süreleri durur; sonra kalpler ve kısa dokunulmazlıkla devam edilir. Ayarlardan kutlamalar kapatılabilir. En yüksek seviye yerel olarak kaydedilir.
+0.7 sürümündeki 900 mesafe kuralı 0.9’da 30 saniye + 12.000 yeni mesafe olarak değiştirildi. Farklı saç/kıyafetli sekiz karakter tekrar etmeyen bir torbadan seçilir; konfeti, yıldız, kalp veya baloncuklarla kutlar. Her **10 seviyede**, kahraman yere inince **1 saniyelik sarılma** olur: dünya, düşmanlar ve güç süreleri durur; sonra kalpler ve kısa dokunulmazlıkla devam edilir. Ayarlardan kutlamalar kapatılabilir. En yüksek seviye yerel olarak kaydedilir.
 
 Mantar başlangıçta zorunlu değildir: ilk 20 saniyede çıkmaz, iki mantar arasında en az 45 saniye vardır; uygun eşya fırsatında varsayılan olasılığı **%2**. Ayarlarda %0–100 değiştirilebilir; bu değer saniye başına olasılık değildir. Devlikte düzensiz aralıklı küçük cüce grupları gelir; 4. seviyeden itibaren mantarsız da seyrek cüceler görülebilir. Devlik bittiğinde dalga cüceleri temizlenir ve kısa koruma verilir. Renk dalgaları ve hafif kamera için ayrı şiddet ayarı vardır; hızlı tam ekran flaş kullanılmaz.
 
@@ -76,6 +86,7 @@ godot --headless --path . --script tests/test_adventure.gd
 godot --headless --path . --script tests/test_localization.gd
 godot --headless --path . --script tests/test_evolution.gd
 godot --headless --path . --script tests/test_frontier.gd
+godot --headless --path . --script tests/test_motion.gd
 ```
 
 Testler kullanıcı kayıtlarına yazdığı için kendi skorunu korumak istiyorsan testleri ayrı bir OS kullanıcısı veya geçici XDG veri klasörüyle çalıştır. Linux örneği:

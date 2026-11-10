@@ -4,18 +4,16 @@ const META = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const ENEMIES = preload("res://assets/adventure-enemies.png")
 const ITEMS = preload("res://assets/adventure-items.png")
 const EVOLUTION = preload("res://assets/EVOLUTION-PROVENANCE.json")
-const BARRIERS = preload("res://assets/evolution-barriers.png")
+
 var host
 
 func atlas(name: String, row: int, frame: int, anchor: Vector2, width: float, centered: bool = false) -> void:
-	var data: Dictionary = META.data.atlases[name]
-	var left := roundf(float(frame) * float(data.width) / 6.0)
-	var right := roundf(float(frame + 1) * float(data.width) / 6.0)
-	var top: float = data.row_y[row]
-	var height: float = data.row_y[row + 1] - top
-	var factor := width / (right - left)
-	var bottom := height * 0.5 if centered else float(data.baselines[row][frame])
-	draw_texture_rect_region(ENEMIES if name == "enemies" else ITEMS, Rect2((anchor - Vector2(width * 0.5, bottom * factor)).round(), Vector2(width, height * factor)), Rect2(left, top, right - left, height), Color(1.22, 1.22, 1.30) if name == "enemies" and row < 3 else Color.WHITE)
+	var f: Dictionary = host.frames.pose(name,row,frame)
+	var tex: Texture2D = f.texture
+	var factor: float = width/f.cell_width
+	var offset: Vector2 = f.offset
+	if centered: offset.y = f.top-f.cell_height*0.5-2
+	draw_texture_rect(tex,Rect2((anchor+offset*factor).round(),tex.get_size()*factor),false)
 
 func _draw() -> void:
 	if host == null: return
@@ -44,35 +42,27 @@ func _draw() -> void:
 	if a.thunder_time > 0.0 and host.effects_enabled and host.motion:
 		var bolt := PackedVector2Array([Vector2(a.thunder_x, 147), Vector2(a.thunder_x - 20, 185), Vector2(a.thunder_x + 8, 181), Vector2(a.thunder_x - 24, 236)])
 		draw_polyline(bolt, Color(0.87, 0.91, 1.0, minf(0.7, a.thunder_time * 1.4)), 4)
-	for obstacle in world.obstacles:
-		if str(obstacle.kind).begins_with("arch") and obstacle.kind not in ["arch_root","arch_pipe"]:
-			var row: int = {"arch":0,"arch_ice":1,"arch_stone":2,"arch_cap":3}.get(obstacle.kind,0)
-			var d: Dictionary = EVOLUTION.data.atlases.barriers
-			var frame := int(clock*5)%6
-			var width: float = d.x[frame+1]-d.x[frame]
-			var height: float = d.y[row+1]-d.y[row]
-			var scale_value := 174.0/width
-			draw_texture_rect_region(BARRIERS,Rect2(Vector2(obstacle.x-87,ground-68-float(d.all_bounds[row][frame][3])*scale_value).round(),Vector2(174,height*scale_value)),Rect2(d.x[frame],d.y[row],width,height))
-			draw_polyline(PackedVector2Array([Vector2(obstacle.x - 10, ground - 28), Vector2(obstacle.x, ground - 19), Vector2(obstacle.x + 10, ground - 28)]), Color("d9ebd6"), 3)
 	for item in a.items:
 		var bob := sin(clock * 4.0 + item.id) * 3.0
 		var point := Vector2(item.x, ground + item.y + bob)
-		var frame := int(clock * 7) % 6
-		if item.kind == "mushroom": atlas("items", 0, frame, point, 63, true)
+		var frame: int = host.frames.cycle("power",0,clock,1.0)
+		if item.kind == "mushroom": atlas("power", 0, frame, point, 63, true)
 		else:
 			var icons := {"lightning":0,"slow":1,"haste":2,"shield":3,"magnet":4,"leaf":5}
-			atlas("items", 1, icons[item.kind], point, 46, true)
+			atlas("power",int(icons[item.kind])+1,host.frames.cycle("power",int(icons[item.kind])+1,clock,1.0),point,46,true)
 	for enemy in a.enemies:
 		var row := 0 if enemy.kind == "crow" else 3
-		var frame := int(clock * (11 if enemy.kind == "crow" else 10) + enemy.id) % 6
+		var frame: int = host.frames.cycle("enemies",row,clock+float(enemy.id)*0.13,0.8)
 		if enemy.hp <= 0:
 			row = 2 if enemy.kind == "crow" else 5
-			frame = mini(5, int(enemy.defeat * 10)) if host.motion else 5
+			frame = host.frames.progress("enemies",row,enemy.defeat/0.65) if host.motion else host.frames.count("enemies",row)-1
 		elif enemy.hurt > 0.0:
 			row = 2 if enemy.kind == "crow" else 5
 			frame = 0
 		elif enemy.kind == "crow" and enemy.diving: row = 1
-		elif enemy.kind == "gnome" and enemy.x < world.PLAYER_X + 160: row = 4
+		elif enemy.kind == "gnome" and enemy.x < world.PLAYER_X + 160:
+			row = 4
+			frame = host.frames.cycle("enemies",row,clock,0.75)
 		var anchor := Vector2(enemy.x, ground + enemy.y + (24.0 if enemy.kind == "crow" else 23.0))
 		atlas("enemies", row, frame, anchor, 80 if enemy.kind == "crow" else 65)
 		if enemy.hp > 0 and enemy.hp < enemy.max_hp:

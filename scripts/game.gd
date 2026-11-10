@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3}
-const GAME_VERSION = "0.8.0"
+const GAME_VERSION = "0.9.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -379,7 +379,7 @@ func rebuild() -> void:
 	position_control(goal_label, Vector2(view_w - 415, 138), Vector2(385, 25))
 	level_label = label("",12,"ffe2b6")
 	ui.add_child(level_label)
-	position_control(level_label,Vector2(view_w-420,view_h-124),Vector2(220,24))
+	position_control(level_label,Vector2(view_w-560,view_h-124),Vector2(350,24))
 	level_progress = ProgressBar.new()
 	level_progress.show_percentage = false
 	level_progress.max_value = world.adventure.LEVEL_DISTANCE
@@ -540,6 +540,7 @@ func build_page() -> void:
 		column.add_child(label(text("how"), 17, "b5e7d6"))
 		column.add_child(wrap_label(text("help"), 13))
 		column.add_child(wrap_label(text("boss_help"),13))
+		column.add_child(wrap_label(text("motion_help"),13))
 		column.add_child(label(text("discoveries") % world.adventure.discoveries.size(), 16))
 		for power in world.adventure.POWER_NAMES:
 			column.add_child(wrap_label(("✓ " if world.adventure.discoveries.has(power) else "○ ") + text("power_" + power) + " · " + text("desc_" + power), 12))
@@ -1043,7 +1044,7 @@ func _physics_process(dt: float) -> void:
 	apply_scene_transform()
 	update_friend()
 	update_hud()
-	evolution_view.z_index = 1 if world.adventure.hugging() or world.adventure.heart_time > 0 else 0
+	evolution_view.z_index = 1 if world.adventure.hugging() else 0
 	evolution_view.queue_redraw()
 	frontier_view.queue_redraw()
 	adventure_view.queue_redraw()
@@ -1070,6 +1071,15 @@ func handle_event(value: String) -> void:
 		notice = text(value) % (500+world.frontier.milestone*10)
 		notice_time = 2.6
 		tone(1046,0.24)
+		return
+	if value == "carrier_down":
+		notice = text(value)
+		notice_time = 1.0
+		return
+	if value == "gate_boost":
+		notice = text("gate_boost")
+		notice_time = 1.2
+		tone(1180,0.1)
 		return
 	if value == "shot":
 		tone(980,0.035)
@@ -1152,6 +1162,7 @@ func update_hud() -> void:
 	var powers: Array[String] = []
 	for id in world.adventure.powers:
 		if float(world.adventure.powers[id]) > 0.0: powers.append(text("power_" + id) + " " + str(ceili(world.adventure.powers[id])) + "s")
+	if world.adventure.rush_time > 0.0: powers.append(text("gate_rush") % ceili(world.adventure.rush_time))
 	if world.adventure.lightning_charges > 0: powers.append(text("power_lightning") + " ×" + str(world.adventure.lightning_charges))
 	if is_instance_valid(power_label): power_label.text = (" · ".join(powers) if not powers.is_empty() else text("power_hint")) + "  |  " + text("defeated") % world.adventure.kills + "  |  " + str(roundi(world.speed() / 320 * 100)) + "%"
 	if is_instance_valid(goal_label):
@@ -1177,7 +1188,7 @@ func update_hud() -> void:
 		action_buttons.duck.modulate = Color("a9ead9") if world.adventure.ducking(world) else Color.WHITE
 	level_label.visible = page == "" or page == "paused"
 	level_progress.visible = level_label.visible
-	level_label.text = (text("level_short") % world.adventure.level) + "  ·  %d/%d" % [int(world.adventure.level_progress(world)),int(world.adventure.LEVEL_DISTANCE)]
+	level_label.text = (text("level_short") % world.adventure.level) + " · " + (text("level_requirements") % [mini(30,int(world.adventure.level_elapsed)),mini(12000,int(world.adventure.level_distance(world)))])
 	level_progress.value = world.adventure.level_progress(world)
 	for control in action_buttons.values(): control.disabled = world.adventure.hugging()
 	progress.value = fmod(world.distance, World.BIOME_DISTANCE)
@@ -1210,6 +1221,16 @@ func publish_web_status() -> void:
 	var canvas = document.getElementById("canvas")
 	if canvas == null: return
 	canvas.setAttribute("data-ui-ready", str(ui_layout_ready))
+	canvas.setAttribute("data-level-elapsed",str(world.adventure.level_elapsed))
+	canvas.setAttribute("data-level-distance",str(world.adventure.level_distance(world)))
+	canvas.setAttribute("data-celebration-x",str(world.adventure.celebration_x(world,motion)))
+	canvas.setAttribute("data-celebration-time",str(world.adventure.celebration_time))
+	canvas.setAttribute("data-girl-facing","left")
+	canvas.setAttribute("data-rush-time",str(world.adventure.rush_time))
+	canvas.setAttribute("data-attack-kind","peck" if world.adventure.attack_airborne else "melee")
+	canvas.setAttribute("data-pose-source",str(friend_sprite.get_meta("source_key","")))
+	canvas.setAttribute("data-source-frame",str(friend_sprite.get_meta("source_frame",0)))
+	canvas.setAttribute("data-source-row",str(friend_sprite.get_meta("source_row",0)))
 	canvas.setAttribute("data-boss-active",str(world.frontier.active()))
 	canvas.setAttribute("data-boss-phase",world.frontier.phase)
 	canvas.setAttribute("data-boss-hp",str(world.frontier.hp))
@@ -1343,7 +1364,7 @@ func update_friend() -> void:
 	for item in followers: item.visible = false
 	sheep_collectible.visible = character == "sheep" and not world.sheep_pickups.is_empty() and world.sheep_count < 3
 	if sheep_collectible.visible:
-		place_companion(sheep_collectible, "sheep", 7, int(animation_clock() * 7) % 6, Vector2(world.sheep_pickups[0].x, ground), 0.46)
+		place_companion(sheep_collectible, "sheep", 7, frames.cycle("runner-sheep",0,animation_clock(),0.9), Vector2(world.sheep_pickups[0].x, ground), 0.46)
 
 	if friend_character != character:
 		friend_character = character
@@ -1354,44 +1375,48 @@ func update_friend() -> void:
 		friend_action = world.boosting() or world.riding_gust
 		friend_row = 6 if world.boosting() else 1
 		# Strides follow distance so feet accelerate with the world and freeze on pause.
-		friend_frame = int(world.distance / 29.0) % 6
+		friend_frame = frames.cycle("runner-"+character,friend_row,world.distance,174.0)
 		if world.y < 0.0:
 			friend_row = 6 if world.gliding else 2
-			if world.gliding: friend_frame = int(animation_clock() * 6) % 6
-			else: friend_frame = flight_frame(world.velocity, world.air_time, character == "sheep")
+			if world.gliding: friend_frame = frames.cycle("runner-"+character,6,animation_clock(),1.0)
+			else: friend_frame = flight_frame(world.velocity, world.air_time, frames.count("runner-"+character,2))
 			if character == "sheep": friend_action = true
 			if character == "wolf": friend_action = false
+			if character == "aion" and world.jumps_used == 2 and world.air_time < 0.4:
+				friend_row = 6
+				friend_frame = frames.progress("runner-aion",6,world.air_time/0.4)
 		elif world.landing_time > 0.0:
 			friend_row = 0 if character == "aion" else (2 if character == "sheep" else 7)
-			friend_frame = 5 if character == "sheep" else mini(2, int((0.14 - world.landing_time) * 20))
+			friend_frame = frames.count("runner-"+character,2)-1
 			friend_action = character == "sheep"
 	elif world.state == "ready":
 		friend_action = false
 		friend_row = 0
-		friend_frame = int(animation_clock() * 4) % 6
+		friend_frame = frames.cycle("runner-"+character,0,animation_clock(),1.5)
 	elif world.state == "ice":
 		friend_action = false
 		friend_row = 3
-		friend_frame = mini(5, int(world.hit_time * 8)) if motion else 5
+		friend_frame = frames.progress("runner-"+character,3,world.hit_time/0.7) if motion else frames.count("runner-"+character,3)-1
 	elif world.state in ["fire", "bonk"]:
 		friend_action = false
 		friend_row = 4 if world.hit_time < 0.75 and motion else 5
-		friend_frame = (mini(5, 3 + int(world.hit_time * 4)) if world.state == "bonk" else mini(5, int(world.hit_time * 8))) if friend_row == 4 else (int(world.hit_time * 5) % 6 if motion else 0)
+		friend_frame = frames.progress("runner-"+character,4,world.hit_time/0.7) if friend_row == 4 else (frames.cycle("runner-"+character,5,world.hit_time,1.2) if motion else 0)
 	if world.state == "fall":
 		friend_action = false
 		friend_row = 2
-		friend_frame = 4
+		friend_frame = frames.count("runner-"+character,2)-3
 	if a.hugging():
 		friend_row = 0
-		friend_frame = 2
+		friend_frame = 4
 		friend_action = false
 	if not motion and world.state not in ["ice", "fire", "bonk", "fall"]: friend_frame = 0
 	place_companion(friend_sprite, character, friend_row, friend_frame, Vector2(World.PLAYER_X, ground + world.y), 0.62 * visual_size, friend_action)
 	if friend_combat >= 0:
-		var combat_frame: int = (a.attack_frame() if friend_combat < 4 else a.roll_frame()) if motion else (3 if friend_combat < 4 else 2)
+		var combat_count := frames.count("rolls",COMBAT_ROWS[character]) if friend_combat >= 4 else frames.count("owl-peck" if a.attack_airborne else "strikes",0 if a.attack_airborne else COMBAT_ROWS[character]*2+a.attack_variant)
+		var combat_frame: int = (a.attack_frame(combat_count) if friend_combat < 4 else a.roll_frame(combat_count)) if motion else combat_count/2
 		place_combat(friend_sprite, character, friend_combat, combat_frame, Vector2(World.PLAYER_X, ground + world.y), visual_size, friend_combat >= 4 or a.ducking(world))
 	if world.frontier.active() and not a.ducking(world) and (world.frontier.phase != "intro" or world.frontier.stage_time > 0.75):
-		var shooting: int = 2 if world.frontier.shot_flash > 0.08 else (3 if world.frontier.shot_flash > 0.0 else (4 if world.y < 0.0 else int(world.frontier.clock*7)%2))
+		var shooting: int = frames.progress("heroes",COMBAT_ROWS[character],0.25+(0.16-world.frontier.shot_flash)/0.16*0.55) if world.frontier.shot_flash > 0.0 else posmod(int(world.frontier.clock*7),3)
 		frames.place(friend_sprite,"heroes",COMBAT_ROWS[character],shooting,Vector2(World.PLAYER_X,ground+world.y))
 	friend_sprite.modulate = Color.WHITE
 	if character == "sheep":
@@ -1401,24 +1426,27 @@ func update_friend() -> void:
 			var in_air: bool = float(pose.y) < -0.01
 			var landing: bool = float(pose.landing_time) > 0.0
 			var row := 2 if in_air or landing else (0 if world.state == "ready" else 1)
-			var frame := flight_frame(float(pose.velocity), float(pose.air_time), true) if in_air else (5 if landing else posmod(int((world.distance - World.FLOCK_GAP * (i + 1)) / 29.0), 6))
+			var frame := flight_frame(float(pose.velocity), float(pose.air_time), frames.count("runner-sheep",2)) if in_air else (frames.count("runner-sheep",2)-1 if landing else frames.cycle("runner-sheep",1,world.distance-World.FLOCK_GAP*(i+1),174.0))
 			place_companion(followers[i], "sheep", row, frame if motion else 0, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), 0.62 * FOLLOWER_RATIO, in_air or landing)
 			if float(pose.get("duck", 0.0)) > 0.5:
-				place_combat(followers[i], "sheep", 6, 1+posmod(int(float(pose.get("roll_phase",0.0))*11),5) if motion else 2, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
+				place_combat(followers[i], "sheep", 6, posmod(int(float(pose.get("roll_phase",0.0))/0.68*frames.count("rolls",2)),frames.count("rolls",2)) if motion else 4, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
 
 func place_combat(item: Sprite2D,id: String,row: int,frame: int,anchor: Vector2,growth: float,crouch: bool) -> void:
 	var key := "rolls" if crouch else "strikes"
 	var actual_row: int = COMBAT_ROWS[id] if crouch else COMBAT_ROWS[id]*2 + world.adventure.attack_variant
-	frames.place(item,key,actual_row,clampi(frame,0,6 if crouch else 5),anchor,growth)
+	if not crouch and id == "owl" and world.adventure.attack_airborne:
+		key = "owl-peck"
+		actual_row = 0
+	frames.place(item,key,actual_row,frame,anchor,growth)
 
 func registered_height(item: Sprite2D) -> float:
 	return float(item.get_meta("pose_height",0.0)) if item.visible else 0.0
 
-func flight_frame(velocity: float, air_time: float, sheep: bool = false) -> int:
-	if air_time < 0.045: return 0
-	if sheep: return 1 if velocity < -450 else (2 if velocity < -120 else (3 if velocity < 140 else 4))
-	return 1 if velocity < -250 else (2 if velocity < -50 else (3 if velocity < 120 else (4 if velocity < 400 else 5)))
+func flight_frame(velocity: float, air_time: float, frame_count: int = 12) -> int:
+	if air_time < 0.03: return 0
+	var phase := 0.5 + clampf(velocity / absf(World.JUMP_SPEED),-1.0,1.0)*0.5
+	return clampi(int(phase*(frame_count-1)),0,frame_count-2)
 
 func place_companion(item: Sprite2D, id: String, row: int, frame: int, anchor: Vector2, scale_value: float = 0.62, action: bool = false) -> void:
 	var key := "actions" if action else "runner-"+id
@@ -1481,10 +1509,12 @@ func _draw() -> void:
 		draw_rect(Rect2(x - 10, ground - 104, 20, 20), Color("9ce4cc"))
 		draw_line(Vector2(x - 5, ground - 94), Vector2(x + 5, ground - 94), Color("102b30"), 3)
 		draw_line(Vector2(x, ground - 99), Vector2(x, ground - 89), Color("102b30"), 3)
-	var frame := int(animation_clock() * 10.0) % 6
 	for o in world.obstacles:
-		if str(o.kind).begins_with("arch") or str(o.kind).begins_with("block") or str(o.kind).begins_with("pit"): continue
-		sprite(6 if o.kind == "ice" else 7, frame, o.x - 40, ground + 3, 80)
+		if str(o.kind).begins_with("arch") or str(o.kind).begins_with("carrier") or o.kind == "gate" or str(o.kind).begins_with("block") or str(o.kind).begins_with("pit"): continue
+		var effect: Dictionary = frames.pose("hazards",0 if o.kind == "ice" else 1,frames.cycle("hazards",0 if o.kind == "ice" else 1,animation_clock(),0.7))
+		var tex: Texture2D = effect.texture
+		var factor := 76.0/float(tex.get_width())
+		draw_texture_rect(tex,Rect2(Vector2(o.x-38,ground+3-tex.get_height()*factor).round(),tex.get_size()*factor),false)
 	for pickup in world.pickups:
 		var point := Vector2(pickup.x, ground + pickup.y)
 		var bob := sin(animation_clock() * 4.0 + pickup.x * 0.01) * 4.0

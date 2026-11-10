@@ -1,3 +1,13 @@
+# Current handoff · 0.9.0
+
+Repository main is authoritative. Current motion release work: ten new unmodified original PNGs / 997 physical frames; dynamic count registry; one common scale per hero sheet; isolated padded textures. Future animation sheets require >=10 actually drawn columns, no duplicated/interpolated padding. Static props exempt.
+
+Progression requires >=30 seconds active normal running AND >=12000 distance since the previous level. No level catch-up loop; pause/hug/boss excluded. Background girls face left, scroll with distance, last five seconds. Every tenth level still hugs/hands off a gun and runs the isolated robot chase. Owl airborne strike selects beak row8. Wolf gun row7 stays bare purple/cream fur. No inverted-U spawn: ground pads grant 3.5s 1.18x rush, two crow-carried loads support rolling or aerial destruction.
+
+Six Godot suites pass 1200 checks. See docs/VALIDATION.md for browser/native/delivery results as finalized. Keep prior releases/tags unchanged. No credentials/signing material in source or Release. Signed APK now exceeds the GitHub single-blob limit; stage <=40 MiB parts in a temporary same-repository branch with APK-PARTS.json, reconstruct and hash-check in publisher, delete branch after public verification. Android signer remains stable; Apple owner signing/notarization remains outstanding.
+
+Historical handoff follows.
+
 # Forge · Aion Endless Run
 
 Yetkili kaynak: https://github.com/kaansavukduran/aion_endless_run · `main`.

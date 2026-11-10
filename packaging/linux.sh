@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-version=0.8.0
+version=0.9.0
 binary=build/linux/AionEndlessRun.x86_64
 chmod +x "$binary"
 cp LICENSE THIRD_PARTY_NOTICES.md README.md build/linux/

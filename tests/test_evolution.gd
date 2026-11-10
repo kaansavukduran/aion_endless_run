@@ -49,7 +49,7 @@ func run() -> void:
 	w.adventure.press_roll(w)
 	advance(w,1.2)
 	check(w.adventure.ducking(w),"Holding the roll control continues the roll loop")
-	for kind in ["arch","arch_ice","arch_stone","arch_cap"]:
+	for kind in ["carrier_pipe","carrier_plank"]:
 		w = arena()
 		w.obstacles = [{"x":World.PLAYER_X,"kind":kind,"counted":false}]
 		w.adventure.press_roll(w)
@@ -95,6 +95,7 @@ func run() -> void:
 	var previous_style := -1
 	for n in range(2,10):
 		w.distance = (n-1)*w.adventure.LEVEL_DISTANCE
+		w.adventure.level_elapsed = 30.0
 		w.adventure.update_level(w)
 		girls[w.adventure.girl_index] = true
 		styles[w.adventure.celebration_style] = true
@@ -104,6 +105,8 @@ func run() -> void:
 	check(girls.size() == 8 and no_repeat,"Eight level-ups use eight identities with no consecutive repeated girl or effect")
 	check(styles.size() >= 3,"Celebrations vary between multiple particle styles")
 	w.distance = 9*w.adventure.LEVEL_DISTANCE
+	w.adventure.level = 9
+	w.adventure.level_elapsed = 30.0
 	w.adventure.update_level(w)
 	check(w.adventure.level == 10 and w.adventure.hugging() and w.adventure.hug_count == 1,"Level ten starts exactly one one-second hug")
 	w.adventure.powers.shield = 8
@@ -131,9 +134,13 @@ func run() -> void:
 	w = arena()
 	w.y = -90
 	w.distance = 9*w.adventure.LEVEL_DISTANCE
+	w.adventure.level = 9
+	w.adventure.level_elapsed = 30.0
 	w.adventure.update_level(w)
 	check(not w.adventure.hugging() and w.adventure.hug_pending,"An airborne milestone waits for a real landing")
 	w.distance = 19*w.adventure.LEVEL_DISTANCE
+	w.adventure.level = 19
+	w.adventure.level_elapsed = 30.0
 	w.adventure.update_level(w)
 	w.y = 0
 	w.adventure.update_level(w)
@@ -141,6 +148,8 @@ func run() -> void:
 	w = arena()
 	w.adventure.celebrations_enabled = false
 	w.distance = 9*w.adventure.LEVEL_DISTANCE
+	w.adventure.level = 9
+	w.adventure.level_elapsed = 30.0
 	w.adventure.update_level(w)
 	check(w.adventure.level == 10 and not w.adventure.hugging(),"Cosmetic celebration setting never blocks real level progress")
 	w = arena()

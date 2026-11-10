@@ -66,9 +66,9 @@ func run() -> void:
 	for crouched in [false, true]:
 		w = arena()
 		w.adventure.duck_held = crouched
-		w.obstacles = [{"x":World.PLAYER_X,"kind":"arch","counted":false}]
+		w.obstacles = [{"x":World.PLAYER_X,"kind":"carrier_pipe","counted":false}]
 		w.step(1.0 / 120)
-		check((w.state == "running") == crouched, "Only a short ducked body fits beneath a low branch: " + str(crouched))
+		check((w.state == "running") == crouched, "Only a rolled body clears the crow-carried pipe: " + str(crouched))
 	w = arena()
 	w.adventure.duck_held = true
 	w.jump()

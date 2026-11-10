@@ -290,10 +290,30 @@ func step(dt: float) -> void:
 	for obstacle in obstacles:
 		obstacle.x -= movement
 		var collides := false
+		var kind: String = obstacle.kind
+		if kind == "gate" or kind.begins_with("arch"):
+			if not obstacle.counted and absf(obstacle.x-PLAYER_X)<60 and y>-35:
+				adventure.rush_time = maxf(adventure.rush_time,3.5)
+				obstacle.counted = true
+				passed += 1
+				event("gate_boost")
+			continue
 		if str(obstacle.kind).begins_with("pit"):
 			collides = absf(obstacle.x-PLAYER_X) < float(obstacle.get("width",150.0))*0.5-5.0 and y > -20.0
-		elif str(obstacle.kind).begins_with("arch"):
-			collides = adventure.body_rect(self).intersects(Rect2(obstacle.x - 54, -174, 108, 106))
+		elif kind.begins_with("carrier"):
+			var targets := [Rect2(obstacle.x-80,-92,160,24),Rect2(obstacle.x-73,-177,36,40),Rect2(obstacle.x+37,-177,36,40)]
+			var body: Rect2 = adventure.body_rect(self)
+			for target in targets: collides = collides or body.intersects(target)
+			if not obstacle.counted and adventure.attack_active() and y < -30:
+				var strike: Rect2 = adventure.attack_rect(self)
+				if targets.any(func(r):return strike.intersects(r)):
+					obstacle.x = -1000
+					obstacle.counted = true
+					passed += 1
+					adventure.kills += 1
+					adventure.bonus_score += 35
+					event("carrier_down")
+					continue
 		else:
 			collides = obstacle.x + 20.0 > PLAYER_X - 15.0 and obstacle.x - 20.0 < PLAYER_X + 15.0 and y > -49.0
 		if collides and adventure.giant() and not str(obstacle.kind).begins_with("pit"):
@@ -304,8 +324,7 @@ func step(dt: float) -> void:
 				event("smash")
 			continue
 		if collides and invulnerable <= 0.0:
-			var kind: String = str(obstacle.kind)
-			if take_hit("fall" if kind.begins_with("pit") else ("bonk" if kind.begins_with("arch") or kind.begins_with("block") else kind)):
+			if take_hit("fall" if kind.begins_with("pit") else ("bonk" if kind.begins_with("carrier") or kind.begins_with("block") else kind)):
 				obstacle.counted = true
 				if kind.begins_with("pit") and state == "running":
 					y = -30.0
