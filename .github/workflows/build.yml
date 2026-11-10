@@ -110,7 +110,7 @@ jobs:
           ditto -xk build/AionEndlessRun-0.11.0-macos-universal-portable.zip build/dmg
           cp LICENSE THIRD_PARTY_NOTICES.md build/dmg/
           ln -s /Applications build/dmg/Applications
-          hdiutil create -volname 'Aion Endless Run' -srcfolder build/dmg -ov -format UDZO build/AionEndlessRun-0.11.0-macos-universal.dmg
+          python3 packaging/macos_dmg.py build/dmg build/AionEndlessRun-0.11.0-macos-universal.dmg
           find build/dmg -path '*/Contents/MacOS/*' -type f -exec chmod +x {} \;
           find build/dmg -path '*/Contents/MacOS/*' -type f -exec {} --headless --quit-after 5 \;
       - uses: actions/upload-artifact@v4

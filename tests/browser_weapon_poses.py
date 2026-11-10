@@ -24,7 +24,7 @@ with sync_playwright() as pw:
  for i,hero in enumerate(['aion','owl','sheep','wolf']):
   click(name='StartSelect_'+hero);wait('[data-character="'+hero+'"]');click(text='Boss antrenmanı');wait('[data-page="bosses"]');click(name='PracticeBoss_0');wait('[data-boss-phase="fight"]')
   page.evaluate('padButton(7,1)');wait('[data-pose-source="canonical-'+hero+'"][data-source-row="8"]');check(True,hero+': actual firing uses the dedicated coherent weapon row')
-  page.wait_for_function('id=>window.gunPoses[id]?.size===(['aion','sheep'].includes(id)?7:8)',arg=hero,timeout=20000);check(True,hero+': actual trigger fire plays all separate anticipation/recoil/recovery poses')
+  page.wait_for_function("id=>window.gunPoses[id]?.size===(['aion','sheep'].includes(id)?7:8)",arg=hero,timeout=20000);check(True,hero+': actual trigger fire plays all separate anticipation/recoil/recovery poses')
   page.screenshot(path=str(a.evidence/(hero+'-new-gun.png')));page.evaluate('padButton(7,0)');button(9);wait('[data-page="paused"]');button(13);button(2);wait('[data-page="main"]')
  check(not errors,'No browser or Godot errors during four-hero weapon playback');browser.close()
 (a.evidence/'weapon-results.json').write_text(json.dumps(results,ensure_ascii=False,indent=2)+'\n');print(len(results),'weapon browser checks passed')
