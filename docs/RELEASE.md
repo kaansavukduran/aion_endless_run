@@ -11,6 +11,8 @@
 
 Aion çift zıplaması, baykuş süzülmesi/yükselen hava, koyunun en fazla üç canı ve kurdun Shift/karaktere basılı tutma deparı korunur. Kumanda: A zıpla, X vur, B eğil, LB depar, Start duraklat. Esc duraklatır. Türkçe/English, çevrimdışı oyun, önceki kayıt ve web önbelleğinden güncelleme korunur. Araştırma ve tasarım kararları: `docs/GAME-DESIGN.md`.
 
+178 oyun/sahne ve 62 yerel tarayıcı/PWA kontrolü geçti; canlı sitedeki 29 yeni oynanış/telefon kontrolü de başarılı. Windows, Linux ve macOS kurulum/açılış ile Android çevrimdışı emülatör doğrulaması: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42872138632 . Dokuz paketin SHA-256/size eşleşmesi ve gerçek Mac ZIP universal mimarileri doğrulandı.
+
 ## İndir ve aç
 
 **Assets** bölümünden cihazına uygun dosyayı seç:
