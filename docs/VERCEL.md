@@ -18,3 +18,7 @@ GitHub listesi boşsa Vercel'de **Adjust GitHub App Permissions** bağlantısıy
 Web sürümü ilk tam yüklemede dosyaları HTTPS üzerinden indirir; servis çalışanı bu dosyaları çevrimdışı kullanım için önbelleğe alır. Kurulabilir oyun paketleri ilk açılışta da internete ihtiyaç duymaz. Yeni web sürümü gelince sayfayı yeniden yükle. Rekor ve tercihler alan adına ait yerel kayıtta saklanır; farklı alan adı veya tarayıcı ayrı kayıt kullanır.
 
 İlk yayının başarılı olması, oyun kontrolleri ve çevrimdışı yüklemesi gerçek `.vercel.app` adresinde de doğrulanmalıdır. Depoda yapılandırmanın bulunması tek başına yayımlanmış bir Vercel adresi olduğu anlamına gelmez.
+
+## Bu proje için tamamlanan bağlantı
+
+Canlı oyun: https://aionendlessrun.vercel.app/ . Kullanıcı GitHub erişimini bağladı ve proje Other + kaynak derleme komutuyla yayımlandı. 0.2.0 main gönderimi Vercel tarafından otomatik yayımlandı. Yeni sürümler aynı adreste açılır; indirme paketleri GitHub Releases içindedir.
