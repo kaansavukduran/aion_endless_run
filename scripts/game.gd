@@ -234,6 +234,11 @@ func rebuild() -> void:
 	var footer_name := label(NAMES[character], 13, "b0e1d2")
 	ui.add_child(footer_name)
 	footer_name.position = Vector2(view_w - 265, view_h - 70)
+	if portrait:
+		var rotate_hint := wrap_label(text("portrait"), 38, "c5d1e7")
+		rotate_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		ui.add_child(rotate_hint)
+		position_control(rotate_hint, Vector2(70, 225), Vector2(view_w - 140, 130))
 	notice_label = label("", 21, "b5ffe0")
 	notice_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ui.add_child(notice_label)

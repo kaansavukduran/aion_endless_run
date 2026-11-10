@@ -23,6 +23,6 @@ Bu Release'ın **Assets** bölümündeki dosyalardan seç:
 
 Windows kurulum dosyasına çift tıkla. Portable ZIP'i tamamen çıkart ve EXE'yi aç. Linux AppImage için dosyaya çalıştırma izni ver; DEB'i paket yöneticisiyle kur. macOS DMG içindeki uygulamayı Applications'a taşı veya ZIP'i çıkart. APK'yı Android'de açıp sistemin kurulum adımlarını izle. İlk ekranda **Koşuya başla** düğmesini görmelisin.
 
-**Sınırlar:** Windows ve macOS paketleri ticari kod imzasına sahip değil. macOS Developer ID/notarization tamamlanmadığı için Gatekeeper uygulamayı engelleyebilir. Android paket imzası bütünlük ve güncelleme kimliği içindir, Play Store yayını değildir. iPhone için Apple Developer hesabı, Xcode imzası ve TestFlight/App Store süreci henüz yok. Fiziksel Android, Windows ve macOS cihaz testlerinin kapsamı `docs/VALIDATION.md` içinde ayrıca belirtilir.
+**Sınırlar:** Windows paketi Authenticode, macOS paketi Developer ID imzasına sahip değil. macOS Developer ID/notarization tamamlanmadığı için Gatekeeper uygulamayı engelleyebilir. Android paket imzası bütünlük ve güncelleme kimliği içindir, Play Store yayını değildir. iPhone için Apple Developer hesabı, Xcode imzası ve TestFlight/App Store süreci henüz yok. Fiziksel Android, Windows ve macOS cihaz testlerinin kapsamı `docs/VALIDATION.md` içinde ayrıca belirtilir.
 
 Kaynak kodu bu etiketin GitHub kaynak arşividir. `SHA256SUMS` indirilen varlıkları karşılaştırmak içindir. İlk beta olduğu için kararlı sürüm olarak sunulmaz; sonraki sürümler önceki Release dosyalarını koruyacaktır.

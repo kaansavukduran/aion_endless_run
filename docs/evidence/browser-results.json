@@ -1,0 +1,14 @@
+[
+  "Actual exported entry opens main menu",
+  "Device language chooses Turkish",
+  "Space starts and jumps in the real exported game",
+  "Esc freezes score and opens pause menu",
+  "Owl is selectable through the character menu",
+  "Resume retains chosen character and open run",
+  "Pointer/tap control jumps",
+  "Language applies immediately without leaving settings",
+  "Running game continues with network disabled",
+  "Real collision reaches animated result screen offline",
+  "Preferences persist across reload",
+  "No uncaught browser errors"
+]
