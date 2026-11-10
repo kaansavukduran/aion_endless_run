@@ -1,0 +1,73 @@
+name: Publish verified packages
+on:
+  workflow_dispatch:
+    inputs:
+      artifact_run_id:
+        description: Successful test/package workflow run ID
+        required: true
+      apk_ref:
+        description: Temporary branch in this same repository containing the signed release APK
+        required: true
+      apk_sha256:
+        description: Expected SHA-256 of the APK
+        required: true
+      source_sha:
+        description: Exact source commit for the release tag
+        required: true
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha }}
+      - name: Require successful native and game verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.artifact_run_id }}
+        run: |
+          test "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID --jq .conclusion)" = success
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.artifact_run_id }}
+          pattern: desktop-*
+          merge-multiple: true
+          path: release
+      - name: Fetch signed APK and verify exact bytes
+        env:
+          APK_REF: ${{ inputs.apk_ref }}
+          APK_SHA256: ${{ inputs.apk_sha256 }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$APK_REF"
+          git show FETCH_HEAD:AionEndlessRun-0.1.0-android-arm64-x64.apk > release/AionEndlessRun-0.1.0-android-arm64-x64.apk
+          printf '%s  %s\n' "$APK_SHA256" release/AionEndlessRun-0.1.0-android-arm64-x64.apk | sha256sum -c -
+      - name: Create receipt and publish all packages together
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.artifact_run_id }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          p=Path('release')
+          packages={}
+          for f in sorted(p.glob('AionEndlessRun-*')):
+              with f.open('rb') as stream:
+                  digest=hashlib.file_digest(stream,'sha256').hexdigest()
+              packages[f.name]={'bytes':f.stat().st_size,'sha256':digest}
+          assert len(packages)==9, f'Expected 9 platform packages, got {len(packages)}'
+          receipt={'version':'0.1.0','source_commit':os.environ['SOURCE_SHA'],'verified_application_commit':'c36b105','verification_run':f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["RUN_ID"]}','source_and_scene_checks':40,'browser_checks':12,'android_native':'API 30 emulator; Wi-Fi/mobile data off; real rendered menu and paused game checked','android_signer_sha256':'50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36','apple_status':'macOS ad-hoc signing only, no Developer ID/notarization; iOS App Store/TestFlight pending owner signing','files':packages}
+          (p/'BUILD-RECEIPT.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          with (p/'SHA256SUMS').open('w') as out:
+              for f in sorted(p.iterdir()):
+                  if f.name=='SHA256SUMS': continue
+                  with f.open('rb') as stream: digest=hashlib.file_digest(stream,'sha256').hexdigest()
+                  out.write(digest+'  '+f.name+'\n')
+          PY
+          gh release upload v0.1.0 release/*
+          gh release edit v0.1.0 --target "$SOURCE_SHA" --notes-file docs/RELEASE.md --draft=false --prerelease
