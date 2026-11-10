@@ -286,6 +286,7 @@ func build_page() -> void:
 	var column := card(440.0 if page == "main" else 560.0)
 	var first: Button
 	if page == "main":
+		column.add_theme_constant_override("separation", 9)
 		column.add_child(label("01 / " + text("desert"), 12, "9edccb"))
 		column.add_child(label("AION\nENDLESS RUN", 43))
 		column.add_child(wrap_label(text("tagline"), 15))
@@ -356,7 +357,13 @@ func focus_later(item: Control) -> void:
 
 func build_characters() -> void:
 	var column := card(850.0)
-	column.add_child(label(text("choose"), 28))
+	var heading := HBoxContainer.new()
+	column.add_child(heading)
+	var title := label(text("choose"), 27)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	heading.add_child(title)
+	var back := button("‹  " + text("back"), func(): show_page(return_page))
+	heading.add_child(back)
 	column.add_child(wrap_label(text("same"), 14))
 	var grid := GridContainer.new()
 	grid.columns = 2
@@ -391,8 +398,6 @@ func build_characters() -> void:
 		details.add_child(wrap_label(NAMES[id], 17, "eef3ff"))
 		details.add_child(wrap_label(text("friend_" + id), 11))
 		details.add_child(button(text("selected" if character == id else "select"), func(): character = id; save_settings(); rebuild(), character == id))
-	var back := button("‹  " + text("back"), func(): show_page(return_page))
-	column.add_child(back)
 	focus_later.call_deferred(back)
 
 func add_toggle(column: VBoxContainer, key: String, value: bool, callback: Callable) -> void:

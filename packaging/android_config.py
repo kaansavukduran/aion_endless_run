@@ -15,7 +15,7 @@ def escaped(value):
 credentials = Path(".godot/export_credentials.cfg")
 credentials.parent.mkdir(exist_ok=True)
 credentials.write_text(
-    '[preset.4]\n'
+    '[preset.4.options]\n'
     f'keystore/release="{escaped(os.environ["AION_KEYSTORE"])}"\n'
     f'keystore/release_user="{escaped(os.environ["AION_KEY_ALIAS"])}"\n'
     f'keystore/release_password="{escaped(os.environ["AION_KEY_PASSWORD"])}"\n'

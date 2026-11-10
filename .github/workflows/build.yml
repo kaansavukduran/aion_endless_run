@@ -53,6 +53,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           mkdir -p build/linux build/web
+          sudo apt-get update -qq
+          sudo apt-get install -y desktop-file-utils
           godot --headless --export-release Linux
           godot --headless --export-release Web
           curl -fL https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-x86_64.AppImage -o /tmp/appimagetool
@@ -66,13 +68,15 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force build/windows | Out-Null
-          godot --headless --export-release Windows
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $exportProcess = Start-Process -FilePath (Get-Command godot).Source -ArgumentList '--headless','--export-release','Windows' -Wait -PassThru -NoNewWindow
+          if ($exportProcess.ExitCode -ne 0) { exit $exportProcess.ExitCode }
           Copy-Item LICENSE,THIRD_PARTY_NOTICES.md,README.md build/windows/
           Compress-Archive -Path build/windows/* -DestinationPath build/AionEndlessRun-0.1.0-windows-x64-portable.zip
+          if (!(Test-Path 'C:\Program Files (x86)\NSIS\makensis.exe')) { choco install nsis -y --no-progress }
           & 'C:\Program Files (x86)\NSIS\makensis.exe' packaging/windows.nsi
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          Start-Process -FilePath build/windows/AionEndlessRun.exe -ArgumentList '--headless','--quit-after','5' -Wait
+          $gameProcess = Start-Process -FilePath build/windows/AionEndlessRun.exe -ArgumentList '--headless','--quit-after','5' -Wait -PassThru
+          if ($gameProcess.ExitCode -ne 0) { exit $gameProcess.ExitCode }
       - name: macOS universal app and DMG
         if: runner.os == 'macOS'
         run: |
