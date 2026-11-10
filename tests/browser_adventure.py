@@ -133,6 +133,7 @@ with sync_playwright() as p:
    page.wait_for_timeout(20)
   if found:break
  check(found,'Ground pickups recruit three real visible sheep in adventure mode')
+ check(all(0<h<=64.9 for h in json.loads(d['followersOpaqueHeight'])),'Both real follower sheep stay smaller than the normal-sized leader')
  page.keyboard.up('s');page.keyboard.down('j')
  page.evaluate('''() => {window.flockTimeline=[];window.flockObserver=new MutationObserver(()=>{let c=document.querySelector('canvas');window.flockTimeline.push({t:performance.now(),y:Number(c.dataset.playerY),second:Number(c.getAttribute('data-follower-1-y')),third:Number(c.getAttribute('data-follower-2-y')),count:Number(c.dataset.flock)});});window.flockObserver.observe(document.querySelector('canvas'),{attributes:true,attributeFilter:['data-player-y','data-follower-1-y','data-follower-2-y']});}''')
  page.keyboard.press('Space');page.wait_for_function('() => Number(document.querySelector("canvas").getAttribute("data-follower-2-y")) < -3')

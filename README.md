@@ -2,7 +2,7 @@
 
 Sevimli bir piksel macerası. **Space ile zıpla, Esc ile mola ver.** Kargalara vur, dalların altından eğil, dev mantar ve tılsımları topla, kendi rekorunu geç. Bağımsız Godot oyunu; Firefox veya eklenti gerektirmez. Oyun internete bağlanmaz.
 
-![Aion dev mantar gücüyle cücelere karşı](docs/evidence-v05/aion-combat.png)
+![Türkçe başlangıç ekranı ve görünür karakter seçimi](docs/evidence-v06/start-tr-TR.png)
 
 **[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Sürüm ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/VALIDATION.md)
 
@@ -25,11 +25,22 @@ Baykuş, kurt ve koyunun koşu/zıplama/donma/kül animasyonları ayrı 48 karel
 
 Her atlanan engel **+10**, her toplanan kristal **+25** puan. Mesafe de skor kazandırır. Hız zamanla artar ve sınırlandırılır. Kehribar Çölü ile Ayaz Vadisi mesafeye göre yer değiştirir; gündüz ve gece bir döngü oluşturur.
 
-Aion varsayılan karakter. **Karakterler** menüsünden Baykuş Ömer, Accursed Wise Wolf veya Blessed Ignorant Sheep seçilebilir. Hepsi ilk açılışta kullanılabilir. Aion iki kez zıplar; Baykuş Ömer tek zıplamadan sonra Space/dokunmayı basılı tutarak süzülür; koyun yerdeki arkadaşları toplayıp en fazla üç koyunluk sürü oluşturur ve her koyun bir can sağlar; kurt Shift veya karakterin üstüne basılı tutarak hızlanır. Kurtta basılı tutan parmak hızlanmayı sürdürürken ikinci parmakla başka bir yere dokunup zıplayabilirsin. Bir temasta bir koyun eksilir; son koyunda çarpışma koşuyu bitirir. Duraklatma menüsünden karakter değiştirmek açık koşuyu korur.
+Aion varsayılan karakter. **Karakterler** menüsünden Baykuş Ömer, Accursed Wise Wolf veya Blessed Ignorant Sheep seçilebilir. Hepsi ilk açılışta kullanılabilir. Aion iki kez zıplar; Baykuş Ömer tek zıplamadan sonra Space/dokunmayı basılı tutarak süzülür; koyun yerdeki arkadaşları toplayıp en fazla üç koyunluk sürü oluşturur ve her koyun bir can sağlar; kurt Shift veya karakterin üstüne basılı tutarak hızlanır. Kurtta basılı tutan parmak hızlanmayı sürdürürken ikinci parmakla başka bir yere dokunup zıplayabilirsin. Bir temasta bir koyun eksilir; son koyunda çarpışma koşuyu bitirir. Karakterini başlangıç ekranındaki dört görünür karttan seç. Koşu sırasında veya duraklatma menüsünden karakter değiştirilemez; yeni seçim için Ana menü’ye dön.
 
-**Ayarlar** menüsünde Türkçe/English, bağımsız ses, ekran efektleri ve dekoratif hareket seçenekleri ile ses düzeyi bulunur. Hareket kapalıyken karakter sabit poz kullanır, parçacıklar ve arka plan kaydırması kapanır; zıplama ve engellerin hareketi oynanış için sürer. Düğmeler Tab/Shift+Tab ve Enter ile kullanılabilir. Fare, dokunma ve klavye desteklenir.
+**TR / EN / CS** açılır dil menüsü başlangıç, duraklatma ve ayar ekranlarında bulunur. İlk açılış tarayıcı/cihazın ana dilini kullanır: Türkçe `tr`, İngilizce `en`, Çekçe `cs`; diğer diller İngilizce açılır. Otomatik seçim, oyuncu açıkça bir dil seçene kadar cihazı izler. Oyuncunun seçimi sonraki açılışlar için kaydedilir; eski geçerli dil tercihleri de korunur. **Ayarlar** menüsünde de üç dil, bağımsız ses, ekran efektleri ve dekoratif hareket seçenekleri ile ses düzeyi bulunur. Hareket kapalıyken karakter sabit poz kullanır, parçacıklar ve arka plan kaydırması kapanır; zıplama ve engellerin hareketi oynanış için sürer. Düğmeler Tab/Shift+Tab ve Enter ile kullanılabilir. Fare, dokunma ve klavye desteklenir.
 
 Rekor, keşfedilen güçler ve tercihler yereldir. Geçici güçler yalnızca o koşuda sürer. Normal kayıt konumu Godot'un `app_userdata/Aion Endless Run/save.cfg` klasörüdür: Windows `%APPDATA%\Godot\app_userdata\Aion Endless Run`, Linux `~/.local/share/godot/app_userdata/Aion Endless Run`, macOS `~/Library/Application Support/Godot/app_userdata/Aion Endless Run`. Portable burada kurulum gerektirmeyen sürüm anlamındadır; kayıtlar işletim sisteminin kullanıcı veri klasöründe tutulur. Canlı koşu uygulama kapatılınca geri yüklenmez; rekor, seçili karakter ve ayarlar korunur.
+
+## 0.6.0 · Üç dil ve tutarlı karakterler
+
+| Karakter | Türkçe | English | Čeština |
+| --- | --- | --- | --- |
+| Aion | Aion | Aion | Aion |
+| Baykuş | Baykuş Ömer | Omar the Owl | Sova Omar |
+| Kurt | Melun Bilge Kurt | Accursed Wise Wolf | Prokletý moudrý vlk |
+| Koyun | Kutsanmış Cahil Koyun | Blessed Ignorant Sheep | Požehnaná nevědomá ovečka |
+
+Dört kart oyuna başlamadan görünür. Koşu, zıplama, iniş, süzülme, yükselen hava ve depar kareleri orijinal PNG'ler değiştirilmeden opak karakter sınırlarına göre hizalanır; normal hareketlerde görünen yükseklik 90 mantıksal piksel kalır. Lider koyun normal, takipçiler %72 boyuttadır. Eğilme kasıtlı olarak alçaktır. **Yalnızca dev mantar gücü büyütür**; zıplama veya rüzgâr büyütmez. Savaş, yedi güç, rastgele karşılaşmalar, hava, iki biyom ve çevrimdışı güncelleme korunur.
 
 ## Kaynaktan çalıştır
 
@@ -40,6 +51,7 @@ godot --path . --editor --import --quit
 godot --path .
 godot --headless --path . --script tests/test_game.gd
 godot --headless --path . --script tests/test_adventure.gd
+godot --headless --path . --script tests/test_localization.gd
 ```
 
 Testler kullanıcı kayıtlarına yazdığı için kendi skorunu korumak istiyorsan testleri ayrı bir OS kullanıcısı veya geçici XDG veri klasörüyle çalıştır. Linux örneği:
@@ -58,7 +70,7 @@ FireAxolotl ve FireAxolotl Extension'daki orijinal Aion koşu paftası ve karakt
 
 ## English
 
-A standalone offline Godot runner. **Space / tap to jump, Esc to pause.** Four available characters, fire and ice collisions, local best score, collectible crystals, two scrolling biomes and a day/night cycle. Choose **Settings → English**. Download installers and portable editions from Releases. Version 0.5.0 adds four distinct melee attacks (left click/J), ducking (Down/S/Ctrl), crows, enemy stomps, giant-mushroom gnome waves, seven collectible powers, changing weather/tempo, short goals and 102 new sprite frames. Sheep follow at clearer spatial delays. Phones always render a landscape playfield with multi-touch controls. Gentle camera/lightning effects can be disabled. Flowing wolf wind and real owl updraft lift are retained. The 48-frame companion sheets, species-specific freeze/ash animations and offline update migration are retained. Abilities include Aion double jump, hold-to-glide owl, collectible sheep lives (up to three) and hold-to-boost wolf. This remains a playable beta. macOS builds use development ad-hoc signing, without Developer ID/notarization; native iPhone distribution requires the owner's Apple Developer signing and App Store/TestFlight setup. See the release notes for actual platform verification, rather than assuming every produced package was device-tested.
+A standalone offline Godot runner. **Space / tap to jump, Esc to pause.** Four available characters, fire and ice collisions, local best score, collectible crystals, two scrolling biomes and a day/night cycle. Choose **TR / EN / CS** in the header or change language in Settings. First launch follows the primary browser/device locale; unsupported locales use English. Explicit choices persist. Version 0.6.0 adds full Czech localization, exact localized character names, visible pre-run character cards, a locked character during each run and normalized pose sizes. Following sheep are smaller; only mushroom power enlarges the hero. Download installers and portable editions from Releases. Version 0.5.0 adds four distinct melee attacks (left click/J), ducking (Down/S/Ctrl), crows, enemy stomps, giant-mushroom gnome waves, seven collectible powers, changing weather/tempo, short goals and 102 new sprite frames. Sheep follow at clearer spatial delays. Phones always render a landscape playfield with multi-touch controls. Gentle camera/lightning effects can be disabled. Flowing wolf wind and real owl updraft lift are retained. The 48-frame companion sheets, species-specific freeze/ash animations and offline update migration are retained. Abilities include Aion double jump, hold-to-glide owl, collectible sheep lives (up to three) and hold-to-boost wolf. This remains a playable beta. macOS builds use development ad-hoc signing, without Developer ID/notarization; native iPhone distribution requires the owner's Apple Developer signing and App Store/TestFlight setup. See the release notes for actual platform verification, rather than assuming every produced package was device-tested.
 
 ## Vercel
 

@@ -304,7 +304,7 @@ func run() -> void:
 	check(game.world.state == "paused" and game.page == "paused", "Esc opens pause menu")
 	var previous_y: float = game.world.y
 	game.open_subpage("characters")
-	check(game.page == "characters", "Character selection opens inside pause")
+	check(game.page == "paused", "Character selection is blocked inside pause")
 	for id in game.FRIENDS:
 		game.character = id
 		game.update_friend()
@@ -316,6 +316,7 @@ func run() -> void:
 			check(game.world.state == kind, "Character supports " + kind + ": " + id)
 	game.world.state = "paused"
 	game.character = "owl"
+	game.open_subpage("settings")
 	key(game, KEY_ESCAPE)
 	check(game.page == "paused", "Back returns to pause")
 	key(game, KEY_ESCAPE)
@@ -343,6 +344,7 @@ func run() -> void:
 	check(second.world.y < 0.0, "Gameplay works with sound and animation disabled")
 	second.main_menu()
 	check(second.world.state == "ready" and second.world.y == 0.0 and second.world.score == 0 and second.world.obstacles.is_empty(), "Main menu resets airborne pose and previous hazards while preserving the best")
+	second.main_menu()
 	second.select_character("wolf")
 	second.start_run()
 	touch(second, 0, Vector2(World.PLAYER_X, second.ground - 35), true)
@@ -360,7 +362,9 @@ func run() -> void:
 	check(not second.world.boost_held and not second.world.jump_held, "Pause clears held controls")
 	second.resume_run()
 	check(not second.world.boosting(), "Resume cannot latch an old boost press")
+	second.main_menu()
 	second.select_character("owl")
+	second.start_run()
 	second.world.y = -100.0
 	second.world.velocity = 110.0
 	second.world.jumps_used = 1
@@ -372,7 +376,9 @@ func run() -> void:
 	check(not second.world.gliding, "Keyboard release ends owl glide")
 	second.motion = true
 	for id in ["wolf", "sheep", "owl"]:
+		second.main_menu()
 		second.select_character(id)
+		second.start_run()
 		second.world.state = "running"
 		second.world.y = 0.0
 		second.world.time = 0.0
@@ -392,13 +398,16 @@ func run() -> void:
 		second.world.hit_time = 1.2
 		second.update_friend()
 		check(second.friend_row == 5 and second.friend_sprite.visible and second.friend_sprite.texture == second.RUNNER_SHEETS[id], "Ash preserves the actual species artwork: " + id)
+	second.main_menu()
 	second.select_character("owl")
 	second.world.state = "running"
 	second.world.y = -80.0
 	second.world.gliding = true
 	second.update_friend()
 	check(second.friend_row == 6, "Owl glide uses its dedicated extended-wing artwork")
+	second.main_menu()
 	second.select_character("wolf")
+	second.start_run()
 	second.world.y = 0.0
 	second.world.boost_held = true
 	second.update_friend()
@@ -409,7 +418,9 @@ func run() -> void:
 	second.update_friend()
 	check(second.friend_sprite.region_rect == paused_region, "Pausing preserves the exact animation pose")
 	second.world.state = "running"
+	second.main_menu()
 	second.select_character("sheep")
+	second.start_run()
 	second.world.sheep_count = 3
 	second.update_friend()
 	check(second.followers[0].visible and second.followers[1].visible, "Three lives render as three running sheep")
@@ -421,7 +432,9 @@ func run() -> void:
 	second.update_friend()
 	check(second.friend_sprite.position.y < second.followers[0].position.y and second.followers[0].position.y == second.followers[1].position.y, "Real follower sprites stay grounded while the leading sheep takes off")
 	check(second.friend_sprite.texture == second.ACTION_SHEET and second.followers[0].texture == second.RUNNER_SHEETS.sheep, "Sheep jump uses new squash/flight frames while its follower still runs")
+	second.main_menu()
 	second.select_character("wolf")
+	second.start_run()
 	second.world.time = 0.5
 	var ribbon_a: Array = second.wolf_wind_ribbons()
 	second.world.time = 0.6

@@ -1,17 +1,12 @@
-# Aion Endless Run 0.5.0 · Savaş, dev mantar ve değişen koşular
+# Aion Endless Run 0.6.0 · Üç dil, başlangıçta seçim, tutarlı boyutlar
 
-- **Saldırı ve üstüne basma:** Aion yumruk, baykuş kanat, koyun kafa, kurt ısırık saldırısı yapar. Space ile zıpla; sol tık/J/Vur ile hasar ver. Düşerken karga veya cücenin üstüne basarak sek, kombo puanı kazan.
-- **Eğil:** Aşağı ok/S/Ctrl/Eğil basılıyken alçak dalların altından geç. Kargaların yüksek ve alçak uçuşları farklı kararlar ister.
-- **Dev mantar:** 10 saniyeliğine büyü, küçük kırmızı şapkalı cüce dalgalarıyla savaş, engelleri parçala. Hafif renk/kamera hareketi ayrı ayardan kapatılır.
-- **Yedi toplanabilir güç:** Mantar, zincir şimşeği, yavaşlatan zaman kumu, hızlandıran çizme, bir darbelik kalkan, kristal mıknatısı ve can yaprağı. Keşifler yerelde saklanır; geçici güçler yeni koşuda sıfırlanır.
-- **Çeşitlilik:** Değişken aralıklar ve karışan karşılaşmalar, hızlanıp yavaşlayan tempo, yağmur/kar/kum/fırtına ve seyrek gök şimşeği. Kısa hedefler +100 puan verir.
-- **102 yeni sprite karesi:** Dört saldırı ve eğilme, karga uçuş/dalış/yenilme, cüce koşu/saldırı/yenilme, animasyonlu eşya ve dal paftaları. Eski koşu/donma/kül animasyonları korunur.
-- **Belirgin sıralı sürü:** Takipçiler 112 ve 224 piksel geriden aynı yolda zıplar; ilk hızda yaklaşık 0,35/0,70 saniye gecikme.
-- **Telefon yatay:** Yön kilidi desteklenmediğinde döndürülen oyun alanı; aynı anda zıplama ve saldırı için bağımsız parmaklar.
+- **TR / EN / CS açılır menü:** Türkçe, İngilizce ve tam Çekçe arayüz. İlk açılış tarayıcı/cihazın ana dilini kullanır; `tr`, `en`, `cs` dışındaki dillerde İngilizce açılır. Oyuncu değiştirdiğinde tercihi kaydedilir. Otomatik ilk seçim bir sonraki cihaz dilini gereksiz yere kilitlemez; eski geçerli tercihler korunur.
+- **İstenen isimler:** Türkçe Aion, Baykuş Ömer, Melun Bilge Kurt, Kutsanmış Cahil Koyun. İngilizce Aion, Omar the Owl, Accursed Wise Wolf, Blessed Ignorant Sheep. Çekçe Aion, Sova Omar, Prokletý moudrý vlk, Požehnaná nevědomá ovečka.
+- **Başlangıçta görünür seçim:** Dört karakter kartı koşudan önce görünür. Koşu ve duraklatma sırasında karakter değişimi arayüzden ve oyun işlevinden engellenir; yeni seçim için ana menüye dönülür.
+- **Tutarlı animasyon ölçeği:** Koşu, zıplama, iniş, süzülme, yükselen hava ve depar aynı normal yüksekliği korur. Paftaların opak sınırları kare bazında kaydedilir; orijinal PNG'ler korunur. Lider koyun normal, arkasındaki koyunlar %72 boyuttadır. Eğilme alçalır; yalnızca mantar gücü büyütür.
+- **Önceki macera korunur:** Dört saldırı, karga, düşmana basıp sekme, alçak dal, dev mantar/cüce dalgaları, yedi güç, değişken karşılaşmalar/tempo, hava/şimşek, gecikmeli sürü, çift zıplama, yükselen hava ve kurt deparı. Space zıpla, sol tık/J vur, aşağı/S/Ctrl eğil, Shift kurt deparı, Esc duraklat. Yatay telefon ve bağımsız çoklu dokunma sürer.
 
-Aion çift zıplaması, baykuş süzülmesi/yükselen hava, koyunun en fazla üç canı ve kurdun Shift/karaktere basılı tutma deparı korunur. Kumanda: A zıpla, X vur, B eğil, LB depar, Start duraklat. Esc duraklatır. Türkçe/English, çevrimdışı oyun, önceki kayıt ve web önbelleğinden güncelleme korunur. Araştırma ve tasarım kararları: `docs/GAME-DESIGN.md`.
-
-178 oyun/sahne ve 62 yerel tarayıcı/PWA kontrolü geçti; canlı sitedeki 29 yeni oynanış/telefon kontrolü de başarılı. Windows, Linux ve macOS kurulum/açılış ile Android çevrimdışı emülatör doğrulaması: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42872138632 . Dokuz paketin SHA-256/size eşleşmesi ve gerçek Mac ZIP universal mimarileri doğrulandı.
+207 kaynak/sahne kontrolü başarılı. Gerçek tarayıcı, güncelleme ve native paket doğrulaması `docs/VALIDATION.md` içinde kaydedilir.
 
 ## İndir ve aç
 
@@ -19,14 +14,14 @@ Aion çift zıplaması, baykuş süzülmesi/yükselen hava, koyunun en fazla ü�
 
 | Cihaz | Kurulum | Taşınabilir |
 | --- | --- | --- |
-| Windows x64 | `AionEndlessRun-0.5.0-windows-x64-Setup.exe` | `AionEndlessRun-0.5.0-windows-x64-portable.zip` |
-| Linux x64 | `AionEndlessRun-0.5.0-linux-x64.deb` | `.AppImage` veya `-portable.tar.gz` |
-| macOS Intel / Apple Silicon | `AionEndlessRun-0.5.0-macos-universal.dmg` | `-macos-universal-portable.zip` |
-| Android ARM64 / x64 | `AionEndlessRun-0.5.0-android-arm64-x64.apk` | APK normal yoldan kurulur |
+| Windows x64 | `AionEndlessRun-0.6.0-windows-x64-Setup.exe` | `AionEndlessRun-0.6.0-windows-x64-portable.zip` |
+| Linux x64 | `AionEndlessRun-0.6.0-linux-x64.deb` | `.AppImage` veya `-portable.tar.gz` |
+| macOS Intel / Apple Silicon | `AionEndlessRun-0.6.0-macos-universal.dmg` | `-macos-universal-portable.zip` |
+| Android ARM64 / x64 | `AionEndlessRun-0.6.0-android-arm64-x64.apk` | APK normal yoldan kurulur |
 | iPhone | Apple hesabı, imzalama ve TestFlight/App Store dağıtımı bekliyor | Yerel portable iPhone paketi yok |
 
-Windows'ta Setup dosyasını aç veya ZIP'i tamamen çıkartıp EXE'yi aç. Linux AppImage'e çalıştırma izni ver ya da DEB'i kur. Mac DMG'deki uygulamayı Applications'a taşı. Android APK, önceki sürümle aynı uygulama kimliği ve imza anahtarını kullanır; versionCode 5'tir.
+Windows'ta Setup dosyasını aç veya ZIP'i tamamen çıkartıp EXE'yi aç. Linux AppImage'e çalıştırma izni ver ya da DEB'i kur. Mac DMG'deki uygulamayı Applications'a taşı. Android APK, önceki sürümle aynı uygulama kimliği ve imza anahtarını kullanır; versionCode 6'dır.
 
 Oyun ve varlıklar çevrimdışıdır. Web sürümünde ilk tam yükleme internet ister; önbellekleme sonrası çevrimdışı açılabilir. `SHA256SUMS` ve `BUILD-RECEIPT.json` gerçek paketleri tanımlar.
 
-Windows Authenticode ve macOS Developer ID/noter onayı yoktur. macOS geliştirme amaçlı ad-hoc imzalıdır; Gatekeeper açılışı engelleyebilir. Fiziksel cihaz kapsamı ve gerçek test kayıtları `docs/VALIDATION.md` içindedir. Önceki 0.1.0, 0.2.0, 0.3.0 ve 0.4.0 sürümleri korunmuştur.
+Windows Authenticode ve macOS Developer ID/noter onayı yoktur. macOS geliştirme amaçlı ad-hoc imzalıdır; Gatekeeper açılışı engelleyebilir. Fiziksel cihaz kapsamı ve gerçek test kayıtları `docs/VALIDATION.md` içindedir. Önceki 0.1.0, 0.2.0, 0.3.0, 0.4.0 ve 0.5.0 sürümleri korunmuştur.

@@ -7,22 +7,35 @@
   url.searchParams.set('build', BUILD);
   history.replaceState(null, '', url);
   if (!('serviceWorker' in navigator)) return;
+  function uiLanguage() {
+    const code = (document.getElementById('canvas')?.getAttribute('lang') || navigator.language || 'en').toLowerCase().split(/[-_]/)[0];
+    return ['tr','en','cs'].includes(code) ? code : 'en';
+  }
+  const words = {
+    tr: ['Yeni sürüm hazır · Güncelle', 'Kaydediliyor…'],
+    en: ['New version ready · Update', 'Saving…'],
+    cs: ['Nová verze je připravena · Aktualizovat', 'Ukládání…']
+  };
   function showUpdate(data) {
     if (!data || data.type !== 'aion-version' || data.build === BUILD) return;
     const show = () => {
       if (document.getElementById('aion-update')) return;
       const button = document.createElement('button');
       button.id = 'aion-update';
-      button.textContent = (navigator.language.startsWith('tr') ? 'Yeni sürüm hazır · Güncelle' : 'New version ready · Update') + ' v' + data.version;
+      button.textContent = words[uiLanguage()][0] + ' v' + data.version;
       Object.assign(button.style, {position:'fixed', bottom:'16px', right:'16px', zIndex:'100', background:'#b1eddb', color:'#102b30', border:'2px solid #e0fff0', borderRadius:'10px', padding:'14px 18px', font:'bold 14px sans-serif', cursor:'pointer'});
       button.onclick = () => {
         button.disabled = true;
-        button.textContent = navigator.language.startsWith('tr') ? 'Kaydediliyor…' : 'Saving…';
+        button.textContent = words[uiLanguage()][1];
         if (typeof window.aionSaveForUpdate === 'function') window.aionSaveForUpdate();
         // Godot automatically flushes its IDBFS persistence once a second.
         setTimeout(() => { location.href = './?build=' + encodeURIComponent(data.build); }, 2200);
       };
       document.body.appendChild(button);
+      const canvas = document.getElementById('canvas');
+      if (canvas) new MutationObserver(() => {
+        if (!button.disabled) button.textContent = words[uiLanguage()][0] + ' v' + data.version;
+      }).observe(canvas, {attributes:true, attributeFilter:['lang']});
     };
     if (document.body) show(); else addEventListener('DOMContentLoaded', show, {once:true});
   }

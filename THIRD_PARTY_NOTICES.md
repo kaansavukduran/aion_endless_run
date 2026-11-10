@@ -38,3 +38,7 @@ Original procedural scenery and synthesized game sounds are part of this project
 ## Adventure atlases (0.5.0)
 
 `assets/adventure-combat.png`, `assets/adventure-enemies.png` and `assets/adventure-items.png` are original owner-authorized imagegen outputs: 48 character melee/crouch frames, 36 crow/gnome frames, and 18 item/branch frames. The established Aion/companion identities were used as references. PNG bytes are preserved unchanged; runtime atlas regions, baselines, body heights and alpha discard register the generated grids. Sizes, row boundaries and SHA-256 are in `assets/ADVENTURE-PROVENANCE.json`. Same MPL-2.0 artwork terms and AI-output limitations above apply. Mushroom and gnome artwork is original; no Mario/Nintendo assets or code are used. The alpha shader now avoids multiplying the already sampled texture color a second time.
+
+## Sprite registration (0.6.0)
+
+No new or altered PNG artwork. `assets/SPRITE-REGISTRATION.json` records largest connected opacity-component bounds for the existing original runner, action and combat frames. `packaging/register_sprites.py` reads alpha values and emits only metadata; it never rewrites image bytes. Runtime registration normalizes moving poses and keeps following sheep smaller. Source atlas hashes are recorded alongside these bounds. Czech game text is a new translation for this project, not a third-party asset.

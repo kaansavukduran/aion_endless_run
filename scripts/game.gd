@@ -11,13 +11,19 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/adventure-combat.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3}
-const GAME_VERSION = "0.5.0"
+const GAME_VERSION = "0.6.0"
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
-const NAMES := {"aion":"Aion", "owl":"Baykuş Ömer", "wolf":"Accursed Wise Wolf", "sheep":"Blessed Ignorant Sheep"}
+const REGISTRATION = preload("res://assets/SPRITE-REGISTRATION.json")
+const NORMAL_HEIGHT := 90.0
+const FOLLOWER_RATIO := 0.72
 const FRIENDS := ["aion", "owl", "wolf", "sheep"]
 const COLORS := [Color("f4a7cd"), Color("ffca84"), Color("b8baf0"), Color("b8ebd3")]
 var world := World.new()
-var language := "tr"
+var language := "en"
+var language_override := false
+var language_picker_open := false
+var language_button: Button
+var language_picker: PanelContainer
 var character := "aion"
 var best := 0
 var best_at_start := 0
@@ -134,14 +140,26 @@ func make_companion_sprite() -> Sprite2D:
 func text(key: String) -> String:
 	return Words.get_text(language, key)
 
+func character_name(id: String) -> String:
+	return text("name_" + id)
+
+func default_language() -> String:
+	var locale := OS.get_locale()
+	if OS.has_feature("web"):
+		var browser_locale = JavaScriptBridge.eval("navigator.language || 'en'")
+		if browser_locale is String: locale = browser_locale
+	return Words.language_for_locale(locale)
+
 func load_settings() -> void:
 	var cfg := ConfigFile.new()
-	language = "en" if OS.get_locale_language() == "en" else "tr"
+	language = default_language()
 	if cfg.load("user://save.cfg") != OK:
 		return
-	language = str(cfg.get_value("prefs", "language", language))
-	if language not in ["tr", "en"]:
-		language = "tr"
+	language_override = bool(cfg.get_value("prefs", "language_override", cfg.has_section_key("prefs", "language")))
+	if language_override:
+		var saved_language := str(cfg.get_value("prefs", "language", ""))
+		if saved_language in Words.LANGUAGES: language = saved_language
+		else: language_override = false
 	character = str(cfg.get_value("prefs", "character", "aion"))
 	if character not in FRIENDS:
 		character = "aion"
@@ -157,6 +175,7 @@ func save_settings() -> void:
 	best = maxi(best, world.score)
 	var cfg := ConfigFile.new()
 	cfg.set_value("prefs", "language", language)
+	cfg.set_value("prefs", "language_override", language_override)
 	cfg.set_value("prefs", "character", character)
 	cfg.set_value("prefs", "audio", audio_enabled)
 	cfg.set_value("prefs", "motion", motion)
@@ -216,6 +235,7 @@ func button(value: String, callback: Callable, primary: bool = false) -> Button:
 	if primary:
 		item.add_theme_stylebox_override("normal", box("9ce4cc", "b7f4dc", 12))
 		item.add_theme_color_override("font_color", Color("102b30"))
+		item.add_theme_color_override("font_focus_color", Color("102b30"))
 		item.add_theme_stylebox_override("hover", box("c2f4e4", "c2f4e4", 12))
 		item.add_theme_color_override("font_hover_color", Color("102b30"))
 		item.add_theme_stylebox_override("pressed", box("72cbb1", "72cbb1", 12))
@@ -253,6 +273,7 @@ func rebuild() -> void:
 	for child in ui.get_children():
 		# Keep the pressed control in the tree until Godot finishes GUI dispatch.
 		child.hide()
+		child.name = "RetiredUI_" + str(child.get_instance_id())
 		child.queue_free()
 	hud = Control.new()
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -309,7 +330,7 @@ func rebuild() -> void:
 	var local_label := label("", 11, "8397b6")
 	ui.add_child(local_label)
 	local_label.position = Vector2(32, view_h - 44)
-	var footer_name := label(NAMES[character], 13, "b0e1d2")
+	var footer_name := label(character_name(character), 13, "b0e1d2")
 	ui.add_child(footer_name)
 	footer_name.position = Vector2(32, view_h - 111)
 	ability_label = label("", 11, "b8e6d6")
@@ -337,6 +358,7 @@ func rebuild() -> void:
 	ui.add_child(menu_layer)
 	if page != "":
 		build_page()
+	build_language_picker()
 	update_hud()
 	queue_redraw()
 
@@ -373,6 +395,8 @@ func wrap_label(value: String, size: int = 15, color: String = "a6b8d1") -> Labe
 	return item
 
 func show_page(value: String) -> void:
+	if value == "characters" and world.state != "ready": return
+	language_picker_open = false
 	page = value
 	rebuild()
 
@@ -388,21 +412,21 @@ func build_page() -> void:
 	var column := card(440.0 if page == "main" else 560.0)
 	var first: Button
 	if page == "main":
-		column.add_theme_constant_override("separation", 9)
+		column.add_theme_constant_override("separation", 7)
 		column.add_child(label("01 / " + text("desert"), 12, "9edccb"))
-		column.add_child(label("AION\nENDLESS RUN", 43))
+		column.add_child(label("AION\nENDLESS RUN", 40))
 		column.add_child(wrap_label(text("tagline"), 15))
 		first = button(text("play"), start_run, true)
 		column.add_child(first)
 		column.add_child(button(text("characters"), func(): open_subpage("characters")))
 		column.add_child(button(text("settings"), func(): open_subpage("settings")))
 		column.add_child(label("SPACE / ENTER", 10, "99abc8"))
+		build_start_roster()
 	elif page == "paused":
 		column.add_child(label(text("paused"), 28))
 		column.add_child(wrap_label(text("pause_note")))
 		first = button(text("resume"), resume_run, true)
 		column.add_child(first)
-		column.add_child(button(text("characters"), func(): open_subpage("characters")))
 		column.add_child(button(text("menu"), main_menu))
 		if not OS.has_feature("web") and not OS.has_feature("mobile"):
 			column.add_child(button(text("quit"), quit_game))
@@ -418,7 +442,6 @@ func build_page() -> void:
 		column.add_child(wrap_label(text("runstats") % [world.passed, world.gems]))
 		first = button(text("again"), start_run, true)
 		column.add_child(first)
-		column.add_child(button(text("characters"), func(): open_subpage("characters")))
 		column.add_child(button(text("menu"), main_menu))
 		column.add_child(button(text("settings"), func(): open_subpage("settings")))
 	elif page == "settings":
@@ -426,10 +449,11 @@ func build_page() -> void:
 		column.add_child(label(text("language"), 13, "a8bcd8"))
 		var row := HBoxContainer.new()
 		column.add_child(row)
-		for lang in ["tr", "en"]:
-			var option := button(("[x]  " if language == lang else "") + ("Türkçe" if lang == "tr" else "English"), func(): set_language(lang))
+		for lang in Words.LANGUAGES:
+			var option := button(("[x]  " if language == lang else "") + Words.LANGUAGE_NAMES[lang], func(): set_language(lang))
 			option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(option)
+		column.add_child(wrap_label(text("language_hint"), 12))
 		column.add_child(label(text("appearance"), 14, "a8bcd8"))
 		add_toggle(column, "motion", motion, func(value): motion = value; save_settings())
 		add_toggle(column, "screen_fx", effects_enabled, func(value): effects_enabled = value; save_settings())
@@ -456,6 +480,91 @@ func build_page() -> void:
 		column.add_child(first)
 	if is_instance_valid(first):
 		focus_later.call_deferred(first)
+
+func build_language_picker() -> void:
+	language_button = button(language.to_upper(), toggle_language_picker)
+	language_button.name = "LanguageMenu"
+	language_button.tooltip_text = text("language")
+	var chevron := Control.new()
+	chevron.set_script(preload("res://scripts/language_chevron.gd"))
+	chevron.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	language_button.add_child(chevron)
+	chevron.position = Vector2(68, 24)
+	language_button.visible = page != ""
+	language_button.add_theme_font_size_override("font_size", 13)
+	ui.add_child(language_button)
+	position_control(language_button, Vector2(view_w - 270, 23), Vector2(84, 48))
+	language_picker = PanelContainer.new()
+	language_picker.name = "LanguagePicker"
+	language_picker.z_index = 100
+	language_picker.add_theme_stylebox_override("panel", box("18283d", "79d7c7", 12))
+	ui.add_child(language_picker)
+	language_picker.position = Vector2(view_w - 282, 78)
+	var options := VBoxContainer.new()
+	language_picker.add_child(options)
+	for lang in Words.LANGUAGES:
+		var option := button(lang.to_upper() + "  " + Words.LANGUAGE_NAMES[lang], func(): set_language(lang), lang == language)
+		option.name = "Language_" + lang
+		option.custom_minimum_size = Vector2(176, 44)
+		options.add_child(option)
+	language_picker.visible = language_picker_open and page != ""
+
+func toggle_language_picker() -> void:
+	language_picker_open = not language_picker_open
+	language_picker.visible = language_picker_open
+	web_stamp = ""
+	if language_picker_open: language_picker.get_child(0).get_child(Words.LANGUAGES.find(language)).grab_focus()
+
+func character_portrait(id: String) -> TextureRect:
+	var picture := TextureRect.new()
+	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	picture.custom_minimum_size = Vector2(58, 66)
+	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var atlas := AtlasTexture.new()
+	atlas.atlas = SHEET if id == "aion" else RUNNER_SHEETS[id]
+	atlas.region = Rect2(0, 0, 209, 157) if id == "aion" else runner_region(id, 1, 0)
+	picture.texture = atlas
+	if id != "aion":
+		var mat := ShaderMaterial.new()
+		mat.shader = preload("res://scripts/companion_alpha.gdshader")
+		picture.material = mat
+	return picture
+
+func build_start_roster() -> void:
+	var width := minf(564.0, view_w - 570.0)
+	var panel := PanelContainer.new()
+	menu_layer.add_child(panel)
+	panel.position = Vector2(32, 178)
+	panel.custom_minimum_size.x = width
+	panel.add_theme_stylebox_override("panel", box("132034", "2d3c57", 14))
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 10)
+	panel.add_child(column)
+	column.add_child(wrap_label(text("choose_before_run"), 16, "b1eddb"))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	column.add_child(grid)
+	for id in FRIENDS:
+		var tile := button("", func(): select_character(id), id == character)
+		tile.name = "StartSelect_" + id
+		tile.tooltip_text = text("ability_" + id)
+		tile.custom_minimum_size = Vector2((width - 50) * 0.5, 90)
+		grid.add_child(tile)
+		var row := HBoxContainer.new()
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tile.add_child(row)
+		row.position = Vector2(8, 8)
+		row.size = Vector2((width - 50) * 0.5 - 16, 74)
+		row.add_child(character_portrait(id))
+		var name_label := wrap_label(character_name(id), 13, "102b30" if id == character else "eef3ff")
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		row.add_child(name_label)
 
 func focus_later(item: Control) -> void:
 	if is_instance_valid(item) and item.is_inside_tree() and item.is_visible_in_tree() and not item.is_queued_for_deletion():
@@ -501,7 +610,7 @@ func build_characters() -> void:
 		var details := VBoxContainer.new()
 		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(details)
-		details.add_child(wrap_label(NAMES[id], 17, "eef3ff"))
+		details.add_child(wrap_label(character_name(id), 17, "eef3ff"))
 		details.add_child(wrap_label(text("ability_" + id), 11, "b6e6d7"))
 		var choice := button(text("selected" if character == id else "select"), func(): select_character(id), character == id)
 		choice.name = "Select_" + id
@@ -518,6 +627,9 @@ func add_toggle(column: VBoxContainer, key: String, value: bool, callback: Calla
 	column.add_child(toggle)
 
 func set_language(value: String) -> void:
+	if value not in Words.LANGUAGES: return
+	language_override = true
+	language_picker_open = false
 	language = value
 	save_settings()
 	rebuild()
@@ -527,10 +639,12 @@ func apply_fullscreen() -> void:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
 func open_subpage(value: String) -> void:
+	if value == "characters" and (page != "main" or world.state != "ready"): return
 	return_page = page
 	show_page(value)
 
 func start_run() -> void:
+	visual_size = 1.0
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("if (matchMedia('(pointer:coarse)').matches) { const c=document.getElementById('canvas'); if(c.requestFullscreen) c.requestFullscreen().then(()=>screen.orientation?.lock?.('landscape')).catch(()=>{}); }")
 	best_at_start = best
@@ -556,6 +670,7 @@ func resume_run() -> void:
 	show_page("")
 
 func main_menu() -> void:
+	visual_size = 1.0
 	save_settings()
 	world.reset()
 	clear_held_controls()
@@ -576,7 +691,7 @@ func _notification(what: int) -> void:
 		pause_run()
 
 func select_character(id: String) -> void:
-	if id not in FRIENDS: return
+	if id not in FRIENDS or world.state != "ready" or page not in ["main", "characters"]: return
 	character = id
 	world.character = id
 	clear_held_controls()
@@ -714,6 +829,12 @@ func _input(event: InputEvent) -> void:
 		release_boost("touch:" + str(event.index))
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE:
+			if language_picker_open:
+				language_picker_open = false
+				language_picker.hide()
+				web_stamp = ""
+				get_viewport().set_input_as_handled()
+				return
 			if page == "": pause_run()
 			elif page == "paused": resume_run()
 			elif page in ["characters", "settings"]: show_page(return_page)
@@ -731,9 +852,11 @@ func _input(event: InputEvent) -> void:
 		elif event.keycode == KEY_SHIFT and page == "":
 			press_boost("shift")
 			get_viewport().set_input_as_handled()
-		elif event.keycode in [KEY_SPACE, KEY_ENTER] and page == "main":
-			start_run()
-			get_viewport().set_input_as_handled()
+		elif event.keycode in [KEY_SPACE, KEY_ENTER] and page == "main" and not language_picker_open:
+			var focused := get_viewport().gui_get_focus_owner()
+			if focused == null or not (str(focused.name).begins_with("StartSelect_") or str(focused.name) == "LanguageMenu"):
+				start_run()
+				get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F11:
 			fullscreen = not fullscreen
 			apply_fullscreen()
@@ -903,6 +1026,7 @@ func update_hud() -> void:
 func publish_web_status() -> void:
 	if not OS.has_feature("web"): return
 	var stamp := "%s:%s:%d:%s:%s:%s:%d:%s:%s:%d" % [world.state, page, world.score, character, language, world.y < 0.0, world.jumps_used, world.gliding, world.boosting(), world.sheep_count]
+	stamp += ":" + str(language_picker_open)
 	stamp += ":" + str(effects_enabled) + ":" + str(motion)
 	stamp += ":%.2f:%s:%d:%d:%s" % [world.y, world.riding_gust, friend_row, friend_frame, friend_action]
 	if character == "sheep": stamp += ":%.2f:%.2f" % [world.flock_pose(0).y, world.flock_pose(1).y]
@@ -950,6 +1074,13 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-obstacles", JSON.stringify(world.obstacles))
 	canvas.setAttribute("data-powers", JSON.stringify(world.adventure.powers))
 	canvas.setAttribute("data-items", JSON.stringify(world.adventure.items))
+	canvas.setAttribute("data-character-name", character_name(character))
+	canvas.setAttribute("data-language-picker", str(language_picker_open))
+	canvas.setAttribute("data-language-override", str(language_override))
+	canvas.setAttribute("data-normal-height", str(NORMAL_HEIGHT))
+	canvas.setAttribute("data-hero-opaque-height", str(registered_height(friend_sprite)))
+	canvas.setAttribute("data-followers-opaque-height", JSON.stringify([registered_height(followers[0]), registered_height(followers[1])]))
+	canvas.setAttribute("data-follower-ratio", str(FOLLOWER_RATIO))
 	canvas.setAttribute("data-best", str(best))
 	canvas.setAttribute("role", "application")
 	canvas.setAttribute("lang", language)
@@ -1051,21 +1182,43 @@ func update_friend() -> void:
 			var landing: bool = float(pose.landing_time) > 0.0
 			var row := 2 if in_air or landing else (0 if world.state == "ready" else 1)
 			var frame := flight_frame(float(pose.velocity), float(pose.air_time), true) if in_air else (5 if landing else posmod(int((world.distance - World.FLOCK_GAP * (i + 1)) / 29.0), 6))
-			place_companion(followers[i], "sheep", row, frame if motion else 0, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), 0.62, in_air or landing)
+			place_companion(followers[i], "sheep", row, frame if motion else 0, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), 0.62 * FOLLOWER_RATIO, in_air or landing)
 			if float(pose.get("duck", 0.0)) > 0.5:
-				place_combat(followers[i], "sheep", 6, 3 + int(animation_clock() * 4) % 2 if motion else 3, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), 1.0, true)
+				place_combat(followers[i], "sheep", 6, 3 + int(animation_clock() * 4) % 2 if motion else 3, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
 
 func place_combat(item: Sprite2D, id: String, row: int, frame: int, anchor: Vector2, growth: float, crouch: bool) -> void:
 	var data: Dictionary = ADVENTURE_DATA.data.atlases.combat
 	var sy: float = data.row_y[row]
 	var cell_w := float(data.width) / 6.0
-	var scale_value := 94.0 / float(data.body_heights[COMBAT_ROWS[id]])
+	var bounds: Array = REGISTRATION.data.combat.bounds[row][frame]
+	var scale_value := NORMAL_HEIGHT / float(bounds[3] - bounds[1])
 	item.texture = COMBAT_SHEET
 	item.region_rect = Rect2(roundf(frame * cell_w), sy, cell_w, float(data.row_y[row + 1]) - sy)
-	item.offset = Vector2(-cell_w * 0.5, -float(data.baselines[row][frame]))
+	item.offset = Vector2(-cell_w * 0.5, -float(bounds[3]))
 	item.scale = Vector2(scale_value, scale_value * (0.53 if crouch else 1.0)) * growth
 	item.position = anchor.round()
+
+func registered_height(item: Sprite2D) -> float:
+	if not item.visible: return 0.0
+	var bounds: Array
+	if item.texture == COMBAT_SHEET:
+		var row := int(item.region_rect.position.y / 181.0)
+		var frame := int(roundf(item.region_rect.position.x / (float(ADVENTURE_DATA.data.atlases.combat.width) / 6.0)))
+		bounds = REGISTRATION.data.combat.bounds[row][frame]
+	elif item.texture == ACTION_SHEET:
+		var row := int(roundf(item.region_rect.position.y / (float(ACTION_DATA.data.height) / 3.0)))
+		var frame := int(roundf(item.region_rect.position.x / (float(ACTION_DATA.data.width) / 6.0)))
+		bounds = REGISTRATION.data.actions.bounds[row][frame]
+	else:
+		for id in RUNNER_SHEETS:
+			if item.texture == RUNNER_SHEETS[id]:
+				var row: int = RUNNER_DATA.data.characters[id].row_y.find(item.region_rect.position.y)
+				if row < 0: return 0.0
+				bounds = REGISTRATION.data.runner[id].bounds[row][int(item.region_rect.position.x / 181.0)]
+				break
+	if bounds.is_empty(): return 0.0
+	return float(bounds[3] - bounds[1]) * item.scale.y
 
 func flight_frame(velocity: float, air_time: float, sheep: bool = false) -> int:
 	if air_time < 0.045: return 0
@@ -1082,13 +1235,16 @@ func place_companion(item: Sprite2D, id: String, row: int, frame: int, anchor: V
 		var width := roundf((frame + 1) * sheet_w / 6.0) - left
 		item.texture = ACTION_SHEET
 		item.region_rect = Rect2(left, top, width, roundf((float(data.row) + 1) * sheet_h / 3.0) - top)
-		item.scale = Vector2.ONE * float(data.scale) * scale_value / 0.62
-		item.offset = Vector2(-width * 0.5, -float(data.baseline[frame]))
+		var bounds: Array = REGISTRATION.data.actions.bounds[int(data.row)][frame]
+		item.scale = Vector2.ONE * NORMAL_HEIGHT / float(bounds[3] - bounds[1]) * scale_value / 0.62
+		item.offset = Vector2(-width * 0.5, -float(bounds[3]))
 	else:
 		item.texture = RUNNER_SHEETS[id]
 		item.region_rect = runner_region(id, row, frame)
-		item.scale = Vector2(scale_value, scale_value)
-		item.offset = Vector2(-90.5, -float(RUNNER_DATA.data.characters[id].baselines[row][frame]))
+		var bounds: Array = REGISTRATION.data.runner[id].bounds[row][frame]
+		var registration_scale := NORMAL_HEIGHT / float(bounds[3] - bounds[1]) if row in [0, 1, 2, 6, 7] else 0.62
+		item.scale = Vector2.ONE * registration_scale * scale_value / 0.62
+		item.offset = Vector2(-90.5, -float(bounds[3]) if row in [0, 1, 2, 6, 7] else -float(RUNNER_DATA.data.characters[id].baselines[row][frame]))
 	item.position = anchor.round()
 
 # Moving ribbons flow away from the wolf with independent offsets, curved paths,
