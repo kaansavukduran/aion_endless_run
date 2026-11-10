@@ -40,7 +40,7 @@ with sync_playwright() as p:
   while time.monotonic()-started<170:
    v=d()
    if v['state']!='running':print('Route retry',attempt,v['state'],v['level'],v['bossPhase'],v['obstacles'],v['enemies'],flush=True);page.screenshot(path=str(out/('route-failure-'+str(attempt)+'.png')));break
-   
+
    if int(v['biome'])==0 or float(v['worldDistance'])%6500>700:biomes.add(int(v['biome']))
    player=float(v['playerX']);speed=float(v['speed']);boss=v['bossPhase'];giant=v['giant']=='true'
    if boss!='run':
