@@ -36,11 +36,14 @@ func run() -> void:
 		check(w.adventure.kills == 1 and w.adventure.bonus_score == bonus, "A defeated enemy cannot award twice: " + id)
 	var w := arena()
 	var gnome: Dictionary = w.adventure.spawn_enemy(w, "gnome", World.PLAYER_X + 95)
-	w.adventure.attack_held = true
+	w.adventure.request_attack(w)
 	advance(w, 0.24)
 	check(gnome.hp == 1 and gnome.x > World.PLAYER_X + 60 and w.state == "running", "A nonlethal hit knocks a two-HP gnome back instead of immediately hurting the player")
+	advance(w, 0.30)
+	w.adventure.attack_held = false
+	w.adventure.request_attack(w)
 	advance(w, 1.0)
-	check(gnome.hp <= 0 and w.adventure.kills == 1, "Held attacks can finish a recovering two-HP gnome")
+	check(gnome.hp <= 0 and w.adventure.kills == 1, "A new press can finish a recovering two-HP gnome")
 	w = arena()
 	w.adventure.spawn_enemy(w, "gnome", World.PLAYER_X, -23)
 	w.y = -52.0
@@ -73,9 +76,9 @@ func run() -> void:
 	check(w.y < 0 and not w.adventure.ducking(w), "Jumping from a crouch uses the full airborne body")
 	w = arena()
 	w.adventure.duck_held = true
-	w.adventure.spawn_enemy(w, "crow", World.PLAYER_X, -70)
+	w.adventure.spawn_enemy(w, "crow", World.PLAYER_X, -86)
 	w.step(1.0 / 120)
-	check(w.state == "running", "A low crow passes safely over a ducking player")
+	check(w.state == "running", "A low crow passes safely over a rolling player")
 	w = arena()
 	var speed_before := w.speed()
 	w.adventure.collect(w, "slow")
@@ -165,7 +168,7 @@ func run() -> void:
 		kinds[w.adventure.last_encounter] = true
 		min_gap = minf(min_gap, w.adventure.spawn_gap)
 		max_gap = maxf(max_gap, w.adventure.spawn_gap)
-	check(kinds.size() == 5, "Encounter bags include ground hazards, low branches and both crow heights")
+	check(kinds.size() == 8, "Encounter bags include ground hazards, four overhead variants and both crow heights")
 	check(min_gap >= 680 and max_gap - min_gap > 400, "Random encounter distances vary broadly while retaining safe clearance")
 	w = arena()
 	w.character = "sheep"

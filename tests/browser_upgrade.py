@@ -1,4 +1,4 @@
-"""Exercise real 0.1 -> current PWA migration and a subsequent hot update.
+"""Exercise real previous-release -> current PWA migration and a subsequent hot update.
 
 Uses a real HTTP server, CacheStorage, ServiceWorker and IndexedDB. No mocked
 network, state injection, cache bypass, unregister or storage clearing.
@@ -56,21 +56,24 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         page.evaluate('navigator.serviceWorker.ready.then(() => true)')
         page.reload()  # Populate the legacy worker's large engine/PCK cache.
         ready()
+        def ui_click(name=None,text=None):
+            page.wait_for_selector('canvas[data-ui-ready="true"]')
+            v=page.locator('canvas').evaluate('c=>({...c.dataset})');b=next(b for b in json.loads(v['ui']) if (b['name']==name if name else text in b['text']))
+            t=json.loads(v['screenTransform']);r=page.locator('canvas').bounding_box();x=b['x']+b['w']/2;y=b['y']+b['h']/2
+            page.mouse.click(r['x']+(t[0]*x+t[2]*y+t[4])/float(v['rawWidth'])*r['width'],r['y']+(t[1]*x+t[3]*y+t[5])/float(v['rawHeight'])*r['height'])
+        # Since 0.6 selection is deliberately locked after starting a run.
+        ui_click(name='StartSelect_owl')
+        page.wait_for_selector('canvas[data-character="owl"]')
+        ui_click(name='LanguageMenu')
+        page.wait_for_selector('canvas[data-language-picker="true"]')
+        ui_click(name='Language_en')
+        page.wait_for_selector('canvas[lang="en"]')
         page.keyboard.press('Space')
         page.wait_for_selector('canvas[data-state="running"]')
         page.wait_for_timeout(1000)
         page.keyboard.press('Escape')
         page.wait_for_selector('canvas[data-state="paused"]')
         saved_score = int(page.locator('canvas').get_attribute('data-score'))
-        page.mouse.click(560,325)
-        page.wait_for_selector('canvas[data-page="characters"]')
-        page.mouse.click(820,360)
-        page.wait_for_selector('canvas[data-character="owl"]')
-        page.keyboard.press('Escape')
-        page.mouse.click(560,445)
-        page.wait_for_selector('canvas[data-page="settings"]')
-        page.mouse.click(695,265)
-        page.wait_for_selector('canvas[lang="en"]')
         page.wait_for_timeout(2200)  # Real Godot IDBFS sync, not a test fixture.
         context.set_offline(True)
         page.reload()

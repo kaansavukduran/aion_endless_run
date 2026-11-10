@@ -4,6 +4,30 @@ extends RefCounted
 const POWER_NAMES := ["mushroom", "lightning", "slow", "haste", "shield", "magnet", "leaf"]
 const ATTACK_DURATION := 0.40
 const ATTACK_COOLDOWN := 0.46
+const LEVEL_DISTANCE := 900.0
+const HUG_DURATION := 1.0
+var celebrations_enabled := true
+var heart_time := 0.0
+var level := 1
+var celebration_clock := 0.0
+var celebration_time := 0.0
+var celebration_style := 0
+var girl_index := -1
+var girl_bag: Array[int] = []
+var last_girl := -1
+var last_hug_girl := -1
+var hug_queue: Array[Dictionary] = []
+var hug_level := 0
+var hug_pending := false
+var hug_time := 0.0
+var hug_count := 0
+var mushroom_chance := 0.02
+var last_mushroom_at := -10000.0
+var ambient_gnome_wait := 16.0
+var attack_variant := 0
+var pending_attack := false
+var roll_time := 0.0
+var roll_elapsed := 0.0
 var enabled := true
 var enemies: Array[Dictionary] = []
 var items: Array[Dictionary] = []
@@ -25,7 +49,7 @@ var bonus_score := 0
 var lightning_charges := 0
 var lightning_time := 0.0
 var lightning_targets: Array[Vector2] = []
-var item_wait := 0.85
+var item_wait := 12.0
 var first_item := true
 var gnome_wait := 0.25
 var weather := "clear"
@@ -45,6 +69,26 @@ var item_id := 0
 var enemy_id := 0
 
 func reset() -> void:
+	heart_time = 0.0
+	level = 1
+	celebration_clock = 0.0
+	celebration_time = 0.0
+	celebration_style = 0
+	girl_index = -1
+	girl_bag.clear()
+	last_girl = -1
+	last_hug_girl = -1
+	hug_queue.clear()
+	hug_level = 0
+	hug_pending = false
+	hug_time = 0.0
+	hug_count = 0
+	last_mushroom_at = -10000.0
+	ambient_gnome_wait = 16.0
+	attack_variant = 0
+	pending_attack = false
+	roll_time = 0.0
+	roll_elapsed = 0.0
 	enemies.clear()
 	items.clear()
 	for key in powers: powers[key] = 0.0
@@ -64,7 +108,7 @@ func reset() -> void:
 	lightning_charges = 0
 	lightning_time = 0.0
 	lightning_targets.clear()
-	item_wait = 0.85
+	item_wait = 12.0
 	first_item = true
 	gnome_wait = 0.3
 	weather = "clear"
@@ -86,10 +130,101 @@ func size_multiplier() -> float:
 	return 1.65 if giant() else 1.0
 
 func ducking(world) -> bool:
-	return enabled and duck_held and world.y >= -0.01
+	return enabled and (duck_held or roll_time > 0.0) and world.y >= -0.01 and not hugging()
+
+func hugging() -> bool:
+	return enabled and hug_time > 0.0
+
+func press_roll(world) -> void:
+	if not enabled or world.state != "running" or hugging(): return
+	duck_held = true
+	attack_time = 0.0
+	pending_attack = false
+	if roll_time <= 0.0: roll_elapsed = 0.0
+	roll_time = maxf(roll_time, 0.68)
+
+func request_attack(world) -> bool:
+	if attack_held or hugging() or world.state != "running": return false
+	attack_held = true
+	if ducking(world): return false
+	if attack_cooldown > 0.0:
+		pending_attack = attack_cooldown <= 0.16
+		return false
+	return attack(world)
+
+func roll_frame() -> int:
+	return 1 + posmod(int(roll_elapsed * 11.0), 5)
+
+func level_progress(world) -> float:
+	return clampf(world.distance - float(level - 1) * LEVEL_DISTANCE, 0.0, LEVEL_DISTANCE)
+
+func choose_power(world) -> String:
+	var eligible: bool = world.time >= 20.0 and world.time - last_mushroom_at >= 45.0
+	if eligible and mushroom_chance > 0.0 and world.rng.randf() < mushroom_chance:
+		last_mushroom_at = world.time
+		return "mushroom"
+	return shuffled_pick(world, power_bag, ["lightning", "slow", "haste", "shield", "magnet", "leaf"])
+
+func choose_girl(world) -> void:
+	if girl_bag.is_empty():
+		girl_bag.assign([0,1,2,3,4,5,6,7])
+		for i in range(7, 0, -1):
+			var other: int = world.rng.randi_range(0, i)
+			var old: int = girl_bag[i]
+			girl_bag[i] = girl_bag[other]
+			girl_bag[other] = old
+	var next: int = girl_bag.pop_back()
+	if next == last_girl or (level % 10 == 0 and next == last_hug_girl):
+		for candidate in range(8):
+			if candidate != last_girl and (level % 10 != 0 or candidate != last_hug_girl):
+				next = candidate
+				break
+	girl_index = next
+	last_girl = next
+
+func update_level(world) -> void:
+	if not enabled: return
+	var reached := 1 + int(world.distance / LEVEL_DISTANCE)
+	while level < reached:
+		heart_time = 0.0
+		level += 1
+		choose_girl(world)
+		var previous_style := celebration_style
+		celebration_style = world.rng.randi_range(0, 3)
+		if celebration_style == previous_style: celebration_style = (celebration_style+1)%4
+		celebration_time = 2.8
+		world.event("level_up")
+		if level % 10 == 0 and celebrations_enabled:
+			hug_queue.append({"level":level,"girl":girl_index,"style":celebration_style})
+			last_hug_girl = girl_index
+			hug_pending = true
+	if hug_pending and celebrations_enabled and world.y >= 0.0 and world.state == "running":
+		var milestone: Dictionary = hug_queue.pop_front()
+		hug_pending = not hug_queue.is_empty()
+		hug_level = milestone.level
+		girl_index = milestone.girl
+		celebration_style = milestone.style
+		hug_time = HUG_DURATION
+		hug_count += 1
+		last_hug_girl = girl_index
+		attack_time = 0.0
+		pending_attack = false
+		roll_time = 0.0
+		duck_held = false
+		world.release_controls()
+		world.event("hug_start")
+
+func advance_hug(world, dt: float) -> void:
+	hug_time = maxf(0.0, hug_time - dt)
+	celebration_clock += dt
+	if hug_time <= 0.0:
+		heart_time = 2.0
+		celebration_time = 2.0
+		world.invulnerable = maxf(world.invulnerable, 0.65)
+		world.event("hug_end")
 
 func body_height(world) -> float:
-	return (35.0 if ducking(world) else 82.0) * size_multiplier()
+	return (52.0 if ducking(world) else 82.0) * size_multiplier()
 
 func speed_multiplier() -> float:
 	if not enabled: return 1.0
@@ -99,8 +234,9 @@ func speed_multiplier() -> float:
 	return factor
 
 func attack(world) -> bool:
-	if not enabled or world.state != "running" or attack_cooldown > 0.0: return false
+	if not enabled or world.state != "running" or attack_cooldown > 0.0 or hugging() or ducking(world): return false
 	swing_id += 1
+	attack_variant = (swing_id - 1) % 2
 	attack_time = ATTACK_DURATION
 	attack_cooldown = ATTACK_COOLDOWN
 	world.event("attack_" + world.character)
@@ -146,7 +282,7 @@ func hit_enemy(world, enemy: Dictionary, damage: int, stomp: bool) -> void:
 func spawn_enemy(world, kind: String, x: float = -1.0, altitude: float = -74.0) -> Dictionary:
 	enemy_id += 1
 	var hp := 2 if kind == "gnome" else 1
-	var enemy := {"id":enemy_id, "kind":kind, "x":world.field_width + 70.0 if x < 0 else x, "y":altitude if kind == "crow" else -23.0, "base_y":altitude, "hp":hp, "max_hp":hp, "hurt":0.0, "defeat":0.0, "age":0.0, "last_swing":-1, "diving":false}
+	var enemy := {"id":enemy_id, "kind":kind, "x":world.field_width + 70.0 if x < 0 else x, "y":altitude if kind == "crow" else -23.0, "base_y":altitude, "hp":hp, "max_hp":hp, "hurt":0.0, "defeat":0.0, "age":0.0, "last_swing":-1, "diving":false,"wave":false}
 	enemies.append(enemy)
 	return enemy
 
@@ -161,13 +297,18 @@ func shuffled_pick(world, bag: Array[String], values: Array[String]) -> String:
 	return bag.pop_back()
 
 func spawn_encounter(world) -> void:
-	var kind := shuffled_pick(world, encounter_bag, ["fire", "ice", "crow", "crow_high", "arch"])
+	var kind := shuffled_pick(world, encounter_bag, ["fire", "ice", "crow", "crow_high", "arch", "arch_ice", "arch_stone", "arch_cap"])
 	if kind == last_encounter: kind = "crow" if kind != "crow" else "ice"
 	last_encounter = kind
 	last_spawn_distance = world.distance
 	spawn_gap = world.rng.randf_range(680.0, 1550.0)
-	if kind.begins_with("crow"):
-		spawn_enemy(world, "crow", -1.0, -154.0 if kind == "crow_high" else -71.0)
+	if level >= 4 and world.rng.randf() < 0.07:
+		kind = "gnome"
+		last_encounter = kind
+	if kind == "gnome":
+		spawn_enemy(world, "gnome")
+	elif kind.begins_with("crow"):
+		spawn_enemy(world, "crow", -1.0, -154.0 if kind == "crow_high" else -86.0)
 	else:
 		world.obstacles.append({"x":world.field_width + 70.0, "kind":kind, "counted":false, "broken":false})
 	# A broad gap distribution creates bursts and breathing spaces. Distances
@@ -188,7 +329,7 @@ func collect(world, kind: String) -> void:
 	match kind:
 		"mushroom":
 			powers.mushroom = 10.0
-			gnome_wait = 0.20
+			gnome_wait = world.rng.randf_range(0.15, 0.65)
 			world.invulnerable = maxf(world.invulnerable, 0.5)
 		"lightning": lightning_charges = mini(3, lightning_charges + 2)
 		"slow":
@@ -204,6 +345,13 @@ func collect(world, kind: String) -> void:
 			else: powers.shield = maxf(float(powers.shield), 8.0)
 	world.event("power_" + kind)
 
+func end_wave(world) -> void:
+	for enemy in enemies:
+		if enemy.get("wave",false) and enemy.hp > 0:
+			enemy.hp = 0
+			enemy.defeat = 0.001
+	world.invulnerable = maxf(world.invulnerable,1.2)
+
 func absorb_hit(world) -> bool:
 	if not enabled: return false
 	if float(powers.shield) > 0.0:
@@ -213,7 +361,8 @@ func absorb_hit(world) -> bool:
 		return true
 	if giant():
 		powers.mushroom = maxf(0.0, float(powers.mushroom) - 2.0)
-		world.invulnerable = 0.9
+		if not giant(): end_wave(world)
+		world.invulnerable = maxf(world.invulnerable,0.9)
 		world.event("giant_hit")
 		return true
 	return false
@@ -235,15 +384,24 @@ func update_goal(world) -> void:
 
 func before_step(world, dt: float) -> void:
 	if not enabled: return
+	celebration_clock += dt
+	heart_time = maxf(0.0, heart_time - dt)
+	celebration_time = maxf(0.0, celebration_time - dt)
+	var was_rolling: bool = ducking(world)
+	roll_time = maxf(0.0, roll_time - dt)
+	if was_rolling: roll_elapsed += dt
+	elif not duck_held: roll_elapsed = 0.0
 	var was_giant := giant()
 	for key in powers: powers[key] = maxf(0.0, float(powers[key]) - dt)
-	if was_giant and not giant(): world.invulnerable = maxf(world.invulnerable, 1.2)
+	if was_giant and not giant(): end_wave(world)
 	attack_time = maxf(0.0, attack_time - dt)
 	attack_cooldown = maxf(0.0, attack_cooldown - dt)
 	duck_time = duck_time + dt if ducking(world) else 0.0
 	lightning_time = maxf(0.0, lightning_time - dt)
 	thunder_time = maxf(0.0, thunder_time - dt)
-	if attack_held and attack_cooldown <= 0.0: attack(world)
+	if pending_attack and attack_cooldown <= 0.0:
+		pending_attack = false
+		attack(world)
 	tempo_wait -= dt
 	if tempo_wait <= 0.0:
 		tempo_target = world.rng.randf_range(0.82, 1.16)
@@ -269,15 +427,28 @@ func after_step(world, dt: float, movement: float, previous_y: float) -> void:
 	if world.y >= 0.0: stomp_chain = 0
 	item_wait -= dt
 	if item_wait <= 0.0:
-		var kind := "mushroom" if first_item else shuffled_pick(world, power_bag, POWER_NAMES)
-		spawn_item(world, kind, world.PLAYER_X + 410.0 if first_item else -1.0)
+		spawn_item(world, choose_power(world))
 		first_item = false
-		item_wait = world.rng.randf_range(6.5, 10.0)
+		item_wait = world.rng.randf_range(8.0, 14.0)
 	if giant():
 		gnome_wait -= dt
-		if gnome_wait <= 0.0 and enemies.filter(func(e): return e.kind == "gnome" and e.hp > 0).size() < 7:
-			spawn_enemy(world, "gnome")
-			gnome_wait = world.rng.randf_range(0.55, 1.05)
+		if gnome_wait <= 0.0:
+			var alive: int = enemies.filter(func(e): return e.kind == "gnome" and e.hp > 0).size()
+			var count: int = mini(14 - alive, world.rng.randi_range(1, 3))
+			for i in count:
+				var wave_enemy := spawn_enemy(world, "gnome", world.field_width + 60.0 + i * world.rng.randf_range(85.0, 220.0))
+				wave_enemy.wave = true
+			gnome_wait = world.rng.randf_range(0.18, 1.30)
+	elif level >= 4:
+		ambient_gnome_wait -= dt
+		if ambient_gnome_wait <= 0.0:
+			var near: bool = world.obstacles.any(func(o): return o.x > world.field_width - 400) or enemies.any(func(e): return e.hp > 0 and e.x > world.field_width - 400)
+			if not near:
+				spawn_enemy(world, "gnome")
+				last_spawn_distance = world.distance
+				spawn_gap = world.rng.randf_range(680.0,1150.0)
+				world.obstacle_wait = world.rng.randf_range(1.2,2.4)
+			ambient_gnome_wait = world.rng.randf_range(18.0, 34.0)
 	var body := body_rect(world)
 	for item in items:
 		item.x -= movement
@@ -313,10 +484,10 @@ func after_step(world, dt: float, movement: float, previous_y: float) -> void:
 			world.invulnerable = maxf(world.invulnerable, 0.18)
 			continue
 		if attack_active() and enemy.last_swing != swing_id:
-			var attack_rect := Rect2(world.PLAYER_X + 4, world.y - (48.0 if ducking(world) else 92.0) * size_multiplier(), 135 * size_multiplier(), (44.0 if ducking(world) else 88.0) * size_multiplier())
+			var attack_rect := Rect2(world.PLAYER_X + 4, world.y - 92.0 * size_multiplier(), (100.0 + float(attack_variant)*12.0) * size_multiplier(), (44.0 if ducking(world) else 88.0) * size_multiplier())
 			if attack_rect.intersects(rect):
 				enemy.last_swing = swing_id
-				hit_enemy(world, enemy, 2 if giant() else 1, false)
+				hit_enemy(world, enemy, 2 if giant() or (world.character == "wolf" and attack_variant == 1) else 1, false)
 				if enemy.hp <= 0: continue
 		if body.intersects(rect) and world.invulnerable <= 0.0 and enemy.hurt <= 0.0:
 			world.take_hit("bonk")

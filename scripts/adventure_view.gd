@@ -3,6 +3,8 @@ extends Node2D
 const META = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const ENEMIES = preload("res://assets/adventure-enemies.png")
 const ITEMS = preload("res://assets/adventure-items.png")
+const EVOLUTION = preload("res://assets/EVOLUTION-PROVENANCE.json")
+const BARRIERS = preload("res://assets/evolution-barriers.png")
 var host
 
 func atlas(name: String, row: int, frame: int, anchor: Vector2, width: float, centered: bool = false) -> void:
@@ -22,6 +24,14 @@ func _draw() -> void:
 	if not a.enabled: return
 	var clock: float = host.animation_clock()
 	var ground: float = host.ground
+	if a.giant() and host.effects_enabled and host.motion:
+		for ribbon in 5:
+			var points := PackedVector2Array()
+			for n in 25:
+				var x: float = float(n)/24.0*host.view_w
+				points.append(Vector2(x,220+ribbon*40+sin(x*0.007+clock*0.45+ribbon)*28))
+			var color := Color.from_hsv(fposmod(clock*0.035+float(ribbon)*0.16,1.0),0.45,1.0,0.065*host.prism_intensity)
+			draw_polyline(points,color,23)
 	# Weather never changes collision bounds or hides the foreground silhouettes.
 	if a.weather in ["rain", "storm", "snow", "sand"]:
 		var tint := Color("a7c9ea") if a.weather in ["rain", "storm"] else (Color("ebf6ff") if a.weather == "snow" else Color("e4c695"))
@@ -35,8 +45,14 @@ func _draw() -> void:
 		var bolt := PackedVector2Array([Vector2(a.thunder_x, 147), Vector2(a.thunder_x - 20, 185), Vector2(a.thunder_x + 8, 181), Vector2(a.thunder_x - 24, 236)])
 		draw_polyline(bolt, Color(0.87, 0.91, 1.0, minf(0.7, a.thunder_time * 1.4)), 4)
 	for obstacle in world.obstacles:
-		if obstacle.kind == "arch":
-			atlas("items", 2, int(clock * 6) % 6, Vector2(obstacle.x, ground - 48), 174)
+		if str(obstacle.kind).begins_with("arch"):
+			var row: int = {"arch":0,"arch_ice":1,"arch_stone":2,"arch_cap":3}.get(obstacle.kind,0)
+			var d: Dictionary = EVOLUTION.data.atlases.barriers
+			var frame := int(clock*5)%6
+			var width: float = d.x[frame+1]-d.x[frame]
+			var height: float = d.y[row+1]-d.y[row]
+			var scale_value := 174.0/width
+			draw_texture_rect_region(BARRIERS,Rect2(Vector2(obstacle.x-87,ground-68-float(d.all_bounds[row][frame][3])*scale_value).round(),Vector2(174,height*scale_value)),Rect2(d.x[frame],d.y[row],width,height))
 			draw_polyline(PackedVector2Array([Vector2(obstacle.x - 10, ground - 28), Vector2(obstacle.x, ground - 19), Vector2(obstacle.x + 10, ground - 28)]), Color("d9ebd6"), 3)
 	for item in a.items:
 		var bob := sin(clock * 4.0 + item.id) * 3.0
@@ -75,6 +91,6 @@ func _draw() -> void:
 	if a.giant() and host.effects_enabled and host.motion:
 		for i in 8:
 			var hue := fposmod(clock * 0.035 + float(i) / 8, 1.0)
-			var color := Color.from_hsv(hue, 0.35, 0.95, 0.12)
+			var color := Color.from_hsv(hue, 0.35, 0.95, 0.12*host.prism_intensity)
 			var x := fposmod(i * 197.0 + sin(clock * 0.8 + i) * 12, host.view_w)
 			draw_circle(Vector2(x, 220.0 + sin(i + clock * 0.6) * 55), 5 + i % 3, color)

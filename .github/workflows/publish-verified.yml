@@ -5,7 +5,7 @@ on:
       version:
         description: New version, preserving previously published releases
         required: true
-        default: "0.6.0"
+        default: "0.7.0"
       artifact_run_id:
         description: Successful test/package workflow run ID
         required: true
@@ -68,7 +68,7 @@ jobs:
                   digest=hashlib.file_digest(stream,'sha256').hexdigest()
               packages[f.name]={'bytes':f.stat().st_size,'sha256':digest}
           assert len(packages)==9, f'Expected 9 platform packages, got {len(packages)}'
-          receipt={'version':os.environ['RELEASE_VERSION'],'source_commit':os.environ['SOURCE_SHA'],'verified_application_commit':os.environ['VERIFIED_SHA'],'verification_run':f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["RUN_ID"]}','source_and_scene_checks':207,'browser_checks':len(json.loads(Path('docs/evidence-v06/browser-results.json').read_text())),'android_native':'API 30 emulator; Wi-Fi/mobile data off; real rendered menu and paused game checked','android_signer_sha256':'50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36','apple_status':'macOS ad-hoc signing only, no Developer ID/notarization; iOS App Store/TestFlight pending owner signing','files':packages}
+          receipt={'version':os.environ['RELEASE_VERSION'],'source_commit':os.environ['SOURCE_SHA'],'verified_application_commit':os.environ['VERIFIED_SHA'],'verification_run':f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["RUN_ID"]}','source_and_scene_checks':316,'browser_checks':len(json.loads(Path('docs/evidence-v07/browser-results.json').read_text())),'android_native':'API 30 offline emulator; rendered starting cards and input smoke frames; semantic controls verified in model/browser','android_signer_sha256':'50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36','apple_status':'macOS ad-hoc signing only, no Developer ID/notarization; iOS App Store/TestFlight pending owner signing','files':packages}
           (p/'BUILD-RECEIPT.json').write_text(json.dumps(receipt,indent=2)+'\n')
           with (p/'SHA256SUMS').open('w') as out:
               for f in sorted(p.iterdir()):

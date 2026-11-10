@@ -186,6 +186,7 @@ func flock_and_wind_tests() -> void:
 	owl.velocity = 40.0
 	owl.jumps_used = 1
 	owl.jump_held = true
+	owl.gust_wait = 999999.0 # This fixture tests one finite gust, without unrelated future gusts.
 	owl.gusts = [{"x":World.PLAYER_X + 50.0, "width":400.0}]
 	for i in 20: owl.step(1.0 / 120)
 	check(owl.riding_gust and owl.gliding and owl.velocity < 0.0 and owl.y < -90.0, "An airborne gliding owl gains real upward height in an updraft")

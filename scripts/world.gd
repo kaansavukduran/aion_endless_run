@@ -27,6 +27,7 @@ var trail: Array[Dictionary] = []
 var gusts: Array[Dictionary] = []
 var gust_wait := 380.0
 var riding_gust := false
+var wind_push := 0.0
 var rng := RandomNumberGenerator.new()
 var state := "ready"
 var time := 0.0
@@ -71,10 +72,11 @@ func reset() -> void:
 	sheep_pickups.clear()
 	invulnerable = 0.0
 	landing_time = 0.0
-	trail = [{"distance":0.0, "y":0.0, "velocity":0.0, "air_time":0.0, "landing_time":0.0, "duck":0.0}]
+	trail = [{"distance":0.0, "y":0.0, "velocity":0.0, "air_time":0.0, "landing_time":0.0, "duck":0.0, "roll_phase":0.0}]
 	gusts.clear()
 	gust_wait = 380.0
 	riding_gust = false
+	wind_push = 0.0
 	obstacles.clear()
 	pickups.clear()
 	last_event = ""
@@ -82,7 +84,7 @@ func reset() -> void:
 
 func speed() -> float:
 	var base := minf(580.0, 320.0 + distance / 450.0)
-	var actual := (base * BOOST_MULTIPLIER if boosting() else base) * float(adventure.speed_multiplier())
+	var actual := (base * BOOST_MULTIPLIER if boosting() else base) * float(adventure.speed_multiplier()) * (1.0 + wind_push)
 	return minf(760.0, actual) if adventure.enabled else actual
 
 func boosting() -> bool:
@@ -98,13 +100,14 @@ func release_controls() -> void:
 	riding_gust = false
 	adventure.attack_held = false
 	adventure.duck_held = false
+	adventure.pending_attack = false
 	jump_buffer = 0.0
 
 func biome() -> int:
 	return int(distance / BIOME_DISTANCE) % 2
 
 func jump() -> void:
-	if state != "running": return
+	if state != "running" or adventure.hugging(): return
 	if y < 0.0 and character == "aion" and jumps_used < 2:
 		velocity = JUMP_SPEED
 		jumps_used += 1
@@ -138,7 +141,7 @@ func take_hit(kind: String) -> bool:
 # spatial gap stays correct as speed changes, including mid-jump speed changes.
 func flock_pose(index: int) -> Dictionary:
 	var target := distance - FLOCK_GAP * (index + 1)
-	if trail.is_empty(): return {"y":0.0, "velocity":0.0, "air_time":0.0, "landing_time":0.0, "duck":0.0}
+	if trail.is_empty(): return {"y":0.0, "velocity":0.0, "air_time":0.0, "landing_time":0.0, "duck":0.0, "roll_phase":0.0}
 	if target <= float(trail[0].distance): return trail[0].duplicate()
 	for i in range(1, trail.size()):
 		var right: Dictionary = trail[i]
@@ -148,12 +151,15 @@ func flock_pose(index: int) -> Dictionary:
 		var pose := {}
 		for key in ["y", "velocity", "air_time", "landing_time"]:
 			pose[key] = lerpf(float(left[key]), float(right[key]), weight)
+		if float(left.get("duck",0.0)) > 0.5 and float(right.get("duck",0.0)) > 0.5:
+			pose["roll_phase"] = lerpf(float(left.get("roll_phase",0.0)),float(right.get("roll_phase",0.0)),weight)
+		else: pose["roll_phase"] = right.get("roll_phase",0.0) if float(right.get("duck",0.0)) > 0.5 else left.get("roll_phase",0.0)
 		pose["duck"] = lerpf(float(left.get("duck", 0.0)), float(right.get("duck", 0.0)), weight)
 		return pose
 	return trail[-1].duplicate()
 
 func record_trail() -> void:
-	trail.append({"distance":distance, "y":y, "velocity":velocity, "air_time":air_time, "landing_time":landing_time, "duck":1.0 if adventure.ducking(self) else 0.0})
+	trail.append({"distance":distance, "y":y, "velocity":velocity, "air_time":air_time, "landing_time":landing_time, "duck":1.0 if adventure.ducking(self) else 0.0, "roll_phase":adventure.roll_elapsed})
 	while trail.size() > 2 and float(trail[1].distance) < distance - FLOCK_GAP * 2.0 - 32.0:
 		trail.pop_front()
 
@@ -164,14 +170,27 @@ func gust_strength() -> float:
 		if across < 1.0: return 0.55 + (1.0 - across) * 0.45
 	return 0.0
 
+func wind_kind() -> String:
+	for gust in gusts:
+		if absf(PLAYER_X-float(gust.x)) < float(gust.width)*0.5: return str(gust.get("kind","up"))
+	return "up"
+
+func wind_components() -> Vector2:
+	if y >= -24.0: return Vector2.ZERO
+	for gust in gusts:
+		if absf(PLAYER_X - float(gust.x)) < float(gust.width) * 0.5:
+			var kind: String = gust.get("kind", "up")
+			return Vector2(0.34, 0.0) if kind == "forward" else (Vector2(0.18, 0.70) if kind == "diagonal" else Vector2(0.0, 1.0))
+	return Vector2.ZERO
+
 func advance_gusts(movement: float) -> void:
 	for gust in gusts: gust.x -= movement
 	gusts = gusts.filter(func(g): return float(g.x) + float(g.width) * 0.5 > -80.0)
 	if character != "owl": return
 	gust_wait -= movement
 	if gust_wait <= 0.0:
-		gusts.append({"x":field_width + 150.0, "width":rng.randf_range(240.0, 310.0)})
-		gust_wait = rng.randf_range(1350.0, 2150.0)
+		gusts.append({"x":field_width + rng.randf_range(30.0, 240.0), "width":rng.randf_range(200.0, 380.0), "kind":["up", "forward", "diagonal"][rng.randi_range(0,2)] if adventure.enabled else "up"})
+		gust_wait = rng.randf_range(900.0, 2400.0) if adventure.enabled else rng.randf_range(1350.0, 2150.0)
 
 func step(dt: float) -> void:
 	if state in ["ice", "fire", "bonk"]:
@@ -181,10 +200,15 @@ func step(dt: float) -> void:
 		return
 	if state != "running" or dt <= 0.0 or dt > 0.05:
 		return
+	if adventure.hugging():
+		adventure.advance_hug(self, dt)
+		return
 	adventure.before_step(self, dt)
 	var previous_y := y
 	time += dt
 	landing_time = maxf(0.0, landing_time - dt)
+	var wind := wind_components() if character == "owl" and gliding else Vector2.ZERO
+	wind_push = move_toward(wind_push, wind.x, dt * 0.7)
 	var movement := speed() * dt
 	advance_gusts(movement)
 	invulnerable = maxf(0.0, invulnerable - dt)
@@ -202,7 +226,7 @@ func step(dt: float) -> void:
 	gliding = character == "owl" and jump_held and y < 0.0 and (velocity >= 0.0 or gliding)
 	riding_gust = gliding and gust_strength() > 0.0
 	if riding_gust:
-		velocity = move_toward(velocity, WIND_RISE_SPEED, 850.0 * gust_strength() * dt)
+		velocity = move_toward(velocity, WIND_RISE_SPEED * wind_components().y, 850.0 * gust_strength() * dt)
 		if not was_riding: event("updraft")
 	elif gliding:
 		velocity = minf(GLIDE_FALL_SPEED, velocity + GRAVITY * 0.18 * dt)
@@ -250,12 +274,12 @@ func step(dt: float) -> void:
 			pickups.append({"x":field_width + 65.0, "y":-113.0, "taken":false})
 	adventure.after_step(self, dt, movement, previous_y)
 	record_trail()
-	if state != "running": return
+	if state != "running" or adventure.hugging(): return
 	for obstacle in obstacles:
 		obstacle.x -= movement
 		var collides := false
-		if obstacle.kind == "arch":
-			collides = adventure.body_rect(self).intersects(Rect2(obstacle.x - 54, -154, 108, 106))
+		if str(obstacle.kind).begins_with("arch"):
+			collides = adventure.body_rect(self).intersects(Rect2(obstacle.x - 54, -174, 108, 106))
 		else:
 			collides = obstacle.x + 20.0 > PLAYER_X - 15.0 and obstacle.x - 20.0 < PLAYER_X + 15.0 and y > -49.0
 		if collides and adventure.giant():
@@ -266,7 +290,7 @@ func step(dt: float) -> void:
 				event("smash")
 			continue
 		if collides and invulnerable <= 0.0:
-			if take_hit("bonk" if obstacle.kind == "arch" else obstacle.kind): obstacle.counted = true
+			if take_hit("bonk" if str(obstacle.kind).begins_with("arch") else obstacle.kind): obstacle.counted = true
 			if state != "running": return
 			continue
 		if not obstacle.counted and obstacle.x + 20.0 < PLAYER_X - 15.0:
@@ -283,6 +307,7 @@ func step(dt: float) -> void:
 	obstacles = obstacles.filter(func(o): return o.x > -90.0)
 	pickups = pickups.filter(func(o): return o.x > -90.0 and not o.taken)
 	recompute_score()
+	adventure.update_level(self)
 
 func recompute_score() -> void:
 	score = int(distance / 32.0) + passed * 10 + gems * 25 + int(adventure.bonus_score)
