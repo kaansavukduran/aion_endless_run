@@ -83,20 +83,27 @@ with sync_playwright() as p:
     check(True, 'Pointer hold on the wolf releases correctly away from the character')
 
     canvas = game('sheep')
-    started = time.monotonic()
     found = False
-    while time.monotonic() - started < 45:
-        if canvas.get_attribute('data-state') != 'running':
-            break
-        flock = int(canvas.get_attribute('data-flock'))
-        if flock == 3:
-            found = True
-            page.screenshot(path=str(out / 'sheep-flock-three.png'))
-            break
-        obstacle = float(canvas.get_attribute('data-next-obstacle'))
-        if canvas.get_attribute('data-airborne') == 'false' and 35 < obstacle - 196 < 145:
-            page.keyboard.press('Space')
-        page.wait_for_timeout(35)
+    for attempt in range(3):
+        if attempt:
+            page.wait_for_selector('canvas[data-page="finished"]', timeout=10000)
+            page.mouse.click(560, 375)
+            page.wait_for_selector('canvas[data-state="running"]')
+        started = time.monotonic()
+        while time.monotonic() - started < 45:
+            if canvas.get_attribute('data-state') != 'running':
+                break
+            if int(canvas.get_attribute('data-flock')) == 3:
+                found = True
+                page.screenshot(path=str(out / 'sheep-flock-three.png'))
+                break
+            obstacle = float(canvas.get_attribute('data-next-obstacle'))
+            if canvas.get_attribute('data-airborne') == 'false' and 35 < obstacle - 196 < 165:
+                page.keyboard.press('Space')
+            page.wait_for_timeout(30)
+        if found: break
+        print('Flock attempt', attempt + 1, 'state', canvas.get_attribute('data-state'), 'flock', canvas.get_attribute('data-flock'), 'score', canvas.get_attribute('data-score'), flush=True)
+        page.screenshot(path=str(out / f'flock-attempt-{attempt+1}.png'))
     check(found, 'Real ground pickups build a visible flock of three')
     page.wait_for_selector('canvas[data-flock="2"]', timeout=10000)
     check(canvas.get_attribute('data-state') == 'running', 'One sheep absorbs a real obstacle hit and the run continues')

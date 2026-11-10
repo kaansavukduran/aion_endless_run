@@ -5,6 +5,11 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      android_only:
+        description: Recheck Android input/rendering without rebuilding desktop binaries
+        type: boolean
+        default: false
 permissions:
   contents: read
 env:
@@ -26,6 +31,7 @@ jobs:
       - name: Physics, menus, input and persistence
         run: godot --headless --script tests/test_game.gd
   desktop:
+    if: github.event_name != 'workflow_dispatch' || inputs.android_only != true
     needs: test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -162,10 +168,7 @@ jobs:
             adb shell input tap 1820 780
             adb shell input keyevent 111
             adb shell input keyevent 111
-            adb shell input swipe 1200 1000 1200 1000 1400 &
-            sleep 0.8
-            adb exec-out screencap -p > build/android-owl-glide.png
-            wait
+            adb shell input swipe 1200 1000 1200 1000 2200 >/tmp/aion-touch.log 2>&1 & gesture=$!; sleep 1; adb exec-out screencap -p > build/android-owl-glide.png; wait "$gesture"
             adb shell pidof com.kaansavukduran.aionendlessrun
             adb logcat -d > build/android-logcat.txt
             python3 packaging/check_android_log.py build/android-logcat.txt
