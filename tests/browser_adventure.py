@@ -124,7 +124,7 @@ with sync_playwright() as p:
   while time.monotonic()-started<55:
    d=bot_step(False)
    if d['state']!='running':break
-   player=float(d['playerX']);obstacles=[o for o in json.loads(d['obstacles']) if o['x']>player-10]
+   player=float(d['playerX']);obstacles=[o for o in json.loads(d['obstacles']) if o['x']>player-100]
    safe=not obstacles or min(o['x']-player for o in obstacles)>float(d['speed'])*1.2+100
    threats=[e for e in json.loads(d['enemies']) if e['hp']>0 and e['x']>player-65]
    safe=safe and (not threats or min(e['x']-player for e in threats)>float(d['speed'])*1.4+100)
