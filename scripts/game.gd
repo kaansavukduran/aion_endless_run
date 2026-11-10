@@ -8,7 +8,10 @@ const RUNNER_SHEETS = {"wolf":preload("res://assets/wolf-runner.png"), "sheep":p
 const RUNNER_DATA = preload("res://assets/FULL-RUNNER-PROVENANCE.json")
 const ACTION_SHEET = preload("res://assets/companion-actions.png")
 const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
-const GAME_VERSION = "0.4.0"
+const COMBAT_SHEET = preload("res://assets/adventure-combat.png")
+const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
+const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3}
+const GAME_VERSION = "0.5.0"
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
 const NAMES := {"aion":"Aion", "owl":"Baykuş Ömer", "wolf":"Accursed Wise Wolf", "sheep":"Blessed Ignorant Sheep"}
 const FRIENDS := ["aion", "owl", "wolf", "sheep"]
@@ -61,10 +64,37 @@ var ui_theme: Theme
 var portrait := false
 var web_stamp := ""
 var web_update_callback: JavaScriptObject
+var effects_enabled := true
+var canvas_layer: CanvasLayer
+var screen_transform := Transform2D.IDENTITY
+var device_portrait := false
+var adventure_view: Node2D
+var world_tint: CanvasModulate
+var power_label: Label
+var goal_label: Label
+var action_buttons := {}
+var duck_sources := {}
+var attack_sources := {}
+var touch_actions := {}
+var visual_size := 1.0
+var friend_combat := -1
+var ui_layout_ready := false
+var layout_generation := 0
 
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("0a1222"))
+	if OS.has_feature("web") and JavaScriptBridge.eval("matchMedia('(prefers-reduced-motion: reduce)').matches"):
+		motion = false
+		effects_enabled = false
 	load_settings()
+	adventure_view = preload("res://scripts/adventure_view.gd").new()
+	adventure_view.host = self
+	var fx_material := ShaderMaterial.new()
+	fx_material.shader = preload("res://scripts/companion_alpha.gdshader")
+	adventure_view.material = fx_material
+	add_child(adventure_view)
+	world_tint = CanvasModulate.new()
+	add_child(world_tint)
 	if OS.has_feature("web"):
 		web_update_callback = JavaScriptBridge.create_callback(prepare_web_update)
 		JavaScriptBridge.get_interface("window").aionSaveForUpdate = web_update_callback
@@ -75,6 +105,7 @@ func _ready() -> void:
 	player_sound = AudioStreamPlayer.new()
 	add_child(player_sound)
 	var canvas := CanvasLayer.new()
+	canvas_layer = canvas
 	add_child(canvas)
 	ui = Control.new()
 	ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -117,6 +148,8 @@ func load_settings() -> void:
 	best = maxi(0, int(cfg.get_value("records", "best", 0)))
 	audio_enabled = bool(cfg.get_value("prefs", "audio", true))
 	motion = bool(cfg.get_value("prefs", "motion", true))
+	effects_enabled = bool(cfg.get_value("prefs", "effects", true))
+	world.adventure.discoveries.assign(Array(cfg.get_value("progress", "powers", [])).filter(func(id): return id in world.adventure.POWER_NAMES))
 	volume = clampf(float(cfg.get_value("prefs", "volume", 0.45)), 0.0, 1.0)
 	fullscreen = bool(cfg.get_value("prefs", "fullscreen", false))
 
@@ -128,6 +161,8 @@ func save_settings() -> void:
 	cfg.set_value("prefs", "audio", audio_enabled)
 	cfg.set_value("prefs", "motion", motion)
 	cfg.set_value("prefs", "volume", volume)
+	cfg.set_value("prefs", "effects", effects_enabled)
+	cfg.set_value("progress", "powers", world.adventure.discoveries)
 	cfg.set_value("prefs", "fullscreen", fullscreen)
 	cfg.set_value("records", "best", best)
 	var result := cfg.save("user://save.tmp")
@@ -194,10 +229,26 @@ func position_control(item: Control, pos: Vector2, dimensions: Vector2) -> void:
 func rebuild() -> void:
 	if not is_instance_valid(ui):
 		return
-	view_w = get_viewport_rect().size.x
-	view_h = get_viewport_rect().size.y
-	portrait = view_h > view_w * 1.1
-	ground = view_h - (190.0 if portrait else 132.0)
+	var raw := get_viewport_rect().size
+	device_portrait = raw.y > raw.x
+	var aspect := raw.y / raw.x if device_portrait else raw.x / raw.y
+	view_h = 648.0
+	view_w = maxf(1024.0, view_h * aspect)
+	var scale_value := minf(raw.x / view_h, raw.y / view_w) if device_portrait else minf(raw.x / view_w, raw.y / view_h)
+	if device_portrait:
+		screen_transform = Transform2D(PI * 0.5, Vector2.ONE * scale_value, 0, Vector2((raw.x + view_h * scale_value) * 0.5, (raw.y - view_w * scale_value) * 0.5))
+	else:
+		screen_transform = Transform2D(0, Vector2.ONE * scale_value, 0, (raw - Vector2(view_w, view_h) * scale_value) * 0.5)
+	canvas_layer.transform = screen_transform
+	ui.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	ui.size = Vector2(view_w, view_h)
+	portrait = false
+	ground = view_h - 132.0
+	apply_scene_transform()
+	web_stamp = ""
+	ui_layout_ready = false
+	layout_generation += 1
+	refresh_interface_metadata.call_deferred(layout_generation)
 	world.field_width = view_w
 	for child in ui.get_children():
 		# Keep the pressed control in the tree until Godot finishes GUI dispatch.
@@ -252,18 +303,26 @@ func rebuild() -> void:
 	var next_label := label(text("next"), 9, "96aac3")
 	hud.add_child(next_label)
 	next_label.position = Vector2(view_w - 252, 99)
-	footer_label = label(text("hint") + "  ·  " + text("touch"), 14, "c5d1e7")
+	footer_label = label(text("hint"), 12, "c5d1e7")
 	ui.add_child(footer_label)
 	footer_label.position = Vector2(32, view_h - 75)
-	var local_label := label(text("local"), 11, "8397b6")
+	var local_label := label("", 11, "8397b6")
 	ui.add_child(local_label)
 	local_label.position = Vector2(32, view_h - 44)
 	var footer_name := label(NAMES[character], 13, "b0e1d2")
 	ui.add_child(footer_name)
-	footer_name.position = Vector2(view_w - 265, view_h - 70)
+	footer_name.position = Vector2(32, view_h - 111)
 	ability_label = label("", 11, "b8e6d6")
 	ui.add_child(ability_label)
-	position_control(ability_label, Vector2(view_w - 360, view_h - 43), Vector2(330, 25))
+	position_control(ability_label, Vector2(32, view_h - 40), Vector2(view_w - 460, 25))
+	power_label = label("", 12, "d7d8f6")
+	hud.add_child(power_label)
+	position_control(power_label, Vector2(32, 138), Vector2(view_w - 470, 25))
+	power_label.clip_text = true
+	goal_label = label("", 12, "ecdaa7")
+	hud.add_child(goal_label)
+	position_control(goal_label, Vector2(view_w - 415, 138), Vector2(385, 25))
+	build_action_buttons()
 	if portrait:
 		var rotate_hint := wrap_label(text("portrait"), 38, "c5d1e7")
 		rotate_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -280,6 +339,14 @@ func rebuild() -> void:
 		build_page()
 	update_hud()
 	queue_redraw()
+
+func refresh_interface_metadata(generation: int) -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if generation != layout_generation: return
+	ui_layout_ready = true
+	web_stamp = ""
+	publish_web_status()
 
 func card(width: float = 520.0) -> VBoxContainer:
 	var panel := PanelContainer.new()
@@ -341,7 +408,7 @@ func build_page() -> void:
 			column.add_child(button(text("quit"), quit_game))
 		column.add_child(button(text("settings"), func(): open_subpage("settings")))
 	elif page == "finished":
-		column.add_child(label(text("frozen" if world.state == "ice" else "burnt"), 26))
+		column.add_child(label(text("frozen" if world.state == "ice" else ("bonked" if world.state == "bonk" else "burnt")), 26))
 		var result := HBoxContainer.new()
 		column.add_child(result)
 		result.add_child(label("%05d" % world.score, 54, "b6f0d9"))
@@ -365,6 +432,7 @@ func build_page() -> void:
 			row.add_child(option)
 		column.add_child(label(text("appearance"), 14, "a8bcd8"))
 		add_toggle(column, "motion", motion, func(value): motion = value; save_settings())
+		add_toggle(column, "screen_fx", effects_enabled, func(value): effects_enabled = value; save_settings())
 		add_toggle(column, "audio", audio_enabled, func(value): audio_enabled = value; save_settings())
 		var volume_label := label(text("volume") + "  %d%%" % roundi(volume * 100.0), 13)
 		column.add_child(volume_label)
@@ -380,6 +448,9 @@ func build_page() -> void:
 			add_toggle(column, "fullscreen", fullscreen, func(value): fullscreen = value; apply_fullscreen(); save_settings())
 		column.add_child(label(text("how"), 17, "b5e7d6"))
 		column.add_child(wrap_label(text("help"), 13))
+		column.add_child(label(text("discoveries") % world.adventure.discoveries.size(), 16))
+		for power in world.adventure.POWER_NAMES:
+			column.add_child(wrap_label(("✓ " if world.adventure.discoveries.has(power) else "○ ") + text("power_" + power) + " · " + text("desc_" + power), 12))
 		column.add_child(label(text("version"), 11, "8e9fbb"))
 		first = button("‹  " + text("back"), func(): show_page(return_page))
 		column.add_child(first)
@@ -432,7 +503,9 @@ func build_characters() -> void:
 		row.add_child(details)
 		details.add_child(wrap_label(NAMES[id], 17, "eef3ff"))
 		details.add_child(wrap_label(text("ability_" + id), 11, "b6e6d7"))
-		details.add_child(button(text("selected" if character == id else "select"), func(): select_character(id), character == id))
+		var choice := button(text("selected" if character == id else "select"), func(): select_character(id), character == id)
+		choice.name = "Select_" + id
+		details.add_child(choice)
 	focus_later.call_deferred(back)
 
 func add_toggle(column: VBoxContainer, key: String, value: bool, callback: Callable) -> void:
@@ -458,6 +531,8 @@ func open_subpage(value: String) -> void:
 	show_page(value)
 
 func start_run() -> void:
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("if (matchMedia('(pointer:coarse)').matches) { const c=document.getElementById('canvas'); if(c.requestFullscreen) c.requestFullscreen().then(()=>screen.orientation?.lock?.('landscape')).catch(()=>{}); }")
 	best_at_start = best
 	world.character = character
 	world.reset()
@@ -511,6 +586,9 @@ func select_character(id: String) -> void:
 func clear_held_controls() -> void:
 	jump_sources.clear()
 	boost_sources.clear()
+	duck_sources.clear()
+	attack_sources.clear()
+	touch_actions.clear()
 	world.release_controls()
 
 func press_jump(source: String) -> void:
@@ -534,18 +612,103 @@ func release_boost(source: String) -> void:
 	boost_sources.erase(source)
 	world.boost_held = not boost_sources.is_empty()
 
+func press_attack(source: String) -> void:
+	if page != "" or world.state != "running": return
+	attack_sources[source] = true
+	world.adventure.attack_held = true
+	world.adventure.attack(world)
+
+func release_attack(source: String) -> void:
+	attack_sources.erase(source)
+	world.adventure.attack_held = not attack_sources.is_empty()
+
+func press_duck(source: String) -> void:
+	if page != "" or world.state != "running": return
+	duck_sources[source] = true
+	world.adventure.duck_held = true
+
+func release_duck(source: String) -> void:
+	duck_sources.erase(source)
+	world.adventure.duck_held = not duck_sources.is_empty()
+
+func build_action_buttons() -> void:
+	action_buttons.clear()
+	var names := ["jump", "attack", "duck"]
+	for i in 3:
+		var id: String = names[i]
+		var control := button(text("control_" + id), func(): pass)
+		ui.add_child(control)
+		position_control(control, Vector2(view_w - 420 + i * 132, view_h - 89), Vector2(124, 72))
+		control.visible = page == "" and world.state == "running"
+		match id:
+			"jump":
+				control.button_down.connect(func(): press_jump("jump-button"))
+				control.button_up.connect(func(): release_jump("jump-button"))
+			"attack":
+				control.button_down.connect(func(): press_attack("attack-button"))
+				control.button_up.connect(func(): release_attack("attack-button"))
+			"duck":
+				control.button_down.connect(func(): press_duck("duck-button"))
+				control.button_up.connect(func(): release_duck("duck-button"))
+		action_buttons[id] = control
+
+func to_game_point(point: Vector2) -> Vector2:
+	return global_transform.affine_inverse() * point
+
+func apply_scene_transform() -> void:
+	var camera := Transform2D.IDENTITY
+	var a = world.adventure
+	if a.giant() and effects_enabled and motion:
+		var clock := animation_clock()
+		var zoom := 1.008 + sin(clock * 0.65) * 0.004
+		camera = Transform2D(sin(clock * 0.8) * 0.004, Vector2.ONE * zoom, 0, Vector2.ZERO)
+		var center := Vector2(view_w * 0.5, ground * 0.6)
+		camera.origin = center - (camera * center) + Vector2(sin(clock * 0.7) * 2, cos(clock * 0.6))
+		if is_instance_valid(world_tint): world_tint.color = Color.WHITE.lerp(Color.from_hsv(fposmod(clock * 0.025, 1.0), 0.12, 1.0), 0.55)
+	elif is_instance_valid(world_tint): world_tint.color = Color.WHITE
+	transform = screen_transform * camera
+
 func on_wolf(point: Vector2) -> bool:
 	return character == "wolf" and Rect2(World.PLAYER_X - 65, ground + world.y - 115, 130, 130).has_point(point)
 
 func _input(event: InputEvent) -> void:
+	# Route game touch buttons by finger ID. BaseButton's emulated mouse alone
+	# cannot reliably represent jump + attack held by two different fingers.
+	if event is InputEventScreenTouch:
+		var touch_source := "touch:" + str(event.index)
+		if not event.pressed:
+			release_attack(touch_source)
+			release_duck(touch_source)
+			touch_actions.erase(event.index)
+		elif page == "" and world.state == "running":
+			var point: Vector2 = screen_transform.affine_inverse() * event.position
+			if is_instance_valid(pause_button) and pause_button.get_global_rect().has_point(point):
+				pause_run()
+				get_viewport().set_input_as_handled()
+				return
+			for id in action_buttons:
+				var control: Button = action_buttons[id]
+				if control.visible and control.get_global_rect().has_point(point):
+					touch_actions[event.index] = id
+					if id == "jump": press_jump(touch_source)
+					elif id == "attack": press_attack(touch_source)
+					else: press_duck(touch_source)
+					get_viewport().set_input_as_handled()
+					return
+	if event is InputEventMouseButton and event.device == -1 and page == "":
+		get_viewport().set_input_as_handled()
+		return
 	# Releases are observed before GUI dispatch so dragging away from a control
 	# or opening a menu can never leave glide/boost latched on.
 	if event is InputEventKey and not event.pressed:
 		if event.keycode == KEY_SPACE: release_jump("key")
 		if event.keycode == KEY_SHIFT: release_boost("shift")
+		if event.keycode == KEY_J: release_attack("key")
+		if event.keycode in [KEY_DOWN, KEY_S, KEY_CTRL]: release_duck("key:" + str(event.keycode))
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		release_jump("mouse")
 		release_boost("mouse")
+		release_attack("mouse")
 	if event is InputEventScreenTouch and not event.pressed:
 		release_jump("touch:" + str(event.index))
 		release_boost("touch:" + str(event.index))
@@ -558,6 +721,12 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_SPACE and page == "":
 			press_jump("key")
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_J and page == "":
+			press_attack("key")
+			get_viewport().set_input_as_handled()
+		elif event.keycode in [KEY_DOWN, KEY_S, KEY_CTRL] and page == "":
+			press_duck("key:" + str(event.keycode))
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_SHIFT and page == "":
 			press_boost("shift")
@@ -572,7 +741,9 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventJoypadButton:
 		if not event.pressed:
 			if event.button_index == JOY_BUTTON_A: release_jump("pad")
-			if event.button_index == JOY_BUTTON_X: release_boost("pad")
+			if event.button_index == JOY_BUTTON_X: release_attack("pad")
+			if event.button_index == JOY_BUTTON_B: release_duck("pad")
+			if event.button_index == JOY_BUTTON_LEFT_SHOULDER: release_boost("pad")
 			return
 		if event.button_index == JOY_BUTTON_START:
 			if page == "": pause_run()
@@ -581,29 +752,35 @@ func _input(event: InputEvent) -> void:
 			if page == "": press_jump("pad")
 			elif page == "main": start_run()
 		elif event.button_index == JOY_BUTTON_X:
+			press_attack("pad")
+		elif event.button_index == JOY_BUTTON_B:
+			press_duck("pad")
+		elif event.button_index == JOY_BUTTON_LEFT_SHOULDER:
 			press_boost("pad")
 
 func _unhandled_input(event: InputEvent) -> void:
 	if page != "": return
 	if event is InputEventScreenTouch and event.pressed:
-		if is_instance_valid(pause_button) and pause_button.get_global_rect().has_point(event.position): return
+		if is_instance_valid(pause_button) and pause_button.get_global_rect().has_point(screen_transform.affine_inverse() * event.position): return
 		var source := "touch:" + str(event.index)
-		if on_wolf(event.position): press_boost(source)
+		if on_wolf(to_game_point(event.position)): press_boost(source)
 		else: press_jump(source)
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton and event.device != -1 and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		if on_wolf(event.position): press_boost("mouse")
-		else: press_jump("mouse")
+		press_attack("mouse")
 		get_viewport().set_input_as_handled()
 
 func _physics_process(dt: float) -> void:
 	world.character = character
-	if page == "" or (world.state in ["fire", "ice"] and page == "finished"):
+	if page == "" or (world.state in ["fire", "ice", "bonk"] and page == "finished"):
 		world.step(dt)
 	if world.event_id != last_event:
 		last_event = world.event_id
-		handle_event(world.last_event)
-	if world.state in ["fire", "ice"] and world.hit_time > 1.45 and not finished_panel:
+		if world.pending_events.is_empty(): handle_event(world.last_event)
+		else:
+			for value in world.pending_events: handle_event(value)
+			world.pending_events.clear()
+	if world.state in ["fire", "ice", "bonk"] and world.hit_time > 1.45 and not finished_panel:
 		finished_panel = true
 		save_settings()
 		show_page("finished")
@@ -618,11 +795,27 @@ func _physics_process(dt: float) -> void:
 			p.velocity.y += 190.0 * dt
 			p.life -= dt
 	particles = particles.filter(func(p): return p.life > 0.0)
+	if world.state != "paused": visual_size = move_toward(visual_size, world.adventure.size_multiplier(), dt * 3.0) if motion else world.adventure.size_multiplier()
+	apply_scene_transform()
 	update_friend()
 	update_hud()
+	adventure_view.queue_redraw()
 	queue_redraw()
 
 func handle_event(value: String) -> void:
+	if value.begins_with("power_"):
+		notice = text(value)
+		notice_time = 1.8
+		burst(Vector2(World.PLAYER_X, ground + world.y - 40), Color("bce8ff"), 16)
+		tone(1050, 0.14)
+		save_settings()
+	if value.begins_with("attack_"): tone(390 if character in ["wolf", "sheep"] else 620, 0.055)
+	if value in ["enemy_down", "enemy_hit", "stomp", "smash", "shield_saved", "giant_hit", "lightning_cast", "goal_done"]:
+		notice = text(value)
+		notice_time = 0.8
+		burst(Vector2(World.PLAYER_X + 55, ground + world.y - 45), Color("ffe0a6"), 9)
+		tone(820 if value == "stomp" else 290, 0.07)
+	if value == "thunder": tone(84, 0.22)
 	if value == "": return
 	if value == "jump": tone(580, 0.07)
 	if value == "double_jump":
@@ -647,7 +840,7 @@ func handle_event(value: String) -> void:
 			tone(1080, 0.1)
 		elif value == "biome": tone(740, 0.18)
 		elif world.combo % 5 == 0: tone(840, 0.1)
-	if value in ["ice", "fire"]:
+	if value in ["ice", "fire", "bonk"]:
 		clear_held_controls()
 		save_settings()
 		burst(Vector2(World.PLAYER_X, ground - 40), Color("a5eafa") if value == "ice" else Color("ffb46b"), 22)
@@ -680,6 +873,22 @@ func update_hud() -> void:
 	best_label.text = "%05d" % best
 	crystal_label.text = "%02d" % world.gems
 	biome_label.text = ("02  /  " + text("snow")) if world.biome() else ("01  /  " + text("desert"))
+	biome_label.text += "  ·  " + text("weather_" + world.adventure.weather)
+	var powers: Array[String] = []
+	for id in world.adventure.powers:
+		if float(world.adventure.powers[id]) > 0.0: powers.append(text("power_" + id) + " " + str(ceili(world.adventure.powers[id])) + "s")
+	if world.adventure.lightning_charges > 0: powers.append(text("power_lightning") + " ×" + str(world.adventure.lightning_charges))
+	if is_instance_valid(power_label): power_label.text = (" · ".join(powers) if not powers.is_empty() else text("power_hint")) + "  |  " + text("defeated") % world.adventure.kills + "  |  " + str(roundi(world.speed() / 320 * 100)) + "%"
+	if is_instance_valid(goal_label):
+		var goal: Dictionary = world.adventure.goal_info()
+		goal_label.text = text("goal_" + goal.kind) % [mini(goal.progress, goal.target), goal.target]
+		goal_label.visible = page == ""
+	for id in action_buttons:
+		action_buttons[id].visible = page == "" and world.state == "running"
+	if action_buttons.has("attack"):
+		action_buttons.attack.modulate.a = 0.70 if world.adventure.attack_cooldown > 0 else 1.0
+		action_buttons.jump.modulate = Color("a9ead9") if world.jump_held else Color.WHITE
+		action_buttons.duck.modulate = Color("a9ead9") if world.adventure.ducking(world) else Color.WHITE
 	progress.value = fmod(world.distance, World.BIOME_DISTANCE)
 	pause_button.visible = page == "" and world.state == "running"
 	notice_label.text = text("saved_error") if save_failed else (notice if notice_time > 0.0 and page == "" else "")
@@ -694,14 +903,53 @@ func update_hud() -> void:
 func publish_web_status() -> void:
 	if not OS.has_feature("web"): return
 	var stamp := "%s:%s:%d:%s:%s:%s:%d:%s:%s:%d" % [world.state, page, world.score, character, language, world.y < 0.0, world.jumps_used, world.gliding, world.boosting(), world.sheep_count]
+	stamp += ":" + str(effects_enabled) + ":" + str(motion)
 	stamp += ":%.2f:%s:%d:%d:%s" % [world.y, world.riding_gust, friend_row, friend_frame, friend_action]
 	if character == "sheep": stamp += ":%.2f:%.2f" % [world.flock_pose(0).y, world.flock_pose(1).y]
+	stamp += ":%.2f:%s:%s:%d:%d" % [world.time, world.adventure.ducking(world), world.adventure.giant(), world.adventure.kills, friend_combat]
+	for scroll in ui.find_children("*", "VScrollBar", true, false): stamp += ":" + str(scroll.value)
 	if stamp == web_stamp: return
 	web_stamp = stamp
 	var document = JavaScriptBridge.get_interface("document")
 	var canvas = document.getElementById("canvas")
 	if canvas == null: return
+	canvas.setAttribute("data-ui-ready", str(ui_layout_ready))
 	canvas.setAttribute("data-version", GAME_VERSION)
+	canvas.setAttribute("data-player-x", str(World.PLAYER_X))
+	canvas.setAttribute("data-ducking", str(world.adventure.ducking(world)))
+	canvas.setAttribute("data-combat-row", str(friend_combat))
+	canvas.setAttribute("data-attacking", str(world.adventure.attack_time > 0.0))
+	canvas.setAttribute("data-attack-cooldown", str(world.adventure.attack_cooldown))
+	canvas.setAttribute("data-giant", str(world.adventure.giant()))
+	canvas.setAttribute("data-kills", str(world.adventure.kills))
+	canvas.setAttribute("data-stomps", str(world.adventure.stomps))
+	canvas.setAttribute("data-weather", world.adventure.weather)
+	canvas.setAttribute("data-speed", str(world.speed()))
+	canvas.setAttribute("data-orientation", "landscape")
+	canvas.setAttribute("data-device-portrait", str(device_portrait))
+	canvas.setAttribute("data-view-width", str(view_w))
+	canvas.setAttribute("data-view-height", str(view_h))
+	canvas.setAttribute("data-raw-width", str(get_viewport_rect().size.x))
+	canvas.setAttribute("data-raw-height", str(get_viewport_rect().size.y))
+	canvas.setAttribute("data-screen-transform", JSON.stringify([screen_transform.x.x,screen_transform.x.y,screen_transform.y.x,screen_transform.y.y,screen_transform.origin.x,screen_transform.origin.y]))
+	var controls := {}
+	for id in action_buttons:
+		var button: Button = action_buttons[id]
+		controls[id] = {"x":button.position.x,"y":button.position.y,"w":button.size.x,"h":button.size.y}
+	canvas.setAttribute("data-controls", JSON.stringify(controls))
+	var buttons: Array = []
+	for node in ui.find_children("*", "Button", true, false):
+		if node.is_visible_in_tree():
+			var rect: Rect2 = node.get_global_rect()
+			buttons.append({"text":node.text,"name":str(node.name),"x":rect.position.x,"y":rect.position.y,"w":rect.size.x,"h":rect.size.y})
+	canvas.setAttribute("data-ui", JSON.stringify(buttons))
+	canvas.setAttribute("data-goal", JSON.stringify(world.adventure.goal_info()))
+	canvas.setAttribute("data-discoveries", JSON.stringify(world.adventure.discoveries))
+	canvas.setAttribute("data-effects-enabled", str(effects_enabled))
+	canvas.setAttribute("data-enemies", JSON.stringify(world.adventure.enemies))
+	canvas.setAttribute("data-obstacles", JSON.stringify(world.obstacles))
+	canvas.setAttribute("data-powers", JSON.stringify(world.adventure.powers))
+	canvas.setAttribute("data-items", JSON.stringify(world.adventure.items))
 	canvas.setAttribute("data-best", str(best))
 	canvas.setAttribute("role", "application")
 	canvas.setAttribute("lang", language)
@@ -745,12 +993,18 @@ func runner_region(id: String, row: int, frame: int) -> Rect2:
 	return Rect2(frame * 181, ys[row], 181, ys[row + 1] - ys[row])
 
 func update_friend() -> void:
-	friend_sprite.visible = character != "aion"
+	var a = world.adventure
+	if world.state != "paused" or friend_character != character:
+		friend_combat = -1
+		if world.state == "running":
+			if a.attack_time > 0.0: friend_combat = COMBAT_ROWS[character]
+			elif a.ducking(world): friend_combat = COMBAT_ROWS[character] + 4
+	friend_sprite.visible = character != "aion" or friend_combat >= 0
 	for item in followers: item.visible = false
 	sheep_collectible.visible = character == "sheep" and not world.sheep_pickups.is_empty() and world.sheep_count < 3
 	if sheep_collectible.visible:
 		place_companion(sheep_collectible, "sheep", 7, int(animation_clock() * 7) % 6, Vector2(world.sheep_pickups[0].x, ground), 0.46)
-	if character == "aion": return
+	if character == "aion" and friend_combat < 0: return
 	if friend_character != character:
 		friend_character = character
 		friend_row = 0
@@ -779,23 +1033,39 @@ func update_friend() -> void:
 		friend_action = false
 		friend_row = 3
 		friend_frame = mini(5, int(world.hit_time * 8)) if motion else 5
-	elif world.state == "fire":
+	elif world.state in ["fire", "bonk"]:
 		friend_action = false
 		friend_row = 4 if world.hit_time < 0.75 and motion else 5
-		friend_frame = mini(5, int(world.hit_time * 8)) if friend_row == 4 else (int(world.hit_time * 5) % 6 if motion else 0)
-	if not motion and world.state not in ["ice", "fire"]: friend_frame = 0
-	place_companion(friend_sprite, character, friend_row, friend_frame, Vector2(World.PLAYER_X, ground + world.y), 0.62, friend_action)
+		friend_frame = (mini(5, 3 + int(world.hit_time * 4)) if world.state == "bonk" else mini(5, int(world.hit_time * 8))) if friend_row == 4 else (int(world.hit_time * 5) % 6 if motion else 0)
+	if not motion and world.state not in ["ice", "fire", "bonk"]: friend_frame = 0
+	if character != "aion": place_companion(friend_sprite, character, friend_row, friend_frame, Vector2(World.PLAYER_X, ground + world.y), 0.62 * visual_size, friend_action)
+	if friend_combat >= 0:
+		var combat_frame: int = (a.attack_frame() if friend_combat < 4 else (mini(2, int(a.duck_time * 28)) if a.duck_time < 0.10 else 3 + int(animation_clock() * 4) % 2)) if motion else 3
+		place_combat(friend_sprite, character, friend_combat, combat_frame, Vector2(World.PLAYER_X, ground + world.y), visual_size, friend_combat >= 4 or a.ducking(world))
 	friend_sprite.modulate = Color.WHITE
 	if character == "sheep":
 		for i in 2:
-			followers[i].visible = world.sheep_count > i + 1 and world.state not in ["fire", "ice"]
+			followers[i].visible = world.sheep_count > i + 1 and world.state not in ["fire", "ice", "bonk"]
 			var pose: Dictionary = world.flock_pose(i)
 			var in_air: bool = float(pose.y) < -0.01
 			var landing: bool = float(pose.landing_time) > 0.0
 			var row := 2 if in_air or landing else (0 if world.state == "ready" else 1)
 			var frame := flight_frame(float(pose.velocity), float(pose.air_time), true) if in_air else (5 if landing else posmod(int((world.distance - World.FLOCK_GAP * (i + 1)) / 29.0), 6))
 			place_companion(followers[i], "sheep", row, frame if motion else 0, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), 0.62, in_air or landing)
+			if float(pose.get("duck", 0.0)) > 0.5:
+				place_combat(followers[i], "sheep", 6, 3 + int(animation_clock() * 4) % 2 if motion else 3, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), 1.0, true)
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
+
+func place_combat(item: Sprite2D, id: String, row: int, frame: int, anchor: Vector2, growth: float, crouch: bool) -> void:
+	var data: Dictionary = ADVENTURE_DATA.data.atlases.combat
+	var sy: float = data.row_y[row]
+	var cell_w := float(data.width) / 6.0
+	var scale_value := 94.0 / float(data.body_heights[COMBAT_ROWS[id]])
+	item.texture = COMBAT_SHEET
+	item.region_rect = Rect2(roundf(frame * cell_w), sy, cell_w, float(data.row_y[row + 1]) - sy)
+	item.offset = Vector2(-cell_w * 0.5, -float(data.baselines[row][frame]))
+	item.scale = Vector2(scale_value, scale_value * (0.53 if crouch else 1.0)) * growth
+	item.position = anchor.round()
 
 func flight_frame(velocity: float, air_time: float, sheep: bool = false) -> int:
 	if air_time < 0.045: return 0
@@ -876,6 +1146,7 @@ func _draw() -> void:
 		draw_line(Vector2(x, ground - 99), Vector2(x, ground - 89), Color("102b30"), 3)
 	var frame := int(animation_clock() * 10.0) % 6
 	for o in world.obstacles:
+		if o.kind == "arch": continue
 		sprite(6 if o.kind == "ice" else 7, frame, o.x - 40, ground + 3, 80)
 	for pickup in world.pickups:
 		var point := Vector2(pickup.x, ground + pickup.y)
@@ -889,7 +1160,7 @@ func _draw() -> void:
 	if character == "sheep":
 		for i in maxi(0, world.sheep_count - 1):
 			draw_rect(Rect2(World.PLAYER_X - World.FLOCK_GAP * (i + 1) - 30, ground - 2, 60, 5), Color(0.02, 0.04, 0.09, 0.3))
-	if character == "aion":
+	if character == "aion" and friend_combat < 0:
 		var row := 0
 		var f := int(animation_clock() * 4.0) % 6
 		if world.state in ["running", "paused"]:
@@ -898,10 +1169,10 @@ func _draw() -> void:
 		if world.state == "ice":
 			row = 3
 			f = mini(5, int(world.hit_time * 8.0)) if motion else 5
-		if world.state == "fire":
+		if world.state in ["fire", "bonk"]:
 			row = 4 if world.hit_time < 0.75 and motion else 5
-			f = mini(5, int(world.hit_time * 8)) if row == 4 else (int(world.hit_time * 5) % 6 if motion else 0)
-		sprite(row, f, World.PLAYER_X - 65, ground + world.y + 3, 130)
+			f = (mini(5, 3 + int(world.hit_time * 4)) if world.state == "bonk" else mini(5, int(world.hit_time * 8))) if row == 4 else (int(world.hit_time * 5) % 6 if motion else 0)
+		sprite(row, f, World.PLAYER_X - 65 * visual_size, ground + world.y + 3, 130 * visual_size)
 	for p in particles:
 		var c: Color = p.color
 		c.a = minf(1.0, p.life * 3.0)

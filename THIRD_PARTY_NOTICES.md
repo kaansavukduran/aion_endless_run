@@ -34,3 +34,7 @@ Original procedural scenery and synthesized game sounds are part of this project
 ## Companion action atlas (0.4.0)
 
 `assets/companion-actions.png` is an original owner-authorized imagegen output using the three 0.3 character sheets as identity/style references. Its 18 frames provide wolf dash, owl updraft wingstroke and sheep jump/landing. Original PNG bytes are unchanged; atlas regions, baselines, scale and SHA-256 are recorded in `assets/ACTION-PROVENANCE.json`. The same MPL-2.0 artwork terms and AI-output limitations above apply. Wind paths are original game code, not baked lines in the image.
+
+## Adventure atlases (0.5.0)
+
+`assets/adventure-combat.png`, `assets/adventure-enemies.png` and `assets/adventure-items.png` are original owner-authorized imagegen outputs: 48 character melee/crouch frames, 36 crow/gnome frames, and 18 item/branch frames. The established Aion/companion identities were used as references. PNG bytes are preserved unchanged; runtime atlas regions, baselines, body heights and alpha discard register the generated grids. Sizes, row boundaries and SHA-256 are in `assets/ADVENTURE-PROVENANCE.json`. Same MPL-2.0 artwork terms and AI-output limitations above apply. Mushroom and gnome artwork is original; no Mario/Nintendo assets or code are used. The alpha shader now avoids multiplying the already sampled texture color a second time.

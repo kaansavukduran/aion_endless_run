@@ -30,6 +30,13 @@ with sync_playwright() as playwright:
         assert value, message
         results.append(message)
 
+
+    def click_button(text=None,name=None):
+        page.wait_for_selector('canvas[data-ui-ready="true"]')
+        controls=json.loads(canvas.get_attribute('data-ui'))
+        b=next(b for b in controls if b['name']==name) if name else next(b for b in controls if text in b['text'])
+        page.mouse.click(b['x']+b['w']/2,b['y']+b['h']/2)
+
     def wait_state(value):
         page.wait_for_selector(f'canvas[data-state="{value}"]')
 
@@ -48,11 +55,11 @@ with sync_playwright() as playwright:
     score = canvas.get_attribute('data-score')
     page.wait_for_timeout(400)
     check(canvas.get_attribute('data-score') == score, 'Esc freezes score and opens pause menu')
-    page.mouse.click(560, 325)
+    click_button('Karakterler')
     page.wait_for_selector('canvas[data-page="characters"]')
     page.screenshot(path=str(evidence / '03-characters.png'))
     # Companion choice uses actual visible select buttons; no test-only state API.
-    page.mouse.click(820, 360)
+    click_button(name='Select_owl')
     page.wait_for_selector('canvas[data-character="owl"]')
     check(True, 'Owl is selectable through the character menu')
     page.keyboard.press('Escape')
@@ -62,14 +69,14 @@ with sync_playwright() as playwright:
     check(canvas.get_attribute('data-character') == 'owl', 'Resume retains chosen character and open run')
     page.wait_for_timeout(850)
     page.mouse.click(250, 250)
-    page.wait_for_selector('canvas[data-airborne="true"]')
-    check(True, 'Pointer/tap control jumps')
+    page.wait_for_selector('canvas[data-attacking="true"]')
+    check(True, 'Left pointer click triggers the requested melee attack')
     page.keyboard.press('Escape')
     wait_state('paused')
-    page.mouse.click(560, 445)
+    click_button('Ayarlar')
     page.wait_for_selector('canvas[data-page="settings"]')
     page.screenshot(path=str(evidence / '04-settings-tr.png'))
-    page.mouse.click(695, 265)
+    click_button('English')
     page.wait_for_selector('canvas[lang="en"]')
     check(canvas.get_attribute('data-page') == 'settings', 'Language applies immediately without leaving settings')
     page.screenshot(path=str(evidence / '05-settings-en.png'))
@@ -80,8 +87,8 @@ with sync_playwright() as playwright:
     before = int(canvas.get_attribute('data-score'))
     page.wait_for_timeout(500)
     check(int(canvas.get_attribute('data-score')) >= before, 'Running game continues with network disabled')
-    page.wait_for_selector('canvas[data-page="finished"]', timeout=15000)
-    check(canvas.get_attribute('data-state') in ['ice', 'fire'], 'Real collision reaches animated result screen offline')
+    page.wait_for_selector('canvas[data-page="finished"]', timeout=25000)
+    check(canvas.get_attribute('data-state') in ['ice', 'fire', 'bonk'], 'Real collision reaches animated result screen offline')
     page.screenshot(path=str(evidence / '06-result-offline.png'))
     context.set_offline(False)
     page.reload()

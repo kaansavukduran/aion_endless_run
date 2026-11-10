@@ -4,6 +4,11 @@ const World = preload("res://scripts/world.gd")
 var checks := 0
 var failures := 0
 
+func classic_world() -> RunnerWorld:
+	var world = World.new()
+	world.adventure.enabled = false
+	return world
+
 func check(condition: bool, message: String) -> void:
 	checks += 1
 	if not condition:
@@ -31,13 +36,13 @@ func hold_key(game: Node, code: Key, pressed: bool) -> void:
 func touch(game: Node, index: int, point: Vector2, pressed: bool) -> void:
 	var event := InputEventScreenTouch.new()
 	event.index = index
-	event.position = point
+	event.position = game.global_transform * point
 	event.pressed = pressed
 	if pressed: game._unhandled_input(event)
 	else: game._input(event)
 
 func ability_tests() -> void:
-	var owl := World.new()
+	var owl := classic_world()
 	owl.character = "owl"
 	owl.reset()
 	owl.obstacle_wait = 999.0
@@ -66,7 +71,7 @@ func ability_tests() -> void:
 		flights.append(duration)
 		check(owl.y == 0.0 and owl.jumps_used == 0 and not owl.gliding, "Owl eventually lands and restores one jump")
 	check(flights[1] > flights[0] + 0.7, "Glide creates measurably longer airtime without infinite flight")
-	var aion := World.new()
+	var aion := classic_world()
 	aion.reset()
 	aion.obstacle_wait = 999.0
 	aion.jump()
@@ -80,7 +85,7 @@ func ability_tests() -> void:
 	aion.step(0.02)
 	aion.jump()
 	check(aion.jumps_used == 2, "Aion can double jump again after landing")
-	var wolf := World.new()
+	var wolf := classic_world()
 	wolf.character = "wolf"
 	wolf.reset()
 	var normal_speed: float = wolf.speed()
@@ -94,7 +99,7 @@ func ability_tests() -> void:
 		wolf.character = id
 		wolf.boost_held = true
 		check(not wolf.boosting(), "Boost is specific to wolf: " + id)
-	var sheep := World.new()
+	var sheep := classic_world()
 	sheep.character = "sheep"
 	sheep.reset()
 	sheep.obstacle_wait = 999.0
@@ -133,7 +138,7 @@ func ability_tests() -> void:
 	check(sheep.sheep_count == 1 and sheep.sheep_pickups.is_empty() and sheep.invulnerable == 0.0, "A new run resets the flock and protection")
 
 func flock_and_wind_tests() -> void:
-	var flock := World.new()
+	var flock := classic_world()
 	flock.character = "sheep"
 	flock.reset()
 	flock.sheep_count = 3
@@ -173,7 +178,7 @@ func flock_and_wind_tests() -> void:
 		flock.jump()
 		while float(flock.flock_pose(0).y) >= 0.0: flock.step(1.0 / 240)
 		check(absf(flock.distance - base_distance - World.FLOCK_GAP) < 5.0, "Spatial follower timing stays correct at speed " + str(flock.speed()))
-	var owl := World.new()
+	var owl := classic_world()
 	owl.character = "owl"
 	owl.reset()
 	owl.obstacle_wait = 999.0
@@ -227,7 +232,7 @@ func flock_and_wind_tests() -> void:
 func run() -> void:
 	ability_tests()
 	flock_and_wind_tests()
-	var world := World.new()
+	var world := classic_world()
 	world.rng.seed = 44
 	world.reset()
 	world.jump()
@@ -285,6 +290,7 @@ func run() -> void:
 	check(world.score == 0 and world.gems == 0 and world.obstacles.is_empty(), "Retry resets run counters")
 	# Actual main scene and its keyboard, menus, settings, four characters and disk save.
 	var game = load("res://main.tscn").instantiate()
+	game.world.adventure.enabled = false
 	root.add_child(game)
 	await process_frame
 	game.set_physics_process(false)
@@ -325,6 +331,7 @@ func run() -> void:
 	game.save_settings()
 	check(not game.save_failed, "Atomic local save succeeds")
 	var second = load("res://main.tscn").instantiate()
+	second.world.adventure.enabled = false
 	root.add_child(second)
 	await process_frame
 	second.set_physics_process(false)

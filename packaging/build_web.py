@@ -65,6 +65,10 @@ shutil.rmtree(root / "build/web", ignore_errors=True)
 (root / "build" / "web").mkdir(parents=True, exist_ok=True)
 (root / "build" / ".gdignore").touch()
 for arguments in [["--editor", "--import", "--quit"], ["--export-release", "Web"]]:
+    if arguments[0] == "--export-release":
+        startup = subprocess.run([engine, "--headless", "--path", str(root), "--quit-after", "5"], cwd=root, env=env, capture_output=True, text=True, timeout=60)
+        if startup.returncode or "SCRIPT ERROR" in startup.stderr or "SCRIPT ERROR" in startup.stdout:
+            raise RuntimeError("Actual game entry failed before Web export:\n" + startup.stdout + startup.stderr)
     subprocess.run([engine, "--headless", "--path", str(root), *arguments], cwd=root, env=env, check=True)
 for name in ["index.html", "index.js", "index.wasm", "index.pck"]:
     if not (root / "build/web" / name).is_file():

@@ -1,8 +1,8 @@
 # Aion Endless Run
 
-Sevimli bir piksel macerası. **Space ile zıpla, Esc ile mola ver.** Ateşi ve buzu aş, kristalleri topla, kendi rekorunu geç. Bağımsız Godot oyunu; Firefox veya eklenti gerektirmez. Oyun internete bağlanmaz.
+Sevimli bir piksel macerası. **Space ile zıpla, Esc ile mola ver.** Kargalara vur, dalların altından eğil, dev mantar ve tılsımları topla, kendi rekorunu geç. Bağımsız Godot oyunu; Firefox veya eklenti gerektirmez. Oyun internete bağlanmaz.
 
-![Baykuş yükselen havayı yakalıyor](docs/evidence-v04/owl-updraft-rise.png)
+![Aion dev mantar gücüyle cücelere karşı](docs/evidence-v05/aion-combat.png)
 
 **[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Sürüm ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/VALIDATION.md)
 
@@ -15,9 +15,11 @@ Sevimli bir piksel macerası. **Space ile zıpla, Esc ile mola ver.** Ateşi ve 
 5. Android: `.apk` dosyasını açarak kur. Yalnızca indirdiğin kaynağa güvendiğinde sistemin o kaynak için sunduğu yükleme iznini kullan. Paket arm64 ve x86_64 içindir; 32 bit Android desteklenmez.
 6. iPhone: Bu sürümde App Store/TestFlight paketi yok. Apple Developer hesabı, dağıtım imzası ve mağaza/test onayı gerekir. Kaynak proje iOS hedefini içerir; web önizlemesi Safari'de alternatif bir oyun sürümüdür, yerel iOS kurulumu değildir.
 
-Ana menüde **Koşuya başla** veya **Space**. Koşarken **Space**, sol tıklama veya dokunma ile zıpla. **Esc** veya sağ üst **Duraklat** düğmesiyle mola ver. Yeniden Esc ile kaldığın yerden devam et. Oyun kumandasında A zıplama, Start duraklatmadır. F11 tam ekranı değiştirir.
+Ana menüde **Koşuya başla** veya **Space**. Koşarken **Space**, Zıpla düğmesi veya boş alana dokunma ile zıpla. **Sol tık/J/Vur** ile saldır; **aşağı ok/S/Ctrl/Eğil** basılıyken alçak dalların altından geç. Düşerken düşmanın üstüne basarak sekebilirsin. **Esc** veya sağ üst **Duraklat** düğmesiyle mola ver. Yeniden Esc ile kaldığın yerden devam et. Oyun kumandasında A zıplama, X saldırı, B eğilme, LB kurt deparı, Start duraklatmadır. F11 tam ekranı değiştirir.
 
-0.4.0’da koyunlar öndekinin izlediği zıplama yolunu mesafeye bağlı gecikmeyle sırayla takip eder. Kurt deparında kıvrılan rüzgâr izleri akar. Baykuş, görünür yükselen hava akımında basılı tutarak biraz yükselebilir. Bu hareketler için yeni 18 karelik ek pafta vardır.
+0.5.0’da **102 yeni karelik üç özgün piksel pafta** saldırı, eğilme, karga, kırmızı şapkalı cüce, eşyalar ve alçak dalı canlandırır. Aion yumruk atar, baykuş kanadını savurur, koyun kafa atar, kurt ısırır. Mantar 10 saniye büyütür ve cüce dalgası başlatır; şimşek, zaman kumu, kanatlı çizme, kalkan, mıknatıs ve can yaprağı geçici güçler verir. Keşfedilen yedi güç cihazda kaydedilir. Karışan karşılaşma torbası, değişen mesafe aralıkları, yumuşak hız değişimleri, yağmur/kar/kum/fırtına, küçük gök şimşeği, düşmana basma komboları ve kısa puan hedefleri koşuları çeşitlendirir. Hafif renk ve kamera efektleri Ayarlar’dan kapatılabilir. Telefon arayüzü her zaman yataydır; ekran kilidi desteklenmediğinde oyun alanı döndürülür. İki parmakla aynı anda zıplama ve saldırı çalışır. [Tasarım ve araştırma notları](docs/GAME-DESIGN.md).
+
+Koyunların aralığı 112/224 piksele çıkarıldı; ilk hızda yaklaşık 0,35/0,70 saniye sonra, öndekinin zıpladığı noktada sırayla havalanırlar. Önceki 0.4 özelliklerinde koyunlar öndekinin izlediği zıplama yolunu mesafeye bağlı gecikmeyle sırayla takip eder. Kurt deparında kıvrılan rüzgâr izleri akar. Baykuş, görünür yükselen hava akımında basılı tutarak biraz yükselebilir. Bu hareketler için yeni 18 karelik ek pafta vardır.
 
 Baykuş, kurt ve koyunun koşu/zıplama/donma/kül animasyonları ayrı 48 karelik paftalar kullanır. Web ve indirilebilir sürümün numarası sol üstte görünür. Eski web önbelleğinden geçiş otomatik yapılır; sonraki güncellemeler oyun içindeki düğmeyle açılır.
 
@@ -25,9 +27,9 @@ Her atlanan engel **+10**, her toplanan kristal **+25** puan. Mesafe de skor kaz
 
 Aion varsayılan karakter. **Karakterler** menüsünden Baykuş Ömer, Accursed Wise Wolf veya Blessed Ignorant Sheep seçilebilir. Hepsi ilk açılışta kullanılabilir. Aion iki kez zıplar; Baykuş Ömer tek zıplamadan sonra Space/dokunmayı basılı tutarak süzülür; koyun yerdeki arkadaşları toplayıp en fazla üç koyunluk sürü oluşturur ve her koyun bir can sağlar; kurt Shift veya karakterin üstüne basılı tutarak hızlanır. Kurtta basılı tutan parmak hızlanmayı sürdürürken ikinci parmakla başka bir yere dokunup zıplayabilirsin. Bir temasta bir koyun eksilir; son koyunda çarpışma koşuyu bitirir. Duraklatma menüsünden karakter değiştirmek açık koşuyu korur.
 
-**Ayarlar** menüsünde Türkçe/English, bağımsız ses ve dekoratif hareket seçenekleri ile ses düzeyi bulunur. Hareket kapalıyken karakter sabit poz kullanır, parçacıklar ve arka plan kaydırması kapanır; zıplama ve engellerin hareketi oynanış için sürer. Düğmeler Tab/Shift+Tab ve Enter ile kullanılabilir. Fare, dokunma ve klavye desteklenir.
+**Ayarlar** menüsünde Türkçe/English, bağımsız ses, ekran efektleri ve dekoratif hareket seçenekleri ile ses düzeyi bulunur. Hareket kapalıyken karakter sabit poz kullanır, parçacıklar ve arka plan kaydırması kapanır; zıplama ve engellerin hareketi oynanış için sürer. Düğmeler Tab/Shift+Tab ve Enter ile kullanılabilir. Fare, dokunma ve klavye desteklenir.
 
-Rekor ve tercihler yereldir. Normal kayıt konumu Godot'un `app_userdata/Aion Endless Run/save.cfg` klasörüdür: Windows `%APPDATA%\Godot\app_userdata\Aion Endless Run`, Linux `~/.local/share/godot/app_userdata/Aion Endless Run`, macOS `~/Library/Application Support/Godot/app_userdata/Aion Endless Run`. Portable burada kurulum gerektirmeyen sürüm anlamındadır; kayıtlar işletim sisteminin kullanıcı veri klasöründe tutulur. Canlı koşu uygulama kapatılınca geri yüklenmez; rekor, seçili karakter ve ayarlar korunur.
+Rekor, keşfedilen güçler ve tercihler yereldir. Geçici güçler yalnızca o koşuda sürer. Normal kayıt konumu Godot'un `app_userdata/Aion Endless Run/save.cfg` klasörüdür: Windows `%APPDATA%\Godot\app_userdata\Aion Endless Run`, Linux `~/.local/share/godot/app_userdata/Aion Endless Run`, macOS `~/Library/Application Support/Godot/app_userdata/Aion Endless Run`. Portable burada kurulum gerektirmeyen sürüm anlamındadır; kayıtlar işletim sisteminin kullanıcı veri klasöründe tutulur. Canlı koşu uygulama kapatılınca geri yüklenmez; rekor, seçili karakter ve ayarlar korunur.
 
 ## Kaynaktan çalıştır
 
@@ -37,6 +39,7 @@ Godot **4.6.3 standard** sürümünü kur. Bu depoyu indir ve Godot'ta `project.
 godot --path . --editor --import --quit
 godot --path .
 godot --headless --path . --script tests/test_game.gd
+godot --headless --path . --script tests/test_adventure.gd
 ```
 
 Testler kullanıcı kayıtlarına yazdığı için kendi skorunu korumak istiyorsan testleri ayrı bir OS kullanıcısı veya geçici XDG veri klasörüyle çalıştır. Linux örneği:
@@ -55,7 +58,7 @@ FireAxolotl ve FireAxolotl Extension'daki orijinal Aion koşu paftası ve karakt
 
 ## English
 
-A standalone offline Godot runner. **Space / tap to jump, Esc to pause.** Four available characters, fire and ice collisions, local best score, collectible crystals, two scrolling biomes and a day/night cycle. Choose **Settings → English**. Download installers and portable editions from Releases. Version 0.4.0 adds spatially staggered sheep jumps, flowing dash wind, real owl updraft lift and 18 new action frames. The 48-frame companion sheets, species-specific freeze/ash animations and offline update migration are retained. Abilities include Aion double jump, hold-to-glide owl, collectible sheep lives (up to three) and hold-to-boost wolf. This remains a playable beta. macOS builds use development ad-hoc signing, without Developer ID/notarization; native iPhone distribution requires the owner's Apple Developer signing and App Store/TestFlight setup. See the release notes for actual platform verification, rather than assuming every produced package was device-tested.
+A standalone offline Godot runner. **Space / tap to jump, Esc to pause.** Four available characters, fire and ice collisions, local best score, collectible crystals, two scrolling biomes and a day/night cycle. Choose **Settings → English**. Download installers and portable editions from Releases. Version 0.5.0 adds four distinct melee attacks (left click/J), ducking (Down/S/Ctrl), crows, enemy stomps, giant-mushroom gnome waves, seven collectible powers, changing weather/tempo, short goals and 102 new sprite frames. Sheep follow at clearer spatial delays. Phones always render a landscape playfield with multi-touch controls. Gentle camera/lightning effects can be disabled. Flowing wolf wind and real owl updraft lift are retained. The 48-frame companion sheets, species-specific freeze/ash animations and offline update migration are retained. Abilities include Aion double jump, hold-to-glide owl, collectible sheep lives (up to three) and hold-to-boost wolf. This remains a playable beta. macOS builds use development ad-hoc signing, without Developer ID/notarization; native iPhone distribution requires the owner's Apple Developer signing and App Store/TestFlight setup. See the release notes for actual platform verification, rather than assuming every produced package was device-tested.
 
 ## Vercel
 
