@@ -1,0 +1,12 @@
+{
+  "release_url": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.9.0",
+  "files_verified": 9,
+  "all_github_digests_match": true,
+  "integrity_files_verified": true,
+  "apk_matches_stable_key_local_bytes": true,
+  "mac_zip_crc_valid": true,
+  "mac_architectures": [
+    "x86_64",
+    "arm64"
+  ]
+}
