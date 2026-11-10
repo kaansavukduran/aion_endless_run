@@ -45,6 +45,7 @@ var view_h := 648.0
 var ground := 493.0
 var ui_theme: Theme
 var portrait := false
+var web_stamp := ""
 
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("0a1222"))
@@ -554,6 +555,24 @@ func update_hud() -> void:
 	progress.value = fmod(world.distance, World.BIOME_DISTANCE)
 	pause_button.visible = page == "" and world.state == "running"
 	notice_label.text = text("saved_error") if save_failed else (notice if notice_time > 0.0 and page == "" else "")
+	publish_web_status()
+
+func publish_web_status() -> void:
+	if not OS.has_feature("web"): return
+	var stamp := "%s:%s:%d:%s:%s:%s" % [world.state, page, world.score, character, language, world.y < 0.0]
+	if stamp == web_stamp: return
+	web_stamp = stamp
+	var document = JavaScriptBridge.get_interface("document")
+	var canvas = document.getElementById("canvas")
+	if canvas == null: return
+	canvas.setAttribute("role", "application")
+	canvas.setAttribute("lang", language)
+	canvas.setAttribute("aria-label", "Aion Endless Run. " + text("hint") + ". " + text("score") + " " + str(world.score))
+	canvas.setAttribute("data-state", world.state)
+	canvas.setAttribute("data-page", page)
+	canvas.setAttribute("data-score", str(world.score))
+	canvas.setAttribute("data-character", character)
+	canvas.setAttribute("data-airborne", str(world.y < 0.0))
 
 func animation_clock() -> float:
 	if not motion: return 0.0
@@ -639,8 +658,10 @@ func draw_scenery() -> void:
 	if not motion:
 		scroll = 0.0
 	var night := (cos(time * TAU / 72.0) + 1.0) / 2.0
-	var snow_weight := smoothstep(0.0, 0.07, fmod(world.distance / World.BIOME_DISTANCE, 1.0))
-	if world.biome() == 0: snow_weight = 1.0 - snow_weight if world.distance > 0.0 else 0.0
+	var snow_weight := 0.0
+	if world.distance >= World.BIOME_DISTANCE:
+		snow_weight = smoothstep(0.0, 0.07, fmod(world.distance / World.BIOME_DISTANCE, 1.0))
+		if world.biome() == 0: snow_weight = 1.0 - snow_weight
 	var top := Color("355c80").lerp(Color("0c142a"), night)
 	var bottom := Color("e5a58b").lerp(Color("3b3655"), night).lerp(Color("405d7e"), snow_weight * 0.65)
 	# Large flat bands preserve the illustrated pixel landscape.

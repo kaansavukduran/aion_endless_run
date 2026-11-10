@@ -4,6 +4,7 @@ import os
 import platform
 import shutil
 import stat
+import subprocess
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -31,7 +32,13 @@ for name in names:
     if actual != checksums[name]:
         raise RuntimeError('Checksum mismatch: ' + name)
     with zipfile.ZipFile(target) as archive:
-        archive.extractall(root / ('engine' if name.endswith('.zip') else 'templates'))
+        directory = root / ('engine' if name.endswith('.zip') else 'templates')
+        archive.extractall(directory)
+        if system != 'Windows':
+            for info in archive.infolist():
+                mode = (info.external_attr >> 16) & 0o777
+                if mode and not info.is_dir():
+                    (directory / info.filename).chmod(mode)
 bin_dir = root / 'bin'
 bin_dir.mkdir(exist_ok=True)
 if system == 'Darwin':
@@ -45,8 +52,14 @@ dest = bin_dir / ('godot.exe' if system == 'Windows' else 'godot')
 if system == 'Windows':
     for p in (root / 'engine').glob('*.exe'):
         shutil.copy2(p, bin_dir / p.name)
-shutil.copy2(executable, dest)
-dest.chmod(dest.stat().st_mode | stat.S_IEXEC)
+if system == 'Darwin':
+    executable.chmod(executable.stat().st_mode | stat.S_IEXEC)
+    subprocess.run(['codesign', '--force', '--deep', '--sign', '-', str(root / 'engine/Godot.app')], check=True)
+    dest.unlink(missing_ok=True)
+    dest.symlink_to(executable)
+else:
+    shutil.copy2(executable, dest)
+    dest.chmod(dest.stat().st_mode | stat.S_IEXEC)
 if system == 'Windows':
     # Use the real executable directly instead of renaming its console launcher.
     gui = next(p for p in (root / 'engine').glob('*.exe') if 'console' not in p.name)
