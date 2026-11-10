@@ -6,6 +6,10 @@ Sevimli bir piksel macerası. **Space ile zıpla, Esc ile mola ver.** Kargalara 
 
 **[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Sürüm ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/VALIDATION.md)
 
+## 0.12.0 · Dört ayaklı depar ve sakin süzülme
+
+Kurt depar sırasında dört ayak üzerinde koşar. Normal saldırıları ileri atılan ısırık ve üç tırnak izli pençedir; depar saldırısı ayrı bir sıçrayarak ısırma kullanır. Baykuşun süzülmesinde gövde ve bakış sağa sola kaymaz; yerde sağ/sol kanadıyla öne vurur, havada açık kanatlarla gagasını uzatır. İki yeni özgün paftada 64 çizilmiş poz vardır. Aion ve koyunun beğenilen çizimleri korunur.
+
 ## 0.11.0 · Özgün karakterler ve sabit kare hizası
 
 Dört kahraman kendi orijinal model referanslarına göre yeniden çizildi. Aion’un pembe dış solungaçları, mavi gözleri ve DNA kuyruğu; kurdun çıplak gri/mor kürkü ve lanet izi; koyunun altın halesi; baykuşun kahverengi tüyleri korunur. Yumruk, kanat/gaga, kafa/çifte, ısırık/kafa hareketleri ayrı fiziksel saldırılardır. Aion’da küçük mavi yumruk parlaması vardır. Yüz hizası ve karakter başına sabit ölçek, koşu/zıplama/saldırı/silah kareleri arasındaki sıçramaları azaltır. Sağ yönlü takla sekiz ayrı pozla saat yönünde döner. Yeni paftalar toplam 449 çizilmiş poz içerir; animasyon başına zorla kare çoğaltılmaz. Hareket, kamera/şimşek, ses ve kutlamalar ilk açılışta açıktır; açık/kapalı durumları yazıyla gösterilir, kaydedilen tercihler korunur.

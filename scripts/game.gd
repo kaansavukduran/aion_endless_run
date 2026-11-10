@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3}
-const GAME_VERSION = "0.11.0"
+const GAME_VERSION = "0.12.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -1242,7 +1242,11 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-celebration-time",str(world.adventure.celebration_time))
 	canvas.setAttribute("data-girl-facing","left")
 	canvas.setAttribute("data-rush-time",str(world.adventure.rush_time))
-	canvas.setAttribute("data-attack-kind","peck" if world.adventure.attack_airborne else "melee")
+	canvas.setAttribute("data-attack-kind","peck" if world.adventure.attack_airborne else ("sprint-bite" if character=="wolf" and world.adventure.attack_sprinting else ("bite" if world.adventure.attack_variant==0 else "claw") if character=="wolf" else "melee"))
+	canvas.setAttribute("data-visual-x",str(friend_sprite.position.x))
+	canvas.setAttribute("data-combat-lunge",str(combat_lunge().x))
+	var gaze: Vector2 = friend_sprite.get_meta("eye_world",Vector2.ZERO)
+	canvas.setAttribute("data-gaze-x",str(gaze.x))
 	canvas.setAttribute("data-pose-source",str(friend_sprite.get_meta("source_key","")))
 	canvas.setAttribute("data-source-frame",str(friend_sprite.get_meta("source_frame",0)))
 	canvas.setAttribute("data-source-row",str(friend_sprite.get_meta("source_row",0)))
@@ -1439,14 +1443,10 @@ func update_friend() -> void:
 	if not motion and world.state not in ["ice", "fire", "bonk", "fall"]: friend_frame = 0
 	place_companion(friend_sprite, character, friend_row, friend_frame, Vector2(World.PLAYER_X, ground + world.y), 0.62 * visual_size, friend_action)
 	if friend_combat >= 0:
-		var combat_count := frames.count("rolls",COMBAT_ROWS[character]) if friend_combat >= 4 else frames.count("owl-peck" if a.attack_airborne else "strikes",0 if a.attack_airborne else COMBAT_ROWS[character]*2+a.attack_variant)
+		var pose_spec := combat_pose(character,friend_combat >= 4 or a.ducking(world))
+		var combat_count := frames.count(pose_spec.key,pose_spec.row)
 		var combat_frame: int = (a.attack_frame(combat_count) if friend_combat < 4 else a.roll_frame(combat_count)) if motion else combat_count/2
-		var combat_anchor := Vector2(World.PLAYER_X,ground+world.y)
-		if friend_combat<4:
-			var phase: float = clampf((a.ATTACK_DURATION-a.attack_time)/a.ATTACK_DURATION,0,1)
-			var lunge := sin(phase*PI)
-			if (character=="wolf" and a.attack_variant==1) or (character=="sheep" and a.attack_variant==0): combat_anchor += Vector2(6,5)*lunge
-			elif character=="sheep" and a.attack_variant==1: combat_anchor.x -= 24*lunge
+		var combat_anchor := Vector2(World.PLAYER_X,ground+world.y)+combat_lunge()
 		place_combat(friend_sprite, character, friend_combat, combat_frame, combat_anchor, visual_size, friend_combat >= 4 or a.ducking(world))
 	if world.state in ["running","paused"] and world.frontier.active() and not a.ducking(world) and (world.frontier.phase != "intro" or world.frontier.stage_time > 0.75):
 		var firing: bool = world.frontier.shot_flash>0
@@ -1473,13 +1473,25 @@ func update_friend() -> void:
 				place_combat(followers[i], "sheep", 6, posmod(int(float(pose.get("roll_phase",0.0))/0.68*frames.count("rolls",2)),frames.count("rolls",2)) if motion else 4, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
 
+func combat_pose(id: String,crouch: bool) -> Dictionary:
+	if crouch: return {"key":"rolls","row":COMBAT_ROWS[id]}
+	if id=="owl" and world.adventure.attack_airborne: return {"key":"owl-peck","row":0}
+	if id=="wolf" and world.adventure.attack_sprinting: return {"key":"wolf-dash-bite","row":0}
+	return {"key":"strikes","row":COMBAT_ROWS[id]*2+world.adventure.attack_variant}
+
+func combat_lunge() -> Vector2:
+	var a = world.adventure
+	if a.attack_time<=0 or a.ducking(world): return Vector2.ZERO
+	var phase: float = clampf((a.ATTACK_DURATION-a.attack_time)/a.ATTACK_DURATION,0,1)
+	var pulse := sin(phase*PI)
+	if character=="wolf": return Vector2(48 if a.attack_sprinting else (34 if a.attack_variant==0 else 24),-3)*pulse
+	if character=="owl": return Vector2(18 if a.attack_airborne else 0,0)*pulse
+	if character=="sheep": return (Vector2(6,5) if a.attack_variant==0 else Vector2(-24,0))*pulse
+	return Vector2.ZERO
+
 func place_combat(item: Sprite2D,id: String,row: int,frame: int,anchor: Vector2,growth: float,crouch: bool) -> void:
-	var key := "rolls" if crouch else "strikes"
-	var actual_row: int = COMBAT_ROWS[id] if crouch else COMBAT_ROWS[id]*2 + world.adventure.attack_variant
-	if not crouch and id == "owl" and world.adventure.attack_airborne:
-		key = "owl-peck"
-		actual_row = 0
-	frames.place(item,key,actual_row,frame,anchor,growth)
+	var spec := combat_pose(id,crouch)
+	frames.place(item,spec.key,spec.row,frame,anchor,growth)
 
 func registered_height(item: Sprite2D) -> float:
 	return float(item.get_meta("pose_height",0.0)) if item.visible else 0.0

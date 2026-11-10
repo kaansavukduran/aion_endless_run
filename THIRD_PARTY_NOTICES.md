@@ -62,3 +62,7 @@ Three new original AI-generated PNGs / 300 drawn frames: 12Ã—8 weapon poses, 12Ã
 ## 0.11 canonical hero animation artwork
 
 Five new original AI-assisted PNG outputs are included unchanged as canonical-aion/owl/sheep/wolf/rolls.png. The owner explicitly requested fidelity to the four existing character designs. Authorized Drive turnaround references and accepted original runner references are identified in assets/CANONICAL-PROVENANCE.json, which also records source hashes and actual per-row frame boundaries. Runtime crops use silhouette spans, a shared scale per character and anatomical origins; no source PNG is retouched. The dedicated compact roll atlas has eight visually reviewed clockwise angles per hero. Prior artwork remains for provenance and historical fallback.
+
+## 0.12 mobility and contact animations
+
+Two unchanged original AI-assisted PNG outputs, agility-wolf.png and agility-owl.png, add64 drawn poses. Original owner turnaround and accepted canonical references are recorded in AGILITY-PROVENANCE.json along with hashes, silhouette spans and reviewed near-eye registrations. Wolf gallop, bite, claw and sprint bite; owl calm glide, two forward wing attacks and airborne beak. No source PNG is retouched; contact-only claw lines are original runtime drawing. Aion/sheep artwork remains unchanged.

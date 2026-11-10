@@ -16,6 +16,7 @@ var celebration_spawn_distance := 0.0
 var celebration_origin := 0.0
 var rush_time := 0.0
 var attack_airborne := false
+var attack_sprinting := false
 var celebration_clock := 0.0
 var celebration_time := 0.0
 var celebration_style := 0
@@ -99,6 +100,7 @@ func reset() -> void:
 	last_mushroom_at = -10000.0
 	ambient_gnome_wait = 16.0
 	attack_variant = 0
+	attack_sprinting = false
 	pending_attack = false
 	roll_time = 0.0
 	roll_elapsed = 0.0
@@ -264,6 +266,7 @@ func attack(world) -> bool:
 	swing_id += 1
 	attack_variant = (swing_id - 1) % 2
 	attack_airborne = world.character == "owl" and world.y < -1.0
+	attack_sprinting = world.character == "wolf" and world.boosting() and world.y >= -1.0
 	attack_time = ATTACK_DURATION
 	attack_cooldown = ATTACK_COOLDOWN
 	world.event("attack_" + world.character)
@@ -290,6 +293,9 @@ func body_rect(world) -> Rect2:
 	return Rect2(world.PLAYER_X - 16 * scale, world.y - body_height(world), 32 * scale, body_height(world))
 
 func attack_rect(world) -> Rect2:
+	if world.character == "wolf":
+		var size := size_multiplier()
+		return Rect2(world.PLAYER_X+4*size,world.y-88*size,(142 if attack_sprinting else 124)*size,84*size)
 	if attack_airborne: return Rect2(world.PLAYER_X+18,world.y-76,88,38)
 	return Rect2(world.PLAYER_X+4,world.y-92.0*size_multiplier(),(100.0+float(attack_variant)*12.0)*size_multiplier(),88.0*size_multiplier())
 

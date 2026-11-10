@@ -5,10 +5,14 @@ const META = preload("res://assets/FRONTIER-PROVENANCE.json")
 const MOTION = preload("res://assets/MOTION-PROVENANCE.json")
 const ENCOUNTERS = preload("res://assets/ENCOUNTERS-PROVENANCE.json")
 const CANONICAL = preload("res://assets/CANONICAL-PROVENANCE.json")
+const AGILITY = preload("res://assets/AGILITY-PROVENANCE.json")
 var images := {}
 var frames := {}
 
 func descriptor(key: String,row: int) -> Dictionary:
+	if AGILITY.data.aliases.has(key) and AGILITY.data.aliases[key][row] != null:
+		var alias: Dictionary = AGILITY.data.aliases[key][row]
+		return {"key":alias.atlas,"row":int(alias.row),"data":AGILITY.data.atlases[alias.atlas]}
 	if CANONICAL.data.aliases.has(key):
 		var alias: Dictionary = CANONICAL.data.aliases[key][row]
 		return {"key":alias.atlas,"row":int(alias.row),"data":CANONICAL.data.atlases[alias.atlas]}
@@ -65,6 +69,7 @@ func pose(key: String, row: int, column: int) -> Dictionary:
 		result.offset = Vector2(float(b[0])-float(f.origin[0])-2.0,float(b[1])-float(f.origin[1])-2.0)
 		result["registration"] = "head" if f.eye != null and row not in [5,9,10,12,13] else ("roll-center" if key=="canonical-rolls" or row==5 else "floor")
 		result["source_column"] = int(f.source_column)
+		if f.eye != null: result["eye_local"] = Vector2(float(f.eye[0]-b[0])+2,float(f.eye[1]-b[1])+2)
 	frames[cache_key] = result
 	return result
 
@@ -83,3 +88,4 @@ func place(item: Sprite2D,key: String,row: int,column: int,anchor: Vector2,growt
 	item.set_meta("pose_frame",column)
 	item.set_meta("pose_height",float(f.height)*growth)
 	item.set_meta("head_size",float(f.head)*growth)
+	if f.has("eye_local"): item.set_meta("eye_world",item.position+(f.offset+f.eye_local)*float(f.scale)*growth)

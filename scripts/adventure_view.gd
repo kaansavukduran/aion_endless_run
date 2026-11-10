@@ -84,3 +84,13 @@ func _draw() -> void:
 			var color := Color.from_hsv(hue, 0.35, 0.95, 0.12*host.prism_intensity)
 			var x := fposmod(i * 197.0 + sin(clock * 0.8 + i) * 12, host.view_w)
 			draw_circle(Vector2(x, 220.0 + sin(i + clock * 0.6) * 55), 5 + i % 3, color)
+
+	# Contact-only claw marks, attached to the advancing forepaw, never a projectile.
+	if world.character=="wolf" and a.attack_time>0 and not a.attack_sprinting and a.attack_variant==1 and host.motion:
+		var phase: float = (a.ATTACK_DURATION-a.attack_time)/a.ATTACK_DURATION
+		if phase>0.28 and phase<0.72:
+			var fade: float = sin((phase-0.28)/0.44*PI)
+			var center: Vector2 = Vector2(world.PLAYER_X+57,ground+world.y-45)+host.combat_lunge()
+			for n in 3:
+				var p: Vector2 = center+Vector2(n*6,-n*3)
+				draw_polyline(PackedVector2Array([p+Vector2(-8,-10),p+Vector2(1,0),p+Vector2(4,12)]),Color(0.90,0.75,1.0,fade),2)

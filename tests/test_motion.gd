@@ -110,7 +110,7 @@ func run() -> void:
 		for key_row in [["runner-"+hero,1],["runner-"+hero,2],["strikes",hero_index*2],["strikes",hero_index*2+1],["heroes",hero_index],["rolls",hero_index]]:
 			var key: String = key_row[0]
 			var row: int = key_row[1]
-			check(bank.count(key,row) == (8 if key=="rolls" or hero=="wolf" or (hero=="owl" and key=="heroes") else 7),"Every animation uses its observed drawn poses: "+hero+"/"+key+"/"+str(row))
+			check(bank.count(key,row) == (8 if key=="rolls" or hero=="wolf" or (hero=="owl" and key in ["heroes","strikes"]) else 7),"Every animation uses its observed drawn poses: "+hero+"/"+key+"/"+str(row))
 			var scale := -1.0
 			var textures := {}
 			for column in bank.count(key,row):
@@ -125,7 +125,7 @@ func run() -> void:
 				check(clear,"Each drawn frame has independent transparent boundaries: "+hero+"/"+key+"/"+str(column))
 			check(textures.size() == bank.count(key,row),"All registered poses are distinct artwork: "+hero+"/"+key+"/"+str(row))
 	check(bank.pose("heroes",3,5).source_key == "canonical-wolf" and bank.pose("heroes",3,5).source_row == 7,"The wolf gun animation uses its own bare-fur sheet")
-	check(bank.count("owl-peck") == 8 and bank.pose("owl-peck",0,5).source_row == 13,"Airborne beak attacks use their own eight-pose row")
+	check(bank.count("owl-peck") == 8 and bank.pose("owl-peck",0,5).source_row == 3,"Airborne beak attacks use their own eight-pose row")
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
 	await process_frame
@@ -133,7 +133,7 @@ func run() -> void:
 	game.world.character = "owl"
 	game.world.adventure.attack_airborne = true
 	game.place_combat(game.friend_sprite,"owl",0,5,Vector2.ZERO,1,false)
-	check(game.friend_sprite.get_meta("source_key") == "canonical-owl" and game.friend_sprite.get_meta("source_row") == 13,"The actual renderer selects beak artwork for the airborne owl")
+	check(game.friend_sprite.get_meta("source_key") == "agility-owl" and game.friend_sprite.get_meta("source_row") == 3,"The actual renderer selects beak artwork for the airborne owl")
 	game.queue_free()
 	await process_frame
 	print("RESULT: %d motion checks, %d failures" % [checks,failures])

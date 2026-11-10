@@ -1,3 +1,13 @@
+# Current handoff · 0.12.0
+
+AGILITY-PROVENANCE overrides nullable aliases before canonical. Two new original unchanged PNGs /64 poses (8×4 each). Wolf rows0 four-legged gallop,1 bite,2 claw,3 sprint pounce bite; owl0 calm glide,1/2 forward wing swipes,3 flying beak. Only wolf/owl movement/combat replaced. Aion/sheep and other hero poses stay canonical. Registration explicitly selects the large near iris, not golden beak/feathers or wolf far eye; blinks interpolate landmarks. One scale per hero atlas. Review near-eye markers against source art; metadata alignment alone does not establish that the chosen landmark is anatomically correct.
+
+Sprint attack posture snapshots on attack start, so releasing Shift mid-swing cannot flip the pose. Actual smooth lunges: wolf48 sprint/34 bite/24 claw pixels, owl18 air peck/0 grounded wing; sheep unchanged. Real wolf melee reach extends142/124 and preserves mushroom scaling. Three claw contact traces attach in front; no projectile/beam. Gliding normal and gust aliases both point to the same calm row, with fixed horizontal gaze. Single press/cooldown remain.
+
+Nine source/scene suites1973 assertions. Maintained browser driver uses passive real rendered sprite X and registered eye observations, without world setters. Stable Android versionCode12. Retain Mac explicit DMG capacity sizing/verify. Package and publication results append once verified; keep prior releases.
+
+Historical handoff follows.
+
 # Current handoff · 0.11.0
 
 Canonical hero identity release. assets/CANONICAL-PROVENANCE.json takes alias priority. Five new original unchanged PNGs contain 449 drawn poses: 14 rows per hero with actual counts7/8, plus four8-pose compact clockwise roll rows. Original T-pose references linked in provenance were read from owner-authorized Drive. Aion is pink external feathery gills/blue eyes/labcoat/DNA tail; wolf gray-lavender bare fur/curse; sheep ivory wool/gold halo; owl brown feathers/amber eyes. Do not substitute generic aquatic fins, beam attacks, wolf clothing or random anatomy.

@@ -1,13 +1,12 @@
-# Aion Endless Run 0.11.0 · Özgün tasarımlar, tutarlı animasyon
+# Aion Endless Run 0.12.0 · Dört ayaklı kurt ve sabit süzülen baykuş
 
-- Dört ana karakter orijinal model paftalarına göre yeniden çizildi. Aion’un mavi gözleri, pembe dallanan dış solungaçları, beyaz önlüğü ve DNA kuyruğu; kurdun kıyafetsiz gri/mor kürkü ve lanet izi; koyunun altın halesi; baykuşun kahverengi tüyleri korunur.
-- Aion tek elle yumruk atar, küçük mavi yumruk parlaması vardır. Enerji topu pozu kaldırıldı. Baykuş kanat/gaga, koyun kafa/çifte, kurt ısırık/kafa saldırıları kullanır.
-- Koşu, zıplama, saldırı ve tabanca pozları yüz hizası üzerinden yerleştirilir; karakter başına ortak ölçek korunur. Yedi ve sekiz poz içeren satırlar gerçek sınırlarıyla ayrı okunur; komşu kare parçaları yalıtılır.
-- Sağa ilerleyen takla, sekiz ayrı sıkı kapanmış pozla saat yönünde döner; merkezi zemine göre sabittir.
-- Hareket, kamera/şimşek, ses ve kutlamalar ilk açılışta açık. Açık/Kapalı yazıları eklendi. Oyuncunun kaydettiği kapalı tercihler güncellemede zorla açılmaz.
-- Beş yeni orijinal PNG / toplam 449 çizilmiş poz. Kalite için zorla kare çoğaltma yok. Bosslar, gecikmeli koyun sürüsü, gamepad menüleri, üç dil ve çevrimdışı özellikler korunur.
+- Kurt Shift/mobil depar sırasında dört ayak üzerinde koşar; normal koşu korunur.
+- Kurt normalde ileri atılarak ısırır ve sıradaki saldırıda pençe savurur. Önde üç tırnak izi görünür. Depar sırasında ayrı bir sıçrayarak ısırma animasyonu vardır; Shift’i saldırı ortasında bırakmak pozu değiştirmez.
+- Baykuş süzülürken yüz ve gövde sağa sola sıçramaz. Hafif kanat ucu hareketleri sürer. Rüzgâra girip çıkarken aynı süzülme dizisi kullanılır.
+- Baykuş yerde kanatlarını sırayla öne savurur; havadayken açık kanat ve toplanmış ayaklarla gagasını ileri uzatır.
+- Yeni kareler gerçek yakın gözden hizalanır. Altın tüy/gaga veya uzak gözü yanlışlıkla merkez seçme sorunu düzeltildi. İki özgün PNG, 64 çizilmiş poz. Aion ve koyunun beğenilen çizimleri korunur.
 
-Sekiz kaynak/sahne dizisinde 1.773 kontrol ve 91 yerel/canlı/PWA akış yürütmesi geçti. Native CI başarılı: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42921167868 . macOS DMG kapasite hesabı düzeltildi; disk kalıbı ve uygulama açılışı doğrulandı. Dokuz paket ve iki doğrulama dosyası yayımlandı; özetler, aynı imzalı APK ve indirilen Mac universal ZIP doğrulandı. Kayıtlar docs/evidence-v011 içindedir. Fiziksel kol ve Apple sahibi imzalama kapsamı önceki sürümle aynıdır.
+Dokuz kaynak/sahne dizisinde 1.973 kontrol geçti. Tarayıcı, çevrimdışı yükseltme ve native paket kayıtları docs/evidence-v012 içine eklenir. Önceki boss, gamepad, dil, sürü ve çevrimdışı özellikleri korunur.
 
 ## İndir ve aç
 
@@ -15,14 +14,14 @@ Sekiz kaynak/sahne dizisinde 1.773 kontrol ve 91 yerel/canlı/PWA akış yürüt
 
 | Cihaz | Kurulum | Taşınabilir |
 | --- | --- | --- |
-| Windows x64 | `AionEndlessRun-0.11.0-windows-x64-Setup.exe` | `AionEndlessRun-0.11.0-windows-x64-portable.zip` |
-| Linux x64 | `AionEndlessRun-0.11.0-linux-x64.deb` | `.AppImage` veya `-portable.tar.gz` |
-| macOS Intel / Apple Silicon | `AionEndlessRun-0.11.0-macos-universal.dmg` | `-macos-universal-portable.zip` |
-| Android ARM64 / x64 | `AionEndlessRun-0.11.0-android-arm64-x64.apk` | APK normal yoldan kurulur |
+| Windows x64 | `AionEndlessRun-0.12.0-windows-x64-Setup.exe` | `AionEndlessRun-0.12.0-windows-x64-portable.zip` |
+| Linux x64 | `AionEndlessRun-0.12.0-linux-x64.deb` | `.AppImage` veya `-portable.tar.gz` |
+| macOS Intel / Apple Silicon | `AionEndlessRun-0.12.0-macos-universal.dmg` | `-macos-universal-portable.zip` |
+| Android ARM64 / x64 | `AionEndlessRun-0.12.0-android-arm64-x64.apk` | APK normal yoldan kurulur |
 | iPhone | Apple hesabı, imzalama ve TestFlight/App Store dağıtımı bekliyor | Yerel portable iPhone paketi yok |
 
-Windows'ta Setup dosyasını aç veya ZIP'i tamamen çıkartıp EXE'yi aç. Linux AppImage'e çalıştırma izni ver ya da DEB'i kur. Mac DMG'deki uygulamayı Applications'a taşı. Android APK, önceki sürümle aynı uygulama kimliği ve imza anahtarını kullanır; versionCode 11’dir.
+Windows'ta Setup dosyasını aç veya ZIP'i tamamen çıkartıp EXE'yi aç. Linux AppImage'e çalıştırma izni ver ya da DEB'i kur. Mac DMG'deki uygulamayı Applications'a taşı. Android APK, önceki sürümle aynı uygulama kimliği ve imza anahtarını kullanır; versionCode 12’dir.
 
 Oyun ve varlıklar çevrimdışıdır. Web sürümünde ilk tam yükleme internet ister; önbellekleme sonrası çevrimdışı açılabilir. `SHA256SUMS` ve `BUILD-RECEIPT.json` gerçek paketleri tanımlar.
 
-Windows Authenticode ve macOS Developer ID/noter onayı yoktur. macOS geliştirme amaçlı ad-hoc imzalıdır; Gatekeeper açılışı engelleyebilir. Fiziksel cihaz kapsamı ve gerçek test kayıtları `docs/VALIDATION.md` içindedir. Önceki 0.1.0–0.10.0 sürümleri korunmuştur.
+Windows Authenticode ve macOS Developer ID/noter onayı yoktur. macOS geliştirme amaçlı ad-hoc imzalıdır; Gatekeeper açılışı engelleyebilir. Fiziksel cihaz kapsamı ve gerçek test kayıtları `docs/VALIDATION.md` içindedir. Önceki 0.1.0–0.11.0 sürümleri korunmuştur.
