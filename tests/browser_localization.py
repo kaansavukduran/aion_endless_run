@@ -25,7 +25,9 @@ with sync_playwright() as p:
   click(name='LanguageMenu',touch=touch);page.wait_for_selector('canvas[data-language-picker="true"]');click(name='Language_'+lang,touch=touch);page.wait_for_selector('canvas[lang="'+lang+'"]');wait_ui()
  def start_character(id):
   if data()['page']!='main':
-   if data()['state']=='running':page.keyboard.press('Escape');page.wait_for_selector('canvas[data-state="paused"]')
+   if data()['page']=='':
+    if data()['state']=='running':page.keyboard.press('Escape')
+    page.wait_for_function('() => ["paused","finished"].includes(document.querySelector("canvas").dataset.page)')
    menu={'tr':'Ana menü','en':'Main menu','cs':'Hlavní nabídka'}[data()['lang']];click(text=menu);page.wait_for_selector('canvas[data-page="main"]');wait_ui()
   click(name='StartSelect_'+id);page.wait_for_selector('canvas[data-character="'+id+'"]');page.keyboard.press('Space');page.wait_for_selector('canvas[data-state="running"]');wait_ui()
  for locale,lang,name in [('tr-TR','tr','Baykuş Ömer'),('en-GB','en','Omar the Owl'),('cs-CZ','cs','Sova Omar'),('de-DE','en','Omar the Owl')]:

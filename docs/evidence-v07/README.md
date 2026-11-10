@@ -1,0 +1,11 @@
+# 0.7.0 verification evidence
+
+These are actual test outputs, original browser/native captures and public-delivery hashes, with no game-state injection in browser tests. `browser-results.json` prefixes each passed flow by context: local, actual HTTPS, or exact public-bundle mirror. It records 60 local flows, 62 actual-HTTPS flows and 11 public-bundle worker migration flows, 133 total executions; these are not 133 different unique requirements.
+
+The HTTPS driver uses system-CA-verified TLS forwarding because cloud Chromium lacks the executor proxy CA. Workers are blocked in that diagnostic driver; identical audio-worklet bytes load from a Blob. The separate mirror-origin run exercises real ServiceWorker/CacheStorage/IndexedDB and offline migration of unchanged public bytes from the published 0.6 archive. It does not assert production-origin worker installation.
+
+The live evolution demo changes the real player-facing mushroom setting to 100% so a legitimate eligible pickup can be observed promptly; a fresh profile still defaults to 2%. No forced spawns, game setters or RNG replacement are used. A deterministic source suite separately checks 0%, 2%, introductory/cooldown rules and distribution. The hug timeline observes constant world/enemy/power state during real level-ten hugs. Screenshots may land between poses; the animation assertions use read-only frame observations and source registration tests rather than filenames.
+
+Android frames come from the API 30 offline CI test APK, which uses a disposable CI signer. The starting frame visibly shows 0.7 and four cards. `android-duck.png` is the historical capture filename for a sent input smoke sequence; its running owl frame is not a semantic proof of a native roll. Distinct real touch roll/attack semantics are covered by the rotated-phone browser and model tests. The separately signed release APK uses the unchanged stable release certificate recorded here; its SHA and package permissions are verified before publication. No physical-device testing is claimed.
+
+See ../VALIDATION.md and the release BUILD-RECEIPT.json for native runs and package integrity. Original PNG art remains unchanged, with frame metadata in assets/EVOLUTION-PROVENANCE.json.

@@ -32,7 +32,7 @@ with sync_playwright() as p:
   for _ in range(14):
    v=d();b=json.loads(v['settingsInputs'])[key]
    if 180<b['y']<475:break
-   page.mouse.move(**point(float(v['viewWidth'])/2+267,420));page.mouse.wheel(0,230 if b['y']>=475 else -230);page.wait_for_timeout(100)
+   page.mouse.move(**point(float(v['viewWidth'])/2+257,420));page.mouse.wheel(0,230 if b['y']>=475 else -230);page.wait_for_timeout(100)
   b=json.loads(d()['settingsInputs'])[key];page.mouse.click(**point(b['x']+b['w']*.38,b['y']+b['h']/2));page.keyboard.press('Control+a');page.keyboard.type(str(value));page.keyboard.press('Enter');page.wait_for_timeout(150)
  page.goto(a.url);page.wait_for_selector('canvas[data-state="ready"]',timeout=60000);ready()
  check(abs(float(d()['mushroomChance'])-.02)<.0001,'Normal fresh entry uses the rare two-percent mushroom default')
@@ -73,13 +73,13 @@ with sync_playwright() as p:
    if int(v['girl'])>=0:level_variants[int(v['level'])]=int(v['girl']);styles[int(v['level'])]=int(v['partyStyle'])
    if v['hugging']=='true' and hug_evidence is None:
     page.screenshot(path=str(out/'milestone-hug.png'));hug_evidence=page.evaluate('window.hugFrames')
-   if int(v['hugCount'])>0 and v['hugging']=='false' and float(v['heartTime'])>0:
+   if not hug_ok and int(v['hugCount'])>0 and v['hugging']=='false' and float(v['heartTime'])>0:
     hug_evidence=page.evaluate('window.hugFrames');hug_ok=len(hug_evidence)>2 and all(s['clock']==hug_evidence[0]['clock'] and s['distance']==hug_evidence[0]['distance'] and s['enemies']==hug_evidence[0]['enemies'] and s['powers']==hug_evidence[0]['powers'] for s in hug_evidence)
     page.screenshot(path=str(out/'hug-hearts-resume.png'))
    if v['giant']=='true':
     if not giant_ok:page.screenshot(path=str(out/'rare-mushroom-colors.png'))
     giant_ok=True
-    if len([e for e in json.loads(v['enemies']) if e['kind']=='gnome' and e['hp']>0])>=4:
+    if not wave_ok and len([e for e in json.loads(v['enemies']) if e['kind']=='gnome' and e['hp']>0])>=4:
      wave_ok=True;page.screenshot(path=str(out/'irregular-gnome-crowd.png'))
    if hug_ok and giant_ok and wave_ok:break
    page.wait_for_timeout(20)
@@ -94,5 +94,22 @@ with sync_playwright() as p:
  (out/'level-variants.json').write_text(json.dumps({'girls':level_variants,'styles':styles},indent=2)+'\n')
  page.keyboard.press('Escape');page.wait_for_selector('canvas[data-state="paused"]');saved=d()['level'];page.wait_for_timeout(350);check(d()['level']==saved,'Pause preserves the current run level')
  context.set_offline(True);page.keyboard.press('Escape');page.wait_for_selector('canvas[data-state="running"]');before=float(d()['worldDistance']);page.wait_for_timeout(250);check(float(d()['worldDistance'])>before,'The expanded game continues to run without network access');context.set_offline(False)
+ context.close()
+ context=browser.new_context(viewport={'width':390,'height':844},locale='tr-TR',has_touch=True,is_mobile=True);page=context.new_page()
+ page.on('pageerror',lambda e:errors.append(str(e)));page.on('console',lambda m:errors.append(m.text) if 'SCRIPT ERROR' in m.text else None)
+ page.goto(a.url);page.wait_for_selector('canvas[data-state="ready"]',timeout=60000);ready()
+ check(d()['orientation']=='landscape','A portrait phone renders the new controls in a landscape playfield')
+ b=next(b for b in json.loads(d()['ui']) if 'Koşuya başla' in b['text']);page.touchscreen.tap(**point(b['x']+b['w']/2,b['y']+b['h']/2));page.wait_for_selector('canvas[data-state="running"]');ready()
+ def contact(key,id):
+  b=json.loads(d()['controls'])[key];return dict(point(b['x']+b['w']/2,b['y']+b['h']/2),id=id)
+ cdp=context.new_cdp_session(page);jump=contact('jump',1);attack=contact('attack',2)
+ cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[jump]});page.wait_for_selector('canvas[data-airborne="true"]')
+ cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[jump,attack]});page.wait_for_selector('canvas[data-attacking="true"][data-airborne="true"]');check(d()['swingCount']=='1','Two real phone fingers jump and perform one attack without mouse duplication')
+ page.wait_for_timeout(650);check(d()['swingCount']=='1','Holding the phone attack contact does not repeat strikes')
+ cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]});page.wait_for_selector('canvas[data-airborne="false"]')
+ cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[attack]});page.wait_for_selector('canvas[data-swing-count="2"][data-attack-variant="1"]');check(True,'A second phone press switches to the alternate attack')
+ cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]});roll=contact('duck',3)
+ cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[roll]});page.wait_for_selector('canvas[data-ducking="true"]');frame=d()['rollFrame'];page.wait_for_function('f=>document.querySelector("canvas").dataset.rollFrame!==f',arg=frame);page.screenshot(path=str(out/'portrait-touch-roll.png'))
+ cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]});page.wait_for_selector('canvas[data-ducking="false"]');check(True,'The rotated phone roll button advances drawn poses and releases after the minimum roll')
  check(not errors,'No uncaught browser or Godot script errors in the expanded real-entry flows');browser.close()
 (out/'evolution-results.json').write_text(json.dumps(results,ensure_ascii=False,indent=2)+'\n');print(len(results),'evolution browser checks passed')

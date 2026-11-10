@@ -1,0 +1,96 @@
+{
+  "aion-9b36d6a80ccd8a23.144x144.png": {
+    "sha256": "fa5c7500b372756f6ec7eaf301d87826349b4a772e71649852b3b0b3eb29f51f",
+    "bytes": 3146,
+    "status": 200,
+    "content_type": "image/png"
+  },
+  "aion-9b36d6a80ccd8a23.180x180.png": {
+    "sha256": "3eac0892636b7e51cf74753f9656062ee6795f179443622d778d26ff8e453c00",
+    "bytes": 4283,
+    "status": 200,
+    "content_type": "image/png"
+  },
+  "aion-9b36d6a80ccd8a23.512x512.png": {
+    "sha256": "afff6fd69a6e00fbc7e03697f4fec8105290fca184b7308789cf3c507708db96",
+    "bytes": 17069,
+    "status": 200,
+    "content_type": "image/png"
+  },
+  "aion-9b36d6a80ccd8a23.apple-touch-icon.png": {
+    "sha256": "3eac0892636b7e51cf74753f9656062ee6795f179443622d778d26ff8e453c00",
+    "bytes": 4283,
+    "status": 200,
+    "content_type": "image/png"
+  },
+  "aion-9b36d6a80ccd8a23.audio.position.worklet.js": {
+    "sha256": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+    "bytes": 2973,
+    "status": 200,
+    "content_type": "application/javascript; charset=utf-8"
+  },
+  "aion-9b36d6a80ccd8a23.audio.worklet.js": {
+    "sha256": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+    "bytes": 7298,
+    "status": 200,
+    "content_type": "application/javascript; charset=utf-8"
+  },
+  "aion-9b36d6a80ccd8a23.icon.png": {
+    "sha256": "b90dbfa25f495297cb2dd5616e610591195a63734010120d4710508499832f6c",
+    "bytes": 4923,
+    "status": 200,
+    "content_type": "image/png"
+  },
+  "aion-9b36d6a80ccd8a23.js": {
+    "sha256": "e3f56ee40e6f84371053db06692cfac15e2c8659547b11c6b2dfa1996dabd981",
+    "bytes": 315759,
+    "status": 200,
+    "content_type": "application/javascript; charset=utf-8"
+  },
+  "aion-9b36d6a80ccd8a23.pck": {
+    "sha256": "9202bb72fd011fe33a8cae8dec1fa49809cf3a366d5248ba729c631127e0cf26",
+    "bytes": 26464908,
+    "status": 200,
+    "content_type": "application/octet-stream"
+  },
+  "aion-9b36d6a80ccd8a23.png": {
+    "sha256": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+    "bytes": 21443,
+    "status": 200,
+    "content_type": "image/png"
+  },
+  "aion-9b36d6a80ccd8a23.wasm": {
+    "sha256": "26b61ce95247012ab3dca3ff51e96d1cdbff44ee91a8c20a83e150afca83f1b6",
+    "bytes": 37700666,
+    "status": 200,
+    "content_type": "application/wasm"
+  },
+  "build.json": {
+    "sha256": "184b2bd70f717be9eb26ea9fe4d47a54aca061d0089be6d1c79cae6d48d664a2",
+    "bytes": 50,
+    "status": 200,
+    "content_type": "application/json; charset=utf-8"
+  },
+  "index.html": {
+    "sha256": "30a0c8be88e9b6176de034edf130360c956a128aad3f07c26974bc36aabccab8",
+    "bytes": 8638,
+    "status": 200,
+    "content_type": "text/html; charset=utf-8"
+  },
+  "index.manifest.json": {
+    "sha256": "1244b8f2022df1d0547a32d496f9370c00d1b2fa2bc5630d4f68abc9fb68804c",
+    "bytes": 379,
+    "status": 200,
+    "content_type": "application/json; charset=utf-8"
+  },
+  "index.offline.html": {
+    "sha256": "b0a5d443e78f58717adac780bac91c1431bfa3b801c41f4707d507fb5ad2e47f",
+    "bytes": 971,
+    "status": 200,
+    "content_type": "text/html; charset=utf-8"
+  },
+  "index.service.worker.js": {
+    "sha256": "a275a1ff0f5a5c106dee1e582fd6b171b82cef1db90dda141d5945d7d7f9f75d",
+    "bytes": 2799
+  }
+}
