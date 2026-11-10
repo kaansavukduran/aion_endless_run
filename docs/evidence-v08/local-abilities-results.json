@@ -1,0 +1,12 @@
+[
+  "Aion performs a second actual airborne jump",
+  "Repeated input never exceeds Aion two-jump budget",
+  "Landing replenishes Aion jumps",
+  "Owl has one jump and uses real held glide frames",
+  "Releasing Space exits glide",
+  "Shift increases actual wolf speed",
+  "Dash uses its own atlas with moving wind geometry",
+  "Releasing Shift clears boost",
+  "Two phone fingers can hold the wolf to boost and jump elsewhere",
+  "Ending touch contacts clears wolf boost"
+]

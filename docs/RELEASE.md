@@ -8,6 +8,8 @@
 - **84 yeni çizilmiş kare:** Silahlı kahramanlar, robot/bitki/mermi/silah ve yeni parkur. Kaynak PNG’ler değiştirilmedi; asıl satır aralıkları ve siluetler kayıtlı.
 - **Korunanlar:** TR/EN/CS, başlangıçta karakter seçimi, çevrimdışı kayıt ve güncelleme, yatay mobil çoklu dokunma, dönüşümlü tek basış saldırıları, gerçek takla, seviye kutlamaları, nadir mantar, rüzgâr ve gecikmeli sürü.
 
+541 kaynak/sahne kontrolü ve 152 yerel/canlı/PWA akış yürütmesi geçti. Native paket doğrulaması: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42898132230 .
+
 Doğrulama kapsamı ve gerçek kayıtlar [docs/VALIDATION.md](https://github.com/kaansavukduran/aion_endless_run/blob/main/docs/VALIDATION.md) içindedir. Önceki sürümler korunur. Paket kimliklerini `BUILD-RECEIPT.json` ve `SHA256SUMS` tanımlar.
 
 ## İndir ve aç
@@ -26,4 +28,4 @@ Windows'ta Setup dosyasını aç veya ZIP'i tamamen çıkartıp EXE'yi aç. Linu
 
 Oyun ve varlıklar çevrimdışıdır. Web sürümünde ilk tam yükleme internet ister; önbellekleme sonrası çevrimdışı açılabilir. `SHA256SUMS` ve `BUILD-RECEIPT.json` gerçek paketleri tanımlar.
 
-Windows Authenticode ve macOS Developer ID/noter onayı yoktur. macOS geliştirme amaçlı ad-hoc imzalıdır; Gatekeeper açılışı engelleyebilir. Fiziksel cihaz kapsamı ve gerçek test kayıtları `docs/VALIDATION.md` içindedir. Önceki 0.1.0, 0.2.0, 0.3.0, 0.4.0 0.5.0 0.6.0 ve 0.7.0 sürümleri korunmuştur.
+Windows Authenticode ve macOS Developer ID/noter onayı yoktur. macOS geliştirme amaçlı ad-hoc imzalıdır; Gatekeeper açılışı engelleyebilir. Fiziksel cihaz kapsamı ve gerçek test kayıtları `docs/VALIDATION.md` içindedir. Önceki 0.1.0–0.7.0 sürümleri korunmuştur.
