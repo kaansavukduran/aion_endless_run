@@ -1,0 +1,49 @@
+{
+  "version": "0.11.0",
+  "source_commit": "016da55cdb01a41b2ad3acf17eae03b7a855b2f1",
+  "verified_application_commit": "4b64701cd62d2d8d97e4ab31c361c71b806283f2",
+  "verification_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/42921167868",
+  "source_and_scene_checks": 1773,
+  "browser_checks": 91,
+  "android_native": "API 30 offline emulator; rendered starting cards and input smoke frames; semantic controls verified in model/browser",
+  "android_signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+  "apple_status": "macOS ad-hoc signing only, no Developer ID/notarization; iOS App Store/TestFlight pending owner signing",
+  "files": {
+    "AionEndlessRun-0.11.0-android-arm64-x64.apk": {
+      "bytes": 124087603,
+      "sha256": "d606bb74ca59bd4c1c7d3f53222df7985896f505b8e8f4fc07b1d40e81a209d7"
+    },
+    "AionEndlessRun-0.11.0-linux-x64-portable.tar.gz": {
+      "bytes": 99756560,
+      "sha256": "6b39a3240560ecc92ff46b39996f760c4ea842e739d6df28c2f637d935e1761f"
+    },
+    "AionEndlessRun-0.11.0-linux-x64.AppImage": {
+      "bytes": 97876472,
+      "sha256": "e372400034e25292ddde50abcbac5524500340d8b7da4b96549eec2ca58493b8"
+    },
+    "AionEndlessRun-0.11.0-linux-x64.deb": {
+      "bytes": 93214620,
+      "sha256": "d77417dea890132e914f3dacad78efb2614fa5fd15e1963093e82ea6fad06ffe"
+    },
+    "AionEndlessRun-0.11.0-macos-universal-portable.zip": {
+      "bytes": 135037959,
+      "sha256": "8d57084d6e3e4775b4d7c4545f99a2565b350cc1150b33a2de453b5f44620030"
+    },
+    "AionEndlessRun-0.11.0-macos-universal.dmg": {
+      "bytes": 144211098,
+      "sha256": "55394ddfab3879d8d3495863ee13a7f00177627ea4311fedfa6b2946bbf9713e"
+    },
+    "AionEndlessRun-0.11.0-web-offline.tar.gz": {
+      "bytes": 82076746,
+      "sha256": "71b35ba155197cb57268040987a4fdd175e11e8437cbe5998a211c396e874817"
+    },
+    "AionEndlessRun-0.11.0-windows-x64-Setup.exe": {
+      "bytes": 108495224,
+      "sha256": "e178394f97fafeefcad792ce5f131ea2ea22755d0e1cc4c8544017e2e169b90f"
+    },
+    "AionEndlessRun-0.11.0-windows-x64-portable.zip": {
+      "bytes": 109733282,
+      "sha256": "6fa3af5827d019b29fc4ec9fcc5ac1e143f523a86cc29989b463696196aad192"
+    }
+  }
+}

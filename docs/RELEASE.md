@@ -7,7 +7,7 @@
 - Hareket, kamera/şimşek, ses ve kutlamalar ilk açılışta açık. Açık/Kapalı yazıları eklendi. Oyuncunun kaydettiği kapalı tercihler güncellemede zorla açılmaz.
 - Beş yeni orijinal PNG / toplam 449 çizilmiş poz. Kalite için zorla kare çoğaltma yok. Bosslar, gecikmeli koyun sürüsü, gamepad menüleri, üç dil ve çevrimdışı özellikler korunur.
 
-Sekiz kaynak/sahne dizisinde 1.773 kontrol ve 91 yerel/canlı/PWA akış yürütmesi geçti. Native CI başarılı: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42921167868 . macOS DMG kapasite hesabı düzeltildi; disk kalıbı ve uygulama açılışı doğrulandı. Kayıtlar docs/evidence-v011 içindedir. Fiziksel kol ve Apple sahibi imzalama kapsamı önceki sürümle aynıdır.
+Sekiz kaynak/sahne dizisinde 1.773 kontrol ve 91 yerel/canlı/PWA akış yürütmesi geçti. Native CI başarılı: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42921167868 . macOS DMG kapasite hesabı düzeltildi; disk kalıbı ve uygulama açılışı doğrulandı. Dokuz paket ve iki doğrulama dosyası yayımlandı; özetler, aynı imzalı APK ve indirilen Mac universal ZIP doğrulandı. Kayıtlar docs/evidence-v011 içindedir. Fiziksel kol ve Apple sahibi imzalama kapsamı önceki sürümle aynıdır.
 
 ## İndir ve aç
 
@@ -21,7 +21,7 @@ Sekiz kaynak/sahne dizisinde 1.773 kontrol ve 91 yerel/canlı/PWA akış yürüt
 | Android ARM64 / x64 | `AionEndlessRun-0.11.0-android-arm64-x64.apk` | APK normal yoldan kurulur |
 | iPhone | Apple hesabı, imzalama ve TestFlight/App Store dağıtımı bekliyor | Yerel portable iPhone paketi yok |
 
-Windows'ta Setup dosyasını aç veya ZIP'i tamamen çıkartıp EXE'yi aç. Linux AppImage'e çalıştırma izni ver ya da DEB'i kur. Mac DMG'deki uygulamayı Applications'a taşı. Android APK, önceki sürümle aynı uygulama kimliği ve imza anahtarını kullanır; versionCode 11'dır.
+Windows'ta Setup dosyasını aç veya ZIP'i tamamen çıkartıp EXE'yi aç. Linux AppImage'e çalıştırma izni ver ya da DEB'i kur. Mac DMG'deki uygulamayı Applications'a taşı. Android APK, önceki sürümle aynı uygulama kimliği ve imza anahtarını kullanır; versionCode 11’dir.
 
 Oyun ve varlıklar çevrimdışıdır. Web sürümünde ilk tam yükleme internet ister; önbellekleme sonrası çevrimdışı açılabilir. `SHA256SUMS` ve `BUILD-RECEIPT.json` gerçek paketleri tanımlar.
 

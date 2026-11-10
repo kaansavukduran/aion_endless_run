@@ -6,6 +6,8 @@ Common scale per hero, iris-based anatomical origins for run/jump/melee/weapon p
 
 Fresh motion/effects/audio/celebrations true even with browser reduced-motion setting, per explicit owner instruction; explicit saved false remains false. Accessible On/Off labels supplement CheckButton icon. Eight source/scene suites1773 checks after observed frame counts replace older count quotas. Future art prioritizes identity, alignment and pose quality over frame count. Build/sign/package0.11, Android code11; same stable signer. Prior boss/flock/gamepad/languages/offline features preserved. Release verification details follow in docs.
 
+0.11 delivery complete: application4a91af9, Mac packaging follow-up4b64701, successful nativeCI42921167868, release source016da55cdb01a41b2ad3acf17eae03b7a855b2f1 and publisher42922436056. 1773 source/scene and91 local/live/PWA browser checks. Nine packages plus receipt/sums verified; stable APK checksumd606bb74ca59bd4c1c7d3f53222df7985896f505b8e8f4fc07b1d40e81a209d7, versionCode11. Actual downloaded Mac ZIP CRC/version11/universal architectures verified. Transfer branch deleted. All old releases preserved. GitHub CLI REST credential later expired; connected GitHub tool confirmed publication and public HTTPS downloads verified bytes. Normal Git transport remained functional. No credentials were replaced or requested.
+
 Historical handoff follows.
 
 # Current handoff · 0.10.0

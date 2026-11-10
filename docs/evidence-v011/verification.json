@@ -1,0 +1,18 @@
+{
+  "release_url": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.11.0",
+  "files_verified": 9,
+  "all_github_digests_match": true,
+  "integrity_files_verified": true,
+  "apk_matches_stable_key_local_bytes": true,
+  "mac_zip_crc_valid": true,
+  "mac_architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "mac_bundle_version": "0.11.0",
+  "mac_bundle_build": "11",
+  "source_commit": "016da55cdb01a41b2ad3acf17eae03b7a855b2f1",
+  "native_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/42921167868",
+  "publisher_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/42922436056",
+  "transfer_branch_deleted": true
+}
