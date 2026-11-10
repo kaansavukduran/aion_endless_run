@@ -84,20 +84,21 @@ with sync_playwright() as p:
   nearest=min(obstacles,key=lambda o:o['x'],default=None)
   arch=nearest and nearest['kind']=='arch' and -65<nearest['x']-player<speed*0.85+70 and d['giant']=='false'
   if arch:
-   page.keyboard.down('s');page.keyboard.up('j')
+   page.keyboard.down('s');page.keyboard.down('j')
   else:
    page.keyboard.up('s');page.keyboard.down('j')
   if d['airborne']=='false':
-   floor=nearest and nearest['kind']!='arch' and 0<nearest['x']-player<speed*0.48+45 and d['giant']=='false'
+   floor=nearest and nearest['kind']!='arch' and 0<nearest['x']-player<speed*0.42+10 and d['giant']=='false'
    mushroom=skip_mushrooms and not arch and any(i['kind']=='mushroom' and 0<i['x']-player<speed*0.36+35 for i in json.loads(d['items']))
    if floor or mushroom:page.keyboard.press('Space')
   return d
  passed=False;weather_seen=False
- for attempt in range(2):
+ for attempt in range(5):
   open_game('aion');started=time.monotonic();branch_x=None
   while time.monotonic()-started<45:
    d=bot_step(True)
-   if d['state']!='running':break
+   if d['state']!='running':
+    print('Branch observation retry',attempt,d['state'],d['obstacles'],d['enemies'],flush=True);page.screenshot(path=str(out/('branch-attempt-'+str(attempt)+'.png')));break
    weather_seen=weather_seen or d['weather']!='clear'
    player=float(d['playerX'])
    arches=[o for o in json.loads(d['obstacles']) if o['kind']=='arch' and abs(o['x']-player)<25]
