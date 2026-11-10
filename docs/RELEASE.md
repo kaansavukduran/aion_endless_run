@@ -6,7 +6,7 @@
 - **Tutarlı animasyon ölçeği:** Koşu, zıplama, iniş, süzülme, yükselen hava ve depar aynı normal yüksekliği korur. Paftaların opak sınırları kare bazında kaydedilir; orijinal PNG'ler korunur. Lider koyun normal, arkasındaki koyunlar %72 boyuttadır. Eğilme alçalır; yalnızca mantar gücü büyütür.
 - **Önceki macera korunur:** Dört saldırı, karga, düşmana basıp sekme, alçak dal, dev mantar/cüce dalgaları, yedi güç, değişken karşılaşmalar/tempo, hava/şimşek, gecikmeli sürü, çift zıplama, yükselen hava ve kurt deparı. Space zıpla, sol tık/J vur, aşağı/S/Ctrl eğil, Shift kurt deparı, Esc duraklat. Yatay telefon ve bağımsız çoklu dokunma sürer.
 
-207 kaynak/sahne kontrolü başarılı. Gerçek tarayıcı, güncelleme ve native paket doğrulaması `docs/VALIDATION.md` içinde kaydedilir.
+207 kaynak/sahne ve 93 yerel tarayıcı/PWA kontrolü başarılı. Gerçek tarayıcı, güncelleme ve native paket doğrulaması `docs/VALIDATION.md` içinde kaydedilir.
 
 ## İndir ve aç
 
