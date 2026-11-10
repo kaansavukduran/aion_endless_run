@@ -104,6 +104,67 @@ jobs:
           path: |
             build/AionEndlessRun-*
           if-no-files-found: error
+  android_smoke:
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up engine and emulator access
+        run: |
+          python3 packaging/setup_godot.py
+          echo "$GITHUB_WORKSPACE/.ci-godot/bin" >> "$GITHUB_PATH"
+          sudo chmod 666 /dev/kvm
+      - name: Build disposable test APK
+        env:
+          AION_KEY_PASSWORD: android
+          AION_KEY_ALIAS: aiontest
+          AION_KEYSTORE: /tmp/aion-test.keystore
+        run: |
+          keytool -genkeypair -keystore "$AION_KEYSTORE" -alias aiontest -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 30 -dname 'CN=CI Test Only'
+          mkdir -p build/android
+          touch build/.gdignore
+          godot --headless --editor --import --quit
+          python3 packaging/android_config.py
+          godot --headless --export-release Android
+      - name: Install and play offline in Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          target: default
+          profile: Nexus 6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: |
+            adb install -r build/android/AionEndlessRun.apk
+            adb shell svc wifi disable
+            adb shell svc data disable
+            adb logcat -c
+            adb shell am start -W -n com.kaansavukduran.aionendlessrun/com.godot.game.GodotAppLauncher
+            sleep 5
+            adb shell pidof com.kaansavukduran.aionendlessrun
+            adb exec-out screencap -p > build/android-first-launch.png
+            adb shell input tap 1900 815
+            sleep 1
+            adb shell input keyevent 62
+            sleep 1
+            adb shell input keyevent 111
+            adb exec-out screencap -p > build/android-paused.png
+            adb shell pidof com.kaansavukduran.aionendlessrun
+            adb logcat -d > build/android-logcat.txt
+            python3 packaging/check_android_log.py build/android-logcat.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-test-evidence
+          path: |
+            build/android-*.png
+            build/android-logcat.txt
+          if-no-files-found: warn
   android:
     if: github.event_name != 'pull_request' && vars.AION_ANDROID_SIGNING_READY == 'true'
     needs: test
@@ -141,8 +202,8 @@ jobs:
           path: build/AionEndlessRun-*.apk
           if-no-files-found: error
   release:
-    if: always() && startsWith(github.ref, 'refs/tags/v') && needs.desktop.result == 'success' && (needs.android.result == 'success' || needs.android.result == 'skipped')
-    needs: [desktop, android]
+    if: always() && startsWith(github.ref, 'refs/tags/v') && needs.desktop.result == 'success' && needs.android_smoke.result == 'success' && (needs.android.result == 'success' || needs.android.result == 'skipped')
+    needs: [desktop, android, android_smoke]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -151,7 +212,13 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: release
+          pattern: desktop-*
           merge-multiple: true
+      - uses: actions/download-artifact@v4
+        if: needs.android.result == 'success'
+        with:
+          path: release
+          name: android
       - name: Publish first playable beta
         env:
           GH_TOKEN: ${{ github.token }}
