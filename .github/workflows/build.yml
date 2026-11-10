@@ -1,0 +1,148 @@
+name: Test and package
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  GODOT_VERSION: 4.6.3
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot
+        run: |
+          curl -fL "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          sudo install /tmp/godot/Godot* /usr/local/bin/godot
+      - run: |
+          mkdir -p build
+          touch build/.gdignore
+          godot --headless --editor --import --quit
+      - name: Physics, menus, input and persistence
+        run: godot --headless --script tests/test_game.gd
+  desktop:
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: .ci-godot
+          key: godot-${{ runner.os }}-4.6.3
+      - name: Set up Godot and export templates
+        shell: bash
+        run: |
+          python3 packaging/setup_godot.py
+          echo "$GITHUB_WORKSPACE/.ci-godot/bin" >> "$GITHUB_PATH"
+      - name: Import
+        shell: bash
+        run: |
+          mkdir -p build
+          touch build/.gdignore
+          godot --headless --editor --import --quit
+      - name: Linux packages and preview
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p build/linux build/web
+          godot --headless --export-release Linux
+          godot --headless --export-release Web
+          curl -fL https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-x86_64.AppImage -o /tmp/appimagetool
+          chmod +x /tmp/appimagetool
+          sudo cp /tmp/appimagetool /usr/local/bin/appimagetool
+          bash packaging/linux.sh
+          tar -czf build/AionEndlessRun-0.1.0-web-offline.tar.gz -C build/web .
+          timeout 15 build/linux/AionEndlessRun.x86_64 --headless --quit-after 5
+      - name: Windows installer and portable
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/windows | Out-Null
+          godot --headless --export-release Windows
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item LICENSE,THIRD_PARTY_NOTICES.md,README.md build/windows/
+          Compress-Archive -Path build/windows/* -DestinationPath build/AionEndlessRun-0.1.0-windows-x64-portable.zip
+          & 'C:\Program Files (x86)\NSIS\makensis.exe' packaging/windows.nsi
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Start-Process -FilePath build/windows/AionEndlessRun.exe -ArgumentList '--headless','--quit-after','5' -Wait
+      - name: macOS universal app and DMG
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p build/macos
+          godot --headless --export-release macOS
+          mv build/macos/AionEndlessRun.zip build/AionEndlessRun-0.1.0-macos-universal-portable.zip
+          ditto -xk build/AionEndlessRun-0.1.0-macos-universal-portable.zip build/dmg
+          cp LICENSE THIRD_PARTY_NOTICES.md build/dmg/
+          ln -s /Applications build/dmg/Applications
+          hdiutil create -volname 'Aion Endless Run' -srcfolder build/dmg -ov -format UDZO build/AionEndlessRun-0.1.0-macos-universal.dmg
+          find build/dmg -path '*/Contents/MacOS/*' -type f -exec chmod +x {} \;
+          find build/dmg -path '*/Contents/MacOS/*' -type f -exec {} --headless --quit-after 5 \;
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ runner.os }}
+          path: |
+            build/AionEndlessRun-*
+          if-no-files-found: error
+  android:
+    if: github.event_name != 'pull_request' && vars.AION_ANDROID_SIGNING_READY == 'true'
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Godot
+        run: |
+          python3 packaging/setup_godot.py
+          echo "$GITHUB_WORKSPACE/.ci-godot/bin" >> "$GITHUB_PATH"
+      - name: Configure stable signing identity
+        env:
+          KEY_B64: ${{ secrets.AION_ANDROID_KEYSTORE_B64 }}
+          AION_KEY_PASSWORD: ${{ secrets.AION_ANDROID_KEY_PASSWORD }}
+          AION_KEY_ALIAS: aionrelease
+          AION_KEYSTORE: /tmp/aion-release.keystore
+        run: |
+          test -n "$KEY_B64"
+          printf '%s' "$KEY_B64" | base64 -d > "$AION_KEYSTORE"
+          chmod 600 "$AION_KEYSTORE"
+          sdkmanager 'platform-tools' 'build-tools;35.0.0' 'platforms;android-35'
+          godot --headless --editor --import --quit
+          python3 packaging/android_config.py
+          mkdir -p build/android
+          godot --headless --export-release Android
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose build/android/AionEndlessRun.apk
+          mv build/android/AionEndlessRun.apk build/AionEndlessRun-0.1.0-android-arm64-x64.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: build/AionEndlessRun-*.apk
+          if-no-files-found: error
+  release:
+    if: always() && startsWith(github.ref, 'refs/tags/v') && needs.desktop.result == 'success' && (needs.android.result == 'success' || needs.android.result == 'skipped')
+    needs: [desktop, android]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: release
+          merge-multiple: true
+      - name: Publish first playable beta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd release
+          sha256sum AionEndlessRun-* > SHA256SUMS
+          cd ..
+          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Aion Endless Run $GITHUB_REF_NAME · İlk oynanabilir sürüm" --notes-file docs/RELEASE.md
