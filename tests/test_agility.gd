@@ -37,6 +37,11 @@ func run() -> void:
  check(game.combat_pose("wolf",false).key=="wolf-dash-bite","Releasing boost mid-strike does not switch the drawn attack")
  game.world.adventure.attack_time=0.2
  check(game.combat_lunge().x>40,"Sprint bite really advances the rendered head")
+ game.update_friend()
+ check(game.friend_sprite.position.x>World.PLAYER_X+40 and game.friend_sprite.get_meta("source_frame")==3,"The real sprint sprite advances while the jaw is visibly open")
+ game.world.adventure.attack_time=0.18
+ game.update_friend()
+ check(game.friend_sprite.get_meta("source_frame")==3,"Open-jaw contact is held long enough to read before the snap")
  check(game.world.adventure.attack_rect(game.world).size.x==142,"Sprint bite collision reach matches the extended contact pose")
  game.world.adventure.powers.mushroom=1.0
  check(is_equal_approx(game.world.adventure.attack_rect(game.world).size.x,142*1.65),"Giant sprint bite retains the mushroom-scaled contact reach")

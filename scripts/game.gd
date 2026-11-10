@@ -1445,7 +1445,7 @@ func update_friend() -> void:
 	if friend_combat >= 0:
 		var pose_spec := combat_pose(character,friend_combat >= 4 or a.ducking(world))
 		var combat_count := frames.count(pose_spec.key,pose_spec.row)
-		var combat_frame: int = (a.attack_frame(combat_count) if friend_combat < 4 else a.roll_frame(combat_count)) if motion else combat_count/2
+		var combat_frame: int = (contact_frame(combat_count) if friend_combat < 4 else a.roll_frame(combat_count)) if motion else combat_count/2
 		var combat_anchor := Vector2(World.PLAYER_X,ground+world.y)+combat_lunge()
 		place_combat(friend_sprite, character, friend_combat, combat_frame, combat_anchor, visual_size, friend_combat >= 4 or a.ducking(world))
 	if world.state in ["running","paused"] and world.frontier.active() and not a.ducking(world) and (world.frontier.phase != "intro" or world.frontier.stage_time > 0.75):
@@ -1478,6 +1478,16 @@ func combat_pose(id: String,crouch: bool) -> Dictionary:
 	if id=="owl" and world.adventure.attack_airborne: return {"key":"owl-peck","row":0}
 	if id=="wolf" and world.adventure.attack_sprinting: return {"key":"wolf-dash-bite","row":0}
 	return {"key":"strikes","row":COMBAT_ROWS[id]*2+world.adventure.attack_variant}
+
+func contact_frame(frame_count: int) -> int:
+	var a = world.adventure
+	if character!="wolf" or (not a.attack_sprinting and a.attack_variant!=0): return a.attack_frame(frame_count)
+	# Let the open jaws read at contact; the snap still occurs in the hit window.
+	var phase: float = clampf((a.ATTACK_DURATION-a.attack_time)/a.ATTACK_DURATION,0,1)
+	var ends := [0.10,0.20,0.32,0.60,0.72,0.82,0.90,1.01]
+	for i in ends.size():
+		if phase<float(ends[i]): return mini(i,frame_count-1)
+	return frame_count-1
 
 func combat_lunge() -> Vector2:
 	var a = world.adventure

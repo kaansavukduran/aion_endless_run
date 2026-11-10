@@ -4,7 +4,7 @@ AGILITY-PROVENANCE overrides nullable aliases before canonical. Two new original
 
 Sprint attack posture snapshots on attack start, so releasing Shift mid-swing cannot flip the pose. Actual smooth lunges: wolf48 sprint/34 bite/24 claw pixels, owl18 air peck/0 grounded wing; sheep unchanged. Real wolf melee reach extends142/124 and preserves mushroom scaling. Three claw contact traces attach in front; no projectile/beam. Gliding normal and gust aliases both point to the same calm row, with fixed horizontal gaze. Single press/cooldown remain.
 
-Nine source/scene suites1973 assertions. Maintained browser driver uses passive real rendered sprite X and registered eye observations, without world setters. Stable Android versionCode12. Retain Mac explicit DMG capacity sizing/verify. Package and publication results append once verified; keep prior releases.
+Nine source/scene suites1975 assertions. Maintained browser driver uses passive real rendered sprite X and registered eye observations, without world setters. Stable Android versionCode12. Retain Mac explicit DMG capacity sizing/verify. Package and publication results append once verified; keep prior releases.
 
 Historical handoff follows.
 
