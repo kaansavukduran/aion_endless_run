@@ -1,0 +1,11 @@
+{
+  "version": "0.7.0",
+  "code": 7,
+  "sha256": "e130b51533009d4128ad0d426c7ebdd1085f808408e9c57f92bfd941131a25b2",
+  "architectures": [
+    "arm64-v8a",
+    "x86_64"
+  ],
+  "internet_permission": false,
+  "stable_certificate_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36"
+}
