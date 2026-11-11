@@ -1,0 +1,16 @@
+[
+  "A stale page with missing engine files recovers to the current manifest",
+  "Recovery finishes without a redirect loop",
+  "HTML and truncated PCK responses are rejected, then the real game starts",
+  "No native missing-PCK alert reaches the mobile user",
+  "Landscape phone touch starts the actual game",
+  "A same-size corrupt PCK fails SHA-256 validation and is downloaded again",
+  "Portrait phone touch works with the landscape game transform",
+  "Persistent download failure shows a Turkish retry screen",
+  "An invalid pack never starts or allocates the engine",
+  "The normal Retry button recovers once the connection returns",
+  "A poisoned real offline cache is repaired automatically",
+  "Repair preserves the score in actual IndexedDB; no data clearing",
+  "The verified repaired game really reloads offline with its record",
+  "No missing-PCK dialog in retry, cache repair or offline boot"
+]

@@ -4,6 +4,8 @@ Uses a real HTTP server, CacheStorage, ServiceWorker and IndexedDB. No mocked
 network, state injection, cache bypass, unregister or storage clearing.
 """
 import argparse
+import hashlib
+import re
 from functools import partial
 import http.server
 import json
@@ -21,7 +23,8 @@ parser.add_argument('--evidence', default='work/upgrade-evidence', type=Path)
 args = parser.parse_args()
 args.evidence.mkdir(parents=True, exist_ok=True)
 results = []
-version = json.loads((args.current/'build.json').read_text())['version']
+current_meta = json.loads((args.current/'build.json').read_text())
+version = current_meta['version']
 
 def check(value, message):
     assert value, message
@@ -80,7 +83,8 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         ready()
         check(page.locator('canvas').get_attribute('data-character') == 'owl', 'Legacy PWA really opens offline with its saved owl')
         legacy_version = page.locator('canvas').get_attribute('data-version')
-        check(legacy_version != version, 'Reproduced the previous export before migration')
+        legacy_build = page.evaluate('window.AION_BUILD?.build')
+        check(legacy_version != version or legacy_build != current_meta['build'], 'Reproduced the previous export before migration')
         page.screenshot(path=str(args.evidence/'legacy-offline.png'))
         context.set_offline(False)
         server_root[0] = args.current.resolve()
@@ -90,7 +94,9 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         if legacy_version is not None:
             page.wait_for_selector('#aion-update', timeout=90000)
             page.locator('#aion-update').click()
-        page.wait_for_selector(f'canvas[data-version="{version}"]', timeout=90000)
+        # Web-only fixes keep the game version; wait for the new shell identity.
+        page.wait_for_function('(build) => window.AION_BUILD?.build === build', arg=current_meta['build'], timeout=90000)
+        page.wait_for_selector(f'canvas[data-version="{version}"][data-state="ready"]', timeout=90000)
         check('build=' in page.url, 'Old cached shell migrates to the current build automatically')
         canvas = page.locator('canvas')
         check(canvas.get_attribute('data-character') == 'owl' and canvas.get_attribute('lang') == 'en', 'Migration preserves character and language in IndexedDB')
@@ -119,6 +125,14 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         for name in ['index.html','index.service.worker.js']:
             text = (future/name).read_text().replace("const BUILD = '"+original_build+"'", "const BUILD = 'test-next-build'").replace("const VERSION = '"+version+"'", "const VERSION = '"+version+"-next-test'")
             (future/name).write_text(text)
+        # The future shell is a self-consistent deploy, including its HTML hash.
+        worker = future/'index.service.worker.js'
+        text = worker.read_text()
+        if 'const INFO = ' in text:
+            info = json.loads(re.search(r'const INFO = (\{.*?\});',text)[1])
+            info['index.html'] = {'bytes':(future/'index.html').stat().st_size,'sha256':hashlib.sha256((future/'index.html').read_bytes()).hexdigest()}
+            text = re.sub(r'const INFO = \{.*?\};','const INFO = '+json.dumps(info)+';',text)
+            worker.write_text(text)
         server_root[0] = future
         page.keyboard.press('Space')
         page.wait_for_selector('canvas[data-state="running"]')

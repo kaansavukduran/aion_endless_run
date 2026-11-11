@@ -1,4 +1,10 @@
-# Current handoff · 0.12.0
+# Current handoff · 0.12.0 web loader hotfix
+
+Poco X7 / Firefox report: native missing-PCK modal during web startup. Web loader revision2 validates the complete PCK byte count, GDPC header and SHA-256 before allocating the engine, retries bad responses, repairs only corrupt pack cache entries and preloads verified bytes at the fixed virtual path /aion.pck. Network filenames remain fingerprinted. A stale shell can recover once through aion-latest.json. Offline installation starts after game startup and validates files sequentially, reusing the verified PCK. Firefox activation probes modern clients rather than forcing navigation based only on a potentially stale Client.url. IndexedDB is never cleared.
+
+Game code, character art, version0.12.0 and published native packages are unchanged. This is a web-only deployment. Five packaging contracts and real Chromium/Firefox packet-fault, touch, retry, cache-repair and offline tests are in tests/test_web_packaging.py and tests/browser_loader.py; PWA migration checks now wait for shell build identity even when game versions match. Evidence and test limits: docs/evidence-web-loader/README.md.
+
+# Application handoff · 0.12.0
 
 AGILITY-PROVENANCE overrides nullable aliases before canonical. Two new original unchanged PNGs /64 poses (8×4 each). Wolf rows0 four-legged gallop,1 bite,2 claw,3 sprint pounce bite; owl0 calm glide,1/2 forward wing swipes,3 flying beak. Only wolf/owl movement/combat replaced. Aion/sheep and other hero poses stay canonical. Registration explicitly selects the large near iris, not golden beak/feathers or wolf far eye; blinks interpolate landmarks. One scale per hero atlas. Review near-eye markers against source art; metadata alignment alone does not establish that the chosen landmark is anatomically correct.
 

@@ -39,8 +39,14 @@
     };
     if (document.body) show(); else addEventListener('DOMContentLoaded', show, {once:true});
   }
-  navigator.serviceWorker.addEventListener('message', event => showUpdate(event.data));
-  navigator.serviceWorker.register('./index.service.worker.js', {updateViaCache:'none'}).then(registration => {
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data?.type === 'aion-client-query') {
+      event.source?.postMessage({type:'aion-client',build:BUILD});
+      return;
+    }
+    showUpdate(event.data);
+  });
+  const registerOffline = () => navigator.serviceWorker.register('./index.service.worker.js', {updateViaCache:'none'}).then(registration => {
     if (!registration) return; // Browsers/privacy tools may disable worker installation.
     const check = () => {
       registration.update().catch(() => {}); // Offline is an expected condition.
@@ -52,4 +58,7 @@
     setInterval(check, 60000);
     check();
   }).catch(error => console.info('Aion offline cache unavailable:', error.message));
+  // Avoid simultaneous engine loading and a second full mobile cache download.
+  if (window.AION_BOOT?.state.phase === 'ready') registerOffline();
+  else addEventListener('aion-game-started',registerOffline,{once:true});
 })();

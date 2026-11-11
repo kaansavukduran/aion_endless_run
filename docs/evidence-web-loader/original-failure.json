@@ -1,0 +1,14 @@
+{
+  "dialogs": [
+    "Error: Couldn't load project data at path \"/\". Is the .pck file missing?\n\nIf you've renamed the executable, the associated .pck file should also be renamed to match the executable's name (without the extension).\n"
+  ],
+  "errors": [
+    "ERROR: Cannot open resource pack 'aion-3d4c0f4a9af39481.pck'.",
+    "   at: _setup (core/config/project_settings.cpp:685)",
+    "ERROR: Error: Couldn't load project data at path \"/\". Is the .pck file missing?",
+    "",
+    "If you've renamed the executable, the associated .pck file should also be renamed to match the executable's name (without the extension).",
+    "",
+    "   at: setup (main/main.cpp:2079)"
+  ]
+}
