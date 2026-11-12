@@ -565,6 +565,9 @@ func toggle_language_picker() -> void:
 	language_picker.visible = language_picker_open
 	web_stamp = ""
 	if language_picker_open: language_picker.get_child(0).get_child(Words.LANGUAGES.find(language)).grab_focus()
+	# Visibility changes do not rebuild the page. Publish the real popup
+	# layout after container sorting for native touch diagnostics as well.
+	refresh_interface_metadata.call_deferred(layout_generation)
 
 func character_portrait(id: String) -> TextureRect:
 	var picture := TextureRect.new()

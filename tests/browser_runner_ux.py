@@ -63,8 +63,13 @@ with sync_playwright() as pw:
   ui(page,text='Koşuya başla',touch=True);wait(page,'[data-state="running"]')
   ui(page,text='Anladım · Devam et',touch=True)
   page.wait_for_function('!JSON.parse(document.querySelector("canvas").dataset.ui).some(b=>b.text==="Anladım · Devam et")')
-  p0=xy(page,210,280);p1=xy(page,214,355);touch(0,p0);touch(0,p1,'move');touch(0,kind='end');wait(page,'[data-ducking="true"]')
-  check(d(page)['airborne']=='false' and d(page)['touchSwipes']=='1',f'{name}: a real down swipe rolls once without a jump')
+  p0=xy(page,210,280);p1=xy(page,214,355)
+  page.evaluate('''()=>{window.swipeObserved=false;new MutationObserver(()=>{const d=document.querySelector('canvas').dataset;if(d.ducking==='true'&&d.airborne==='false'&&d.touchSwipes==='1')swipeObserved=true}).observe(document.querySelector('canvas'),{attributes:true})}''')
+  # One browser-level gesture keeps the intended fast swipe timing. Separate
+  # protocol round trips can turn it into a >180 ms long press under load.
+  cdp.send('Input.synthesizeScrollGesture',{'x':p0[0],'y':p0[1],'yDistance':p1[1]-p0[1],'speed':1000,'gestureSourceType':'touch','preventFling':True})
+  page.wait_for_function('swipeObserved')
+  check(True,f'{name}: a real down swipe rolls once without a jump')
   page.wait_for_timeout(150)
   ui(page,text='Duraklat',touch=True);wait(page,'[data-state="paused"]');ui(page,text='Ana menü',touch=True);ui(page,text='Koşuya başla',touch=True);wait(page,'[data-state="running"]')
   attack=button(page,'attack');before=int(d(page)['swingId']);touch(0,attack);wait(page,'[data-attacking="true"]');page.wait_for_timeout(650)
