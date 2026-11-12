@@ -144,6 +144,7 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         page.evaluate("""()=>{sessionStorage.removeItem('aion-test-paused');new MutationObserver(()=>{if(document.querySelector('canvas').dataset.state==='paused')sessionStorage.setItem('aion-test-paused','yes')}).observe(document.querySelector('canvas'),{attributes:true})}""")
         page.locator('#aion-update').click()
         ready()
+        print('UPDATE_READBACK',{'paused_observed':page.evaluate("sessionStorage.getItem('aion-test-paused')"),'url':page.url,'character':canvas.get_attribute('data-character'),'build':page.evaluate('window.AION_BUILD')},flush=True)
         check(page.evaluate("sessionStorage.getItem('aion-test-paused')")=='yes' and 'test-next-build' in page.url and canvas.get_attribute('data-character') == 'owl', 'Update button saves, pauses and opens the new shell with preferences intact')
         check(not errors, 'No uncaught browser errors during legacy migration or offline updates')
         browser.close()

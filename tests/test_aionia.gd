@@ -32,6 +32,9 @@ func run() -> void:
 	var path:="user://save.cfg";var original:=FileAccess.get_file_as_bytes(path) if FileAccess.file_exists(path) else PackedByteArray()
 	var game=load("res://main.tscn").instantiate();root.add_child(game);await process_frame;game.set_physics_process(false)
 	print("AIONIA_BODY_FONT ",game.interface_options.body_font.get_font_name())
+	check(game.GAME_VERSION==ProjectSettings.get_setting("application/config/version"),"Displayed and exported application versions agree")
+	for code in ["tr","en","cs"]:
+		game.language=code;check(game.text("version").contains(game.GAME_VERSION),"Localized version agrees with the running application "+code)
 	game.touch_mode=true;game.touch_tutorial_done=true;game.interface_options.text_scale=1.0;game.interface_options.font_mode="system"
 	game.interface_options.theme_mode="dark";game.interface_options.resolve_theme();game.build_theme();game.ui.theme=game.ui_theme
 	check(not game.gamepad.haptics,"Controller vibration is opt-in by default")
@@ -57,7 +60,7 @@ func run() -> void:
 	check(game.page=="paused" and not game.world.jump_held and not game.world.boost_held and game.attack_sources.is_empty(),"Controller disconnect pauses and clears every held action")
 	game.interface_options.reduced_motion=true;game.motion=true
 	check(not game.decorative_motion() and game.motion,"Reduced motion suppresses decoration without freezing hero animation")
-	for dimensions in [Vector2i(393,873),Vector2i(873,393)]:
+	for dimensions in [Vector2i(393,873),Vector2i(873,393),Vector2i(1440,2560)]:
 		root.size=dimensions;await process_frame
 		for lang in ["tr","en","cs"]:
 			game.language=lang

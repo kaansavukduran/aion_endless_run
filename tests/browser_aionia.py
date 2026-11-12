@@ -11,7 +11,7 @@ def check(ok,label):
  results.append(label);print('PASS',label,flush=True)
 with sync_playwright() as pw:
  browser=pw.chromium.launch(args=['--no-sandbox','--enable-unsafe-swiftshader'])
- for name,size,touch in [('desktop',(1152,648),False),('narrow-phone',(320,740),True),('portrait',(393,873),True),('landscape',(873,393),True),('tablet-portrait',(768,1024),True),('tablet-landscape',(1024,768),True)]:
+ for name,size,touch in [('desktop',(1152,648),False),('narrow-phone',(320,740),True),('portrait',(393,873),True),('portrait-16x9',(450,800),True),('landscape',(873,393),True),('tablet-portrait',(768,1024),True),('tablet-landscape',(1024,768),True)]:
   if a.case and a.case!=name:continue
   ctx=browser.new_context(viewport={'width':size[0],'height':size[1]},has_touch=touch,is_mobile=touch,locale='en-GB',color_scheme='light',service_workers='block')
   page=ctx.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.on('console',lambda m:errors.append(m.text) if 'SCRIPT ERROR' in m.text else None)
@@ -26,7 +26,7 @@ with sync_playwright() as pw:
    expected={'Option_theme_light':'[data-theme="light"]','Option_theme_dark':'[data-theme="dark"]','Option_theme_system':'[data-theme="system"]','Option_text_size_2.0':'[data-text-scale="2.0"]','Option_text_size_1.0':'[data-text-scale="1.0"]'}
    wait(expected[control]+'[data-ui-ready="true"]')
   def native_label(part):return next(b['text'] for b in json.loads(d()['ui']) if part in b['text'])
-  v=d();check(v['version']=='0.14.0' and v['theme']=='dark' and v['themeDark']=='true',name+': fresh launch is the current game and dark even with a light OS')
+  v=d();check(v['version']=='0.14.1' and v['theme']=='dark' and v['themeDark']=='true',name+': fresh launch is the current game and dark even with a light OS')
   check(v['fontMode']=='system' and 'Pixelify' not in v['fontFamily'],name+': body text uses the platform sans/system fallback, not the pixel logo font');fonts[name]=v['fontFamily']
   check(page.locator('#aion-accessibility-controls').get_by_role('button').count()>=8,name+': four character choices and real menu actions have semantic counterparts')
   semantic('Settings');wait('[data-page="settings"]');option('Option_theme_light');wait('[data-theme="light"][data-theme-dark="false"]')

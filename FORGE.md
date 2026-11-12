@@ -163,3 +163,7 @@ Manual portrait review exposed a clipped boss status label missed by the menu-bu
 Normatif belge ve bağlı AER-001–013 kaydı okundu; sürümlü kaynak/hash ve tasarım/sanat/kontrol kararları eklendi. Kullanıcı iki yana bölünmüş düğmeleri seçti. Varsayılan koyu/sistem yazısı, light/system seçenekleri, büyütülmüş metin, azaltılmış dekorasyon, erişilebilir menü karşılıkları ve kol ayarları mevcut Godot altyapısına bağlandı. Kahraman PNG'leri korunur. Fragaria yükleyicisi ve sekiz kişilik arka kutlama tamamlandı. Kaynak kontrolü 2549, tarayıcı 190, paket sözleşmesi 5; fiziksel cihaz ve yayın sınırları `docs/AIONIA-QA.md` içinde. Native CI/yayın sonucu son makbuzda ayrı kaydedilir.
 
 0.14 son düzeltme: CI font farkı için gerçek Label ölçümü, DejaVu/Liberation regresyonu; hızlı yenilemeye karşı sürümlü senkron browser kurtarma kopyası. Güncel yerel kontrol 2549 kaynak/sahne + 190 browser + 6 paket sözleşmesidir.
+
+### 0.14.1 — gerçek Android görüntüsündeki menü çakışması
+
+0.14.0 giriş testi geçmesine rağmen API30 ekran görüntüsünde sistem yazı tipiyle Settings/karakter başlığı çakıştı. 9:16 ekranda sabit yüksekliğe sığmayan başlık/altbaşlık/üç düğme minimum toplamı kanıtlandı. İki telefon yönünde kompakt tek satır logo ve 64 birimlik okunaklı eylemler kullanılır; panel yüksekliği karakter seçimi başlangıcından hesaplanır. 1440×2560 kaynak ve 450×800 gerçek tarayıcı durumları, ayrıca Android pasif UI bölge sınırı kontrolü eklendi. Oyun girdisi ve kahraman paftaları değişmedi.

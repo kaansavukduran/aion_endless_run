@@ -108,7 +108,9 @@ func card(width: float) -> VBoxContainer:
 	if enlarged:width=h.view_w-40
 	var height: float=minf(h.view_h-120,410 if h.page!="main" else 340)
 	if h.page=="settings" or enlarged:height=h.view_h-110
-	if h.page=="main" and h.touch_mode and not h.portrait and not enlarged:height=minf(292,roster_y()-chooser_height()-6-56-8)
+	if h.page=="main" and h.touch_mode and not enlarged:
+		var top: float=stage_y()+26 if h.portrait else 56
+		height=minf(292,roster_y()-chooser_height()-6-top-8)
 	var panel:=PanelContainer.new()
 	panel.name="PagePanel"
 	h.menu_layer.add_child(panel)
@@ -210,7 +212,7 @@ func main(column: VBoxContainer) -> Button:
 	column.add_child(first)
 	column.add_child(h.button(h.text("boss_training"),func():h.show_page("bosses")))
 	column.add_child(h.button(h.text("settings"),func():h.open_subpage("settings")))
-	if h.touch_mode and not h.portrait and h.interface_options.text_scale<=1.0:
+	if h.touch_mode and h.interface_options.text_scale<=1.0:
 		logo.text="AION · ENDLESS RUN"
 		logo.add_theme_font_size_override("font_size",26)
 		subtitle.hide()

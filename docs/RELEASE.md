@@ -1,4 +1,4 @@
-# Aion Endless Run 0.14.0
+# Aion Endless Run 0.14.1
 
 AIONIA v1.4 uygulaması: varsayılan koyu tema ve sistem/sans yazı, saklanan açık/koyu/sistem seçimi, pixel alternatifi ve büyütülmüş metin; sıcak, keskin çerçeveli kompakt arayüz. Uzun karakter adı ve karakter seçimi başlığı gerçek karta sığar. %200 metinde gerekli menü kaydırması korunur.
 
@@ -10,6 +10,8 @@ Kaynak doğrulaması: 2.549 sahne/model kontrolü, 190 gerçek tarayıcı kontro
 
 ## İndirme / platform
 
-[0.14.0 sürümü](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.14.0) bütün doğrulamalar bitince Windows kurulum/portable, Linux deb/AppImage/portable, macOS universal DMG/portable, sabit anahtarla imzalı Android APK ve web offline arşivini birlikte sunar. Önceki sürümler korunur. `SHA256SUMS` ve `BUILD-RECEIPT.json` dosya boyutu, özet, kaynak commit ve CI bağlantısını taşır.
+[0.14.1 sürümü](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.14.1) bütün doğrulamalar bitince Windows kurulum/portable, Linux deb/AppImage/portable, macOS universal DMG/portable, sabit anahtarla imzalı Android APK ve web offline arşivini birlikte sunar. Önceki sürümler korunur. `SHA256SUMS` ve `BUILD-RECEIPT.json` dosya boyutu, özet, kaynak commit ve CI bağlantısını taşır.
 
-Android uygulama kimliği ve imza korunur, versionCode 15'tir. macOS paketleri yalnız ad-hoc imzalıdır; Developer ID/noter yok. Windows Authenticode yok. iPhone için web/PWA hedefi vardır; yerel iOS/App Store/TestFlight için sahibin Apple imzası gerekir. Fiziksel Poco/Xbox/PS/iPhone ve ekran okuyucu testi bu ortamda yapılmadı.
+Android uygulama kimliği ve imza korunur, versionCode 16'tir. macOS paketleri yalnız ad-hoc imzalıdır; Developer ID/noter yok. Windows Authenticode yok. iPhone için web/PWA hedefi vardır; yerel iOS/App Store/TestFlight için sahibin Apple imzası gerekir. Fiziksel Poco/Xbox/PS/iPhone ve ekran okuyucu testi bu ortamda yapılmadı.
+
+0.14.1: Android sistem yazı tipi ve 9:16 ekranda ana menü/karakter başlığı çakışması giderildi. Telefon ana menüsü iki yönde de kompakt başlık ve gerçek ayrılmış yüksekliğe göre yerleşir. 1440×2560 kaynak regresyonu ve gerçek native UI bölge sınırı kontrolü eklendi. Özgün karakter PNG’leri değiştirilmedi.

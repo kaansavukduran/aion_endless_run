@@ -1,0 +1,23 @@
+[
+  "portrait tr: all main actions and character cards fit on screen",
+  "portrait tr: long settings scroll to the reachable Back action",
+  "portrait en: all main actions and character cards fit on screen",
+  "portrait en: long settings scroll to the reachable Back action",
+  "portrait cs: all main actions and character cards fit on screen",
+  "portrait cs: long settings scroll to the reachable Back action",
+  "portrait tr: real defeat score, retry and menu actions fit without scrolling",
+  "portrait en: real defeat score, retry and menu actions fit without scrolling",
+  "portrait cs: real defeat score, retry and menu actions fit without scrolling",
+  "portrait: result retry really starts the next run",
+  "landscape tr: all main actions and character cards fit on screen",
+  "landscape tr: long settings scroll to the reachable Back action",
+  "landscape en: all main actions and character cards fit on screen",
+  "landscape en: long settings scroll to the reachable Back action",
+  "landscape cs: all main actions and character cards fit on screen",
+  "landscape cs: long settings scroll to the reachable Back action",
+  "landscape tr: real defeat score, retry and menu actions fit without scrolling",
+  "landscape en: real defeat score, retry and menu actions fit without scrolling",
+  "landscape cs: real defeat score, retry and menu actions fit without scrolling",
+  "landscape: result retry really starts the next run",
+  "No uncaught browser/Godot errors in translated phone menus"
+]

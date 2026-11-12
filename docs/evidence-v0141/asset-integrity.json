@@ -1,0 +1,202 @@
+{
+  "adventure-combat.png": {
+    "bytes": 2662534,
+    "sha256": "fc7705e037201c0caeb44224030b2779a5225884d604606e944958645989b29c",
+    "unchanged_from_base": true
+  },
+  "adventure-enemies.png": {
+    "bytes": 1470343,
+    "sha256": "0a368b2330b60aaadade0944e77980b1a8c734ff8dff25109709de122010379f",
+    "unchanged_from_base": true
+  },
+  "adventure-items.png": {
+    "bytes": 1907448,
+    "sha256": "2fb54115f29923aea2209fd978238b8d57dfe86bd9e09ae292bd782da8431b12",
+    "unchanged_from_base": true
+  },
+  "agility-owl.png": {
+    "bytes": 1805820,
+    "sha256": "2930ec1c574613398bd741962aaf8feba9b83d434a5ceec9df94abd6d1720dfc",
+    "unchanged_from_base": true
+  },
+  "agility-wolf.png": {
+    "bytes": 2155921,
+    "sha256": "411ccdf8e8a09371367b412cc061b95b08ebb2d7b637bccc5b5f88b7e05f096d",
+    "unchanged_from_base": true
+  },
+  "aion-runner.png": {
+    "bytes": 2026952,
+    "sha256": "215d90e9074dab317ad9ca947224c14cc02b06c2e7cef1626236cd1d4c2ba586",
+    "unchanged_from_base": true
+  },
+  "canonical-aion.png": {
+    "bytes": 2650092,
+    "sha256": "789fe4e54752e0f11da49eff5d43ab92e0c726ca919ca136c906991143844687",
+    "unchanged_from_base": true
+  },
+  "canonical-owl.png": {
+    "bytes": 2637221,
+    "sha256": "7969f14b2b15d92f3352350546e8cd55cd3d663ecef6f768fa4f1289d727c1bb",
+    "unchanged_from_base": true
+  },
+  "canonical-rolls.png": {
+    "bytes": 2115077,
+    "sha256": "01aebfe28ed30efb6faa1e3034fd4a2fed32dc6d7333e9cd9f76fa9d6c8731e3",
+    "unchanged_from_base": true
+  },
+  "canonical-sheep.png": {
+    "bytes": 3011991,
+    "sha256": "8b60d58e55798aeed7edde058342beb66647eb5d1a8735f867fbb586c2eb9083",
+    "unchanged_from_base": true
+  },
+  "canonical-wolf.png": {
+    "bytes": 2670658,
+    "sha256": "6f5eb1f33b92f4b0f77be626d9c50ab997bb79b37237d3f8857de723469e0ba3",
+    "unchanged_from_base": true
+  },
+  "companion-actions.png": {
+    "bytes": 1676890,
+    "sha256": "87d2205bde4fe6607039345dd37aa257d7ef410270d54c590d19173a40488c6e",
+    "unchanged_from_base": true
+  },
+  "companions-runner.png": {
+    "bytes": 2817925,
+    "sha256": "d308de70c13e77aa61f29040f300913b54d42f4ed4d885a9c0373b72174dba01",
+    "unchanged_from_base": true
+  },
+  "encounter-bosses.png": {
+    "bytes": 2956608,
+    "sha256": "0d8415026e6e7c1c52575dc53d88bccdf59b4c1ad60762648c750e3f1a3052ec",
+    "unchanged_from_base": true
+  },
+  "encounter-defeats.png": {
+    "bytes": 2622826,
+    "sha256": "0c2d26a24a2e28045ada5b47db1f1474dced7a237c62012d0ba46cc76991d842",
+    "unchanged_from_base": true
+  },
+  "encounter-weapons.png": {
+    "bytes": 2878442,
+    "sha256": "15d302826b2694d57333a350df0543f545e4c9566dc768ba4e6b56113e32d476",
+    "unchanged_from_base": true
+  },
+  "evolution-barriers.png": {
+    "bytes": 2842048,
+    "sha256": "7f34a97888b24bf4032d7955113935081938b000c0ca705d6407c4aed45c1626",
+    "unchanged_from_base": true
+  },
+  "evolution-celebrants.png": {
+    "bytes": 2991737,
+    "sha256": "ed358621516469f0705de3c1745eccbe7fdc5635195cffe92cfd046122653600",
+    "unchanged_from_base": true
+  },
+  "evolution-rolls.png": {
+    "bytes": 2966668,
+    "sha256": "e1271db4e607d01bfba55e8d6dfcdf678fe296b1eaca1296074b4c1f83de5a7f",
+    "unchanged_from_base": true
+  },
+  "evolution-strikes.png": {
+    "bytes": 2573734,
+    "sha256": "17577985167eb750310c40b383e4a0a2fb89e8c579d371ea5620ae2312718f48",
+    "unchanged_from_base": true
+  },
+  "fragaria-strawberry.png": {
+    "bytes": 704922,
+    "sha256": "b01ae5896be8ba724faabbd3cfd6e70b929e6491efec54ea066d82797ab9120d",
+    "unchanged_from_base": true
+  },
+  "frontier-boss.png": {
+    "bytes": 2799597,
+    "sha256": "ecf0037858d5f6bae267f0814452c2f89f2a3272151698379f3e9b94e5d18458",
+    "unchanged_from_base": true
+  },
+  "frontier-heroes.png": {
+    "bytes": 2336130,
+    "sha256": "773c61e8767d9daebec45905b2dec214b9ac907ae05690e73fc1c43edd735bbc",
+    "unchanged_from_base": true
+  },
+  "frontier-parkour.png": {
+    "bytes": 2535674,
+    "sha256": "07bcf676cc7805916462c7c8af056b89b8411025813902a9c48514dc21417e6d",
+    "unchanged_from_base": true
+  },
+  "motion-aion.png": {
+    "bytes": 3058751,
+    "sha256": "9312191d6aebca0fd96db16ddae7391316890f627096d77d619d7588989876d2",
+    "unchanged_from_base": true
+  },
+  "motion-elements.png": {
+    "bytes": 3104711,
+    "sha256": "7eaabea40b30f2d201c97cc681d7430d486dee1310d100bd3835fbdfae069041",
+    "unchanged_from_base": true
+  },
+  "motion-girls.png": {
+    "bytes": 3348957,
+    "sha256": "c1b139969036d1d7f194c3ade3c1142aeaa648d08c95c150015f3d8b80d1baba",
+    "unchanged_from_base": true
+  },
+  "motion-owl.png": {
+    "bytes": 2785446,
+    "sha256": "145cb66faba9ca0b7bde64fc55da1fa2a8d414c8c7fbb3bb371323b03751064c",
+    "unchanged_from_base": true
+  },
+  "motion-powers.png": {
+    "bytes": 2446136,
+    "sha256": "e25eea678b633ca439ccade472bc4618614a31d57aee596aaaa76b6a81e8da10",
+    "unchanged_from_base": true
+  },
+  "motion-rolls.png": {
+    "bytes": 2717906,
+    "sha256": "153368d07a504a500969d8fcc02775c6ccfe320b734b38be85c3c901eaddef85",
+    "unchanged_from_base": true
+  },
+  "motion-sheep.png": {
+    "bytes": 2785832,
+    "sha256": "be50626466064f8cde5f75cfbb31ea1543caf0293971b5d456cd7bd7940a893e",
+    "unchanged_from_base": true
+  },
+  "motion-terrain.png": {
+    "bytes": 2489378,
+    "sha256": "cedfe855e5ca0cced5558e04c0dccb635c72fe6bfc36093f9a51456742836f20",
+    "unchanged_from_base": true
+  },
+  "motion-wolf.png": {
+    "bytes": 2944863,
+    "sha256": "06db7e167e22815ccce2b15b78ccba41d6987eca465f5278a0592af85094b099",
+    "unchanged_from_base": true
+  },
+  "motion-world.png": {
+    "bytes": 2756433,
+    "sha256": "2b67050ab9d7bc815fb94b9d06ede3bc464b3060efae9178134783cd50ae6cea",
+    "unchanged_from_base": true
+  },
+  "owl-runner.png": {
+    "bytes": 2192684,
+    "sha256": "4b10872ff49b9995969f4540fab9c478c80267d27f5d5e3944a45b2aba9e89aa",
+    "unchanged_from_base": true
+  },
+  "owl.png": {
+    "bytes": 1215369,
+    "sha256": "52792c990f816ce3e387ae271fb91947d0c4610dd6c2ff67a5f4c98ba26787bf",
+    "unchanged_from_base": true
+  },
+  "sheep-runner.png": {
+    "bytes": 2804457,
+    "sha256": "ea2df12ad8afc99a6dad937a03ec7b917b2be0784a80ee489c32d782aa45d96c",
+    "unchanged_from_base": true
+  },
+  "sheep.png": {
+    "bytes": 1068676,
+    "sha256": "79d732d43f0d8adebeaac959e68ef3740635fe7b022fcf22e4d7395bebd0bc28",
+    "unchanged_from_base": true
+  },
+  "wolf-runner.png": {
+    "bytes": 2848034,
+    "sha256": "749d7195cb155d9dd60f5ed5a95cd17d27bee6614f819e9075b79a4eb1acdf7b",
+    "unchanged_from_base": true
+  },
+  "wolf.png": {
+    "bytes": 1227488,
+    "sha256": "cd5004045b7e083bd2ea7d560e128d32e75a1ac5b437ca1d9fd181ec6397d3fc",
+    "unchanged_from_base": true
+  }
+}

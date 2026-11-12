@@ -82,11 +82,11 @@ jobs:
           chmod +x /tmp/appimagetool
           sudo cp /tmp/appimagetool /usr/local/bin/appimagetool
           bash packaging/linux.sh
-          tar -czf build/AionEndlessRun-0.14.0-web-offline.tar.gz -C build/web .
+          tar -czf build/AionEndlessRun-0.14.1-web-offline.tar.gz -C build/web .
           timeout 15 build/linux/AionEndlessRun.x86_64 --headless -- --aion-smoke-test
-          sudo apt-get install -y ./build/AionEndlessRun-0.14.0-linux-x64.deb
+          sudo apt-get install -y ./build/AionEndlessRun-0.14.1-linux-x64.deb
           timeout 15 /usr/games/AionEndlessRun --headless -- --aion-smoke-test
-          APPIMAGE_EXTRACT_AND_RUN=1 timeout 20 build/AionEndlessRun-0.14.0-linux-x64.AppImage --headless -- --aion-smoke-test
+          APPIMAGE_EXTRACT_AND_RUN=1 timeout 20 build/AionEndlessRun-0.14.1-linux-x64.AppImage --headless -- --aion-smoke-test
       - name: Windows installer and portable
         if: runner.os == 'Windows'
         shell: pwsh
@@ -95,13 +95,13 @@ jobs:
           $exportProcess = Start-Process -FilePath (Get-Command godot).Source -ArgumentList '--headless','--export-release','Windows' -Wait -PassThru -NoNewWindow
           if ($exportProcess.ExitCode -ne 0) { exit $exportProcess.ExitCode }
           Copy-Item LICENSE,THIRD_PARTY_NOTICES.md,README.md build/windows/
-          Compress-Archive -Path build/windows/* -DestinationPath build/AionEndlessRun-0.14.0-windows-x64-portable.zip
+          Compress-Archive -Path build/windows/* -DestinationPath build/AionEndlessRun-0.14.1-windows-x64-portable.zip
           if (!(Test-Path 'C:\Program Files (x86)\NSIS\makensis.exe')) { choco install nsis -y --no-progress }
           & 'C:\Program Files (x86)\NSIS\makensis.exe' packaging/windows.nsi
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $gameProcess = Start-Process -FilePath build/windows/AionEndlessRun.exe -ArgumentList '--headless','--','--aion-smoke-test' -Wait -PassThru
           if ($gameProcess.ExitCode -ne 0) { exit $gameProcess.ExitCode }
-          $installProcess = Start-Process -FilePath build/AionEndlessRun-0.14.0-windows-x64-Setup.exe -ArgumentList '/S' -Wait -PassThru
+          $installProcess = Start-Process -FilePath build/AionEndlessRun-0.14.1-windows-x64-Setup.exe -ArgumentList '/S' -Wait -PassThru
           if ($installProcess.ExitCode -ne 0) { exit $installProcess.ExitCode }
           $installedGame = Join-Path $env:LOCALAPPDATA 'Programs/Aion Endless Run/AionEndlessRun.exe'
           if (!(Test-Path $installedGame)) { throw 'Installer did not create game executable' }
@@ -112,11 +112,11 @@ jobs:
         run: |
           mkdir -p build/macos
           godot --headless --export-release macOS
-          mv build/macos/AionEndlessRun.zip build/AionEndlessRun-0.14.0-macos-universal-portable.zip
-          ditto -xk build/AionEndlessRun-0.14.0-macos-universal-portable.zip build/dmg
+          mv build/macos/AionEndlessRun.zip build/AionEndlessRun-0.14.1-macos-universal-portable.zip
+          ditto -xk build/AionEndlessRun-0.14.1-macos-universal-portable.zip build/dmg
           cp LICENSE THIRD_PARTY_NOTICES.md build/dmg/
           ln -s /Applications build/dmg/Applications
-          python3 packaging/macos_dmg.py build/dmg build/AionEndlessRun-0.14.0-macos-universal.dmg
+          python3 packaging/macos_dmg.py build/dmg build/AionEndlessRun-0.14.1-macos-universal.dmg
           find build/dmg -path '*/Contents/MacOS/*' -type f -exec chmod +x {} \;
           find build/dmg -path '*/Contents/MacOS/*' -type f -exec {} --headless -- --aion-smoke-test \;
       - uses: actions/upload-artifact@v4
@@ -214,7 +214,7 @@ jobs:
           mkdir -p build/android
           godot --headless --export-release Android
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose build/android/AionEndlessRun.apk
-          mv build/android/AionEndlessRun.apk build/AionEndlessRun-0.14.0-android-arm64-x64.apk
+          mv build/android/AionEndlessRun.apk build/AionEndlessRun-0.14.1-android-arm64-x64.apk
       - uses: actions/upload-artifact@v4
         with:
           name: android
@@ -238,11 +238,26 @@ jobs:
         with:
           path: release
           name: android
-      - name: Publish first playable beta
+      - name: Restore the verified stable-signed Android package when CI signing is unavailable
+        if: needs.android.result == 'skipped'
+        run: |
+          VERSION=$(python3 -c 'import json; print(json.load(open("packaging/release_android.json"))["version"])')
+          git fetch --no-tags --depth=1 origin "release-assets/v$VERSION"
+          python3 - <<'PY'
+          import json, subprocess
+          m=json.load(open('packaging/release_android.json'))
+          subprocess.run(['python3','packaging/restore_staged_apk.py','--version',m['version'],'--sha256',m['sha256'],'--output','release/'+m['name']],check=True)
+          PY
+      - name: Verify every package and publish the complete beta together
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd release
-          sha256sum AionEndlessRun-* > SHA256SUMS
-          cd ..
-          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Aion Endless Run $GITHUB_REF_NAME · İlk oynanabilir sürüm" --notes-file docs/RELEASE.md
+          VERSION="${GITHUB_REF_NAME#v}"
+          python3 packaging/write_release_receipt.py --version "$VERSION"
+          if gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft > /tmp/aion-release-state; then
+            test "$(cat /tmp/aion-release-state)" = true
+          else
+            gh release create "$GITHUB_REF_NAME" --verify-tag --draft --prerelease --title "Aion Endless Run $GITHUB_REF_NAME" --notes-file docs/RELEASE.md
+          fi
+          gh release upload "$GITHUB_REF_NAME" release/* --clobber
+          gh release edit "$GITHUB_REF_NAME" --draft=false --prerelease --notes-file docs/RELEASE.md

@@ -1,14 +1,14 @@
 # AIONIA v1.4 · Doğrulama ve teslim kapıları
 
-Bu dosya 0.14.0 kaynak commit'i hazırlanırkenki kayıttır. [Makine sonuçları ve gerçek görüntüler](evidence-v014/README.md). Yayın sonrasında native/URL/paket sonucu, sürümün `BUILD-RECEIPT.json` dosyasında ve Drive teslim raporunda tutulur; kaynak öncesi tahmin başarılı test diye yazılmaz.
+Bu dosya 0.14.1 kaynak commit'i hazırlanırkenki kayıttır. [Makine sonuçları ve gerçek görüntüler](evidence-v0141/README.md). Yayın sonrasında native/URL/paket sonucu, sürümün `BUILD-RECEIPT.json` dosyasında ve Drive teslim raporunda tutulur; kaynak öncesi tahmin başarılı test diye yazılmaz.
 
 | Kapı | Durum | Kanıt / kapsam |
 | --- | --- | --- |
-| A · Kaynak denetimi | PASS | Güncel main/c54cff0; önceki 03fd1f4 referansı; Godot 4.6.3; Drive 9 JPEG ve 11 eski PNG; lisans/provenans |
+| A · Kaynak denetimi | PASS | Güncel main/aacdcc2; önceki 03fd1f4 referansı; Godot 4.6.3; Drive 9 JPEG ve 11 eski PNG; lisans/provenans |
 | B · Tasarım | PASS | AIONIA_STANDARD, DESIGN_BRIEF, ART_BIBLE, LORE_LINKS, CONTROLS |
 | C · Oynanabilir dilim | PASS | Gerçek menü → koşu → zıplama/saldırı/takla → yenilgi/yeniden koş; boss antrenmanı ve üç gerçek zafer |
 | D · İçerik | PASS | Dört kahraman PNG'leri korunur; mevcut biyomlar/yetenekler; Fragaria arka planında sekiz farklı mevcut kutlama kimliği |
-| E · Otomasyon | PASS | 12 kaynak/sahne süiti, 2.549 kontrol; 190 tarayıcı kontrolü; 6 paket sözleşme testi |
+| E · Otomasyon | PASS | 12 kaynak/sahne süiti, 2.691 kontrol; 199 tarayıcı kontrolü; 6 paket sözleşme testi |
 | E · Fiziksel cihaz / ekran okuyucu | NOT TESTED | Fiziksel Poco X7/Firefox, Xbox/PS donanımı ve ekran okuyucu bu ortamda bağlı değil |
 | F · Bu kaynak commit'inin yayımlanması | NOT TESTED | Bu kayıt yazıldıktan sonra GitHub native CI ve Vercel çalışır; sonuca makbuz/teslim raporundan bakılmalı |
 
@@ -41,4 +41,6 @@ Native CI tam ana sahne açılmadan biten 5 kare denemesi yerine `-- --aion-smok
 
 `godot --headless --script tests/test_aionia.gd`; diğer 11 kaynak süiti `.github/workflows/build.yml` içinde. `python3 tests/test_web_packaging.py`. Web çıktısı `python3 packaging/build_web.py` ile üretilir. Tarayıcı kanıtları `tests/browser_aionia.py`, `browser_runner_ux.py`, `browser_panels.py`, `browser_boss_hud.py`, `browser_encounters.py`, `browser_loader.py` ve `browser_upgrade.py` komutlarının gerçek çıktılarıdır. Firefox WebGL için bu bulut ortamında headed Xvfb kullanıldı; Android UA fiziksel telefon sayılmaz.
 
-CI ilk denemesi add2d59 üzerinde Çekçe koyun adı için bir taşma yakaladı. Kart yüksekliği gerçek, ağaca bağlanmış Label ölçümüyle hesaplanır; DejaVu Sans ve Liberation Sans için ek regresyon vardır. Hızlı yenilemede IndexedDB yazımı sürerken son ayarların geri düşmesine karşı mevcut ConfigFile/IndexedDB yanında sürümlü, eşzamanlı küçük tarayıcı kurtarma kopyası tutulur. Yeni test altı ekranda beklemeden yeniler; eski kayıtlar silinmez.
+CI ilk denemesi add2d59 üzerinde Çekçe koyun adı için bir taşma yakaladı. Kart yüksekliği gerçek, ağaca bağlanmış Label ölçümüyle hesaplanır; DejaVu Sans ve Liberation Sans için ek regresyon vardır. Hızlı yenilemede IndexedDB yazımı sürerken son ayarların geri düşmesine karşı mevcut ConfigFile/IndexedDB yanında sürümlü, eşzamanlı küçük tarayıcı kurtarma kopyası tutulur. Yeni test yedi ekranda beklemeden yeniler; eski kayıtlar silinmez.
+
+0.14.0 Android giriş kontrolleri geçtiği halde gerçek API30 PNG’sinin görsel incelemesi 9:16 sistem fontunda Settings/karakter başlığı çakışmasını yakaladı. 0.14.1, iki mobil yönde kompakt menü ve karakter alanına göre hesaplanan panel yüksekliğiyle düzeltir. 1440×2560 kaynak, 450×800 tarayıcı ve native UI bölge ayrılığı kontrolü eklendi.

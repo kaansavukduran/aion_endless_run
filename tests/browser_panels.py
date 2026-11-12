@@ -19,7 +19,10 @@ with sync_playwright() as pw:
   def tap(text=None,name=None):
    page.wait_for_selector('canvas[data-ui-ready="true"]');v=d();b=next(b for b in json.loads(v['ui']) if (b['name']==name if name else b['text']==text));page.touchscreen.tap(*xy(b['x']+b['w']/2,b['y']+b['h']/2));page.wait_for_timeout(150)
   def lang(code):
-   tap(name='LanguageMenu');tap(name='Language_'+code);page.wait_for_selector('canvas[lang="'+code+'"][data-ui-ready="true"]')
+   tap(name='LanguageMenu');tap(name='Language_'+code)
+   try:page.wait_for_selector('canvas[lang="'+code+'"][data-ui-ready="true"]')
+   except Exception:
+    print('FAILED LANGUAGE STATE',d(),flush=True);page.screenshot(path=str(a.evidence/('failed-language-'+code+'.png')));raise
   def fit(label):
    v=d();w,h=float(v['viewWidth']),float(v['viewHeight']);bs=json.loads(v['ui']);check(all(b['x']>=-1 and b['y']>=-1 and b['x']+b['w']<=w+1 and b['y']+b['h']<=h+1 for b in bs),label)
   labels={'tr':('Ayarlar','Koşuya başla','Anladım · Devam et','Yeniden koş','Ana menü'),'en':('Settings','Start run','Got it · Continue','Run again','Main menu'),'cs':('Nastavení','Začít běh','Rozumím · Pokračovat','Běžet znovu','Hlavní nabídka')}

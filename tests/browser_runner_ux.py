@@ -75,7 +75,11 @@ with sync_playwright() as pw:
   # screenshot/protocol time must not turn an input test into hazard survival.
   if d(page)['state'] not in ['running','paused']:wait(page,'[data-page="finished"]')
   menu(page);ui(page,text='Koşuya başla',touch=True);wait(page,'[data-state="running"]')
-  touch(0,button(page,'jump'));touch(1,button(page,'attack'));wait(page,'[data-airborne="true"]');check(d(page)['jumpHeld']=='true',f'{name}: jump can stay held while another finger attacks');touch(0,kind='cancel')
+  # Resolve both coordinates before pressing Jump: protocol/layout reads
+  # between the fingers can outlast the short airborne window on a slow GPU.
+  jump_point=button(page,'jump');attack_point=button(page,'attack')
+  page.evaluate('''()=>{window.multiActionObserved=false;new MutationObserver(()=>{const d=document.querySelector('canvas').dataset;if(d.airborne==='true'&&d.jumpHeld==='true'&&d.attacking==='true')multiActionObserved=true}).observe(document.querySelector('canvas'),{attributes:true})}''')
+  touch(0,jump_point);touch(1,attack_point);page.wait_for_function('multiActionObserved');check(True,f'{name}: jump can stay held while another finger attacks');touch(0,kind='cancel')
   old=d(page);new_size={'width':873,'height':393} if name=='portrait' else {'width':393,'height':873};page.set_viewport_size(new_size);wait(page,'[data-orientation="'+('landscape' if name=='portrait' else 'portrait')+'"][data-ui-ready="true"]');new=d(page)
   check(new['character']==old['character'] and int(new['score'])>=int(old['score']) and new['state']=='running',f'{name}: rotating mid-run keeps the character, score and running state')
   ui(page,text='Duraklat',touch=True);wait(page,'[data-state="paused"]');page.screenshot(path=str(a.evidence/(name+'-rotated-pause.png')))

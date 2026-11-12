@@ -10,13 +10,18 @@ func point(rect: Rect2) -> Array:
 	return [roundi(physical.x),roundi(physical.y)]
 func layout() -> void:
 	if not OS.has_feature("android"):return
-	var buttons:=[];var actions:={}
+	var buttons:=[];var actions:={};var regions:={}
+	for name in ["PagePanel","StartChooser"]:
+		var control=host.menu_layer.get_node_or_null(name)
+		if control!=null and control.is_visible_in_tree():
+			var rect: Rect2=control.get_global_rect()
+			regions[name]=[rect.position.x,rect.position.y,rect.size.x,rect.size.y]
 	for control in host.ui.find_children("*","BaseButton",true,false):
 		if control.is_visible_in_tree():buttons.append({"name":str(control.name),"text":control.text,"point":point(control.get_global_rect())})
 	for id in host.action_buttons:
 		var control=host.action_buttons[id]
 		if control.is_visible_in_tree():actions[id]=point(control.get_global_rect())
-	print("AION_UI "+JSON.stringify({"page":host.page,"character":host.character,"orientation":"portrait" if host.portrait else "landscape","score":host.world.score,"level":host.world.adventure.level,"buttons":buttons,"actions":actions}))
+	print("AION_UI "+JSON.stringify({"page":host.page,"character":host.character,"orientation":"portrait" if host.portrait else "landscape","score":host.world.score,"level":host.world.adventure.level,"buttons":buttons,"actions":actions,"regions":regions}))
 func state() -> void:
 	if not OS.has_feature("android"):return
 	var w=host.world

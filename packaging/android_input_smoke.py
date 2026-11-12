@@ -37,6 +37,8 @@ def pause():
 def main():
  menu_button(text=r'^(Main menu|Ana menü|Hlavní nabídka)$');latest('AION_UI ',lambda s:s['page']=='main')
 initial=latest('AION_UI ',lambda s:s['page']=='main',timeout=25);capture('first-launch')
+panel=initial['regions']['PagePanel'];chooser=initial['regions']['StartChooser']
+check(panel[1]+panel[3]<=chooser[1], 'Native system-font main panel ends before the character heading')
 menu_button(name='StartSelect_owl');latest('AION_UI ',lambda s:s['character']=='owl' and s['page']=='main')
 menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 gesture=hold('jump',2200)
