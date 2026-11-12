@@ -135,6 +135,7 @@ func finish(world) -> void:
 	world.invulnerable = 1.3
 	world.release_controls()
 	for pose in world.trail: pose.distance -= chase_distance-world.distance
+	if hp==0: world.adventure.offer_fragaria(world,milestone)
 	world.event("boss_return")
 
 func fire(world) -> bool:

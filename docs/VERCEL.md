@@ -22,3 +22,7 @@ Web sürümü ilk tam yüklemede dosyaları HTTPS üzerinden indirir; servis ça
 ## Bu proje için tamamlanan bağlantı
 
 Canlı oyun: https://aionendlessrun.vercel.app/ . Kullanıcı GitHub erişimini bağladı ve proje Other + kaynak derleme komutuyla yayımlandı. Yeni main gönderimleri Vercel tarafından otomatik yayımlandı. Yeni sürümler aynı adreste açılır; indirme paketleri GitHub Releases içindedir.
+
+## 0.13 Fragaria splash
+
+packaging/web_splash.html supplies responsive separate logo, brand text, progress and actual version. web_updates.py fingerprints the bundled logo/font and includes them in the verified offline manifest. The PCK byte percentage is real; verification/engine preparation is indeterminate. Keep web_boot.js integrity checks/retries/fixed virtual PCK path and deferred sequential offline installation. Upright portrait/landscape controls replace forced orientation; no automatic fullscreen switch interrupts the first touch.

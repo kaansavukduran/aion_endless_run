@@ -5,6 +5,7 @@ const ENEMIES = preload("res://assets/adventure-enemies.png")
 const ITEMS = preload("res://assets/adventure-items.png")
 const EVOLUTION = preload("res://assets/EVOLUTION-PROVENANCE.json")
 
+const FRAGARIA = preload("res://assets/fragaria-strawberry.png")
 var host
 
 func atlas(name: String, row: int, frame: int, anchor: Vector2, width: float, centered: bool = false) -> void:
@@ -26,7 +27,7 @@ func _draw() -> void:
 		for ribbon in 5:
 			var points := PackedVector2Array()
 			for n in 25:
-				var x: float = float(n)/24.0*host.view_w
+				var x: float = float(n)/24.0*host.scene_w
 				points.append(Vector2(x,220+ribbon*40+sin(x*0.007+clock*0.45+ribbon)*28))
 			var color := Color.from_hsv(fposmod(clock*0.035+float(ribbon)*0.16,1.0),0.45,1.0,0.065*host.prism_intensity)
 			draw_polyline(points,color,23)
@@ -35,7 +36,7 @@ func _draw() -> void:
 		var tint := Color("a7c9ea") if a.weather in ["rain", "storm"] else (Color("ebf6ff") if a.weather == "snow" else Color("e4c695"))
 		tint.a = 0.38
 		for i in 64:
-			var x := fposmod(i * 151.0 - clock * (180.0 if a.weather == "sand" else 45.0), host.view_w)
+			var x := fposmod(i * 151.0 - clock * (180.0 if a.weather == "sand" else 45.0), host.scene_w)
 			var y := 146.0 + fposmod(i * 93.0 + clock * (510.0 if a.weather in ["rain", "storm"] else 70.0), ground - 145.0)
 			if a.weather in ["rain", "storm"]: draw_line(Vector2(x, y), Vector2(x - 4, y + 15), tint, 2)
 			else: draw_rect(Rect2(Vector2(x, y).round(), Vector2(3, 3)), tint)
@@ -46,7 +47,9 @@ func _draw() -> void:
 		var bob := sin(clock * 4.0 + item.id) * 3.0
 		var point := Vector2(item.x, ground + item.y + bob)
 		var frame: int = host.frames.cycle("power",0,clock,1.0)
-		if item.kind == "mushroom": atlas("power", 0, frame, point, 63, true)
+		if item.kind=="fragaria":
+			draw_texture_rect(FRAGARIA,Rect2(point-Vector2(22,42),Vector2(44,62)),false)
+		elif item.kind == "mushroom": atlas("power", 0, frame, point, 63, true)
 		else:
 			var icons := {"lightning":0,"slow":1,"haste":2,"shield":3,"magnet":4,"leaf":5}
 			atlas("power",int(icons[item.kind])+1,host.frames.cycle("power",int(icons[item.kind])+1,clock,1.0),point,46,true)
@@ -82,7 +85,7 @@ func _draw() -> void:
 		for i in 8:
 			var hue := fposmod(clock * 0.035 + float(i) / 8, 1.0)
 			var color := Color.from_hsv(hue, 0.35, 0.95, 0.12*host.prism_intensity)
-			var x := fposmod(i * 197.0 + sin(clock * 0.8 + i) * 12, host.view_w)
+			var x := fposmod(i * 197.0 + sin(clock * 0.8 + i) * 12, host.scene_w)
 			draw_circle(Vector2(x, 220.0 + sin(i + clock * 0.6) * 55), 5 + i % 3, color)
 
 	# Contact-only claw marks, attached to the advancing forepaw, never a projectile.

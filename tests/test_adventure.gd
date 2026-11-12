@@ -106,7 +106,10 @@ func run() -> void:
 	check(w.adventure.giant() and w.adventure.size_multiplier() > 1.5, "Mushroom grants real enlarged collision and combat size")
 	w.adventure.gnome_wait = 0.01
 	w.step(0.02)
-	check(w.adventure.enemies.any(func(e): return e.kind == "gnome"), "Mushroom starts the red-cap gnome encounter wave")
+	if w.adventure.wave_candidate_count<2:
+		w.adventure.gnome_wait=0.01
+		w.step(0.02)
+	check(w.adventure.enemies.any(func(e): return e.kind == "gnome" and e.wave), "The thinned mushroom wave emits a red-cap gnome by its second candidate")
 	w.obstacles = [{"x":World.PLAYER_X,"kind":"fire","counted":false}]
 	w.step(0.02)
 	check(w.state == "running" and w.obstacles.is_empty() and w.passed == 1, "Giant form physically smashes a ground obstacle")

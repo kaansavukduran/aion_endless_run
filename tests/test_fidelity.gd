@@ -18,7 +18,10 @@ func run() -> void:
     var f: Dictionary = d.frames[row][column]
     check(f.eye != null,"Actual iris or blink registration exists: "+hero+str(row)+":"+str(column))
     var eye: Vector2 = (Vector2(f.eye[0],f.eye[1])-Vector2(f.origin[0],f.origin[1]))*float(d.scale[row])
-    check(eye.distance_to(Vector2(d.target_eye[0],d.target_eye[1]))<0.01 and is_equal_approx(scale,float(d.scale[row])),"Head registration has no position or scale pop: "+hero+str(row)+":"+str(column))
+    if hero=="sheep" and row==4:
+     check(absf((float(f.turn_center_x)-float(f.origin[0]))*scale-float(f.turn_target_x))<0.01 and is_equal_approx(scale,float(d.scale[row])),"The turning kick anchors its body while the head naturally turns away")
+    else:
+     check(eye.distance_to(Vector2(d.target_eye[0],d.target_eye[1]))<0.01 and is_equal_approx(scale,float(d.scale[row])),"Head registration has no position or scale pop: "+hero+str(row)+":"+str(column))
     check(f.body_bounds[3]-f.body_bounds[1]>d.height/14*.35,"A row boundary does not crop through the face: "+hero+str(row)+":"+str(column))
  var roll: Dictionary = bank.CANONICAL.data.atlases["canonical-rolls"]
  for row in 4:

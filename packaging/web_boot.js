@@ -13,6 +13,10 @@
   const state = {phase:'waiting',attempts:0,error:''};
   function stamp(phase, error = '') {
     state.phase = phase; state.error = error;
+    if (['verifying','starting'].includes(phase)) {
+      document.getElementById('status-progress')?.removeAttribute('value');
+      const percent=document.getElementById('aion-loading-percent'); if(percent)percent.textContent='…';
+    }
     document.documentElement.dataset.bootState = phase;
     document.documentElement.dataset.bootAttempts = String(state.attempts);
     if (error) document.documentElement.dataset.bootError = error;
@@ -62,6 +66,8 @@
               if (size + part.value.byteLength > bytes.byteLength) throw new Error('pack-too-large');
               bytes.set(part.value,size); size += part.value.byteLength;
               progress?.(size,expected.bytes);
+              const output=document.getElementById('aion-loading-percent');
+              if(output)output.textContent=Math.floor(size/expected.bytes*100)+'%';
             }
           } catch (error) { await reader.cancel().catch(() => {}); throw error; }
           if (size !== expected.bytes) throw new Error('pack-incomplete:'+size);
@@ -101,6 +107,7 @@
     stamp('failed',String(error?.message || error));
     console.error('Aion startup:',state.error);
     if (await repairLatest()) return;
+    const output=document.getElementById('aion-loading-percent'); if(output)output.textContent='';
     const overlay = document.getElementById('status');
     if (overlay) overlay.style.visibility = 'visible';
     const bar = document.getElementById('status-progress');
@@ -110,7 +117,7 @@
     if (!node || document.getElementById('aion-retry')) return;
     for (const [id,label,fresh] of [['aion-retry',words[3],false],['aion-current',words[4],true]]) {
       const button = document.createElement('button'); button.id=id; button.textContent=label;
-      Object.assign(button.style,{margin:'12px 6px',padding:'12px 18px',borderRadius:'10px',border:'1px solid #b1eddb',background:'#b1eddb',color:'#102b30',font:'600 16px sans-serif',cursor:'pointer'});
+      Object.assign(button.style,{margin:'12px 6px',padding:'12px 18px',borderRadius:'0',border:'2px solid #edc88f',background:'#b65c77',color:'#fff1d5',font:'20px AionPixel, monospace',cursor:'pointer'});
       button.onclick = () => {
         const url = new URL('./',location.href);
         if (!fresh) url.searchParams.set('build',BUILD);
@@ -131,7 +138,7 @@
     };
     stamp('starting'); notice(words[1]);
     try {
-      const result = await engine.startGame({...options,mainPack:PACK_PATH});
+      const result = await engine.startGame({...options,onProgress:()=>{},mainPack:PACK_PATH});
       stamp('ready');
       const url = new URL(location.href); url.searchParams.delete('aion-recovery'); url.searchParams.delete('retry'); history.replaceState(null,'',url);
       window.dispatchEvent(new Event('aion-game-started'));

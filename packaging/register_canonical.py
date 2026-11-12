@@ -41,11 +41,23 @@ def eye_point(cell,hero,body,expected=None,roll=False):
  else:m=visible&(r>110)&(g>45)&(g<180)&(g<r*.78)&(b<g*.62)
  labs,n=label(m,np.ones((3,3)));options=[];x0,y0,x1,y1=body;bw=x1-x0;bh=y1-y0
  ex,ey=expected or (x0+bw*.70,y0+bh*.31)
+ if not roll:
+  # Anatomically reviewed near-iris windows. Colour alone also finds Aion's
+  # far eye/gills, the owl's beak/eyebrow, and the sheep's halo/hooves.
+  fx,fy={'aion':(.58,.43),'owl':(.59,.45),'sheep':(.54,.48),'wolf':(.69,.43)}[hero]
+  if expected is None:ex,ey=x0+bw*fx,y0+bh*fy
  for i,sl in enumerate(find_objects(labs),1):
   if sl is None:continue
   yy,xx=np.where(labs==i);area=len(xx)
   if area<3 or area>(65 if hero=="aion" else max(90,bw*bh*.05)) or xx.max()-xx.min()>bw*.28 or yy.max()-yy.min()>bh*.30:continue
   cx=float(xx.mean());cy=float(yy.mean())
+  if not roll:
+   ew=xx.max()-xx.min()+1;eh=yy.max()-yy.min()+1
+   if area<(35 if hero=='sheep' else 15) or not .45<=ew/eh<=1.6:continue
+   if not y0+bh*.27<cy<y0+bh*.68:continue
+   if not (x0-2 if hero=='sheep' and expected is not None else x0+bw*.35)<cx<x0+bw*.83:continue
+   if hero=='aion' and (area>70 or ew>15 or eh>16):continue
+   if hero=='owl' and (abs(cx-ex)>bw*.12 or abs(cy-ey)>bh*.11):continue
   if hero=="sheep" and not roll and cy<y0+bh*.32:continue
   score=((cx-ex)/max(1,bw))**2+((cy-ey)/max(1,bh))**2
   options.append((score,cx,cy))
@@ -85,14 +97,14 @@ for hero,(src,counts) in SPECS.items():
   valid=[i for i,e in enumerate(roweyes) if e is not None]
   if valid:
    for i in range(cols):
-    if roweyes[i] is None:roweyes[i]=[float(np.interp(i,valid,[roweyes[j][axis] for j in valid])) for axis in [0,1]]
+    if roweyes[i] is None:roweyes[i]=[float(np.interp(i,valid,[roweyes[j][axis]+line[j]['rect'][axis] for j in valid]))-line[i]['rect'][axis] for axis in [0,1]]
   rows.append(line);eyes.append(roweyes);body_bounds.append(rowbody)
  basebody=body_bounds[0];factor=82/statistics.median(b[3]-b[1] for b in basebody)
  initial=[e for e in eyes[0] if e is not None];target_eye=[14.,-statistics.median((basebody[i][3]-eyes[0][i][1])*factor for i in range(len(basebody)) if eyes[0][i] is not None)]
  scales=[factor]*14;roll=rows[5];rollfactor=64/max(max(f['body_bounds'][2]-f['body_bounds'][0],f['body_bounds'][3]-f['body_bounds'][1]) for f in roll[1:-1]);scales[5]=rollfactor
  for row,line in enumerate(rows):
   for col,f in enumerate(line):
-   b=f['bounds'];bb=f['body_bounds'];eye=eyes[row][col];f['eye']=eye
+   b=f['bounds'];bb=f['body_bounds'];eye=eyes[row][col];f['blink']=f['eye'] is None;f['eye']=eye
    if row==5:
     cx=(bb[0]+bb[2])/2;cy=(bb[1]+bb[3])/2
     # Capture the full head orbit, using the actual iris when available.
@@ -106,6 +118,24 @@ for hero,(src,counts) in SPECS.items():
     # Physical falls/elements settle against the shared row floor, not frame bounds.
     f['origin']=[w/len(line)*(col+.5)-f['rect'][0],statistics.median(q['body_bounds'][3] for q in line)]
    f['anchor_x']=f['origin'][0]
+ # The sheep turns its back to kick: a near iris is not visible in the
+ # middle poses. Register the turning head/body mass instead of inventing
+ # a travelling eye and pulling the entire sprite sideways to follow it.
+ if hero=='sheep':
+  centers=[]
+  for f in rows[4]:
+   x,y,cw,ch=f['rect'];cell=a[y:y+ch,x:x+cw];r,g,b=[cell[:,:,i].astype(float) for i in range(3)];bb=f['body_bounds']
+   wool=(cell[:,:,3]>160)&(r>170)&(g>135)&(b>105)&(r<g*1.65)
+   wool[:max(0,bb[1]+3)]=False;wool[round(bb[1]+(bb[3]-bb[1])*.58):]=False
+   yy,xx=np.where(wool)
+   assert len(xx)>40,('Missing turning-body landmark',f['source_column'])
+   centers.append(float(xx.mean()))
+  target_x=(centers[0]-rows[4][0]['origin'][0])*factor
+  floor_offset=rows[4][0]['origin'][1]-rows[4][0]['body_bounds'][3]
+  for f,cx in zip(rows[4],centers):
+   f['turn_center_x']=cx;f['turn_target_x']=target_x
+   f['origin']=[cx-target_x/factor,f['body_bounds'][3]+floor_offset]
+   f['anchor_x']=f['origin'][0];f['registration']='turn-body'
  # Exclude standing prep/recovery from the continuous wheel loop; sort clockwise.
  compact=roll[1:-1];compact.sort(key=lambda f:f['roll_angle']);rows[5]=compact
  # Match a complete untucked row as the neutral boss gun pose, preserving identity.

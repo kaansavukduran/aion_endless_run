@@ -1,0 +1,37 @@
+[
+  {
+    "file": "canonical-aion.png",
+    "unchanged": true,
+    "sha256": "789fe4e54752e0f11da49eff5d43ab92e0c726ca919ca136c906991143844687"
+  },
+  {
+    "file": "canonical-owl.png",
+    "unchanged": true,
+    "sha256": "7969f14b2b15d92f3352350546e8cd55cd3d663ecef6f768fa4f1289d727c1bb"
+  },
+  {
+    "file": "canonical-sheep.png",
+    "unchanged": true,
+    "sha256": "8b60d58e55798aeed7edde058342beb66647eb5d1a8735f867fbb586c2eb9083"
+  },
+  {
+    "file": "canonical-wolf.png",
+    "unchanged": true,
+    "sha256": "6f5eb1f33b92f4b0f77be626d9c50ab997bb79b37237d3f8857de723469e0ba3"
+  },
+  {
+    "file": "canonical-rolls.png",
+    "unchanged": true,
+    "sha256": "01aebfe28ed30efb6faa1e3034fd4a2fed32dc6d7333e9cd9f76fa9d6c8731e3"
+  },
+  {
+    "file": "agility-owl.png",
+    "unchanged": true,
+    "sha256": "2930ec1c574613398bd741962aaf8feba9b83d434a5ceec9df94abd6d1720dfc"
+  },
+  {
+    "file": "agility-wolf.png",
+    "unchanged": true,
+    "sha256": "411ccdf8e8a09371367b412cc061b95b08ebb2d7b637bccc5b5f88b7e05f096d"
+  }
+]

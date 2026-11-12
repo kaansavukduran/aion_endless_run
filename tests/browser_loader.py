@@ -1,5 +1,5 @@
 """Real PCK boot, packet faults, cache repair and mobile touch; no game setters."""
-import argparse,hashlib,http.server,json,os,threading
+import argparse,hashlib,http.server,json,os,threading,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 p=argparse.ArgumentParser();p.add_argument('--browser',choices=['chromium','firefox'],default='chromium');p.add_argument('--export',type=Path,default=Path('build/web'));p.add_argument('--evidence',type=Path,required=True);a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
@@ -15,6 +15,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
    self.send_response(200);self.send_header('Content-Type','text/html');self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body);return
   if path==pack_name and faults:
    kind=faults.pop(0)
+   if kind=='slow':
+    self.send_response(200);self.send_header('Content-Type','application/octet-stream');self.send_header('Content-Length',str(len(pack)));self.end_headers()
+    for i in range(0,len(pack),1024*1024):self.wfile.write(pack[i:i+1024*1024]);self.wfile.flush();time.sleep(.03)
+    return
    if kind=='html':body=b'<html>stale deployment</html>';mime='text/html';status=200
    elif kind=='short':body=pack[:1024];mime='application/octet-stream';status=200
    elif kind=='partial':body=pack[:1024];mime='application/octet-stream';status=206
@@ -40,6 +44,13 @@ with sync_playwright() as pw:
   v=data(page);b=next(b for b in json.loads(v['ui']) if b['text']==text);t=json.loads(v['screenTransform']);r=page.locator('canvas').bounding_box();x=b['x']+b['w']/2;y=b['y']+b['h']/2;page.touchscreen.tap(r['x']+(t[0]*x+t[2]*y+t[4])/float(v['rawWidth'])*r['width'],r['y']+(t[1]*x+t[3]*y+t[5])/float(v['rawHeight'])*r['height'])
  def tap_start(page):
   tap_text(page,'Koşuya başla');page.wait_for_selector('canvas[data-state="running"]')
+  if any(b['text']=='Anladım · Devam et' for b in json.loads(data(page)['ui'])):tap_text(page,'Anladım · Devam et')
+ faults[:]=['slow'];ctx,page=context();page.goto(url,wait_until='domcontentloaded')
+ page.wait_for_function('()=>{const p=document.querySelector("#aion-loading-percent");return p&&/^\\d+%$/.test(p.textContent)&&parseInt(p.textContent)>4&&parseInt(p.textContent)<95}')
+ check(page.locator('.fragaria-brand').inner_text()=='Fragaria\nInteractive','The Fragaria brand and live byte-derived percentage render while downloading')
+ page.screenshot(path=str(a.evidence/'fragaria-loading.png'));ready(page)
+ check(page.locator('#status').count()==0,'The real branded loader hands off after verified engine startup')
+ ctx.close()
  # A stale page can reference files removed by a newer deployment.
  stale_entry[0]=True;ctx,page=context();page.goto(url);ready(page)
  check(page.evaluate('AION_BUILD.build')==meta['build'],'A stale page with missing engine files recovers to the current manifest')
@@ -53,7 +64,7 @@ with sync_playwright() as pw:
  page.screenshot(path=str(a.evidence/'landscape-game.png'));ctx.close()
  faults[:]=['hash'];ctx,page=context(portrait=True);page.goto(url);ready(page)
  check(page.evaluate('AION_BOOT.state.attempts')==2,'A same-size corrupt PCK fails SHA-256 validation and is downloaded again')
- tap_start(page);check(data(page)['devicePortrait']=='true' and data(page)['orientation']=='landscape','Portrait phone touch works with the landscape game transform')
+ tap_start(page);check(data(page)['devicePortrait']=='true' and data(page)['orientation']=='portrait','Portrait phone touch works with the upright responsive game transform')
  page.screenshot(path=str(a.evidence/'portrait-landscape-game.png'));ctx.close()
  faults[:]=['partial','html','short'];ctx,page=context();before=requests.count(next(n for n in meta['assets'] if n.endswith('.wasm')));page.goto(url);page.wait_for_selector('#aion-retry',timeout=30000)
  check(page.locator('#status-notice').inner_text().startswith('Oyun dosyası tam yüklenemedi'),'Persistent download failure shows a Turkish retry screen')

@@ -30,3 +30,7 @@ From 0.9, a signed APK can exceed GitHub's 100 MiB blob limit. Transfer it as <=
 Run the eight suites including `godot --headless --script tests/test_fidelity.gd`. Canonical rows use observed7/8 pose counts, not requested grid widths. `packaging/register_canonical.py` reads bundled original PNGs when generation workspace paths are unavailable; it requires Pillow, NumPy and SciPy for maintainer registration only, never in the game runtime. Preserve original files and anatomical origins.
 
 macOS packaging uses `packaging/macos_dmg.py` to reserve explicit HFS+ capacity (at least128MiB beyond source allocation, minimum384MiB) before compression, and runs `hdiutil verify`. This avoids a full mounted image while copying the universal game PCK.
+
+## 0.13 touch and registration checks
+
+Run tests/test_runner_ux.gd alongside the existing nine suites. The new pixel interface, touch router and portrait scene transform use the same Godot actions on web and native. Registration tools need Pillow/NumPy/SciPy only during maintenance; PNGs are preserved. Pixelify Sans and its OFL are bundled. packaging/archive_project.py creates a dated Istanbul-time immutable tracked-tree snapshot, inventory and source receipt; no history backup or continuous sync is configured.

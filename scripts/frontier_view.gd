@@ -29,7 +29,7 @@ func _draw() -> void:
 		elif kind.begins_with("pit"):
 			var width: float = o.get("width",150)
 			var left: float = o.x-width*0.5
-			var depth: float = maxf(26,host.view_h-98-ground)
+			var depth: float = maxf(26,host.scene_h-98-ground)
 			draw_rect(Rect2(left,ground,width,depth),Color("0a1421"))
 			for i in 4: draw_rect(Rect2(left+4,ground+5+i*7,width-8,2),Color(0.08,0.16,0.19,0.65-float(i)*0.12))
 			var city: bool = kind == "pit_city" or world.biome() == 3

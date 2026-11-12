@@ -7,7 +7,9 @@ class ExportContract(unittest.TestCase):
  def setUp(self):
   self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name);(self.root/'build/web').mkdir(parents=True);(self.root/'packaging').mkdir();self.out=self.root/'build/web'
   (self.root/'project.godot').write_text('config/version="0.12.0"')
-  for name in ['web_update.js','web_worker.js','web_boot.js']:shutil.copy2(ROOT/'packaging'/name,self.root/'packaging'/name)
+  for name in ['web_update.js','web_worker.js','web_boot.js','web_splash.html']:shutil.copy2(ROOT/'packaging'/name,self.root/'packaging'/name)
+  (self.root/'assets').mkdir()
+  for name in ['fragaria-strawberry.png','PixelifySans.ttf']:(self.root/'assets'/name).write_bytes(b'brand fixture')
   for name,data in [('index.js',b'engine'),('index.wasm',b'\0asm\1\0\0\0'),('index.pck',b'GDPC'+bytes(60))]:(self.out/name).write_bytes(data)
   self.html='<html><head></head><body><script>const GODOT_CONFIG={"executable":"index","serviceWorker":"index.service.worker.js"};engine.startGame({});function displayFailureNotice(err) {console.error(err);}</script></body></html>'
   (self.out/'index.html').write_text(self.html)
@@ -19,7 +21,7 @@ class ExportContract(unittest.TestCase):
  def test_startup_rewrite_does_not_rewrite_loader_recursively(self):
   web.prepare_web_export(self.root);s=(self.out/'index.html').read_text()
   self.assertEqual(s.count('window.AION_BOOT.start(engine,GODOT_CONFIG,{'),1)
-  self.assertEqual(s.count('engine.startGame({...options,mainPack:PACK_PATH})'),1)
+  self.assertEqual(s.count('engine.startGame({...options,onProgress:()=>{},mainPack:PACK_PATH})'),1)
  def test_worker_has_hash_for_final_html_and_latest_endpoint(self):
   web.prepare_web_export(self.root);s=(self.out/'index.service.worker.js').read_text();info=json.loads(re.search(r'const INFO = (\{.*?\});',s)[1]);files=json.loads(re.search(r'const FILES = (\[.*?\]);',s)[1]);self.assertIn('aion-latest.json',files)
   self.assertEqual(info['index.html']['sha256'],hashlib.sha256((self.out/'index.html').read_bytes()).hexdigest())

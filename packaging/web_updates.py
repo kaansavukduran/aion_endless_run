@@ -7,13 +7,17 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shutil
 
 
 def prepare_web_export(root: Path) -> None:
     output = root / 'build/web'
     version = re.search(r'config/version="([^"]+)"', (root / 'project.godot').read_text())[1]
     source = Path(__file__).read_bytes() + (root / 'packaging/web_update.js').read_bytes() + (root / 'packaging/web_worker.js').read_bytes() + (root / 'packaging/web_boot.js').read_bytes()
+    source += (root/'packaging/web_splash.html').read_bytes()
     digest = hashlib.sha256(source)
+    for name in ['fragaria-strawberry.png','PixelifySans.ttf']:
+        digest.update((root/'assets'/name).read_bytes())
     for name in ['index.js', 'index.wasm', 'index.pck']:
         digest.update((output / name).read_bytes())
     build = digest.hexdigest()[:16]
@@ -24,6 +28,12 @@ def prepare_web_export(root: Path) -> None:
             continue
         names[path.name] = executable + path.name[len('index'):]
         path.rename(output / names[path.name])
+    logo = 'fragaria-'+build+'.png'
+    font = 'pixel-font-'+build+'.ttf'
+    shutil.copy2(root/'assets/fragaria-strawberry.png',output/logo)
+    shutil.copy2(root/'assets/PixelifySans.ttf',output/font)
+    names['fragaria.png']=logo
+    names['pixel-font.ttf']=font
     html = (output / 'index.html').read_text()
     for before, after in names.items():
         html = html.replace(before, after)
@@ -40,6 +50,9 @@ def prepare_web_export(root: Path) -> None:
     html = html.replace('function displayFailureNotice(err) {','function displayFailureNotice(err) {\n        if (window.AION_BOOT && window.AION_BOOT.state.phase !== "waiting") { window.AION_BOOT.failure(err); return; }')
     boot = (root / 'packaging/web_boot.js').read_text().replace('__BUILD__',build).replace('__ASSETS__',json.dumps(assets))
     html = html.replace('<head>', '<head>\n<script>\n' + script + '\n' + boot + '\n</script>', 1)
+    splash = (root/'packaging/web_splash.html').read_text().replace('__FRAGARIA__',logo).replace('__PIXEL_FONT__',font).replace('__VERSION__',version)
+    html = re.sub(r'<div id="status">.*?<div id="status-notice"></div>\s*</div>',lambda _:splash,html,count=1,flags=re.S)
+    html = html.replace('width=device-width,', 'viewport-fit=cover,width=device-width,')
     (output / 'index.html').write_text(html)
     manifest = output / 'index.manifest.json'
     if manifest.exists():

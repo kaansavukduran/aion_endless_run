@@ -6,6 +6,12 @@ Sevimli bir piksel macerası. **Space ile zıpla, Esc ile mola ver.** Kargalara 
 
 **[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Sürüm ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/VALIDATION.md)
 
+## 0.13.0 · Sabit animasyonlar ve telefon arayüzü
+
+Aion ve diğer kahramanların yakın göz/gövde hizaları düzeltildi; eski kahraman PNG’leri değiştirilmedi. Baykuşun göz kırpması gagaya sabitlenmez, koyun çifte atarken dönen gövdesi sabit kalır. Telefon hem dikey hem yatay oynanır. Aşağı kaydırarak ya da yuvarlak Takla düğmesiyle takla at; Vur düğmesine her ayrı dokunuş bir saldırıdır. Baykuş için Zıpla’yı, kurt için Depar’ı basılı tut; boss’ta ayrı Ateş et düğmesi vardır. Kısa telefon öğreticisi geçilebilir.
+
+Piksel yazı tipi, keskin çerçeveler ve sıcak bir palet kullanılır. Karakter seçimi başlangıçta görünür; ana/sonuç menüsünde scrollbar yoktur, uzun ayarlar kaydırılır. Her 20 saniyelik aktif normal koşuda bir seviye; mantar cüce üretimi sabit tohumlu karşılaştırmada yaklaşık yarıdır. Her 100’ün katı eşiğinden sonraki ilk boss zaferi Fragaria çileğini sunar. Çilek yalnız kısa bir kutlamadır; güç, skor veya başka ödül vermez. Web açılışında Fragaria Interactive ekranı gerçek indirme yüzdesini gösterir. Firefox dosya doğrulaması, kayıtlar, diller ve çevrimdışı güncelleme korunur.
+
 ## 0.12.0 · Dört ayaklı depar ve sakin süzülme
 
 Kurt depar sırasında dört ayak üzerinde koşar. Normal saldırıları ileri atılan ısırık ve üç tırnak izli pençedir; depar saldırısı ayrı bir sıçrayarak ısırma kullanır. Baykuşun süzülmesinde gövde ve bakış sağa sola kaymaz; yerde sağ/sol kanadıyla öne vurur, havada açık kanatlarla gagasını uzatır. İki yeni özgün paftada 64 çizilmiş poz vardır. Aion ve koyunun beğenilen çizimleri korunur.

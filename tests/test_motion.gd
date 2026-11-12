@@ -22,20 +22,20 @@ func arena() -> RunnerWorld:
 func run() -> void:
 	var w := arena()
 	w.distance = 1000000
-	w.adventure.level_elapsed = 29.99
+	w.adventure.level_elapsed = 19.99
 	w.adventure.update_level(w)
-	check(w.adventure.level == 1,"Even extreme travel cannot level before thirty active seconds")
-	w.adventure.level_elapsed = 30
+	check(w.adventure.level == 1,"Even extreme travel cannot level before twenty active seconds")
+	w.adventure.level_elapsed = 20
 	w.adventure.update_level(w)
-	check(w.adventure.level == 2 and w.adventure.level_elapsed == 0,"Thirty seconds and required travel advance exactly one level")
+	check(w.adventure.level == 2 and w.adventure.level_elapsed == 0,"Twenty active seconds advance exactly one level")
 	w.adventure.update_level(w)
 	check(w.adventure.level == 2,"Excess distance cannot create a burst of catch-up levels")
 	w.adventure.level_elapsed = 100
 	w.adventure.update_level(w)
-	check(w.adventure.level == 2,"Time alone cannot replace required new travel")
+	check(w.adventure.level == 3,"Twenty seconds suffice even without new travel; no old distance gate")
 	w.distance += w.adventure.LEVEL_DISTANCE
 	w.adventure.update_level(w)
-	check(w.adventure.level == 3,"Each subsequent level needs a new distance segment")
+	check(w.adventure.level == 3,"Extra travel alone cannot add a second level after the timer resets")
 	var x: float = w.adventure.celebration_x(w)
 	w.distance += 200
 	check(is_equal_approx(w.adventure.celebration_x(w),x-90),"The background spectator scrolls left with world travel")

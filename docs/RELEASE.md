@@ -1,27 +1,19 @@
-# Aion Endless Run 0.12.0 · Dört ayaklı kurt ve sabit süzülen baykuş
+# Aion Endless Run 0.13.0
 
-- Kurt Shift/mobil depar sırasında dört ayak üzerinde koşar; normal koşu korunur.
-- Kurt normalde ileri atılarak ısırır ve sıradaki saldırıda pençe savurur. Önde üç tırnak izi görünür. Depar sırasında ayrı bir sıçrayarak ısırma animasyonu vardır; Shift’i saldırı ortasında bırakmak pozu değiştirmez.
-- Baykuş süzülürken yüz ve gövde sağa sola sıçramaz. Hafif kanat ucu hareketleri sürer. Rüzgâra girip çıkarken aynı süzülme dizisi kullanılır.
-- Baykuş yerde kanatlarını sırayla öne savurur; havadayken açık kanat ve toplanmış ayaklarla gagasını ileri uzatır.
-- Yeni kareler gerçek yakın gözden hizalanır. Altın tüy/gaga veya uzak gözü yanlışlıkla merkez seçme sorunu düzeltildi. İki özgün PNG, 64 çizilmiş poz. Aion ve koyunun beğenilen çizimleri korunur.
+Original hero art, steadier movement and a compact pixel interface. Aion's unwanted sideways frame drift is repaired, including the same registration failure in owl/blink and sheep-turn poses. All seven hero artwork PNGs remain unchanged. Double jump, owl glide, wolf sprint/bite, sheep followers, boss rotation, keyboard/mouse/gamepad and saved offline records are preserved.
 
-Dokuz kaynak/sahne dizisinde 1.975 kontrol, 55 yerel/canlı/PWA akış yürütmesi ve bütün native işler geçti. Native CI: https://github.com/kaansavukduran/aion_endless_run/actions/runs/42926160897 . Dokuz paket ve iki bütünlük dosyası yayımlandı; paket özetleri, aynı imzalı APK ve indirilen Mac arşivi doğrulandı. Kayıtlar docs/evidence-v012 içindedir. Önceki boss, gamepad, dil, sürü ve çevrimdışı özellikleri korunur.
+Phone play supports upright portrait and landscape, including rotation during a run. Swipe down to roll or use the stepped circular Jump, Attack, Roll and context-specific Fire/Boost buttons. One press means one strike; release and press again to alternate. A short skippable lesson pauses hazards while you read. Main/results fit without scrolling; long settings remain scrollable. TR/EN/CS and browser-language fallback remain available.
 
-## İndir ve aç
+Each normal active level takes 20 seconds, independent of the former distance gate. Mushroom-wave gnomes are approximately halved; ambient spawns are unchanged. After the first eligible boss victory following each 100-level threshold, a rare Fragaria strawberry offers a brief celebration with no gameplay reward. The branded black loader shows actual download progress and preserves the verified Firefox PCK/offline update repair.
 
-**Assets** bölümünden cihazına uygun dosyayı seç:
-
-| Cihaz | Kurulum | Taşınabilir |
+| Device | Installation | Portable |
 | --- | --- | --- |
-| Windows x64 | `AionEndlessRun-0.12.0-windows-x64-Setup.exe` | `AionEndlessRun-0.12.0-windows-x64-portable.zip` |
-| Linux x64 | `AionEndlessRun-0.12.0-linux-x64.deb` | `.AppImage` veya `-portable.tar.gz` |
-| macOS Intel / Apple Silicon | `AionEndlessRun-0.12.0-macos-universal.dmg` | `-macos-universal-portable.zip` |
-| Android ARM64 / x64 | `AionEndlessRun-0.12.0-android-arm64-x64.apk` | APK normal yoldan kurulur |
-| iPhone | Apple hesabı, imzalama ve TestFlight/App Store dağıtımı bekliyor | Yerel portable iPhone paketi yok |
+| Windows x64 | `AionEndlessRun-0.13.0-windows-x64-Setup.exe` | `AionEndlessRun-0.13.0-windows-x64-portable.zip` |
+| Linux x64 | `AionEndlessRun-0.13.0-linux-x64.deb` | `-linux-x64.AppImage` or `-linux-x64-portable.tar.gz` |
+| macOS Intel / Apple Silicon | `AionEndlessRun-0.13.0-macos-universal.dmg` | `-macos-universal-portable.zip` |
+| Android ARM64 / x64 | `AionEndlessRun-0.13.0-android-arm64-x64.apk` | Normal APK installation |
+| Browser / iPhone browser | https://aionendlessrun.vercel.app/ | `-web-offline.tar.gz` for local hosting |
 
-Windows'ta Setup dosyasını aç veya ZIP'i tamamen çıkartıp EXE'yi aç. Linux AppImage'e çalıştırma izni ver ya da DEB'i kur. Mac DMG'deki uygulamayı Applications'a taşı. Android APK, önceki sürümle aynı uygulama kimliği ve imza anahtarını kullanır; versionCode 12’dir.
+Unzip portable packages completely. Windows Setup installs per user. Linux AppImage needs executable permission. Move the Mac app from DMG to Applications. Android uses the established application ID/signing key and versionCode13. `SHA256SUMS` and `BUILD-RECEIPT.json` identify actual published files. Previous releases are preserved.
 
-Oyun ve varlıklar çevrimdışıdır. Web sürümünde ilk tam yükleme internet ister; önbellekleme sonrası çevrimdışı açılabilir. `SHA256SUMS` ve `BUILD-RECEIPT.json` gerçek paketleri tanımlar.
-
-Windows Authenticode ve macOS Developer ID/noter onayı yoktur. macOS geliştirme amaçlı ad-hoc imzalıdır; Gatekeeper açılışı engelleyebilir. Fiziksel cihaz kapsamı ve gerçek test kayıtları `docs/VALIDATION.md` içindedir. Önceki 0.1.0–0.11.0 sürümleri korunmuştur.
+The first web load needs internet; a completely cached verified build then works offline. Windows Authenticode and Apple Developer ID/notarization are not included. Mac is ad-hoc signed. Native iPhone/TestFlight/App Store distribution still requires the owner's Apple signing/provisioning; no native iPhone portable package is claimed. Current tests and physical-hardware limits are recorded in `docs/evidence-v013`.

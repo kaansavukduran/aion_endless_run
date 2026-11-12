@@ -68,6 +68,7 @@ func pose(key: String, row: int, column: int) -> Dictionary:
 	if f.has("origin"):
 		result.offset = Vector2(float(b[0])-float(f.origin[0])-2.0,float(b[1])-float(f.origin[1])-2.0)
 		result["registration"] = "head" if f.eye != null and row not in [5,9,10,12,13] else ("roll-center" if key=="canonical-rolls" or row==5 else "floor")
+		if f.has("registration"): result["registration"] = f.registration
 		result["source_column"] = int(f.source_column)
 		if f.eye != null: result["eye_local"] = Vector2(float(f.eye[0]-b[0])+2,float(f.eye[1]-b[1])+2)
 	frames[cache_key] = result

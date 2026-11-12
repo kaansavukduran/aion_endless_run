@@ -38,8 +38,7 @@ func touch(game: Node, index: int, point: Vector2, pressed: bool) -> void:
 	event.index = index
 	event.position = game.global_transform * point
 	event.pressed = pressed
-	if pressed: game._unhandled_input(event)
-	else: game._input(event)
+	game._input(event)
 
 func ability_tests() -> void:
 	var owl := classic_world()
@@ -351,6 +350,7 @@ func run() -> void:
 	touch(second, 0, Vector2(World.PLAYER_X, second.ground - 35), true)
 	check(second.world.boosting(), "Mobile hold on the wolf activates boost")
 	touch(second, 1, Vector2(World.PLAYER_X + 230, second.ground - 35), true)
+	second.touch_controls.step(0.20)
 	second.world.step(0.02)
 	check(second.world.y < 0.0 and second.world.boosting(), "A second mobile finger can jump while the first holds boost")
 	touch(second, 0, Vector2(800, 200), false)

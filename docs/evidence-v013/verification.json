@@ -1,0 +1,17 @@
+{
+  "source_and_scene_checks": 2188,
+  "browser_suites": {
+    "runner-ux": 29,
+    "phone-panels": 21,
+    "firefox-loader": 16,
+    "chromium-loader": 16,
+    "pwa-upgrade": 11,
+    "gamepad-bosses": 26
+  },
+  "browser_checks": 119,
+  "packaging_contracts": 5,
+  "device_scope": "Chromium and desktop Gecko with Android UA/touch emulation; software GPU, not physical Poco or physical controllers",
+  "baseline_commit": "03fd1f4a400345847da7b0b471272ec75602a62a",
+  "local_web_build": "d5c313ee77ad3d00",
+  "assumption": "The truncated Fragaria rule is implemented as first eligible boss victory after 100/200/300 per-run thresholds. Separate ChatGPT chats are inaccessible. No gameplay reward."
+}

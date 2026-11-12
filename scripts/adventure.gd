@@ -5,10 +5,13 @@ const POWER_NAMES := ["mushroom", "lightning", "slow", "haste", "shield", "magne
 const ATTACK_DURATION := 0.40
 const ATTACK_COOLDOWN := 0.46
 const LEVEL_DISTANCE := 12000.0
-const MIN_LEVEL_TIME := 30.0
+const MIN_LEVEL_TIME := 20.0
 const HUG_DURATION := 1.0
 var celebrations_enabled := true
 var heart_time := 0.0
+var fragaria_next_level := 100
+var fragaria_time := 0.0
+var fragaria_found := 0
 var level := 1
 var level_elapsed := 0.0
 var level_start_distance := 0.0
@@ -60,6 +63,8 @@ var lightning_targets: Array[Vector2] = []
 var item_wait := 12.0
 var first_item := true
 var gnome_wait := 0.25
+var wave_candidate_count := 0
+var wave_spawn_count := 0
 var weather := "clear"
 var weather_wait := 11.0
 var thunder_wait := 3.0
@@ -78,6 +83,9 @@ var enemy_id := 0
 
 func reset() -> void:
 	heart_time = 0.0
+	fragaria_next_level = 100
+	fragaria_time = 0.0
+	fragaria_found = 0
 	level = 1
 	level_elapsed = 0.0
 	level_start_distance = 0.0
@@ -126,6 +134,8 @@ func reset() -> void:
 	item_wait = 12.0
 	first_item = true
 	gnome_wait = 0.3
+	wave_candidate_count = 0
+	wave_spawn_count = 0
 	weather = "clear"
 	weather_wait = 11.0
 	thunder_time = 0.0
@@ -174,7 +184,7 @@ func level_distance(world) -> float:
 	return maxf(0.0,world.distance-level_start_distance)
 
 func level_progress(world) -> float:
-	return LEVEL_DISTANCE * minf(clampf(level_distance(world)/LEVEL_DISTANCE,0,1),clampf(level_elapsed/MIN_LEVEL_TIME,0,1))
+	return clampf(level_elapsed / MIN_LEVEL_TIME, 0.0, 1.0)
 
 func celebration_x(world, moving: bool = true) -> float:
 	return celebration_origin - (world.distance-celebration_spawn_distance)*0.45 if moving else celebration_origin
@@ -206,7 +216,7 @@ func choose_girl(world) -> void:
 func update_level(world) -> void:
 	if not enabled or world.frontier.active(): return
 	if world.state != "running": return
-	if level_elapsed >= MIN_LEVEL_TIME and level_distance(world) >= LEVEL_DISTANCE:
+	if level_elapsed + 0.000001 >= MIN_LEVEL_TIME:
 		heart_time = 0.0
 		level += 1
 		level_elapsed = 0.0
@@ -361,7 +371,17 @@ func spawn_item(world, kind: String, x: float = -1.0) -> Dictionary:
 	items.append(item)
 	return item
 
+func offer_fragaria(world, milestone: int) -> void:
+	if world.practice or milestone < fragaria_next_level or level < fragaria_next_level: return
+	spawn_item(world,"fragaria")
+	fragaria_next_level += 100
+
 func collect(world, kind: String) -> void:
+	if kind=="fragaria":
+		fragaria_found += 1
+		fragaria_time = 3.8
+		world.event("fragaria_found")
+		return # No score, item-goal progress, discovery, power or other reward.
 	items_collected += 1
 	bonus_score += 15
 	if not discoveries.has(kind): discoveries.append(kind)
@@ -369,6 +389,8 @@ func collect(world, kind: String) -> void:
 		"mushroom":
 			powers.mushroom = 10.0
 			gnome_wait = world.rng.randf_range(0.15, 0.65)
+			wave_candidate_count = 0
+			wave_spawn_count = 0
 			world.invulnerable = maxf(world.invulnerable, 0.5)
 		"lightning": lightning_charges = mini(3, lightning_charges + 2)
 		"slow":
@@ -424,6 +446,7 @@ func update_goal(world) -> void:
 func before_step(world, dt: float) -> void:
 	if not enabled: return
 	if not world.frontier.active(): level_elapsed += dt
+	fragaria_time = maxf(0.0,fragaria_time-dt)
 	rush_time = maxf(0.0,rush_time-dt)
 	celebration_clock += dt
 	heart_time = maxf(0.0, heart_time - dt)
@@ -472,14 +495,7 @@ func after_step(world, dt: float, movement: float, previous_y: float) -> void:
 		first_item = false
 		item_wait = world.rng.randf_range(8.0, 14.0)
 	if giant():
-		gnome_wait -= dt
-		if gnome_wait <= 0.0:
-			var alive: int = enemies.filter(func(e): return e.kind == "gnome" and e.hp > 0).size()
-			var count: int = mini(14 - alive, world.rng.randi_range(1, 3))
-			for i in count:
-				var wave_enemy := spawn_enemy(world, "gnome", world.field_width + 60.0 + i * world.rng.randf_range(85.0, 220.0))
-				wave_enemy.wave = true
-			gnome_wait = world.rng.randf_range(0.18, 1.30)
+		update_mushroom_wave(world,dt)
 	elif level >= 4:
 		ambient_gnome_wait -= dt
 		if ambient_gnome_wait <= 0.0:
@@ -535,3 +551,21 @@ func after_step(world, dt: float, movement: float, previous_y: float) -> void:
 			if world.state != "running": break
 	enemies = enemies.filter(func(e): return e.x > -120 and (e.hp > 0 or e.defeat < 0.65))
 	update_goal(world)
+
+func update_mushroom_wave(world,dt: float) -> void:
+	gnome_wait -= dt
+	if gnome_wait <= 0.0:
+		var alive: int = enemies.filter(func(e): return e.kind == "gnome" and e.hp > 0).size()
+		var count: int = world.rng.randi_range(1, 3)
+		for i in count:
+			# Draw every candidate's spacing, even when thinning. Keep random
+			# wave cadence; emit alternate candidates across wave boundaries.
+			var spawn_x: float = world.field_width + 60.0 + i * world.rng.randf_range(85.0, 220.0)
+			wave_candidate_count += 1
+			if wave_candidate_count % 2 == 0 and alive < 7:
+				var wave_enemy := spawn_enemy(world, "gnome", spawn_x)
+				wave_enemy.wave = true
+				wave_spawn_count += 1
+				alive += 1
+		gnome_wait = world.rng.randf_range(0.18, 1.30)
+

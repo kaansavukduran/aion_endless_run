@@ -161,7 +161,7 @@ func run() -> void:
 	for i in 300:
 		w.step(0.02)
 		counts[w.adventure.enemies.size()] = true
-	check(w.adventure.enemy_id > 7 and w.adventure.enemies.size() <= 14 and counts.size()>4,"Giant waves contain more irregularly arriving gnomes")
+	check(w.adventure.enemy_id >= 3 and w.adventure.enemies.size() <= 7 and counts.size()>=3,"Thinned giant waves retain irregular arrivals with a seven-gnome safety cap")
 	w = arena()
 	w.adventure.level = 4
 	w.adventure.ambient_gnome_wait = 0

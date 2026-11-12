@@ -66,3 +66,9 @@ Five new original AI-assisted PNG outputs are included unchanged as canonical-ai
 ## 0.12 mobility and contact animations
 
 Two unchanged original AI-assisted PNG outputs, agility-wolf.png and agility-owl.png, add64 drawn poses. Original owner turnaround and accepted canonical references are recorded in AGILITY-PROVENANCE.json along with hashes, silhouette spans and reviewed near-eye registrations. Wolf gallop, bite, claw and sprint bite; owl calm glide, two forward wing attacks and airborne beak. No source PNG is retouched; contact-only claw lines are original runtime drawing. Aion/sheep artwork remains unchanged.
+
+## 0.13 interface and Fragaria
+
+Pixelify Sans is bundled unchanged under SIL Open Font License 1.1 in assets/PixelifySans.ttf with assets/PIXELIFY-OFL.txt. Upstream: https://github.com/google/fonts/tree/main/ofl/pixelifysans . TR/EN/CS glyph coverage is checked locally. The previous Lexend font and license remain in the source. No runtime font CDN is used.
+
+The transparent Fragaria strawberry is an owner-authorized cutout generated from the supplied reference. Its source reference and SHA-256 are recorded in assets/FRAGARIA-PROVENANCE.json. The original Drive JPEGs remain unchanged. Brand text, actual loading progress and version are rendered separately. All existing hero PNGs are unchanged; only anatomical registration metadata is corrected.
