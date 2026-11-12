@@ -1,0 +1,44 @@
+[
+  {
+    "job": "test",
+    "id": 131520426888,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  {
+    "job": "android_smoke",
+    "id": 131520917819,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  {
+    "job": "desktop (ubuntu-24.04)",
+    "id": 131520918032,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  {
+    "job": "desktop (windows-latest)",
+    "id": 131520918059,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  {
+    "job": "desktop (macos-15-intel)",
+    "id": 131520918074,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  {
+    "job": "android",
+    "id": 131520921040,
+    "status": "completed",
+    "conclusion": "skipped"
+  },
+  {
+    "job": "release",
+    "id": 131523830397,
+    "status": "completed",
+    "conclusion": "success"
+  }
+]
