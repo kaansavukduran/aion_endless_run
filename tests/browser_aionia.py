@@ -11,7 +11,7 @@ def check(ok,label):
  results.append(label);print('PASS',label,flush=True)
 with sync_playwright() as pw:
  browser=pw.chromium.launch(args=['--no-sandbox','--enable-unsafe-swiftshader'])
- for name,size,touch in [('desktop',(1152,648),False),('narrow-phone',(320,740),True),('portrait',(393,873),True),('portrait-16x9',(450,800),True),('landscape',(873,393),True),('tablet-portrait',(768,1024),True),('tablet-landscape',(1024,768),True)]:
+ for name,size,touch in [('desktop',(1152,648),False),('desktop-portrait',(600,900),False),('narrow-phone',(320,740),True),('portrait',(393,873),True),('portrait-16x9',(450,800),True),('landscape',(873,393),True),('tablet-portrait',(768,1024),True),('tablet-landscape',(1024,768),True)]:
   if a.case and a.case!=name:continue
   ctx=browser.new_context(viewport={'width':size[0],'height':size[1]},has_touch=touch,is_mobile=touch,locale='en-GB',color_scheme='light',service_workers='block')
   page=ctx.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.on('console',lambda m:errors.append(m.text) if 'SCRIPT ERROR' in m.text else None)

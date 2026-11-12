@@ -60,7 +60,7 @@ func run() -> void:
 	check(game.page=="paused" and not game.world.jump_held and not game.world.boost_held and game.attack_sources.is_empty(),"Controller disconnect pauses and clears every held action")
 	game.interface_options.reduced_motion=true;game.motion=true
 	check(not game.decorative_motion() and game.motion,"Reduced motion suppresses decoration without freezing hero animation")
-	for dimensions in [Vector2i(393,873),Vector2i(873,393),Vector2i(1440,2560)]:
+	for dimensions in [Vector2i(393,873),Vector2i(873,393),Vector2i(1440,2560),Vector2i(768,1024)]:
 		root.size=dimensions;await process_frame
 		for lang in ["tr","en","cs"]:
 			game.language=lang
@@ -76,6 +76,7 @@ func run() -> void:
 						var choose: Label=game.menu_layer.get_node("StartChooser")
 						check(not panel.get_global_rect().intersects(choose.get_global_rect()),"Character heading does not overlap main actions "+lang+str(dimensions))
 						check(choose.size.x>=floorf(game.view_w-56) and choose.get_minimum_size().y<=choose.size.y,"Character heading has real readable width "+lang)
+						check(choose.size.y<100 and choose.get_global_rect().end.y<=game.pixel_ui.roster_y(),"Character heading never covers its roster "+lang+str(dimensions))
 						for tile in game.menu_layer.find_children("StartSelect_*","Button",true,false):
 							check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Actual portrait/name content stays inside its character card "+lang+str(tile.name))
 					check(screen.encloses(panel.get_global_rect()),"Panel fits "+str(dimensions)+lang+str(scale_value)+target)
@@ -91,14 +92,15 @@ func run() -> void:
 	for family in ["DejaVu Sans","Liberation Sans"]:
 		var alternate:=SystemFont.new();alternate.font_names=PackedStringArray([family]);alternate.fallbacks=[ThemeDB.fallback_font]
 		game.interface_options.body_font=alternate;game.ui_theme.default_font=alternate
-		game.rebuild();await process_frame;await process_frame
-		print("AIONIA_ALTERNATE_FONT ",alternate.get_font_name())
-		for tile in game.menu_layer.find_children("StartSelect_*","Button",true,false):
-			if not tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()):
-				var title: Label=tile.get_child(0).get_child(1)
-				print("FONT_LAYOUT_DEBUG ",tile.get_global_rect()," row ",tile.get_child(0).get_global_rect()," title ",title.get_global_rect()," min ",title.get_minimum_size()," font ",title.get_theme_font("font").get_font_name()," theme ",game.ui.theme.default_font.get_font_name()," same ",game.ui.theme==game.ui_theme," lines ",title.get_line_count()," size ",title.get_theme_font_size("font_size")," measure ",alternate.get_multiline_string_size(title.text,HORIZONTAL_ALIGNMENT_LEFT,title.size.x,title.get_theme_font_size("font_size")))
-			check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Czech names fit measured alternate font "+family+str(tile.name))
-		check(not game.menu_layer.get_node("PagePanel").get_global_rect().intersects(game.menu_layer.get_node("StartChooser").get_global_rect()),"Measured alternate-font roster does not overlap main actions "+family)
+		for dimensions in [Vector2i(1200,540),Vector2i(1440,2560),Vector2i(768,1024),Vector2i(600,900)]:
+			game.touch_mode=dimensions!=Vector2i(600,900)
+			root.size=dimensions;await process_frame;game.rebuild();await process_frame;await process_frame
+			print("AIONIA_ALTERNATE_FONT ",alternate.get_font_name()," ",dimensions)
+			for tile in game.menu_layer.find_children("StartSelect_*","Button",true,false):
+				check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Czech names fit measured alternate font "+family+str(dimensions)+str(tile.name))
+			var heading: Control=game.menu_layer.get_node("StartChooser")
+			check(not game.menu_layer.get_node("PagePanel").get_global_rect().intersects(heading.get_global_rect()),"Measured alternate-font roster does not overlap main actions "+family+str(dimensions))
+			check(heading.size.y<100 and heading.get_global_rect().end.y<=game.pixel_ui.roster_y(),"Translated heading uses its actual wrapped height "+family+str(dimensions))
 	game.interface_options.text_scale=1;game.world.reset();game.world.state="running";game.world.adventure.celebrations_enabled=true
 	game.world.adventure.collect(game.world,"fragaria")
 	var party: Array=game.evolution_view.fragaria_tableau()

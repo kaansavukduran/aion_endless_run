@@ -3,7 +3,14 @@ extends RefCounted
 var host
 
 func stage_y() -> float:
-	return minf(360.0,host.view_h*0.31) if host.portrait else host.view_h-(170.0 if host.touch_mode else 210.0)
+	if host.portrait:
+		var preview: float=minf(360.0,host.view_h*0.31)
+		if host.page=="main" and host.interface_options.text_scale<=1.0:
+			# Preserve the actual translated roster and heading. A tall system
+			# font needs more room than the old fixed preview/sky allocation.
+			preview=minf(preview,roster_y()-chooser_height()-6-8-300-26)
+		return preview
+	return host.view_h-(170.0 if host.touch_mode else 210.0)
 
 func hud() -> void:
 	var h = host
@@ -108,7 +115,7 @@ func card(width: float) -> VBoxContainer:
 	if enlarged:width=h.view_w-40
 	var height: float=minf(h.view_h-120,410 if h.page!="main" else 340)
 	if h.page=="settings" or enlarged:height=h.view_h-110
-	if h.page=="main" and h.touch_mode and not enlarged:
+	if h.page=="main" and (h.touch_mode or h.portrait) and not enlarged:
 		var top: float=stage_y()+26 if h.portrait else 56
 		height=minf(292,roster_y()-chooser_height()-6-top-8)
 	var panel:=PanelContainer.new()
@@ -157,7 +164,14 @@ func roster_y() -> float:
 	return host.view_h-float(roster_geometry(host.view_w-56).total_height)-20
 
 func chooser_height() -> float:
-	return maxf(36,ceilf(host.interface_options.body_font.get_height(host.ui_size(24 if host.touch_mode else 20))))
+	var probe: Label=host.wrap_label("",20)
+	probe.theme=host.ui.theme
+	host.ui.add_child(probe)
+	probe.size.x=host.view_w-56
+	probe.text=host.text("choose_before_run")
+	var height: float=maxf(36,ceilf(probe.get_minimum_size().y))
+	probe.free()
+	return height
 
 func roster(parent: Control, at: Vector2, width: float, separate: bool=false) -> void:
 	var h=host
@@ -212,7 +226,7 @@ func main(column: VBoxContainer) -> Button:
 	column.add_child(first)
 	column.add_child(h.button(h.text("boss_training"),func():h.show_page("bosses")))
 	column.add_child(h.button(h.text("settings"),func():h.open_subpage("settings")))
-	if h.touch_mode and h.interface_options.text_scale<=1.0:
+	if (h.touch_mode or h.portrait) and h.interface_options.text_scale<=1.0:
 		logo.text="AION · ENDLESS RUN"
 		logo.add_theme_font_size_override("font_size",26)
 		subtitle.hide()
@@ -220,9 +234,10 @@ func main(column: VBoxContainer) -> Button:
 			if item is Button:
 				item.custom_minimum_size.y=64
 				item.add_theme_font_size_override("font_size",24)
-	var choose: Label=h.wrap_label(h.text("choose_before_run"),20,"ffe1b9")
+	var choose: Label=h.wrap_label("",20,"ffe1b9")
 	choose.name="StartChooser"
 	if h.interface_options.text_scale>1.0:
+		choose.text=h.text("choose_before_run")
 		column.add_child(choose)
 		var roster_host:=Control.new()
 		roster_host.custom_minimum_size.y=roster_geometry(h.view_w-68).total_height
@@ -230,9 +245,13 @@ func main(column: VBoxContainer) -> Button:
 		roster(roster_host,Vector2.ZERO,h.view_w-68)
 		return first
 	h.menu_layer.add_child(choose)
+	# Shape text only after its real width exists. A Label initialized with
+	# text at width zero can retain an enormous stale minimum height.
+	choose.size.x=h.view_w-56
+	choose.text=h.text("choose_before_run")
 	var roster_at: float=roster_y()
 	choose.position=Vector2(28,roster_at-chooser_height()-6)
-	choose.size=Vector2(h.view_w-56,chooser_height())
+	choose.size.y=chooser_height()
 	roster(h.menu_layer,Vector2(28,roster_at),h.view_w-56)
 	return first
 

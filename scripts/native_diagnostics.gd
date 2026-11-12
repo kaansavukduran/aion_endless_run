@@ -21,7 +21,7 @@ func layout() -> void:
 	for id in host.action_buttons:
 		var control=host.action_buttons[id]
 		if control.is_visible_in_tree():actions[id]=point(control.get_global_rect())
-	print("AION_UI "+JSON.stringify({"page":host.page,"character":host.character,"orientation":"portrait" if host.portrait else "landscape","score":host.world.score,"level":host.world.adventure.level,"buttons":buttons,"actions":actions,"regions":regions}))
+	print("AION_UI "+JSON.stringify({"page":host.page,"language":host.language,"character":host.character,"orientation":"portrait" if host.portrait else "landscape","score":host.world.score,"level":host.world.adventure.level,"buttons":buttons,"actions":actions,"regions":regions}))
 func state() -> void:
 	if not OS.has_feature("android"):return
 	var w=host.world
