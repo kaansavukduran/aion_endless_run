@@ -326,15 +326,18 @@ func hit_enemy(world, enemy: Dictionary, damage: int, stomp: bool) -> void:
 
 func reward_enemy(world, stomp: bool) -> void:
 	kills += 1
-	last_xp = 15 if stomp else 10
-	run_xp += last_xp
-	xp_notice = 1.0
+	award_xp(15 if stomp else 10)
 	if stomp:
 		stomps += 1
 		stomp_chain = mini(5, stomp_chain + 1)
 		bonus_score += 50 + stomp_chain * 10
 	else: bonus_score += 35
 	world.event("stomp" if stomp else "enemy_down")
+
+func award_xp(amount: int) -> void:
+	last_xp = amount
+	run_xp += amount
+	xp_notice = 1.0
 
 func mastery_rank() -> int: return 1 + run_xp / 100
 func jump_multiplier() -> float: return 1.16 if enabled and powers.spring > 0.0 else 1.0

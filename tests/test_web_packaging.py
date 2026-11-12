@@ -42,4 +42,12 @@ class ExportContract(unittest.TestCase):
  def test_unknown_engine_template_fails_build(self):
   (self.out/'index.html').write_text(self.html.replace('engine.startGame({','engine.otherStart({'))
   with self.assertRaises(RuntimeError):web.prepare_web_export(self.root)
+class PackageVersionContract(unittest.TestCase):
+ def test_native_package_names_match_the_actual_project(self):
+  version=re.search(r'config/version="([^"]+)"',(ROOT/'project.godot').read_text())[1]
+  linux=(ROOT/'packaging/linux.sh').read_text();windows=(ROOT/'packaging/windows.nsi').read_text()
+  self.assertEqual(re.search(r'^version=([^\n]+)',linux,re.M)[1],version)
+  self.assertIn('AionEndlessRun-'+version+'-windows-x64-Setup.exe',windows)
+  self.assertIn('"DisplayVersion" "'+version+'"',windows)
+  self.assertIn('const GAME_VERSION = "'+version+'"',(ROOT/'scripts/game.gd').read_text())
 if __name__=='__main__':unittest.main()

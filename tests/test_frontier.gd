@@ -133,7 +133,7 @@ func run() -> void:
 	w.frontier.hp = 1
 	w.frontier.projectiles.assign([{"owner":"hero","kind":"energy","x":w.frontier.boss_x,"y":w.frontier.boss_y,"vx":1.0,"vy":0.0,"r":8.0}])
 	w.frontier.update_projectiles(w,0.01)
-	check(w.frontier.phase == "victory" and w.frontier.wins == 1 and w.adventure.bonus_score == 600,"The final hit wins exactly once and grants the real milestone reward")
+	check(w.frontier.phase == "victory" and w.frontier.wins == 1 and w.adventure.bonus_score == 600 and w.adventure.run_xp==100,"The final hit wins exactly once and grants score plus 100 boss XP")
 	advance(w,3.0)
 	check(not w.frontier.active() and w.frontier.projectiles.is_empty() and w.adventure.powers.shield > 8.8,"Victory restores the suspended powers and clears combat")
 	check(w.obstacle_wait > 2 and w.invulnerable > 1 and w.trail.size() < 120,"Return has a safe runway and preserves bounded continuous chase follower history")

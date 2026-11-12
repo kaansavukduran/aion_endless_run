@@ -55,7 +55,7 @@ with sync_playwright() as pw:
    biomes.add(int(v['biome']));best_xp=max(best_xp,int(v['xp']))
    if page.evaluate('window.boltEdges||0') and int(v['lightningCharges'])<2:bolt_seen=True
    for tag in ['biome-'+v['biome']]+[e['kind'] for e in json.loads(v.get('enemies','[]')) if e['kind'] in ['bat','slime','beetle','wisp']]:
-    if tag not in captures and (not tag.startswith('biome-') or int(v['biome'])>=4):
+    if tag not in captures and (not tag.startswith('biome-') or int(v['biome'])>=4 and float(v['worldDistance'])%6500>900):
      page.screenshot(path=str(a.evidence/(tag+'.png')));captures.add(tag)
    if v['state']!='running':print('Route ended',attempt,v['worldTime'],v['deathCause'],flush=True);break
    if bolt_seen and best_xp>0 and {4,5}<=biomes and len(seen)>=5 and {'spring','fortune','frost'}<=buffs:break

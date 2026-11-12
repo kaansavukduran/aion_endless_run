@@ -3,6 +3,7 @@ extends RefCounted
 # Passive local Android diagnostics. No network, player identity or setters.
 var host
 var stamp := ""
+var packet_id := 0
 func point(rect: Rect2) -> Array:
 	var p: Vector2=host.screen_transform*rect.get_center()
 	var raw: Vector2=host.layout_size
@@ -21,9 +22,18 @@ func layout() -> void:
 	for id in host.action_buttons:
 		var control=host.action_buttons[id]
 		if control.is_visible_in_tree():actions[id]=point(control.get_global_rect())
-	print("AION_UI "+JSON.stringify({"page":host.page,"language":host.language,"character":host.character,"orientation":"portrait" if host.portrait else "landscape","score":host.world.score,"level":host.world.adventure.level,"buttons":buttons,"actions":actions,"regions":regions}))
+	emit_packet("AION_UI",JSON.stringify({"page":host.page,"language":host.language,"character":host.character,"orientation":"portrait" if host.portrait else "landscape","score":host.world.score,"level":host.world.adventure.level,"buttons":buttons,"actions":actions,"regions":regions}))
 func state() -> void:
 	if not OS.has_feature("android"):return
 	var w=host.world
 	var payload:=JSON.stringify({"page":host.page,"character":host.character,"state":w.state,"airborne":w.y<0,"gliding":w.gliding,"attacking":w.adventure.attack_time>0,"rolling":w.adventure.ducking(w)})
 	if stamp!=payload:stamp=payload;print("AION_STATE "+payload)
+
+func emit_packet(kind: String, payload: String) -> void:
+	# Android log lines are bounded. ASCII base64 chunks prevent UTF-8 or JSON
+	# truncation even with eleven language labels and large accessibility menus.
+	packet_id += 1
+	var encoded := Marshalls.utf8_to_base64(payload)
+	var count := ceili(float(encoded.length())/700.0)
+	for index in count:
+		print("AION_CHUNK %s %d %d %d %s" % [kind,packet_id,index,count,encoded.substr(index*700,700)])

@@ -72,7 +72,11 @@ func hud() -> void:
 	h.xp_progress.show_percentage=false
 	h.xp_progress.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	h.xp_progress.add_theme_stylebox_override("background",h.box("302437","796176"))
-	h.xp_progress.add_theme_stylebox_override("fill",h.box("d7b56d","f4c190"))
+	var xp_fill := StyleBoxFlat.new()
+	xp_fill.bg_color=h.interface_options.color("accent")
+	xp_fill.border_color=h.interface_options.color("text")
+	xp_fill.set_border_width_all(1)
+	h.xp_progress.add_theme_stylebox_override("fill",xp_fill)
 	h.hud.add_child(h.xp_progress)
 	h.position_control(h.xp_progress,Vector2(h.view_w-192,134),Vector2(174,8))
 	h.power_label=h.label("",18,"f5dbbd")

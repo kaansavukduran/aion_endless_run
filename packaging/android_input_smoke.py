@@ -1,12 +1,13 @@
 """Use real ADB gestures and passive Godot layout/state logs; no state injection."""
 import argparse,json,re,subprocess,time
+from android_packets import decode_packets
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=Path('build'));a=p.parse_args();a.output.mkdir(exist_ok=True,parents=True)
 results=[]
 def adb(*args,**kwargs):return subprocess.check_output(['adb',*map(str,args)],**kwargs)
 def packets(prefix):
  text=adb('logcat','-d','-s','godot',text=True)
- return [json.loads(line.split(prefix,1)[1]) for line in text.splitlines() if prefix in line]
+ return decode_packets(text,prefix)
 def latest(prefix,predicate=lambda x:True,timeout=15):
  until=time.monotonic()+timeout
  while time.monotonic()<until:

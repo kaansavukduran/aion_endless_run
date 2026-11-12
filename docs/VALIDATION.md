@@ -1,3 +1,7 @@
+# 0.15.0 · Güncel doğrulama
+
+[Uygulama ve gerçek nedenler](UPGRADE-0.15.0.md) · [Test sonuçları, kayıtlar ve sınırlar](evidence-v0150/README.md). Güncel kaynak kapısı `.github/workflows/build.yml` içindeki 13 Godot paketi ve 6 web paket testidir. Güncel tarayıcı sürücüleri: `browser_runner_ux.py`, `browser_encounters.py`, `browser_variety.py`, `browser_trails.py`, `browser_loader.py`, `browser_upgrade.py`, `browser_aionia.py`, `browser_panels.py`, `browser_boss_hud.py`. Aşağıdaki eski sürüm kayıtları ve eski beklentileri kullanan tarayıcı sürücüleri tarihçedir; eski sayılar güncel sonuç sayılmaz.
+
 # 0.14.0 · Güncel doğrulama
 
 [AIONIA kapıları, sonuçlar ve sınırlar](AIONIA-QA.md); [2539 kaynak/sahne, 184 tarayıcı ve 5 paket testi kanıtı](evidence-v014/README.md). Aşağıdaki eski sürüm kayıtları tarihçe olarak korunur.

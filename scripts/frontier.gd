@@ -193,6 +193,7 @@ func update_projectiles(world,dt: float) -> void:
 					salvo.clear()
 					stage_time = 0.0
 					wins += 1
+					world.adventure.award_xp(100)
 					world.adventure.bonus_score += 500 + milestone*10
 					world.event("boss_won")
 		else:
