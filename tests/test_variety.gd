@@ -66,6 +66,12 @@ func run() -> void:
 		check(continuous and seen_return and not w.frontier.active(),"Smooth monotonic exit including return phase: "+str(milestone))
 		check(frozen and w.sheep_count==3 and w.trail.size()<150,"Boss freezes normal progression, retains flock: "+str(milestone))
 		check(w.obstacles.is_empty() and w.adventure.enemies.is_empty(),"Safe clear runway after boss: "+str(milestone))
+	w=arena();w.adventure.powers.haste=.02;w.frontier.request_boss(10);w.step(.01)
+	w.frontier.phase="victory";w.frontier.hp=0;w.frontier.stage_time=1.59;w.step(.02);w.step(.04)
+	check(w.frontier.phase=="return" and is_equal_approx(w.adventure.powers.haste,.02),"A nearly expired haste stays frozen through return, avoiding an expire/restore speed bounce")
+	while w.frontier.active(): w.step(.01)
+	w.step(.03)
+	check(w.adventure.powers.haste==0,"Restored buff expiry resumes only after normal play returns")
 	var seen:={};var repeats:=0;var prior:=""
 	w=arena();w.rng.seed=829141;w.adventure.level=6
 	for n in 400:

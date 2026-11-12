@@ -508,7 +508,8 @@ func before_step(world, dt: float) -> void:
 	if was_rolling: roll_elapsed += dt
 	elif not duck_held: roll_elapsed = 0.0
 	var was_giant := giant()
-	for key in powers: powers[key] = maxf(0.0, float(powers[key]) - dt)
+	if not world.frontier.active():
+		for key in powers: powers[key] = maxf(0.0, float(powers[key]) - dt)
 	if was_giant and not giant(): end_wave(world)
 	attack_time = maxf(0.0, attack_time - dt)
 	attack_cooldown = maxf(0.0, attack_cooldown - dt)
