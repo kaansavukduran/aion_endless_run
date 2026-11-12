@@ -39,7 +39,8 @@ var y := 0.0
 var velocity := 0.0
 var score := 0
 var passed := 0
-var gems := 0
+var gems := 0 # Legacy counter name retained; now counts common fruit.
+var orchard := preload("res://scripts/orchard.gd").new()
 var combo := 0
 var hit_time := 0.0
 var death_cause := ""
@@ -55,6 +56,7 @@ var field_width := 1152.0
 func reset() -> void:
 	state = "running"
 	adventure.reset()
+	orchard.reset()
 	frontier.reset()
 	frontier.plant_wait = rng.randf_range(26.0,42.0)
 	pending_events.clear()
@@ -120,7 +122,7 @@ func biome() -> int:
 func jump() -> void:
 	if state != "running" or adventure.hugging(): return
 	if y < 0.0 and character == "aion" and jumps_used < 2:
-		velocity = JUMP_SPEED * adventure.jump_multiplier()
+		velocity = JUMP_SPEED * adventure.jump_multiplier() * (1.12 if character=="rabbit" else 1.0)
 		jumps_used += 1
 		air_time = 0.0
 		jump_buffer = 0.0
@@ -234,7 +236,7 @@ func step(dt: float) -> void:
 	if not frontier.active(): advance_gusts(movement)
 	invulnerable = maxf(0.0, invulnerable - dt)
 	if jump_buffer > 0.0 and y >= 0.0:
-		velocity = JUMP_SPEED * adventure.jump_multiplier()
+		velocity = JUMP_SPEED * adventure.jump_multiplier() * (1.12 if character=="rabbit" else 1.0)
 		jumps_used = 1
 		air_time = 0.0
 		landing_time = 0.0
@@ -297,9 +299,9 @@ func step(dt: float) -> void:
 			var kind := "ice" if rng.randf() < (0.78 if biome() else 0.22) else "fire"
 			obstacles.append({"x":field_width + 60.0, "kind":kind, "counted":false})
 			obstacle_wait = rng.randf_range(1.30, 1.95)
-			pickups.append({"x":field_width + 65.0, "y":-113.0, "taken":false})
 	adventure.after_step(self, dt, movement, previous_y)
 	if adventure.enabled: frontier.step_plants(self,dt,movement)
+	orchard.step(self,movement)
 	record_trail()
 	if state != "running" or adventure.hugging(): return
 	for obstacle in obstacles:
@@ -356,6 +358,7 @@ func step(dt: float) -> void:
 		if not pickup.taken and absf(pickup.x - PLAYER_X) < 34.0 and absf(pickup.y - (y - 35.0)) < 43.0:
 			pickup.taken = true
 			gems += 1
+			orchard.last_kind = str(pickup.get("kind","apple"))
 			if adventure.powers.fortune > 0: adventure.bonus_score += 25
 			event("gem")
 	obstacles = obstacles.filter(func(o): return o.x > -90.0)

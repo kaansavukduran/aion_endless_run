@@ -1,0 +1,187 @@
+{
+  "version": "0.16.0",
+  "baseline_commit": "d502658",
+  "engine": "4.6.3",
+  "source_and_scene_checks": 5531,
+  "source_suites": [
+    {
+      "suite": "game",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 124 checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "adventure",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 58 adventure checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "localization",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 51 localization/registration checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "evolution",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 122 evolution checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "frontier",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 272 frontier checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "motion",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 447 motion checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "encounters",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 108 encounter/gamepad checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "fidelity",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 685 fidelity checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "agility",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 198 agility checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "runner_ux",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 219 runner UX checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "boss_hud",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 30 boss HUD checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "aionia",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 681 AIONIA checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "variety",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 551 variety/transition/locale checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "visual_polish",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 152 visual polish checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "orchard",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 1833 orchard/Emre checks, 0 failures"
+      ]
+    }
+  ],
+  "browser_checks": 39,
+  "browser_scope": "31 original-hero/Emre animation, touch/cancel/multitouch/rotation checks plus8 normal-input unseeded Emre/fruit/RB-boss/portrait checks on local build acae47c568dd03ed. Subsequent text-only updates add Emre help sentence and correct AZ/JA fruit wording.",
+  "browser_runner": [
+    "Branded loader really hands off to the playable main menu",
+    "aion: actual complete run loop keeps the anatomically reviewed gaze horizontally fixed",
+    "aion: the physical sprite anchor does not compensate by moving frame to frame",
+    "Aion still double jumps with the repaired frames",
+    "owl: actual complete run loop keeps the anatomically reviewed gaze horizontally fixed",
+    "owl: the physical sprite anchor does not compensate by moving frame to frame",
+    "Owl glides through actual frames without lateral sway",
+    "wolf: actual complete run loop keeps the anatomically reviewed gaze horizontally fixed",
+    "wolf: the physical sprite anchor does not compensate by moving frame to frame",
+    "Wolf retains its four-legged sprint and separate sprint bite",
+    "sheep: actual complete run loop keeps the anatomically reviewed gaze horizontally fixed",
+    "sheep: the physical sprite anchor does not compensate by moving frame to frame",
+    "rabbit: actual complete run loop keeps the anatomically reviewed gaze horizontally fixed",
+    "rabbit: the physical sprite anchor does not compensate by moving frame to frame",
+    "portrait: upright orientation is selected from the actual viewport",
+    "portrait: a real down swipe rolls once without a jump",
+    "portrait: holding the attack circle gives exactly one strike",
+    "portrait: release and tap gives the alternating strike",
+    "portrait: touch cancellation releases all fingers",
+    "portrait: jump can stay held while another finger attacks",
+    "portrait: rotating mid-run keeps the character, score and running state",
+    "portrait: the boss Fire circle emits real projectiles and lowers actual boss health",
+    "landscape: upright orientation is selected from the actual viewport",
+    "landscape: a real down swipe rolls once without a jump",
+    "landscape: holding the attack circle gives exactly one strike",
+    "landscape: release and tap gives the alternating strike",
+    "landscape: touch cancellation releases all fingers",
+    "landscape: jump can stay held while another finger attacks",
+    "landscape: rotating mid-run keeps the character, score and running state",
+    "landscape: the boss Fire circle emits real projectiles and lowers actual boss health",
+    "No uncaught browser or Godot script errors in all tested inputs and layouts"
+  ],
+  "orchard_browser": {
+    "checks": [
+      "All five hero cards fit the real opening screen",
+      "Emre is selected from his actual named menu card",
+      "Emre collects at least eight actual fruit pickups through normal unseeded play",
+      "All eight common fruit silhouettes appear in the actual running world",
+      "Observed fruit ribbons remain on reachable ground and clear ordinary hazards and pits",
+      "Emre uses his own pistol poses and RB projectiles actually damage the boss",
+      "Portrait rotation preserves Emre and the live boss run",
+      "No browser or Godot script errors during real Emre, fruit, controller and rotation flows"
+    ],
+    "fruit_types": [
+      "apple",
+      "apricot",
+      "banana",
+      "cherries",
+      "grapes",
+      "orange",
+      "peach",
+      "pear"
+    ],
+    "max_fruit_count": 9,
+    "safe_placement": true,
+    "errors": []
+  },
+  "packaging_checks": 11,
+  "preserved_original_pngs": 41,
+  "new_hero_drawn_poses": 144,
+  "new_common_fruits": 8,
+  "new_background_panels": 6,
+  "emre_reference": "https://drive.google.com/file/d/1_gDPSpL7sQDdO791wWfx4zzZWQksbZPk/view",
+  "assumption": "No separate special ability was specified for Emre. Implemented one strong single leap with1.12 jump velocity multiplier; existing jump/attack/roll/fire controls remain.",
+  "limits": [
+    "No physical Poco/controller/iPhone test.",
+    "Mac ad-hoc only; native iOS signing awaits owner.",
+    "Background panel repeats are mirrored to match their edges; scenes are illustrations, not separately painted per-depth sprite layers."
+  ],
+  "recorded_at": "2026-11-13T02:29:21.208669+03:00",
+  "timezone": "Europe/Istanbul"
+}

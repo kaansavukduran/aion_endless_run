@@ -26,7 +26,7 @@ with sync_playwright() as pw:
    expected={'Option_theme_light':'[data-theme="light"]','Option_theme_dark':'[data-theme="dark"]','Option_theme_system':'[data-theme="system"]','Option_text_size_2.0':'[data-text-scale="2.0"]','Option_text_size_1.0':'[data-text-scale="1.0"]'}
    wait(expected[control]+'[data-ui-ready="true"]')
   def native_label(part):return next(b['text'] for b in json.loads(d()['ui']) if part in b['text'])
-  v=d();check(v['version']=='0.15.1' and v['theme']=='dark' and v['themeDark']=='true',name+': fresh launch is the current game and dark even with a light OS')
+  v=d();check(v['version']=='0.16.0' and v['theme']=='dark' and v['themeDark']=='true',name+': fresh launch is the current game and dark even with a light OS')
   check(v['fontMode']=='system' and 'Pixelify' not in v['fontFamily'],name+': body text uses the platform sans/system fallback, not the pixel logo font');fonts[name]=v['fontFamily']
   check(page.locator('#aion-accessibility-controls').get_by_role('button').count()>=8,name+': four character choices and real menu actions have semantic counterparts')
   semantic('Settings');wait('[data-page="settings"]');option('Option_theme_light');wait('[data-theme="light"][data-theme-dark="false"]')

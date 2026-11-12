@@ -149,7 +149,7 @@ func fire(world) -> bool:
 	return true
 
 func emit_hero_shot(world) -> void:
-	var muzzle: Array = MUZZLES.data.muzzles[world.character]
+	var muzzle: Array = preload("res://assets/EMRE-PROVENANCE.json").data.muzzle if world.character=="rabbit" else MUZZLES.data.muzzles[world.character]
 	var origin := Vector2(world.PLAYER_X+float(muzzle[0]),world.y+float(muzzle[1]))
 	shots_fired += 1
 	# Energy bolts leave the measured muzzle, then gently converge on the core.

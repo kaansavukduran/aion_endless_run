@@ -1,0 +1,54 @@
+{
+  "path": "assets/aionverse-landscapes.png",
+  "sha256": "60891fd7e40d31100063e4bc458ec302117907a7d42cb23f420ee263b0fdcc38",
+  "generation": "exec-12b30175-5cbd-4611-bc7c-6f22b631a3f4",
+  "columns": 2,
+  "rows": 3,
+  "panels": [
+    [
+      1,
+      1,
+      722,
+      360
+    ],
+    [
+      725,
+      1,
+      722,
+      360
+    ],
+    [
+      1,
+      363,
+      722,
+      360
+    ],
+    [
+      725,
+      363,
+      722,
+      360
+    ],
+    [
+      1,
+      725,
+      722,
+      360
+    ],
+    [
+      725,
+      725,
+      722,
+      360
+    ]
+  ],
+  "biomes": [
+    "desert",
+    "snow",
+    "swamp",
+    "city",
+    "forest",
+    "volcano"
+  ],
+  "method": "Original PNG unchanged. Runtime panel isolation excludes the one-pixel grid seam. Uniform-scale, mirrored repeat joins; crossfade and day/night tint preserve travel continuity."
+}

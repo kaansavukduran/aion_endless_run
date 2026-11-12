@@ -411,7 +411,6 @@ func spawn_encounter(world) -> void:
 	# A broad gap distribution creates bursts and breathing spaces. Distances
 	# also reserve enough clearance for a full jump at the future speed cap.
 	world.obstacle_wait = world.rng.randf_range(0.8, 2.7)
-	world.pickups.append({"x":world.field_width + 75.0, "y":-112.0, "taken":false})
 
 func spawn_item(world, kind: String, x: float = -1.0) -> Dictionary:
 	item_id += 1

@@ -1,13 +1,15 @@
-# Aion Endless Run 0.15.1
+# Aion Endless Run 0.16.0
 
-Yarasa, balçık, kabuk böceği ve fırtına ışığının kaba geometrik çizimleri yerine toplam 24 ayrıntılı animasyon karesi kullanılır. Yüz hizası, ortak zemin ve sabit tür ölçeği korunur; şeffaf kareler birbirinden ayrı örneklenir. Kahramanlar ve mevcut karga/cüce çizimleri değiştirilmedi.
+Altı biyom için ayrıntılı, piksel resimli Aionverse manzaraları: gözlemevleri, laboratuvar seraları, bakır şehir, karlı dağlar, bataklık, fenerli orman ve kor sırtı. Kamera ölçeği, gece/gündüz, hava ve boss dönüşleri korunur.
 
-Dokunmatik tuşlar simetrik basamaklı piksel çerçeveler, altı okunaklı ikon, belirgin basılı/bekleme/kullanılamıyor durumları kullanır. Çizilen tuşla gerçek dokunma alanı eşleşir. Önbelleğe alınan çizimler telefonun her karede yüzlerce küçük parça çizmesini önler. Seçtiğin solda Zıpla, sağda Vur/Takla düzeni ve ayrı Şimşek/Ateş/Depar erişimi korunur.
+Sıradan kristaller yerini sekiz meyveye bıraktı: muz, elma, armut, kayısı, kara üzüm, portakal, kiraz, şeftali. Her biri +25 puan. Daha sık3–5'li diziler zeminden erişilir; uçan engelin üstüne sabit kristal koyan kural kaldırıldı. Tehlikelerle çakışmalar yeniden denetlenir. Mıknatıs ve şans bonusu meyvelerle çalışır. Nadir Fragaria çileği ödülsüz özel kutlama olarak korunur.
 
-Hasar, XP, rastgele karşılaşma kuralları, boss geçişleri, 11 dil, klavye/gamepad eşlemeleri, çoklu dokunma, dikey/yatay oynanış ve çevrimdışı kayıtlar korunur. [Gerçek ekranlar ve doğrulama](evidence-v0151/README.md).
+Tavşan Emre beşinci oynanabilir kahraman: resmi paftasına sadık144 çizilmiş poz; güçlü tek sıçrama, yumruk/tekme, takla, boss tabancası, donma, yanma ve düşüş. İlk dört kahramanın ve önceki düşmanların41 PNG'si aynen korundu.11 dilde yeni adlar ve yardım metinleri, çevrimdışı ek font karakterleri; küçük yatay menüde beş kartın erişilebilir yerleşimi.
 
-## İndirme / platform
+[Gerçek oyun görüntüleri ve test kapsamı](evidence-v0160/README.md).
 
-[0.15.1 sürümü](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.15.1) kapılar geçince Windows kurulum/portable, Linux DEB/AppImage/portable, macOS universal DMG/portable, sabit anahtarla imzalı Android APK ve web offline arşivini birlikte sunar. Önceki sürümler korunur. `SHA256SUMS` ve `BUILD-RECEIPT.json` tam dosya özetlerini ve doğrulanan kaynak commit'ini taşır.
+## İndir / kur
 
-Android uygulama kimliği ve imza korunur; versionCode18. macOS yalnız ad-hoc imzalı; Developer ID/noter yok. Windows Authenticode yok. iPhone için web/PWA hedefi vardır; yerel iOS için sahibin Apple imzası gerekir. Fiziksel Poco/Xbox/PS/iPhone ve ekran okuyucu testi bu ortamda yapılmadı.
+[0.16.0 sürümü](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.16.0) tüm kapılar geçince dokuz paketi birlikte yayımlar. Windows: Setup.exe'yi çalıştır veya portable ZIP'in tamamını çıkartıp EXE'yi aç. Linux: DEB'i kur, AppImage'a çalıştırma izni ver veya portable tar.gz'yi çıkart. Mac: universal DMG'yi açıp uygulamayı Applications'a taşı veya portable ZIP'i çıkart. Android: APK'yı indirip mevcut uygulamanın üstüne kur; uygulama kimliği/imzası korunur, versionCode19. Web offline arşivi yerel HTTP sunucusuyla açılır.
+
+Önceki sürümler korunur. SHA256SUMS ve BUILD-RECEIPT.json tam paket özetlerini ve doğrulanan kaynak commit'ini taşır. Mac Intel/Apple Silicon universal paket yalnız ad-hoc imzalıdır; Developer ID/noter yok. Windows Authenticode yok. iPhone web/PWA ile oynanır; yerel App Store/TestFlight sahibin Apple imzasını bekler. Fiziksel Poco, Xbox/PS ve iPhone testleri bu ortamda yapılmadı.

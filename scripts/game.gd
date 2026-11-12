@@ -10,15 +10,15 @@ const ACTION_SHEET = preload("res://assets/companion-actions.png")
 const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
-const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3}
-const GAME_VERSION = "0.15.1"
+const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4}
+const GAME_VERSION = "0.16.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
 const REGISTRATION = preload("res://assets/SPRITE-REGISTRATION.json")
 const NORMAL_HEIGHT := 90.0
 const FOLLOWER_RATIO := 0.72
-const FRIENDS := ["aion", "owl", "wolf", "sheep"]
+const FRIENDS := ["aion", "owl", "wolf", "sheep", "rabbit"]
 const COLORS := [Color("f4a7cd"), Color("ffca84"), Color("b8baf0"), Color("b8ebd3")]
 var interface_options := preload("res://scripts/interface_options.gd").new()
 var native_diagnostics := preload("res://scripts/native_diagnostics.gd").new()
@@ -31,6 +31,7 @@ var scene_w := 1152.0
 var scene_h := 648.0
 var scene_zoom := 1.0
 var touch_mode := false
+var landscape := preload("res://scripts/landscape_view.gd").new()
 var frames := preload("res://scripts/frame_bank.gd").new()
 var world := World.new()
 var language := "en"
@@ -602,8 +603,6 @@ func character_portrait(id: String) -> TextureRect:
 	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var atlas := AtlasTexture.new()
-	atlas.atlas = SHEET if id == "aion" else RUNNER_SHEETS[id]
-	atlas.region = Rect2(0, 0, 209, 157) if id == "aion" else runner_region(id, 1, 0)
 	picture.texture = frames.pose("runner-"+id,1,0).texture
 	if id != "aion":
 		var mat := ShaderMaterial.new()
@@ -1086,7 +1085,8 @@ func handle_event(value: String) -> void:
 		notice = text(value)
 		notice_time = 1.0 if value != "biome" else 2.2
 		if value == "gem":
-			burst(Vector2(World.PLAYER_X, ground + world.y - 35), Color("9cffe0"), 12)
+			notice = text("fruit_"+world.orchard.last_kind)+"  +25"
+			burst(Vector2(World.PLAYER_X, ground + world.y - 35), Color("ffcf8c"), 8)
 			tone(1080, 0.1)
 		elif value == "biome": tone(740, 0.18)
 		elif world.combo % 5 == 0: tone(840, 0.1)
@@ -1259,6 +1259,8 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-projectiles",JSON.stringify(world.frontier.projectiles))
 	canvas.setAttribute("data-plants",JSON.stringify(world.frontier.plants))
 	canvas.setAttribute("data-biome",str(world.biome()))
+	canvas.setAttribute("data-fruits",JSON.stringify(world.pickups))
+	canvas.setAttribute("data-fruit-count",str(world.gems))
 	canvas.setAttribute("data-xp",str(world.adventure.run_xp))
 	canvas.setAttribute("data-lightning-charges",str(world.adventure.lightning_charges))
 	canvas.setAttribute("data-travel-distance",str(world.travel_distance()))
@@ -1410,7 +1412,7 @@ func update_friend() -> void:
 		friend_combat = -1
 		if world.state == "running":
 			if a.attack_time > 0.0: friend_combat = COMBAT_ROWS[character]
-			elif a.ducking(world): friend_combat = COMBAT_ROWS[character] + 4
+			elif a.ducking(world): friend_combat = COMBAT_ROWS[character] + FRIENDS.size()
 	friend_sprite.visible = true
 	gun_echo.visible = false
 	for item in followers: item.visible = false
@@ -1466,11 +1468,11 @@ func update_friend() -> void:
 	var anchor_x := ((view_w*.5-92)/scene_zoom+World.PLAYER_X) if portrait else view_w*.73
 	place_companion(friend_sprite, character, friend_row, friend_frame, Vector2(anchor_x if preview else World.PLAYER_X, ground + world.y), 0.62 * (1.65 if preview else visual_size), friend_action)
 	if friend_combat >= 0:
-		var pose_spec := combat_pose(character,friend_combat >= 4 or a.ducking(world))
+		var pose_spec := combat_pose(character,friend_combat >= FRIENDS.size() or a.ducking(world))
 		var combat_count := frames.count(pose_spec.key,pose_spec.row)
-		var combat_frame: int = (contact_frame(combat_count) if friend_combat < 4 else a.roll_frame(combat_count)) if motion else combat_count/2
+		var combat_frame: int = (contact_frame(combat_count) if friend_combat < FRIENDS.size() else a.roll_frame(combat_count)) if motion else combat_count/2
 		var combat_anchor := Vector2(World.PLAYER_X,ground+world.y)+combat_lunge()
-		place_combat(friend_sprite, character, friend_combat, combat_frame, combat_anchor, visual_size, friend_combat >= 4 or a.ducking(world))
+		place_combat(friend_sprite, character, friend_combat, combat_frame, combat_anchor, visual_size, friend_combat >= FRIENDS.size() or a.ducking(world))
 	if world.state in ["running","paused"] and world.frontier.active() and not a.ducking(world) and world.frontier.phase != "return" and (world.frontier.phase != "intro" or world.frontier.stage_time > 0.75):
 		var firing: bool = world.frontier.shot_flash>0
 		var key := "gun-fire" if firing else "gun-run"
@@ -1541,6 +1543,7 @@ func flight_frame(velocity: float, air_time: float, frame_count: int = 12) -> in
 	return clampi(int(phase*(frame_count-1)),0,frame_count-2)
 
 func place_companion(item: Sprite2D, id: String, row: int, frame: int, anchor: Vector2, scale_value: float = 0.62, action: bool = false) -> void:
+	if id=="rabbit":action=false
 	var key := "actions" if action else "runner-"+id
 	var actual_row: int = int(ACTION_DATA.data.characters[id].row) if action else row
 	frames.place(item,key,actual_row,frame,anchor,scale_value/0.62)
@@ -1608,12 +1611,13 @@ func _draw() -> void:
 		var factor := 76.0/float(tex.get_width())
 		draw_texture_rect(tex,Rect2(Vector2(o.x-38,ground+3-tex.get_height()*factor).round(),tex.get_size()*factor),false)
 	for pickup in world.pickups:
-		var point := Vector2(pickup.x, ground + pickup.y)
-		var bob := sin(animation_clock() * 4.0 + pickup.x * 0.01) * 4.0
-		point.y += bob
-		var diamond := PackedVector2Array([point + Vector2(0, -12), point + Vector2(9, 0), point + Vector2(0, 12), point + Vector2(-9, 0)])
-		draw_colored_polygon(diamond, Color("8befd1"))
-		draw_line(point + Vector2(0, -8), point + Vector2(-5, 0), Color("e0fff0"), 3)
+		var kind: int=maxi(0,world.orchard.KINDS.find(str(pickup.get("kind","apple"))))
+		var pose: Dictionary=frames.pose("fruits",kind/4,kind%4)
+		var spec: Dictionary=frames.ORCHARD.data.atlas.frames[kind/4][kind%4]
+		var factor: float=spec.display_scale
+		var bob: float=sin(animation_clock()*3.5+float(pickup.get("id",0)))*2.0 if decorative_motion() else 0.0
+		var point:=Vector2(pickup.x,ground+pickup.y+bob)
+		draw_texture_rect(pose.texture,Rect2((point+pose.offset*factor).round(),pose.texture.get_size()*factor),false)
 	# Soft pixel shadow remains on the floor while the character jumps.
 	draw_rect(Rect2(World.PLAYER_X - 35, ground - 2, 70, 5), Color(0.02, 0.04, 0.09, 0.4))
 	if character == "sheep":
@@ -1655,69 +1659,11 @@ func draw_scenery() -> void:
 	for i in 48:
 		var fraction := float(i)/48.0
 		draw_rect(Rect2(0,fraction*ground,scene_w,ground/48.0+1),top.lerp(bottom,fraction))
-	for i in 45:
-		var x := fposmod(float(i*173+51)-scroll*0.018,scene_w)
-		var y := 151.0+fposmod(float(i*67),maxf(60,ground-280))
-		draw_rect(Rect2(roundf(x),roundf(y),2 if i%4 else 4,2 if i%4 else 4),Color(0.85,0.91,1.0,night*(0.32+0.5*float(i%3)/2.0)))
-	var moon := Vector2(scene_w*0.77,224)
-	draw_rect(Rect2(moon-Vector2(26,30),Vector2(52,60)),Color("f5dfbc").lerp(Color("f3ba89"),1-night))
-	draw_rect(Rect2(moon-Vector2(33,19),Vector2(66,38)),Color("f5dfbc").lerp(Color("f3ba89"),1-night))
-	for layer in 3:
-		var base := ground-14.0+float(layer)*6
-		var spacing := 235.0+float(layer)*95
-		var offset := fposmod(scroll*(0.08+float(layer)*0.09),spacing)
-		for i in range(-1,int(scene_w/spacing)+2):
-			var x := float(i)*spacing-offset
-			var height := 100.0+float((i+22)%3)*31-float(layer)*19
-			var color := Color("6d5266").lerp(Color("25304f"),night).lerp(Color("355774"),weights[1]).lerp(Color("234b43"),weights[2]).lerp(Color("353958"),weights[3]).lerp(Color("345149"),weights[4]).lerp(Color("623c4a"),weights[5]).darkened(float(layer)*0.15)
-			var points := PackedVector2Array([Vector2(x,base),Vector2(x,base-29),Vector2(x+35,base-29),Vector2(x+35,base-height*0.55),Vector2(x+62,base-height*0.55),Vector2(x+62,base-height),Vector2(x+123,base-height),Vector2(x+123,base-height*0.72),Vector2(x+161,base-height*0.72),Vector2(x+161,base-height*0.35),Vector2(x+spacing,base-height*0.35),Vector2(x+spacing,base)])
-			draw_colored_polygon(points,color)
-			if weights[1] > 0 and layer<2: draw_rect(Rect2(x+62,base-height,61,8),Color(0.75,0.85,0.9,float(weights[1])*0.65))
-			if weights[3] > 0:
-				for row in 3:
-					for col in 3: draw_rect(Rect2(x+68+col*15,base-height+15+row*19,6,9),Color(0.92,0.74,0.48,float(weights[3])*(0.35+night*0.35)))
+	var previous: int=posmod(biome-1,World.BIOME_NAMES.size())
+	if blend<1.0:landscape.panorama(self,previous,scroll,night)
+	landscape.panorama(self,biome,scroll,night,blend)
 	evolution_view.draw_scene(self,true)
-	for kind in World.BIOME_NAMES.size():
-		var alpha: float = weights[kind]
-		if alpha <= 0: continue
-		for i in range(-1,int(scene_w/275)+2):
-			var x := float(i)*275-fposmod(scroll*0.55,275)
-			var c := Color("263b48")
-			c.a = alpha
-			match kind:
-				0:
-					draw_rect(Rect2(x+26,ground-71,14,71),c)
-					draw_rect(Rect2(x+3,ground-51,37,10),c)
-					draw_rect(Rect2(x+3,ground-68,10,23),c)
-					draw_rect(Rect2(x+32,ground-38,34,10),c)
-					draw_rect(Rect2(x+56,ground-59,10,29),c)
-				1:
-					draw_rect(Rect2(x+30,ground-75,8,75),c)
-					for j in 3:
-						draw_rect(Rect2(x+18-j*9,ground-85+j*19,32+j*18,21),c)
-						draw_rect(Rect2(x+18-j*9,ground-85+j*19,32+j*18,4),Color(0.72,0.83,0.88,alpha))
-				2:
-					draw_rect(Rect2(x+40,ground-128,13,128),Color(0.18,0.29,0.24,alpha))
-					for j in 4:
-						var leaf := Vector2(x+12+j*20,ground-135+absf(j-1.5)*10)
-						draw_rect(Rect2(leaf,Vector2(55,24)),Color(0.18,0.38,0.27,alpha))
-						draw_line(leaf+Vector2(12,19),leaf+Vector2(12,75+sin(time+j)*7),Color(0.32,0.49,0.33,alpha),3)
-					draw_rect(Rect2(x+80,ground-8,125,5),Color(0.4,0.7,0.58,alpha*0.4))
-					for j in 4: draw_rect(Rect2(x+80+j*33,ground-46-sin(time*0.8+j)*12,3,3),Color(0.85,0.94,0.46,alpha*0.65))
-				3:
-					draw_rect(Rect2(x+16,ground-145,86,145),Color(0.16,0.19,0.29,alpha))
-					draw_rect(Rect2(x+12,ground-150,94,6),Color(0.46,0.48,0.58,alpha))
-					for j in 4:
-						for k in 3: draw_rect(Rect2(x+27+k*24,ground-130+j*28,10,15),Color(0.92,0.73,0.47,alpha*(0.5+night*0.35)))
-					draw_rect(Rect2(x+145,ground-106,5,106),c)
-					draw_rect(Rect2(x+130,ground-110,35,7),Color(0.98,0.82,0.5,alpha))
-				4:
-					draw_rect(Rect2(x+43,ground-162,19,162),Color(0.20,0.29,0.25,alpha))
-					for crown in [Rect2(x-5,ground-156,113,30),Rect2(x+6,ground-184,92,32),Rect2(x+29,ground-207,48,26)]: draw_rect(crown,Color(0.25,0.43,0.34,alpha))
-					for leaf in 5: draw_rect(Rect2(x+leaf*23,ground-12,16,5),Color(0.67,0.66,0.37,alpha))
-				5:
-					draw_colored_polygon(PackedVector2Array([Vector2(x,ground),Vector2(x+22,ground-42),Vector2(x+22,ground-66),Vector2(x+50,ground-66),Vector2(x+66,ground-105),Vector2(x+83,ground-66),Vector2(x+111,ground-66),Vector2(x+146,ground)]),Color(0.27,0.19,0.27,alpha))
-					for crack in 3: draw_rect(Rect2(x+48+crack*10,ground-68+crack*19,7,19),Color(0.96,0.48,0.31,alpha*0.65))
+	landscape.foreground(self,scroll,night)
 	draw_rect(Rect2(0,ground,scene_w,scene_h-ground),floor_color)
 	draw_rect(Rect2(0,ground,scene_w,4),edge_color)
 	draw_rect(Rect2(0,ground+4,scene_w,10),floor_color.lightened(0.22))

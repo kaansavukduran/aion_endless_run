@@ -20,7 +20,7 @@ with sync_playwright() as pw:
   def touch_name(name):
    point=page.locator('canvas').evaluate('''(c,name)=>{const d=c.dataset,b=JSON.parse(d.ui).find(b=>b.name===name),t=JSON.parse(d.screenTransform),r=c.getBoundingClientRect(),x=b.x+b.w/2,y=b.y+b.h/2;return [r.x+(t[0]*x+t[2]*y+t[4])/Number(d.rawWidth)*r.width,r.y+(t[1]*x+t[3]*y+t[5])/Number(d.rawHeight)*r.height]}''',name)
    page.touchscreen.tap(*point)
-  page.goto(a.url);wait('[data-version="0.15.1"][data-state="ready"][data-ui-ready="true"]');check(data()['language']=='az',shape+': Azerbaijani browser locale is selected on a fresh profile')
+  page.goto(a.url);wait('[data-version="0.16.0"][data-state="ready"][data-ui-ready="true"]');check(data()['language']=='az',shape+': Azerbaijani browser locale is selected on a fresh profile')
   for lang in names:
    touch_name('LanguageMenu');wait('[data-language-picker="true"]')
    semantic(lang.upper()+'  '+names[lang]);wait('[lang="'+lang+'"][data-ui-ready="true"]')

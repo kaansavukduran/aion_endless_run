@@ -7,10 +7,25 @@ const ENCOUNTERS = preload("res://assets/ENCOUNTERS-PROVENANCE.json")
 const CANONICAL = preload("res://assets/CANONICAL-PROVENANCE.json")
 const AGILITY = preload("res://assets/AGILITY-PROVENANCE.json")
 const CREATURES = preload("res://assets/CREATURES-PROVENANCE.json")
+const EMRE = preload("res://assets/EMRE-PROVENANCE.json")
+const ORCHARD = preload("res://assets/ORCHARD-PROVENANCE.json")
 var images := {}
 var frames := {}
 
 func descriptor(key: String,row: int) -> Dictionary:
+	if key=="fruits":return {"key":key,"row":row,"data":ORCHARD.data.atlas}
+	if EMRE.data.atlases.has(key):return {"key":key,"row":row,"data":EMRE.data.atlases[key]}
+	var emre_row := -1
+	var emre_key := "emre-movement"
+	if key=="runner-rabbit":
+		emre_row=[0,1,2,3,4,5,2,2][clampi(row,0,7)]
+		if row in [3,4,5]:emre_key="emre-encounters"
+	elif key=="rolls" and row==4:emre_row=5
+	elif key=="strikes" and row in [8,9]:emre_row=3+row-8
+	elif key in ["gun-run","gun-fire","heroes"] and row==4:
+		emre_key="emre-encounters";emre_row=0 if key=="gun-run" else 1
+	elif key=="deaths" and row in [8,9]:emre_key="emre-encounters";emre_row=2
+	if emre_row>=0:return {"key":emre_key,"row":emre_row,"data":EMRE.data.atlases[emre_key]}
 	if key=="creatures":return {"key":key,"row":row,"data":CREATURES.data.atlas}
 	if AGILITY.data.aliases.has(key) and AGILITY.data.aliases[key][row] != null:
 		var alias: Dictionary = AGILITY.data.aliases[key][row]

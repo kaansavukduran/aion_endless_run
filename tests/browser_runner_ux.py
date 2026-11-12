@@ -32,10 +32,10 @@ with sync_playwright() as pw:
   wait(page,'[data-state="ready"]')
  c,page=context((1152,648))
  check(page.locator('#status').count()==0,'Branded loader really hands off to the playable main menu')
- for hero in ['aion','owl','wolf','sheep']:
+ for hero in ['aion','owl','wolf','sheep','rabbit']:
   ui(page,name='StartSelect_'+hero);page.keyboard.press('Space');wait(page,'[data-state="running"]')
   page.evaluate('''()=>{window.poses={};new MutationObserver(()=>{const d=document.querySelector('canvas').dataset;if(d.state==='running'&&d.spriteRow==='1'&&d.attacking==='false'&&d.airborne==='false')poses[d.sourceFrame]=[Number(d.gazeX),Number(d.visualX),d.poseSource]}).observe(document.querySelector('canvas'),{attributes:true})}''')
-  expected=8 if hero=='wolf' else 7
+  expected=12 if hero=='rabbit' else (8 if hero=='wolf' else 7)
   page.wait_for_function('(n)=>Object.keys(poses).length===n',arg=expected)
   poses=page.evaluate('poses');samples[hero]=poses
   check(max(v[0] for v in poses.values())-min(v[0] for v in poses.values())<.01,f'{hero}: actual complete run loop keeps the anatomically reviewed gaze horizontally fixed')
