@@ -147,5 +147,16 @@
   "initial_browser_retry": "An initial 5-second glide sample timed out with several software renderers active. Unchanged assertions passed on the final rerun after icon draw caching. Exact contribution of concurrency was not isolated.",
   "native_and_production": "Pending actual CI and production checks; no success claimed yet.",
   "recorded_at": "2026-11-13T01:41:45.448633+03:00",
-  "timezone": "Europe/Istanbul"
+  "timezone": "Europe/Istanbul",
+  "android_package": {
+    "version": "0.15.1",
+    "name": "AionEndlessRun-0.15.1-android-arm64-x64.apk",
+    "sha256": "3251ffcfb2dd54b2a4f62808115f81ee9d5e7f52f3da604c01f6b6e52579b926",
+    "bytes": 129715684,
+    "version_code": 18,
+    "signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+    "application_source_commit": "cfb1ca9bfd43be0eb773f12657935897eec7357d",
+    "provenance_note": "Stable-signed APK exported locally from this application commit. Later commits only record package metadata and delivery evidence; gameplay, scenes, resources and project settings match this commit."
+  },
+  "application_commit": "cfb1ca9bfd43be0eb773f12657935897eec7357d"
 }

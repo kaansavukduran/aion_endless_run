@@ -1,0 +1,37 @@
+{
+  "checks": [
+    "Real gamepad attacks earn visible run XP on spawned enemies",
+    "A collected lightning charge is fired with a normal RB edge",
+    "Normal travel reaches both forest and volcanic biomes",
+    "At least five ordinary enemy types appear in unseeded real encounters",
+    "All three new buffs are collected through normal play",
+    "No JavaScript or Godot script errors during varied normal play"
+  ],
+  "enemy_types": [
+    "bat",
+    "beetle",
+    "crow",
+    "gnome",
+    "slime",
+    "wisp"
+  ],
+  "biomes": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "buffs": [
+    "fortune",
+    "frost",
+    "haste",
+    "magnet",
+    "shield",
+    "slow",
+    "spring"
+  ],
+  "bolt_seen": true,
+  "max_xp": 160
+}
