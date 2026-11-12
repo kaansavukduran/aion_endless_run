@@ -44,8 +44,9 @@ with sync_playwright() as pw:
   if hero=='aion':
    page.keyboard.press('Space');wait(page,'[data-airborne="true"]');page.keyboard.press('Space');wait(page,'[data-jumps="2"]');check(True,'Aion still double jumps with the repaired frames')
   if hero=='owl':
+   menu(page);page.keyboard.press('Space');wait(page,'[data-state="running"]')
    page.keyboard.down('Space');wait(page,'[data-gliding="true"]');page.evaluate("window.glide=[];new MutationObserver(()=>{const d=document.querySelector('canvas').dataset;if(d.gliding==='true'&&d.attacking==='false')glide.push(Number(d.gazeX))}).observe(document.querySelector('canvas'),{attributes:true})")
-   page.wait_for_timeout(700);xs=page.evaluate('glide');check(len(xs)>12 and max(xs)-min(xs)<.01,'Owl glides through actual frames without lateral sway');page.screenshot(path=str(a.evidence/'owl-glide.png'));page.keyboard.up('Space')
+   page.wait_for_function('glide.length>12',timeout=5000);xs=page.evaluate('glide');print('OWL_GLIDE_SAMPLES',len(xs),min(xs),max(xs),flush=True);check(len(xs)>12 and max(xs)-min(xs)<.01,'Owl glides through actual frames without lateral sway');page.screenshot(path=str(a.evidence/'owl-glide.png'));page.keyboard.up('Space')
   if hero=='wolf':
    page.keyboard.down('Shift');wait(page,'[data-boosting="true"][data-pose-source="agility-wolf"]');page.keyboard.press('j');wait(page,'[data-attack-kind="sprint-bite"]');check(True,'Wolf retains its four-legged sprint and separate sprint bite');page.keyboard.up('Shift')
   menu(page)
@@ -70,6 +71,10 @@ with sync_playwright() as pw:
   check(int(d(page)['swingId'])==before+1,f'{name}: holding the attack circle gives exactly one strike')
   touch(0,kind='end');touch(0,attack);wait(page,'[data-attacking="true"]');check(int(d(page)['swingId'])==before+2,f'{name}: release and tap gives the alternating strike')
   touch(0,kind='cancel');page.wait_for_timeout(30);check(d(page)['touchFingers']=='0',f'{name}: touch cancellation releases all fingers')
+  # Each independent input scenario starts through the real menus; idle
+  # screenshot/protocol time must not turn an input test into hazard survival.
+  if d(page)['state'] not in ['running','paused']:wait(page,'[data-page="finished"]')
+  menu(page);ui(page,text='Koşuya başla',touch=True);wait(page,'[data-state="running"]')
   touch(0,button(page,'jump'));touch(1,button(page,'attack'));wait(page,'[data-airborne="true"]');check(d(page)['jumpHeld']=='true',f'{name}: jump can stay held while another finger attacks');touch(0,kind='cancel')
   old=d(page);new_size={'width':873,'height':393} if name=='portrait' else {'width':393,'height':873};page.set_viewport_size(new_size);wait(page,'[data-orientation="'+('landscape' if name=='portrait' else 'portrait')+'"][data-ui-ready="true"]');new=d(page)
   check(new['character']==old['character'] and int(new['score'])>=int(old['score']) and new['state']=='running',f'{name}: rotating mid-run keeps the character, score and running state')

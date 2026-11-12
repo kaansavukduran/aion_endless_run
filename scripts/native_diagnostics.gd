@@ -1,0 +1,24 @@
+class_name RunnerNativeDiagnostics
+extends RefCounted
+# Passive local Android diagnostics. No network, player identity or setters.
+var host
+var stamp := ""
+func point(rect: Rect2) -> Array:
+	var p: Vector2=host.screen_transform*rect.get_center()
+	var raw: Vector2=host.layout_size
+	var physical:=p/raw*Vector2(DisplayServer.window_get_size())+Vector2(DisplayServer.window_get_position())
+	return [roundi(physical.x),roundi(physical.y)]
+func layout() -> void:
+	if not OS.has_feature("android"):return
+	var buttons:=[];var actions:={}
+	for control in host.ui.find_children("*","BaseButton",true,false):
+		if control.is_visible_in_tree():buttons.append({"name":str(control.name),"text":control.text,"point":point(control.get_global_rect())})
+	for id in host.action_buttons:
+		var control=host.action_buttons[id]
+		if control.is_visible_in_tree():actions[id]=point(control.get_global_rect())
+	print("AION_UI "+JSON.stringify({"page":host.page,"character":host.character,"orientation":"portrait" if host.portrait else "landscape","score":host.world.score,"level":host.world.adventure.level,"buttons":buttons,"actions":actions}))
+func state() -> void:
+	if not OS.has_feature("android"):return
+	var w=host.world
+	var payload:=JSON.stringify({"page":host.page,"character":host.character,"state":w.state,"airborne":w.y<0,"gliding":w.gliding,"attacking":w.adventure.attack_time>0,"rolling":w.adventure.ducking(w)})
+	if stamp!=payload:stamp=payload;print("AION_STATE "+payload)

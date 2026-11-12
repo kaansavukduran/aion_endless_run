@@ -7,7 +7,7 @@ class ExportContract(unittest.TestCase):
  def setUp(self):
   self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name);(self.root/'build/web').mkdir(parents=True);(self.root/'packaging').mkdir();self.out=self.root/'build/web'
   (self.root/'project.godot').write_text('config/version="0.12.0"')
-  for name in ['web_update.js','web_worker.js','web_boot.js','web_splash.html']:shutil.copy2(ROOT/'packaging'/name,self.root/'packaging'/name)
+  for name in ['web_update.js','web_worker.js','web_boot.js','web_splash.html','web_accessibility.js']:shutil.copy2(ROOT/'packaging'/name,self.root/'packaging'/name)
   (self.root/'assets').mkdir()
   for name in ['fragaria-strawberry.png','PixelifySans.ttf']:(self.root/'assets'/name).write_bytes(b'brand fixture')
   for name,data in [('index.js',b'engine'),('index.wasm',b'\0asm\1\0\0\0'),('index.pck',b'GDPC'+bytes(60))]:(self.out/name).write_bytes(data)

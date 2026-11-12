@@ -43,6 +43,7 @@ jobs:
           timeout 90 godot --headless --script tests/test_agility.gd
           timeout 90 godot --headless --script tests/test_runner_ux.gd
           timeout 90 godot --headless --script tests/test_boss_hud.gd
+          timeout 90 godot --headless --script tests/test_aionia.gd
   desktop:
     if: github.event_name != 'workflow_dispatch' || inputs.android_only != true
     needs: test
@@ -81,11 +82,11 @@ jobs:
           chmod +x /tmp/appimagetool
           sudo cp /tmp/appimagetool /usr/local/bin/appimagetool
           bash packaging/linux.sh
-          tar -czf build/AionEndlessRun-0.13.1-web-offline.tar.gz -C build/web .
-          timeout 15 build/linux/AionEndlessRun.x86_64 --headless --quit-after 5
-          sudo apt-get install -y ./build/AionEndlessRun-0.13.1-linux-x64.deb
-          timeout 15 /usr/games/AionEndlessRun --headless --quit-after 5
-          APPIMAGE_EXTRACT_AND_RUN=1 timeout 20 build/AionEndlessRun-0.13.1-linux-x64.AppImage --headless --quit-after 5
+          tar -czf build/AionEndlessRun-0.14.0-web-offline.tar.gz -C build/web .
+          timeout 15 build/linux/AionEndlessRun.x86_64 --headless -- --aion-smoke-test
+          sudo apt-get install -y ./build/AionEndlessRun-0.14.0-linux-x64.deb
+          timeout 15 /usr/games/AionEndlessRun --headless -- --aion-smoke-test
+          APPIMAGE_EXTRACT_AND_RUN=1 timeout 20 build/AionEndlessRun-0.14.0-linux-x64.AppImage --headless -- --aion-smoke-test
       - name: Windows installer and portable
         if: runner.os == 'Windows'
         shell: pwsh
@@ -94,30 +95,30 @@ jobs:
           $exportProcess = Start-Process -FilePath (Get-Command godot).Source -ArgumentList '--headless','--export-release','Windows' -Wait -PassThru -NoNewWindow
           if ($exportProcess.ExitCode -ne 0) { exit $exportProcess.ExitCode }
           Copy-Item LICENSE,THIRD_PARTY_NOTICES.md,README.md build/windows/
-          Compress-Archive -Path build/windows/* -DestinationPath build/AionEndlessRun-0.13.1-windows-x64-portable.zip
+          Compress-Archive -Path build/windows/* -DestinationPath build/AionEndlessRun-0.14.0-windows-x64-portable.zip
           if (!(Test-Path 'C:\Program Files (x86)\NSIS\makensis.exe')) { choco install nsis -y --no-progress }
           & 'C:\Program Files (x86)\NSIS\makensis.exe' packaging/windows.nsi
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $gameProcess = Start-Process -FilePath build/windows/AionEndlessRun.exe -ArgumentList '--headless','--quit-after','5' -Wait -PassThru
+          $gameProcess = Start-Process -FilePath build/windows/AionEndlessRun.exe -ArgumentList '--headless','--','--aion-smoke-test' -Wait -PassThru
           if ($gameProcess.ExitCode -ne 0) { exit $gameProcess.ExitCode }
-          $installProcess = Start-Process -FilePath build/AionEndlessRun-0.13.1-windows-x64-Setup.exe -ArgumentList '/S' -Wait -PassThru
+          $installProcess = Start-Process -FilePath build/AionEndlessRun-0.14.0-windows-x64-Setup.exe -ArgumentList '/S' -Wait -PassThru
           if ($installProcess.ExitCode -ne 0) { exit $installProcess.ExitCode }
           $installedGame = Join-Path $env:LOCALAPPDATA 'Programs/Aion Endless Run/AionEndlessRun.exe'
           if (!(Test-Path $installedGame)) { throw 'Installer did not create game executable' }
-          $installedProcess = Start-Process -FilePath $installedGame -ArgumentList '--headless','--quit-after','5' -Wait -PassThru
+          $installedProcess = Start-Process -FilePath $installedGame -ArgumentList '--headless','--','--aion-smoke-test' -Wait -PassThru
           if ($installedProcess.ExitCode -ne 0) { exit $installedProcess.ExitCode }
       - name: macOS universal app and DMG
         if: runner.os == 'macOS'
         run: |
           mkdir -p build/macos
           godot --headless --export-release macOS
-          mv build/macos/AionEndlessRun.zip build/AionEndlessRun-0.13.1-macos-universal-portable.zip
-          ditto -xk build/AionEndlessRun-0.13.1-macos-universal-portable.zip build/dmg
+          mv build/macos/AionEndlessRun.zip build/AionEndlessRun-0.14.0-macos-universal-portable.zip
+          ditto -xk build/AionEndlessRun-0.14.0-macos-universal-portable.zip build/dmg
           cp LICENSE THIRD_PARTY_NOTICES.md build/dmg/
           ln -s /Applications build/dmg/Applications
-          python3 packaging/macos_dmg.py build/dmg build/AionEndlessRun-0.13.1-macos-universal.dmg
+          python3 packaging/macos_dmg.py build/dmg build/AionEndlessRun-0.14.0-macos-universal.dmg
           find build/dmg -path '*/Contents/MacOS/*' -type f -exec chmod +x {} \;
-          find build/dmg -path '*/Contents/MacOS/*' -type f -exec {} --headless --quit-after 5 \;
+          find build/dmg -path '*/Contents/MacOS/*' -type f -exec {} --headless -- --aion-smoke-test \;
       - uses: actions/upload-artifact@v4
         with:
           name: desktop-${{ runner.os }}
@@ -169,25 +170,7 @@ jobs:
             adb shell svc data disable
             adb logcat -c
             adb shell am start -W -n com.kaansavukduran.aionendlessrun/com.godot.game.GodotAppLauncher
-            sleep 8
-            adb shell pidof com.kaansavukduran.aionendlessrun
-            adb exec-out screencap -p > build/android-first-launch.png
-            adb shell input tap 1040 600
-            sleep 1
-            adb shell input keyevent 62
-            sleep 1
-            adb shell input keyevent 62
-            sleep 1
-            adb shell input keyevent 111
-            adb exec-out screencap -p > build/android-paused.png
-            adb shell input keyevent 111
-            adb shell input swipe 1200 1000 1200 1000 2200 >/tmp/aion-touch.log 2>&1 & gesture=$!; sleep 1; adb exec-out screencap -p > build/android-owl-glide.png; wait "$gesture"
-            adb shell am force-stop com.kaansavukduran.aionendlessrun
-            adb shell am start -W -n com.kaansavukduran.aionendlessrun/com.godot.game.GodotAppLauncher
-            sleep 4
-            adb shell input keyevent 62
-            adb shell input swipe 2055 1322 2055 1322 1200 >/tmp/aion-attack.log 2>&1 & attack=$!; sleep 0.7; adb exec-out screencap -p > build/android-melee.png; wait "$attack"
-            adb shell input swipe 2351 1322 2351 1322 1200 >/tmp/aion-duck.log 2>&1 & duck=$!; sleep 0.7; adb exec-out screencap -p > build/android-duck.png; wait "$duck"
+            python3 packaging/android_input_smoke.py --output build
             adb shell pidof com.kaansavukduran.aionendlessrun
             adb logcat -d > build/android-logcat.txt
             python3 packaging/check_android_log.py build/android-logcat.txt
@@ -199,6 +182,7 @@ jobs:
           path: |
             build/android-*.png
             build/android-logcat.txt
+            build/android-input-results.json
           if-no-files-found: warn
   android:
     if: github.event_name != 'pull_request' && vars.AION_ANDROID_SIGNING_READY == 'true'
@@ -230,7 +214,7 @@ jobs:
           mkdir -p build/android
           godot --headless --export-release Android
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose build/android/AionEndlessRun.apk
-          mv build/android/AionEndlessRun.apk build/AionEndlessRun-0.13.1-android-arm64-x64.apk
+          mv build/android/AionEndlessRun.apk build/AionEndlessRun-0.14.0-android-arm64-x64.apk
       - uses: actions/upload-artifact@v4
         with:
           name: android

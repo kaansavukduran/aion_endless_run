@@ -1,12 +1,14 @@
 # Aion Endless Run
 
-Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** Kargalara vur, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.13.1**.
+Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** Kargalara vur, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.14.0**.
 
-**[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Paket ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/evidence-v013/README.md)
+**[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA v1.4 uygulaması](AIONIA_STANDARD.md) · [Doğrulama](docs/AIONIA-QA.md)
 
-![Başlangıç ekranı ve özgün Aion](docs/evidence-v013/panels-final-landscape-en-main.png)
+![Başlangıç ekranı ve özgün Aion](docs/evidence-v014/screenshots/landscape-main.png)
 
 ## Oyna
+
+Telefon kontrolleri seçimin üzerine iki yana bölündü: solda Zıpla, sağda Vur/Takla; boss’ta Vur yerinde Ateş et. Ayarlardan eski sağ küme seçilebilir. Koyu/açık/sistem teması, sistem/pixel yazı ve büyütülmüş menü metni saklanır. Kol eylemleri yeniden atanabilir; titreşim varsayılan kapalıdır. [Kontroller](docs/CONTROLS.md).
 
 Başlangıç kartlarından karakterini seç; koşu sırasında karakter değişmez. İlk dil cihaz/tarayıcı dilidir; desteklenmeyen diller İngilizce açılır. **TR / EN / CS** menüsünden değiştirebilirsin; seçimin ve rekorun cihazda saklanır.
 

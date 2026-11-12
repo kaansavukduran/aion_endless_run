@@ -65,44 +65,63 @@ func hud() -> void:
 	h.footer_label=h.wrap_label(h.text("touch_hint") if h.touch_mode else h.text("hint"),18,"e6c8b0")
 	h.ui.add_child(h.footer_label)
 	h.position_control(h.footer_label,Vector2(18,h.view_h-84 if h.touch_mode else h.view_h-26),Vector2(h.view_w-420 if not h.portrait else 128,74 if h.touch_mode else 25))
+	if h.touch_mode and h.interface_options.touch_layout=="split":
+		var left: float=224 if h.character=="wolf" else 124
+		h.position_control(h.footer_label,Vector2(left,h.view_h-82),Vector2(h.view_w-left-218,76))
+		h.footer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	h.ability_label=h.wrap_label("",18,"eedbb6")
 	h.ui.add_child(h.ability_label)
 	h.position_control(h.ability_label,Vector2(18,h.view_h-162 if h.touch_mode else h.view_h-56),Vector2(210 if h.portrait else h.view_w-360,32))
 	h.boss_label=h.label("",21,"f4c68b")
 	h.ui.add_child(h.boss_label)
 	h.boss_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	h.position_control(h.boss_label,Vector2(18,205),Vector2(h.view_w-36,96 if h.portrait else 32))
+	h.position_control(h.boss_label,Vector2(18,205),Vector2(h.view_w-36,96 if h.portrait else 36))
 	h.boss_bar=ProgressBar.new()
 	h.boss_bar.show_percentage=false
 	h.boss_bar.add_theme_stylebox_override("background",h.box("302437","796176"))
 	h.boss_bar.add_theme_stylebox_override("fill",h.box("c75772","e7a497"))
 	h.ui.add_child(h.boss_bar)
-	h.position_control(h.boss_bar,Vector2(18,310 if h.portrait else 242),Vector2(h.view_w-36,12))
+	h.position_control(h.boss_bar,Vector2(18,310 if h.portrait else 246),Vector2(h.view_w-36,12))
 	h.notice_label=h.label("",23,"ffe0a3")
 	h.notice_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	h.ui.add_child(h.notice_label)
 	h.notice_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	h.position_control(h.notice_label,Vector2(12,338 if h.portrait else 268),Vector2(h.view_w-24,62 if h.portrait else 34))
+	h.position_control(h.notice_label,Vector2(12,338 if h.portrait else 272),Vector2(h.view_w-24,62 if h.portrait else 34))
+	if h.interface_options.text_scale>1.25:
+		band.size.y=122
+		stats.add_theme_constant_override("separation",20)
+		stats.get_child(1).hide()
+		stats.get_child(2).hide()
+		h.position_control(h.pause_button,Vector2(h.view_w-224,12),Vector2(208,96))
+		h.pause_button.add_theme_font_size_override("font_size",h.ui_size(24))
+		h.position_control(h.level_label,Vector2(18,136),Vector2(h.view_w-36,65))
+		h.position_control(h.level_progress,Vector2(18,204),Vector2(h.view_w-36,10))
+		h.position_control(h.boss_label,Vector2(18,228),Vector2(h.view_w-36,190))
+		h.position_control(h.boss_bar,Vector2(18,426),Vector2(h.view_w-36,12))
+		h.position_control(h.notice_label,Vector2(18,448),Vector2(h.view_w-36,96))
 	h.notice_label.clip_text=true
 
 func card(width: float) -> VBoxContainer:
 	var h=host
 	width=minf(width,h.view_w-40)
+	var enlarged: bool=h.interface_options.text_scale>1.25
+	if enlarged:width=h.view_w-40
 	var height: float=minf(h.view_h-120,410 if h.page!="main" else 340)
-	if h.page=="settings":height=h.view_h-110
-	if h.page=="main" and h.touch_mode and not h.portrait:height=292
+	if h.page=="settings" or enlarged:height=h.view_h-110
+	if h.page=="main" and h.touch_mode and not h.portrait and not enlarged:height=292
 	var panel:=PanelContainer.new()
 	panel.name="PagePanel"
 	h.menu_layer.add_child(panel)
 	var pos:=Vector2((h.view_w-width)*.5,maxf(82,(h.view_h-height)*.5))
 	if h.page=="main":pos=Vector2(28 if not h.portrait else (h.view_w-width)*.5,(56 if h.touch_mode else 94) if not h.portrait else stage_y()+26)
-	h.position_control(panel,pos,Vector2(width,height))
+	if enlarged:pos=Vector2(20,84)
+	h.position_control(panel,pos.floor(),Vector2(floorf(width),floorf(height)))
 	var column:=VBoxContainer.new()
 	column.add_theme_constant_override("separation",8)
 	column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	if h.page=="settings":
+	if h.page=="settings" or enlarged:
 		var scroll:=ScrollContainer.new()
-		scroll.name="SettingsScroll"
+		scroll.name="SettingsScroll" if h.page=="settings" else "AccessiblePageScroll"
 		scroll.follow_focus=true
 		scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 		scroll.custom_minimum_size=Vector2(width-28,height-28)
@@ -113,7 +132,8 @@ func card(width: float) -> VBoxContainer:
 
 func roster(parent: Control, at: Vector2, width: float, separate: bool=false) -> void:
 	var h=host
-	var columns:=2 if h.portrait or separate else 4
+	var enlarged: bool=h.interface_options.text_scale>1.25
+	var columns:=1 if enlarged and h.portrait else (2 if h.portrait or separate or enlarged else 4)
 	var grid:=GridContainer.new()
 	grid.columns=columns
 	grid.add_theme_constant_override("h_separation",10)
@@ -124,18 +144,21 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 	for id in h.FRIENDS:
 		var tile: Button=h.button("",func():h.select_character(id),id==h.character)
 		tile.name=("Select_" if separate else "StartSelect_")+id
-		tile.custom_minimum_size=Vector2(tile_w,104 if h.portrait or not h.touch_mode else 92)
+		tile.accessibility_name=h.character_name(id)+(" · "+h.text("setting_on") if id==h.character else "")
+		tile.custom_minimum_size=Vector2(tile_w,120 if h.portrait else (104 if not h.touch_mode else 92))
+		if enlarged:tile.custom_minimum_size.y=210
 		grid.add_child(tile)
 		var row:=HBoxContainer.new()
 		row.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tile.add_child(row)
 		row.position=Vector2(8,8)
-		row.size=Vector2(tile_w-16,88)
+		row.size=Vector2(tile_w-16,tile.custom_minimum_size.y-16)
 		row.add_theme_constant_override("separation",6)
 		var image: TextureRect=h.character_portrait(id)
 		image.custom_minimum_size=Vector2(54,78)
 		row.add_child(image)
 		var title: Label=h.wrap_label(("> " if id==h.character else "")+h.character_name(id),20,"fff1d5")
+		title.add_theme_color_override("font_color",h.interface_options.color("on_primary" if id==h.character else "text"))
 		title.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		title.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
@@ -146,16 +169,37 @@ func main(column: VBoxContainer) -> Button:
 	var record: Label=h.label(h.text("best")+"  %05d" % h.best,22,"f2d5a6")
 	h.menu_layer.add_child(record)
 	record.position=Vector2(28,18)
-	column.add_child(h.label("AION",48,"f8d9b1"))
-	column.add_child(h.label("ENDLESS RUN",24,"d999ad"))
+	var logo: Label=h.label("AION",48,"f8d9b1")
+	logo.add_theme_font_override("font",h.FONT)
+	column.add_child(logo)
+	var subtitle: Label=h.label("ENDLESS RUN",24,"d999ad")
+	column.add_child(subtitle)
 	var first: Button=h.button(h.text("play"),h.start_run,true)
+	first.name="StartRun"
 	column.add_child(first)
 	column.add_child(h.button(h.text("boss_training"),func():h.show_page("bosses")))
 	column.add_child(h.button(h.text("settings"),func():h.open_subpage("settings")))
-	var choose: Label=h.label(h.text("choose_before_run"),20,"ffe1b9")
+	if h.touch_mode and not h.portrait and h.interface_options.text_scale<=1.25:
+		logo.add_theme_font_size_override("font_size",32)
+		subtitle.add_theme_font_override("font",h.FONT)
+		subtitle.add_theme_font_size_override("font_size",20)
+		for item in column.get_children():
+			if item is Button:
+				item.custom_minimum_size.y=64
+				item.add_theme_font_size_override("font_size",26)
+	var choose: Label=h.wrap_label(h.text("choose_before_run"),20,"ffe1b9")
+	choose.name="StartChooser"
+	if h.interface_options.text_scale>1.25:
+		column.add_child(choose)
+		var roster_host:=Control.new()
+		roster_host.custom_minimum_size.y=880 if h.portrait else 440
+		column.add_child(roster_host)
+		roster(roster_host,Vector2.ZERO,h.view_w-68)
+		return first
 	h.menu_layer.add_child(choose)
-	var roster_y: float=h.view_h-246 if h.portrait else h.view_h-(120 if h.touch_mode else 154)
-	choose.position=Vector2(28,roster_y-32)
+	var roster_y: float=h.view_h-270 if h.portrait else h.view_h-(120 if h.touch_mode else 154)
+	choose.position=Vector2(28,roster_y-42)
+	choose.size=Vector2(h.view_w-56,36)
 	roster(h.menu_layer,Vector2(28,roster_y),h.view_w-56)
 	return first
 
@@ -164,7 +208,7 @@ func characters() -> void:
 	var column: VBoxContainer=card(760)
 	column.add_child(h.label(h.text("choose"),26))
 	var grid_host:=Control.new()
-	grid_host.custom_minimum_size.y=220
+	grid_host.custom_minimum_size.y=(880 if h.portrait else 440) if h.interface_options.text_scale>1.25 else (250 if h.portrait else 220)
 	column.add_child(grid_host)
 	roster(grid_host,Vector2.ZERO,minf(760,h.view_w-40)-28,true)
 	var back: Button=h.button(h.text("back"),func():h.show_page(h.return_page))
@@ -176,9 +220,18 @@ func tutorial() -> void:
 	var panel:=PanelContainer.new()
 	h.tutorial_panel=panel
 	h.ui.add_child(panel)
-	h.position_control(panel,Vector2(18 if h.portrait else h.view_w-350,200),Vector2(504 if h.portrait else 330,160))
+	h.position_control(panel,Vector2(18 if h.portrait else h.view_w-520,200 if h.portrait else 80),Vector2(504 if h.portrait else 500,160))
+	if h.interface_options.text_scale>1.25:
+		h.position_control(panel,Vector2(18,84),Vector2(h.view_w-36,floorf(h.view_h-124)))
 	var column:=VBoxContainer.new()
-	panel.add_child(column)
+	if h.interface_options.text_scale>1.25:
+		var scroll:=ScrollContainer.new()
+		scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+		scroll.follow_focus=true
+		scroll.custom_minimum_size=Vector2(h.view_w-64,floorf(h.view_h-148))
+		panel.add_child(scroll);scroll.add_child(column)
+		column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	else:panel.add_child(column)
 	column.add_child(h.wrap_label(h.text("touch_tutorial"),20))
 	var done: Button=h.button(h.text("touch_skip"),func():
 		h.touch_tutorial_done=true

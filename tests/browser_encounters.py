@@ -19,7 +19,7 @@ with sync_playwright() as pw:
   page.evaluate('i=>padButton(i,1)',i);page.wait_for_timeout(140);page.evaluate('i=>padButton(i,0)',i);page.wait_for_timeout(140)
  def click(name=None,text=None):
   wait('[data-ui-ready="true"]');v=d();b=next(b for b in json.loads(v['ui']) if (b['name']==name if name else text in b['text']));t=json.loads(v['screenTransform']);r=page.locator('canvas').bounding_box();x=b['x']+b['w']/2;y=b['y']+b['h']/2;page.mouse.click(r['x']+(t[0]*x+t[2]*y+t[4])/float(v['rawWidth'])*r['width'],r['y']+(t[1]*x+t[3]*y+t[5])/float(v['rawHeight'])*r['height'])
- page.goto(a.url);wait('[data-version="0.13.1"][data-state="ready"][data-ui-ready="true"]')
+ page.goto(a.url);wait('[data-version="0.14.0"][data-state="ready"][data-ui-ready="true"]')
  button(0);wait('[data-state="running"]');check(True,'Virtual Xbox A activates the actual focused Start action')
  button(9);wait('[data-page="paused"]');check(True,'Start opens Pause')
  button(13);button(2);wait('[data-page="main"]');check(True,'D-pad and X activate Main menu from Pause')
@@ -35,28 +35,51 @@ with sync_playwright() as pw:
  for kind in range(3):
   click(name='PracticeBoss_'+str(kind));wait('[data-boss-phase="fight"]');v=d();check(v['bossKind']==str(kind) and v['practice']=='true','Normal training UI starts distinct boss '+str(kind));check(json.loads(v['followerVisible'])==[True,True],'Both follower sheep remain rendered in boss '+str(kind))
   for attempt in range(3):
-   page.evaluate('padButton(7,1)');deadline=time.monotonic()+55;captured=False;patterns=set();phase_two=False;duck=False;jump=False
+   page.evaluate('''() => {
+    padButton(7,1);window.aionPilot=true;
+    const set=(i,v)=>{if(virtualPad.buttons[i].pressed!==v)padButton(i,v?1:0)};
+    const step=()=>{
+      if(!window.aionPilot){set(0,false);set(1,false);return;}
+      const v=document.querySelector('canvas').dataset;
+      const x=Number(v.playerX),ps=JSON.parse(v.projectiles||'[]').filter(p=>p.owner==='boss'&&p.x>x-50);
+      const high=ps.some(p=>p.kind==='bolt'&&p.x-x<330);
+      const low=ps.some(p=>['ember','seed'].includes(p.kind)&&0<(p.x-x)/Math.abs(p.vx)&&(p.x-x)/Math.abs(p.vx)<(v.bossPattern==='seeds'?.23:.35));
+      set(1,v.state==='running'&&high);set(0,v.state==='running'&&low&&v.airborne==='false');
+      requestAnimationFrame(step);
+    };requestAnimationFrame(step);
+   }''');deadline=time.monotonic()+55;captured=False;patterns=set();phase_two=False;duck=False;jump=False
    while time.monotonic()<deadline:
     v=d();phase=v['bossPhase']
     if phase in ['victory','run'] or v['page']=='bosses':break
     if v['state']!='running':
      print('Normal controller retry',kind,attempt,v['bossHp'],v['bossPlayerHp'],flush=True);break
     player=float(v['playerX']);ps=[q for q in json.loads(v['projectiles']) if q['owner']=='boss' and q['x']>player-50]
-    high=any(q['kind']=='bolt' and -50<q['x']-player<330 for q in ps)
-    low=any(q['kind'] in ['ember','seed'] and 0<(q['x']-player)/abs(q['vx'])<(.30 if v['bossPattern']=='seeds' else .40) for q in ps)
-    if high!=duck:page.evaluate('v=>padButton(1,v?1:0)',high);duck=high
-    need_jump=low and v['airborne']=='false'
-    if need_jump!=jump:page.evaluate('v=>padButton(0,v?1:0)',need_jump);jump=need_jump
     patterns.add(v['bossPattern']);phase_two=phase_two or int(v['bossHp'])<=int(v['bossMaxHp'])//2
     if not captured and int(v['bossHits'])>=5 and not ps:
      page.screenshot(path=str(a.evidence/('boss-'+str(kind)+'-three-sheep.png')));captured=True
     timeline.append({'boss':kind,'hp':v['bossHp'],'shots':v['bossShots'],'health':v['bossPlayerHp'],'pattern':v['bossPattern'],'followers':v['followerVisible']})
     page.wait_for_timeout(15)
-   page.evaluate('()=>[0,1,7].forEach(i=>padButton(i,0))')
+   page.evaluate('()=>{window.aionPilot=false;[0,1,7].forEach(i=>padButton(i,0))}')
    if int(d()['bossWins'])==1:break
    wait('[data-page="finished"]');button(0);wait('[data-boss-phase="fight"]')
   check(int(d()['bossWins'])==1,'Actual RT/R2 fire damages and defeats moving boss '+str(kind))
   check(len(patterns)>=3 and phase_two,'Boss '+str(kind)+' uses varied attacks and a half-health phase')
   wait('[data-page="bosses"]');check(d()['best']==start_best,'Training boss '+str(kind)+' preserves the actual saved record')
+ click(text='Ana menü');wait('[data-page="main"]');click(text='Ayarlar');wait('[data-page="settings"]')
+ import re
+ menu=page.locator('#aion-accessibility-controls')
+ menu.get_by_role('button',name=re.compile(r'^Zıpla\s+·')).press('Enter');wait('[data-pad-capturing="jump"]');button(3);wait('[data-pad-capturing=""]')
+ check(json.loads(d()['padBindings'])['jump']==3,'The actual remap UI captures virtual Y/triangle for Jump')
+ menu.get_by_role('button',name=re.compile('^‹')).press('Enter');wait('[data-page="main"]');button(0);wait('[data-state="running"]');button(3);wait('[data-airborne="true"]')
+ check('Y / △' in d()['footer'],'The rebound controller button really jumps and updates the visible prompt')
+ page.evaluate("padButton(3,1)");wait('[data-jump-held="true"]')
+ page.evaluate("()=>{virtualPad.connected=false;const e=new Event('gamepaddisconnected');Object.defineProperty(e,'gamepad',{value:virtualPad});window.dispatchEvent(e)}")
+ wait('[data-state="paused"]')
+ check(d()['jumpHeld']=='false' and d()['boosting']=='false','A real Gamepad API disconnect pauses and clears held actions')
+ page.evaluate("()=>{virtualPad.buttons.forEach((_,i)=>padButton(i,0));virtualPad.connected=true;const e=new Event('gamepadconnected');Object.defineProperty(e,'gamepad',{value:virtualPad});window.dispatchEvent(e)}")
+ page.wait_for_timeout(300);button(0);wait('[data-state="running"]');button(9);wait('[data-state="paused"]')
+ check(True,'The reconnected standard controller can resume and pause again')
+ page.wait_for_timeout(2200);page.reload();wait('[data-state="ready"][data-ui-ready="true"]')
+ check(json.loads(d()['padBindings'])['jump']==3,'The actual controller binding survives an engine/IndexedDB reload')
  check(not errors,'No uncaught browser or Godot errors in gamepad/boss flows');browser.close()
 (a.evidence/'encounter-results.json').write_text(json.dumps(results,ensure_ascii=False,indent=2)+'\n');(a.evidence/'boss-timeline.json').write_text(json.dumps(timeline,indent=2)+'\n');print(len(results),'encounter browser checks passed')

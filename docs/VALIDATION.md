@@ -1,3 +1,7 @@
+# 0.14.0 · Güncel doğrulama
+
+[AIONIA kapıları, sonuçlar ve sınırlar](AIONIA-QA.md); [2539 kaynak/sahne, 184 tarayıcı ve 5 paket testi kanıtı](evidence-v014/README.md). Aşağıdaki eski sürüm kayıtları tarihçe olarak korunur.
+
 # Verification
 
 ## 0.11.0 canonical identity and registration

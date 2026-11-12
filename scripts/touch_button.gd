@@ -5,6 +5,7 @@ var caption := ""
 var pressed := false
 var disabled := false
 var cooldown := 0.0
+var palette := {"pressed":"5b3d50","surface":"27212e","accent":"ffcf8c","border":"ad8d9f","text":"f5ebd9","muted":"cfbec4"}
 var font: Font
 func hit(point: Vector2) -> bool:
 	return visible and (point-get_global_rect().get_center()).length()<=size.x*.5
@@ -16,10 +17,10 @@ func _draw() -> void:
 	for i in 20:
 		var p:=center+Vector2.from_angle(float(i)*TAU/20.0)*radius
 		shape.append((p/3).round()*3)
-	draw_colored_polygon(shape,Color("564052") if pressed else Color("29202ee8"))
+	draw_colored_polygon(shape,Color(palette.pressed) if pressed else Color(palette.surface))
 	var outline:=shape.duplicate();outline.append(shape[0])
-	draw_polyline(outline,Color("f8d59e") if pressed else Color("b78b87"),4 if pressed else 2)
-	var ink:=Color("f5e2ba") if not disabled else Color("81717d")
+	draw_polyline(outline,Color(palette.accent) if pressed else Color(palette.border),4 if pressed else 2)
+	var ink:=Color(palette.text) if not disabled else Color(palette.muted)
 	var c:=center+Vector2(0,-8)
 	match action:
 		"jump":
@@ -48,6 +49,6 @@ func _draw() -> void:
 	if cooldown>0:
 		var p:=PackedVector2Array()
 		for i in 20:p.append(center+Vector2.from_angle(-PI/2+float(i)/19*TAU*cooldown)*(radius-7))
-		draw_polyline(p,Color("e8aa64"),3)
+		draw_polyline(p,Color(palette.accent),3)
 	if disabled:
-		draw_line(center+Vector2(-14,14),center+Vector2(14,-14),Color("b6a0a4"),3)
+		draw_line(center+Vector2(-14,14),center+Vector2(14,-14),Color(palette.muted),3)

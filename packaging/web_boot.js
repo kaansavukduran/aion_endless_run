@@ -11,10 +11,17 @@
     cs: ['Stahování hry…','Příprava hry…','Herní soubor se nepodařilo načíst celý. Zkontrolujte připojení a zkuste to znovu.','Zkusit znovu','Otevřít aktuální verzi']
   }[['tr','en','cs'].includes(lang) ? lang : 'en'];
   const state = {phase:'waiting',attempts:0,error:''};
+  function paintSegments(value) {
+    const bar=document.querySelector('.fragaria-segments');
+    if(!bar)return;
+    bar.classList.toggle('indeterminate',value==null);
+    [...bar.children].forEach((part,i)=>part.classList.toggle('filled',value!=null && i<Math.floor(Math.max(0,Math.min(1,value))*10)));
+  }
   function stamp(phase, error = '') {
     state.phase = phase; state.error = error;
     if (['verifying','starting'].includes(phase)) {
       document.getElementById('status-progress')?.removeAttribute('value');
+      paintSegments(null);
       const percent=document.getElementById('aion-loading-percent'); if(percent)percent.textContent='…';
     }
     document.documentElement.dataset.bootState = phase;
@@ -23,6 +30,7 @@
   }
   function notice(text) {
     const node = document.getElementById('status-notice');
+    const title=document.querySelector('.fragaria-loading-label');if(title)title.textContent=({tr:'Yükleniyor…',en:'Loading…',cs:'Načítání…'})[lang]||'Loading…';
     if (node) {node.textContent = text; node.style.display = 'block'; node.setAttribute('role','status');}
   }
   async function forgetBadPack(url) {
@@ -66,6 +74,7 @@
               if (size + part.value.byteLength > bytes.byteLength) throw new Error('pack-too-large');
               bytes.set(part.value,size); size += part.value.byteLength;
               progress?.(size,expected.bytes);
+              paintSegments(size/expected.bytes);
               const output=document.getElementById('aion-loading-percent');
               if(output)output.textContent=Math.floor(size/expected.bytes*100)+'%';
             }

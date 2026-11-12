@@ -157,3 +157,7 @@ Application/native source7f139f7ed3039a068b60b771ba7e2b13d09f56d5; full native C
 ## 0.13.1 portrait boss follow-up
 
 Manual portrait review exposed a clipped boss status label missed by the menu-button checks. The label wraps, portrait HP/notice geometry is separate, and mobile help/lives are shown once. Eleven source suites2218 and46 current local browser checks pass; evidence and exact scope: docs/evidence-v0131. The0.13 evidence and published packages are preserved. Native/public outcomes are recorded only after their real completion.
+
+## 0.14.0 · AIONIA v1.4
+
+Normatif belge ve bağlı AER-001–013 kaydı okundu; sürümlü kaynak/hash ve tasarım/sanat/kontrol kararları eklendi. Kullanıcı iki yana bölünmüş düğmeleri seçti. Varsayılan koyu/sistem yazısı, light/system seçenekleri, büyütülmüş metin, azaltılmış dekorasyon, erişilebilir menü karşılıkları ve kol ayarları mevcut Godot altyapısına bağlandı. Kahraman PNG'leri korunur. Fragaria yükleyicisi ve sekiz kişilik arka kutlama tamamlandı. Kaynak kontrolü 2539, tarayıcı 184, paket sözleşmesi 5; fiziksel cihaz ve yayın sınırları `docs/AIONIA-QA.md` içinde. Native CI/yayın sonucu son makbuzda ayrı kaydedilir.

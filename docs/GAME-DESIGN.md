@@ -1,3 +1,7 @@
+# Güncel uygulama
+
+[AIONIA v1.4 kapsamı](DESIGN_BRIEF.md), [sanat kuralları](ART_BIBLE.md) ve [kullanıcının seçtiği kontroller](CONTROLS.md) güncel kararlardır. Aşağıdaki sürüm başlıkları tarihsel ayrıntıları da korur.
+
 # 0.8.0 · Dört biyom, parkur ve izole boss sahnesi
 
 - Ana koşu mesafesi dört biyomda döner; geniş ve okunur zemin boşlukları tek karşılaşma olarak ayrılmış güvenli aralıklarda üretilir. Ekranda yalnızca boyanmış karanlık bir alan değildir: yerdeki ayak gerçekten düşer, bir can kurtarırsa fiziksel kurtarma sıçraması olur.
@@ -17,8 +21,8 @@
 - Sekiz karşılaşma türü karışan torbadan gelir; güvenli mesafe sınırları içinde farklı aralıklar kullanılır. Seyrek ortam cüceleri de sonraki tehlike için boşluk ayırır.
 - Saldırı kenar tetiklemelidir: bir basış bir vuruş. Her karakterin iki çizilmiş hareketi sırayla değişir; son 0,16 saniyede sonraki tek basış tamponlanabilir. Takla saldırıyı iptal eder; görünmez vuruş oluşmaz.
 - Takla en az 0,68 saniyedir; beş çizilmiş dönme pozu döngü yapar. Dikey ölçek sıkıştırması yoktur. Takipçi koyunlar 112/224 piksel geriden aynı takla/zıplama yolunu izler.
-- 900 mesafede bir seviye. Sekiz kutlama kimliği tekrarsız torba, dört efekt ardışık tekrarsız seçim kullanır. Her 10 seviyede yere iniş beklenir; 1 saniye dünya tamamen durur. Bekleyen kilometre taşları kuyrukta korunur. Sonra 2 saniye kalp ve 0,65 saniye koruma vardır. Kutlama kapalıysa seviye ilerler, duraklama oluşmaz.
-- Mantar seçimi, ilk 20 saniye ve 45 saniye tekrar sınırından sonra uygun eşya fırsatı başına %2'dir. Ayarlanabilir %0–100 değeri saniye başına oran değildir. Diğer altı güç karışan torbadadır. Devlikte 0,18–1,30 saniye arasında düzensiz küçük cüce grupları ve en fazla 14 canlı dalga cücesi vardır. Süre bitince dalga cüceleri puan vermeden ayrılır; ortam cüceleri kalır. 4. seviyeden itibaren seyrek ortam cüceleri de çıkar.
+- 20 saniye aktif normal koşuda bir seviye; mesafe eşiği yok. Sekiz kutlama kimliği tekrarsız torba, dört efekt ardışık tekrarsız seçim kullanır. Her 10 seviyede yere iniş beklenir; 1 saniye dünya tamamen durur. Bekleyen kilometre taşları kuyrukta korunur. Sonra 2 saniye kalp ve 0,65 saniye koruma vardır. Kutlama kapalıysa seviye ilerler, duraklama oluşmaz.
+- Mantar seçimi, ilk 20 saniye ve 45 saniye tekrar sınırından sonra uygun eşya fırsatı başına %2'dir. Ayarlanabilir %0–100 değeri saniye başına oran değildir. Diğer altı güç karışan torbadadır. Devlikte 0,18–1,30 saniye arasında düzensiz küçük cüce grupları ve en fazla 7 canlı dalga cücesi; dalga adaylarının her ikisinden biri alınarak toplam üretim yaklaşık yarıya iner vardır. Süre bitince dalga cüceleri puan vermeden ayrılır; ortam cüceleri kalır. 4. seviyeden itibaren seyrek ortam cüceleri de çıkar.
 - Baykuş akımı yukarı/ileri/çaprazdır. İleri hız katkısı gerçek dünya ilerlemesine uygulanır; havada karakterin resmini sağa kaydıran sahte bir etki değildir.
 - Mantar renkleri yavaş HSV dalgalarıdır. Kamera en yüksek şiddette yaklaşık %1,2–2,8 yakınlaşır, 0,46 dereceye kadar döner ve 4 piksel kayar. Şiddet bağımsız %0–100; hareket ve ekran efektleri ayrıca kapanabilir. Hızlı tam ekran stroboskop yoktur.
 

@@ -14,7 +14,7 @@ def prepare_web_export(root: Path) -> None:
     output = root / 'build/web'
     version = re.search(r'config/version="([^"]+)"', (root / 'project.godot').read_text())[1]
     source = Path(__file__).read_bytes() + (root / 'packaging/web_update.js').read_bytes() + (root / 'packaging/web_worker.js').read_bytes() + (root / 'packaging/web_boot.js').read_bytes()
-    source += (root/'packaging/web_splash.html').read_bytes()
+    source += (root/'packaging/web_splash.html').read_bytes() + (root/'packaging/web_accessibility.js').read_bytes()
     digest = hashlib.sha256(source)
     for name in ['fragaria-strawberry.png','PixelifySans.ttf']:
         digest.update((root/'assets'/name).read_bytes())
@@ -41,7 +41,7 @@ def prepare_web_export(root: Path) -> None:
     assets = {name:{'bytes':(output/name).stat().st_size,'sha256':hashlib.sha256((output/name).read_bytes()).hexdigest()} for name in names.values()}
     # The updater initializes before Godot. It marks modern clients so a new
     # worker never interrupts their active runs, and exposes an explicit button.
-    script = (root / 'packaging/web_update.js').read_text().replace('__BUILD__', build).replace('__VERSION__', version)
+    script = (root / 'packaging/web_accessibility.js').read_text() + '\n' + (root / 'packaging/web_update.js').read_text().replace('__BUILD__', build).replace('__VERSION__', version)
     html = html.replace('"serviceWorker":"index.service.worker.js"', '"serviceWorker":""')
     # Rewrite the exported call before injecting the loader's own engine call.
     if html.count('engine.startGame({') != 1:

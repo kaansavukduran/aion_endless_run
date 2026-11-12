@@ -11,6 +11,7 @@ var celebrations_enabled := true
 var heart_time := 0.0
 var fragaria_next_level := 100
 var fragaria_time := 0.0
+var fragaria_origin_distance := 0.0
 var fragaria_found := 0
 var level := 1
 var level_elapsed := 0.0
@@ -379,6 +380,7 @@ func offer_fragaria(world, milestone: int) -> void:
 func collect(world, kind: String) -> void:
 	if kind=="fragaria":
 		fragaria_found += 1
+		fragaria_origin_distance=world.distance
 		fragaria_time = 3.8
 		world.event("fragaria_found")
 		return # No score, item-goal progress, discovery, power or other reward.

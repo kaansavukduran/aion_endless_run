@@ -1,21 +1,15 @@
-# Aion Endless Run 0.13.1
+# Aion Endless Run 0.14.0
 
-The 0.13.1 patch fits long boss status/attack instructions on portrait phones, separates the HP bar and uses the actual touch help without duplicate lives/keyboard hints. Earlier releases remain available.
+AIONIA v1.4 uygulaması: varsayılan koyu tema ve sistem/sans yazı, saklanan açık/koyu/sistem seçimi, pixel alternatifi ve büyütülmüş metin; sıcak, keskin çerçeveli kompakt arayüz. Uzun karakter adı ve karakter seçimi başlığı gerçek karta sığar. %200 metinde gerekli menü kaydırması korunur.
 
-Original hero art, steadier movement and a compact pixel interface. Aion's unwanted sideways frame drift is repaired, including the same registration failure in owl/blink and sheep-turn poses. All seven hero artwork PNGs remain unchanged. Double jump, owl glide, wolf sprint/bite, sheep followers, boss rotation, keyboard/mouse/gamepad and saved offline records are preserved.
+Kullanıcının seçtiği bölünmüş telefon kontrolleri: solda Zıpla, sağda Vur/Takla; boss'ta Vur yerinde Ateş et. Depar erişilebilir; eski sağ küme alternatif. Portre/yatay ve çoklu dokunma korunur. Kol eylemleri yeniden atanabilir; ölü bölge ve isteğe bağlı, varsayılan kapalı titreşim; güncel tuş yardımı ve kesilince duraklama.
 
-Phone play supports upright portrait and landscape, including rotation during a run. Swipe down to roll or use the stepped circular Jump, Attack, Roll and context-specific Fire/Boost buttons. One press means one strike; release and press again to alternate. A short skippable lesson pauses hazards while you read. Main/results fit without scrolling; long settings remain scrollable. TR/EN/CS and browser-language fallback remain available.
+Siyah Fragaria açılışı gerçek ilerlemeye bağlı on segmentli çubukla web ve native sahnede. Çilek kutlaması arka planda büyük FRAGARIA ve sekiz mevcut kutlama kimliği kullanır; ödül vermez. Kahraman çizimleri değiştirilmez. Firefox PCK doğrulama, eski worker güncellemesi ve çevrimdışı kayıtlar korunur; son atomik ayar taşımasından sonra açık FS senkronizasyonu istenir.
 
-Each normal active level takes 20 seconds, independent of the former distance gate. Mushroom-wave gnomes are approximately halved; ambient spawns are unchanged. After the first eligible boss victory following each 100-level threshold, a rare Fragaria strawberry offers a brief celebration with no gameplay reward. The branded black loader shows actual download progress and preserves the verified Firefox PCK/offline update repair.
+Kaynak doğrulaması: 2.539 sahne/model kontrolü, 184 gerçek tarayıcı kontrolü ve 5 paket sözleşme testi. [Kapsam ve NOT TESTED alanları](AIONIA-QA.md). Paket makbuzu gerçek native CI sonuçlarına bağlanır; testten önce yayın başarılı denmez.
 
-| Device | Installation | Portable |
-| --- | --- | --- |
-| Windows x64 | `AionEndlessRun-0.13.1-windows-x64-Setup.exe` | `AionEndlessRun-0.13.1-windows-x64-portable.zip` |
-| Linux x64 | `AionEndlessRun-0.13.1-linux-x64.deb` | `-linux-x64.AppImage` or `-linux-x64-portable.tar.gz` |
-| macOS Intel / Apple Silicon | `AionEndlessRun-0.13.1-macos-universal.dmg` | `-macos-universal-portable.zip` |
-| Android ARM64 / x64 | `AionEndlessRun-0.13.1-android-arm64-x64.apk` | Normal APK installation |
-| Browser / iPhone browser | https://aionendlessrun.vercel.app/ | `-web-offline.tar.gz` for local hosting |
+## İndirme / platform
 
-Unzip portable packages completely. Windows Setup installs per user. Linux AppImage needs executable permission. Move the Mac app from DMG to Applications. Android uses the established application ID/signing key and versionCode14. `SHA256SUMS` and `BUILD-RECEIPT.json` identify actual published files. Previous releases are preserved.
+[0.14.0 sürümü](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.14.0) bütün doğrulamalar bitince Windows kurulum/portable, Linux deb/AppImage/portable, macOS universal DMG/portable, sabit anahtarla imzalı Android APK ve web offline arşivini birlikte sunar. Önceki sürümler korunur. `SHA256SUMS` ve `BUILD-RECEIPT.json` dosya boyutu, özet, kaynak commit ve CI bağlantısını taşır.
 
-The first web load needs internet; a completely cached verified build then works offline. Windows Authenticode and Apple Developer ID/notarization are not included. Mac is ad-hoc signed. Native iPhone/TestFlight/App Store distribution still requires the owner's Apple signing/provisioning; no native iPhone portable package is claimed. Current tests and physical-hardware limits are recorded in `docs/evidence-v0131`.
+Android uygulama kimliği ve imza korunur, versionCode 15'tir. macOS paketleri yalnız ad-hoc imzalıdır; Developer ID/noter yok. Windows Authenticode yok. iPhone için web/PWA hedefi vardır; yerel iOS/App Store/TestFlight için sahibin Apple imzası gerekir. Fiziksel Poco/Xbox/PS/iPhone ve ekran okuyucu testi bu ortamda yapılmadı.
