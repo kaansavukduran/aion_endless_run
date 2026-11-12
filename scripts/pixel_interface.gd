@@ -70,17 +70,19 @@ func hud() -> void:
 	h.position_control(h.ability_label,Vector2(18,h.view_h-162 if h.touch_mode else h.view_h-56),Vector2(210 if h.portrait else h.view_w-360,32))
 	h.boss_label=h.label("",21,"f4c68b")
 	h.ui.add_child(h.boss_label)
-	h.position_control(h.boss_label,Vector2(h.view_w*.5-minf(230,h.view_w*.42),205),Vector2(minf(460,h.view_w*.84),32))
+	h.boss_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	h.position_control(h.boss_label,Vector2(18,205),Vector2(h.view_w-36,96 if h.portrait else 32))
 	h.boss_bar=ProgressBar.new()
 	h.boss_bar.show_percentage=false
 	h.boss_bar.add_theme_stylebox_override("background",h.box("302437","796176"))
 	h.boss_bar.add_theme_stylebox_override("fill",h.box("c75772","e7a497"))
 	h.ui.add_child(h.boss_bar)
-	h.position_control(h.boss_bar,Vector2(h.view_w*.08,242),Vector2(h.view_w*.84,12))
+	h.position_control(h.boss_bar,Vector2(18,310 if h.portrait else 242),Vector2(h.view_w-36,12))
 	h.notice_label=h.label("",23,"ffe0a3")
 	h.notice_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	h.ui.add_child(h.notice_label)
-	h.position_control(h.notice_label,Vector2(12,268),Vector2(h.view_w-24,34))
+	h.notice_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	h.position_control(h.notice_label,Vector2(12,338 if h.portrait else 268),Vector2(h.view_w-24,62 if h.portrait else 34))
 	h.notice_label.clip_text=true
 
 func card(width: float) -> VBoxContainer:

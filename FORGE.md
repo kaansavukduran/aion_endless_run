@@ -152,3 +152,8 @@ The normal canonical HTTPS entry opens 0.9.0; its regular updater selects immuta
 ## 0.10.0 completed delivery
 
 Application/native source7f139f7ed3039a068b60b771ba7e2b13d09f56d5; full native CI42913367815 succeeds. Source/tag ddcd117966a727b935a2d9690f87e1bff21373e3 contains final tests/evidence, no exported app changes. 1344 source/scene +91 browser/PWA executions pass, including actual virtual-controller UI and all three training victories locally and via verified HTTPS. Physical controller testing is not claimed. Releasev0.10.0 / publisher42914898071 complete:9 packages+receipt+sums; all server digests/sizes, stable APK bytes and downloaded Mac CRC/architectures verified. Staging branch deleted; private key never transferred. Old releases retained. See docs/evidence-v010 and docs/VALIDATION.md.
+
+
+## 0.13.1 portrait boss follow-up
+
+Manual portrait review exposed a clipped boss status label missed by the menu-button checks. The label wraps, portrait HP/notice geometry is separate, and mobile help/lives are shown once. Eleven source suites2218 and46 current local browser checks pass; evidence and exact scope: docs/evidence-v0131. The0.13 evidence and published packages are preserved. Native/public outcomes are recorded only after their real completion.

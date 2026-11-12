@@ -201,3 +201,8 @@ Nine suites1975 assertions:121 classic,57 adventure,29 localization,105 evolutio
 ## 0.13 runner UX verification
 
 See docs/evidence-v013 for source/browser/native delivery results and limits as finalized. Character atlas PNG hashes remain unchanged. Anatomically reviewed run landmarks and closed-eye/turn-body cases supplement metadata self-consistency checks. Real phone-shaped browser flows use normal input only; deterministic scene/model fixtures cover rare hundred-level offers and exact enemy damage. Do not describe a fixture as a naturally played level100 run or an emulated viewport as physical Poco hardware.
+
+
+## 0.13.1 portrait boss follow-up
+
+Manual portrait review exposed a clipped boss status label missed by the menu-button checks. The label wraps, portrait HP/notice geometry is separate, and mobile help/lives are shown once. Eleven source suites2218 and46 current local browser checks pass; evidence and exact scope: docs/evidence-v0131. The0.13 evidence and published packages are preserved. Native/public outcomes are recorded only after their real completion.

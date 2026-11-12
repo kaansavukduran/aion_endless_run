@@ -1,0 +1,7 @@
+# 0.13.1 portrait boss HUD repair
+
+Manual review after the 0.13.0 checks found a real portrait issue: long boss attack/status text extended beyond the screen. The compact button-bound checks did not cover the label. Boss status now wraps within the viewport; portrait HP and notices have separate vertical space. Phone help describes the actual Fire/Jump/Swipe controls in the footer, with no duplicate keyboard-only startup notice or duplicate lives footer.
+
+Eleven current source/scene suites pass2,218 checks, including30 longest-localized-copy HUD checks with an actual active model boss phase. Six real phone-view browser flows cover TR/EN/CS in both orientations, all three training bosses, line height/bounds and HP separation; screenshots are actual gameplay. Twenty-nine current four-hero/touch/rotation/boss tests and eleven actual public0.13→0.13.1 ServiceWorker/IndexedDB/offline migrations also pass, totaling46 current local browser checks. The119 earlier0.13 browser checks are retained separately under evidence-v013 and are not counted again here. Five packaging contracts pass.
+
+The registration repair, original seven hero PNGs, offline/PCK guard, character abilities and desktop/gamepad mappings are unchanged from0.13. Live/native/public-package verification belongs to the corresponding actual delivery receipt and report. Software-GPU desktop browsers with phone viewports/Android UA and virtual standard controllers are not physical Poco/Xbox/PS devices. Apple native signing/notarization limits remain in RELEASE.md.

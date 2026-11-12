@@ -1,0 +1,13 @@
+{
+  "version": "0.13.1",
+  "source_and_scene_checks": 2218,
+  "browser_suites": {
+    "runner": 29,
+    "boss_hud": 6,
+    "upgrade": 11
+  },
+  "browser_checks": 46,
+  "packaging_contracts": 5,
+  "local_web_build": "16affb48f6cd11d8",
+  "scope": "Current 0.13.1 uses normal browser input/passive observations; model/scene fixtures verify rare/exact cases. Prior 0.13 foundation has119 separate browser checks under evidence-v013. No physical Poco/controller claim."
+}

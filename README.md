@@ -1,6 +1,6 @@
 # Aion Endless Run
 
-Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** Kargalara vur, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.13.0**.
+Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** Kargalara vur, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.13.1**.
 
 **[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Paket ve platform durumu](docs/RELEASE.md) · [Doğrulama](docs/evidence-v013/README.md)
 
@@ -31,6 +31,10 @@ Düşerken düşmanın üstüne basarak sekebilirsin. Aion sırayla yumruk, bayk
 Dört biyom: Kehribar Çölü, Ayaz Vadisi, Sisli Bataklık ve Bakır Şehir. Gündüz/gece, hava olayları, kargalar, cüceler, seyrek ateş bitkileri, çukurlar ve kargaların taşıdığı üst engeller vardır. Her **20 saniyelik aktif normal koşu** yeni seviyedir; menü, duraklatma, sarılma ve boss zamanı bu sayaca girmez. Her on seviyede sarılma/silah teslimi ve üç tasarımı dönen boss kovalamacası vardır. Boss arenasında normal parkur temizlenir. İsteğe bağlı antrenman üç boss’u doğrudan denetir ve rekoru değiştirmez.
 
 Kristaller +25, temiz aşılan engeller +10; mesafe de skor kazandırır. Yedi güç geçici etkiler verir. Dev mantar varsayılan %2 uygun eşya olasılığıyla nadirdir; ilk 20 saniyede ve önceki mantardan sonraki 45 saniyede gelmez. Mantar dalgasının toplam cüce üretimi yaklaşık yarıya indirildi; ortam cüceleri değişmedi. Her 100’ün katı eşiğinden sonraki ilk uygun boss zaferi **Fragaria çileğini** sunar. Bu nesne yalnız kısa kutlamadır; güç, puan veya başka oynanış ödülü vermez.
+
+## 0.13.1 düzeltmesi
+
+Dikey boss açıklaması ekrana sığacak biçimde sarılır; can barıyla çakışmaz. Telefonun kısa boss ipucu gerçek dokunma eylemlerini gösterir ve can bilgisi tekrarlanmaz. [Güncel doğrulama](docs/evidence-v0131/README.md).
 
 ## 0.13.0 değişiklikleri
 
@@ -65,4 +69,4 @@ FireAxolotl/Extension kaynakları ve önceki paftalar korunur. Güncel kahraman 
 
 ## English
 
-An offline Godot pixel runner with four heroes, four biomes, alternating melee attacks, rolling, varied weather/enemies/powers and repeating robot boss chases. Version0.13 repairs unwanted frame drift while preserving original hero artwork. Phones support upright portrait/landscape, down-swipe rolls, circular multitouch actions and a skippable lesson. Normal levels take20 active seconds. Mushroom-wave gnomes are approximately halved. The rare hundred-level Fragaria celebration grants no gameplay reward. TR/EN/CS follow the device locale by default, otherwise English. Verified downloads/offline migrations preserve local records. Installers and portable editions are under Releases; evidence distinguishes real browser/model tests from unavailable physical phone/controller and Apple distribution checks.
+An offline Godot pixel runner with four heroes, four biomes, alternating melee attacks, rolling, varied weather/enemies/powers and repeating robot boss chases. Version 0.13 repairs unwanted frame drift while preserving original hero artwork. Phones support upright portrait/landscape, down-swipe rolls, circular multitouch actions and a skippable lesson. Normal levels take 20 active seconds. Mushroom-wave gnomes are approximately halved. The rare hundred-level Fragaria celebration grants no gameplay reward. TR/EN/CS follow the device locale by default, otherwise English. Verified downloads/offline migrations preserve local records. Installers and portable editions are under Releases; evidence distinguishes real browser/model tests from unavailable physical phone/controller and Apple distribution checks.

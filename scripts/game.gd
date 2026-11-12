@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3}
-const GAME_VERSION = "0.13.0"
+const GAME_VERSION = "0.13.1"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -914,7 +914,7 @@ func handle_event(value: String) -> void:
 		notice = text("hug_notice")
 		notice_time = 1.0
 	if value in ["boss_intro","boss_fight","boss_return","boss_player_hit"]:
-		notice = text(value)
+		notice = "" if touch_mode and value=="boss_fight" else text(value)
 		notice_time = 2.5
 		if value == "boss_intro": clear_held_controls()
 		tone(460 if value == "boss_player_hit" else 780,0.1)
@@ -1050,7 +1050,7 @@ func update_hud() -> void:
 		control.queue_redraw()
 	if is_instance_valid(fragaria_panel): fragaria_panel.visible = world.adventure.fragaria_time>0 and page in ["","paused"]
 	footer_label.visible = page==""
-	ability_label.visible = page==""
+	ability_label.visible = page=="" and not boss.active()
 	biome_label.visible = page in ["","paused"]
 	power_label.visible = page=="" and not powers.is_empty()
 	progress.value = fmod(world.distance, World.BIOME_DISTANCE)
@@ -1162,6 +1162,13 @@ func publish_web_status() -> void:
 			var rect: Rect2 = node.get_global_rect()
 			buttons.append({"text":node.text,"name":str(node.name),"x":rect.position.x,"y":rect.position.y,"w":rect.size.x,"h":rect.size.y})
 	canvas.setAttribute("data-ui", JSON.stringify(buttons))
+	var boss_text := {}
+	for id in ["status","notice"]:
+		var item: Label=boss_label if id=="status" else notice_label
+		var rect: Rect2=item.get_global_rect()
+		boss_text[id]={"text":item.text,"x":rect.position.x,"y":rect.position.y,"w":rect.size.x,"h":rect.size.y,"required_h":item.get_minimum_size().y,"visible":item.is_visible_in_tree()}
+	boss_text["bar_y"]=boss_bar.position.y
+	canvas.setAttribute("data-boss-hud",JSON.stringify(boss_text))
 	canvas.setAttribute("data-goal", JSON.stringify(world.adventure.goal_info()))
 	canvas.setAttribute("data-discoveries", JSON.stringify(world.adventure.discoveries))
 	canvas.setAttribute("data-effects-enabled", str(effects_enabled))

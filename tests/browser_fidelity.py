@@ -13,7 +13,7 @@ with sync_playwright() as pw:
  def wait(sel):page.wait_for_selector('canvas'+sel,timeout=90000)
  def click(name=None,text=None):
   wait('[data-ui-ready="true"]');v=d();b=next(b for b in json.loads(v['ui']) if (b['name']==name if name else text in b['text']));t=json.loads(v['screenTransform']);r=page.locator('canvas').bounding_box();x=b['x']+b['w']/2;y=b['y']+b['h']/2;page.mouse.click(r['x']+(t[0]*x+t[2]*y+t[4])/float(v['rawWidth'])*r['width'],r['y']+(t[1]*x+t[3]*y+t[5])/float(v['rawHeight'])*r['height'])
- page.goto(a.url);wait('[data-version="0.13.0"][data-state="ready"]')
+ page.goto(a.url);wait('[data-version="0.13.1"][data-state="ready"]')
  fields=['motionEnabled','effectsEnabled','audioEnabled','celebrationsEnabled']
  check(all(d()[k]=='true' for k in fields),'Fresh browser defaults all four options ON, even when the OS requests reduced motion')
  click(text='Settings');wait('[data-page="settings"]');page.screenshot(path=str(a.evidence/'settings-default-on.png'))
