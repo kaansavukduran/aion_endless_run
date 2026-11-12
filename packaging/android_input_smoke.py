@@ -31,6 +31,9 @@ def hold(action,duration=1200):
 def pause():
  menu_button(text=r'^(Pause|Duraklat|Pozastavit)$')
  latest('AION_STATE ',lambda s:s['page']=='paused')
+ # State changes before the deferred menu rebuild. Wait for the actual
+ # paused layout as well, otherwise main() can read the old Pause button.
+ latest('AION_UI ',lambda s:s['page']=='paused')
 def main():
  menu_button(text=r'^(Main menu|Ana menü|Hlavní nabídka)$');latest('AION_UI ',lambda s:s['page']=='main')
 initial=latest('AION_UI ',lambda s:s['page']=='main',timeout=25);capture('first-launch')
