@@ -1,0 +1,100 @@
+[
+  {
+    "suite": "game",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 121 checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "adventure",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 58 adventure checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "localization",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 51 localization/registration checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "evolution",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 105 evolution checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "frontier",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 224 frontier checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "motion",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 447 motion checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "encounters",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 108 encounter/gamepad checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "fidelity",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 685 fidelity checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "agility",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 198 agility checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "runner_ux",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 213 runner UX checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "boss_hud",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 30 boss HUD checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "aionia",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 661 AIONIA checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "variety",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 551 variety/transition/locale checks, 0 failures"
+    ]
+  },
+  {
+    "suite": "visual_polish",
+    "exit_code": 0,
+    "result": [
+      "RESULT: 152 visual polish checks, 0 failures"
+    ]
+  }
+]

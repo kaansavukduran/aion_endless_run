@@ -19,7 +19,7 @@ with sync_playwright() as pw:
   page.evaluate('i=>padButton(i,1)',i);page.wait_for_timeout(140);page.evaluate('i=>padButton(i,0)',i);page.wait_for_timeout(140)
  def click(name=None,text=None):
   wait('[data-ui-ready="true"]');v=d();b=next(b for b in json.loads(v['ui']) if (b['name']==name if name else text in b['text']));t=json.loads(v['screenTransform']);r=page.locator('canvas').bounding_box();x=b['x']+b['w']/2;y=b['y']+b['h']/2;page.mouse.click(r['x']+(t[0]*x+t[2]*y+t[4])/float(v['rawWidth'])*r['width'],r['y']+(t[1]*x+t[3]*y+t[5])/float(v['rawHeight'])*r['height'])
- page.goto(a.url);wait('[data-version="0.15.0"][data-state="ready"][data-ui-ready="true"]')
+ page.goto(a.url);wait('[data-version="0.15.1"][data-state="ready"][data-ui-ready="true"]')
  page.evaluate("""() => {window.gunPoses={};new MutationObserver(()=>{const c=document.querySelector('canvas').dataset;if(c.poseSource==='canonical-'+c.character&&c.state==='running'&&Number(c.sourceRow)===8){(window.gunPoses[c.character]??=new Set()).add(Number(c.sourceFrame));}}).observe(document.querySelector('canvas'),{attributes:true});}""")
  for i,hero in enumerate(['aion','owl','sheep','wolf']):
   click(name='StartSelect_'+hero);wait('[data-character="'+hero+'"]');click(text='Boss antrenmanı');wait('[data-page="bosses"]');click(name='PracticeBoss_0');wait('[data-boss-phase="fight"]')

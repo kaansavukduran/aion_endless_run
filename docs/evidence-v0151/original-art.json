@@ -1,0 +1,162 @@
+[
+  {
+    "path": "assets/adventure-combat.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/adventure-enemies.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/adventure-items.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/agility-owl.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/agility-wolf.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/aion-runner.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/canonical-aion.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/canonical-owl.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/canonical-rolls.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/canonical-sheep.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/canonical-wolf.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/companion-actions.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/companions-runner.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/encounter-bosses.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/encounter-defeats.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/encounter-weapons.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/evolution-barriers.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/evolution-celebrants.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/evolution-rolls.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/evolution-strikes.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/fragaria-strawberry.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/frontier-boss.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/frontier-heroes.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/frontier-parkour.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/motion-aion.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/motion-elements.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/motion-girls.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/motion-owl.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/motion-powers.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/motion-rolls.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/motion-sheep.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/motion-terrain.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/motion-wolf.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/motion-world.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/owl-runner.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/owl.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/sheep-runner.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/sheep.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/wolf-runner.png",
+    "unchanged": true
+  },
+  {
+    "path": "assets/wolf.png",
+    "unchanged": true
+  }
+]

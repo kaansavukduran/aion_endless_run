@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3}
-const GAME_VERSION = "0.15.0"
+const GAME_VERSION = "0.15.1"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -826,7 +826,7 @@ func release_duck(source: String) -> void:
 
 func build_action_buttons() -> void:
 	action_buttons.clear()
-	var size_value := 92.0 if touch_mode else 76.0
+	var size_value := 96.0 if touch_mode else 80.0
 	var start := Vector2(view_w-294,view_h-108)
 	var positions := {"duck":Vector2.ZERO,"attack":Vector2(92,-60),"jump":Vector2(184,0),"shoot":Vector2(92,-60),"boost":Vector2(-92,0)}
 	for id in ["jump","attack","duck","shoot","boost"]:

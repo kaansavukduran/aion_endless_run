@@ -6,10 +6,12 @@ const MOTION = preload("res://assets/MOTION-PROVENANCE.json")
 const ENCOUNTERS = preload("res://assets/ENCOUNTERS-PROVENANCE.json")
 const CANONICAL = preload("res://assets/CANONICAL-PROVENANCE.json")
 const AGILITY = preload("res://assets/AGILITY-PROVENANCE.json")
+const CREATURES = preload("res://assets/CREATURES-PROVENANCE.json")
 var images := {}
 var frames := {}
 
 func descriptor(key: String,row: int) -> Dictionary:
+	if key=="creatures":return {"key":key,"row":row,"data":CREATURES.data.atlas}
 	if AGILITY.data.aliases.has(key) and AGILITY.data.aliases[key][row] != null:
 		var alias: Dictionary = AGILITY.data.aliases[key][row]
 		return {"key":alias.atlas,"row":int(alias.row),"data":AGILITY.data.atlases[alias.atlas]}

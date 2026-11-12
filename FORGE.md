@@ -1,3 +1,9 @@
+# Current handoff · 0.15.1 visual polish
+
+Started clean on main d8ae342ee9855f79e52b403a093476dd90118412, Godot4.6.3. The four 0.15 newcomers were drawn with coarse procedural primitives; replace only their rendering with 24 original AI-assisted drawn poses in woodland-creatures.png. register_creatures.py is read-only: transparent alpha spans, explicit near-iris regions, one scale/species, shared floors. Physics, HP, spawn randomness and hitboxes are unchanged. Existing 40 PNGs (heroes, crow/gnome, bosses and scenery) are byte-identical to the starting commit.
+
+Touch rims now use a mirrored integral two-unit raster mask shared by rendering and hit testing. Six authored bitmap icons distinguish jump, melee, clockwise roll, boost, lightning and pistol. Cached rim/icon textures avoid per-frame tiny draw calls. Preserve the selected split layout, right-cluster option, ownership/cancellation, simultaneous inputs, labels, accessibility names, cooldown and disabled behavior. 152 new targeted checks join the existing suites. Evidence and real-play screenshots: docs/evidence-v0151/.
+
 # Current handoff · 0.15.0
 
 See docs/UPGRADE-0.15.0.md for the diagnosed causes, implemented changes, and preserved behavior. Final evidence is in docs/evidence-v0150/. Existing 40 PNGs are byte-identical to 2f15b5e. Languages now number eleven, with offline OFL fallback fonts.

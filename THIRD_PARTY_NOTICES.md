@@ -72,3 +72,7 @@ Two unchanged original AI-assisted PNG outputs, agility-wolf.png and agility-owl
 Pixelify Sans is bundled unchanged under SIL Open Font License 1.1 in assets/PixelifySans.ttf with assets/PIXELIFY-OFL.txt. Upstream: https://github.com/google/fonts/tree/main/ofl/pixelifysans . TR/EN/CS glyph coverage is checked locally. The previous Lexend font and license remain in the source. No runtime font CDN is used.
 
 The transparent Fragaria strawberry is an owner-authorized cutout generated from the supplied reference. Its source reference and SHA-256 are recorded in assets/FRAGARIA-PROVENANCE.json. The original Drive JPEGs remain unchanged. Brand text, actual loading progress and version are rendered separately. All existing hero PNGs are unchanged; only anatomical registration metadata is corrected.
+
+## 0.15.1 creature animation and touch artwork
+
+`assets/woodland-creatures.png` is a new original owner-authorized AI-assisted imagegen output: four species × six actual drawn poses (bat, moss slime, copper beetle, storm wisp). The PNG is preserved byte-for-byte. `assets/CREATURES-PROVENANCE.json` records its generation identity, source SHA-256, real frame rectangles, alpha spans, common species scales and anatomical origins. `packaging/register_creatures.py` only reads artwork and writes registration metadata. The preceding MPL-2.0 terms and AI-output limitations apply; no third-party enemy character is copied. All existing hero, crow and gnome PNGs remain unchanged. Touch-button silhouettes and bitmap action icons are original project code under MPL-2.0.

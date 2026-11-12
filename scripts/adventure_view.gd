@@ -17,6 +17,25 @@ func atlas(name: String, row: int, frame: int, anchor: Vector2, width: float, ce
 	if centered: offset.y = f.top-f.cell_height*0.5-2
 	draw_texture_rect(tex,Rect2((anchor+offset*factor).round(),tex.get_size()*factor),false)
 
+func creature(enemy: Dictionary, ground: float) -> void:
+	var row: int = ["bat","slime","beetle","wisp"].find(enemy.kind)
+	var seconds: float = [.70,PI/2.8,.65,.85][row]
+	var clock: float = maxf(0,float(enemy.age)-float(enemy.defeat)) if host.motion else 0.0
+	var frame: int = host.frames.cycle("creatures",row,clock,seconds)
+	var f: Dictionary = host.frames.pose("creatures",row,frame)
+	var factor: float = f.scale
+	var anchor := Vector2(enemy.x,ground+enemy.y+(15.0 if row==1 else (23.0 if row==2 else 0.0)))
+	var fade := 1.0
+	if enemy.hp<=0:
+		fade=clampf(1.0-float(enemy.defeat)/.65,0,1)
+		anchor.y+=float(enemy.defeat)*40
+	var texture: Texture2D = f.texture
+	draw_texture_rect(texture,Rect2((anchor+f.offset*factor).round(),texture.get_size()*factor),false,Color(1,1,1,fade))
+	if enemy.hp<=0 and enemy.defeat<.35 and host.motion:
+		for n in 4:
+			var point: Vector2 = anchor+Vector2.from_angle(n*TAU/4-PI/4)*(8+enemy.defeat*60)
+			draw_rect(Rect2(point.round(),Vector2.ONE*3),Color(1,.83,.56,fade))
+
 func _draw() -> void:
 	if host == null: return
 	var world = host.world
@@ -57,7 +76,7 @@ func _draw() -> void:
 			atlas("power",int(icons[item.kind])+1,host.frames.cycle("power",int(icons[item.kind])+1,clock,1.0),point,46,true)
 	for enemy in a.enemies:
 		if enemy.kind in ["bat","slime","beetle","wisp"]:
-			PixelArt.enemy(self,enemy,ground)
+			creature(enemy,ground)
 			continue
 		var row := 0 if enemy.kind == "crow" else 3
 		var frame: int = host.frames.cycle("enemies",row,clock+float(enemy.id)*0.13,0.8)

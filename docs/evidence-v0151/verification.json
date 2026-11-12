@@ -1,0 +1,151 @@
+{
+  "version": "0.15.1",
+  "baseline_commit": "d8ae342ee9855f79e52b403a093476dd90118412",
+  "engine": "4.6.3",
+  "source_and_scene_checks": 3604,
+  "source_suites": [
+    {
+      "suite": "game",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 121 checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "adventure",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 58 adventure checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "localization",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 51 localization/registration checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "evolution",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 105 evolution checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "frontier",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 224 frontier checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "motion",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 447 motion checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "encounters",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 108 encounter/gamepad checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "fidelity",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 685 fidelity checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "agility",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 198 agility checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "runner_ux",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 213 runner UX checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "boss_hud",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 30 boss HUD checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "aionia",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 661 AIONIA checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "variety",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 551 variety/transition/locale checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "visual_polish",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 152 visual polish checks, 0 failures"
+      ]
+    }
+  ],
+  "browser_checks": 35,
+  "browser_runner_checks": [
+    "Branded loader really hands off to the playable main menu",
+    "aion: actual complete run loop keeps the anatomically reviewed gaze horizontally fixed",
+    "aion: the physical sprite anchor does not compensate by moving frame to frame",
+    "Aion still double jumps with the repaired frames",
+    "owl: actual complete run loop keeps the anatomically reviewed gaze horizontally fixed",
+    "owl: the physical sprite anchor does not compensate by moving frame to frame",
+    "Owl glides through actual frames without lateral sway",
+    "wolf: actual complete run loop keeps the anatomically reviewed gaze horizontally fixed",
+    "wolf: the physical sprite anchor does not compensate by moving frame to frame",
+    "Wolf retains its four-legged sprint and separate sprint bite",
+    "sheep: actual complete run loop keeps the anatomically reviewed gaze horizontally fixed",
+    "sheep: the physical sprite anchor does not compensate by moving frame to frame",
+    "portrait: upright orientation is selected from the actual viewport",
+    "portrait: a real down swipe rolls once without a jump",
+    "portrait: holding the attack circle gives exactly one strike",
+    "portrait: release and tap gives the alternating strike",
+    "portrait: touch cancellation releases all fingers",
+    "portrait: jump can stay held while another finger attacks",
+    "portrait: rotating mid-run keeps the character, score and running state",
+    "portrait: the boss Fire circle emits real projectiles and lowers actual boss health",
+    "landscape: upright orientation is selected from the actual viewport",
+    "landscape: a real down swipe rolls once without a jump",
+    "landscape: holding the attack circle gives exactly one strike",
+    "landscape: release and tap gives the alternating strike",
+    "landscape: touch cancellation releases all fingers",
+    "landscape: jump can stay held while another finger attacks",
+    "landscape: rotating mid-run keeps the character, score and running state",
+    "landscape: the boss Fire circle emits real projectiles and lowers actual boss health",
+    "No uncaught browser or Godot script errors in all tested inputs and layouts"
+  ],
+  "browser_scope": "29 real rendered input/animation/rotation checks on final local build 2eaa0af906748ffc. Six normal-input unseeded encounter-route checks on the same final enemy atlas and earlier button styling build; no gameplay setters.",
+  "packaging_checks": 11,
+  "preserved_original_pngs": 40,
+  "new_enemy_poses": 24,
+  "limitations": [
+    "Physical Poco/console-controller devices unavailable.",
+    "Native iOS distribution requires owner Apple signing.",
+    "macOS ad-hoc only; Windows has no Authenticode."
+  ],
+  "initial_browser_retry": "An initial 5-second glide sample timed out with several software renderers active. Unchanged assertions passed on the final rerun after icon draw caching. Exact contribution of concurrency was not isolated.",
+  "native_and_production": "Pending actual CI and production checks; no success claimed yet.",
+  "recorded_at": "2026-11-13T01:41:45.448633+03:00",
+  "timezone": "Europe/Istanbul"
+}
