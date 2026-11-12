@@ -1,0 +1,7 @@
+2026-11-12T22:47:22.6311626Z PASS Native system-font menu and heading/roster stay separated: tr
+2026-11-12T22:47:27.2205525Z PASS Native system-font menu and heading/roster stay separated: cs
+2026-11-12T22:47:31.2788062Z PASS Native system-font menu and heading/roster stay separated: en
+2026-11-12T22:47:38.3076061Z PASS Real native Jump hold reaches an airborne owl glide
+2026-11-12T22:47:46.5955923Z PASS Real native Attack touch reaches the actual strike state
+2026-11-12T22:47:53.4935782Z PASS Real native Roll touch reaches the actual roll state
+2026-11-12T22:47:58.5770937Z PASS Native landscape resize preserves the paused character, score and level

@@ -1,4 +1,8 @@
-# 0.15.0 · Güncel doğrulama
+# 0.15.1 · Güncel doğrulama
+
+[Gerçek oyun görüntüleri ve doğrulama](evidence-v0151/README.md). Güncel kapı: **14 Godot kaynak/sahne paketi, 3604 kontrol; 7 web paketleme ve 4 Android kayıt ayrıştırma testi**. Görsel regresyonlar `tests/test_visual_polish.gd` ile simetri, gerçek dokunma maskesi, farklı düşman kareleri, yüz/zemin hizası ve ortak ölçeği denetler. Tarayıcı sonuçları ve hangi derlemede çalıştırıldığı sürüm kanıtındadır. Aşağıdaki kayıtlar önceki sürümlerin tarihçesidir.
+
+# 0.15.0 · Önceki doğrulama
 
 [Uygulama ve gerçek nedenler](UPGRADE-0.15.0.md) · [Test sonuçları, kayıtlar ve sınırlar](evidence-v0150/README.md). Güncel kaynak kapısı `.github/workflows/build.yml` içindeki 13 Godot paketi ve 6 web paket testidir. Güncel tarayıcı sürücüleri: `browser_runner_ux.py`, `browser_encounters.py`, `browser_variety.py`, `browser_trails.py`, `browser_loader.py`, `browser_upgrade.py`, `browser_aionia.py`, `browser_panels.py`, `browser_boss_hud.py`. Aşağıdaki eski sürüm kayıtları ve eski beklentileri kullanan tarayıcı sürücüleri tarihçedir; eski sayılar güncel sonuç sayılmaz.
 

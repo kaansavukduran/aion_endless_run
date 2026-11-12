@@ -8,6 +8,8 @@ Touch rims now use a mirrored integral two-unit raster mask shared by rendering 
 
 See docs/UPGRADE-0.15.0.md for the diagnosed causes, implemented changes, and preserved behavior. Final evidence is in docs/evidence-v0150/. Existing 40 PNGs are byte-identical to 2f15b5e. Languages now number eleven, with offline OFL fallback fonts.
 
+Delivery0.15.1: applicationcfb1ca9, release9d15440, successful full CI43322478219, production dpl_EyW74pwkhprEwTZVZ9ch946HDnD9 READY. 3604 source checks +11 packaging tests +35 local browser checks +6 live Firefox checks +7 native Android checks. Nine public packages verified against receipt; actual downloaded stable APK signer/hash and universal Mac ZIP verified. Evidence distinguishes fixture scenes, normal play and unavailable physical-device checks.
+
 # Current handoff · 0.13.0 runner UX
 
 Start reference and actual starting main: 03fd1f4a400345847da7b0b471272ec75602a62a, clean working tree; Godot4.6.3. Preserve the verified Firefox loader2, offline caches/IndexedDB and existing native signer.

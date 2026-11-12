@@ -145,8 +145,7 @@
     "macOS ad-hoc only; Windows has no Authenticode."
   ],
   "initial_browser_retry": "An initial 5-second glide sample timed out with several software renderers active. Unchanged assertions passed on the final rerun after icon draw caching. Exact contribution of concurrency was not isolated.",
-  "native_and_production": "Pending actual CI and production checks; no success claimed yet.",
-  "recorded_at": "2026-11-13T01:41:45.448633+03:00",
+  "recorded_at": "2026-11-13T01:52:09.653321+03:00",
   "timezone": "Europe/Istanbul",
   "android_package": {
     "version": "0.15.1",
@@ -158,5 +157,165 @@
     "application_source_commit": "cfb1ca9bfd43be0eb773f12657935897eec7357d",
     "provenance_note": "Stable-signed APK exported locally from this application commit. Later commits only record package metadata and delivery evidence; gameplay, scenes, resources and project settings match this commit."
   },
-  "application_commit": "cfb1ca9bfd43be0eb773f12657935897eec7357d"
+  "application_commit": "cfb1ca9bfd43be0eb773f12657935897eec7357d",
+  "production": {
+    "id": "dpl_EyW74pwkhprEwTZVZ9ch946HDnD9",
+    "state": "READY",
+    "sha": "9d15440d1751f9c95b1d9e079f4e7dfaa9414204",
+    "target": "production",
+    "url": "https://aionendlessrun.vercel.app/",
+    "build": "83810bc33c43438c"
+  },
+  "release_candidate_commit": "9d15440d1751f9c95b1d9e079f4e7dfaa9414204",
+  "ci_source": {
+    "run_id": 43322478219,
+    "job_id": 131546434997,
+    "result": "PASS"
+  },
+  "live_firefox": {
+    "checks": 6,
+    "result": "PASS",
+    "build": {
+      "build": "83810bc33c43438c",
+      "version": "0.15.1"
+    },
+    "browser": "Firefox 153.0",
+    "errors": [],
+    "dialogs": [],
+    "scope": "Headed desktop Gecko with Android UA/touch, not physical Poco. Live HTTPS responses forwarded with system-CA TLS verification; SW disabled here and separately tested with real local workers."
+  },
+  "local_render_performance": {
+    "landscape": 55.11666360462987,
+    "portrait": 45.24204494027875
+  },
+  "performance_scope": "Cloud software GPU with video recording: approximately55 landscape /45 portrait FPS. No physical-phone performance claim.",
+  "native_android": {
+    "run_id": 43322478219,
+    "job_id": 131546893092,
+    "artifact_id": 13991402195,
+    "checks": 7,
+    "result": "PASS",
+    "scope": "Offline API30 emulator with real ADB actions, portrait menus and landscape rotation. Disposable CI test key; shipped APK separately uses the stable production signer. Not a physical Poco test."
+  },
+  "observed_preexisting_layout_limit": "The API30 1440×2560 English system-font gameplay screenshot shows the crystals heading partly under Pause and a wrapped ability hint. This patch changes only action-button size/art and enemy rendering, not HUD layout. The native seven-check gate covers menus/input/rotation; it does not certify this HUD overflow.",
+  "release": {
+    "release_url": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.15.1",
+    "source_commit": "9d15440d1751f9c95b1d9e079f4e7dfaa9414204",
+    "version": "0.15.1",
+    "packages": [
+      {
+        "file": "AionEndlessRun-0.15.1-android-arm64-x64.apk",
+        "bytes": 129715684,
+        "sha256": "3251ffcfb2dd54b2a4f62808115f81ee9d5e7f52f3da604c01f6b6e52579b926",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.15.1-linux-x64-portable.tar.gz",
+        "bytes": 105259812,
+        "sha256": "67af29510b197d599dbf52e0634851a35ecabd1bfc64df8eaac787ab0b8a9fa1",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.15.1-linux-x64.AppImage",
+        "bytes": 103352824,
+        "sha256": "8644b05b33e2708dd3534f05127be5b4b63375863c611abec52eb5cdd03380e4",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.15.1-linux-x64.deb",
+        "bytes": 98692908,
+        "sha256": "e3501f03e3dd84471634024e8102914494598cfa99a3846336bcbe9a8a0afb44",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.15.1-macos-universal-portable.zip",
+        "bytes": 140537113,
+        "sha256": "12aa095c34b3b5a52f6f0eb233efc7b997fe28cc28414ef9c9e11bb0787ff657",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.15.1-macos-universal.dmg",
+        "bytes": 149755629,
+        "sha256": "40d8605bfa9f456eaefbddb4955f64711be55f0f5a7d0bcf14c9641973cfa61e",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.15.1-web-offline.tar.gz",
+        "bytes": 88164093,
+        "sha256": "b36f26273665167c4da618a6e9c70cc7de12f8716ad7171f2a44f246d5e685b1",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.15.1-windows-x64-Setup.exe",
+        "bytes": 114005107,
+        "sha256": "bf87dee8f9a299e721592a4479c26ec0604bbbdc819c83476c927f7ad1fa783f",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.15.1-windows-x64-portable.zip",
+        "bytes": 115226089,
+        "sha256": "117d4b5bb9544d38014faba45721d4768c622a4243b97edfd8ca04c5c6c6ab99",
+        "public_digest_matches": true
+      }
+    ],
+    "public_apk_bytes_and_hash_verified": true,
+    "mac_zip_crc_and_universal_cpus_verified": [
+      16777223,
+      16777228
+    ],
+    "signer": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+    "receipt": {
+      "version": "0.15.1",
+      "source_commit": "9d15440d1751f9c95b1d9e079f4e7dfaa9414204",
+      "verified_application_commit": "9d15440d1751f9c95b1d9e079f4e7dfaa9414204",
+      "verification_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43322478219",
+      "source_and_scene_checks": 3604,
+      "browser_checks": 35,
+      "android_native": "API30 offline emulator: real Jump/glide, Attack, Roll, paused resize and actual menu-region separation. No physical phone claim.",
+      "android_signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+      "apple_status": "macOS ad-hoc only; no Developer ID/notarization. Native iOS awaits owner signing.",
+      "files": {
+        "AionEndlessRun-0.15.1-android-arm64-x64.apk": {
+          "bytes": 129715684,
+          "sha256": "3251ffcfb2dd54b2a4f62808115f81ee9d5e7f52f3da604c01f6b6e52579b926"
+        },
+        "AionEndlessRun-0.15.1-linux-x64-portable.tar.gz": {
+          "bytes": 105259812,
+          "sha256": "67af29510b197d599dbf52e0634851a35ecabd1bfc64df8eaac787ab0b8a9fa1"
+        },
+        "AionEndlessRun-0.15.1-linux-x64.AppImage": {
+          "bytes": 103352824,
+          "sha256": "8644b05b33e2708dd3534f05127be5b4b63375863c611abec52eb5cdd03380e4"
+        },
+        "AionEndlessRun-0.15.1-linux-x64.deb": {
+          "bytes": 98692908,
+          "sha256": "e3501f03e3dd84471634024e8102914494598cfa99a3846336bcbe9a8a0afb44"
+        },
+        "AionEndlessRun-0.15.1-macos-universal-portable.zip": {
+          "bytes": 140537113,
+          "sha256": "12aa095c34b3b5a52f6f0eb233efc7b997fe28cc28414ef9c9e11bb0787ff657"
+        },
+        "AionEndlessRun-0.15.1-macos-universal.dmg": {
+          "bytes": 149755629,
+          "sha256": "40d8605bfa9f456eaefbddb4955f64711be55f0f5a7d0bcf14c9641973cfa61e"
+        },
+        "AionEndlessRun-0.15.1-web-offline.tar.gz": {
+          "bytes": 88164093,
+          "sha256": "b36f26273665167c4da618a6e9c70cc7de12f8716ad7171f2a44f246d5e685b1"
+        },
+        "AionEndlessRun-0.15.1-windows-x64-Setup.exe": {
+          "bytes": 114005107,
+          "sha256": "bf87dee8f9a299e721592a4479c26ec0604bbbdc819c83476c927f7ad1fa783f"
+        },
+        "AionEndlessRun-0.15.1-windows-x64-portable.zip": {
+          "bytes": 115226089,
+          "sha256": "117d4b5bb9544d38014faba45721d4768c622a4243b97edfd8ca04c5c6c6ab99"
+        }
+      }
+    },
+    "run_id": 43322478219,
+    "release_job_id": 131550023018,
+    "all_native_platform_jobs": "PASS",
+    "public_apk_signer_verified": true
+  }
 }
