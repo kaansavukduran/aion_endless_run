@@ -6,6 +6,8 @@ Emre is the fifth hero, based on authorized Drive model reference1_gDPSpL7sQDdO7
 
 Tests/evidence: docs/evidence-v0160/. Preserve touch ownership/cancel behavior,11-language English fallback rule, save data, stable native signer, Godot4.6.3,20-second levels and verified Firefox loader2. GitHub remains the development source; no continuous Drive sync was established by this visual/gameplay task.
 
+Delivery0.16.0: application932c3e7, release da37225, successful full native CI43329490987.9 public package digests match receipt; downloaded APK stable signer/hash and universal Mac ZIP validated. Production dpl_HaPifEMKqaGMZzqqP1jUtRbJLvmf READY, Firefox6 checks on build86324583a4955132;39 local browser checks and7 native Android input/layout checks. Actual normal-play video and screenshots distinguish seeded visual fixtures from unseeded gameplay. Physical phone/controller and native iOS distribution limits remain explicit in evidence-v0160.
+
 # Current handoff · 0.15.1 visual polish
 
 Started clean on main d8ae342ee9855f79e52b403a093476dd90118412, Godot4.6.3. The four 0.15 newcomers were drawn with coarse procedural primitives; replace only their rendering with 24 original AI-assisted drawn poses in woodland-creatures.png. register_creatures.py is read-only: transparent alpha spans, explicit near-iris regions, one scale/species, shared floors. Physics, HP, spawn randomness and hitboxes are unchanged. Existing 40 PNGs (heroes, crow/gnome, bosses and scenery) are byte-identical to the starting commit.

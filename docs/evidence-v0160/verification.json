@@ -182,7 +182,7 @@
     "Mac ad-hoc only; native iOS signing awaits owner.",
     "Background panel repeats are mirrored to match their edges; scenes are illustrations, not separately painted per-depth sprite layers."
   ],
-  "recorded_at": "2026-11-13T02:29:21.208669+03:00",
+  "recorded_at": "2026-11-13T02:40:07.409088+03:00",
   "timezone": "Europe/Istanbul",
   "android_package": {
     "version": "0.16.0",
@@ -194,5 +194,164 @@
     "application_source_commit": "932c3e75da3d6dbc589bc7326e2bce39dff99505",
     "provenance_note": "Stable-signed APK exported locally from this application commit. Later commits only record package metadata and delivery evidence; gameplay, scenes, resources and project settings match this commit."
   },
-  "application_commit": "932c3e75da3d6dbc589bc7326e2bce39dff99505"
+  "application_commit": "932c3e75da3d6dbc589bc7326e2bce39dff99505",
+  "ci_source": {
+    "run_id": 43329490987,
+    "job_id": 131570314857,
+    "result": "PASS",
+    "checks": 5531
+  },
+  "production": {
+    "id": "dpl_HaPifEMKqaGMZzqqP1jUtRbJLvmf",
+    "state": "READY",
+    "sha": "da372255e088b54a6cad547f2846705136f194c8",
+    "target": "production",
+    "url": "https://aionendlessrun.vercel.app/"
+  },
+  "release_candidate_commit": "da372255e088b54a6cad547f2846705136f194c8",
+  "live_firefox": {
+    "build": {
+      "build": "86324583a4955132",
+      "version": "0.16.0"
+    },
+    "browser": "Firefox 153.0",
+    "checks": [
+      "The canonical production URL really boots 0.16.0 with a verified PCK in Firefox",
+      "Every actual Aion running frame keeps the corrected horizontal gaze on production",
+      "Firefox touch Attack reaches the actual single-strike animation",
+      "Firefox touch Roll reaches the actual somersault action",
+      "Production rotates upright to portrait without resetting the paused run",
+      "No script errors or missing-PCK alert in live Firefox play"
+    ],
+    "errors": [],
+    "dialogs": [],
+    "scope": "Headed desktop Gecko with Android UA/touch, not physical Poco. Live HTTPS responses forwarded with system-CA TLS verification; SW disabled here and separately tested with real local workers."
+  },
+  "native_android": {
+    "run_id": 43329490987,
+    "job_id": 131570744823,
+    "artifact_id": 13993828065,
+    "result": "PASS",
+    "checks": 7,
+    "scope": "API30 offline emulator with actual ADB menu, hold-Jump/owl glide, Attack, Roll and portrait/landscape checks. Disposable CI key; stable production APK separately signed and verified. Not a physical Poco or Emre-specific Android input test."
+  },
+  "release": {
+    "release_url": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.16.0",
+    "source_commit": "da372255e088b54a6cad547f2846705136f194c8",
+    "version": "0.16.0",
+    "packages": [
+      {
+        "file": "AionEndlessRun-0.16.0-android-arm64-x64.apk",
+        "bytes": 136127336,
+        "sha256": "293d99ef8b034db1a9b503868071e4fd66135ff16fade8e68bc8e9b05e37170e",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.16.0-linux-x64-portable.tar.gz",
+        "bytes": 111658241,
+        "sha256": "fea44d2d6458f79183829ffb2b9ff1472e9bc2f9d21865099a190234e52e1bfc",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.16.0-linux-x64.AppImage",
+        "bytes": 109754872,
+        "sha256": "23748a61478279f2dce1f1c2c68d2a9552d5d7edb20ac647019258dcc9e9012e",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.16.0-linux-x64.deb",
+        "bytes": 105054618,
+        "sha256": "bf6f9c1af86fa2f1f6aa84be0b1f3f574fca076f4ed3e1dde5019b1914ab97e2",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.16.0-macos-universal-portable.zip",
+        "bytes": 146930410,
+        "sha256": "fc2767cd38f121015d81b54fb3e4fff6f756f43ca0dae5c7550f3f0b366dffa3",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.16.0-macos-universal.dmg",
+        "bytes": 156187668,
+        "sha256": "4e7ee004c3a5deaf3ece8c08aa42f741290d84b50c400f51886033f144be9c98",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.16.0-web-offline.tar.gz",
+        "bytes": 94565011,
+        "sha256": "bff4a2eab6aa6fc4bafe81e553075f0c7c6cea3ceddbc659d9d7570a79339c26",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.16.0-windows-x64-Setup.exe",
+        "bytes": 120401233,
+        "sha256": "8338ca85874b676b2fccf370d72d0aa79f3fa88c4865a76f1804a23142334031",
+        "public_digest_matches": true
+      },
+      {
+        "file": "AionEndlessRun-0.16.0-windows-x64-portable.zip",
+        "bytes": 121628135,
+        "sha256": "2983019e90d44aa659cf865c773c067cb7948e8bb4464850fcd3c8870ef89048",
+        "public_digest_matches": true
+      }
+    ],
+    "public_apk_bytes_and_hash_verified": true,
+    "mac_zip_crc_and_universal_cpus_verified": [
+      16777223,
+      16777228
+    ],
+    "signer": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+    "receipt": {
+      "version": "0.16.0",
+      "source_commit": "da372255e088b54a6cad547f2846705136f194c8",
+      "verified_application_commit": "da372255e088b54a6cad547f2846705136f194c8",
+      "verification_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43329490987",
+      "source_and_scene_checks": 5531,
+      "browser_checks": 39,
+      "android_native": "API30 offline emulator: real Jump/glide, Attack, Roll, paused resize and actual menu-region separation. No physical phone claim.",
+      "android_signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+      "apple_status": "macOS ad-hoc only; no Developer ID/notarization. Native iOS awaits owner signing.",
+      "files": {
+        "AionEndlessRun-0.16.0-android-arm64-x64.apk": {
+          "bytes": 136127336,
+          "sha256": "293d99ef8b034db1a9b503868071e4fd66135ff16fade8e68bc8e9b05e37170e"
+        },
+        "AionEndlessRun-0.16.0-linux-x64-portable.tar.gz": {
+          "bytes": 111658241,
+          "sha256": "fea44d2d6458f79183829ffb2b9ff1472e9bc2f9d21865099a190234e52e1bfc"
+        },
+        "AionEndlessRun-0.16.0-linux-x64.AppImage": {
+          "bytes": 109754872,
+          "sha256": "23748a61478279f2dce1f1c2c68d2a9552d5d7edb20ac647019258dcc9e9012e"
+        },
+        "AionEndlessRun-0.16.0-linux-x64.deb": {
+          "bytes": 105054618,
+          "sha256": "bf6f9c1af86fa2f1f6aa84be0b1f3f574fca076f4ed3e1dde5019b1914ab97e2"
+        },
+        "AionEndlessRun-0.16.0-macos-universal-portable.zip": {
+          "bytes": 146930410,
+          "sha256": "fc2767cd38f121015d81b54fb3e4fff6f756f43ca0dae5c7550f3f0b366dffa3"
+        },
+        "AionEndlessRun-0.16.0-macos-universal.dmg": {
+          "bytes": 156187668,
+          "sha256": "4e7ee004c3a5deaf3ece8c08aa42f741290d84b50c400f51886033f144be9c98"
+        },
+        "AionEndlessRun-0.16.0-web-offline.tar.gz": {
+          "bytes": 94565011,
+          "sha256": "bff4a2eab6aa6fc4bafe81e553075f0c7c6cea3ceddbc659d9d7570a79339c26"
+        },
+        "AionEndlessRun-0.16.0-windows-x64-Setup.exe": {
+          "bytes": 120401233,
+          "sha256": "8338ca85874b676b2fccf370d72d0aa79f3fa88c4865a76f1804a23142334031"
+        },
+        "AionEndlessRun-0.16.0-windows-x64-portable.zip": {
+          "bytes": 121628135,
+          "sha256": "2983019e90d44aa659cf865c773c067cb7948e8bb4464850fcd3c8870ef89048"
+        }
+      }
+    },
+    "run_id": 43329490987,
+    "all_native_platform_jobs": "PASS",
+    "public_apk_signer_verified": true
+  }
 }

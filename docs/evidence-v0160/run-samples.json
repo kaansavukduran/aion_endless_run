@@ -1,0 +1,217 @@
+{
+  "aion": {
+    "0": [
+      302,
+      288,
+      "canonical-aion"
+    ],
+    "1": [
+      302,
+      288,
+      "canonical-aion"
+    ],
+    "2": [
+      302,
+      288,
+      "canonical-aion"
+    ],
+    "3": [
+      302,
+      288,
+      "canonical-aion"
+    ],
+    "4": [
+      302,
+      288,
+      "canonical-aion"
+    ],
+    "5": [
+      302,
+      288,
+      "canonical-aion"
+    ],
+    "6": [
+      302,
+      288,
+      "canonical-aion"
+    ]
+  },
+  "owl": {
+    "0": [
+      302,
+      288,
+      "canonical-owl"
+    ],
+    "1": [
+      302,
+      288,
+      "canonical-owl"
+    ],
+    "2": [
+      302,
+      288,
+      "canonical-owl"
+    ],
+    "3": [
+      302,
+      288,
+      "canonical-owl"
+    ],
+    "4": [
+      302,
+      288,
+      "canonical-owl"
+    ],
+    "5": [
+      302,
+      288,
+      "canonical-owl"
+    ],
+    "6": [
+      302,
+      288,
+      "canonical-owl"
+    ]
+  },
+  "wolf": {
+    "0": [
+      302,
+      288,
+      "canonical-wolf"
+    ],
+    "1": [
+      302,
+      288,
+      "canonical-wolf"
+    ],
+    "2": [
+      302,
+      288,
+      "canonical-wolf"
+    ],
+    "3": [
+      302,
+      288,
+      "canonical-wolf"
+    ],
+    "4": [
+      302,
+      288,
+      "canonical-wolf"
+    ],
+    "5": [
+      302,
+      288,
+      "canonical-wolf"
+    ],
+    "6": [
+      302,
+      288,
+      "canonical-wolf"
+    ],
+    "7": [
+      302,
+      288,
+      "canonical-wolf"
+    ]
+  },
+  "sheep": {
+    "0": [
+      302,
+      288,
+      "canonical-sheep"
+    ],
+    "1": [
+      302,
+      288,
+      "canonical-sheep"
+    ],
+    "2": [
+      302,
+      288,
+      "canonical-sheep"
+    ],
+    "3": [
+      302,
+      288,
+      "canonical-sheep"
+    ],
+    "4": [
+      302,
+      288,
+      "canonical-sheep"
+    ],
+    "5": [
+      302,
+      288,
+      "canonical-sheep"
+    ],
+    "6": [
+      302,
+      288,
+      "canonical-sheep"
+    ]
+  },
+  "rabbit": {
+    "0": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "1": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "2": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "3": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "4": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "5": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "6": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "7": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "8": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "9": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "10": [
+      306,
+      288,
+      "emre-movement"
+    ],
+    "11": [
+      306,
+      288,
+      "emre-movement"
+    ]
+  }
+}

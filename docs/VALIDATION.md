@@ -1,4 +1,8 @@
-# 0.15.1 · Güncel doğrulama
+# 0.16.0 · Güncel doğrulama
+
+[Gerçek ekranlar, kayıtlar ve kapsam](evidence-v0160/README.md).15 Godot kaynak/sahne paketi, **5531 kontrol**;7 web paketleme ve4 Android kayıt ayrıştırma testi. Yeni `test_orchard.gd` ve normal girdili `browser_orchard.py`, erişilebilir meyve yerleşimini ve Emre akışını denetler. `browser_runner_ux.py` artık beş kahramanın gerçek animasyon döngüsünü kontrol eder;31 kontrol geçti. Bunlara8 gerçek meyve/Emre/boss/yön kontrolü eklenir. Aşağıdaki sürüm notları tarihçedir.
+
+# 0.15.1 · Önceki doğrulama
 
 [Gerçek oyun görüntüleri ve doğrulama](evidence-v0151/README.md). Güncel kapı: **14 Godot kaynak/sahne paketi, 3604 kontrol; 7 web paketleme ve 4 Android kayıt ayrıştırma testi**. Görsel regresyonlar `tests/test_visual_polish.gd` ile simetri, gerçek dokunma maskesi, farklı düşman kareleri, yüz/zemin hizası ve ortak ölçeği denetler. Tarayıcı sonuçları ve hangi derlemede çalıştırıldığı sürüm kanıtındadır. Aşağıdaki kayıtlar önceki sürümlerin tarihçesidir.
 
