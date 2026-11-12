@@ -71,7 +71,7 @@ jobs:
         run: |
           mkdir -p build
           touch build/.gdignore
-          godot --headless --editor --import --quit
+          python3 -c "import subprocess; subprocess.run(['godot','--headless','--editor','--import','--quit'],check=True,timeout=300)"
       - name: Linux packages and preview
         if: runner.os == 'Linux'
         run: |

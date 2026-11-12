@@ -2,8 +2,8 @@
   "version": "0.15.0",
   "base_commit": "2f15b5ea45854c2959716fa7425c2015861d7d5c",
   "engine": "4.6.3",
-  "tested_export_build": "55373f3f39b5b403",
-  "source_and_scene_checks": 3450,
+  "tested_export_build": "4a4975352fddb686",
+  "source_and_scene_checks": 3452,
   "source_suites": [
     {
       "suite": "game",
@@ -93,23 +93,17 @@
       "suite": "variety",
       "exit_code": 0,
       "result": [
-        "RESULT: 549 variety/transition/locale checks, 0 failures"
+        "RESULT: 551 variety/transition/locale checks, 0 failures"
       ]
     }
   ],
-  "browser_checks": 200,
+  "browser_checks": 217,
   "browser_suites": [
     {
       "suite": "locales",
       "checks": 96,
       "result": "PASS",
       "build": "e14a739eca3f023d"
-    },
-    {
-      "suite": "gamepad",
-      "checks": 31,
-      "result": "PASS",
-      "build": "8b5632e4ecc549af"
     },
     {
       "suite": "runner",
@@ -134,29 +128,50 @@
       "checks": 19,
       "result": "PASS",
       "build": "29fed4b9a0ce3034"
+    },
+    {
+      "suite": "gamepad-boss-return",
+      "checks": 37,
+      "result": "PASS",
+      "build": "55373f3f39b5b403"
+    },
+    {
+      "suite": "upgrade-0.14.1-to-0.15.0",
+      "checks": 11,
+      "result": "PASS",
+      "build": "55373f3f39b5b403"
     }
   ],
   "original_png_count": 40,
   "original_pngs_unchanged": true,
   "limits": [
-    "No physical Xbox/PlayStation, Poco X7 Firefox, iPhone or native-language editorial review.",
-    "Android host ADB cannot create its default config directory in this read-only home; native emulator checks are delegated to the existing owner-authorized GitHub Actions job, not claimed locally.",
-    "Additional unseeded route, loader and publishing verification in progress; this file is updated with completed evidence only."
+    "No physical Xbox/PlayStation, Poco X7 Firefox, iPhone, screen-reader, or native-language editorial review.",
+    "Local host ADB cannot create its default directory in the read-only home. Native Android was actually verified in the GitHub Actions API30 job cited above.",
+    "Final native release and production readback are appended only after successful checks."
   ],
   "packaging_checks": 11,
   "android_apk": {
     "version": "0.15.0",
     "name": "AionEndlessRun-0.15.0-android-arm64-x64.apk",
-    "sha256": "5b4928adb3884a0520b3a20288a76ee3be9aebb10f881072a64d0ea5fcee4b1c",
+    "sha256": "eb8b4d8717f47b2b02a6e554f776124abf4240d52938a28d8bbdda01f9d306f7",
     "bytes": 127986869,
     "version_code": 17,
     "signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
-    "application_source_commit": "e472f2c7b5b85f6edd800b97c88fd3a0df451643",
+    "application_source_commit": "f805e8d66d129f8828091474cfc4933fd19da91d",
     "provenance_note": "Stable-signed APK exported locally from this application commit. Later commits add verification and passive browser-driver evidence; gameplay, scenes, resources and project settings match this commit."
   },
   "diagnosed_ci_failures": [
     "First main run 43311740652: Linux/Windows outputs still used 0.14.1 names; packaging scripts and cross-version contract corrected.",
-    "Android UI diagnostic record exceeded the native log-line limit after adding eleven languages. Replaced one long record with bounded base64 chunks, validated by four parser tests; no gameplay state setters. Native verification rerun pending."
+    "Android UI diagnostic record exceeded the native log-line limit after adding eleven languages. Replaced one long record with bounded base64 chunks, validated by four parser tests; no gameplay state setters. Native rerun 43313385100 / job 131515689313 passed all seven input/layout checks."
   ],
-  "application_commit": "e472f2c7b5b85f6edd800b97c88fd3a0df451643"
+  "application_commit": "f805e8d66d129f8828091474cfc4933fd19da91d",
+  "native_android": {
+    "result": "PASS",
+    "checks": 7,
+    "run_id": 43313385100,
+    "job_id": 131515689313,
+    "artifact_id": 13987656427,
+    "application_commit": "e2239af854a05fc40e89ac9f3b4b5c0361572bd1",
+    "scope": "Offline API30 emulator: real ADB touches, glide, attack, roll, display resize and actual menu regions. No physical Poco claim."
+  }
 }
