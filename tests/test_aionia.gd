@@ -31,6 +31,7 @@ func run() -> void:
 	check(not restored.dark and restored.theme_mode=="light" and restored.font_mode=="pixel" and restored.text_scale==2 and restored.reduced_motion,"Explicit appearance choices survive settings serialization")
 	var path:="user://save.cfg";var original:=FileAccess.get_file_as_bytes(path) if FileAccess.file_exists(path) else PackedByteArray()
 	var game=load("res://main.tscn").instantiate();root.add_child(game);await process_frame;game.set_physics_process(false)
+	print("AIONIA_BODY_FONT ",game.interface_options.body_font.get_font_name())
 	game.touch_mode=true;game.touch_tutorial_done=true;game.interface_options.text_scale=1.0;game.interface_options.font_mode="system"
 	game.interface_options.theme_mode="dark";game.interface_options.resolve_theme();game.build_theme();game.ui.theme=game.ui_theme
 	check(not game.gamepad.haptics,"Controller vibration is opt-in by default")
@@ -82,6 +83,19 @@ func run() -> void:
 						if not buttons.is_empty():
 							scrolls[0].ensure_control_visible(buttons[-1]);await process_frame;await process_frame
 							check(scrolls[0].get_global_rect().encloses(buttons[-1].get_global_rect()),"Last enlarged/long-menu action is reachable "+lang+target)
+	root.size=Vector2i(1200,540);await process_frame
+	game.interface_options.text_scale=1;game.language="cs";game.page="main"
+	for family in ["DejaVu Sans","Liberation Sans"]:
+		var alternate:=SystemFont.new();alternate.font_names=PackedStringArray([family]);alternate.fallbacks=[ThemeDB.fallback_font]
+		game.interface_options.body_font=alternate;game.ui_theme.default_font=alternate
+		game.rebuild();await process_frame;await process_frame
+		print("AIONIA_ALTERNATE_FONT ",alternate.get_font_name())
+		for tile in game.menu_layer.find_children("StartSelect_*","Button",true,false):
+			if not tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()):
+				var title: Label=tile.get_child(0).get_child(1)
+				print("FONT_LAYOUT_DEBUG ",tile.get_global_rect()," row ",tile.get_child(0).get_global_rect()," title ",title.get_global_rect()," min ",title.get_minimum_size()," font ",title.get_theme_font("font").get_font_name()," theme ",game.ui.theme.default_font.get_font_name()," same ",game.ui.theme==game.ui_theme," lines ",title.get_line_count()," size ",title.get_theme_font_size("font_size")," measure ",alternate.get_multiline_string_size(title.text,HORIZONTAL_ALIGNMENT_LEFT,title.size.x,title.get_theme_font_size("font_size")))
+			check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Czech names fit measured alternate font "+family+str(tile.name))
+		check(not game.menu_layer.get_node("PagePanel").get_global_rect().intersects(game.menu_layer.get_node("StartChooser").get_global_rect()),"Measured alternate-font roster does not overlap main actions "+family)
 	game.interface_options.text_scale=1;game.world.reset();game.world.state="running";game.world.adventure.celebrations_enabled=true
 	game.world.adventure.collect(game.world,"fragaria")
 	var party: Array=game.evolution_view.fragaria_tableau()

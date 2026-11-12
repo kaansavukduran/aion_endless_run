@@ -83,6 +83,8 @@ var notice_time := 0.0
 var menu_clock := 0.0
 var particles: Array[Dictionary] = []
 var save_failed := false
+var save_observation := {}
+var save_revision := 0
 var finished_panel := false
 var player_sound: AudioStreamPlayer
 var layout_size := Vector2.ZERO
@@ -201,6 +203,8 @@ func load_settings() -> void:
 	var cfg := ConfigFile.new()
 	language = default_language()
 	var loaded := cfg.load("user://save.cfg")
+	if preload("res://scripts/browser_save.gd").restore(cfg):loaded=OK
+	save_revision=maxi(0,int(cfg.get_value("meta","revision",0)))
 	interface_options.load_from(cfg)
 	gamepad.load_from(cfg)
 	if loaded != OK:
@@ -248,10 +252,16 @@ func save_settings() -> void:
 	cfg.set_value("prefs", "prism_intensity", prism_intensity)
 	interface_options.save_to(cfg)
 	gamepad.save_to(cfg)
+	save_revision=maxi(save_revision+1,int(Time.get_unix_time_from_system()*1000.0))
+	cfg.set_value("meta","schema",1);cfg.set_value("meta","revision",save_revision)
+	var mirrored:=preload("res://scripts/browser_save.gd").persist(cfg,save_revision)
 	var result := cfg.save("user://save.tmp")
 	if result == OK:
 		result = DirAccess.rename_absolute("user://save.tmp", "user://save.cfg")
-	save_failed = result != OK
+	save_failed = result != OK and not mirrored
+	var written:=ConfigFile.new()
+	var read_result:=written.load("user://save.cfg")
+	save_observation={"write_error":result,"read_error":read_result,"theme":str(written.get_value("prefs","theme_mode","missing")),"scale":float(written.get_value("prefs","text_scale",0)),"modified":FileAccess.get_modified_time("user://save.cfg")}
 	if result==OK and OS.has_feature("web"):
 		# The final atomic rename must be part of the persistent snapshot.
 		JavaScriptBridge.force_fs_sync()
@@ -1116,7 +1126,7 @@ func update_hud() -> void:
 		control.disabled = world.adventure.hugging() or (id=="shoot" and world.frontier.phase!="fight") or (id=="attack" and world.adventure.ducking(world))
 		control.cooldown = world.adventure.attack_cooldown/world.adventure.ATTACK_COOLDOWN if id=="attack" else (world.frontier.shot_cooldown/world.frontier.SHOT_CADENCE if id=="shoot" else 0.0)
 		control.queue_redraw()
-	if is_instance_valid(fragaria_panel): fragaria_panel.visible = world.adventure.fragaria_time>0 and page in ["","paused"] and interface_options.text_scale<=1.25
+	if is_instance_valid(fragaria_panel): fragaria_panel.visible = world.adventure.fragaria_time>0 and page in ["","paused"] and interface_options.text_scale<=1.0
 	footer_label.visible = page==""
 	ability_label.visible = page=="" and not boss.active()
 	biome_label.visible = page in ["","paused"]
@@ -1134,7 +1144,7 @@ func update_hud() -> void:
 		elif world.riding_gust: ability_label.text = text("riding_gust") if world.wind_kind() == "up" else text("riding_"+world.wind_kind())
 		elif world.gliding: ability_label.text = text("gliding")
 		elif world.boosting(): ability_label.text = text("boosting")
-	if interface_options.text_scale>1.25:
+	if interface_options.text_scale>1.0:
 		biome_label.hide();power_label.hide();goal_label.hide();ability_label.hide();footer_label.hide()
 	publish_web_status()
 
@@ -1282,6 +1292,7 @@ func publish_web_status() -> void:
 		var rect: Rect2 = settings_inputs[id].get_global_rect()
 		numeric_controls[id] = {"x":rect.position.x,"y":rect.position.y,"w":rect.size.x,"h":rect.size.y}
 	canvas.setAttribute("data-settings-inputs",JSON.stringify(numeric_controls))
+	canvas.setAttribute("data-save-observation",JSON.stringify(save_observation))
 	canvas.setAttribute("data-theme",interface_options.theme_mode)
 	canvas.setAttribute("data-theme-dark",str(interface_options.dark))
 	canvas.setAttribute("data-font-mode",interface_options.font_mode)

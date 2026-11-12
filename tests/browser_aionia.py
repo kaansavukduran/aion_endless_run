@@ -57,9 +57,9 @@ with sync_playwright() as pw:
       }db.close();
     }return out;
   }""")
-  print('PERSISTED_BEFORE_WAIT',name,persisted,flush=True)
+  print('PERSISTED_BEFORE_WAIT',name,persisted,'MEMORY',d().get('saveObservation'),flush=True)
   # Readbacks follow a genuine save and fresh engine/IndexedDB load.
-  wait('[data-theme="light"][data-text-scale="1.0"][data-ui-ready="true"]');page.wait_for_timeout(2300);page.reload();wait('[data-page="main"][data-ui-ready="true"]')
+  wait('[data-theme="light"][data-text-scale="1.0"][data-ui-ready="true"]');check(page.evaluate('JSON.parse(localStorage.getItem("aion-runner-save-v1")).schema===1'),name+': a real synchronous recovery copy exists before immediate reload');page.reload();wait('[data-page="main"][data-ui-ready="true"]')
   check(d()['theme']=='light' and d()['fontMode']=='system' and d()['textScale']=='1.0',name+': chosen theme/font/text settings survive a real reload '+str({k:d().get(k) for k in ['theme','fontMode','textScale']}))
   semantic('Settings');option('Option_theme_dark');page.locator('#aion-accessibility-controls').get_by_role('button',name=re.compile('^‹')).press('Enter');page.wait_for_timeout(150);wait('[data-page="main"]');page.screenshot(path=str(a.evidence/(name+'-dark-main.png')))
   ctx.close()

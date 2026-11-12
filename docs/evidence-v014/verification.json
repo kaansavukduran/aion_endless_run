@@ -1,9 +1,9 @@
 {
   "version": "0.14.0",
   "standards": "AIONIA v1.4",
-  "base_commit": "c54cff00f288b29d59eed7c83a2cc8a4a6f024ad",
-  "tested_export_build": "cde88395991f575c",
-  "source_and_scene_checks": 2539,
+  "base_commit": "add2d598553ade8574a8714b67af6a2cc399b3ec",
+  "tested_export_build": "9bb15b0a19e43f88",
+  "source_and_scene_checks": 2549,
   "source_suites": [
     {
       "suite": "game",
@@ -86,62 +86,70 @@
       "suite": "aionia",
       "exit_code": 0,
       "result": [
-        "RESULT: 321 AIONIA checks, 0 failures"
+        "RESULT: 331 AIONIA checks, 0 failures"
       ]
     }
   ],
-  "browser_checks": 184,
+  "browser_checks": 190,
   "browser_suites": [
     {
       "suite": "aionia",
-      "checks": 48,
+      "checks": 54,
       "status": "PASS",
-      "evidence": "browser/aionia.json"
+      "evidence": "browser/aionia.json",
+      "export_build": "9bb15b0a19e43f88"
     },
     {
       "suite": "gamepad",
       "checks": 31,
       "status": "PASS",
-      "evidence": "browser/gamepad.json"
+      "evidence": "browser/gamepad.json",
+      "export_build": "cde88395991f575c"
     },
     {
       "suite": "runner",
       "checks": 29,
       "status": "PASS",
-      "evidence": "browser/runner.json"
+      "evidence": "browser/runner.json",
+      "export_build": "cde88395991f575c"
     },
     {
       "suite": "panels",
       "checks": 21,
       "status": "PASS",
-      "evidence": "browser/panels.json"
+      "evidence": "browser/panels.json",
+      "export_build": "9bb15b0a19e43f88"
     },
     {
       "suite": "firefox-loader",
       "checks": 19,
       "status": "PASS",
-      "evidence": "browser/firefox-loader.json"
+      "evidence": "browser/firefox-loader.json",
+      "export_build": "9bb15b0a19e43f88"
     },
     {
       "suite": "chromium-loader",
       "checks": 19,
       "status": "PASS",
-      "evidence": "browser/chromium-loader.json"
+      "evidence": "browser/chromium-loader.json",
+      "export_build": "9bb15b0a19e43f88"
     },
     {
       "suite": "upgrade",
       "checks": 11,
       "status": "PASS",
-      "evidence": "browser/upgrade.json"
+      "evidence": "browser/upgrade.json",
+      "export_build": "9bb15b0a19e43f88"
     },
     {
       "suite": "boss-hud",
       "checks": 6,
       "status": "PASS",
-      "evidence": "browser/boss-hud.json"
+      "evidence": "browser/boss-hud.json",
+      "export_build": "cde88395991f575c"
     }
   ],
-  "packaging_contract_tests": 5,
+  "packaging_contract_tests": 6,
   "physical_phone": "NOT TESTED",
   "physical_gamepad": "NOT TESTED",
   "screen_reader_end_to_end": "NOT TESTED",

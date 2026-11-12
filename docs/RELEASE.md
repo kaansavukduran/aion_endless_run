@@ -6,7 +6,7 @@ Kullanıcının seçtiği bölünmüş telefon kontrolleri: solda Zıpla, sağda
 
 Siyah Fragaria açılışı gerçek ilerlemeye bağlı on segmentli çubukla web ve native sahnede. Çilek kutlaması arka planda büyük FRAGARIA ve sekiz mevcut kutlama kimliği kullanır; ödül vermez. Kahraman çizimleri değiştirilmez. Firefox PCK doğrulama, eski worker güncellemesi ve çevrimdışı kayıtlar korunur; son atomik ayar taşımasından sonra açık FS senkronizasyonu istenir.
 
-Kaynak doğrulaması: 2.539 sahne/model kontrolü, 184 gerçek tarayıcı kontrolü ve 5 paket sözleşme testi. [Kapsam ve NOT TESTED alanları](AIONIA-QA.md). Paket makbuzu gerçek native CI sonuçlarına bağlanır; testten önce yayın başarılı denmez.
+Kaynak doğrulaması: 2.549 sahne/model kontrolü, 190 gerçek tarayıcı kontrolü ve 6 paket sözleşme testi. [Kapsam ve NOT TESTED alanları](AIONIA-QA.md). Paket makbuzu gerçek native CI sonuçlarına bağlanır; testten önce yayın başarılı denmez.
 
 ## İndirme / platform
 

@@ -87,7 +87,7 @@ func hud() -> void:
 	h.ui.add_child(h.notice_label)
 	h.notice_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	h.position_control(h.notice_label,Vector2(12,338 if h.portrait else 272),Vector2(h.view_w-24,62 if h.portrait else 34))
-	if h.interface_options.text_scale>1.25:
+	if h.interface_options.text_scale>1.0:
 		band.size.y=122
 		stats.add_theme_constant_override("separation",20)
 		stats.get_child(1).hide()
@@ -104,11 +104,11 @@ func hud() -> void:
 func card(width: float) -> VBoxContainer:
 	var h=host
 	width=minf(width,h.view_w-40)
-	var enlarged: bool=h.interface_options.text_scale>1.25
+	var enlarged: bool=h.interface_options.text_scale>1.0
 	if enlarged:width=h.view_w-40
 	var height: float=minf(h.view_h-120,410 if h.page!="main" else 340)
 	if h.page=="settings" or enlarged:height=h.view_h-110
-	if h.page=="main" and h.touch_mode and not h.portrait and not enlarged:height=292
+	if h.page=="main" and h.touch_mode and not h.portrait and not enlarged:height=minf(292,roster_y()-chooser_height()-6-56-8)
 	var panel:=PanelContainer.new()
 	panel.name="PagePanel"
 	h.menu_layer.add_child(panel)
@@ -130,23 +130,50 @@ func card(width: float) -> VBoxContainer:
 	else:panel.add_child(column)
 	return column
 
+func roster_geometry(width: float,separate: bool=false) -> Dictionary:
+	var h=host
+	var enlarged: bool=h.interface_options.text_scale>1.0
+	var columns:=1 if enlarged and h.portrait else (2 if h.portrait or separate or enlarged else 4)
+	var tile_w: float=(width-float(columns-1)*10)/columns
+	var tile_h:=210.0 if enlarged else (120.0 if h.portrait else (104.0 if not h.touch_mode else 94.0))
+	var probe: Label=h.wrap_label("",20)
+	probe.theme=h.ui.theme
+	probe.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	h.ui.add_child(probe)
+	# Label shaping includes the actual fallback font, smart wrapping and theme
+	# line spacing. Measure at the smallest integer width the grid can allocate.
+	probe.size=Vector2(maxf(60,floorf(tile_w)-88),0)
+	for id in h.FRIENDS:
+		for prefix in ["","> "]:
+			probe.text=prefix+h.character_name(id)
+			tile_h=maxf(tile_h,ceilf(probe.get_minimum_size().y)+22)
+	probe.free()
+	var rows:=ceili(float(h.FRIENDS.size())/columns)
+	return {"columns":columns,"width":tile_w,"height":tile_h,"total_height":tile_h*rows+float(rows-1)*10}
+
+func roster_y() -> float:
+	return host.view_h-float(roster_geometry(host.view_w-56).total_height)-20
+
+func chooser_height() -> float:
+	return maxf(36,ceilf(host.interface_options.body_font.get_height(host.ui_size(24 if host.touch_mode else 20))))
+
 func roster(parent: Control, at: Vector2, width: float, separate: bool=false) -> void:
 	var h=host
-	var enlarged: bool=h.interface_options.text_scale>1.25
-	var columns:=1 if enlarged and h.portrait else (2 if h.portrait or separate or enlarged else 4)
+	var enlarged: bool=h.interface_options.text_scale>1.0
+	var geometry:=roster_geometry(width,separate)
+	var columns: int=geometry.columns
 	var grid:=GridContainer.new()
 	grid.columns=columns
 	grid.add_theme_constant_override("h_separation",10)
 	grid.add_theme_constant_override("v_separation",10)
 	parent.add_child(grid)
 	grid.position=at
-	var tile_w: float=(width-float(columns-1)*10)/columns
+	var tile_w: float=geometry.width
 	for id in h.FRIENDS:
 		var tile: Button=h.button("",func():h.select_character(id),id==h.character)
 		tile.name=("Select_" if separate else "StartSelect_")+id
 		tile.accessibility_name=h.character_name(id)+(" · "+h.text("setting_on") if id==h.character else "")
-		tile.custom_minimum_size=Vector2(tile_w,120 if h.portrait else (104 if not h.touch_mode else 92))
-		if enlarged:tile.custom_minimum_size.y=210
+		tile.custom_minimum_size=Vector2(tile_w,geometry.height)
 		grid.add_child(tile)
 		var row:=HBoxContainer.new()
 		row.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -167,8 +194,12 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 func main(column: VBoxContainer) -> Button:
 	var h=host
 	var record: Label=h.label(h.text("best")+"  %05d" % h.best,22,"f2d5a6")
-	h.menu_layer.add_child(record)
-	record.position=Vector2(28,18)
+	if h.interface_options.text_scale>1.0:
+		record.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		column.add_child(record)
+	else:
+		h.menu_layer.add_child(record)
+		record.position=Vector2(28,18)
 	var logo: Label=h.label("AION",48,"f8d9b1")
 	logo.add_theme_font_override("font",h.FONT)
 	column.add_child(logo)
@@ -179,28 +210,28 @@ func main(column: VBoxContainer) -> Button:
 	column.add_child(first)
 	column.add_child(h.button(h.text("boss_training"),func():h.show_page("bosses")))
 	column.add_child(h.button(h.text("settings"),func():h.open_subpage("settings")))
-	if h.touch_mode and not h.portrait and h.interface_options.text_scale<=1.25:
-		logo.add_theme_font_size_override("font_size",32)
-		subtitle.add_theme_font_override("font",h.FONT)
-		subtitle.add_theme_font_size_override("font_size",20)
+	if h.touch_mode and not h.portrait and h.interface_options.text_scale<=1.0:
+		logo.text="AION · ENDLESS RUN"
+		logo.add_theme_font_size_override("font_size",26)
+		subtitle.hide()
 		for item in column.get_children():
 			if item is Button:
 				item.custom_minimum_size.y=64
-				item.add_theme_font_size_override("font_size",26)
+				item.add_theme_font_size_override("font_size",24)
 	var choose: Label=h.wrap_label(h.text("choose_before_run"),20,"ffe1b9")
 	choose.name="StartChooser"
-	if h.interface_options.text_scale>1.25:
+	if h.interface_options.text_scale>1.0:
 		column.add_child(choose)
 		var roster_host:=Control.new()
-		roster_host.custom_minimum_size.y=880 if h.portrait else 440
+		roster_host.custom_minimum_size.y=roster_geometry(h.view_w-68).total_height
 		column.add_child(roster_host)
 		roster(roster_host,Vector2.ZERO,h.view_w-68)
 		return first
 	h.menu_layer.add_child(choose)
-	var roster_y: float=h.view_h-270 if h.portrait else h.view_h-(120 if h.touch_mode else 154)
-	choose.position=Vector2(28,roster_y-42)
-	choose.size=Vector2(h.view_w-56,36)
-	roster(h.menu_layer,Vector2(28,roster_y),h.view_w-56)
+	var roster_at: float=roster_y()
+	choose.position=Vector2(28,roster_at-chooser_height()-6)
+	choose.size=Vector2(h.view_w-56,chooser_height())
+	roster(h.menu_layer,Vector2(28,roster_at),h.view_w-56)
 	return first
 
 func characters() -> void:
@@ -208,7 +239,7 @@ func characters() -> void:
 	var column: VBoxContainer=card(760)
 	column.add_child(h.label(h.text("choose"),26))
 	var grid_host:=Control.new()
-	grid_host.custom_minimum_size.y=(880 if h.portrait else 440) if h.interface_options.text_scale>1.25 else (250 if h.portrait else 220)
+	grid_host.custom_minimum_size.y=roster_geometry(minf(760,h.view_w-40)-28,true).total_height
 	column.add_child(grid_host)
 	roster(grid_host,Vector2.ZERO,minf(760,h.view_w-40)-28,true)
 	var back: Button=h.button(h.text("back"),func():h.show_page(h.return_page))
@@ -221,10 +252,10 @@ func tutorial() -> void:
 	h.tutorial_panel=panel
 	h.ui.add_child(panel)
 	h.position_control(panel,Vector2(18 if h.portrait else h.view_w-520,200 if h.portrait else 80),Vector2(504 if h.portrait else 500,160))
-	if h.interface_options.text_scale>1.25:
+	if h.interface_options.text_scale>1.0:
 		h.position_control(panel,Vector2(18,84),Vector2(h.view_w-36,floorf(h.view_h-124)))
 	var column:=VBoxContainer.new()
-	if h.interface_options.text_scale>1.25:
+	if h.interface_options.text_scale>1.0:
 		var scroll:=ScrollContainer.new()
 		scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 		scroll.follow_focus=true
