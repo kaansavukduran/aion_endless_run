@@ -33,6 +33,7 @@ with sync_playwright() as pw:
  click(name='StartSelect_sheep');wait('[data-character="sheep"]');click(text='Boss antrenmanı');wait('[data-page="bosses"]')
  start_best=d()['best']
  for kind in range(3):
+  page.evaluate('''()=>{window.returnSamples=[];if(window.returnObserver)returnObserver.disconnect();window.returnObserver=new MutationObserver(()=>{const d=document.querySelector('canvas').dataset;if(d.bossActive==='true')returnSamples.push({t:Number(d.worldTime),travel:Number(d.travelDistance),normal:Number(d.worldDistance),phase:d.bossPhase})});returnObserver.observe(document.querySelector('canvas'),{attributes:true})}''')
   click(name='PracticeBoss_'+str(kind));wait('[data-boss-phase="fight"]');v=d();check(v['bossKind']==str(kind) and v['practice']=='true','Normal training UI starts distinct boss '+str(kind));check(json.loads(v['followerVisible'])==[True,True],'Both follower sheep remain rendered in boss '+str(kind))
   for attempt in range(3):
    page.evaluate('''() => {
@@ -64,7 +65,12 @@ with sync_playwright() as pw:
    wait('[data-page="finished"]');button(0);wait('[data-boss-phase="fight"]')
   check(int(d()['bossWins'])==1,'Actual RT/R2 fire damages and defeats moving boss '+str(kind))
   check(len(patterns)>=3 and phase_two,'Boss '+str(kind)+' uses varied attacks and a half-health phase')
-  wait('[data-page="bosses"]');check(d()['best']==start_best,'Training boss '+str(kind)+' preserves the actual saved record')
+  wait('[data-boss-phase="return"]');page.wait_for_timeout(180);page.screenshot(path=str(a.evidence/('boss-'+str(kind)+'-smooth-return.png')))
+  wait('[data-page="bosses"]');samples=page.evaluate('returnSamples');steps=[(right['travel']-left['travel'])/(right['t']-left['t']) for left,right in zip(samples,samples[1:]) if right['t']>left['t']]
+  check(any(s['phase']=='return' for s in samples) and all(200<speed<800 for speed in steps) and len({s['normal'] for s in samples})==1,'Boss '+str(kind)+' returns with continuous scroll speed and frozen normal progression')
+  check(d()['xp']=='100','Boss '+str(kind)+' awards its 100 XP once through real projectile damage')
+  (a.evidence/('boss-'+str(kind)+'-return-samples.json')).write_text(json.dumps(samples,indent=2))
+  check(d()['best']==start_best,'Training boss '+str(kind)+' preserves the actual saved record')
  click(text='Ana menü');wait('[data-page="main"]');click(text='Ayarlar');wait('[data-page="settings"]')
  import re
  menu=page.locator('#aion-accessibility-controls')

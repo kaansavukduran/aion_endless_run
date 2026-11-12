@@ -1,17 +1,17 @@
-# Aion Endless Run 0.14.1
+# Aion Endless Run 0.15.0
 
-AIONIA v1.4 uygulaması: varsayılan koyu tema ve sistem/sans yazı, saklanan açık/koyu/sistem seçimi, pixel alternatifi ve büyütülmüş metin; sıcak, keskin çerçeveli kompakt arayüz. Uzun karakter adı ve karakter seçimi başlığı gerçek karta sığar. %200 metinde gerekli menü kaydırması korunur.
+Boss sonrası arka plan ve koşu sıçraması giderildi; hız, silah ve boss göstergesi güvenli bir dönüş boyunca yumuşak geçer. Normal düşmanlar tek vuruşta veya üstüne basınca yenilir. Yenmek 10 XP, üstüne basmak 15 XP, boss yenmek 100 XP verir. Her 100 XP koşu ustalık derecesini artırır; seviyeler yine 20 aktif koşu saniyesidir.
 
-Kullanıcının seçtiği bölünmüş telefon kontrolleri: solda Zıpla, sağda Vur/Takla; boss'ta Vur yerinde Ateş et. Depar erişilebilir; eski sağ küme alternatif. Portre/yatay ve çoklu dokunma korunur. Kol eylemleri yeniden atanabilir; ölü bölge ve isteğe bağlı, varsayılan kapalı titreşim; güncel tuş yardımı ve kesilince duraklama.
+Şimşek artık yakın saldırıda harcanmaz: sağ tık/F, kolda ateş tuşu (varsayılan RB; RT de çalışır) veya telefondaki ayrı Şimşek düğmesi, 1500 birimlik geniş bir hat boyunca vurur. Her basış bir yük harcar. Boss tabancasında basılı ateş korunur.
 
-Siyah Fragaria açılışı gerçek ilerlemeye bağlı on segmentli çubukla web ve native sahnede. Çilek kutlaması arka planda büyük FRAGARIA ve sekiz mevcut kutlama kimliği kullanır; ödül vermez. Kahraman çizimleri değiştirilmez. Firefox PCK doğrulama, eski worker güncellemesi ve çevrimdışı kayıtlar korunur; son atomik ayar taşımasından sonra açık FS senkronizasyonu istenir.
+Yarasa, balçık, kabuk böceği ve fırtına ışığı; Fener Ormanı ve Kor Sırtı biyomları; sıçrama tılsımı, şans parası ve buz feneri eklendi. Bölgesel rastgele karşılaşmalar çeşitlendi. Aion ve arkadaşlarının özgün 40 PNG dosyası değiştirilmedi.
 
-Kaynak doğrulaması: 2.549 sahne/model kontrolü, 190 gerçek tarayıcı kontrolü ve 6 paket sözleşme testi. [Kapsam ve NOT TESTED alanları](AIONIA-QA.md). Paket makbuzu gerçek native CI sonuçlarına bağlanır; testten önce yayın başarılı denmez.
+Türkçe, İngilizce ve Çekçeye Azerbaycanca, Almanca, Fransızca, Japonca, Korece, Çince (basitleştirilmiş), İspanyolca ve İtalyanca eklendi. 11 dilde 208 anahtar, çevrimdışı lisanslı fontlar, küçük ekrana sığan kaydırılabilir dil seçimi ve saklanan dil tercihi. Çeviriler ana dili konuşan bir editör tarafından incelenmedi.
+
+Bölünmüş telefon kontrolleri, dikey/yatay oynanış, çoklu dokunma, tek basış saldırısı, aşağı sürükleyerek takla, yeniden atanabilir oyun kolu, koyu tema, sistem fontu, erişilebilirlik seçenekleri, Fragaria açılışı ve çevrimdışı kayıtlar korunur. [Uygulama ayrıntıları](UPGRADE-0.15.0.md) · [Doğrulama ve sınırlar](evidence-v0150/README.md).
 
 ## İndirme / platform
 
-[0.14.1 sürümü](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.14.1) bütün doğrulamalar bitince Windows kurulum/portable, Linux deb/AppImage/portable, macOS universal DMG/portable, sabit anahtarla imzalı Android APK ve web offline arşivini birlikte sunar. Önceki sürümler korunur. `SHA256SUMS` ve `BUILD-RECEIPT.json` dosya boyutu, özet, kaynak commit ve CI bağlantısını taşır.
+[0.15.0 sürümü](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.15.0) bütün kapılar geçince Windows kurulum/portable, Linux DEB/AppImage/portable, macOS universal DMG/portable, sabit anahtarla imzalı Android APK ve web offline arşivini birlikte sunar. Önceki sürümler korunur. `SHA256SUMS` ve `BUILD-RECEIPT.json` dosya boyutu, özet, kaynak commit ve CI bağlantısını taşır.
 
-Android uygulama kimliği ve imza korunur, versionCode 16'tir. macOS paketleri yalnız ad-hoc imzalıdır; Developer ID/noter yok. Windows Authenticode yok. iPhone için web/PWA hedefi vardır; yerel iOS/App Store/TestFlight için sahibin Apple imzası gerekir. Fiziksel Poco/Xbox/PS/iPhone ve ekran okuyucu testi bu ortamda yapılmadı.
-
-0.14.1: Android sistem yazı tipi ve 9:16 ekranda ana menü/karakter başlığı çakışması giderildi. Telefon ana menüsü iki yönde de kompakt başlık ve gerçek ayrılmış yüksekliğe göre yerleşir. 1440×2560 kaynak regresyonu ve gerçek native UI bölge sınırı kontrolü eklendi. Özgün karakter PNG’leri değiştirilmedi.
+Android uygulama kimliği ve imza korunur; versionCode 17. macOS yalnız ad-hoc imzalı; Developer ID/noter yok. Windows Authenticode yok. iPhone için web/PWA hedefi vardır; yerel iOS için sahibin Apple imzası gerekir. Fiziksel Poco/Xbox/PS/iPhone ve ekran okuyucu testi bu ortamda yapılmadı.
