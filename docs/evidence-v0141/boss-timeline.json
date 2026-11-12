@@ -1,16 +1,16 @@
 [
   {
     "boss": 0,
-    "hp": "35",
-    "shots": "2",
+    "hp": "36",
+    "shots": "1",
     "health": "3",
     "pattern": "high",
     "followers": "[true,true]"
   },
   {
     "boss": 0,
-    "hp": "34",
-    "shots": "2",
+    "hp": "35",
+    "shots": "3",
     "health": "3",
     "pattern": "high",
     "followers": "[true,true]"
@@ -20,7 +20,7 @@
     "hp": "33",
     "shots": "4",
     "health": "3",
-    "pattern": "low",
+    "pattern": "high",
     "followers": "[true,true]"
   },
   {
@@ -28,13 +28,29 @@
     "hp": "31",
     "shots": "6",
     "health": "3",
-    "pattern": "low",
+    "pattern": "high",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "30",
+    "shots": "7",
+    "health": "3",
+    "pattern": "high",
     "followers": "[true,true]"
   },
   {
     "boss": 0,
     "hp": "29",
-    "shots": "8",
+    "shots": "7",
+    "health": "3",
+    "pattern": "high",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "28",
+    "shots": "9",
     "health": "3",
     "pattern": "low",
     "followers": "[true,true]"
@@ -42,6 +58,14 @@
   {
     "boss": 0,
     "hp": "27",
+    "shots": "10",
+    "health": "3",
+    "pattern": "low",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "26",
     "shots": "11",
     "health": "3",
     "pattern": "low",
@@ -49,15 +73,47 @@
   },
   {
     "boss": 0,
+    "hp": "25",
+    "shots": "12",
+    "health": "3",
+    "pattern": "low",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "24",
+    "shots": "13",
+    "health": "3",
+    "pattern": "low",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
     "hp": "23",
+    "shots": "14",
+    "health": "3",
+    "pattern": "low",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "22",
     "shots": "15",
     "health": "3",
-    "pattern": "burst",
+    "pattern": "low",
     "followers": "[true,true]"
   },
   {
     "boss": 0,
     "hp": "21",
+    "shots": "16",
+    "health": "3",
+    "pattern": "low",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "20",
     "shots": "17",
     "health": "3",
     "pattern": "burst",
@@ -65,16 +121,24 @@
   },
   {
     "boss": 0,
-    "hp": "19",
-    "shots": "17",
-    "health": "3",
-    "pattern": "burst",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 0,
-    "hp": "19",
+    "hp": "20",
     "shots": "18",
+    "health": "3",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "19",
+    "shots": "19",
+    "health": "3",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "19",
+    "shots": "19",
     "health": "3",
     "pattern": "burst",
     "followers": "[true,true]"
@@ -89,7 +153,7 @@
   },
   {
     "boss": 0,
-    "hp": "15",
+    "hp": "17",
     "shots": "21",
     "health": "3",
     "pattern": "burst",
@@ -97,8 +161,48 @@
   },
   {
     "boss": 0,
-    "hp": "15",
+    "hp": "16",
     "shots": "21",
+    "health": "3",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "16",
+    "shots": "22",
+    "health": "3",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "15",
+    "shots": "22",
+    "health": "3",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "14",
+    "shots": "22",
+    "health": "3",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "14",
+    "shots": "22",
+    "health": "3",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "14",
+    "shots": "22",
     "health": "3",
     "pattern": "burst",
     "followers": "[true,true]"
@@ -108,21 +212,77 @@
     "hp": "14",
     "shots": "23",
     "health": "3",
-    "pattern": "low",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "14",
+    "shots": "24",
+    "health": "3",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "13",
+    "shots": "25",
+    "health": "3",
+    "pattern": "burst",
     "followers": "[true,true]"
   },
   {
     "boss": 0,
     "hp": "12",
-    "shots": "25",
+    "shots": "26",
     "health": "3",
-    "pattern": "low",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "11",
+    "shots": "27",
+    "health": "3",
+    "pattern": "burst",
     "followers": "[true,true]"
   },
   {
     "boss": 0,
     "hp": "10",
     "shots": "27",
+    "health": "3",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "9",
+    "shots": "27",
+    "health": "3",
+    "pattern": "burst",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "9",
+    "shots": "27",
+    "health": "3",
+    "pattern": "low",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "9",
+    "shots": "27",
+    "health": "3",
+    "pattern": "low",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "9",
+    "shots": "28",
     "health": "3",
     "pattern": "low",
     "followers": "[true,true]"
@@ -132,13 +292,29 @@
     "hp": "8",
     "shots": "29",
     "health": "3",
-    "pattern": "high",
+    "pattern": "low",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "7",
+    "shots": "30",
+    "health": "3",
+    "pattern": "low",
     "followers": "[true,true]"
   },
   {
     "boss": 0,
     "hp": "6",
-    "shots": "32",
+    "shots": "31",
+    "health": "3",
+    "pattern": "low",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "5",
+    "shots": "33",
     "health": "3",
     "pattern": "high",
     "followers": "[true,true]"
@@ -153,8 +329,24 @@
   },
   {
     "boss": 0,
+    "hp": "3",
+    "shots": "35",
+    "health": "3",
+    "pattern": "high",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
     "hp": "2",
-    "shots": "34",
+    "shots": "35",
+    "health": "3",
+    "pattern": "high",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 0,
+    "hp": "2",
+    "shots": "36",
     "health": "3",
     "pattern": "high",
     "followers": "[true,true]"
@@ -162,55 +354,111 @@
   {
     "boss": 0,
     "hp": "1",
-    "shots": "36",
+    "shots": "37",
     "health": "3",
-    "pattern": "burst",
+    "pattern": "high",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
-    "hp": "41",
+    "hp": "42",
     "shots": "2",
     "health": "3",
-    "pattern": "arc",
+    "pattern": "ribbon",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "40",
-    "shots": "4",
+    "shots": "3",
     "health": "3",
-    "pattern": "arc",
+    "pattern": "ribbon",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "39",
-    "shots": "5",
+    "shots": "4",
     "health": "3",
-    "pattern": "arc",
+    "pattern": "ribbon",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "38",
-    "shots": "7",
+    "shots": "4",
     "health": "3",
-    "pattern": "arc",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "38",
+    "shots": "4",
+    "health": "3",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "38",
+    "shots": "4",
+    "health": "3",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "38",
+    "shots": "5",
+    "health": "3",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "38",
+    "shots": "5",
+    "health": "3",
+    "pattern": "ribbon",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "37",
+    "shots": "6",
+    "health": "3",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "36",
+    "shots": "7",
+    "health": "3",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "36",
     "shots": "8",
     "health": "3",
-    "pattern": "arc",
+    "pattern": "dive",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
-    "hp": "34",
-    "shots": "10",
+    "hp": "35",
+    "shots": "8",
+    "health": "3",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "35",
+    "shots": "9",
     "health": "3",
     "pattern": "dive",
     "followers": "[true,true]"
@@ -225,7 +473,31 @@
   },
   {
     "boss": 1,
-    "hp": "34",
+    "hp": "32",
+    "shots": "10",
+    "health": "3",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "32",
+    "shots": "10",
+    "health": "3",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "32",
+    "shots": "10",
+    "health": "3",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "32",
     "shots": "11",
     "health": "3",
     "pattern": "dive",
@@ -233,8 +505,8 @@
   },
   {
     "boss": 1,
-    "hp": "33",
-    "shots": "12",
+    "hp": "32",
+    "shots": "11",
     "health": "3",
     "pattern": "dive",
     "followers": "[true,true]"
@@ -244,15 +516,39 @@
     "hp": "32",
     "shots": "12",
     "health": "3",
-    "pattern": "dive",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "31",
+    "shots": "12",
+    "health": "3",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "31",
+    "shots": "13",
+    "health": "3",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "30",
+    "shots": "13",
+    "health": "3",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "30",
     "shots": "14",
     "health": "3",
-    "pattern": "dive",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -260,15 +556,7 @@
     "hp": "29",
     "shots": "14",
     "health": "3",
-    "pattern": "dive",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "29",
-    "shots": "14",
-    "health": "3",
-    "pattern": "dive",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -276,23 +564,23 @@
     "hp": "29",
     "shots": "15",
     "health": "3",
-    "pattern": "dive",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
-    "hp": "29",
+    "hp": "27",
     "shots": "16",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
-    "hp": "28",
+    "hp": "27",
     "shots": "16",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -300,15 +588,15 @@
     "hp": "27",
     "shots": "17",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
-    "hp": "27",
+    "hp": "26",
     "shots": "17",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -316,7 +604,15 @@
     "hp": "26",
     "shots": "18",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "25",
+    "shots": "18",
+    "health": "3",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -324,7 +620,15 @@
     "hp": "25",
     "shots": "19",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "24",
+    "shots": "19",
+    "health": "3",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -332,7 +636,7 @@
     "hp": "24",
     "shots": "20",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -340,23 +644,7 @@
     "hp": "23",
     "shots": "20",
     "health": "3",
-    "pattern": "ribbon",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "23",
-    "shots": "20",
-    "health": "3",
-    "pattern": "ribbon",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "23",
-    "shots": "20",
-    "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -364,31 +652,47 @@
     "hp": "23",
     "shots": "21",
     "health": "3",
-    "pattern": "ribbon",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "23",
-    "shots": "21",
-    "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "22",
+    "shots": "21",
+    "health": "3",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "21",
     "shots": "22",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
-    "hp": "22",
+    "hp": "21",
     "shots": "23",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "20",
+    "shots": "24",
+    "health": "3",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "20",
+    "shots": "24",
+    "health": "3",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -396,15 +700,15 @@
     "hp": "19",
     "shots": "25",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
-    "hp": "19",
-    "shots": "26",
+    "hp": "18",
+    "shots": "25",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -412,28 +716,28 @@
     "hp": "18",
     "shots": "26",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
-    "hp": "18",
+    "hp": "17",
     "shots": "26",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
-    "hp": "18",
+    "hp": "17",
     "shots": "27",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
-    "hp": "18",
+    "hp": "17",
     "shots": "27",
     "health": "3",
     "pattern": "arc",
@@ -449,18 +753,10 @@
   },
   {
     "boss": 1,
-    "hp": "16",
+    "hp": "15",
     "shots": "29",
     "health": "3",
-    "pattern": "arc",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "16",
-    "shots": "30",
-    "health": "3",
-    "pattern": "arc",
+    "pattern": "ribbon",
     "followers": "[true,true]"
   },
   {
@@ -468,7 +764,15 @@
     "hp": "15",
     "shots": "30",
     "health": "3",
-    "pattern": "arc",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "14",
+    "shots": "30",
+    "health": "3",
+    "pattern": "ribbon",
     "followers": "[true,true]"
   },
   {
@@ -476,44 +780,92 @@
     "hp": "14",
     "shots": "31",
     "health": "3",
-    "pattern": "arc",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "14",
-    "shots": "32",
-    "health": "3",
-    "pattern": "arc",
+    "pattern": "ribbon",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "13",
-    "shots": "32",
+    "shots": "31",
     "health": "3",
-    "pattern": "arc",
+    "pattern": "ribbon",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "13",
-    "shots": "33",
+    "shots": "31",
     "health": "3",
-    "pattern": "arc",
+    "pattern": "ribbon",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "12",
-    "shots": "34",
+    "shots": "32",
     "health": "3",
-    "pattern": "arc",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "12",
+    "shots": "32",
+    "health": "3",
+    "pattern": "ribbon",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "11",
+    "shots": "33",
+    "health": "3",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "11",
+    "shots": "33",
+    "health": "3",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "10",
+    "shots": "33",
+    "health": "3",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "10",
+    "shots": "33",
+    "health": "3",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "10",
+    "shots": "33",
+    "health": "3",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "10",
+    "shots": "33",
+    "health": "3",
+    "pattern": "ribbon",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "10",
     "shots": "34",
     "health": "3",
     "pattern": "dive",
@@ -522,7 +874,31 @@
   {
     "boss": 1,
     "hp": "10",
-    "shots": "36",
+    "shots": "34",
+    "health": "3",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "10",
+    "shots": "35",
+    "health": "3",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "9",
+    "shots": "35",
+    "health": "3",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "9",
+    "shots": "35",
     "health": "3",
     "pattern": "dive",
     "followers": "[true,true]"
@@ -531,14 +907,6 @@
     "boss": 1,
     "hp": "9",
     "shots": "36",
-    "health": "3",
-    "pattern": "dive",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "9",
-    "shots": "37",
     "health": "3",
     "pattern": "dive",
     "followers": "[true,true]"
@@ -546,7 +914,15 @@
   {
     "boss": 1,
     "hp": "8",
-    "shots": "38",
+    "shots": "36",
+    "health": "3",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "8",
+    "shots": "37",
     "health": "3",
     "pattern": "dive",
     "followers": "[true,true]"
@@ -554,15 +930,7 @@
   {
     "boss": 1,
     "hp": "7",
-    "shots": "38",
-    "health": "3",
-    "pattern": "dive",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "7",
-    "shots": "39",
+    "shots": "37",
     "health": "3",
     "pattern": "dive",
     "followers": "[true,true]"
@@ -570,7 +938,7 @@
   {
     "boss": 1,
     "hp": "6",
-    "shots": "39",
+    "shots": "38",
     "health": "3",
     "pattern": "dive",
     "followers": "[true,true]"
@@ -578,7 +946,7 @@
   {
     "boss": 1,
     "hp": "5",
-    "shots": "39",
+    "shots": "38",
     "health": "3",
     "pattern": "dive",
     "followers": "[true,true]"
@@ -586,9 +954,33 @@
   {
     "boss": 1,
     "hp": "5",
-    "shots": "39",
+    "shots": "38",
     "health": "3",
     "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "5",
+    "shots": "38",
+    "health": "3",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "5",
+    "shots": "39",
+    "health": "3",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "5",
+    "shots": "39",
+    "health": "3",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -596,7 +988,15 @@
     "hp": "5",
     "shots": "40",
     "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "5",
+    "shots": "40",
+    "health": "3",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -604,39 +1004,23 @@
     "hp": "5",
     "shots": "41",
     "health": "3",
-    "pattern": "ribbon",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "5",
-    "shots": "42",
-    "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
     "boss": 1,
     "hp": "4",
+    "shots": "41",
+    "health": "3",
+    "pattern": "arc",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 1,
+    "hp": "3",
     "shots": "42",
     "health": "3",
-    "pattern": "ribbon",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "3",
-    "shots": "43",
-    "health": "3",
-    "pattern": "ribbon",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "3",
-    "shots": "43",
-    "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -644,15 +1028,7 @@
     "hp": "2",
     "shots": "43",
     "health": "3",
-    "pattern": "ribbon",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 1,
-    "hp": "2",
-    "shots": "43",
-    "health": "3",
-    "pattern": "ribbon",
+    "pattern": "arc",
     "followers": "[true,true]"
   },
   {
@@ -666,17 +1042,17 @@
   {
     "boss": 1,
     "hp": "1",
-    "shots": "45",
+    "shots": "44",
     "health": "3",
     "pattern": "arc",
     "followers": "[true,true]"
   },
   {
-    "boss": 2,
-    "hp": "48",
-    "shots": "1",
+    "boss": 1,
+    "hp": "1",
+    "shots": "45",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "dive",
     "followers": "[true,true]"
   },
   {
@@ -684,7 +1060,15 @@
     "hp": "48",
     "shots": "1",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "48",
+    "shots": "1",
+    "health": "3",
+    "pattern": "dive",
     "followers": "[true,true]"
   },
   {
@@ -692,7 +1076,15 @@
     "hp": "48",
     "shots": "2",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "dive",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "48",
+    "shots": "2",
+    "health": "3",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
@@ -700,15 +1092,15 @@
     "hp": "47",
     "shots": "3",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
     "boss": 2,
     "hp": "46",
-    "shots": "4",
+    "shots": "3",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
@@ -716,7 +1108,7 @@
     "hp": "45",
     "shots": "4",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
@@ -724,7 +1116,15 @@
     "hp": "45",
     "shots": "5",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "sweep",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "44",
+    "shots": "5",
+    "health": "3",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
@@ -732,7 +1132,7 @@
     "hp": "44",
     "shots": "6",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
@@ -740,7 +1140,7 @@
     "hp": "43",
     "shots": "6",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
@@ -748,7 +1148,7 @@
     "hp": "43",
     "shots": "7",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
@@ -756,21 +1156,53 @@
     "hp": "42",
     "shots": "7",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "sweep",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "42",
+    "shots": "7",
+    "health": "3",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
     "boss": 2,
     "hp": "41",
-    "shots": "8",
+    "shots": "7",
     "health": "3",
-    "pattern": "hop",
+    "pattern": "sweep",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "41",
+    "shots": "7",
+    "health": "3",
+    "pattern": "sweep",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "41",
+    "shots": "7",
+    "health": "3",
+    "pattern": "sweep",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "41",
+    "shots": "9",
+    "health": "3",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
     "boss": 2,
     "hp": "40",
-    "shots": "9",
+    "shots": "10",
     "health": "3",
     "pattern": "seeds",
     "followers": "[true,true]"
@@ -786,6 +1218,14 @@
   {
     "boss": 2,
     "hp": "39",
+    "shots": "11",
+    "health": "3",
+    "pattern": "seeds",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "38",
     "shots": "11",
     "health": "3",
     "pattern": "seeds",
@@ -810,6 +1250,22 @@
   {
     "boss": 2,
     "hp": "36",
+    "shots": "13",
+    "health": "3",
+    "pattern": "seeds",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "36",
+    "shots": "14",
+    "health": "3",
+    "pattern": "seeds",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "36",
     "shots": "14",
     "health": "3",
     "pattern": "seeds",
@@ -825,8 +1281,24 @@
   },
   {
     "boss": 2,
-    "hp": "34",
+    "hp": "35",
     "shots": "15",
+    "health": "3",
+    "pattern": "seeds",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "34",
+    "shots": "16",
+    "health": "3",
+    "pattern": "seeds",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "33",
+    "shots": "16",
     "health": "3",
     "pattern": "seeds",
     "followers": "[true,true]"
@@ -842,9 +1314,17 @@
   {
     "boss": 2,
     "hp": "32",
+    "shots": "17",
+    "health": "3",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "32",
     "shots": "18",
     "health": "3",
-    "pattern": "seeds",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
@@ -852,7 +1332,15 @@
     "hp": "31",
     "shots": "19",
     "health": "3",
-    "pattern": "sweep",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "31",
+    "shots": "19",
+    "health": "3",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
@@ -860,7 +1348,15 @@
     "hp": "30",
     "shots": "20",
     "health": "3",
-    "pattern": "sweep",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "30",
+    "shots": "20",
+    "health": "3",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
@@ -868,7 +1364,23 @@
     "hp": "29",
     "shots": "21",
     "health": "3",
-    "pattern": "sweep",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "29",
+    "shots": "21",
+    "health": "3",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "28",
+    "shots": "21",
+    "health": "3",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
@@ -876,7 +1388,7 @@
     "hp": "27",
     "shots": "22",
     "health": "3",
-    "pattern": "sweep",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
@@ -884,15 +1396,15 @@
     "hp": "26",
     "shots": "23",
     "health": "3",
-    "pattern": "sweep",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
     "boss": 2,
-    "hp": "25",
-    "shots": "23",
+    "hp": "26",
+    "shots": "24",
     "health": "3",
-    "pattern": "sweep",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
@@ -900,7 +1412,7 @@
     "hp": "25",
     "shots": "24",
     "health": "3",
-    "pattern": "sweep",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
@@ -913,7 +1425,39 @@
   },
   {
     "boss": 2,
+    "hp": "24",
+    "shots": "25",
+    "health": "3",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "24",
+    "shots": "26",
+    "health": "3",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
     "hp": "23",
+    "shots": "26",
+    "health": "3",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "23",
+    "shots": "27",
+    "health": "3",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "22",
     "shots": "27",
     "health": "3",
     "pattern": "hop",
@@ -930,6 +1474,14 @@
   {
     "boss": 2,
     "hp": "21",
+    "shots": "28",
+    "health": "3",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "21",
     "shots": "29",
     "health": "3",
     "pattern": "hop",
@@ -937,7 +1489,7 @@
   },
   {
     "boss": 2,
-    "hp": "20",
+    "hp": "19",
     "shots": "30",
     "health": "3",
     "pattern": "hop",
@@ -946,7 +1498,7 @@
   {
     "boss": 2,
     "hp": "19",
-    "shots": "31",
+    "shots": "30",
     "health": "3",
     "pattern": "hop",
     "followers": "[true,true]"
@@ -961,10 +1513,42 @@
   },
   {
     "boss": 2,
+    "hp": "18",
+    "shots": "32",
+    "health": "3",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
     "hp": "17",
     "shots": "32",
     "health": "3",
     "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "17",
+    "shots": "33",
+    "health": "3",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "16",
+    "shots": "33",
+    "health": "3",
+    "pattern": "sweep",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "16",
+    "shots": "34",
+    "health": "3",
+    "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
@@ -986,7 +1570,7 @@
   {
     "boss": 2,
     "hp": "14",
-    "shots": "36",
+    "shots": "35",
     "health": "3",
     "pattern": "sweep",
     "followers": "[true,true]"
@@ -994,14 +1578,14 @@
   {
     "boss": 2,
     "hp": "13",
-    "shots": "36",
+    "shots": "37",
     "health": "3",
     "pattern": "sweep",
     "followers": "[true,true]"
   },
   {
     "boss": 2,
-    "hp": "13",
+    "hp": "12",
     "shots": "37",
     "health": "3",
     "pattern": "sweep",
@@ -1036,6 +1620,22 @@
     "hp": "10",
     "shots": "38",
     "health": "3",
+    "pattern": "sweep",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "10",
+    "shots": "38",
+    "health": "3",
+    "pattern": "seeds",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "10",
+    "shots": "39",
+    "health": "3",
     "pattern": "seeds",
     "followers": "[true,true]"
   },
@@ -1058,14 +1658,6 @@
   {
     "boss": 2,
     "hp": "9",
-    "shots": "40",
-    "health": "3",
-    "pattern": "seeds",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 2,
-    "hp": "8",
     "shots": "41",
     "health": "3",
     "pattern": "seeds",
@@ -1098,6 +1690,14 @@
   {
     "boss": 2,
     "hp": "6",
+    "shots": "43",
+    "health": "3",
+    "pattern": "seeds",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "6",
     "shots": "44",
     "health": "3",
     "pattern": "seeds",
@@ -1116,7 +1716,7 @@
     "hp": "4",
     "shots": "45",
     "health": "3",
-    "pattern": "seeds",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
@@ -1124,7 +1724,7 @@
     "hp": "4",
     "shots": "46",
     "health": "3",
-    "pattern": "seeds",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
@@ -1132,23 +1732,15 @@
     "hp": "3",
     "shots": "46",
     "health": "3",
-    "pattern": "seeds",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
     "boss": 2,
-    "hp": "2",
+    "hp": "3",
     "shots": "47",
     "health": "3",
-    "pattern": "seeds",
-    "followers": "[true,true]"
-  },
-  {
-    "boss": 2,
-    "hp": "2",
-    "shots": "48",
-    "health": "3",
-    "pattern": "seeds",
+    "pattern": "hop",
     "followers": "[true,true]"
   },
   {
@@ -1156,7 +1748,15 @@
     "hp": "1",
     "shots": "48",
     "health": "3",
-    "pattern": "seeds",
+    "pattern": "hop",
+    "followers": "[true,true]"
+  },
+  {
+    "boss": 2,
+    "hp": "1",
+    "shots": "49",
+    "health": "3",
+    "pattern": "hop",
     "followers": "[true,true]"
   }
 ]

@@ -1,9 +1,9 @@
 {
   "version": "0.14.1",
   "standards": "AIONIA v1.4",
-  "base_commit": "aacdcc29632730dd1a795e99c7b429fc2cb87bac",
-  "tested_export_build": "208ceac62cc20d3e",
-  "source_and_scene_checks": 2691,
+  "base_commit": "10432e08e3843404cfce3c3335caf9af7db83d91",
+  "tested_export_build": "8ed8d7dd9c646fee",
+  "source_and_scene_checks": 2879,
   "source_suites": [
     {
       "suite": "game",
@@ -86,67 +86,67 @@
       "suite": "aionia",
       "exit_code": 0,
       "result": [
-        "RESULT: 473 AIONIA checks, 0 failures"
+        "RESULT: 661 AIONIA checks, 0 failures"
       ]
     }
   ],
-  "browser_checks": 199,
+  "browser_checks": 207,
   "browser_suites": [
     {
       "suite": "aionia",
-      "checks": 63,
+      "checks": 71,
       "status": "PASS",
       "evidence": "browser/aionia.json",
-      "export_build": "208ceac62cc20d3e"
+      "export_build": "3a3512065a96480b"
     },
     {
       "suite": "gamepad",
       "checks": 31,
       "status": "PASS",
       "evidence": "browser/gamepad.json",
-      "export_build": "208ceac62cc20d3e"
+      "export_build": "3a3512065a96480b"
     },
     {
       "suite": "runner",
       "checks": 29,
       "status": "PASS",
       "evidence": "browser/runner.json",
-      "export_build": "208ceac62cc20d3e"
+      "export_build": "8ed8d7dd9c646fee"
     },
     {
       "suite": "panels",
       "checks": 21,
       "status": "PASS",
       "evidence": "browser/panels.json",
-      "export_build": "208ceac62cc20d3e"
+      "export_build": "8ed8d7dd9c646fee"
     },
     {
       "suite": "firefox-loader",
       "checks": 19,
       "status": "PASS",
       "evidence": "browser/firefox-loader.json",
-      "export_build": "208ceac62cc20d3e"
+      "export_build": "3a3512065a96480b"
     },
     {
       "suite": "chromium-loader",
       "checks": 19,
       "status": "PASS",
       "evidence": "browser/chromium-loader.json",
-      "export_build": "208ceac62cc20d3e"
+      "export_build": "3a3512065a96480b"
     },
     {
       "suite": "upgrade",
       "checks": 11,
       "status": "PASS",
       "evidence": "browser/upgrade.json",
-      "export_build": "208ceac62cc20d3e"
+      "export_build": "3a3512065a96480b"
     },
     {
       "suite": "boss-hud",
       "checks": 6,
       "status": "PASS",
       "evidence": "browser/boss-hud.json",
-      "export_build": "208ceac62cc20d3e"
+      "export_build": "3a3512065a96480b"
     }
   ],
   "packaging_contract_tests": 6,
@@ -155,5 +155,6 @@
   "screen_reader_end_to_end": "NOT TESTED",
   "native_iOS": "NOT TESTED / owner signing unavailable",
   "publication": "Source-time record; native CI, canonical deployment and downloadable package verification follow in BUILD-RECEIPT.json and the Drive delivery report.",
-  "working_tree_note": "Tests were run on the 0.14.1 working changes based on aacdcc2 before evidence documents were committed. Export 208ceac62cc20d3e; final CI, deployment and release are separate receipts."
+  "native_android_checks": 7,
+  "working_tree_note": "Browser suites identify their actual export build. Final runner/panels used 8ed8d7dd9c646fee; other suites used 3a3512065a96480b before a passive popup diagnostics refresh. Gameplay/art did not change between them. Native 7 checks and actual images are from 10432e0. The final evidence commit adds reports/test-driver refinements; publication is independently gated by native CI."
 }

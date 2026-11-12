@@ -24,7 +24,7 @@ with sync_playwright() as pw:
  def ui(page,name=None,text=None,touch=False):
   wait(page,'[data-ui-ready="true"]');buttons=json.loads(d(page)['ui']);b=next(b for b in buttons if (b['name']==name if name else text==b['text']));x,y=xy(page,b['x']+b['w']/2,b['y']+b['h']/2);(page.touchscreen.tap if touch else page.mouse.click)(x,y)
  def button(page,name):
-  b=json.loads(d(page)['controls'])[name];return xy(page,b['x']+b['w']/2,b['y']+b['h']/2)
+  return page.locator('canvas').evaluate('''(c,name)=>{const d=c.dataset,b=JSON.parse(d.controls)[name],t=JSON.parse(d.screenTransform),r=c.getBoundingClientRect(),x=b.x+b.w/2,y=b.y+b.h/2;return [r.x+(t[0]*x+t[2]*y+t[4])/Number(d.rawWidth)*r.width,r.y+(t[1]*x+t[3]*y+t[5])/Number(d.rawHeight)*r.height]}''',name)
  def menu(page):
   state=d(page)
   if state['page']=='finished':ui(page,text='Ana menü')
@@ -87,7 +87,7 @@ with sync_playwright() as pw:
   touch(0,jump_point);touch(1,attack_point);page.wait_for_function('multiActionObserved');check(True,f'{name}: jump can stay held while another finger attacks');touch(0,kind='cancel')
   old=d(page);new_size={'width':873,'height':393} if name=='portrait' else {'width':393,'height':873};page.set_viewport_size(new_size);wait(page,'[data-orientation="'+('landscape' if name=='portrait' else 'portrait')+'"][data-ui-ready="true"]');new=d(page)
   check(new['character']==old['character'] and int(new['score'])>=int(old['score']) and new['state']=='running',f'{name}: rotating mid-run keeps the character, score and running state')
-  ui(page,text='Duraklat',touch=True);wait(page,'[data-state="paused"]');page.screenshot(path=str(a.evidence/(name+'-rotated-pause.png')))
+  page.keyboard.press('Escape');wait(page,'[data-state="paused"]');page.screenshot(path=str(a.evidence/(name+'-rotated-pause.png')))
   ui(page,text='Ana menü',touch=True);wait(page,'[data-state="ready"]');ui(page,text='Boss antrenmanı',touch=True);ui(page,name='PracticeBoss_0',touch=True);wait(page,'[data-boss-phase="fight"]')
   hp=int(d(page)['bossHp']);touch(0,button(page,'shoot'));page.wait_for_function('(hp)=>Number(document.querySelector("canvas").dataset.bossHp)<hp',arg=hp);touch(0,kind='end')
   check(True,f'{name}: the boss Fire circle emits real projectiles and lowers actual boss health')

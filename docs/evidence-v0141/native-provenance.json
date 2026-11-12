@@ -1,0 +1,7 @@
+{
+  "application_commit": "10432e08e3843404cfce3c3335caf9af7db83d91",
+  "ci_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43290977515",
+  "artifact_id": 13977162892,
+  "checks": 7,
+  "scope": "API30 offline Android emulator, real ADB inputs; original unedited screenshots, not physical Poco. Three native translated menus were also visually inspected."
+}

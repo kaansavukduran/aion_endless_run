@@ -4,5 +4,7 @@
   "sha256": "cc17ef949ecb4c7ac5ebc53af9c0a7d4a583efe5e7152fe8ac78bc4d20ffd230",
   "bytes": 127473499,
   "version_code": 16,
-  "signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36"
+  "signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+  "application_source_commit": "10432e08e3843404cfce3c3335caf9af7db83d91",
+  "provenance_note": "Stable-signed APK was built locally before evidence documents and passive test-driver refinements were committed; gameplay scripts, project settings, scenes and art match this application commit. Final tag also contains delivery evidence."
 }
