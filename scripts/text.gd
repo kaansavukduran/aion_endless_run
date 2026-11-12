@@ -1,14 +1,13 @@
 class_name GameText
 extends RefCounted
 
-const LANGUAGES := ["tr", "en", "cs"]
-const LANGUAGE_NAMES := {"tr":"Türkçe", "en":"English", "cs":"Čeština"}
+const LANGUAGES := ["tr", "en", "cs", "az", "de", "fr", "ja", "ko", "zh", "es", "it"]
+const LANGUAGE_NAMES := {"tr":"Türkçe", "en":"English", "cs":"Čeština", "az":"Azərbaycanca", "de":"Deutsch", "fr":"Français", "ja":"日本語", "ko":"한국어", "zh":"中文", "es":"Español", "it":"Italiano"}
 const STRINGS := {
 	"tr": {
 		"touch_layout": "Dokunmatik yerleşimi",
 		"layout_split": "İki yana bölünmüş",
 		"layout_right": "Sağda düğmeler",
-
 		"theme": "Tema",
 		"theme_dark": "Koyu",
 		"theme_light": "Açık",
@@ -25,14 +24,13 @@ const STRINGS := {
 		"controller": "Oyun kolu",
 		"pad_haptics": "Titreşim (isteğe bağlı)",
 		"pad_deadzone": "Sol çubuk ölü bölgesi (20–80%)",
-		"pad_remap_help": "Oyun eylemlerini yeniden ata. Menüde A/X seçer, B geri döner, Start duraklatır. Aynı tuş atanırsa iki eylem yer değiştirir. RT daima boss ateşidir.",
+		"pad_remap_help": "Oyun eylemlerini yeniden ata. Menüde A/X seçer, B geri döner, Start duraklatır. Aynı tuş atanırsa iki eylem yer değiştirir. RT daima boss ateşidir. Boss dışında Ateş et, şimşek yükünü kullanır.",
 		"pad_capture": "%s: koldaki yeni tuşa bas. İptal: Start / Esc.",
 		"pad_reset": "Kol ayarlarını sıfırla",
 		"pad_ability_aion": "İki kez %s: çift zıpla",
 		"pad_ability_owl": "%s basılı: süzül",
 		"pad_ability_wolf": "%s basılı: depar",
 		"pad_ability_sheep": "En fazla üç koyun",
-
 		"touch_ability_sheep": "En fazla üç koyun",
 		"touch_ability_wolf": "Depar: basılı tut",
 		"touch_ability_owl": "↑ Basılı tut: süzül",
@@ -60,7 +58,6 @@ const STRINGS := {
 		"boss_pattern_seeds": "Tohum salvosu",
 		"boss_pattern_sweep": "Sarmaşık süpürüşü",
 		"boss_pattern_hop": "Sıçrayan çekirdek",
-
 		"level_requirements": "%d/20 sn",
 		"gate_boost": "HIZ ŞERİDİ · İLERİ!",
 		"gate_rush": "Hız şeridi %ds",
@@ -87,7 +84,7 @@ const STRINGS := {
 		"control_attack": "Vur",
 		"control_duck": "Takla",
 		"screen_fx": "Hafif kamera ve şimşek efektleri",
-		"discoveries": "KEŞFEDİLEN GÜÇLER %d/7",
+		"discoveries": "KEŞFEDİLEN GÜÇLER %d/10",
 		"defeated": "%d düşman",
 		"bonked": "Puf! Bir daha deneyelim.",
 		"power_hint": "Mantar ve tılsımları topla · Yeni güçler keşfet",
@@ -111,7 +108,7 @@ const STRINGS := {
 		"power_magnet": "Kristal mıknatısı",
 		"power_leaf": "Can yaprağı",
 		"desc_mushroom": "Nadir mantar: 10 saniye büyü; düzensiz cüce dalgalarıyla savaş.",
-		"desc_lightning": "İki şimşek yükü; sonraki saldırı uzaktaki düşmanlara atlar.",
+		"desc_lightning": "İki yük. Sağ tık / F / RB / Şimşek ile 1500 adımlık geniş bir hat boyunca vur. Her basış bir yük harcar; yakın saldırı harcamaz.",
 		"desc_slow": "Dünya 7 saniye yavaşlar; hareketlerini planla.",
 		"desc_haste": "8 saniye daha hızlı koş ve mesafe kazan.",
 		"desc_shield": "12 saniye içinde bir darbeyi engeller.",
@@ -152,7 +149,7 @@ const STRINGS := {
 		"off": "Kapalı",
 		"volume": "Ses düzeyi",
 		"appearance": "Görünüm ve erişilebilirlik",
-		"help": "Space / Zıpla ile zıpla; her sol tık / J / Vur basışı tek saldırıdır.\nBasılı tutmak tekrar saldırmaz. Yeniden basınca diğer yumruk/kanat/hareket gelir.\nAşağı ok / S / Ctrl / Takla: alçak engellerin altından yuvarlan.\nKısa basış taklayı tamamlar; basılı tutmak yuvarlanmayı sürdürür.\nTakla sırasında saldırı yerine savunma yaparsın; ayakta tekrar vur.\nDüşerken düşmanın üstüne basıp sek. Kristaller +25, engeller +10 puan.\nHer 20 saniye aktif normal koşuda yeni seviye; rekor bu cihazda saklanır.\nKutlamalar açıksa her 10 seviyede güvenli inişte 1 saniyelik sarılma molası.\nAion çift zıplar. Baykuş basılı tutarak süzülür; yukarı, ileri veya çapraz rüzgârı yakala.\nKoyun arkadaşları toplayıp en fazla üç canla koşar; küçük takipçiler sırayla zıplar.\nKurt Shift / karakteri basılı tutarak hızlanır.\nMantar nadirdir; olasılığını ve renk etkisini bu ayarlardan değiştir.\nCüceler dördüncü seviyeden sonra ara sıra, dev mantarda düzensiz kalabalıklarla gelir.\nKumanda: A zıpla, X tek saldırı, B takla, LB hızlan, Start duraklat.\nKarakterini koşudan önce seç; Esc veya sağ üst düğme ile mola ver.",
+		"help": "Space / Zıpla ile zıpla; her sol tık / J / Vur basışı tek saldırıdır.\nBasılı tutmak tekrar saldırmaz. Yeniden basınca diğer yumruk/kanat/hareket gelir.\nAşağı ok / S / Ctrl / Takla: alçak engellerin altından yuvarlan.\nKısa basış taklayı tamamlar; basılı tutmak yuvarlanmayı sürdürür.\nTakla sırasında saldırı yerine savunma yaparsın; ayakta tekrar vur.\nDüşerken düşmanın üstüne basıp sek. Kristaller +25, engeller +10 puan.\nHer 20 saniye aktif normal koşuda yeni seviye; rekor bu cihazda saklanır.\nKutlamalar açıksa her 10 seviyede güvenli inişte 1 saniyelik sarılma molası.\nAion çift zıplar. Baykuş basılı tutarak süzülür; yukarı, ileri veya çapraz rüzgârı yakala.\nKoyun arkadaşları toplayıp en fazla üç canla koşar; küçük takipçiler sırayla zıplar.\nKurt Shift / karakteri basılı tutarak hızlanır.\nMantar nadirdir; olasılığını ve renk etkisini bu ayarlardan değiştir.\nCüceler dördüncü seviyeden sonra ara sıra, dev mantarda düzensiz kalabalıklarla gelir.\nKumanda: A zıpla, X tek saldırı, B takla, LB hızlan, Start duraklat.\nKarakterini koşudan önce seç; Esc veya sağ üst düğme ile mola ver.\nNormal düşmanlar tek vuruşta veya üstüne basınca yenilir. Yenmek 10 XP, üstüne basmak 15 XP kazandırır; her 100 XP koşu ustalık dereceni artırır. Süreye bağlı seviyeler yine 20 saniyedir.\nBoss dışında sağ tık / F / RB / Şimşek bir şimşek yükü kullanır.",
 		"how": "Nasıl oynanır?",
 		"next": "SONRAKİ BİYOM",
 		"clear": "TEMİZ ATLAMA  +10",
@@ -161,7 +158,7 @@ const STRINGS := {
 		"saved_error": "Kayıt yazılamadı. Disk alanını kontrol et.",
 		"pause": "Duraklat",
 		"new_best": "YENİ REKOR!",
-		"version": "Sürüm 0.14.1 · Hesap yok. İnternet yok.",
+		"version": "Sürüm 0.15.0 · Hesap yok. İnternet yok.",
 		"portrait": "Daha geniş bir manzara için cihazını çevirebilirsin.",
 		"return": "Koşuya dön",
 		"controls": "Kontroller",
@@ -202,13 +199,25 @@ const STRINGS := {
 		"gust_forward": "İLERİ ESEN RÜZGÂR",
 		"gust_diagonal": "ÇAPRAZ RÜZGÂR",
 		"riding_forward": "İLERİ SÜZÜLÜYOR · Rüzgârla hızlan",
-		"riding_diagonal": "ÇAPRAZ AKIM · İleri ve yukarı süzül"
+		"riding_diagonal": "ÇAPRAZ AKIM · İleri ve yukarı süzül",
+		"forest": "FENER ORMANI",
+		"volcano": "KOR SIRTI",
+		"mastery": "Ustalık",
+		"control_lightning": "Şimşek",
+		"lightning_controls": "SAĞ TIK / F / RB: Şimşek · her basışta bir yük",
+		"lightning_touch": "⚡ Şimşeğe dokun: hat boyunca vur",
+		"boss_returning": "Yola dönüyoruz…",
+		"power_spring": "Sıçrama tılsımı",
+		"power_fortune": "Şans parası",
+		"power_frost": "Buz feneri",
+		"desc_spring": "9 saniye boyunca %16 daha yükseğe zıpla. Karakter boyutu değişmez.",
+		"desc_fortune": "12 saniye boyunca kristallerden iki kat puan kazan.",
+		"desc_frost": "8 saniye boyunca 430 adım içindeki yaklaşan düşmanları yavaşlat. Engellerin hızı değişmez."
 	},
 	"en": {
 		"touch_layout": "Touch layout",
 		"layout_split": "Split thumbs",
 		"layout_right": "Right-side buttons",
-
 		"theme": "Theme",
 		"theme_dark": "Dark",
 		"theme_light": "Light",
@@ -225,14 +234,13 @@ const STRINGS := {
 		"controller": "Controller",
 		"pad_haptics": "Vibration (optional)",
 		"pad_deadzone": "Left stick deadzone (20–80%)",
-		"pad_remap_help": "Rebind gameplay actions. Menus keep A/X to select, B to go back, Start to pause. A used button swaps the two actions. RT always fires in boss fights.",
+		"pad_remap_help": "Rebind gameplay actions. Menus keep A/X to select, B to go back, Start to pause. A used button swaps the two actions. RT always fires in boss fights. Outside boss fights, Fire uses a lightning charge.",
 		"pad_capture": "%s: press the new controller button. Cancel: Start / Esc.",
 		"pad_reset": "Reset controller settings",
 		"pad_ability_aion": "%s twice: double jump",
 		"pad_ability_owl": "Hold %s: glide",
 		"pad_ability_wolf": "Hold %s: sprint",
 		"pad_ability_sheep": "Up to three sheep",
-
 		"touch_ability_sheep": "Up to three sheep",
 		"touch_ability_wolf": "Hold Sprint to boost",
 		"touch_ability_owl": "↑ Hold to glide",
@@ -260,7 +268,6 @@ const STRINGS := {
 		"boss_pattern_seeds": "Seed salvo",
 		"boss_pattern_sweep": "Vine sweep",
 		"boss_pattern_hop": "Hopping core",
-
 		"level_requirements": "%d/20 s",
 		"gate_boost": "SPEED PAD · GO!",
 		"gate_rush": "Speed pad %ds",
@@ -287,7 +294,7 @@ const STRINGS := {
 		"control_attack": "Attack",
 		"control_duck": "Roll",
 		"screen_fx": "Gentle camera and lightning effects",
-		"discoveries": "DISCOVERED POWERS %d/7",
+		"discoveries": "DISCOVERED POWERS %d/10",
 		"defeated": "%d defeated",
 		"bonked": "Poof! Give it another go.",
 		"power_hint": "Collect mushrooms and charms · Discover new powers",
@@ -311,7 +318,7 @@ const STRINGS := {
 		"power_magnet": "Crystal magnet",
 		"power_leaf": "Life leaf",
 		"desc_mushroom": "A rare mushroom: grow for 10 seconds and battle irregular gnome waves.",
-		"desc_lightning": "Two charges; your next attack chains to distant enemies.",
+		"desc_lightning": "Two charges. Right click / F / RB / Bolt fires a broad 1500-step line. One press spends one charge; melee does not.",
 		"desc_slow": "Slow the world for 7 seconds and plan your moves.",
 		"desc_haste": "Run faster for 8 seconds and cover more ground.",
 		"desc_shield": "Absorb one hit within the next 12 seconds.",
@@ -352,7 +359,7 @@ const STRINGS := {
 		"off": "Off",
 		"volume": "Volume",
 		"appearance": "Appearance & accessibility",
-		"help": "Space / Jump to leap; each left click / J / Attack press is one strike.\nHolding does not repeat attacks. Press again for the other fist/wing/move.\nDown / S / Ctrl / Roll: somersault beneath low obstacles.\nA quick press completes a roll; hold to keep rolling.\nRolling is defensive; stand before striking again.\nLand on enemies to stomp and bounce. Crystals +25, obstacles +10.\nA level takes 20 active normal-running seconds; your best stays on this device.\nWith celebrations on, every 10 levels gives a one-second hug after landing.\nAion double jumps. Hold to glide as the owl; catch upward, forward or diagonal wind.\nCollect sheep for up to three lives; the smaller followers jump in sequence.\nWolf: hold Shift / the character to boost.\nMushrooms are rare; adjust their chance and color intensity here.\nGnomes occasionally appear from level four, with irregular crowds during giant power.\nGamepad: A jump, X one strike, B roll, LB boost, Start pause.\nChoose your character before the run; Esc or the top-right button pauses.",
+		"help": "Space / Jump to leap; each left click / J / Attack press is one strike.\nHolding does not repeat attacks. Press again for the other fist/wing/move.\nDown / S / Ctrl / Roll: somersault beneath low obstacles.\nA quick press completes a roll; hold to keep rolling.\nRolling is defensive; stand before striking again.\nLand on enemies to stomp and bounce. Crystals +25, obstacles +10.\nA level takes 20 active normal-running seconds; your best stays on this device.\nWith celebrations on, every 10 levels gives a one-second hug after landing.\nAion double jumps. Hold to glide as the owl; catch upward, forward or diagonal wind.\nCollect sheep for up to three lives; the smaller followers jump in sequence.\nWolf: hold Shift / the character to boost.\nMushrooms are rare; adjust their chance and color intensity here.\nGnomes occasionally appear from level four, with irregular crowds during giant power.\nGamepad: A jump, X one strike, B roll, LB boost, Start pause.\nChoose your character before the run; Esc or the top-right button pauses.\nOrdinary enemies fall to one strike or stomp. Defeats award 10 XP, stomps 15 XP; every 100 XP raises your run mastery rank. Timed levels still take 20 seconds.\nRight click / F / RB / Bolt uses a lightning charge outside boss fights.",
 		"how": "How to play",
 		"next": "NEXT BIOME",
 		"clear": "CLEAN JUMP  +10",
@@ -361,7 +368,7 @@ const STRINGS := {
 		"saved_error": "Could not save. Check free disk space.",
 		"pause": "Pause",
 		"new_best": "NEW PERSONAL BEST!",
-		"version": "Version 0.14.1 · No account. No internet.",
+		"version": "Version 0.15.0 · No account. No internet.",
 		"portrait": "Turn your device for a wider view.",
 		"return": "Return to run",
 		"controls": "Controls",
@@ -402,13 +409,25 @@ const STRINGS := {
 		"gust_forward": "FORWARD WIND",
 		"gust_diagonal": "DIAGONAL WIND",
 		"riding_forward": "TAILWIND · Glide forward faster",
-		"riding_diagonal": "DIAGONAL FLOW · Rise and glide forward"
+		"riding_diagonal": "DIAGONAL FLOW · Rise and glide forward",
+		"forest": "LANTERN WOODS",
+		"volcano": "EMBER RIDGE",
+		"mastery": "Rank",
+		"control_lightning": "Bolt",
+		"lightning_controls": "RIGHT CLICK / F / RB: Lightning · one charge per press",
+		"lightning_touch": "⚡ Tap Bolt: line lightning",
+		"boss_returning": "Back to the trail…",
+		"power_spring": "Spring charm",
+		"power_fortune": "Lucky coin",
+		"power_frost": "Frost lantern",
+		"desc_spring": "Jump 16% higher for 9 seconds. Character size stays the same.",
+		"desc_fortune": "Crystals award double points for 12 seconds.",
+		"desc_frost": "Slow approaching enemies within 430 steps for 8 seconds. Obstacles keep their speed."
 	},
 	"cs": {
 		"touch_layout": "Rozložení dotykového ovládání",
 		"layout_split": "Dvě strany",
 		"layout_right": "Tlačítka vpravo",
-
 		"theme": "Motiv",
 		"theme_dark": "Tmavý",
 		"theme_light": "Světlý",
@@ -425,14 +444,13 @@ const STRINGS := {
 		"controller": "Ovladač",
 		"pad_haptics": "Vibrace (volitelné)",
 		"pad_deadzone": "Mrtvá zóna levé páčky (20–80 %)",
-		"pad_remap_help": "Změňte herní tlačítka. V menu A/X potvrzuje, B se vrací a Start pozastaví hru. Obsazené tlačítko prohodí akce. RT vždy střílí na bosse.",
+		"pad_remap_help": "Změňte herní tlačítka. V menu A/X potvrzuje, B se vrací a Start pozastaví hru. Obsazené tlačítko prohodí akce. RT vždy střílí na bosse. Mimo souboj s bossem střelba použije dávku blesku.",
 		"pad_capture": "%s: stiskněte nové tlačítko. Zrušit: Start / Esc.",
 		"pad_reset": "Obnovit nastavení ovladače",
 		"pad_ability_aion": "Dvakrát %s: dvojitý skok",
 		"pad_ability_owl": "Držet %s: plachtit",
 		"pad_ability_wolf": "Držet %s: sprint",
 		"pad_ability_sheep": "Až tři ovce",
-
 		"touch_ability_sheep": "Až tři ovce",
 		"touch_ability_wolf": "Drž Sprint pro zrychlení",
 		"touch_ability_owl": "↑ Drž pro plachtění",
@@ -460,7 +478,6 @@ const STRINGS := {
 		"boss_pattern_seeds": "Salva semen",
 		"boss_pattern_sweep": "Švih liánou",
 		"boss_pattern_hop": "Skákající jádro",
-
 		"level_requirements": "%d/20 s",
 		"gate_boost": "RYCHLOSTNÍ PÁS · VPŘED!",
 		"gate_rush": "Rychlostní pás %ds",
@@ -487,7 +504,7 @@ const STRINGS := {
 		"control_attack": "Útok",
 		"control_duck": "Kotoul",
 		"screen_fx": "Jemný pohyb kamery a blesky",
-		"discoveries": "OBJEVENÉ BONUSY %d/7",
+		"discoveries": "OBJEVENÉ SCHOPNOSTI %d/10",
 		"defeated": "%d poražených",
 		"bonked": "Puf! Zkus to znovu.",
 		"power_hint": "Sbírej houby a talismany · Objevuj nové schopnosti",
@@ -511,7 +528,7 @@ const STRINGS := {
 		"power_magnet": "Magnet na krystaly",
 		"power_leaf": "Lístek života",
 		"desc_mushroom": "Vzácná houba: na 10 sekund vyrosteš a utkáš se s nepravidelnými vlnami skřítků.",
-		"desc_lightning": "Dvě dávky blesků; příští útok zasáhne i vzdálené nepřátele.",
+		"desc_lightning": "Dvě dávky. Pravé tlačítko / F / RB / Blesk zasáhne širokou přímku dlouhou 1500 kroků. Jeden stisk spotřebuje jednu dávku; úder zblízka žádnou.",
 		"desc_slow": "Svět se na 7 sekund zpomalí. Naplánujte si pohyb.",
 		"desc_haste": "Na 8 sekund poběžíte rychleji a urazíte větší vzdálenost.",
 		"desc_shield": "Během 12 sekund pohltí jeden zásah.",
@@ -552,7 +569,7 @@ const STRINGS := {
 		"off": "Vypnuto",
 		"volume": "Hlasitost",
 		"appearance": "Vzhled a přístupnost",
-		"help": "Mezerník / Skok: skoč; každé stisknutí levého tlačítka / J / Útok provede jeden útok.\nDržení útok neopakuje. Další stisk použije druhou pěst/křídlo/pohyb.\nDolů / S / Ctrl / Kotoul: prokutálej se pod nízkými překážkami.\nKrátký stisk dokončí kotoul; držením pokračuješ v kutálení.\nKotoul slouží k obraně; před dalším útokem se postav.\nDopadni na nepřítele a odraz se. Krystaly +25, překážky +10.\nNová úroveň po každých 20 sekundách aktivního běžného běhu; rekord se ukládá v zařízení.\nSe zapnutými oslavami přijde po každých 10 úrovních po přistání sekundové objetí.\nAion skáče dvakrát. Sova držením plachtí; zachyť vítr vzhůru, vpřed nebo šikmo.\nSbírej ovečky, nejvýše tři životy; menší přátelé skáčou postupně.\nVlk: drž Shift / postavu a zrychli.\nHouby jsou vzácné; jejich pravděpodobnost a barevné efekty nastavíš zde.\nSkřítci občas přicházejí od čtvrté úrovně a během obří síly v nepravidelných skupinách.\nOvladač: A skok, X jeden útok, B kotoul, LB zrychlení, Start pauza.\nPostavu vyber před během; Esc nebo pravé horní tlačítko hru pozastaví.",
+		"help": "Mezerník / Skok: skoč; každé stisknutí levého tlačítka / J / Útok provede jeden útok.\nDržení útok neopakuje. Další stisk použije druhou pěst/křídlo/pohyb.\nDolů / S / Ctrl / Kotoul: prokutálej se pod nízkými překážkami.\nKrátký stisk dokončí kotoul; držením pokračuješ v kutálení.\nKotoul slouží k obraně; před dalším útokem se postav.\nDopadni na nepřítele a odraz se. Krystaly +25, překážky +10.\nNová úroveň po každých 20 sekundách aktivního běžného běhu; rekord se ukládá v zařízení.\nSe zapnutými oslavami přijde po každých 10 úrovních po přistání sekundové objetí.\nAion skáče dvakrát. Sova držením plachtí; zachyť vítr vzhůru, vpřed nebo šikmo.\nSbírej ovečky, nejvýše tři životy; menší přátelé skáčou postupně.\nVlk: drž Shift / postavu a zrychli.\nHouby jsou vzácné; jejich pravděpodobnost a barevné efekty nastavíš zde.\nSkřítci občas přicházejí od čtvrté úrovně a během obří síly v nepravidelných skupinách.\nOvladač: A skok, X jeden útok, B kotoul, LB zrychlení, Start pauza.\nPostavu vyber před během; Esc nebo pravé horní tlačítko hru pozastaví.\nBěžní nepřátelé padnou po jediném úderu nebo dupnutí. Zásah dává 10 XP, dupnutí 15 XP; každých 100 XP zvýší hodnost v tomto běhu. Časované úrovně stále trvají 20 sekund.\nMimo bosse pravé tlačítko / F / RB / Blesk použije jednu dávku blesku.",
 		"how": "Jak hrát",
 		"next": "DALŠÍ BIOM",
 		"clear": "ČISTÝ SKOK +10",
@@ -561,7 +578,7 @@ const STRINGS := {
 		"saved_error": "Uložení se nezdařilo. Zkontroluj volné místo.",
 		"pause": "Pozastavit",
 		"new_best": "NOVÝ OSOBNÍ REKORD!",
-		"version": "Verze 0.14.1 · Bez účtu. Bez internetu.",
+		"version": "Verze 0.15.0 · Bez účtu. Bez internetu.",
 		"portrait": "Pro širší výhled otoč zařízení.",
 		"return": "Zpět do běhu",
 		"controls": "Ovládání",
@@ -602,8 +619,31 @@ const STRINGS := {
 		"gust_forward": "VÍTR VPŘED",
 		"gust_diagonal": "ŠIKMÝ PROUD",
 		"riding_forward": "VÍTR DO ZAD · Plachti rychleji vpřed",
-		"riding_diagonal": "ŠIKMÝ PROUD · Stoupej a plachti vpřed"
+		"riding_diagonal": "ŠIKMÝ PROUD · Stoupej a plachti vpřed",
+		"forest": "LUCERNOVÝ LES",
+		"volcano": "ŽHAVÝ HŘEBEN",
+		"mastery": "Hodnost",
+		"control_lightning": "Blesk",
+		"lightning_controls": "PRAVÉ TLAČÍTKO / F / RB: blesk · jedna dávka za stisk",
+		"lightning_touch": "⚡ Klepni na Blesk: zásah po přímce",
+		"boss_returning": "Zpátky na cestu…",
+		"power_spring": "Talizman skoku",
+		"power_fortune": "Šťastná mince",
+		"power_frost": "Mrazivá lucerna",
+		"desc_spring": "Na 9 sekund skáčeš o 16 % výš. Velikost postavy se nemění.",
+		"desc_fortune": "Krystaly dávají dvojité body po dobu 12 sekund.",
+		"desc_frost": "Na 8 sekund zpomalí blížící se nepřátele do vzdálenosti 430 kroků. Překážky nezpomalí."
 	}
+}
+const EXTRA := {
+	"az":preload("res://assets/locales/az.json"),
+	"de":preload("res://assets/locales/de.json"),
+	"fr":preload("res://assets/locales/fr.json"),
+	"ja":preload("res://assets/locales/ja.json"),
+	"ko":preload("res://assets/locales/ko.json"),
+	"zh":preload("res://assets/locales/zh.json"),
+	"es":preload("res://assets/locales/es.json"),
+	"it":preload("res://assets/locales/it.json")
 }
 
 static func language_for_locale(locale: String) -> String:
@@ -611,4 +651,5 @@ static func language_for_locale(locale: String) -> String:
 	return primary if primary in LANGUAGES else "en"
 
 static func get_text(language: String, key: String) -> String:
-	return STRINGS.get(language, STRINGS.en).get(key, STRINGS.en.get(key, key))
+	var table: Dictionary = EXTRA[language].data if EXTRA.has(language) else STRINGS.get(language, STRINGS.en)
+	return table.get(key, STRINGS.en.get(key, key))

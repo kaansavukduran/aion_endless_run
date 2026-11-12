@@ -1,3 +1,7 @@
+# 0.15.0 lightning
+
+Outside bosses, right click / F / the remappable Fire button (default RB/R1) / RT/R2 / the mobile Bolt circle consumes one lightning charge per press. Holding does not spend another charge. Melee remains separate and does not consume lightning. During boss fights these same Fire inputs keep their existing held pistol fire. Split touch places the extra Bolt above-left of Attack while retaining Jump, Roll and wolf Sprint.
+
 # Kontrol kararı · 12 Kasım 2026
 
 Kullanıcıya uygunluk sırasıyla 1) sağ düğmeler + aşağı kaydırma, 2) iki başparmağa bölünmüş düğmeler, 3) jest ağırlıklı düzen sunuldu. Her seçenek için portre/yatay alan ve öğrenme/ergonomi farkı açıklandı. Kullanıcı açıkça **2 — İki yana bölünmüş düğmeler (solda zıpla, sağda saldır/takla)** seçti.

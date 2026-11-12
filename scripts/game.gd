@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3}
-const GAME_VERSION = "0.14.1"
+const GAME_VERSION = "0.15.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -43,6 +43,8 @@ var best_level := 1
 var prism_intensity := 0.60
 var evolution_view: Node2D
 var level_label: Label
+var xp_label: Label
+var xp_progress: ProgressBar
 var level_progress: ProgressBar
 var settings_inputs := {}
 var best := 0
@@ -67,6 +69,7 @@ var progress: ProgressBar
 var footer_label: Label
 var notice_label: Label
 var pause_button: Button
+var gun_echo: Sprite2D
 var friend_sprite: Sprite2D
 var followers: Array[Sprite2D] = []
 var sheep_collectible: Sprite2D
@@ -149,11 +152,13 @@ func _ready() -> void:
 	if OS.has_feature("web"):
 		web_update_callback = JavaScriptBridge.create_callback(prepare_web_update)
 		JavaScriptBridge.get_interface("window").aionSaveForUpdate = web_update_callback
-		JavaScriptBridge.eval("document.getElementById('canvas').addEventListener('contextmenu',e=>{if(e.currentTarget.dataset.bossActive==='true')e.preventDefault()})")
+		JavaScriptBridge.eval("document.getElementById('canvas').addEventListener('contextmenu',e=>{if(e.currentTarget.dataset.page==='')e.preventDefault()})")
 	for i in 2:
 		followers.append(make_companion_sprite())
 	sheep_collectible = make_companion_sprite()
 	friend_sprite = make_companion_sprite()
+	gun_echo = make_companion_sprite()
+	gun_echo.visible = false
 	player_sound = AudioStreamPlayer.new()
 	add_child(player_sound)
 	var canvas := CanvasLayer.new()
@@ -550,13 +555,22 @@ func build_language_picker() -> void:
 	language_picker.z_index = 100
 	language_picker.add_theme_stylebox_override("panel", box("18283d", "79d7c7", 12))
 	ui.add_child(language_picker)
-	language_picker.position = Vector2(view_w-220,80 if touch_mode else 64)
+	var picker_width := minf(330,view_w-60)
+	language_picker.position = Vector2(view_w-picker_width-40,80 if touch_mode else 64)
+	var lang_scroll := ScrollContainer.new()
+	lang_scroll.name = "LanguageScroll"
+	lang_scroll.custom_minimum_size = Vector2(picker_width,minf(480,view_h-128))
+	lang_scroll.follow_focus = true
+	lang_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	language_picker.add_child(lang_scroll)
 	var options := VBoxContainer.new()
-	language_picker.add_child(options)
+	options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lang_scroll.add_child(options)
 	for lang in Words.LANGUAGES:
 		var option := button(lang.to_upper() + "  " + Words.LANGUAGE_NAMES[lang], func(): set_language(lang), lang == language)
 		option.name = "Language_" + lang
-		option.custom_minimum_size = Vector2(176, 44)
+		option.custom_minimum_size = Vector2(0,48)
+		option.add_theme_font_size_override("font_size",ui_size(24))
 		options.add_child(option)
 	language_picker.visible = language_picker_open and page != ""
 
@@ -564,10 +578,21 @@ func toggle_language_picker() -> void:
 	language_picker_open = not language_picker_open
 	language_picker.visible = language_picker_open
 	web_stamp = ""
-	if language_picker_open: language_picker.get_child(0).get_child(Words.LANGUAGES.find(language)).grab_focus()
+	if language_picker_open: focus_language_option.call_deferred(layout_generation)
 	# Visibility changes do not rebuild the page. Publish the real popup
 	# layout after container sorting for native touch diagnostics as well.
 	refresh_interface_metadata.call_deferred(layout_generation)
+
+func focus_language_option(generation: int) -> void:
+	# Hidden containers have no final row positions on their first visible frame.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if generation != layout_generation or not language_picker_open or not is_instance_valid(language_picker): return
+	var option: Control = language_picker.find_child("Language_"+language,true,false)
+	var scroll: ScrollContainer = language_picker.find_child("LanguageScroll",true,false)
+	option.grab_focus()
+	scroll.ensure_control_visible(option)
+	refresh_interface_metadata.call_deferred(generation)
 
 func character_portrait(id: String) -> TextureRect:
 	var picture := TextureRect.new()
@@ -771,14 +796,19 @@ func press_attack(source: String) -> void:
 
 func press_shoot(source: String) -> void:
 	begin_playing()
-	if page != "" or world.state != "running" or not world.frontier.active(): return
+	if page != "" or world.state != "running" or world.adventure.hugging(): return
+	if shoot_sources.has(source): return
+	var first := shoot_sources.is_empty()
 	shoot_sources[source] = true
+	if not world.frontier.active():
+		if first: world.adventure.cast_lightning(world)
+		return
 	world.frontier.shoot_held = true
 	world.frontier.fire(world)
 
 func release_shoot(source: String) -> void:
 	shoot_sources.erase(source)
-	world.frontier.shoot_held = not shoot_sources.is_empty()
+	world.frontier.shoot_held = world.frontier.active() and not shoot_sources.is_empty()
 
 func release_attack(source: String) -> void:
 	attack_sources.erase(source)
@@ -1013,6 +1043,9 @@ func handle_event(value: String) -> void:
 		notice_time = 1.2
 		tone(1180,0.1)
 		return
+	if value == "boss_returning":
+		notice = text(value)
+		notice_time = 1.25
 	if value == "shot":
 		tone(980,0.035)
 		return
@@ -1090,7 +1123,7 @@ func update_hud() -> void:
 	score_label.text = "%05d" % world.score
 	best_label.text = "%05d" % best
 	crystal_label.text = "%02d" % world.gems
-	biome_label.text = text(["desert","snow","swamp","city"][world.biome()])
+	biome_label.text = text(World.BIOME_NAMES[world.biome()])
 	biome_label.text += "  ·  " + text("weather_" + world.adventure.weather)
 	var powers: Array[String] = []
 	for id in world.adventure.powers:
@@ -1109,13 +1142,27 @@ func update_hud() -> void:
 	boss_bar.value = boss.hp
 	footer_label.text = text("touch_boss_hint") if touch_mode and boss.active() else (text("touch_hint") if touch_mode else (text("boss_fight") if boss.active() else text("hint")))
 	if active_input=="gamepad":footer_label.text=gamepad.prompts(boss.active())
+	if not boss.active() and world.adventure.lightning_charges>0:
+		footer_label.text = text("lightning_touch") if touch_mode else text("lightning_controls")
+		if active_input=="gamepad": footer_label.text = gamepad.binding_name("shoot")+" / RT: "+text("control_lightning")
+	var exit_fade: float = 1.0-smoothstep(0.0,world.frontier.RETURN_DURATION,world.frontier.stage_time) if world.frontier.phase=="return" else 1.0
+	boss_label.modulate.a = exit_fade
+	boss_bar.modulate.a = exit_fade
 	boss_label.text = text(["boss_name","boss_ray","boss_root"][boss.boss_kind]) + "  ·  %d/%d  ·  " % [boss.hp,boss.max_hp] + text("boss_hearts") % boss.player_hp
 	if boss.warning != "": boss_label.text += " · " + text("boss_pattern_"+boss.pattern) + " · " + text("boss_dodge_"+boss.warning)
 	var ids: Array = ["jump","duck","shoot"] if boss.active() else ["jump","attack","duck"]
+	if not boss.active() and world.adventure.lightning_charges > 0: ids.append("shoot")
 	if character=="wolf": ids.append("boost")
 	for id in action_buttons:
 		var index: int = ids.find(id)
 		action_buttons[id].visible = page == "" and world.state == "running" and index >= 0
+		if id == "shoot":
+			var control = action_buttons[id]
+			control.elemental = not boss.active()
+			control.caption = text("control_shoot" if boss.active() else "control_lightning")
+			control.accessibility_name = control.caption
+			var shoot_pos: Vector2 = action_buttons.attack.position if boss.active() else action_buttons.attack.position+Vector2(-98,-50)
+			control.position = shoot_pos
 	if action_buttons.has("attack"):
 		action_buttons.attack.modulate.a = 0.70 if world.adventure.attack_cooldown > 0 else 1.0
 		action_buttons.jump.modulate = Color("a9ead9") if world.jump_held else Color.WHITE
@@ -1124,10 +1171,14 @@ func update_hud() -> void:
 	level_progress.visible = level_label.visible
 	level_label.text = (text("level_short") % world.adventure.level) + " · " + (text("level_requirements") % mini(20,int(world.adventure.level_elapsed)))
 	level_progress.value = world.adventure.level_progress(world)
+	xp_label.text = "XP %d · %s %d" % [world.adventure.run_xp,text("mastery"),world.adventure.mastery_rank()]
+	xp_label.visible = level_label.visible and interface_options.text_scale<=1.0
+	xp_progress.visible = xp_label.visible
+	xp_progress.value = world.adventure.run_xp % 100
 	for id in action_buttons:
 		var control = action_buttons[id]
-		control.disabled = world.adventure.hugging() or (id=="shoot" and world.frontier.phase!="fight") or (id=="attack" and world.adventure.ducking(world))
-		control.cooldown = world.adventure.attack_cooldown/world.adventure.ATTACK_COOLDOWN if id=="attack" else (world.frontier.shot_cooldown/world.frontier.SHOT_CADENCE if id=="shoot" else 0.0)
+		control.disabled = world.adventure.hugging() or (id=="shoot" and (world.frontier.phase!="fight" if boss.active() else world.adventure.lightning_charges<=0 or world.adventure.ducking(world))) or (id=="attack" and world.adventure.ducking(world))
+		control.cooldown = world.adventure.attack_cooldown/world.adventure.ATTACK_COOLDOWN if id=="attack" else ((world.frontier.shot_cooldown/world.frontier.SHOT_CADENCE if boss.active() else world.adventure.lightning_cooldown/world.adventure.LIGHTNING_COOLDOWN) if id=="shoot" else 0.0)
 		control.queue_redraw()
 	if is_instance_valid(fragaria_panel): fragaria_panel.visible = world.adventure.fragaria_time>0 and page in ["","paused"] and interface_options.text_scale<=1.0
 	footer_label.visible = page==""
@@ -1208,6 +1259,9 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-projectiles",JSON.stringify(world.frontier.projectiles))
 	canvas.setAttribute("data-plants",JSON.stringify(world.frontier.plants))
 	canvas.setAttribute("data-biome",str(world.biome()))
+	canvas.setAttribute("data-xp",str(world.adventure.run_xp))
+	canvas.setAttribute("data-lightning-charges",str(world.adventure.lightning_charges))
+	canvas.setAttribute("data-travel-distance",str(world.travel_distance()))
 	canvas.setAttribute("data-hero-head-size",str(friend_sprite.get_meta("head_size",0)))
 	canvas.setAttribute("data-isolated-frame",str(not friend_sprite.region_enabled))
 	canvas.setAttribute("data-version", GAME_VERSION)
@@ -1358,6 +1412,7 @@ func update_friend() -> void:
 			if a.attack_time > 0.0: friend_combat = COMBAT_ROWS[character]
 			elif a.ducking(world): friend_combat = COMBAT_ROWS[character] + 4
 	friend_sprite.visible = true
+	gun_echo.visible = false
 	for item in followers: item.visible = false
 	sheep_collectible.visible = character == "sheep" and not world.sheep_pickups.is_empty() and world.sheep_count < 3
 	if sheep_collectible.visible:
@@ -1372,7 +1427,7 @@ func update_friend() -> void:
 		friend_action = world.boosting() or world.riding_gust
 		friend_row = 6 if world.boosting() else 1
 		# Strides follow distance so feet accelerate with the world and freeze on pause.
-		friend_frame = frames.cycle("runner-"+character,friend_row,world.distance,174.0)
+		friend_frame = frames.cycle("runner-"+character,friend_row,world.travel_distance(),174.0)
 		if world.y < 0.0:
 			friend_row = 6 if world.gliding else 2
 			if world.gliding: friend_frame = frames.cycle("runner-"+character,6,animation_clock(),1.0)
@@ -1416,7 +1471,7 @@ func update_friend() -> void:
 		var combat_frame: int = (contact_frame(combat_count) if friend_combat < 4 else a.roll_frame(combat_count)) if motion else combat_count/2
 		var combat_anchor := Vector2(World.PLAYER_X,ground+world.y)+combat_lunge()
 		place_combat(friend_sprite, character, friend_combat, combat_frame, combat_anchor, visual_size, friend_combat >= 4 or a.ducking(world))
-	if world.state in ["running","paused"] and world.frontier.active() and not a.ducking(world) and (world.frontier.phase != "intro" or world.frontier.stage_time > 0.75):
+	if world.state in ["running","paused"] and world.frontier.active() and not a.ducking(world) and world.frontier.phase != "return" and (world.frontier.phase != "intro" or world.frontier.stage_time > 0.75):
 		var firing: bool = world.frontier.shot_flash>0
 		var key := "gun-fire" if firing else "gun-run"
 		var row: int = COMBAT_ROWS[character]
@@ -1428,6 +1483,12 @@ func update_friend() -> void:
 		frames.place(friend_sprite,"deaths",row,frames.progress("deaths",row,world.hit_time/1.25) if motion else frames.count("deaths",row)-1,Vector2(World.PLAYER_X,ground+world.y),visual_size)
 
 	friend_sprite.modulate = Color.WHITE
+	if world.frontier.phase == "return" and world.state == "running" and not a.ducking(world):
+		var fade: float = smoothstep(0.0,0.55,world.frontier.stage_time)
+		frames.place(gun_echo,"gun-run",COMBAT_ROWS[character],frames.cycle("gun-run",COMBAT_ROWS[character],world.travel_distance(),174.0) if motion else 0,Vector2(World.PLAYER_X,ground+world.y))
+		gun_echo.visible = fade<1.0
+		gun_echo.modulate.a = 1.0-fade
+		friend_sprite.modulate.a = fade
 	if character == "sheep":
 		for i in 2:
 			followers[i].visible = world.sheep_count > i + 1 and world.state not in ["fire", "ice", "bonk", "fall"]
@@ -1565,26 +1626,26 @@ func _draw() -> void:
 
 func draw_scenery() -> void:
 	var time: float = world.time
-	var scroll: float = world.frontier.chase_distance if world.frontier.active() else world.distance
+	var scroll: float = world.travel_distance()
 	if world.state == "ready":
 		time = menu_clock
 		scroll = menu_clock*20.0
 	if not decorative_motion(): scroll = 0.0
 	var night := 0.12 if world.state=="ready" else (cos(time*TAU/72.0)+1.0)/2.0
-	var weights := [0.0,0.0,0.0,0.0]
+	var weights := [0.0,0.0,0.0,0.0,0.0,0.0]
 	var biome: int = world.biome()
 	var blend := 1.0 if world.distance < World.BIOME_DISTANCE else smoothstep(0.0,0.08,fmod(world.distance/World.BIOME_DISTANCE,1.0))
 	weights[biome] = blend
-	weights[posmod(biome-1,4)] += 1.0-blend
-	var days := [Color("e5a58b"),Color("7396b0"),Color("6b9476"),Color("9183ad")]
-	var nights := [Color("3b3655"),Color("253f59"),Color("193c3a"),Color("272d4d")]
-	var floors := [Color("553e50"),Color("233b51"),Color("193e39"),Color("2d3445")]
-	var edges := [Color("c48d91"),Color("c4e7f0"),Color("a5bd7c"),Color("a7b7c8")]
+	weights[posmod(biome-1,World.BIOME_NAMES.size())] += 1.0-blend
+	var days := [Color("e5a58b"),Color("7396b0"),Color("6b9476"),Color("9183ad"),Color("94ab79"),Color("bd7975")]
+	var nights := [Color("3b3655"),Color("253f59"),Color("193c3a"),Color("272d4d"),Color("203842"),Color("492a40")]
+	var floors := [Color("553e50"),Color("233b51"),Color("193e39"),Color("2d3445"),Color("303d38"),Color("432d39")]
+	var edges := [Color("c48d91"),Color("c4e7f0"),Color("a5bd7c"),Color("a7b7c8"),Color("b4c88b"),Color("e59670")]
 	var top := Color("9d667e") if world.state=="ready" else Color("355c80").lerp(Color("0c142a"),night)
 	var bottom := Color(0,0,0,1)
 	var floor_color := Color(0,0,0,1)
 	var edge_color := Color(0,0,0,1)
-	for n in 4:
+	for n in World.BIOME_NAMES.size():
 		bottom += days[n].lerp(nights[n],night)*float(weights[n])
 		floor_color += floors[n]*float(weights[n])
 		edge_color += edges[n]*float(weights[n])
@@ -1608,7 +1669,7 @@ func draw_scenery() -> void:
 		for i in range(-1,int(scene_w/spacing)+2):
 			var x := float(i)*spacing-offset
 			var height := 100.0+float((i+22)%3)*31-float(layer)*19
-			var color := Color("6d5266").lerp(Color("25304f"),night).lerp(Color("355774"),weights[1]).lerp(Color("234b43"),weights[2]).lerp(Color("353958"),weights[3]).darkened(float(layer)*0.15)
+			var color := Color("6d5266").lerp(Color("25304f"),night).lerp(Color("355774"),weights[1]).lerp(Color("234b43"),weights[2]).lerp(Color("353958"),weights[3]).lerp(Color("345149"),weights[4]).lerp(Color("623c4a"),weights[5]).darkened(float(layer)*0.15)
 			var points := PackedVector2Array([Vector2(x,base),Vector2(x,base-29),Vector2(x+35,base-29),Vector2(x+35,base-height*0.55),Vector2(x+62,base-height*0.55),Vector2(x+62,base-height),Vector2(x+123,base-height),Vector2(x+123,base-height*0.72),Vector2(x+161,base-height*0.72),Vector2(x+161,base-height*0.35),Vector2(x+spacing,base-height*0.35),Vector2(x+spacing,base)])
 			draw_colored_polygon(points,color)
 			if weights[1] > 0 and layer<2: draw_rect(Rect2(x+62,base-height,61,8),Color(0.75,0.85,0.9,float(weights[1])*0.65))
@@ -1616,7 +1677,7 @@ func draw_scenery() -> void:
 				for row in 3:
 					for col in 3: draw_rect(Rect2(x+68+col*15,base-height+15+row*19,6,9),Color(0.92,0.74,0.48,float(weights[3])*(0.35+night*0.35)))
 	evolution_view.draw_scene(self,true)
-	for kind in 4:
+	for kind in World.BIOME_NAMES.size():
 		var alpha: float = weights[kind]
 		if alpha <= 0: continue
 		for i in range(-1,int(scene_w/275)+2):
@@ -1650,6 +1711,13 @@ func draw_scenery() -> void:
 						for k in 3: draw_rect(Rect2(x+27+k*24,ground-130+j*28,10,15),Color(0.92,0.73,0.47,alpha*(0.5+night*0.35)))
 					draw_rect(Rect2(x+145,ground-106,5,106),c)
 					draw_rect(Rect2(x+130,ground-110,35,7),Color(0.98,0.82,0.5,alpha))
+				4:
+					draw_rect(Rect2(x+43,ground-162,19,162),Color(0.20,0.29,0.25,alpha))
+					for crown in [Rect2(x-5,ground-156,113,30),Rect2(x+6,ground-184,92,32),Rect2(x+29,ground-207,48,26)]: draw_rect(crown,Color(0.25,0.43,0.34,alpha))
+					for leaf in 5: draw_rect(Rect2(x+leaf*23,ground-12,16,5),Color(0.67,0.66,0.37,alpha))
+				5:
+					draw_colored_polygon(PackedVector2Array([Vector2(x,ground),Vector2(x+22,ground-42),Vector2(x+22,ground-66),Vector2(x+50,ground-66),Vector2(x+66,ground-105),Vector2(x+83,ground-66),Vector2(x+111,ground-66),Vector2(x+146,ground)]),Color(0.27,0.19,0.27,alpha))
+					for crack in 3: draw_rect(Rect2(x+48+crack*10,ground-68+crack*19,7,19),Color(0.96,0.48,0.31,alpha*0.65))
 	draw_rect(Rect2(0,ground,scene_w,scene_h-ground),floor_color)
 	draw_rect(Rect2(0,ground,scene_w,4),edge_color)
 	draw_rect(Rect2(0,ground+4,scene_w,10),floor_color.lightened(0.22))

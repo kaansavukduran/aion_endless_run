@@ -1,7 +1,7 @@
 class_name RunnerAdventure
 extends RefCounted
 
-const POWER_NAMES := ["mushroom", "lightning", "slow", "haste", "shield", "magnet", "leaf"]
+const POWER_NAMES := ["mushroom", "lightning", "slow", "haste", "shield", "magnet", "leaf", "spring", "fortune", "frost"]
 const ATTACK_DURATION := 0.40
 const ATTACK_COOLDOWN := 0.46
 const LEVEL_DISTANCE := 12000.0
@@ -43,7 +43,7 @@ var roll_elapsed := 0.0
 var enabled := true
 var enemies: Array[Dictionary] = []
 var items: Array[Dictionary] = []
-var powers := {"mushroom":0.0, "slow":0.0, "haste":0.0, "shield":0.0, "magnet":0.0}
+var powers := {"mushroom":0.0, "slow":0.0, "haste":0.0, "shield":0.0, "magnet":0.0, "spring":0.0, "fortune":0.0, "frost":0.0}
 var discoveries: Array[String] = []
 var attack_held := false
 var duck_held := false
@@ -59,6 +59,15 @@ var stomps := 0
 var stomp_chain := 0
 var bonus_score := 0
 var lightning_charges := 0
+const LIGHTNING_RANGE := 1500.0
+const LIGHTNING_RADIUS := 92.0
+const LIGHTNING_COOLDOWN := 0.65
+var lightning_cooldown := 0.0
+var lightning_origin := Vector2.ZERO
+var lightning_end := Vector2.ZERO
+var run_xp := 0
+var xp_notice := 0.0
+var last_xp := 0
 var lightning_time := 0.0
 var lightning_targets: Array[Vector2] = []
 var item_wait := 12.0
@@ -131,6 +140,10 @@ func reset() -> void:
 	bonus_score = 0
 	lightning_charges = 0
 	lightning_time = 0.0
+	lightning_cooldown = 0.0
+	run_xp = 0
+	xp_notice = 0.0
+	last_xp = 0
 	lightning_targets.clear()
 	item_wait = 12.0
 	first_item = true
@@ -195,7 +208,7 @@ func choose_power(world) -> String:
 	if eligible and mushroom_chance > 0.0 and world.rng.randf() < mushroom_chance:
 		last_mushroom_at = world.time
 		return "mushroom"
-	return shuffled_pick(world, power_bag, ["lightning", "slow", "haste", "shield", "magnet", "leaf"])
+	return shuffled_pick(world, power_bag, ["lightning", "slow", "haste", "shield", "magnet", "leaf", "spring", "fortune", "frost"])
 
 func choose_girl(world) -> void:
 	if girl_bag.is_empty():
@@ -281,16 +294,7 @@ func attack(world) -> bool:
 	attack_time = ATTACK_DURATION
 	attack_cooldown = ATTACK_COOLDOWN
 	world.event("attack_" + world.character)
-	if lightning_charges > 0:
-		lightning_charges -= 1
-		lightning_time = 0.32
-		lightning_targets.clear()
-		for enemy in enemies:
-			if enemy.hp > 0 and enemy.x > world.PLAYER_X - 40 and enemy.x < world.PLAYER_X + 700:
-				lightning_targets.append(Vector2(enemy.x, enemy.y))
-				hit_enemy(world, enemy, 3, false)
-				if lightning_targets.size() >= 5: break
-		world.event("lightning_cast")
+
 	return true
 
 func attack_active() -> bool:
@@ -318,19 +322,55 @@ func hit_enemy(world, enemy: Dictionary, damage: int, stomp: bool) -> void:
 	world.event("enemy_hit")
 	if enemy.hp <= 0:
 		enemy.defeat = 0.001
-		kills += 1
-		if stomp:
-			stomps += 1
-			stomp_chain = mini(5, stomp_chain + 1)
-			bonus_score += 50 + stomp_chain * 10
-		else:
-			bonus_score += 35
-		world.event("stomp" if stomp else "enemy_down")
+		reward_enemy(world, stomp)
+
+func reward_enemy(world, stomp: bool) -> void:
+	kills += 1
+	last_xp = 15 if stomp else 10
+	run_xp += last_xp
+	xp_notice = 1.0
+	if stomp:
+		stomps += 1
+		stomp_chain = mini(5, stomp_chain + 1)
+		bonus_score += 50 + stomp_chain * 10
+	else: bonus_score += 35
+	world.event("stomp" if stomp else "enemy_down")
+
+func mastery_rank() -> int: return 1 + run_xp / 100
+func jump_multiplier() -> float: return 1.16 if enabled and powers.spring > 0.0 else 1.0
+
+func cast_lightning(world) -> bool:
+	if not enabled or world.state != "running" or world.frontier.active() or hugging() or ducking(world) or lightning_charges <= 0 or lightning_cooldown > 0: return false
+	lightning_charges -= 1
+	lightning_cooldown = LIGHTNING_COOLDOWN
+	lightning_time = 0.32
+	lightning_origin = Vector2(world.PLAYER_X+28, world.y-48)
+	lightning_end = lightning_origin + Vector2(LIGHTNING_RANGE, 0)
+	lightning_targets.clear()
+	var corridor := Rect2(lightning_origin-Vector2(0,LIGHTNING_RADIUS),Vector2(LIGHTNING_RANGE,LIGHTNING_RADIUS*2))
+	for enemy in enemies:
+		if enemy.hp > 0 and corridor.intersects(enemy_rect(enemy)):
+			lightning_targets.append(Vector2(enemy.x, enemy.y))
+			hit_enemy(world, enemy, 1, false)
+	for plant in world.frontier.plants:
+		if plant.hp > 0 and corridor.intersects(Rect2(plant.x-25,-68,50,68)):
+			plant.hp = 0
+			reward_enemy(world, false)
+			lightning_targets.append(Vector2(plant.x,-36))
+	world.event("lightning_cast")
+	return true
+
+func flying(kind: String) -> bool: return kind in ["crow", "bat", "wisp"]
+
+func enemy_rect(enemy: Dictionary) -> Rect2:
+	if flying(enemy.kind): return Rect2(enemy.x-22,enemy.y-19,44,38)
+	if enemy.kind == "slime": return Rect2(enemy.x-23,enemy.y-15,46,30)
+	return Rect2(enemy.x-18,enemy.y-23,36,46)
 
 func spawn_enemy(world, kind: String, x: float = -1.0, altitude: float = -74.0) -> Dictionary:
 	enemy_id += 1
-	var hp := 2 if kind == "gnome" else 1
-	var enemy := {"id":enemy_id, "kind":kind, "x":world.field_width + 70.0 if x < 0 else x, "y":altitude if kind == "crow" else -23.0, "base_y":altitude, "hp":hp, "max_hp":hp, "hurt":0.0, "defeat":0.0, "age":0.0, "last_swing":-1, "diving":false,"wave":false}
+	var hp := 1
+	var enemy := {"id":enemy_id, "kind":kind, "x":world.field_width + 70.0 if x < 0 else x, "y":altitude if flying(kind) else (-15.0 if kind == "slime" else -23.0), "base_y":altitude, "hp":hp, "max_hp":hp, "hurt":0.0, "defeat":0.0, "age":0.0, "last_swing":-1, "diving":false,"wave":false}
 	enemies.append(enemy)
 	return enemy
 
@@ -345,18 +385,22 @@ func shuffled_pick(world, bag: Array[String], values: Array[String]) -> String:
 	return bag.pop_back()
 
 func spawn_encounter(world) -> void:
-	var kind := shuffled_pick(world, encounter_bag, ["fire", "ice", "crow", "crow_high", "gate", "gate", "carrier_pipe", "carrier_plank"])
+	var kind := shuffled_pick(world, encounter_bag, ["fire", "ice", "crow", "crow_high", "bat", "wisp", "slime", "beetle", "gate", "carrier_pipe", "carrier_plank"])
 	if kind == last_encounter: kind = "crow" if kind != "crow" else "ice"
-	if world.rng.randf() < 0.38:
+	if world.rng.randf() < 0.30:
 		kind = ["block_crate","block_log","block_road","block_rock","block_vent","block_barrel","pit","pit_city"][world.rng.randi_range(0,7)]
+	# A bag guarantees variety; occasional weighted draws break its repeating cadence.
+	if world.rng.randf() < 0.28:
+		var regional: Array = [["beetle","crow"],["wisp","beetle"],["slime","bat"],["crow","beetle"],["bat","slime"],["wisp","bat"]][world.biome()]
+		kind = regional[world.rng.randi_range(0,1)]
 	last_encounter = kind
 	last_spawn_distance = world.distance
 	spawn_gap = world.rng.randf_range(680.0, 1550.0)
 	if level >= 4 and world.rng.randf() < 0.07:
 		kind = "gnome"
 		last_encounter = kind
-	if kind == "gnome":
-		spawn_enemy(world, "gnome")
+	if kind in ["gnome", "slime", "beetle", "bat", "wisp"]:
+		spawn_enemy(world, kind, -1.0, world.rng.randf_range(-128.0,-78.0) if flying(kind) else -23.0)
 	elif kind.begins_with("crow"):
 		spawn_enemy(world, "crow", -1.0, -154.0 if kind == "crow_high" else -86.0)
 	else:
@@ -403,6 +447,9 @@ func collect(world, kind: String) -> void:
 			powers.slow = 0.0
 		"shield": powers.shield = 12.0
 		"magnet": powers.magnet = 10.0
+		"spring": powers.spring = 9.0
+		"fortune": powers.fortune = 12.0
+		"frost": powers.frost = 8.0
 		"leaf":
 			if world.character == "sheep" and world.sheep_count < 3: world.sheep_count += 1
 			else: powers.shield = maxf(float(powers.shield), 8.0)
@@ -464,6 +511,8 @@ func before_step(world, dt: float) -> void:
 	attack_cooldown = maxf(0.0, attack_cooldown - dt)
 	duck_time = duck_time + dt if ducking(world) else 0.0
 	lightning_time = maxf(0.0, lightning_time - dt)
+	lightning_cooldown = maxf(0.0, lightning_cooldown - dt)
+	xp_notice = maxf(0.0, xp_notice - dt)
 	thunder_time = maxf(0.0, thunder_time - dt)
 	if pending_attack and attack_cooldown <= 0.0:
 		pending_attack = false
@@ -522,7 +571,7 @@ func after_step(world, dt: float, movement: float, previous_y: float) -> void:
 				crystal.y = move_toward(crystal.y, world.y - 35.0, dt * 480)
 	for enemy in enemies:
 		enemy.age += dt
-		enemy.x -= movement * (1.13 if enemy.kind == "crow" else 1.04) * (0.1 if enemy.hurt > 0.0 and enemy.hp > 0 else 1.0)
+		enemy.x -= movement * (1.13 if flying(enemy.kind) else (1.16 if enemy.kind == "beetle" else 1.04)) * (0.55 if powers.frost > 0 and enemy.x > world.PLAYER_X and enemy.x-world.PLAYER_X < 430 else 1.0) * (0.1 if enemy.hurt > 0.0 and enemy.hp > 0 else 1.0)
 		enemy.hurt = maxf(0.0, enemy.hurt - dt)
 		if enemy.hp <= 0:
 			enemy.defeat += dt
@@ -531,7 +580,10 @@ func after_step(world, dt: float, movement: float, previous_y: float) -> void:
 			enemy.diving = enemy.base_y > -100 and enemy.x < world.PLAYER_X + 380
 			enemy.y = enemy.base_y + sin(enemy.age * 4.0 + enemy.id) * 7.0
 			if enemy.diving: enemy.y += 5.0
-		var rect := Rect2(enemy.x - 22, enemy.y - 19, 44, 38) if enemy.kind == "crow" else Rect2(enemy.x - 18, -46, 36, 46)
+		elif enemy.kind == "bat": enemy.y = enemy.base_y + sin(enemy.age*3.2)*18.0
+		elif enemy.kind == "wisp": enemy.y = enemy.base_y + sin(enemy.age*2.0)*12.0
+		elif enemy.kind == "slime": enemy.y = -15.0-absf(sin(enemy.age*2.8))*24.0
+		var rect := enemy_rect(enemy)
 		# A descending foot crossing the top wins over side damage on that tick.
 		if world.velocity > 0.0 and previous_y <= rect.position.y + 9 and world.y >= rect.position.y and absf(enemy.x - world.PLAYER_X) < 35 * size_multiplier():
 			hit_enemy(world, enemy, 3, true)

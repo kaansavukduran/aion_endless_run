@@ -1,6 +1,6 @@
 # Aion Endless Run
 
-Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** Kargalara vur, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.14.1**.
+Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** Kargalara vur, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.15.0**.
 
 **[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA v1.4 uygulaması](AIONIA_STANDARD.md) · [Doğrulama](docs/AIONIA-QA.md)
 
@@ -10,7 +10,7 @@ Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile m
 
 Telefon kontrolleri seçimin üzerine iki yana bölündü: solda Zıpla, sağda Vur/Takla; boss’ta Vur yerinde Ateş et. Ayarlardan eski sağ küme seçilebilir. Koyu/açık/sistem teması, sistem/pixel yazı ve büyütülmüş menü metni saklanır. Kol eylemleri yeniden atanabilir; titreşim varsayılan kapalıdır. [Kontroller](docs/CONTROLS.md).
 
-Başlangıç kartlarından karakterini seç; koşu sırasında karakter değişmez. İlk dil cihaz/tarayıcı dilidir; desteklenmeyen diller İngilizce açılır. **TR / EN / CS** menüsünden değiştirebilirsin; seçimin ve rekorun cihazda saklanır.
+Başlangıç kartlarından karakterini seç; koşu sırasında karakter değişmez. İlk dil cihaz/tarayıcı dilidir; desteklenmeyen diller İngilizce açılır. **TR / EN / CS / AZ / DE / FR / JA / KO / ZH / ES / IT** menüsünden değiştirebilirsin; seçimin ve rekorun cihazda saklanır.
 
 | Karakter | Türkçe | English | Čeština | Yetenek |
 | --- | --- | --- | --- | --- |
@@ -25,14 +25,19 @@ Başlangıç kartlarından karakterini seç; koşu sırasında karakter değişm
 | Tek saldırı | Sol tık / J; tekrar için bırak ve bas | Vur; her dokunuş tek saldırı | X / □ |
 | Takla | Aşağı / S / Ctrl | Aşağı kaydır veya Takla | B / ○ |
 | Kurt deparı | Shift; karakterin üstünü basılı tut | Depar veya kurdun üstünü basılı tut | LB / L1 |
+| Şimşek | Sağ tık / F; her basışta bir yük | Ayrı Şimşek düğmesi | RB / R1 veya RT / R2 |
 | Boss’ta ateş | Sağ tık / F basılı | Ayrı Ateş et düğmesi | RB / R1 veya RT / R2 |
 | Duraklat | Esc | Duraklat | Start / Options |
 
 Düşerken düşmanın üstüne basarak sekebilirsin. Aion sırayla yumruk, baykuş kanat ve havada gaga, koyun kafa/çifte, kurt ısırık/pençe kullanır; depar ısırığı ayrıdır. Telefon hem dikey hem yatay oynanır; döndürmek koşuyu sıfırlamaz. İki parmakla eşzamanlı geçerli eylemler çalışır. Kısa telefon öğreticisini okurken dünya bekler; Devam et veya ilk oyun hareketinle başlar.
 
-Dört biyom: Kehribar Çölü, Ayaz Vadisi, Sisli Bataklık ve Bakır Şehir. Gündüz/gece, hava olayları, kargalar, cüceler, seyrek ateş bitkileri, çukurlar ve kargaların taşıdığı üst engeller vardır. Her **20 saniyelik aktif normal koşu** yeni seviyedir; menü, duraklatma, sarılma ve boss zamanı bu sayaca girmez. Her on seviyede sarılma/silah teslimi ve üç tasarımı dönen boss kovalamacası vardır. Boss arenasında normal parkur temizlenir. İsteğe bağlı antrenman üç boss’u doğrudan denetir ve rekoru değiştirmez.
+Altı biyom: Kehribar Çölü, Ayaz Vadisi, Sisli Bataklık, Bakır Şehir, Fener Ormanı ve Kor Sırtı. Gündüz/gece, hava olayları, kargalar, cüceler, seyrek ateş bitkileri, çukurlar ve kargaların taşıdığı üst engeller vardır. Her **20 saniyelik aktif normal koşu** yeni seviyedir; menü, duraklatma, sarılma ve boss zamanı bu sayaca girmez. Her on seviyede sarılma/silah teslimi ve üç tasarımı dönen boss kovalamacası vardır. Boss arenasında normal parkur temizlenir. İsteğe bağlı antrenman üç boss’u doğrudan denetir ve rekoru değiştirmez.
 
-Kristaller +25, temiz aşılan engeller +10; mesafe de skor kazandırır. Yedi güç geçici etkiler verir. Dev mantar varsayılan %2 uygun eşya olasılığıyla nadirdir; ilk 20 saniyede ve önceki mantardan sonraki 45 saniyede gelmez. Mantar dalgasının toplam cüce üretimi yaklaşık yarıya indirildi; ortam cüceleri değişmedi. Her 100’ün katı eşiğinden sonraki ilk uygun boss zaferi **Fragaria çileğini** sunar. Bu nesne yalnız kısa kutlamadır; güç, puan veya başka oynanış ödülü vermez.
+Kristaller +25, temiz aşılan engeller +10; mesafe de skor kazandırır. On toplanabilir güç bulunur. Sıçrama tılsımı 9 saniye daha yüksek zıplatır, şans parası 12 saniye kristal puanını ikiye katlar, buz feneri 8 saniye yakındaki yaklaşan düşmanları yavaşlatır. Dev mantar varsayılan %2 uygun eşya olasılığıyla nadirdir; ilk 20 saniyede ve önceki mantardan sonraki 45 saniyede gelmez. Mantar dalgasının toplam cüce üretimi yaklaşık yarıya indirildi; ortam cüceleri değişmedi. Her 100’ün katı eşiğinden sonraki ilk uygun boss zaferi **Fragaria çileğini** sunar. Bu nesne yalnız kısa kutlamadır; güç, puan veya başka oynanış ödülü vermez.
+
+## 0.15.0
+
+Normal düşmanlar tek vuruşta veya üstüne basınca yenilir; yenmek 10 XP, üstüne basmak 15 XP verir. Her 100 XP koşu ustalık derecesini artırır; süreye bağlı seviyeler yine 20 saniyedir. Şimşek yakın saldırıda harcanmaz: sağ tık/F/RB/Şimşek ile 1500 birimlik geniş bir hat boyunca vurur. Yarasa, balçık, kabuk böceği ve fırtına ışığı eklendi. Boss sonrası arka plan/koşu sıçraması giderildi; hız, silah ve gösterge yumuşak geçer. [Ayrıntılar](docs/UPGRADE-0.15.0.md).
 
 ## 0.14.1 düzeltmesi
 

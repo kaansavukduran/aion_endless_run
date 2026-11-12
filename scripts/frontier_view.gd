@@ -21,7 +21,7 @@ func _draw() -> void:
 			var n: int = ["block_crate","block_log","block_road","block_rock","block_vent","block_barrel"].find(kind)
 			object("parkour",2,maxi(0,n),Vector2(o.x,ground+2),78)
 		elif kind == "gate" or kind.begins_with("arch"):
-			var theme: int = int(o.get("theme",world.biome()))
+			var theme: int = int(o.get("theme",world.biome())) % 4
 			object("boost-pads",theme,host.frames.cycle("boost-pads",theme,clock,0.9),Vector2(o.x,ground+4),132)
 		elif kind.begins_with("carrier"):
 			var row := 0 if kind == "carrier_pipe" else 1
@@ -53,7 +53,7 @@ func _draw() -> void:
 		if f.phase == "victory":
 			row = f.boss_kind*3+2
 			frame = host.frames.progress("boss-designs",row,f.stage_time/1.6) if host.motion else host.frames.count("boss-designs",row)-1
-		object("boss-designs",row,frame,Vector2(f.boss_x,ground+f.boss_y),300 if f.boss_kind==1 else 248,true)
+		if f.phase != "return": object("boss-designs",row,frame,Vector2(f.boss_x,ground+f.boss_y),300 if f.boss_kind==1 else 248,true)
 		if f.warning_time > 0.0:
 			var low: bool = f.warning == "low"
 			draw_line(Vector2(f.boss_x-95,ground+(-14 if low else -82)),Vector2(f.boss_x-190,ground+(-14 if low else -82)),Color(1,0.72,0.38,0.5),2)

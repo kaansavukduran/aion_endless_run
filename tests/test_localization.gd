@@ -10,17 +10,18 @@ func check(value: bool, message: String) -> void:
 func _initialize() -> void:
 	call_deferred("run")
 func run() -> void:
-	for pair in [["tr-TR","tr"],["en-GB","en"],["cs-CZ","cs"],["CS_cz","cs"],["de-DE","en"],["fr","en"],["cz","en"],["","en"]]:
+	for pair in [["tr-TR","tr"],["en-GB","en"],["cs-CZ","cs"],["CS_cz","cs"],["de-DE","de"],["fr","fr"],["ja-JP","ja"],["ko_KR","ko"],["zh-Hant-TW","zh"],["az-AZ","az"],["es-ES","es"],["it-IT","it"],["cz","en"],["","en"]]:
 		check(Words.language_for_locale(pair[0]) == pair[1], "Locale selection: " + pair[0])
 	var names := {"tr":["Aion","Baykuş Ömer","Melun Bilge Kurt","Kutsanmış Cahil Koyun"],"en":["Aion","Omar the Owl","Accursed Wise Wolf","Blessed Ignorant Sheep"],"cs":["Aion","Sova Omar","Prokletý moudrý vlk","Požehnaná nevědomá ovečka"]}
 	for lang in Words.LANGUAGES:
-		var complete: bool = Words.STRINGS[lang].size() == Words.STRINGS.en.size()
+		var table: Dictionary = Words.EXTRA[lang].data if Words.EXTRA.has(lang) else Words.STRINGS[lang]
+		var complete: bool = table.size() == Words.STRINGS.en.size()
 		for key in Words.STRINGS.en:
-			complete = complete and Words.STRINGS[lang].has(key) and not Words.get_text(lang,key).is_empty() and Words.get_text(lang,key).count("%d") == Words.get_text("en",key).count("%d")
+			complete = complete and table.has(key) and not Words.get_text(lang,key).is_empty() and Words.get_text(lang,key).count("%d") == Words.get_text("en",key).count("%d")
 		check(complete, "Complete localized UI with matching numeric placeholders: " + lang)
 		var actual: Array[String] = []
 		for id in ["aion","owl","wolf","sheep"]: actual.append(Words.get_text(lang,"name_"+id))
-		check(actual == names[lang], "Exact character names: " + lang)
+		check(actual == names[lang] if names.has(lang) else actual.size()==4 and actual[0]=="Aion", "Exact character names: " + lang)
 	check(Words.get_text("xx","play") == "Start running", "Unsupported lookup falls back to English")
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)

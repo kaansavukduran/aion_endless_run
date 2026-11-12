@@ -6,6 +6,7 @@ const ITEMS = preload("res://assets/adventure-items.png")
 const EVOLUTION = preload("res://assets/EVOLUTION-PROVENANCE.json")
 
 const FRAGARIA = preload("res://assets/fragaria-strawberry.png")
+const PixelArt = preload("res://scripts/encounter_art.gd")
 var host
 
 func atlas(name: String, row: int, frame: int, anchor: Vector2, width: float, centered: bool = false) -> void:
@@ -49,11 +50,15 @@ func _draw() -> void:
 		var frame: int = host.frames.cycle("power",0,clock,1.0)
 		if item.kind=="fragaria":
 			draw_texture_rect(FRAGARIA,Rect2(point-Vector2(22,42),Vector2(44,62)),false)
+		elif item.kind in ["spring","fortune","frost"]: PixelArt.item(self,point,item.kind)
 		elif item.kind == "mushroom": atlas("power", 0, frame, point, 63, true)
 		else:
 			var icons := {"lightning":0,"slow":1,"haste":2,"shield":3,"magnet":4,"leaf":5}
 			atlas("power",int(icons[item.kind])+1,host.frames.cycle("power",int(icons[item.kind])+1,clock,1.0),point,46,true)
 	for enemy in a.enemies:
+		if enemy.kind in ["bat","slime","beetle","wisp"]:
+			PixelArt.enemy(self,enemy,ground)
+			continue
 		var row := 0 if enemy.kind == "crow" else 3
 		var frame: int = host.frames.cycle("enemies",row,clock+float(enemy.id)*0.13,0.8)
 		if enemy.hp <= 0:
@@ -74,11 +79,26 @@ func _draw() -> void:
 		if enemy.kind == "crow" and enemy.diving and enemy.hp > 0 and enemy.x > world.PLAYER_X + 135:
 			draw_string(host.FONT, Vector2(enemy.x - 4, ground + enemy.y - 43), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 19, Color("ffd57a"))
 	if a.lightning_time > 0.0:
-		var source := Vector2(world.PLAYER_X + 20, ground + world.y - 54)
+		var source: Vector2 = a.lightning_origin+Vector2(0,ground)
+		var end: Vector2 = a.lightning_end+Vector2(0,ground)
+		var alpha: float = minf(1,a.lightning_time/0.12)
+		var beam := PackedVector2Array()
+		for n in 26:
+			var point := source.lerp(end,float(n)/25)
+			point.y += (0 if n in [0,25] else (6 if n%2 else -6))
+			beam.append(point)
+		draw_polyline(beam,Color(0.51,0.79,0.88,alpha*0.23),15)
+		draw_polyline(beam,Color(1,0.91,0.63,alpha),3)
 		for target in a.lightning_targets:
-			var end: Vector2 = target + Vector2(0, ground)
-			var midpoint := (source + end) * 0.5 + Vector2(12, -20)
-			draw_polyline(PackedVector2Array([source, midpoint, midpoint + Vector2(-10, 18), end]), Color("f8df94"), 4)
+			var impact: Vector2 = target+Vector2(0,ground)
+			draw_line(Vector2(impact.x,source.y),impact,Color(1,0.91,0.63,alpha),2)
+	if a.xp_notice>0:
+		draw_string(host.interface_options.body_font,Vector2(world.PLAYER_X+18,ground+world.y-122-(1-a.xp_notice)*20),"+%d XP"%a.last_xp,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color(1,0.88,0.60,minf(1,a.xp_notice*3)))
+	if a.powers.frost>0:
+		for n in 9:
+			var point := Vector2(world.PLAYER_X+24+n*45,ground-8-fposmod(clock*15+n*17,70))
+			draw_rect(Rect2(point.round(),Vector2(3,3)),Color(0.65,0.88,0.94,0.6))
+
 	if float(a.powers.shield) > 0.0:
 		draw_arc(Vector2(world.PLAYER_X, ground + world.y - a.body_height(world) * 0.5), a.body_height(world) * 0.65, 0, TAU, 24, Color(0.55, 0.94, 0.88, 0.7), 3)
 	if a.giant() and host.effects_enabled and host.decorative_motion():

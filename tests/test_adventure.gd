@@ -38,12 +38,12 @@ func run() -> void:
 	var gnome: Dictionary = w.adventure.spawn_enemy(w, "gnome", World.PLAYER_X + 95)
 	w.adventure.request_attack(w)
 	advance(w, 0.24)
-	check(gnome.hp == 1 and gnome.x > World.PLAYER_X + 60 and w.state == "running", "A nonlethal hit knocks a two-HP gnome back instead of immediately hurting the player")
+	check(gnome.hp == 0 and w.state == "running" and w.adventure.run_xp==10, "A single normal strike defeats a gnome and awards XP")
 	advance(w, 0.30)
 	w.adventure.attack_held = false
 	w.adventure.request_attack(w)
 	advance(w, 1.0)
-	check(gnome.hp <= 0 and w.adventure.kills == 1, "A new press can finish a recovering two-HP gnome")
+	check(gnome.hp <= 0 and w.adventure.kills == 1, "A later press cannot award the same defeated gnome again")
 	w = arena()
 	w.adventure.spawn_enemy(w, "gnome", World.PLAYER_X, -23)
 	w.y = -52.0
@@ -133,12 +133,14 @@ func run() -> void:
 	w.adventure.spawn_enemy(w, "crow", World.PLAYER_X+350,-70)
 	w.adventure.spawn_enemy(w, "gnome", World.PLAYER_X+550)
 	w.adventure.attack(w)
+	check(w.adventure.lightning_charges==2,"Melee leaves collected lightning charges untouched")
+	w.adventure.cast_lightning(w)
 	check(w.adventure.kills == 2 and w.adventure.lightning_charges == 1 and w.adventure.lightning_targets.size() == 2, "A collected lightning charge chains actual damage to distant enemies")
 	for id in w.adventure.POWER_NAMES: w.adventure.collect(w, id)
 	w.adventure.collect(w, "mushroom")
-	check(w.adventure.discoveries.size() == 7, "Discovery progress records each power once")
+	check(w.adventure.discoveries.size() == w.adventure.POWER_NAMES.size(), "Discovery progress records each power once")
 	w.reset()
-	check(w.adventure.discoveries.size() == 7 and not w.adventure.giant() and w.adventure.enemies.is_empty(), "Retry preserves discoveries but clears temporary buffs and enemies")
+	check(w.adventure.discoveries.size() == w.adventure.POWER_NAMES.size() and not w.adventure.giant() and w.adventure.enemies.is_empty(), "Retry preserves discoveries but clears temporary buffs and enemies")
 	w = arena()
 	w.adventure.powers.mushroom = 4.0
 	w.adventure.attack_held = true

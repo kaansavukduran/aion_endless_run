@@ -284,7 +284,7 @@ func run() -> void:
 		visited[world.biome()] = true
 		if world.state != "running": break
 	check(world.state == "running", "Generated obstacles remain jumpable through a long run")
-	check(visited.size() == 4 and world.distance > 26000, "All four biomes transition during real progress")
+	check(visited.size() == World.BIOME_NAMES.size() and world.distance > 26000, "All six biomes transition during real progress")
 	check(world.passed > 30 and world.gems > 15, "Long run records real obstacles and pickups")
 	world.reset()
 	check(world.score == 0 and world.gems == 0 and world.obstacles.is_empty(), "Retry resets run counters")

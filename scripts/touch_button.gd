@@ -2,6 +2,7 @@ class_name RunnerTouchButton
 extends Control
 var action := "jump"
 var caption := ""
+var elemental := false
 var pressed := false
 var disabled := false
 var cooldown := 0.0
@@ -36,8 +37,10 @@ func _draw() -> void:
 			draw_polyline(points,ink,4)
 			draw_line(points[-1],points[-1]+Vector2(-9,-3),ink,4)
 		"shoot":
-			draw_rect(Rect2(c+Vector2(-17,-7),Vector2(32,8)),ink)
-			draw_rect(Rect2(c+Vector2(-10,0),Vector2(9,16)),ink)
+			if elemental:
+				draw_polyline(PackedVector2Array([c+Vector2(8,-16),c+Vector2(-7,0),c+Vector2(5,0),c+Vector2(-8,17)]),ink,5)
+			else: draw_rect(Rect2(c+Vector2(-17,-7),Vector2(32,8)),ink)
+			if not elemental: draw_rect(Rect2(c+Vector2(-10,0),Vector2(9,16)),ink)
 		"boost":
 			for i in 2:
 				draw_polyline(PackedVector2Array([c+Vector2(-13+i*14,-10),c+Vector2(-3+i*14,0),c+Vector2(-13+i*14,10)]),ink,4)

@@ -1,0 +1,202 @@
+[
+  {
+    "path": "assets/adventure-combat.png",
+    "unchanged": true,
+    "sha256": "fc7705e037201c0caeb44224030b2779a5225884d604606e944958645989b29c"
+  },
+  {
+    "path": "assets/adventure-enemies.png",
+    "unchanged": true,
+    "sha256": "0a368b2330b60aaadade0944e77980b1a8c734ff8dff25109709de122010379f"
+  },
+  {
+    "path": "assets/adventure-items.png",
+    "unchanged": true,
+    "sha256": "2fb54115f29923aea2209fd978238b8d57dfe86bd9e09ae292bd782da8431b12"
+  },
+  {
+    "path": "assets/agility-owl.png",
+    "unchanged": true,
+    "sha256": "2930ec1c574613398bd741962aaf8feba9b83d434a5ceec9df94abd6d1720dfc"
+  },
+  {
+    "path": "assets/agility-wolf.png",
+    "unchanged": true,
+    "sha256": "411ccdf8e8a09371367b412cc061b95b08ebb2d7b637bccc5b5f88b7e05f096d"
+  },
+  {
+    "path": "assets/aion-runner.png",
+    "unchanged": true,
+    "sha256": "215d90e9074dab317ad9ca947224c14cc02b06c2e7cef1626236cd1d4c2ba586"
+  },
+  {
+    "path": "assets/canonical-aion.png",
+    "unchanged": true,
+    "sha256": "789fe4e54752e0f11da49eff5d43ab92e0c726ca919ca136c906991143844687"
+  },
+  {
+    "path": "assets/canonical-owl.png",
+    "unchanged": true,
+    "sha256": "7969f14b2b15d92f3352350546e8cd55cd3d663ecef6f768fa4f1289d727c1bb"
+  },
+  {
+    "path": "assets/canonical-rolls.png",
+    "unchanged": true,
+    "sha256": "01aebfe28ed30efb6faa1e3034fd4a2fed32dc6d7333e9cd9f76fa9d6c8731e3"
+  },
+  {
+    "path": "assets/canonical-sheep.png",
+    "unchanged": true,
+    "sha256": "8b60d58e55798aeed7edde058342beb66647eb5d1a8735f867fbb586c2eb9083"
+  },
+  {
+    "path": "assets/canonical-wolf.png",
+    "unchanged": true,
+    "sha256": "6f5eb1f33b92f4b0f77be626d9c50ab997bb79b37237d3f8857de723469e0ba3"
+  },
+  {
+    "path": "assets/companion-actions.png",
+    "unchanged": true,
+    "sha256": "87d2205bde4fe6607039345dd37aa257d7ef410270d54c590d19173a40488c6e"
+  },
+  {
+    "path": "assets/companions-runner.png",
+    "unchanged": true,
+    "sha256": "d308de70c13e77aa61f29040f300913b54d42f4ed4d885a9c0373b72174dba01"
+  },
+  {
+    "path": "assets/encounter-bosses.png",
+    "unchanged": true,
+    "sha256": "0d8415026e6e7c1c52575dc53d88bccdf59b4c1ad60762648c750e3f1a3052ec"
+  },
+  {
+    "path": "assets/encounter-defeats.png",
+    "unchanged": true,
+    "sha256": "0c2d26a24a2e28045ada5b47db1f1474dced7a237c62012d0ba46cc76991d842"
+  },
+  {
+    "path": "assets/encounter-weapons.png",
+    "unchanged": true,
+    "sha256": "15d302826b2694d57333a350df0543f545e4c9566dc768ba4e6b56113e32d476"
+  },
+  {
+    "path": "assets/evolution-barriers.png",
+    "unchanged": true,
+    "sha256": "7f34a97888b24bf4032d7955113935081938b000c0ca705d6407c4aed45c1626"
+  },
+  {
+    "path": "assets/evolution-celebrants.png",
+    "unchanged": true,
+    "sha256": "ed358621516469f0705de3c1745eccbe7fdc5635195cffe92cfd046122653600"
+  },
+  {
+    "path": "assets/evolution-rolls.png",
+    "unchanged": true,
+    "sha256": "e1271db4e607d01bfba55e8d6dfcdf678fe296b1eaca1296074b4c1f83de5a7f"
+  },
+  {
+    "path": "assets/evolution-strikes.png",
+    "unchanged": true,
+    "sha256": "17577985167eb750310c40b383e4a0a2fb89e8c579d371ea5620ae2312718f48"
+  },
+  {
+    "path": "assets/fragaria-strawberry.png",
+    "unchanged": true,
+    "sha256": "b01ae5896be8ba724faabbd3cfd6e70b929e6491efec54ea066d82797ab9120d"
+  },
+  {
+    "path": "assets/frontier-boss.png",
+    "unchanged": true,
+    "sha256": "ecf0037858d5f6bae267f0814452c2f89f2a3272151698379f3e9b94e5d18458"
+  },
+  {
+    "path": "assets/frontier-heroes.png",
+    "unchanged": true,
+    "sha256": "773c61e8767d9daebec45905b2dec214b9ac907ae05690e73fc1c43edd735bbc"
+  },
+  {
+    "path": "assets/frontier-parkour.png",
+    "unchanged": true,
+    "sha256": "07bcf676cc7805916462c7c8af056b89b8411025813902a9c48514dc21417e6d"
+  },
+  {
+    "path": "assets/motion-aion.png",
+    "unchanged": true,
+    "sha256": "9312191d6aebca0fd96db16ddae7391316890f627096d77d619d7588989876d2"
+  },
+  {
+    "path": "assets/motion-elements.png",
+    "unchanged": true,
+    "sha256": "7eaabea40b30f2d201c97cc681d7430d486dee1310d100bd3835fbdfae069041"
+  },
+  {
+    "path": "assets/motion-girls.png",
+    "unchanged": true,
+    "sha256": "c1b139969036d1d7f194c3ade3c1142aeaa648d08c95c150015f3d8b80d1baba"
+  },
+  {
+    "path": "assets/motion-owl.png",
+    "unchanged": true,
+    "sha256": "145cb66faba9ca0b7bde64fc55da1fa2a8d414c8c7fbb3bb371323b03751064c"
+  },
+  {
+    "path": "assets/motion-powers.png",
+    "unchanged": true,
+    "sha256": "e25eea678b633ca439ccade472bc4618614a31d57aee596aaaa76b6a81e8da10"
+  },
+  {
+    "path": "assets/motion-rolls.png",
+    "unchanged": true,
+    "sha256": "153368d07a504a500969d8fcc02775c6ccfe320b734b38be85c3c901eaddef85"
+  },
+  {
+    "path": "assets/motion-sheep.png",
+    "unchanged": true,
+    "sha256": "be50626466064f8cde5f75cfbb31ea1543caf0293971b5d456cd7bd7940a893e"
+  },
+  {
+    "path": "assets/motion-terrain.png",
+    "unchanged": true,
+    "sha256": "cedfe855e5ca0cced5558e04c0dccb635c72fe6bfc36093f9a51456742836f20"
+  },
+  {
+    "path": "assets/motion-wolf.png",
+    "unchanged": true,
+    "sha256": "06db7e167e22815ccce2b15b78ccba41d6987eca465f5278a0592af85094b099"
+  },
+  {
+    "path": "assets/motion-world.png",
+    "unchanged": true,
+    "sha256": "2b67050ab9d7bc815fb94b9d06ede3bc464b3060efae9178134783cd50ae6cea"
+  },
+  {
+    "path": "assets/owl-runner.png",
+    "unchanged": true,
+    "sha256": "4b10872ff49b9995969f4540fab9c478c80267d27f5d5e3944a45b2aba9e89aa"
+  },
+  {
+    "path": "assets/owl.png",
+    "unchanged": true,
+    "sha256": "52792c990f816ce3e387ae271fb91947d0c4610dd6c2ff67a5f4c98ba26787bf"
+  },
+  {
+    "path": "assets/sheep-runner.png",
+    "unchanged": true,
+    "sha256": "ea2df12ad8afc99a6dad937a03ec7b917b2be0784a80ee489c32d782aa45d96c"
+  },
+  {
+    "path": "assets/sheep.png",
+    "unchanged": true,
+    "sha256": "79d732d43f0d8adebeaac959e68ef3740635fe7b022fcf22e4d7395bebd0bc28"
+  },
+  {
+    "path": "assets/wolf-runner.png",
+    "unchanged": true,
+    "sha256": "749d7195cb155d9dd60f5ed5a95cd17d27bee6614f819e9075b79a4eb1acdf7b"
+  },
+  {
+    "path": "assets/wolf.png",
+    "unchanged": true,
+    "sha256": "cd5004045b7e083bd2ea7d560e128d32e75a1ac5b437ca1d9fd181ec6397d3fc"
+  }
+]

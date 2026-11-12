@@ -45,10 +45,13 @@ func resolve_theme() -> bool:
  return changed
 
 func font_for(pixel_font: Font) -> Font:
+ var multilingual: Font = preload("res://assets/fonts/NotoSansCJK-Game.otf")
+ var latin: Font = preload("res://assets/fonts/NotoSans-Game.ttf")
+ pixel_font.fallbacks=[latin,multilingual,ThemeDB.fallback_font]
  if font_mode=="pixel":body_font=pixel_font;return body_font
  var system:=SystemFont.new()
  system.font_names=PackedStringArray(["system-ui","Segoe UI","Roboto","Helvetica Neue","Arial","sans-serif"])
- system.fallbacks=[ThemeDB.fallback_font]
+ system.fallbacks=[latin,multilingual,ThemeDB.fallback_font]
  body_font=system
  return body_font
 

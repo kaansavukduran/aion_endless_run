@@ -1,3 +1,7 @@
+# Current handoff · 0.15.0
+
+See docs/UPGRADE-0.15.0.md for the diagnosed causes, implemented changes, and preserved behavior. Final evidence is in docs/evidence-v0150/. Existing 40 PNGs are byte-identical to 2f15b5e. Languages now number eleven, with offline OFL fallback fonts.
+
 # Current handoff · 0.13.0 runner UX
 
 Start reference and actual starting main: 03fd1f4a400345847da7b0b471272ec75602a62a, clean working tree; Godot4.6.3. Preserve the verified Firefox loader2, offline caches/IndexedDB and existing native signer.

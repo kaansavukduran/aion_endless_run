@@ -1,0 +1,128 @@
+{
+  "version": "0.15.0",
+  "base_commit": "2f15b5ea45854c2959716fa7425c2015861d7d5c",
+  "engine": "4.6.3",
+  "tested_export_build": "e14a739eca3f023d",
+  "source_and_scene_checks": 3449,
+  "source_suites": [
+    {
+      "suite": "game",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 121 checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "adventure",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 58 adventure checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "localization",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 51 localization/registration checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "evolution",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 105 evolution checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "frontier",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 224 frontier checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "motion",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 447 motion checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "encounters",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 108 encounter/gamepad checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "fidelity",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 685 fidelity checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "agility",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 198 agility checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "runner_ux",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 213 runner UX checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "boss_hud",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 30 boss HUD checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "aionia",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 661 AIONIA checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "variety",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 548 variety/transition/locale checks, 0 failures"
+      ]
+    }
+  ],
+  "browser_checks": 156,
+  "browser_suites": [
+    {
+      "suite": "locales",
+      "checks": 96,
+      "result": "PASS",
+      "build": "e14a739eca3f023d"
+    },
+    {
+      "suite": "gamepad",
+      "checks": 31,
+      "result": "PASS",
+      "build": "8b5632e4ecc549af"
+    },
+    {
+      "suite": "runner",
+      "checks": 29,
+      "result": "PASS",
+      "build": "8b5632e4ecc549af"
+    }
+  ],
+  "original_png_count": 40,
+  "original_pngs_unchanged": true,
+  "limits": [
+    "No physical Xbox/PlayStation, Poco X7 Firefox, iPhone or native-language editorial review.",
+    "Android host ADB cannot create its default config directory in this read-only home; native emulator checks are delegated to the existing owner-authorized GitHub Actions job, not claimed locally.",
+    "Additional unseeded route, loader and publishing verification in progress; this file is updated with completed evidence only."
+  ]
+}

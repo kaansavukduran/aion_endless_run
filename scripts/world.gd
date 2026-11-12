@@ -5,6 +5,8 @@ const PLAYER_X := 288.0
 const GRAVITY := 1700.0
 const JUMP_SPEED := -650.0
 const BIOME_DISTANCE := 6500.0
+const BIOME_NAMES := ["desert", "snow", "swamp", "city", "forest", "volcano"]
+var boss_travel_offset := 0.0
 const GLIDE_FALL_SPEED := 85.0
 const BOOST_MULTIPLIER := 1.55
 const FLOCK_GAP := 112.0
@@ -58,6 +60,7 @@ func reset() -> void:
 	pending_events.clear()
 	time = 0.0
 	distance = 0.0
+	boss_travel_offset = 0.0
 	y = 0.0
 	velocity = 0.0
 	score = 0
@@ -112,12 +115,12 @@ func release_controls() -> void:
 	jump_buffer = 0.0
 
 func biome() -> int:
-	return int(distance / BIOME_DISTANCE) % 4
+	return int(distance / BIOME_DISTANCE) % BIOME_NAMES.size()
 
 func jump() -> void:
 	if state != "running" or adventure.hugging(): return
 	if y < 0.0 and character == "aion" and jumps_used < 2:
-		velocity = JUMP_SPEED
+		velocity = JUMP_SPEED * adventure.jump_multiplier()
 		jumps_used += 1
 		air_time = 0.0
 		jump_buffer = 0.0
@@ -169,7 +172,7 @@ func flock_pose(index: int) -> Dictionary:
 	return trail[-1].duplicate()
 
 func travel_distance() -> float:
-	return frontier.chase_distance if frontier.active() else distance
+	return frontier.chase_distance if frontier.active() else distance + boss_travel_offset
 
 func record_trail() -> void:
 	trail.append({"distance":travel_distance(), "y":y, "velocity":velocity, "air_time":air_time, "landing_time":landing_time, "duck":1.0 if adventure.ducking(self) else 0.0, "roll_phase":adventure.roll_elapsed})
@@ -231,7 +234,7 @@ func step(dt: float) -> void:
 	if not frontier.active(): advance_gusts(movement)
 	invulnerable = maxf(0.0, invulnerable - dt)
 	if jump_buffer > 0.0 and y >= 0.0:
-		velocity = JUMP_SPEED
+		velocity = JUMP_SPEED * adventure.jump_multiplier()
 		jumps_used = 1
 		air_time = 0.0
 		landing_time = 0.0
@@ -322,8 +325,7 @@ func step(dt: float) -> void:
 					obstacle.x = -1000
 					obstacle.counted = true
 					passed += 1
-					adventure.kills += 1
-					adventure.bonus_score += 35
+					adventure.reward_enemy(self, false)
 					event("carrier_down")
 					continue
 		else:
@@ -354,6 +356,7 @@ func step(dt: float) -> void:
 		if not pickup.taken and absf(pickup.x - PLAYER_X) < 34.0 and absf(pickup.y - (y - 35.0)) < 43.0:
 			pickup.taken = true
 			gems += 1
+			if adventure.powers.fortune > 0: adventure.bonus_score += 25
 			event("gem")
 	obstacles = obstacles.filter(func(o): return o.x > -90.0)
 	pickups = pickups.filter(func(o): return o.x > -90.0 and not o.taken)

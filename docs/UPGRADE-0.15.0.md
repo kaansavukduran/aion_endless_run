@@ -1,0 +1,21 @@
+# 0.15.0 — Trails and lightning
+
+Starting point: clean `main`, `2f15b5ea45854c2959716fa7425c2015861d7d5c`; Godot 4.6.3. No engine/framework migration. Existing character PNGs and anatomical registration are preserved.
+
+## Changes and diagnosed causes
+
+- Boss scrolling used `frontier.chase_distance`, then reverted to frozen `world.distance`. The new accumulated travel offset keeps scenery, stride phase and follower trail on a single continuous coordinate. Normal distance, timed levels and score do not gain boss travel. After victory, a 1.25-second safe return blends chase speed into restored running speed. The weapon blends out over 0.55 seconds, the boss HUD fades, and the next encounter has a clear runway.
+- Gnomes and fire plants had two HP. All ordinary enemies now fall to one normal contact or stomp. Boss health is unchanged. The shared reward function grants 10 run XP per defeat or 15 per stomp; dead enemies and mushroom cleanup cannot award twice. XP is a separate run mastery rank (100 XP per rank), preserving the requested 20 active seconds per normal level. XP resets on retry, like run score; it does not claim account progression or unlock characters.
+- Lightning previously spent a charge automatically during melee and stopped after five targets within 700 units. It is now an explicit right click / F / gamepad Fire (default RB, RT also supported) / mobile Bolt action. A 1500-unit straight corridor with a 92-unit radius hits every ordinary enemy and fire plant in front within that area. It does not hit behind, above the corridor, or out of range. One press spends one charge; holding outside a boss does not auto-repeat. Melee never spends charges. Boss fire retains its existing held-shot behavior. The mobile bolt button has a separate touch area and visible cooldown.
+- Added bat, marsh slime, shell beetle and storm wisp. Their small native pixel silhouettes animate wings, legs, hop or flame, with matching collision positions and death fades. Existing hero art is untouched. Regional random draws supplement the encounter bag; existing minimum gaps, plant lane reservations and rare mushroom policy remain.
+- Added Lantern Woods and Ember Ridge, including pixel trees, leaf ground cover, crags and ember seams. All six biomes cross-fade and loop. New biomes reuse the four existing boost-pad atlas rows via an explicit modulo, preventing invalid atlas indices.
+- Spring charm: +16% jump impulse for 9 seconds, no body-size change. Lucky coin: crystals award 50 instead of 25 points for 12 seconds, applied at collection rather than retroactively. Frost lantern: approaching enemies within 430 units move at 55% speed for 8 seconds; runner/obstacles keep their speed. Existing powers and expiry are retained, with ten discoverable items in total.
+- Added Azerbaijani, German, French, Japanese, Korean, Chinese, Spanish and Italian, alongside Turkish, English and Czech. Each has all 208 keys and matching format placeholders. Device/browser primary language selects the initial locale; unsupported locales fall back to English. Manual choice persists. Translations were authored and checked here, not reviewed by native-language editors. Chinese is simplified; a shared Noto Sans CJK SC fallback supplies readable CJK glyphs, rather than separate regional glyph fonts. SIL OFL licenses and source URLs are retained. Fonts are bundled for offline use. The 11-language popup is bounded, scrollable, and follows keyboard/gamepad focus.
+
+## Retained behavior
+
+Split touch controls (jump left, attack/roll right); down-swipe roll; portrait/landscape resizing; Aion double jump; stable owl glide and gusts; quadruped wolf sprint; delayed smaller sheep followers, including boss fights; faithful contact attacks; 20-second timed levels; boss milestones 10/20/30 and later cycles; Fragaria cosmetic-only pickup; reduced-motion settings; system-font default; dark theme; saved best scores/settings and verified offline web loader.
+
+## Verification
+
+See `docs/evidence-v0150/verification.json` and the adjacent report for executed checks and limits. Simulated browser controllers do not prove physical Xbox/PlayStation behavior. A cloud Android emulator does not prove physical Poco Firefox or iPhone behavior. No native iOS signing/notarization claim is made.

@@ -22,7 +22,7 @@ func run() -> void:
 	var w := arena()
 	for n in 8:
 		w.distance = n*World.BIOME_DISTANCE+10
-		check(w.biome() == n%4,"The four biomes cycle without losing the first two: "+str(n))
+		check(w.biome() == n%World.BIOME_NAMES.size(),"The six biomes cycle without losing the first two: "+str(n))
 	for kind in ["pit","pit_city"]:
 		w = arena()
 		w.obstacles.assign([{"x":World.PLAYER_X,"width":150,"kind":kind,"counted":false}])
@@ -63,13 +63,10 @@ func run() -> void:
 	w.adventure.attack_time = 0.25
 	w.adventure.swing_id = 1
 	w.step(0.01)
-	check(w.frontier.plants[0].hp == 1,"A real melee contact damages the plant once")
+	check(w.frontier.plants.is_empty() and w.adventure.kills == 1 and w.adventure.run_xp==10,"One real melee contact defeats and scores a fire plant")
 	advance(w,0.05)
-	check(w.frontier.plants[0].hp == 1,"The same swing cannot damage the plant twice")
-	w.adventure.swing_id = 2
-	w.adventure.attack_time = 0.25
-	w.step(0.01)
-	check(w.frontier.plants.is_empty() and w.adventure.kills == 1,"A second strike defeats and scores the plant")
+	check(w.adventure.kills == 1 and w.adventure.run_xp==10,"The same swing cannot award a defeated plant twice")
+
 	w = arena()
 	w.adventure.level = 9
 	w.adventure.level_elapsed = 30
@@ -137,9 +134,9 @@ func run() -> void:
 	w.frontier.projectiles.assign([{"owner":"hero","kind":"energy","x":w.frontier.boss_x,"y":w.frontier.boss_y,"vx":1.0,"vy":0.0,"r":8.0}])
 	w.frontier.update_projectiles(w,0.01)
 	check(w.frontier.phase == "victory" and w.frontier.wins == 1 and w.adventure.bonus_score == 600,"The final hit wins exactly once and grants the real milestone reward")
-	advance(w,1.7)
+	advance(w,3.0)
 	check(not w.frontier.active() and w.frontier.projectiles.is_empty() and w.adventure.powers.shield > 8.8,"Victory restores the suspended powers and clears combat")
-	check(w.obstacle_wait > 2 and w.invulnerable > 1 and w.trail.size() < 120,"Return has a safe runway and rebases bounded moving chase follower history")
+	check(w.obstacle_wait > 2 and w.invulnerable > 1 and w.trail.size() < 120,"Return has a safe runway and preserves bounded continuous chase follower history")
 	w = arena()
 	w.frontier.request_boss(10)
 	w.step(0.01)

@@ -1,0 +1,1115 @@
+{
+  "checks": [
+    "portrait: Azerbaijani browser locale is selected on a fresh profile",
+    "portrait/tr: translated start action stays in bounds",
+    "portrait/tr: four original characters remain selectable",
+    "portrait/tr: localized settings page builds without missing labels",
+    "portrait/tr: start, pause and return preserve the chosen language",
+    "portrait/en: translated start action stays in bounds",
+    "portrait/en: four original characters remain selectable",
+    "portrait/en: localized settings page builds without missing labels",
+    "portrait/en: start, pause and return preserve the chosen language",
+    "portrait/cs: translated start action stays in bounds",
+    "portrait/cs: four original characters remain selectable",
+    "portrait/cs: localized settings page builds without missing labels",
+    "portrait/cs: start, pause and return preserve the chosen language",
+    "portrait/az: translated start action stays in bounds",
+    "portrait/az: four original characters remain selectable",
+    "portrait/az: localized settings page builds without missing labels",
+    "portrait/az: start, pause and return preserve the chosen language",
+    "portrait/de: translated start action stays in bounds",
+    "portrait/de: four original characters remain selectable",
+    "portrait/de: localized settings page builds without missing labels",
+    "portrait/de: start, pause and return preserve the chosen language",
+    "portrait/fr: translated start action stays in bounds",
+    "portrait/fr: four original characters remain selectable",
+    "portrait/fr: localized settings page builds without missing labels",
+    "portrait/fr: start, pause and return preserve the chosen language",
+    "portrait/ja: translated start action stays in bounds",
+    "portrait/ja: four original characters remain selectable",
+    "portrait/ja: localized settings page builds without missing labels",
+    "portrait/ja: start, pause and return preserve the chosen language",
+    "portrait/ko: translated start action stays in bounds",
+    "portrait/ko: four original characters remain selectable",
+    "portrait/ko: localized settings page builds without missing labels",
+    "portrait/ko: start, pause and return preserve the chosen language",
+    "portrait/zh: translated start action stays in bounds",
+    "portrait/zh: four original characters remain selectable",
+    "portrait/zh: localized settings page builds without missing labels",
+    "portrait/zh: start, pause and return preserve the chosen language",
+    "portrait/es: translated start action stays in bounds",
+    "portrait/es: four original characters remain selectable",
+    "portrait/es: localized settings page builds without missing labels",
+    "portrait/es: start, pause and return preserve the chosen language",
+    "portrait/it: translated start action stays in bounds",
+    "portrait/it: four original characters remain selectable",
+    "portrait/it: localized settings page builds without missing labels",
+    "portrait/it: start, pause and return preserve the chosen language",
+    "portrait: Italian override survives a real page reload",
+    "portrait: lower language option is reachable by actual touch after focus-scroll",
+    "landscape: Azerbaijani browser locale is selected on a fresh profile",
+    "landscape/tr: translated start action stays in bounds",
+    "landscape/tr: four original characters remain selectable",
+    "landscape/tr: localized settings page builds without missing labels",
+    "landscape/tr: start, pause and return preserve the chosen language",
+    "landscape/en: translated start action stays in bounds",
+    "landscape/en: four original characters remain selectable",
+    "landscape/en: localized settings page builds without missing labels",
+    "landscape/en: start, pause and return preserve the chosen language",
+    "landscape/cs: translated start action stays in bounds",
+    "landscape/cs: four original characters remain selectable",
+    "landscape/cs: localized settings page builds without missing labels",
+    "landscape/cs: start, pause and return preserve the chosen language",
+    "landscape/az: translated start action stays in bounds",
+    "landscape/az: four original characters remain selectable",
+    "landscape/az: localized settings page builds without missing labels",
+    "landscape/az: start, pause and return preserve the chosen language",
+    "landscape/de: translated start action stays in bounds",
+    "landscape/de: four original characters remain selectable",
+    "landscape/de: localized settings page builds without missing labels",
+    "landscape/de: start, pause and return preserve the chosen language",
+    "landscape/fr: translated start action stays in bounds",
+    "landscape/fr: four original characters remain selectable",
+    "landscape/fr: localized settings page builds without missing labels",
+    "landscape/fr: start, pause and return preserve the chosen language",
+    "landscape/ja: translated start action stays in bounds",
+    "landscape/ja: four original characters remain selectable",
+    "landscape/ja: localized settings page builds without missing labels",
+    "landscape/ja: start, pause and return preserve the chosen language",
+    "landscape/ko: translated start action stays in bounds",
+    "landscape/ko: four original characters remain selectable",
+    "landscape/ko: localized settings page builds without missing labels",
+    "landscape/ko: start, pause and return preserve the chosen language",
+    "landscape/zh: translated start action stays in bounds",
+    "landscape/zh: four original characters remain selectable",
+    "landscape/zh: localized settings page builds without missing labels",
+    "landscape/zh: start, pause and return preserve the chosen language",
+    "landscape/es: translated start action stays in bounds",
+    "landscape/es: four original characters remain selectable",
+    "landscape/es: localized settings page builds without missing labels",
+    "landscape/es: start, pause and return preserve the chosen language",
+    "landscape/it: translated start action stays in bounds",
+    "landscape/it: four original characters remain selectable",
+    "landscape/it: localized settings page builds without missing labels",
+    "landscape/it: start, pause and return preserve the chosen language",
+    "landscape: Italian override survives a real page reload",
+    "landscape: lower language option is reachable by actual touch after focus-scroll",
+    "Unsupported browser locale still falls back to English",
+    "No JavaScript or Godot script errors in the tested locale flows"
+  ],
+  "errors": [],
+  "measurements": [
+    {
+      "shape": "portrait",
+      "lang": "tr",
+      "roster": [
+        {
+          "h": 120.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 929.53125
+        },
+        {
+          "h": 120.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 929.53125
+        },
+        {
+          "h": 120.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1059.53125
+        },
+        {
+          "h": 120.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1059.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Koşuya başla",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "portrait",
+      "lang": "en",
+      "roster": [
+        {
+          "h": 133.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 903.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 903.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1046.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1046.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Start running",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "portrait",
+      "lang": "cs",
+      "roster": [
+        {
+          "h": 171.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 827.53125
+        },
+        {
+          "h": 171.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 827.53125
+        },
+        {
+          "h": 171.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1008.53125
+        },
+        {
+          "h": 171.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1008.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Začít běžet",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "portrait",
+      "lang": "az",
+      "roster": [
+        {
+          "h": 120.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 929.53125
+        },
+        {
+          "h": 120.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 929.53125
+        },
+        {
+          "h": 120.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1059.53125
+        },
+        {
+          "h": 120.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1059.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Qaçmağa başla",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "portrait",
+      "lang": "de",
+      "roster": [
+        {
+          "h": 171.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 827.53125
+        },
+        {
+          "h": 171.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 827.53125
+        },
+        {
+          "h": 171.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1008.53125
+        },
+        {
+          "h": 171.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1008.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Loslaufen",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "portrait",
+      "lang": "fr",
+      "roster": [
+        {
+          "h": 133.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 903.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 903.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1046.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1046.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Commencer",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "portrait",
+      "lang": "ja",
+      "roster": [
+        {
+          "h": 134.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 901.53125
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 901.53125
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1045.53125
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1045.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "走り始める",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "portrait",
+      "lang": "ko",
+      "roster": [
+        {
+          "h": 120.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 929.53125
+        },
+        {
+          "h": 120.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 929.53125
+        },
+        {
+          "h": 120.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1059.53125
+        },
+        {
+          "h": 120.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1059.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "달리기 시작",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "portrait",
+      "lang": "zh",
+      "roster": [
+        {
+          "h": 134.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 901.53125
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 901.53125
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1045.53125
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1045.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "开始奔跑",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "portrait",
+      "lang": "es",
+      "roster": [
+        {
+          "h": 133.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 903.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 903.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1046.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1046.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Empezar a correr",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "portrait",
+      "lang": "it",
+      "roster": [
+        {
+          "h": 133.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 903.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 903.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 237.0,
+          "x": 28.0,
+          "y": 1046.53125
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 237.0,
+          "x": 275.0,
+          "y": 1046.53125
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Inizia a correre",
+        "w": 416.0,
+        "x": 62.0,
+        "y": 445.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "tr",
+      "roster": [
+        {
+          "h": 95.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 425.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Koşuya başla",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "en",
+      "roster": [
+        {
+          "h": 95.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 425.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Start running",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "cs",
+      "roster": [
+        {
+          "h": 133.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 387.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Začít běžet",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "az",
+      "roster": [
+        {
+          "h": 95.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 425.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Qaçmağa başla",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "de",
+      "roster": [
+        {
+          "h": 133.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 387.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Loslaufen",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "fr",
+      "roster": [
+        {
+          "h": 95.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 425.0
+        },
+        {
+          "h": 95.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 425.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Commencer",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "ja",
+      "roster": [
+        {
+          "h": 134.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 386.0
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 386.0
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 386.0
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 386.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "走り始める",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "ko",
+      "roster": [
+        {
+          "h": 97.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 423.0
+        },
+        {
+          "h": 97.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 423.0
+        },
+        {
+          "h": 97.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 423.0
+        },
+        {
+          "h": 97.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 423.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "달리기 시작",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "zh",
+      "roster": [
+        {
+          "h": 134.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 386.0
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 386.0
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 386.0
+        },
+        {
+          "h": 134.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 386.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "开始奔跑",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "es",
+      "roster": [
+        {
+          "h": 133.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 387.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Empezar a correr",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    },
+    {
+      "shape": "landscape",
+      "lang": "it",
+      "roster": [
+        {
+          "h": 133.0,
+          "name": "StartSelect_aion",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 28.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_owl",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 316.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_wolf",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 604.0,
+          "y": 387.0
+        },
+        {
+          "h": 133.0,
+          "name": "StartSelect_sheep",
+          "text": "",
+          "w": 278.291656494141,
+          "x": 892.0,
+          "y": 387.0
+        }
+      ],
+      "start": {
+        "h": 64.0,
+        "name": "StartRun",
+        "text": "Inizia a correre",
+        "w": 416.0,
+        "x": 40.0,
+        "y": 115.0
+      }
+    }
+  ]
+}

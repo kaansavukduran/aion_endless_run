@@ -62,6 +62,19 @@ func hud() -> void:
 	h.level_progress.add_theme_stylebox_override("fill",fill)
 	h.hud.add_child(h.level_progress)
 	h.position_control(h.level_progress,Vector2(18,134),Vector2(174,8))
+	h.xp_label=h.label("",17,"f8db96")
+	h.xp_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+	h.xp_label.clip_text=true
+	h.hud.add_child(h.xp_label)
+	h.position_control(h.xp_label,Vector2(h.view_w-238,102),Vector2(220,26))
+	h.xp_progress=ProgressBar.new()
+	h.xp_progress.max_value=100
+	h.xp_progress.show_percentage=false
+	h.xp_progress.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	h.xp_progress.add_theme_stylebox_override("background",h.box("302437","796176"))
+	h.xp_progress.add_theme_stylebox_override("fill",h.box("d7b56d","f4c190"))
+	h.hud.add_child(h.xp_progress)
+	h.position_control(h.xp_progress,Vector2(h.view_w-192,134),Vector2(174,8))
 	h.power_label=h.label("",18,"f5dbbd")
 	h.hud.add_child(h.power_label)
 	h.position_control(h.power_label,Vector2(18,150),Vector2(h.view_w-36,24))
