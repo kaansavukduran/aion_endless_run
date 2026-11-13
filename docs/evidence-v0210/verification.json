@@ -1,12 +1,12 @@
 {
   "version": "0.21.0",
-  "recorded_at": "2026-11-14T00:39:42.012170+03:00",
+  "recorded_at": "2026-11-14T00:51:21.367035+03:00",
   "timezone": "Europe/Istanbul",
   "base_commit": "16c40b3cf7f989d6501d9b589a506de4ad075ad7",
-  "source_and_scene_checks": 11953,
+  "source_and_scene_checks": 12013,
   "source_suites": 20,
   "browser_checks": 166,
-  "browser_scope": "138 six-hero normal-input pose/foot/control/menu checks,11 naturally reached level5 story/upgrade/victory checks, and17 DPR3 touch/swipe/cancel/rotation checks. Initial route preceded story-prop-only foreground placement; a final route is being checked separately. No world/save/RNG/health setters or physical-device claim.",
+  "browser_scope": "138 normal six-hero pose/foot/control/menu checks plus17 DPR3 touch/swipe/cancel/rotation checks on unchanged pose/input code, and11 naturally reached level5 story/upgrade/victory checks on the final0.21.0 runtime. Passive diagnostics only; keyboard, trusted CDP touch and emulated standard Gamepad API. No world/save/RNG/health setters or physical-device claim.",
   "publication_status": "NOT_YET_PUBLISHED",
   "physical_poco_iphone_gamepads": "NOT TESTED",
   "ios_native": "Requires owner signing; unchanged limitation",
@@ -15,5 +15,11 @@
     "version": "0.21.0"
   },
   "android_application_source_commit": "072b1b8b3f4ed4eb9b84db8434aa734957329ddc",
-  "dpr3_touch_and_swipe_checks": 17
+  "dpr3_touch_and_swipe_checks": 17,
+  "source_commit": "a26766c93cfb468feb7825cee94bfe4b8ec8094a",
+  "final_natural_browser_build": {
+    "build": "14d83d6561c073fe",
+    "version": "0.21.0"
+  },
+  "verification_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43513378584"
 }

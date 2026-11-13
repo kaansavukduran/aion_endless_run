@@ -42,7 +42,7 @@ with sync_playwright() as pw:
      const obs=JSON.parse(d.obstacles).filter(o=>o.x>player-(o.kind.startsWith('carrier')?120:(o.width||160)/2+45)).sort((a,b)=>a.x-b.x),n=obs[0];
      const enemies=JSON.parse(d.enemies).filter(e=>e.hp>0&&e.x>player-60);
      const crow=enemies.some(e=>e.kind==='crow'&&e.y>-115&&e.y< -45&&e.x-player> -65&&e.x-player<speed*.65+100);
-     const carrier=n&&n.kind.startsWith('carrier')&&n.x-player> -120&&n.x-player<speed*.70+90;
+     const carrier=obs.some(o=>o.kind.startsWith('carrier')&&o.x-player> -120&&o.x-player<speed*.70+90);
      const roll=!!(crow||carrier)&&d.giant!=='true';
      const floor=n&&!/^(carrier|gate|arch)/.test(n.kind)&&n.x-player>0&&n.x-player<speed*.40+(n.kind.startsWith('pit')?(n.width||150)*.25:25);
      const bolt=JSON.parse(d.projectiles).some(p=>p.owner==='plant'&&(p.x-player)/Math.abs(p.vx)>0&&(p.x-player)/Math.abs(p.vx)<.45);

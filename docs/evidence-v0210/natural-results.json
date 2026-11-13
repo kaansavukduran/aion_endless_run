@@ -16,194 +16,381 @@
   "timeline": [
     {
       "bossPhase": "fight",
+      "bossHp": "32",
+      "bossShots": "163",
+      "bossHits": "2",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "1167.83333333333"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "30",
+      "bossShots": "164",
+      "bossHits": "3",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "1276.91666666667"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "28",
+      "bossShots": "164",
+      "bossHits": "4",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "1379.58333333334"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "28",
+      "bossShots": "165",
+      "bossHits": "4",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "1488.66666666667"
+    },
+    {
+      "bossPhase": "fight",
       "bossHp": "26",
-      "bossShots": "179",
+      "bossShots": "166",
       "bossHits": "5",
       "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "1655.50000000001"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "1623.41666666667"
     },
     {
       "bossPhase": "fight",
       "bossHp": "24",
-      "bossShots": "179",
+      "bossShots": "166",
       "bossHits": "6",
       "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "1944.25000000001"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "1732.50000000001"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "24",
+      "bossShots": "166",
+      "bossHits": "6",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "1854.41666666667"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "24",
+      "bossShots": "167",
+      "bossHits": "6",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "1976.33333333334"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "24",
+      "bossShots": "167",
+      "bossHits": "6",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "2072.58333333334"
     },
     {
       "bossPhase": "fight",
       "bossHp": "22",
-      "bossShots": "181",
+      "bossShots": "168",
       "bossHits": "7",
       "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "2239.41666666667"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "2175.25000000001"
     },
     {
       "bossPhase": "fight",
       "bossHp": "20",
-      "bossShots": "182",
+      "bossShots": "169",
       "bossHits": "8",
       "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "2425.5"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "2284.33333333334"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "18",
+      "bossShots": "170",
+      "bossHits": "9",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "2393.41666666667"
     },
     {
       "bossPhase": "fight",
       "bossHp": "16",
-      "bossShots": "184",
+      "bossShots": "171",
       "bossHits": "10",
       "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "2618.0"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "2508.91666666667"
     },
     {
       "bossPhase": "fight",
       "bossHp": "14",
-      "bossShots": "184",
+      "bossShots": "171",
       "bossHits": "11",
       "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "2855.41666666666"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "2611.58333333333"
     },
     {
       "bossPhase": "fight",
       "bossHp": "14",
-      "bossShots": "184",
+      "bossShots": "172",
       "bossHits": "11",
       "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "3092.83333333332"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "2727.08333333333"
     },
     {
       "bossPhase": "fight",
-      "bossHp": "14",
-      "bossShots": "185",
-      "bossHits": "11",
+      "bossHp": "12",
+      "bossShots": "172",
+      "bossHits": "12",
       "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "3317.41666666665"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "2836.16666666666"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "12",
+      "bossShots": "172",
+      "bossHits": "12",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "2932.41666666666"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "12",
+      "bossShots": "172",
+      "bossHits": "12",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "3035.08333333332"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "12",
+      "bossShots": "173",
+      "bossHits": "12",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "3163.41666666665"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "12",
+      "bossShots": "173",
+      "bossHits": "12",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "3272.49999999998"
     },
     {
       "bossPhase": "fight",
       "bossHp": "10",
-      "bossShots": "187",
+      "bossShots": "174",
       "bossHits": "13",
       "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "3529.16666666664"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "3381.58333333331"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "8",
+      "bossShots": "175",
+      "bossHits": "14",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "3490.66666666664"
     },
     {
       "bossPhase": "fight",
       "bossHp": "6",
-      "bossShots": "189",
+      "bossShots": "176",
       "bossHits": "15",
       "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "3830.74999999997"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "3606.16666666664"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "4",
+      "bossShots": "177",
+      "bossHits": "16",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "3728.0833333333"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "2",
+      "bossShots": "178",
+      "bossHits": "17",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "3849.99999999997"
     },
     {
       "bossPhase": "victory",
       "bossHp": "0",
-      "bossShots": "192",
+      "bossShots": "179",
       "bossHits": "18",
-      "bossPlayerHp": "2",
+      "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "4234.99999999997"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "3959.0833333333"
     },
     {
       "bossPhase": "victory",
       "bossHp": "0",
-      "bossShots": "192",
+      "bossShots": "179",
       "bossHits": "18",
-      "bossPlayerHp": "2",
+      "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "4542.99999999998"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "4093.83333333329"
+    },
+    {
+      "bossPhase": "victory",
+      "bossHp": "0",
+      "bossShots": "179",
+      "bossHits": "18",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "4215.74999999997"
+    },
+    {
+      "bossPhase": "victory",
+      "bossHp": "0",
+      "bossShots": "179",
+      "bossHits": "18",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "4356.91666666664"
+    },
+    {
+      "bossPhase": "victory",
+      "bossHp": "0",
+      "bossShots": "179",
+      "bossHits": "18",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "4485.24999999998"
     },
     {
       "bossPhase": "return",
       "bossHp": "0",
-      "bossShots": "192",
+      "bossShots": "179",
       "bossHits": "18",
-      "bossPlayerHp": "2",
+      "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "4786.84739806599"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "4645.73211394319"
     },
     {
       "bossPhase": "return",
       "bossHp": "0",
-      "bossShots": "192",
+      "bossShots": "179",
       "bossHits": "18",
-      "bossPlayerHp": "2",
+      "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "4909.838026489"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "4807.16332045288"
     },
     {
       "bossPhase": "return",
       "bossHp": "0",
-      "bossShots": "192",
+      "bossShots": "179",
       "bossHits": "18",
-      "bossPlayerHp": "2",
+      "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "5035.83590469432"
-    },
-    {
-      "bossPhase": "return",
-      "bossHp": "0",
-      "bossShots": "192",
-      "bossHits": "18",
-      "bossPlayerHp": "2",
-      "level": "5",
-      "redWeapon": "true",
-      "worldDistance": "20497.4227721038",
-      "travelDistance": "5165.03694301336"
+      "worldDistance": "19690.3591472234",
+      "travelDistance": "4976.68270422532"
     },
     {
       "bossPhase": "run",
       "bossHp": "0",
-      "bossShots": "192",
+      "bossShots": "179",
       "bossHits": "18",
-      "bossPlayerHp": "2",
+      "bossPlayerHp": "3",
       "level": "5",
       "redWeapon": "true",
-      "worldDistance": "20531.1590197291",
-      "travelDistance": "5287.23659558265"
+      "worldDistance": "19775.5359333527",
+      "travelDistance": "5127.34530861598"
     }
   ],
   "build": {
-    "build": "b9276afcf05f9ee6",
+    "build": "14d83d6561c073fe",
     "version": "0.21.0"
   },
   "scope": "Normal UI and real keyboard/touch/browser-gamepad input. Passive observations only. No state/RNG/save/health setters. Not a physical controller or phone."

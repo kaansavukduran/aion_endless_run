@@ -1,16 +1,18 @@
 name: Publish verified release artifacts
 on:
+  push:
+    branches: [release-publication/v0.21.0]
   workflow_dispatch:
     inputs:
       source_run:
         description: Successful main Test and package run
         required: true
-        default: '43501562033'
+        default: '43513378584'
         type: string
       tag:
         description: Existing release tag with unchanged runtime sources
         required: true
-        default: v0.20.0
+        default: v0.21.0
         type: string
   repository_dispatch:
     types: [aion-verified-release]
@@ -25,8 +27,8 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       GH_TOKEN: ${{ github.token }}
-      SOURCE_RUN: ${{ inputs.source_run || github.event.client_payload.source_run || '43501562033' }}
-      AION_TAG: ${{ inputs.tag || github.event.client_payload.tag || 'v0.20.0' }}
+      SOURCE_RUN: ${{ inputs.source_run || github.event.client_payload.source_run || '43513378584' }}
+      AION_TAG: ${{ inputs.tag || github.event.client_payload.tag || 'v0.21.0' }}
     steps:
       - name: Validate dispatch values
         run: |
@@ -38,7 +40,7 @@ jobs:
           PY
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.AION_TAG }}
+          ref: ${{ github.event_name == 'push' && github.sha || env.AION_TAG }}
       - name: Require verified source, platform gates and matching runtime
         id: proof
         run: |
@@ -59,11 +61,28 @@ jobs:
           meta=json.load(open('packaging/release_android.json'))
           version=re.search(r'config/version="([^"]+)"',Path('project.godot').read_text())[1]
           assert meta['version']==version and os.environ['AION_TAG']=='v'+version
-          release=next(r for r in json.load(open('build/releases.json')) if r['tag_name']==os.environ['AION_TAG'])
-          assert release['draft'],'Published releases must not be overwritten'
           subprocess.run(['git','fetch','--no-tags','--depth=1','origin',run['head_sha']],check=True)
           paths=['scripts','assets','project.godot','main.tscn','export_presets.cfg','packaging/build_web.py','packaging/web_updates.py','packaging/web_boot.js','packaging/web_update.js','packaging/web_worker.js','packaging/web_splash.html','packaging/web_accessibility.js','packaging/web_storage.js','packaging/release_android.json']
           subprocess.run(['git','diff','--exit-code',run['head_sha'],'HEAD','--',*paths],check=True)
+          release=next((r for r in json.load(open('build/releases.json')) if r['tag_name']==os.environ['AION_TAG']),None)
+          if release is None:
+            # A versioned publication branch is an explicit one-release request.
+            # Runtime equality and all platform gates above run BEFORE any tag.
+            assert os.environ['GITHUB_EVENT_NAME']=='push'
+            assert os.environ['GITHUB_REF']=='refs/heads/release-publication/v0.21.0'
+            assert version=='0.21.0' and os.environ['SOURCE_RUN']=='43513378584'
+            target=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+            ref='repos/'+os.environ['GITHUB_REPOSITORY']+'/git/ref/tags/'+os.environ['AION_TAG']
+            existing=subprocess.run(['gh','api',ref],text=True,capture_output=True)
+            if existing.returncode:
+              assert '404' in existing.stderr,existing.stderr
+              subprocess.run(['gh','api','--method','POST','repos/'+os.environ['GITHUB_REPOSITORY']+'/git/refs','-f','ref=refs/tags/'+os.environ['AION_TAG'],'-f','sha='+target],check=True)
+            else:assert json.loads(existing.stdout)['object']['sha']==target,'Existing tags must never be moved'
+            notes=Path('build/release-notes.md')
+            notes.write_text('Boss encounters every five levels, three localized boss stories, six faithful surprise animations and a red pistol with twice boss damage. Grounded hero feet, repeating held low rolls and a thinner HUD.\n\nVerified source and platform jobs: '+run['html_url']+'\nEvidence: docs/evidence-v0210/README.md. Physical phones/controllers were not tested. macOS ad-hoc; native iOS requires owner signing.\n')
+            subprocess.run(['gh','release','create',os.environ['AION_TAG'],'--verify-tag','--draft','--prerelease','--title','Aion Endless Run '+version,'--notes-file',str(notes)],check=True)
+            release=json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/releases/tags/'+os.environ['AION_TAG']],text=True))
+          assert release['draft'],'Published releases must not be overwritten'
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('version='+version+'\nrelease_id='+str(release['id'])+'\nsource_sha='+run['head_sha']+'\n')
           PY
       - uses: actions/download-artifact@v4

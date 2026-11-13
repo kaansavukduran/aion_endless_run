@@ -140,10 +140,10 @@
     "passed": true,
     "script_error": false,
     "assertion_error": false,
-    "checks": 239,
+    "checks": 238,
     "results": [
       [
-        "239",
+        "238",
         "runner UX checks",
         "0"
       ]
@@ -170,10 +170,10 @@
     "passed": true,
     "script_error": false,
     "assertion_error": false,
-    "checks": 709,
+    "checks": 710,
     "results": [
       [
-        "709",
+        "710",
         "AIONIA checks",
         "0"
       ]
@@ -245,10 +245,10 @@
     "passed": true,
     "script_error": false,
     "assertion_error": false,
-    "checks": 2573,
+    "checks": 2633,
     "results": [
       [
-        "2573",
+        "2633",
         "charge/roll/paged UI checks",
         "0"
       ]
