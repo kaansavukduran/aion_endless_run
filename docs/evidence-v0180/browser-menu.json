@@ -1,0 +1,15 @@
+{
+  "checks": [
+    "Legacy Italian override follows the Turkish device/browser locale",
+    "Language migration preserves light theme,200% text and records",
+    "At200% all five cards and three main actions fit without overlap: 2048x1024",
+    "At200% all five cards and three main actions fit without overlap: 393x873",
+    "At200% all five cards and three main actions fit without overlap: 768x1024",
+    "At200% all five cards and three main actions fit without overlap: 873x393",
+    "A new explicit language choice persists after reopening",
+    "System language can be restored and survives reopening with the record",
+    "No browser or script errors in menu/language migration flows"
+  ],
+  "errors": [],
+  "scope": "Real menu UI with documented Italian/light/200% legacy preference and record fixture; no running-world injection."
+}

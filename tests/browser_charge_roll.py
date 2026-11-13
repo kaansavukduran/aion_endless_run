@@ -45,7 +45,10 @@ with sync_playwright() as pw:
   except Exception:
    print('ROLL_FAILED',hero,{k:d().get(k) for k in ['state','page','ducking','poseSource','sourceFrame','touchInput','touchTrace','touchFingers']},page.evaluate('roll.slice(0,10)'),flush=True);page.screenshot(path=str(a.evidence/'roll-failed.png'));raise
   check(min(x['height'] for x in page.evaluate('roll'))<height*.92 and d()['playerY']=='0.0','Drawn knee bend leads to a lower ground-contact roll: '+hero)
-  page.wait_for_function('roll.some(p=>p.time-roll[0].time>.85)');check(all(3<=x['frame']<=8 for x in page.evaluate('roll.filter(p=>p.time-roll[0].time>.7)')),'Holding roll keeps the compact rotation instead of standing: '+hero);rolls[hero]=page.evaluate('roll')
+  try:page.wait_for_function('roll.some(p=>p.time-roll[0].time>.85)')
+  except Exception:
+   print('HOLD_FAILED',hero,{k:d().get(k) for k in ['state','page','ducking','touchTrace','worldTime']},page.evaluate('roll[-1]') if False else page.evaluate('roll.slice(-3)'),flush=True);raise
+  check(all(3<=x['frame']<=8 for x in page.evaluate('roll.filter(p=>p.time-roll[0].time>.7)')),'Holding roll keeps the compact rotation instead of standing: '+hero);rolls[hero]=page.evaluate('roll')
   page.screenshot(path=str(a.evidence/(hero+'-low-roll.png')))
   if kind=='key':page.keyboard.up('ArrowDown')
   elif kind=='pad':page.evaluate('padSet(1,false)')
@@ -70,7 +73,7 @@ with sync_playwright() as pw:
  check(peaks['key']<peaks['pad']<peaks['touch'],'Measured real leap apex increases with the held charge time')
  start('rabbit');page.evaluate("window.cancelAirborne=false;new MutationObserver(()=>{if(document.querySelector('canvas').dataset.airborne==='true')cancelAirborne=true}).observe(document.querySelector('canvas'),{attributes:true})");touch(action('jump'),True);wait('[data-charging="true"]');cdp.send('Input.dispatchTouchEvent',{'type':'touchCancel','touchPoints':[]});wait('[data-charging="false"]');page.wait_for_timeout(200)
  check(not page.evaluate('cancelAirborne'),'A cancelled charging touch never launches the rabbit')
- touch(action('jump'),True);wait('[data-charging="true"]');prior=d();page.set_viewport_size({'width':393,'height':873});wait('[data-orientation="portrait"][data-ui-ready="true"]');check(d()['charging']=='false' and d()['airborne']=='false' and d()['character']=='rabbit' and int(d()['score'])>=int(prior['score']),'Rotation clears a held charge safely and preserves the run');menu()
+ touch(action('jump'),True);wait('[data-charging="true"]');prior=d();page.set_viewport_size({'width':393,'height':873});wait('[data-orientation="portrait"][data-ui-ready="true"]');check(d()['charging']=='false' and d()['airborne']=='false' and d()['character']=='rabbit' and int(d()['score'])>=int(prior['score']),'Rotation clears a held charge safely and preserves the run');touch(None,False);menu()
  # Real settings paging. Every currently visible action must fit the canvas.
  def fitted():
   v=d();return all(b['x']>=-1 and b['y']>=-1 and b['x']+b['w']<=float(v['viewWidth'])+1 and b['y']+b['h']<=float(v['viewHeight'])+1 for b in json.loads(v['ui']))
@@ -80,7 +83,7 @@ with sync_playwright() as pw:
    check(fitted(),'Settings page fits without wheel scrolling '+str(size)+'/'+str(i+1));seen.extend(b['name'] for b in json.loads(d()['ui']))
    if i<n-1:
     old=d()['menuPage'];ui(name='NextPage');page.wait_for_function('(old)=>document.querySelector("canvas").dataset.menuPage!==old',arg=old);wait('[data-ui-ready="true"]')
-  check('Bind_jump' in seen and 'Option_text_size_2.0' in seen,'Font and gamepad settings remain reachable using page buttons '+str(size));page.screenshot(path=str(a.evidence/('settings-last-'+str(size[0])+'.png')));ui(name='PageBack');wait('[data-page="main"]')
+  check('Bind_jump' in seen and 'Option_text_size_2_0' in seen,'Font and gamepad settings remain reachable using page buttons '+str(size));page.screenshot(path=str(a.evidence/('settings-last-'+str(size[0])+'.png')));ui(name='PageBack');wait('[data-page="main"]')
  check(page.evaluate('document.documentElement.scrollHeight<=innerHeight+1&&document.documentElement.scrollWidth<=innerWidth+1'),'The actual browser document has no horizontal or vertical page overflow')
  check(not errors,'No browser or Godot script errors in roll, charge, cancel, paging and rotation flows');report={'checks':checks,'errors':errors,'apex_by_input':peaks,'roll_samples':rolls,'build':page.evaluate('AION_BUILD'),'scope':'Normal menu,key,standard Gamepad API and browser touch input. Only passive observations; no save/world/RNG/inventory injection.'};(a.evidence/'results.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n');ctx.close();browser.close()
 print('RESULT:',len(checks),'real low-roll/charged-jump/paged-menu checks')

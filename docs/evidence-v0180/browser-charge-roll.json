@@ -1,0 +1,1804 @@
+{
+  "checks": [
+    "Drawn knee bend leads to a lower ground-contact roll: aion",
+    "Holding roll keeps the compact rotation instead of standing: aion",
+    "Release recovers to pistol running without melee: aion",
+    "Drawn knee bend leads to a lower ground-contact roll: owl",
+    "Holding roll keeps the compact rotation instead of standing: owl",
+    "Release recovers to pistol running without melee: owl",
+    "Drawn knee bend leads to a lower ground-contact roll: sheep",
+    "Holding roll keeps the compact rotation instead of standing: sheep",
+    "Release recovers to pistol running without melee: sheep",
+    "Drawn knee bend leads to a lower ground-contact roll: wolf",
+    "Holding roll keeps the compact rotation instead of standing: wolf",
+    "Release recovers to pistol running without melee: wolf",
+    "Drawn knee bend leads to a lower ground-contact roll: rabbit",
+    "Holding roll keeps the compact rotation instead of standing: rabbit",
+    "Release recovers to pistol running without melee: rabbit",
+    "Emre visibly charges on the ground through key",
+    "Release produces exactly one real leap through key",
+    "Emre visibly charges on the ground through pad",
+    "Release produces exactly one real leap through pad",
+    "Emre visibly charges on the ground through touch",
+    "Release produces exactly one real leap through touch",
+    "Measured real leap apex increases with the held charge time",
+    "A cancelled charging touch never launches the rabbit",
+    "Rotation clears a held charge safely and preserves the run",
+    "Settings page fits without wheel scrolling (1100, 620)/1",
+    "Settings page fits without wheel scrolling (1100, 620)/2",
+    "Settings page fits without wheel scrolling (1100, 620)/3",
+    "Settings page fits without wheel scrolling (1100, 620)/4",
+    "Settings page fits without wheel scrolling (1100, 620)/5",
+    "Settings page fits without wheel scrolling (1100, 620)/6",
+    "Settings page fits without wheel scrolling (1100, 620)/7",
+    "Settings page fits without wheel scrolling (1100, 620)/8",
+    "Settings page fits without wheel scrolling (1100, 620)/9",
+    "Settings page fits without wheel scrolling (1100, 620)/10",
+    "Settings page fits without wheel scrolling (1100, 620)/11",
+    "Settings page fits without wheel scrolling (1100, 620)/12",
+    "Settings page fits without wheel scrolling (1100, 620)/13",
+    "Settings page fits without wheel scrolling (1100, 620)/14",
+    "Settings page fits without wheel scrolling (1100, 620)/15",
+    "Settings page fits without wheel scrolling (1100, 620)/16",
+    "Settings page fits without wheel scrolling (1100, 620)/17",
+    "Settings page fits without wheel scrolling (1100, 620)/18",
+    "Settings page fits without wheel scrolling (1100, 620)/19",
+    "Settings page fits without wheel scrolling (1100, 620)/20",
+    "Font and gamepad settings remain reachable using page buttons (1100, 620)",
+    "Settings page fits without wheel scrolling (393, 873)/1",
+    "Settings page fits without wheel scrolling (393, 873)/2",
+    "Settings page fits without wheel scrolling (393, 873)/3",
+    "Settings page fits without wheel scrolling (393, 873)/4",
+    "Settings page fits without wheel scrolling (393, 873)/5",
+    "Settings page fits without wheel scrolling (393, 873)/6",
+    "Settings page fits without wheel scrolling (393, 873)/7",
+    "Font and gamepad settings remain reachable using page buttons (393, 873)",
+    "The actual browser document has no horizontal or vertical page overflow",
+    "No browser or Godot script errors in roll, charge, cancel, paging and rotation flows"
+  ],
+  "errors": [],
+  "apex_by_input": {
+    "key": 125.916666666667,
+    "pad": 209.545138888889,
+    "touch": 219.166666666667
+  },
+  "roll_samples": {
+    "aion": [
+      {
+        "frame": 0,
+        "height": 71.5,
+        "y": 0,
+        "time": 0.41666666666667
+      },
+      {
+        "frame": 2,
+        "height": 57,
+        "y": 0,
+        "time": 0.5
+      },
+      {
+        "frame": 3,
+        "height": 51.5,
+        "y": 0,
+        "time": 0.56666666666667
+      },
+      {
+        "frame": 4,
+        "height": 56,
+        "y": 0,
+        "time": 0.61666666666667
+      },
+      {
+        "frame": 4,
+        "height": 56,
+        "y": 0,
+        "time": 0.65
+      },
+      {
+        "frame": 5,
+        "height": 58.5,
+        "y": 0,
+        "time": 0.68333333333333
+      },
+      {
+        "frame": 6,
+        "height": 60,
+        "y": 0,
+        "time": 0.71666666666667
+      },
+      {
+        "frame": 6,
+        "height": 60,
+        "y": 0,
+        "time": 0.75
+      },
+      {
+        "frame": 7,
+        "height": 58,
+        "y": 0,
+        "time": 0.78333333333333
+      },
+      {
+        "frame": 7,
+        "height": 58,
+        "y": 0,
+        "time": 0.81666666666667
+      },
+      {
+        "frame": 8,
+        "height": 62.5,
+        "y": 0,
+        "time": 0.85
+      },
+      {
+        "frame": 8,
+        "height": 62.5,
+        "y": 0,
+        "time": 0.9
+      },
+      {
+        "frame": 4,
+        "height": 56,
+        "y": 0,
+        "time": 1.01666666666667
+      },
+      {
+        "frame": 5,
+        "height": 58.5,
+        "y": 0,
+        "time": 1.08333333333333
+      },
+      {
+        "frame": 6,
+        "height": 60,
+        "y": 0,
+        "time": 1.11666666666667
+      },
+      {
+        "frame": 6,
+        "height": 60,
+        "y": 0,
+        "time": 1.15
+      },
+      {
+        "frame": 7,
+        "height": 58,
+        "y": 0,
+        "time": 1.18333333333333
+      },
+      {
+        "frame": 7,
+        "height": 58,
+        "y": 0,
+        "time": 1.21666666666667
+      },
+      {
+        "frame": 8,
+        "height": 62.5,
+        "y": 0,
+        "time": 1.25
+      },
+      {
+        "frame": 3,
+        "height": 51.5,
+        "y": 0,
+        "time": 1.28333333333333
+      },
+      {
+        "frame": 3,
+        "height": 51.5,
+        "y": 0,
+        "time": 1.31666666666667
+      }
+    ],
+    "owl": [
+      {
+        "frame": 0,
+        "height": 66.7058823529412,
+        "y": 0,
+        "time": 0.85
+      },
+      {
+        "frame": 0,
+        "height": 66.7058823529412,
+        "y": 0,
+        "time": 0.85
+      },
+      {
+        "frame": 1,
+        "height": 61.9411764705882,
+        "y": 0,
+        "time": 0.88333333333333
+      },
+      {
+        "frame": 1,
+        "height": 61.9411764705882,
+        "y": 0,
+        "time": 0.88333333333333
+      },
+      {
+        "frame": 2,
+        "height": 56.1176470588235,
+        "y": 0,
+        "time": 0.95
+      },
+      {
+        "frame": 2,
+        "height": 56.1176470588235,
+        "y": 0,
+        "time": 0.95
+      },
+      {
+        "frame": 4,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.03333333333333
+      },
+      {
+        "frame": 4,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.03333333333333
+      },
+      {
+        "frame": 5,
+        "height": 59.8235294117647,
+        "y": 0,
+        "time": 1.1
+      },
+      {
+        "frame": 5,
+        "height": 59.8235294117647,
+        "y": 0,
+        "time": 1.1
+      },
+      {
+        "frame": 5,
+        "height": 59.8235294117647,
+        "y": 0,
+        "time": 1.13333333333333
+      },
+      {
+        "frame": 5,
+        "height": 59.8235294117647,
+        "y": 0,
+        "time": 1.13333333333333
+      },
+      {
+        "frame": 6,
+        "height": 59.2941176470588,
+        "y": 0,
+        "time": 1.18333333333333
+      },
+      {
+        "frame": 6,
+        "height": 59.2941176470588,
+        "y": 0,
+        "time": 1.18333333333333
+      },
+      {
+        "frame": 7,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.23333333333333
+      },
+      {
+        "frame": 7,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.23333333333333
+      },
+      {
+        "frame": 7,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.26666666666667
+      },
+      {
+        "frame": 7,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.26666666666667
+      },
+      {
+        "frame": 8,
+        "height": 63,
+        "y": 0,
+        "time": 1.31666666666667
+      },
+      {
+        "frame": 8,
+        "height": 63,
+        "y": 0,
+        "time": 1.31666666666667
+      },
+      {
+        "frame": 3,
+        "height": 54,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 3,
+        "height": 54,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 3,
+        "height": 54,
+        "y": 0,
+        "time": 1.38333333333333
+      },
+      {
+        "frame": 3,
+        "height": 54,
+        "y": 0,
+        "time": 1.38333333333333
+      },
+      {
+        "frame": 4,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.41666666666667
+      },
+      {
+        "frame": 4,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.41666666666667
+      },
+      {
+        "frame": 5,
+        "height": 59.8235294117647,
+        "y": 0,
+        "time": 1.46666666666667
+      },
+      {
+        "frame": 5,
+        "height": 59.8235294117647,
+        "y": 0,
+        "time": 1.46666666666667
+      },
+      {
+        "frame": 5,
+        "height": 59.8235294117647,
+        "y": 0,
+        "time": 1.5
+      },
+      {
+        "frame": 5,
+        "height": 59.8235294117647,
+        "y": 0,
+        "time": 1.5
+      },
+      {
+        "frame": 6,
+        "height": 59.2941176470588,
+        "y": 0,
+        "time": 1.53333333333333
+      },
+      {
+        "frame": 6,
+        "height": 59.2941176470588,
+        "y": 0,
+        "time": 1.53333333333333
+      },
+      {
+        "frame": 6,
+        "height": 59.2941176470588,
+        "y": 0,
+        "time": 1.56666666666667
+      },
+      {
+        "frame": 6,
+        "height": 59.2941176470588,
+        "y": 0,
+        "time": 1.56666666666667
+      },
+      {
+        "frame": 7,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 7,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 7,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.63333333333333
+      },
+      {
+        "frame": 7,
+        "height": 57.7058823529412,
+        "y": 0,
+        "time": 1.63333333333333
+      },
+      {
+        "frame": 8,
+        "height": 63,
+        "y": 0,
+        "time": 1.66666666666667
+      },
+      {
+        "frame": 8,
+        "height": 63,
+        "y": 0,
+        "time": 1.66666666666667
+      },
+      {
+        "frame": 8,
+        "height": 63,
+        "y": 0,
+        "time": 1.7
+      },
+      {
+        "frame": 8,
+        "height": 63,
+        "y": 0,
+        "time": 1.7
+      },
+      {
+        "frame": 3,
+        "height": 54,
+        "y": 0,
+        "time": 1.73333333333333
+      },
+      {
+        "frame": 3,
+        "height": 54,
+        "y": 0,
+        "time": 1.73333333333333
+      },
+      {
+        "frame": 3,
+        "height": 54,
+        "y": 0,
+        "time": 1.76666666666667
+      },
+      {
+        "frame": 3,
+        "height": 54,
+        "y": 0,
+        "time": 1.76666666666667
+      }
+    ],
+    "sheep": [
+      {
+        "frame": 0,
+        "height": 69.7846153846154,
+        "y": 0,
+        "time": 1.41666666666667
+      },
+      {
+        "frame": 0,
+        "height": 69.7846153846154,
+        "y": 0,
+        "time": 1.41666666666667
+      },
+      {
+        "frame": 0,
+        "height": 69.7846153846154,
+        "y": 0,
+        "time": 1.41666666666667
+      },
+      {
+        "frame": 1,
+        "height": 65.9076923076923,
+        "y": 0,
+        "time": 1.45
+      },
+      {
+        "frame": 1,
+        "height": 65.9076923076923,
+        "y": 0,
+        "time": 1.45
+      },
+      {
+        "frame": 1,
+        "height": 65.9076923076923,
+        "y": 0,
+        "time": 1.45
+      },
+      {
+        "frame": 2,
+        "height": 58.1538461538462,
+        "y": 0,
+        "time": 1.48333333333333
+      },
+      {
+        "frame": 2,
+        "height": 58.1538461538462,
+        "y": 0,
+        "time": 1.48333333333333
+      },
+      {
+        "frame": 2,
+        "height": 58.1538461538462,
+        "y": 0,
+        "time": 1.48333333333333
+      },
+      {
+        "frame": 2,
+        "height": 58.1538461538462,
+        "y": 0,
+        "time": 1.51666666666667
+      },
+      {
+        "frame": 2,
+        "height": 58.1538461538462,
+        "y": 0,
+        "time": 1.51666666666667
+      },
+      {
+        "frame": 2,
+        "height": 58.1538461538462,
+        "y": 0,
+        "time": 1.51666666666667
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.53333333333333
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.53333333333333
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.53333333333333
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.56666666666667
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.56666666666667
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.56666666666667
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 1.63333333333333
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 1.63333333333333
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 1.63333333333333
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 1.66666666666667
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 1.66666666666667
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 1.66666666666667
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 1.7
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 1.7
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 1.7
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 1.73333333333333
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 1.73333333333333
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 1.73333333333333
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 1.76666666666667
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 1.76666666666667
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 1.76666666666667
+      },
+      {
+        "frame": 7,
+        "height": 65.9076923076923,
+        "y": 0,
+        "time": 1.8
+      },
+      {
+        "frame": 7,
+        "height": 65.9076923076923,
+        "y": 0,
+        "time": 1.8
+      },
+      {
+        "frame": 7,
+        "height": 65.9076923076923,
+        "y": 0,
+        "time": 1.8
+      },
+      {
+        "frame": 7,
+        "height": 65.9076923076923,
+        "y": 0,
+        "time": 1.81666666666667
+      },
+      {
+        "frame": 7,
+        "height": 65.9076923076923,
+        "y": 0,
+        "time": 1.81666666666667
+      },
+      {
+        "frame": 7,
+        "height": 65.9076923076923,
+        "y": 0,
+        "time": 1.81666666666667
+      },
+      {
+        "frame": 8,
+        "height": 72,
+        "y": 0,
+        "time": 1.85
+      },
+      {
+        "frame": 8,
+        "height": 72,
+        "y": 0,
+        "time": 1.85
+      },
+      {
+        "frame": 8,
+        "height": 72,
+        "y": 0,
+        "time": 1.85
+      },
+      {
+        "frame": 8,
+        "height": 72,
+        "y": 0,
+        "time": 1.88333333333333
+      },
+      {
+        "frame": 8,
+        "height": 72,
+        "y": 0,
+        "time": 1.88333333333333
+      },
+      {
+        "frame": 8,
+        "height": 72,
+        "y": 0,
+        "time": 1.88333333333333
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.91666666666666
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.91666666666666
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.91666666666666
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 1.98333333333333
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 1.98333333333333
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 1.98333333333333
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 2.01666666666666
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 2.01666666666666
+      },
+      {
+        "frame": 4,
+        "height": 62.0307692307692,
+        "y": 0,
+        "time": 2.01666666666666
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 2.03333333333333
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 2.03333333333333
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 2.03333333333333
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 2.06666666666666
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 2.06666666666666
+      },
+      {
+        "frame": 5,
+        "height": 64.2461538461538,
+        "y": 0,
+        "time": 2.06666666666666
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 2.1
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 2.1
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 2.1
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 2.13333333333333
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 2.13333333333333
+      },
+      {
+        "frame": 6,
+        "height": 65.3538461538462,
+        "y": 0,
+        "time": 2.13333333333333
+      },
+      {
+        "frame": 8,
+        "height": 72,
+        "y": 0,
+        "time": 2.23333333333333
+      },
+      {
+        "frame": 8,
+        "height": 72,
+        "y": 0,
+        "time": 2.23333333333333
+      },
+      {
+        "frame": 8,
+        "height": 72,
+        "y": 0,
+        "time": 2.23333333333333
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 2.28333333333333
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 2.28333333333333
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 2.28333333333333
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 2.31666666666666
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 2.31666666666666
+      },
+      {
+        "frame": 3,
+        "height": 60.3692307692308,
+        "y": 0,
+        "time": 2.31666666666666
+      }
+    ],
+    "wolf": [
+      {
+        "frame": 1,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.15
+      },
+      {
+        "frame": 1,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.15
+      },
+      {
+        "frame": 1,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.15
+      },
+      {
+        "frame": 1,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.15
+      },
+      {
+        "frame": 2,
+        "height": 53.0802919708029,
+        "y": 0,
+        "time": 1.21666666666667
+      },
+      {
+        "frame": 2,
+        "height": 53.0802919708029,
+        "y": 0,
+        "time": 1.21666666666667
+      },
+      {
+        "frame": 2,
+        "height": 53.0802919708029,
+        "y": 0,
+        "time": 1.21666666666667
+      },
+      {
+        "frame": 2,
+        "height": 53.0802919708029,
+        "y": 0,
+        "time": 1.21666666666667
+      },
+      {
+        "frame": 3,
+        "height": 53.6058394160584,
+        "y": 0,
+        "time": 1.28333333333333
+      },
+      {
+        "frame": 3,
+        "height": 53.6058394160584,
+        "y": 0,
+        "time": 1.28333333333333
+      },
+      {
+        "frame": 3,
+        "height": 53.6058394160584,
+        "y": 0,
+        "time": 1.28333333333333
+      },
+      {
+        "frame": 3,
+        "height": 53.6058394160584,
+        "y": 0,
+        "time": 1.28333333333333
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 5,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.4
+      },
+      {
+        "frame": 5,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.4
+      },
+      {
+        "frame": 5,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.4
+      },
+      {
+        "frame": 5,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.4
+      },
+      {
+        "frame": 6,
+        "height": 58.8613138686131,
+        "y": 0,
+        "time": 1.45
+      },
+      {
+        "frame": 6,
+        "height": 58.8613138686131,
+        "y": 0,
+        "time": 1.45
+      },
+      {
+        "frame": 6,
+        "height": 58.8613138686131,
+        "y": 0,
+        "time": 1.45
+      },
+      {
+        "frame": 6,
+        "height": 58.8613138686131,
+        "y": 0,
+        "time": 1.45
+      },
+      {
+        "frame": 7,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.5
+      },
+      {
+        "frame": 7,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.5
+      },
+      {
+        "frame": 7,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.5
+      },
+      {
+        "frame": 7,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.5
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.56666666666667
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.56666666666667
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.56666666666667
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.56666666666667
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.66666666666667
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.66666666666667
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.66666666666667
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.66666666666667
+      },
+      {
+        "frame": 5,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.75
+      },
+      {
+        "frame": 5,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.75
+      },
+      {
+        "frame": 5,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.75
+      },
+      {
+        "frame": 5,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 1.75
+      },
+      {
+        "frame": 6,
+        "height": 58.8613138686131,
+        "y": 0,
+        "time": 1.81666666666667
+      },
+      {
+        "frame": 6,
+        "height": 58.8613138686131,
+        "y": 0,
+        "time": 1.81666666666667
+      },
+      {
+        "frame": 6,
+        "height": 58.8613138686131,
+        "y": 0,
+        "time": 1.81666666666667
+      },
+      {
+        "frame": 6,
+        "height": 58.8613138686131,
+        "y": 0,
+        "time": 1.81666666666667
+      },
+      {
+        "frame": 7,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.88333333333333
+      },
+      {
+        "frame": 7,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.88333333333333
+      },
+      {
+        "frame": 7,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.88333333333333
+      },
+      {
+        "frame": 7,
+        "height": 59.9124087591241,
+        "y": 0,
+        "time": 1.88333333333333
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 8,
+        "height": 64.6423357664234,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 3,
+        "height": 53.6058394160584,
+        "y": 0,
+        "time": 2
+      },
+      {
+        "frame": 3,
+        "height": 53.6058394160584,
+        "y": 0,
+        "time": 2
+      },
+      {
+        "frame": 3,
+        "height": 53.6058394160584,
+        "y": 0,
+        "time": 2
+      },
+      {
+        "frame": 3,
+        "height": 53.6058394160584,
+        "y": 0,
+        "time": 2
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 2.05
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 2.05
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 2.05
+      },
+      {
+        "frame": 4,
+        "height": 57.2846715328467,
+        "y": 0,
+        "time": 2.05
+      }
+    ],
+    "rabbit": [
+      {
+        "frame": 1,
+        "height": 64.6027397260274,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 1,
+        "height": 64.6027397260274,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 1,
+        "height": 64.6027397260274,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 1,
+        "height": 64.6027397260274,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 1,
+        "height": 64.6027397260274,
+        "y": 0,
+        "time": 1.35
+      },
+      {
+        "frame": 2,
+        "height": 55.2328767123288,
+        "y": 0,
+        "time": 1.41666666666667
+      },
+      {
+        "frame": 2,
+        "height": 55.2328767123288,
+        "y": 0,
+        "time": 1.41666666666667
+      },
+      {
+        "frame": 2,
+        "height": 55.2328767123288,
+        "y": 0,
+        "time": 1.41666666666667
+      },
+      {
+        "frame": 2,
+        "height": 55.2328767123288,
+        "y": 0,
+        "time": 1.41666666666667
+      },
+      {
+        "frame": 2,
+        "height": 55.2328767123288,
+        "y": 0,
+        "time": 1.41666666666667
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 1.46666666666667
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 1.46666666666667
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 1.46666666666667
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 1.46666666666667
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 1.46666666666667
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 1.6
+      },
+      {
+        "frame": 6,
+        "height": 56.7123287671233,
+        "y": 0,
+        "time": 1.68333333333333
+      },
+      {
+        "frame": 6,
+        "height": 56.7123287671233,
+        "y": 0,
+        "time": 1.68333333333333
+      },
+      {
+        "frame": 6,
+        "height": 56.7123287671233,
+        "y": 0,
+        "time": 1.68333333333333
+      },
+      {
+        "frame": 6,
+        "height": 56.7123287671233,
+        "y": 0,
+        "time": 1.68333333333333
+      },
+      {
+        "frame": 6,
+        "height": 56.7123287671233,
+        "y": 0,
+        "time": 1.68333333333333
+      },
+      {
+        "frame": 7,
+        "height": 56.2191780821918,
+        "y": 0,
+        "time": 1.73333333333333
+      },
+      {
+        "frame": 7,
+        "height": 56.2191780821918,
+        "y": 0,
+        "time": 1.73333333333333
+      },
+      {
+        "frame": 7,
+        "height": 56.2191780821918,
+        "y": 0,
+        "time": 1.73333333333333
+      },
+      {
+        "frame": 7,
+        "height": 56.2191780821918,
+        "y": 0,
+        "time": 1.73333333333333
+      },
+      {
+        "frame": 7,
+        "height": 56.2191780821918,
+        "y": 0,
+        "time": 1.73333333333333
+      },
+      {
+        "frame": 8,
+        "height": 63.1232876712329,
+        "y": 0,
+        "time": 1.78333333333333
+      },
+      {
+        "frame": 8,
+        "height": 63.1232876712329,
+        "y": 0,
+        "time": 1.78333333333333
+      },
+      {
+        "frame": 8,
+        "height": 63.1232876712329,
+        "y": 0,
+        "time": 1.78333333333333
+      },
+      {
+        "frame": 8,
+        "height": 63.1232876712329,
+        "y": 0,
+        "time": 1.78333333333333
+      },
+      {
+        "frame": 8,
+        "height": 63.1232876712329,
+        "y": 0,
+        "time": 1.78333333333333
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 1.83333333333333
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 1.83333333333333
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 1.83333333333333
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 1.83333333333333
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 1.83333333333333
+      },
+      {
+        "frame": 4,
+        "height": 51.2876712328767,
+        "y": 0,
+        "time": 1.9
+      },
+      {
+        "frame": 4,
+        "height": 51.2876712328767,
+        "y": 0,
+        "time": 1.9
+      },
+      {
+        "frame": 4,
+        "height": 51.2876712328767,
+        "y": 0,
+        "time": 1.9
+      },
+      {
+        "frame": 4,
+        "height": 51.2876712328767,
+        "y": 0,
+        "time": 1.9
+      },
+      {
+        "frame": 4,
+        "height": 51.2876712328767,
+        "y": 0,
+        "time": 1.9
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 1.95
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 2
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 2
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 2
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 2
+      },
+      {
+        "frame": 5,
+        "height": 54.2465753424658,
+        "y": 0,
+        "time": 2
+      },
+      {
+        "frame": 6,
+        "height": 56.7123287671233,
+        "y": 0,
+        "time": 2.05
+      },
+      {
+        "frame": 6,
+        "height": 56.7123287671233,
+        "y": 0,
+        "time": 2.05
+      },
+      {
+        "frame": 6,
+        "height": 56.7123287671233,
+        "y": 0,
+        "time": 2.05
+      },
+      {
+        "frame": 6,
+        "height": 56.7123287671233,
+        "y": 0,
+        "time": 2.05
+      },
+      {
+        "frame": 6,
+        "height": 56.7123287671233,
+        "y": 0,
+        "time": 2.05
+      },
+      {
+        "frame": 7,
+        "height": 56.2191780821918,
+        "y": 0,
+        "time": 2.11666666666666
+      },
+      {
+        "frame": 7,
+        "height": 56.2191780821918,
+        "y": 0,
+        "time": 2.11666666666666
+      },
+      {
+        "frame": 7,
+        "height": 56.2191780821918,
+        "y": 0,
+        "time": 2.11666666666666
+      },
+      {
+        "frame": 7,
+        "height": 56.2191780821918,
+        "y": 0,
+        "time": 2.11666666666666
+      },
+      {
+        "frame": 7,
+        "height": 56.2191780821918,
+        "y": 0,
+        "time": 2.11666666666666
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 2.23333333333333
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 2.23333333333333
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 2.23333333333333
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 2.23333333333333
+      },
+      {
+        "frame": 3,
+        "height": 51.7808219178082,
+        "y": 0,
+        "time": 2.23333333333333
+      },
+      {
+        "frame": 4,
+        "height": 51.2876712328767,
+        "y": 0,
+        "time": 2.3
+      },
+      {
+        "frame": 4,
+        "height": 51.2876712328767,
+        "y": 0,
+        "time": 2.3
+      },
+      {
+        "frame": 4,
+        "height": 51.2876712328767,
+        "y": 0,
+        "time": 2.3
+      },
+      {
+        "frame": 4,
+        "height": 51.2876712328767,
+        "y": 0,
+        "time": 2.3
+      },
+      {
+        "frame": 4,
+        "height": 51.2876712328767,
+        "y": 0,
+        "time": 2.3
+      }
+    ]
+  },
+  "build": {
+    "build": "9a49115f1e5797c8",
+    "version": "0.18.0"
+  },
+  "scope": "Normal menu,key,standard Gamepad API and browser touch input. Only passive observations; no save/world/RNG/inventory injection."
+}
