@@ -1,0 +1,28 @@
+{
+  "version": "0.21.0",
+  "name": "AionEndlessRun-0.21.0-android-arm64-x64.apk",
+  "bytes": 155742177,
+  "sha256": "d3342455022ade92b35e7ba019eb50db062adf23ede54bd0c655e9910ebdde43",
+  "parts": [
+    {
+      "name": "apk-part-000",
+      "bytes": 41943040,
+      "sha256": "5fd3816b1a935e4d925eb41c1dff9182be3b45239bffb4f8fdbfcd7d31518f6e"
+    },
+    {
+      "name": "apk-part-001",
+      "bytes": 41943040,
+      "sha256": "70236869ffcb31cc008fc19037e9f3efc1531b61c33676a9cae6f9094c822a35"
+    },
+    {
+      "name": "apk-part-002",
+      "bytes": 41943040,
+      "sha256": "c78db2dc7db9f2bb4c1b61abe14a5dcbb55291280b3a8c8d9023ae4b83b546e6"
+    },
+    {
+      "name": "apk-part-003",
+      "bytes": 29913057,
+      "sha256": "e6de61362d4f83459fa8fd471a1563002a18067c0fa85ad97470bfcd8bcd59c3"
+    }
+  ]
+}
