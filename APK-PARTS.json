@@ -2,27 +2,27 @@
   "version": "0.20.0",
   "name": "AionEndlessRun-0.20.0-android-arm64-x64.apk",
   "bytes": 154131991,
-  "sha256": "a800eeb22d3b8f4dd6d546573c627e50a74ae6b0a7606398b266d83b9273ec9e",
+  "sha256": "079e7b103fdcb808cbba739154199feae32b6c4e996825c1459cbdb006ff2399",
   "parts": [
     {
       "name": "apk-part-000",
       "bytes": 41943040,
-      "sha256": "2972d7eaba3867add711cf31a9527fd99978ad8bc8111b96cff5125f2b981b72"
+      "sha256": "259bc864c2eb2da64d589435e8bdec69ed3586abcd676274faa373d9b9fe0280"
     },
     {
       "name": "apk-part-001",
       "bytes": 41943040,
-      "sha256": "36aa848043e720bc2a161a03893a1e452baa66061bcf69bb54f82dc09f925b19"
+      "sha256": "1b09368d93e1d82d89066fb889c24a8823d97d0ded3e90949b0c5fb34a06e50a"
     },
     {
       "name": "apk-part-002",
       "bytes": 41943040,
-      "sha256": "e4114f0d9514afa9b446f195d7f017e4df64c62fa1be9b4dd0311b57bae87a10"
+      "sha256": "79668bafa98e850ed505517812fc640fc488ea8c8c8f2981b915432b8bd3b7bc"
     },
     {
       "name": "apk-part-003",
       "bytes": 28302871,
-      "sha256": "51c7e0c9ed3b4da6f21f22bb181649bc8e6b8b1b30f68b044847fc2eb589913a"
+      "sha256": "55d91ab2d953d4107fb8a34d3384f0909a5ba51f0b2427b789e5ec49e831d2ec"
     }
   ]
 }
