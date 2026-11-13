@@ -28,16 +28,26 @@ jobs:
         with:
           github-token: ${{ github.token }}
           run-id: ${{ github.event.workflow_run.id }}
-          name: desktop-Linux
-          path: packages
-      - name: Extract the web archive from the successful platform run
+          name: web-game
+          path: site
+      - name: Verify the exact web output of the successful platform run
         run: |
-          VERSION=$(python3 -c 'import re; print(re.search(r"config/version=\"([^\"]+)\"",open("project.godot").read()).group(1))')
-          mkdir site
-          tar -xzf "packages/AionEndlessRun-$VERSION-web-offline.tar.gz" -C site
-          test -f site/index.html
-          test -f site/build.json
-          touch site/.nojekyll
+          python3 - <<'PYCODE'
+          import hashlib,json,re
+          from pathlib import Path
+          site=Path('site')
+          meta=json.loads((site/'build.json').read_text())
+          version=re.search(r'config/version="([^"]+)"',Path('project.godot').read_text()).group(1)
+          assert meta['version']==version
+          assert (site/'index.html').is_file()
+          for name,expected in meta['assets'].items():
+              f=site/name
+              assert f.is_file() and f.stat().st_size==expected['bytes'],name
+              with f.open('rb') as stream:actual=hashlib.file_digest(stream,'sha256').hexdigest()
+              assert actual==expected['sha256'],name
+          (site/'.nojekyll').touch()
+          print('Verified',version,meta['build'],'and every fingerprinted asset')
+          PYCODE
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

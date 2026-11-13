@@ -161,7 +161,8 @@ func _ready() -> void:
 		JavaScriptBridge.get_interface("window").aionCancelTouches=web_touch_cancel_callback
 		# Some web engine paths map DOM touchcancel to an ordinary release.
 		# Clear ownership in capture phase before such a release can launch Emre.
-		JavaScriptBridge.eval("if(!window.aionTouchCancelInstalled){window.aionTouchCancelInstalled=true;for(const type of ['touchcancel','pointercancel'])window.addEventListener(type,()=>window.aionCancelTouches?.(),{capture:true,passive:true})}")
+		# Do not cancel on pointercancel: Chrome emits it for valid legacy-touch holds.
+		JavaScriptBridge.eval("if(!window.aionTouchCancelInstalled){window.aionTouchCancelInstalled=true;window.addEventListener('touchcancel',()=>window.aionCancelTouches?.(),{capture:true,passive:true})}")
 		JavaScriptBridge.eval("document.getElementById('canvas').addEventListener('contextmenu',e=>{if(e.currentTarget.dataset.page==='')e.preventDefault()})")
 	for i in 2:
 		followers.append(make_companion_sprite())
