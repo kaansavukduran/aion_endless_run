@@ -64,6 +64,29 @@ func run():
     g.page="main";g.rebuild();await process_frame;g.toggle_language_picker();await process_frame;await process_frame
     for b in g.language_picker.find_children("*","Button",true,false):check(Rect2(0,0,g.view_w,g.view_h).grow(1).encloses(b.get_global_rect()),"All language options fit without scrolling: "+lang+str(dims)+str(scale_value))
     g.language_picker_open=false
+ # A wider system font on the CI host exposed clipping at 200% landscape.
+ # Keep this separate from the default-font matrix so local font choice cannot
+ # silently bypass the regression again.
+ for family in ["DejaVu Sans","Liberation Sans"]:
+  for dims in [Vector2i(1152,648),Vector2i(873,393),Vector2i(393,873)]:
+   root.size=dims;await process_frame;g.interface_options.text_scale=2;g.build_theme()
+   var alternate:=SystemFont.new();alternate.font_names=PackedStringArray([family]);alternate.fallbacks=g.interface_options.body_font.fallbacks;g.interface_options.body_font=alternate;g.ui_theme.default_font=alternate;g.ui.theme=g.ui_theme
+   for lang in ["tr","en"]:
+    g.language=lang;g.page="main";g.language_picker_open=false;g.rebuild();await process_frame;await process_frame;await process_frame
+    var screen:=Rect2(0,0,g.view_w,g.view_h)
+    var tiles: Array=g.menu_layer.find_children("StartSelect_*","Button",true,false)
+    var panel: Control=g.menu_layer.get_node("PagePanel")
+    check(tiles.size()==5,"All five heroes remain visible with the actual wider system font")
+    for tile in tiles:
+     check(screen.grow(1).encloses(tile.get_global_rect()),"200% hero card fits "+family+lang+str(dims)+str(tile.name))
+     check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"200% hero title/image fits its actual card")
+     check(not panel.get_global_rect().intersects(tile.get_global_rect()),"Large-text main actions never overlap hero cards")
+    g.toggle_language_picker();await process_frame;await process_frame
+    var languages: Array=g.language_picker.find_children("*","Button",true,false)
+    check(languages.size()==12,"System plus eleven languages remain individually reachable")
+    for option in languages:check(screen.grow(1).encloses(option.get_global_rect()),"200% language fits "+family+lang+str(dims)+str(option.name))
+    g.language_picker_open=false
+ g.build_theme();g.ui.theme=g.ui_theme
  g.interface_options.text_scale=1;g.main_menu();g.select_character("rabbit");g.start_run();g.press_jump("key");advance(g.world,.5);g.release_jump("key");g.world.step(.01)
  check(g.world.y<0,"Actual scene key press/release routes into charged leap")
  g.main_menu();g.start_run();g.press_jump("touch:1");advance(g.world,.5);g.release_jump("touch:1",false);g.world.step(.01)

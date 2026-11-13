@@ -12,6 +12,8 @@ Proven UI causes: settings/enlarged pages/language/tutorial instantiated ScrollC
 
 User explicitly authorized an additional GitHub Pages address after the Vercel daily quota blocked recent deployments. User then enabled Pages Source=GitHub Actions; API read confirmed workflow mode. A separate workflow deploys the exact successful main-run web output artifact after source, native Android and desktop gates. Keep Vercel and its origin-local records. Different origin has separate records; do not claim migration.
 
+First remote CI run43349358325 correctly blocked publication: the host resolves the system font to the wider DejaVu Sans; at200% and960×540 logical view the fifth hero card and three languages overflowed. Reproduced locally with an explicit real DejaVu system font. Enlarged landscape now gives60% width to the roster and40% to wrapped main actions, and uses the Label's shaped line count for measured card height. The System language option shares the language grid, avoiding an extra tall row. Added both DejaVu Sans and Liberation Sans, both orientations and TR/EN at200% as explicit regression cases. No smaller text scale or font substitution hides the failure.
+
 Local evidence and final platform/publication states: docs/evidence-v0180/. Verify real runtime before reporting a deploy as playable. Native iOS/Apple Developer ID remain owner-signing limitations; no physical phone/controller claim.
 
 # Current handoff · 0.17.1 help and native screenshot correction

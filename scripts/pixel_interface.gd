@@ -6,7 +6,7 @@ func split_main() -> bool:
 	return host.page=="main" and not host.portrait and host.interface_options.text_scale>1.0
 
 func roster_width() -> float:
-	return host.view_w*.5-42 if split_main() else host.view_w-56
+	return host.view_w*.6-42 if split_main() else host.view_w-56
 
 func stage_y() -> float:
 	if host.portrait:
@@ -141,7 +141,7 @@ func hud() -> void:
 func card(width: float) -> VBoxContainer:
 	var h=host
 	width=minf(width,h.view_w-40)
-	if h.page=="main" and h.interface_options.text_scale>1:width=roster_width() if split_main() else minf(640,h.view_w-56)
+	if h.page=="main" and h.interface_options.text_scale>1:width=host.view_w*.4-42 if split_main() else minf(640,h.view_w-56)
 	var enlarged: bool=h.interface_options.text_scale>1.0
 	if enlarged and h.page!="main":width=h.view_w-40
 	var height: float=minf(h.view_h-120,410 if h.page!="main" else 340)
@@ -189,6 +189,7 @@ func roster_geometry(width: float,separate: bool=false) -> Dictionary:
 	for id in h.FRIENDS:
 		for prefix in [""]:
 			probe.text=prefix+h.character_name(id)
+			probe.get_line_count()
 			tile_h=maxf(tile_h,ceilf(probe.get_minimum_size().y)+22+(48 if stacked else 0))
 	probe.free()
 	var rows:=ceili(float(h.FRIENDS.size())/columns)
@@ -257,6 +258,7 @@ func main(column: VBoxContainer) -> Button:
 	record.position=Vector2(28,12)
 	record.visible=h.interface_options.text_scale<=1.0
 	var logo: Label=h.label("AION · ENDLESS RUN",24,"f8d9b1")
+	logo.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	logo.add_theme_font_override("font",h.FONT)
 	logo.add_theme_font_size_override("font_size",h.ui_size(20))
 	column.add_child(logo)
@@ -283,7 +285,7 @@ func main(column: VBoxContainer) -> Button:
 	var roster_at: float=roster_y()
 	choose.position=Vector2(28,roster_at-chooser_height()-6)
 	choose.size.y=chooser_height()
-	roster(h.menu_layer,Vector2(h.view_w*.5+14 if split_main() else 28,roster_at),roster_width())
+	roster(h.menu_layer,Vector2(h.view_w*.4+14 if split_main() else 28,roster_at),roster_width())
 	return first
 
 func characters() -> void:

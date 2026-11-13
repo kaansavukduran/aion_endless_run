@@ -576,12 +576,13 @@ func build_language_picker() -> void:
 	var auto_option:=button(text("language_system"),func():set_language("system"),not language_override)
 	auto_option.name="Language_system"
 	auto_option.add_theme_font_size_override("font_size",ui_size(24))
-	options.add_child(auto_option)
 	var grid:=GridContainer.new()
 	grid.columns=2 if portrait else 4
 	grid.add_theme_constant_override("h_separation",8)
 	grid.add_theme_constant_override("v_separation",8)
 	options.add_child(grid)
+	auto_option.custom_minimum_size.x=(picker_width-28-8*(grid.columns-1))/grid.columns
+	grid.add_child(auto_option)
 	for lang in Words.LANGUAGES:
 		var option:=button(Words.LANGUAGE_NAMES[lang],func():set_language(lang),lang==language)
 		option.name="Language_"+lang
