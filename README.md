@@ -2,7 +2,7 @@
 
 Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.20.0**.
 
-**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.20.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0200/README.md)
+**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.20.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.20.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0200/README.md)
 
 ![Gerçek oyunun kompakt ana menüsü](docs/evidence-v0200/screenshots/main-dark.png)
 

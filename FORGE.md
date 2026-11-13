@@ -1,3 +1,9 @@
+## 0.20.0 · Altı yeni pixel-art kahraman
+
+Altı yeni pafta/396 kaynak kare, özgün karakter kimlikleri, daha belirgin malzeme gölgeleri ve piksel kümeleri. Tam bağlı siluet kesimi, bütün-yüz kaydı, tek karakter ölçeği, alçak tek omuz taklası, ayrı Emre şarjı, Ömer uçuşu, Melun dört ayak deparı ve dar silah eki. Son72 element pozu da sabitlendi; eski49 PNG byte olarak korunur.
+
+[Doğrulama](docs/evidence-v0200/README.md):19 temiz CI paketi/10970 kontrol,166 tarayıcı,11 native Android giriş,36 açık durum render fixture'ı. Dokuz paket/iki makbuz yayımlandı ve kamu özetleri doğrulandı. Güncel Pages çalışır; Vercel son yamada günlük kota nedeniyle BLOCKED. Fiziksel Poco/iPhone/kol NOT TESTED.
+
 # Published delivery · 0.19.0
 
 Releasev0.19.0 is public with9 platform packages and2 receipts. Exact artifacts from verified run43480686993 (source4fea30b), documentation tagf2b7f79 and stable APK application537391a are recorded separately. All11 server asset digests verified before publication; actual public APK bytes/signer/code23 and Mac ZIP CRC/universal CPUs verified afterward. Pages and Vercel actual final build IDs/scopes are in docs/evidence-v0190/verification.json. Runtime unchanged after the final HUD fix.

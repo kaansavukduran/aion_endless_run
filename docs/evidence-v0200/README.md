@@ -33,4 +33,4 @@ Vercel'in son6de0867 dağıtımı günlük kota nedeniyle BLOCKED: `Deployment r
 
 Fiziksel Poco X7/Firefox, iPhone/Safari ve fiziksel Xbox/PS kolu NOT TESTED. Native iOS sahibinin Apple imzasını gerektirir. Mac ad-hoc; Developer ID/noter ve Windows Authenticode yok. Kontrol şeması, kayıtlar,15s seviyeler ve düşman/buff dengesi bu sanat görevinde yeniden tasarlanmadı.
 
-Dokuz paket ve makbuzlar aynı başarılı CI çıktılarından yayınlanacak; kamu dosya özetleri yayın sonrası ayrıca kaydedilir.
+Dokuz paket ve iki makbuz [v0.20.0](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.20.0) altında yayımlandı. Yayın43506636283,11 yüklemenin sunucu SHA-256 özetleri eşleşmeden taslağı açmadı. `public-packages.json`: dokuz kamu paketinin özet/boyut eşleşmesi; ayrıca gerçekten indirilen kararlı APK byte/hash ve macOS ZIP CRC/universal CPU denetimleri. Bütün paketlerin yerelde indirildiği iddia edilmez. Etiket2569d22, CI kaynağı6de0867 ve Android uygulama kaynağıbbf2ebd makbuzda ayrıdır.

@@ -13,7 +13,12 @@
   "pages_status": "PASS: corrected source and actual Chromium/Firefox play",
   "offline_status": "PASS: same-build worker, naturally earned record, offline Fire",
   "vercel_status": "BLOCKED final elemental fix: Deployment rate limited — retry in 24 hours. Initial0.20.0 build6c16a911acb2a9f4 remains available.",
-  "publication_status": "VERIFIED_BUILD_AWAITING_PUBLICATION",
+  "publication_status": "PUBLISHED_VERIFIED",
   "physical_poco_iphone_gamepads": "NOT TESTED",
-  "ios_native": "Requires owner signing; unchanged limitation"
+  "ios_native": "Requires owner signing; unchanged limitation",
+  "release_url": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.20.0",
+  "release_tag_commit": "2569d22dc4c481341d04b3af7fa5b04a18b4bc97",
+  "publication_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43506636283",
+  "published_asset_count": 11,
+  "delivery_recorded_at": "2026-11-14T00:07:37.306849+03:00"
 }

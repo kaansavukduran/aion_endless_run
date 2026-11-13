@@ -1,3 +1,7 @@
+## Güncel0.20.0 kapsamı
+
+Kaynak6de0867:19 Godot paketi/10970 kontrol, native Android11, Windows/Linux/macOS paket açılışları PASS. Pages323d157ff6249dfa Chromium/Firefox gerçek açılış/oynanış PASS; toplam166 tarayıcı kontrolü, doğal rekorla gerçek offline reload, önce başarısız olan72 element regresyonu ve36 açık durum render fixture'ı. Dokuz kamu paketinin özetleri ve indirilen APK/Mac ZIP doğrulandı. [Kanıt ve sınırlar](evidence-v0200/README.md). Vercel son yamada kotadan BLOCKED; fiziksel Poco/iPhone/kol NOT TESTED. Aşağıdakiler önceki sürüm kayıtlarıdır.
+
 # Current verification · 0.19.0
 
 [Somut sonuçlar, ekranlar ve kapsam](evidence-v0190/README.md).18 gerçek Godot grubu /9,556 CI kontrolü;126 altı-kahraman normal giriş kontrolü, son derlemede17 DPR3,40 canlı Firefox/Chromium,3 gerçek offline arşiv kontrolü ve11 offline native Android ADB kontrolü geçer.7 web paketleme ve4 Android parser testi de geçer.126 turundan sonraki portre-HUD değişikliği ile değişmeyen çizim/giriş kodu ayrıca belgelenmiştir. 9 paket ve2 makbuz yayımlandı; sunucu özetleri, indirilen APK imzası/sürümü ve Mac ZIP CRC/universal CPU başlığı doğrulandı. Fiziksel telefon/kol ve yerel iOS dağıtımı ayrı sınırlar olarak raporlanır.

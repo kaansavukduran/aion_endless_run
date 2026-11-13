@@ -1,0 +1,122 @@
+{
+  "release_url": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.20.0",
+  "release_tag_commit": "2569d22dc4c481341d04b3af7fa5b04a18b4bc97",
+  "source_commit": "6de0867fdfa78cc8c5e1d8978624c82821692b93",
+  "version": "0.20.0",
+  "packages": [
+    {
+      "file": "AionEndlessRun-0.20.0-android-arm64-x64.apk",
+      "bytes": 154131991,
+      "sha256": "079e7b103fdcb808cbba739154199feae32b6c4e996825c1459cbdb006ff2399",
+      "public_digest_matches": true
+    },
+    {
+      "file": "AionEndlessRun-0.20.0-linux-x64-portable.tar.gz",
+      "bytes": 129649492,
+      "sha256": "40a6274c2f4ec0ad96d58a3b93f3025a1ad67e2ea086f94d2d05ccbc2599a681",
+      "public_digest_matches": true
+    },
+    {
+      "file": "AionEndlessRun-0.20.0-linux-x64.AppImage",
+      "bytes": 127646200,
+      "sha256": "3fe1b29b77e6524a1dd6bfae6027c1a6a4dfea7f6769f583df36fe2d16a7a78d",
+      "public_digest_matches": true
+    },
+    {
+      "file": "AionEndlessRun-0.20.0-linux-x64.deb",
+      "bytes": 122942712,
+      "sha256": "5fb267b8e0625b0a9d8aa099e21d1cde441eeef4fd2027e611dc8917c876d2bd",
+      "public_digest_matches": true
+    },
+    {
+      "file": "AionEndlessRun-0.20.0-macos-universal-portable.zip",
+      "bytes": 164913724,
+      "sha256": "37baa1601586cd6e0d60d3e4b5e3bacc96df01d3ba4ee26603b96ee76655a244",
+      "public_digest_matches": true
+    },
+    {
+      "file": "AionEndlessRun-0.20.0-macos-universal.dmg",
+      "bytes": 173952426,
+      "sha256": "21112433f6de4219130127afc23ca449923f367826f65d504e3dfbb14b30442c",
+      "public_digest_matches": true
+    },
+    {
+      "file": "AionEndlessRun-0.20.0-web-offline.tar.gz",
+      "bytes": 112550417,
+      "sha256": "bbe338ea4c741f6d52dbeb9c2db4f862dae5818623dc7fd9f6337a4be4665148",
+      "public_digest_matches": true
+    },
+    {
+      "file": "AionEndlessRun-0.20.0-windows-x64-Setup.exe",
+      "bytes": 138390995,
+      "sha256": "d45e6122eed60d074f0c0081d3e1f1df6ff1efc8f5118fce250d5bbeaa83295b",
+      "public_digest_matches": true
+    },
+    {
+      "file": "AionEndlessRun-0.20.0-windows-x64-portable.zip",
+      "bytes": 139625421,
+      "sha256": "88e5e31439d2460095dc0fbc5ee33d481f6fa992810d2c8e4669fd03aa028b4d",
+      "public_digest_matches": true
+    }
+  ],
+  "public_apk_bytes_and_hash_verified": true,
+  "mac_zip_crc_and_universal_cpus_verified": [
+    16777223,
+    16777228
+  ],
+  "signer": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+  "receipt": {
+    "version": "0.20.0",
+    "source_commit": "6de0867fdfa78cc8c5e1d8978624c82821692b93",
+    "verified_application_commit": "6de0867fdfa78cc8c5e1d8978624c82821692b93",
+    "verification_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43501562033",
+    "source_and_scene_checks": 10970,
+    "browser_checks": 166,
+    "android_native": "API30 offline emulator: real Jump/glide, continuous Fire without reload, Roll, independent Eren, Emre charge/release, paused resize and actual menu-region separation. No physical phone claim.",
+    "android_signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+    "apple_status": "macOS ad-hoc only; no Developer ID/notarization. Native iOS awaits owner signing.",
+    "files": {
+      "AionEndlessRun-0.20.0-android-arm64-x64.apk": {
+        "bytes": 154131991,
+        "sha256": "079e7b103fdcb808cbba739154199feae32b6c4e996825c1459cbdb006ff2399"
+      },
+      "AionEndlessRun-0.20.0-linux-x64-portable.tar.gz": {
+        "bytes": 129649492,
+        "sha256": "40a6274c2f4ec0ad96d58a3b93f3025a1ad67e2ea086f94d2d05ccbc2599a681"
+      },
+      "AionEndlessRun-0.20.0-linux-x64.AppImage": {
+        "bytes": 127646200,
+        "sha256": "3fe1b29b77e6524a1dd6bfae6027c1a6a4dfea7f6769f583df36fe2d16a7a78d"
+      },
+      "AionEndlessRun-0.20.0-linux-x64.deb": {
+        "bytes": 122942712,
+        "sha256": "5fb267b8e0625b0a9d8aa099e21d1cde441eeef4fd2027e611dc8917c876d2bd"
+      },
+      "AionEndlessRun-0.20.0-macos-universal-portable.zip": {
+        "bytes": 164913724,
+        "sha256": "37baa1601586cd6e0d60d3e4b5e3bacc96df01d3ba4ee26603b96ee76655a244"
+      },
+      "AionEndlessRun-0.20.0-macos-universal.dmg": {
+        "bytes": 173952426,
+        "sha256": "21112433f6de4219130127afc23ca449923f367826f65d504e3dfbb14b30442c"
+      },
+      "AionEndlessRun-0.20.0-web-offline.tar.gz": {
+        "bytes": 112550417,
+        "sha256": "bbe338ea4c741f6d52dbeb9c2db4f862dae5818623dc7fd9f6337a4be4665148"
+      },
+      "AionEndlessRun-0.20.0-windows-x64-Setup.exe": {
+        "bytes": 138390995,
+        "sha256": "d45e6122eed60d074f0c0081d3e1f1df6ff1efc8f5118fce250d5bbeaa83295b"
+      },
+      "AionEndlessRun-0.20.0-windows-x64-portable.zip": {
+        "bytes": 139625421,
+        "sha256": "88e5e31439d2460095dc0fbc5ee33d481f6fa992810d2c8e4669fd03aa028b4d"
+      }
+    },
+    "release_tag_commit": "2569d22dc4c481341d04b3af7fa5b04a18b4bc97",
+    "android_application_source_commit": "bbf2ebdd678736be69d9ec685943f54a327494db",
+    "publication_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43506636283",
+    "source_provenance_note": "Exact unchanged artifacts from the successful main CI run; release tag adds delivery documentation only. Runtime source equality was checked before publication.",
+    "browser_scope": "126 normal six-hero pose/input checks with unchanged pose code; final17 DPR,40 live and3 actual-release-archive offline checks. No physical-device claim."
+  }
+}
