@@ -1,0 +1,9 @@
+{
+  "source": "072b1b8b3f4ed4eb9b84db8434aa734957329ddc",
+  "sha256": "d3342455022ade92b35e7ba019eb50db062adf23ede54bd0c655e9910ebdde43",
+  "bytes": 155742177,
+  "versionCode": 25,
+  "versionName": "0.21.0",
+  "signer": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+  "zip_crc_and_both_provenance_files_match_checkout": true
+}

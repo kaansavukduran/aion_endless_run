@@ -5,13 +5,15 @@
   "base_commit": "16c40b3cf7f989d6501d9b589a506de4ad075ad7",
   "source_and_scene_checks": 11953,
   "source_suites": 20,
-  "browser_checks": 149,
-  "browser_scope": "138 normal-input six-hero/foot/roll/glide/sprint/menu checks and11 naturally reached level5 dialogue/upgrade/victory checks, before a story-prop-only foreground placement adjustment. No world/save/RNG setters, physical phone or physical gamepad claim. Final DPR and public-browser checks are recorded separately.",
+  "browser_checks": 166,
+  "browser_scope": "138 six-hero normal-input pose/foot/control/menu checks,11 naturally reached level5 story/upgrade/victory checks, and17 DPR3 touch/swipe/cancel/rotation checks. Initial route preceded story-prop-only foreground placement; a final route is being checked separately. No world/save/RNG/health setters or physical-device claim.",
   "publication_status": "NOT_YET_PUBLISHED",
   "physical_poco_iphone_gamepads": "NOT TESTED",
   "ios_native": "Requires owner signing; unchanged limitation",
   "browser_build": {
     "build": "b9276afcf05f9ee6",
     "version": "0.21.0"
-  }
+  },
+  "android_application_source_commit": "072b1b8b3f4ed4eb9b84db8434aa734957329ddc",
+  "dpr3_touch_and_swipe_checks": 17
 }
