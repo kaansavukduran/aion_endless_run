@@ -28,6 +28,11 @@ var projectiles: Array[Dictionary] = []
 var plants: Array[Dictionary] = []
 var plant_wait := 28.0
 var saved_powers := {}
+const MAGAZINE_SIZE := 5
+const RELOAD_DURATION := 1.0
+var ammo := MAGAZINE_SIZE
+var reload_time := 0.0
+var reloads := 0
 const SHOT_DURATION := 0.30
 const SHOT_CADENCE := 0.32
 const MUZZLES = preload("res://assets/CANONICAL-PROVENANCE.json")
@@ -45,6 +50,9 @@ func active() -> bool: return phase != "run"
 
 func reset() -> void:
 	phase = "run"
+	ammo = MAGAZINE_SIZE
+	reload_time = 0.0
+	reloads = 0
 	pending_level = 0
 	milestone = 0
 	stage_time = 0.0
@@ -141,20 +149,45 @@ func finish(world) -> void:
 	if hp==0: world.adventure.offer_fragaria(world,milestone)
 	world.event("boss_return")
 
+func reload(world) -> bool:
+	if world.state!="running" or world.adventure.hugging() or ammo>=MAGAZINE_SIZE or reload_time>0 or phase not in ["run","fight"]:return false
+	reload_time=RELOAD_DURATION
+	world.event("reload")
+	return true
+
+func step_weapon(world,dt: float) -> void:
+	if phase not in ["run","fight"]:return
+	shot_cooldown=maxf(0.0,shot_cooldown-dt)
+	shot_flash=maxf(0.0,shot_flash-dt)
+	if reload_time>0:
+		reload_time=maxf(0.0,reload_time-dt)
+		if reload_time<=0:
+			ammo=MAGAZINE_SIZE
+			reloads+=1
+			world.event("reloaded")
+	if pending_shot>=0:
+		pending_shot-=dt
+		if pending_shot<=0:
+			pending_shot=-1
+			emit_hero_shot(world)
+	if shoot_held:fire(world)
+
 func fire(world) -> bool:
-	if phase != "fight" or shot_cooldown > 0.0 or world.adventure.ducking(world): return false
-	shot_cooldown = SHOT_CADENCE
-	shot_flash = SHOT_DURATION
-	pending_shot = 0.075
+	if world.state!="running" or phase not in ["run","fight"] or world.adventure.hugging() or shot_cooldown>0 or reload_time>0 or ammo<=0 or world.adventure.ducking(world):return false
+	ammo-=1
+	shot_cooldown=SHOT_CADENCE
+	shot_flash=SHOT_DURATION
+	pending_shot=0.075
 	return true
 
 func emit_hero_shot(world) -> void:
 	var muzzle: Array = preload("res://assets/EMRE-PROVENANCE.json").data.muzzle if world.character=="rabbit" else MUZZLES.data.muzzles[world.character]
 	var origin := Vector2(world.PLAYER_X+float(muzzle[0]),world.y+float(muzzle[1]))
 	shots_fired += 1
+	if not active() and world.adventure.lightning_charges>0:world.adventure.cast_lightning(world)
 	# Energy bolts leave the measured muzzle, then gently converge on the core.
-	var vertical := clampf((boss_y-origin.y)*1.4,-170.0,170.0)
-	projectiles.append({"owner":"hero","kind":"energy","x":origin.x,"y":origin.y,"vx":1050.0,"vy":vertical,"r":8.0})
+	var vertical := 0.0 # Every shot travels straight forward; no automatic boss aiming.
+	projectiles.append({"owner":"hero","kind":"energy","x":origin.x,"y":origin.y,"vx":1050.0,"vy":vertical,"r":12.0})
 	world.event("shot")
 
 func gun_frame(frame_count: int) -> int:
@@ -175,12 +208,28 @@ func hit_player(world) -> bool:
 func update_projectiles(world,dt: float) -> void:
 	var body: Rect2 = world.adventure.body_rect(world)
 	for p in projectiles:
+		var previous_x: float=p.x
 		p.x += p.vx*dt
 		p.y += p.vy*dt
 		if p.has("target_y"):
 			p.age += dt
 			p.y = lerpf(p.start_y,p.target_y,smoothstep(0.0,0.30,p.age))
 		if p.owner == "hero":
+			if phase=="run":
+				var sweep:=Rect2(previous_x-p.r,p.y-p.r,maxf(1,p.x-previous_x)+p.r*2,p.r*2)
+				for enemy in world.adventure.enemies:
+					if enemy.hp>0 and sweep.intersects(world.adventure.enemy_rect(enemy)):
+						world.adventure.hit_enemy(world,enemy,1,false)
+						p.x=-1000.0
+						break
+				if p.x>-100:
+					for plant in plants:
+						if plant.hp>0 and sweep.intersects(Rect2(plant.x-25,-68,50,68)):
+							plant.hp=0
+							world.adventure.reward_enemy(world,false)
+							world.event("enemy_down")
+							p.x=-1000.0
+							break
 			var target := boss_rect()
 			if phase == "fight" and target.grow(p.r).has_point(Vector2(p.x,p.y)):
 				p.x = -1000.0
@@ -234,8 +283,6 @@ func step_boss(world,dt: float) -> void:
 	var chase_speed := 380.0+minf(float(milestone),60.0)
 	if phase == "return": chase_speed = lerpf(return_start_speed, world.speed(), smoothstep(0.0, RETURN_DURATION, stage_time))
 	chase_distance += chase_speed*dt
-	shot_cooldown = maxf(0.0,shot_cooldown-dt)
-	shot_flash = maxf(0.0,shot_flash-dt)
 	cast_flash = maxf(0.0,cast_flash-dt)
 	rage = hp>0 and hp<=max_hp/2
 	var reach: float = world.field_width-180.0
@@ -266,12 +313,6 @@ func step_boss(world,dt: float) -> void:
 	if phase == "return":
 		if stage_time >= RETURN_DURATION: finish(world)
 		return
-	if pending_shot >= 0.0:
-		pending_shot -= dt
-		if pending_shot <= 0:
-			pending_shot = -1
-			if not world.adventure.ducking(world): emit_hero_shot(world)
-	if shoot_held: fire(world)
 	if warning_time > 0.0:
 		warning_time = maxf(0.0,warning_time-dt)
 		if warning_time <= 0.0:

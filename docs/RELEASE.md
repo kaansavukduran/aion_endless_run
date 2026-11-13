@@ -1,4 +1,20 @@
-# Aion Endless Run 0.16.0
+# Aion Endless Run 0.17.0
+
+Her zaman tabanca: ileri düz atış, beş mermi ve bir aktif saniyelik elle doldurma. Sol/sağ tık veya F ateş; R/J doldurur. Kolda RB/RT ateş, X/□ doldurur. Mobilde ayrı Ateş et/Doldur/Takla düğmeleri; seçilen bölünmüş yerleşim korunur. Dört ayaklı Melun ve süzülen Ömer hareketleri tabancayla çalışır.
+
+Kaydırmasız ana menü: 100–200% yazı, portre/yatay beş kart; Aion, Kutsanmış, Melun, Ömer, Emre. Eski dil tercihi bir kez sistem/tarayıcı diline alınır; yeni elle seçim saklanır. Rekorlar, tema ve yazı ayarları korunur. Dil menüsünde Sistem dili bulunur. Uzun seviye/XP barı yok; 15 aktif saniyede bir seviye. Altı tür dekor bitkisi için üçer hafif rüzgâr pozu; önceki45 PNG değişmedi.
+
+[Doğrulama ve gerçek ekranlar](evidence-v0170/README.md).
+
+## İndir / kur
+
+[0.17.0 sürümü](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.17.0): kapılar geçince dokuz paket birlikte yayımlanır. Windows Setup veya portable ZIP; Linux DEB/AppImage/portable; Mac universal DMG/ZIP; Android ARM64/x64 APK, aynı uygulama kimliği ve kararlı imza, versionCode20; yerel HTTP ile çalışan çevrimdışı web arşivi. Önceki sürümler korunur.
+
+SHA256SUMS ve BUILD-RECEIPT.json paket özeti/kaynak bilgilerini taşır. Mac ad-hoc imzalı; Developer ID/noter ve Windows Authenticode yok. Yerel iOS sahibinin Apple imzasını bekler. Fiziksel Poco, iPhone ve Xbox/PS testleri bu ortamda yapılmadı.
+
+## Önceki sürüm
+
+### 0.16.0
 
 Altı biyom için ayrıntılı, piksel resimli Aionverse manzaraları: gözlemevleri, laboratuvar seraları, bakır şehir, karlı dağlar, bataklık, fenerli orman ve kor sırtı. Kamera ölçeği, gece/gündüz, hava ve boss dönüşleri korunur.
 

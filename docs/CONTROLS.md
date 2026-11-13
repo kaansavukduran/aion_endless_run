@@ -1,22 +1,20 @@
-# 0.15.0 lightning
+# Güncel kontroller · 0.17.0
 
-Outside bosses, right click / F / the remappable Fire button (default RB/R1) / RT/R2 / the mobile Bolt circle consumes one lightning charge per press. Holding does not spend another charge. Melee remains separate and does not consume lightning. During boss fights these same Fire inputs keep their existing held pistol fire. Split touch places the extra Bolt above-left of Attack while retaining Jump, Roll and wolf Sprint.
+Tabanca normal koşuda ve boss'ta sürekli elde. Beş mermi bittiğinde oyuncu elle doldurur; doldurma bir aktif saniye sürer. Duraklama, sarılma ve boss girişinde sayaç bekler. Yumruk kaldırıldı. Mevcut Attack eşlemesi kayıtlarda korunur fakat işlevi artık Doldur'dur; Fire eşlemesi ateştir. Yeniden atama desteği korunur.
 
-# Kontrol kararı · 12 Kasım 2026
+| Eylem | Klavye / fare | Xbox / PlayStation | Dokunma |
+| --- | --- | --- | --- |
+| İleri ateş | Sol veya sağ tık / F basılı | RB/R1 veya RT/R2 | Ateş et basılı |
+| Doldur | R veya eski J | X/□ | Doldur |
+| Zıpla / süzül | Space | A/× | Solda Zıpla; Ömer için basılı |
+| Takla | Aşağı/S/Ctrl | B/○ | Takla veya aşağı kaydır |
+| Depar | Shift; Melun üstünde basılı | LB/L1 | Depar veya Melun üstünde basılı |
+| Duraklat | Esc | Start/Options | Duraklat |
 
-Kullanıcıya uygunluk sırasıyla 1) sağ düğmeler + aşağı kaydırma, 2) iki başparmağa bölünmüş düğmeler, 3) jest ağırlıklı düzen sunuldu. Her seçenek için portre/yatay alan ve öğrenme/ergonomi farkı açıklandı. Kullanıcı açıkça **2 — İki yana bölünmüş düğmeler (solda zıpla, sağda saldır/takla)** seçti.
+Kullanıcı daha önce **iki yana bölünmüş düğmeler** seçti. Solda Zıpla (Melun için Depar da), sağda ayrı Ateş et, Doldur ve Takla korunur. Eski sağ küme ayarlarda alternatiftir. Menüde A/× veya X/□ seçer, B/○ geri gider. Geçerli eşzamanlı giriş, iptal/odak/yön değişiminde bırakma ve kol bağlantısı kesilince duraklama korunur. Joystick eklenmedi.
 
-Seçilen düzen telefon/tablette varsayılandır: solda Zıpla, sağda Vur/Takla; boss evresinde Vur yerinde Ateş et. Kurdun Depar düğmesi solda ek düğmedir. Basılı Zıpla baykuşu süzdürür; Aion iki ayrı basışla çift zıplar. Aşağı kaydırma taklaya alternatif, aynı ortak eylemdir. Ayarlarda eski sağ küme erişilebilir alternatif olarak seçilebilir. Tek basış bir yakın saldırı üretir, basılı ateş boss'ta tekrar eder. Çoklu dokunma, iptal, odak kaybı ve yön değişimi tutulmuş girdiyi temizler. Joystick eklenmez.
+Toplanan şimşek normal koşudaki bir sonraki gerçek atışa ek alan etkisi verir; ayrı yumruk ya da şimşek düğmesi yoktur. Boss mermileri aynı şarjörü kullanır. Fiziksel Xbox/PS testi ile sanal Gamepad API testleri birbirinin yerine sayılmaz.
 
-| Girdi | Varsayılan eylem |
-| --- | --- |
-| Space / A, PlayStation × | Zıpla; baykuş için basılı süzül |
-| Sol tık / J / X, □ | Tek yakın saldırı |
-| Aşağı, S, Ctrl / B, ○ / aşağı kaydır | Takla |
-| Shift / LB, L1 / Depar basılı | Kurt deparı |
-| Sağ tık / F / RB, R1 / RT, R2 / Ateş et | Boss ateşi |
-| Esc / Start, Options | Duraklat / sürdür |
+## Önceki kontrol kararı
 
-Kol menüleri: yön tuşları/sol çubuk gezinir; A/× veya X/□ seçer; B/○ geri. Menü eşlemeleri saklı kalır. Oyun eylemleri A/B/X/Y/LB/RB arasında yeniden atanabilir; kullanılan düğme seçilince iki eylem yer değiştirir. Start/Esc atamayı iptal eder. RT ayrı boss ateşi olarak korunur. Ölü bölge %20–80; titreşim varsayılan kapalıdır ve donanım destekliyorsa isteğe bağlıdır. Etkin girdi kol olunca yardım gerçek atamaları gösterir. Bağlantı kesilince duraklama ve bütün tutuşları bırakma uygulanır.
-
-Fiziksel Xbox/PS kolu denenmediyse sanal tarayıcı kol testleri fiziksel kanıt diye sunulmaz. Bu destek Xbox konsol yayını/sertifikasyonu anlamına gelmez.
+12 Kasım 2026'da kullanıcıya sağ küme, iki yana bölünmüş düğmeler ve jest ağırlıklı düzen sunuldu. Kullanıcı ikinciyi seçti. 0.17'de kullanıcının yeni sürekli-tabanca isteğiyle eski Vur işlevi Doldur'a dönüştürüldü; zıplama, takla, depar ve kol menüsü eşlemeleri korundu.

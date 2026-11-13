@@ -11,14 +11,14 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4}
-const GAME_VERSION = "0.16.0"
+const GAME_VERSION = "0.17.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
 const REGISTRATION = preload("res://assets/SPRITE-REGISTRATION.json")
 const NORMAL_HEIGHT := 90.0
 const FOLLOWER_RATIO := 0.72
-const FRIENDS := ["aion", "owl", "wolf", "sheep", "rabbit"]
+const FRIENDS := ["aion", "sheep", "wolf", "owl", "rabbit"]
 const COLORS := [Color("f4a7cd"), Color("ffca84"), Color("b8baf0"), Color("b8ebd3")]
 var interface_options := preload("res://scripts/interface_options.gd").new()
 var native_diagnostics := preload("res://scripts/native_diagnostics.gd").new()
@@ -43,6 +43,7 @@ var character := "aion"
 var best_level := 1
 var prism_intensity := 0.60
 var evolution_view: Node2D
+var ammo_label: Label
 var level_label: Label
 var xp_label: Label
 var xp_progress: ProgressBar
@@ -70,6 +71,7 @@ var progress: ProgressBar
 var footer_label: Label
 var notice_label: Label
 var pause_button: Button
+var gun_parts := {}
 var gun_echo: Sprite2D
 var friend_sprite: Sprite2D
 var followers: Array[Sprite2D] = []
@@ -201,7 +203,7 @@ func character_name(id: String) -> String:
 func default_language() -> String:
 	var locale := OS.get_locale()
 	if OS.has_feature("web"):
-		var browser_locale = JavaScriptBridge.eval("navigator.language || 'en'")
+		var browser_locale = JavaScriptBridge.eval("(typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().locale) || (navigator.languages && navigator.languages[0]) || navigator.language || 'en'")
 		if browser_locale is String: locale = browser_locale
 	return Words.language_for_locale(locale)
 
@@ -215,7 +217,7 @@ func load_settings() -> void:
 	gamepad.load_from(cfg)
 	if loaded != OK:
 		return
-	language_override = bool(cfg.get_value("prefs", "language_override", cfg.has_section_key("prefs", "language")))
+	language_override = int(cfg.get_value("prefs","language_mode_revision",0))>=2 and bool(cfg.get_value("prefs", "language_override",false))
 	if language_override:
 		var saved_language := str(cfg.get_value("prefs", "language", ""))
 		if saved_language in Words.LANGUAGES: language = saved_language
@@ -243,6 +245,7 @@ func save_settings() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("prefs", "language", language)
 	cfg.set_value("prefs", "language_override", language_override)
+	cfg.set_value("prefs","language_mode_revision",2)
 	cfg.set_value("prefs", "character", character)
 	cfg.set_value("prefs","touch_tutorial_done",touch_tutorial_done)
 	cfg.set_value("prefs", "audio", audio_enabled)
@@ -567,6 +570,11 @@ func build_language_picker() -> void:
 	var options := VBoxContainer.new()
 	options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lang_scroll.add_child(options)
+	var auto_option:=button(text("language_system")+" · "+Words.LANGUAGE_NAMES[default_language()],func():set_language("system"),not language_override)
+	auto_option.name="Language_system"
+	auto_option.custom_minimum_size.y=48
+	auto_option.add_theme_font_size_override("font_size",ui_size(24))
+	options.add_child(auto_option)
 	for lang in Words.LANGUAGES:
 		var option := button(lang.to_upper() + "  " + Words.LANGUAGE_NAMES[lang], func(): set_language(lang), lang == language)
 		option.name = "Language_" + lang
@@ -671,10 +679,10 @@ func add_range_setting(column: VBoxContainer,key: String,value: float,callback: 
 	number.value_changed.connect(func(v): slider.set_value_no_signal(v); callback.call(v))
 
 func set_language(value: String) -> void:
-	if value not in Words.LANGUAGES: return
-	language_override = true
+	if value!="system" and value not in Words.LANGUAGES:return
+	language_override = value!="system"
 	language_picker_open = false
-	language = value
+	language = default_language() if value=="system" else value
 	save_settings()
 	rebuild()
 
@@ -786,12 +794,11 @@ func release_boost(source: String) -> void:
 	world.boost_held = not boost_sources.is_empty()
 
 func press_attack(source: String) -> void:
+	# Saved attack bindings now mean Reload; no melee input remains in play.
 	begin_playing()
-	if page != "" or world.state != "running" or world.adventure.hugging() or world.frontier.active(): return
-	if attack_sources.has(source): return
-	var first := attack_sources.is_empty()
-	attack_sources[source] = true
-	if first: world.adventure.request_attack(world)
+	if page!="" or world.state!="running" or attack_sources.has(source):return
+	attack_sources[source]=true
+	world.frontier.reload(world)
 
 func press_shoot(source: String) -> void:
 	begin_playing()
@@ -799,15 +806,12 @@ func press_shoot(source: String) -> void:
 	if shoot_sources.has(source): return
 	var first := shoot_sources.is_empty()
 	shoot_sources[source] = true
-	if not world.frontier.active():
-		if first: world.adventure.cast_lightning(world)
-		return
 	world.frontier.shoot_held = true
 	world.frontier.fire(world)
 
 func release_shoot(source: String) -> void:
 	shoot_sources.erase(source)
-	world.frontier.shoot_held = world.frontier.active() and not shoot_sources.is_empty()
+	world.frontier.shoot_held = not shoot_sources.is_empty()
 
 func release_attack(source: String) -> void:
 	attack_sources.erase(source)
@@ -827,14 +831,14 @@ func build_action_buttons() -> void:
 	action_buttons.clear()
 	var size_value := 96.0 if touch_mode else 80.0
 	var start := Vector2(view_w-294,view_h-108)
-	var positions := {"duck":Vector2.ZERO,"attack":Vector2(92,-60),"jump":Vector2(184,0),"shoot":Vector2(92,-60),"boost":Vector2(-92,0)}
+	var positions := {"duck":Vector2.ZERO,"attack":Vector2(-6,-110),"jump":Vector2(184,0),"shoot":Vector2(92,-60),"boost":Vector2(-92,0)}
 	for id in ["jump","attack","duck","shoot","boost"]:
 		var control := preload("res://scripts/touch_button.gd").new()
 		control.name = "Touch_"+id
-		control.action = id
+		control.action = "reload" if id=="attack" else id
 		control.caption = text("control_"+id)
 		if touch_mode and interface_options.touch_layout=="split":
-			var split: Dictionary={"jump":Vector2(22,view_h-108),"boost":Vector2(124,view_h-108),"duck":Vector2(view_w-210,view_h-108),"attack":Vector2(view_w-112,view_h-168),"shoot":Vector2(view_w-112,view_h-168)}
+			var split: Dictionary={"jump":Vector2(22,view_h-108),"boost":Vector2(124,view_h-108),"duck":Vector2(view_w-210,view_h-108),"attack":Vector2(view_w-210,view_h-218),"shoot":Vector2(view_w-112,view_h-168)}
 			positions[id]=split[id]-start
 		control.font = interface_options.body_font
 		control.accessibility_name=control.caption
@@ -895,14 +899,14 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and not event.pressed:
 		if event.keycode == KEY_SPACE: release_jump("key")
 		if event.keycode == KEY_SHIFT: release_boost("shift")
-		if event.keycode == KEY_J: release_attack("key")
+		if event.keycode in [KEY_J,KEY_R]: release_attack("key")
 		if event.keycode == KEY_F: release_shoot("key")
 		if event.keycode in [KEY_DOWN, KEY_S, KEY_CTRL]: release_duck("key:" + str(event.keycode))
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and not event.pressed: release_shoot("mouse")
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		release_jump("mouse")
 		release_boost("mouse")
-		release_attack("mouse")
+		release_shoot("mouse")
 	if event is InputEventScreenTouch and not event.pressed:
 		release_jump("touch:" + str(event.index))
 		release_boost("touch:" + str(event.index))
@@ -925,7 +929,7 @@ func _input(event: InputEvent) -> void:
 		elif event.keycode == KEY_F and page == "":
 			press_shoot("key")
 			get_viewport().set_input_as_handled()
-		elif event.keycode == KEY_J and page == "":
+		elif event.keycode in [KEY_J,KEY_R] and page == "":
 			press_attack("key")
 			get_viewport().set_input_as_handled()
 		elif event.keycode in [KEY_DOWN, KEY_S, KEY_CTRL] and page == "":
@@ -957,7 +961,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		press_shoot("mouse")
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton and event.device != -1 and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		press_attack("mouse")
+		press_shoot("mouse")
 		get_viewport().set_input_as_handled()
 
 func _physics_process(dt: float) -> void:
@@ -1140,46 +1144,43 @@ func update_hud() -> void:
 	boss_bar.visible = boss_label.visible
 	boss_bar.max_value = maxi(1,boss.max_hp)
 	boss_bar.value = boss.hp
-	footer_label.text = text("touch_boss_hint") if touch_mode and boss.active() else (text("touch_hint") if touch_mode else (text("boss_fight") if boss.active() else text("hint")))
+	footer_label.text=text("firearm_touch") if touch_mode else text("firearm_hint")
 	if active_input=="gamepad":footer_label.text=gamepad.prompts(boss.active())
-	if not boss.active() and world.adventure.lightning_charges>0:
-		footer_label.text = text("lightning_touch") if touch_mode else text("lightning_controls")
-		if active_input=="gamepad": footer_label.text = gamepad.binding_name("shoot")+" / RT: "+text("control_lightning")
 	var exit_fade: float = 1.0-smoothstep(0.0,world.frontier.RETURN_DURATION,world.frontier.stage_time) if world.frontier.phase=="return" else 1.0
 	boss_label.modulate.a = exit_fade
 	boss_bar.modulate.a = exit_fade
 	boss_label.text = text(["boss_name","boss_ray","boss_root"][boss.boss_kind]) + "  ·  %d/%d  ·  " % [boss.hp,boss.max_hp] + text("boss_hearts") % boss.player_hp
 	if boss.warning != "": boss_label.text += " · " + text("boss_pattern_"+boss.pattern) + " · " + text("boss_dodge_"+boss.warning)
-	var ids: Array = ["jump","duck","shoot"] if boss.active() else ["jump","attack","duck"]
-	if not boss.active() and world.adventure.lightning_charges > 0: ids.append("shoot")
+	var ids: Array = ["jump","duck","shoot","attack"]
 	if character=="wolf": ids.append("boost")
 	for id in action_buttons:
 		var index: int = ids.find(id)
 		action_buttons[id].visible = page == "" and world.state == "running" and index >= 0
-		if id == "shoot":
-			var control = action_buttons[id]
-			control.elemental = not boss.active()
-			control.caption = text("control_shoot" if boss.active() else "control_lightning")
-			control.accessibility_name = control.caption
-			var shoot_pos: Vector2 = action_buttons.attack.position if boss.active() else action_buttons.attack.position+Vector2(-98,-50)
-			control.position = shoot_pos
+		if id=="shoot":
+			action_buttons[id].elemental=false
+			action_buttons[id].caption=text("control_shoot")
+			action_buttons[id].accessibility_name=text("control_shoot")
 	if action_buttons.has("attack"):
 		action_buttons.attack.modulate.a = 0.70 if world.adventure.attack_cooldown > 0 else 1.0
 		action_buttons.jump.modulate = Color("a9ead9") if world.jump_held else Color.WHITE
 		action_buttons.duck.modulate = Color("a9ead9") if world.adventure.ducking(world) else Color.WHITE
 	level_label.visible = page == "" or page == "paused"
-	level_progress.visible = level_label.visible
-	level_label.text = (text("level_short") % world.adventure.level) + " · " + (text("level_requirements") % mini(20,int(world.adventure.level_elapsed)))
+	level_progress.visible = false
+	level_label.text = text("level_short") % world.adventure.level
 	level_progress.value = world.adventure.level_progress(world)
 	xp_label.text = "XP %d · %s %d" % [world.adventure.run_xp,text("mastery"),world.adventure.mastery_rank()]
 	xp_label.visible = level_label.visible and interface_options.text_scale<=1.0
-	xp_progress.visible = xp_label.visible
+	xp_progress.visible = false
 	xp_progress.value = world.adventure.run_xp % 100
 	for id in action_buttons:
-		var control = action_buttons[id]
-		control.disabled = world.adventure.hugging() or (id=="shoot" and (world.frontier.phase!="fight" if boss.active() else world.adventure.lightning_charges<=0 or world.adventure.ducking(world))) or (id=="attack" and world.adventure.ducking(world))
-		control.cooldown = world.adventure.attack_cooldown/world.adventure.ATTACK_COOLDOWN if id=="attack" else ((world.frontier.shot_cooldown/world.frontier.SHOT_CADENCE if boss.active() else world.adventure.lightning_cooldown/world.adventure.LIGHTNING_COOLDOWN) if id=="shoot" else 0.0)
+		var control=action_buttons[id]
+		control.disabled=world.adventure.hugging() or (id=="shoot" and (boss.ammo<=0 or boss.reload_time>0 or world.adventure.ducking(world))) or (id=="attack" and (boss.ammo>=boss.MAGAZINE_SIZE or boss.reload_time>0))
+		control.cooldown=boss.reload_time/boss.RELOAD_DURATION if id=="attack" else (boss.shot_cooldown/boss.SHOT_CADENCE if id=="shoot" else 0.0)
 		control.queue_redraw()
+	ammo_label.visible=page in ["","paused"]
+	ammo_label.text=(text("reloading") % boss.reload_time) if boss.reload_time>0 else (text("ammo")+" %d/%d" % [boss.ammo,boss.MAGAZINE_SIZE])
+	ammo_label.accessibility_name=ammo_label.text
+	if interface_options.text_scale>1:ammo_label.text=("↻ %.1f" % boss.reload_time) if boss.reload_time>0 else ("%d/%d" % [boss.ammo,boss.MAGAZINE_SIZE])
 	if is_instance_valid(fragaria_panel): fragaria_panel.visible = world.adventure.fragaria_time>0 and page in ["","paused"] and interface_options.text_scale<=1.0
 	footer_label.visible = page==""
 	ability_label.visible = page=="" and not boss.active()
@@ -1253,6 +1254,12 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-boss-max-hp",str(world.frontier.max_hp))
 	canvas.setAttribute("data-boss-player-hp",str(world.frontier.player_hp))
 	canvas.setAttribute("data-boss-shots",str(world.frontier.shots_fired))
+	canvas.setAttribute("data-ammo",str(world.frontier.ammo))
+	canvas.setAttribute("data-reloads",str(world.frontier.reloads))
+	canvas.setAttribute("data-shooting",str(world.frontier.shot_flash>0))
+	canvas.setAttribute("data-gun-overlay",str(gun_echo.visible))
+	canvas.setAttribute("data-reloading",str(world.frontier.reload_time))
+	canvas.setAttribute("data-level-bar-visible",str(level_progress.visible))
 	canvas.setAttribute("data-boss-hits",str(world.frontier.hits))
 	canvas.setAttribute("data-boss-wins",str(world.frontier.wins))
 	canvas.setAttribute("data-boss-warning",world.frontier.warning)
@@ -1413,7 +1420,7 @@ func update_friend() -> void:
 		if world.state == "running":
 			if a.attack_time > 0.0: friend_combat = COMBAT_ROWS[character]
 			elif a.ducking(world): friend_combat = COMBAT_ROWS[character] + FRIENDS.size()
-	friend_sprite.visible = true
+	friend_sprite.visible = not (world.state=="ready" and pixel_ui.split_main())
 	gun_echo.visible = false
 	for item in followers: item.visible = false
 	sheep_collectible.visible = character == "sheep" and not world.sheep_pickups.is_empty() and world.sheep_count < 3
@@ -1473,24 +1480,20 @@ func update_friend() -> void:
 		var combat_frame: int = (contact_frame(combat_count) if friend_combat < FRIENDS.size() else a.roll_frame(combat_count)) if motion else combat_count/2
 		var combat_anchor := Vector2(World.PLAYER_X,ground+world.y)+combat_lunge()
 		place_combat(friend_sprite, character, friend_combat, combat_frame, combat_anchor, visual_size, friend_combat >= FRIENDS.size() or a.ducking(world))
-	if world.state in ["running","paused"] and world.frontier.active() and not a.ducking(world) and world.frontier.phase != "return" and (world.frontier.phase != "intro" or world.frontier.stage_time > 0.75):
+	if world.state in ["running","paused"] and not a.ducking(world) and not a.hugging() and world.y>=0 and not world.boosting() and not (world.state=="paused" and character=="wolf" and friend_row==6):
 		var firing: bool = world.frontier.shot_flash>0
 		var key := "gun-fire" if firing else "gun-run"
 		var row: int = COMBAT_ROWS[character]
 		var shooting: int = world.frontier.gun_frame(frames.count(key,row)) if firing else frames.cycle(key,row,world.travel_distance(),174.0)
 		if not motion: shooting = 3 if firing else 0
 		frames.place(friend_sprite,key,row,shooting,Vector2(World.PLAYER_X,ground+world.y))
+	if world.state in ["running","paused"] and not a.ducking(world) and not a.hugging() and (world.y<0 or world.boosting() or (world.state=="paused" and character=="wolf" and friend_row==6)):
+		place_held_gun()
 	if world.state == "bonk":
 		var row: int = COMBAT_ROWS[character]*2+(1 if world.death_cause=="enemy" else 0)
 		frames.place(friend_sprite,"deaths",row,frames.progress("deaths",row,world.hit_time/1.25) if motion else frames.count("deaths",row)-1,Vector2(World.PLAYER_X,ground+world.y),visual_size)
 
 	friend_sprite.modulate = Color.WHITE
-	if world.frontier.phase == "return" and world.state == "running" and not a.ducking(world):
-		var fade: float = smoothstep(0.0,0.55,world.frontier.stage_time)
-		frames.place(gun_echo,"gun-run",COMBAT_ROWS[character],frames.cycle("gun-run",COMBAT_ROWS[character],world.travel_distance(),174.0) if motion else 0,Vector2(World.PLAYER_X,ground+world.y))
-		gun_echo.visible = fade<1.0
-		gun_echo.modulate.a = 1.0-fade
-		friend_sprite.modulate.a = fade
 	if character == "sheep":
 		for i in 2:
 			followers[i].visible = world.sheep_count > i + 1 and world.state not in ["fire", "ice", "bonk", "fall"]
@@ -1503,6 +1506,30 @@ func update_friend() -> void:
 			if float(pose.get("duck", 0.0)) > 0.5:
 				place_combat(followers[i], "sheep", 6, posmod(int(float(pose.get("roll_phase",0.0))/0.68*frames.count("rolls",2)),frames.count("rolls",2)) if motion else 4, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
+
+func place_held_gun() -> void:
+	# Keep the established jump/glide/four-legged sprint art and add only its
+	# own isolated pistol/paw pixels. Never resize or sway the hero to aim.
+	var f=world.frontier
+	var key: String="gun-fire" if f.shot_flash>0 else "gun-run"
+	var row: int=COMBAT_ROWS[character]
+	var frame: int=f.gun_frame(frames.count(key,row)) if f.shot_flash>0 else 0
+	var cache_key:=character+":"+key+":"+str(frame)
+	var muzzle: Array=frames.EMRE.data.muzzle if character=="rabbit" else frames.CANONICAL.data.muzzles[character]
+	if not gun_parts.has(cache_key):
+		var pose: Dictionary=frames.pose(key,row,frame)
+		var factor: float=pose.scale
+		var point:=Vector2(muzzle[0],muzzle[1])
+		var from: Vector2=((point-Vector2(35,11))/factor-pose.offset).floor()
+		var wanted:=Rect2i(Vector2i(from),Vector2i(ceilf(52/factor),ceilf(29/factor)))
+		var image: Image=pose.texture.get_image()
+		var region:=wanted.intersection(Rect2i(Vector2i.ZERO,image.get_size()))
+		gun_parts[cache_key]={"texture":ImageTexture.create_from_image(image.get_region(region)),"offset":pose.offset+Vector2(region.position),"scale":factor}
+	var part: Dictionary=gun_parts[cache_key]
+	gun_echo.region_enabled=false;gun_echo.texture=part.texture;gun_echo.offset=part.offset
+	gun_echo.position=Vector2(World.PLAYER_X,ground+world.y).round()
+	gun_echo.scale=Vector2.ONE*float(part.scale)*visual_size
+	gun_echo.modulate=Color.WHITE;gun_echo.visible=true
 
 func combat_pose(id: String,crouch: bool) -> Dictionary:
 	if crouch: return {"key":"rolls","row":COMBAT_ROWS[id]}

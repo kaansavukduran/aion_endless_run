@@ -226,6 +226,7 @@ func step(dt: float) -> void:
 		adventure.advance_hug(self, dt)
 		return
 	if frontier.pending_level > 0 and y >= 0.0 and not frontier.active(): frontier.begin(self)
+	frontier.step_weapon(self,dt)
 	adventure.before_step(self, dt)
 	var previous_y := y
 	time += dt

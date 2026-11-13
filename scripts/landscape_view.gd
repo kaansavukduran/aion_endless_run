@@ -31,27 +31,18 @@ func panorama(host,kind: int,scroll: float,night: float,alpha: float=1.0) -> voi
 	host.draw_set_transform(Vector2.ZERO,0,Vector2.ONE)
 
 func foreground(host,scroll: float,night: float) -> void:
-	# Small botanical details move faster than the panorama. Hashed world
-	# indices preserve variety and placement across screen edges and resizing.
-	var spacing:=173.0
-	var travel: float=scroll*.48
+	var spacing:=350.0
+	var travel: float=scroll*.38
 	var start: int=floori(travel/spacing)
 	var offset: float=fposmod(travel,spacing)
 	var kind: int=host.world.biome()
+	var clock: float=host.animation_clock() if host.decorative_motion() else 0.0
+	var poses:=[0,1,0,2]
 	for n in range(-1,ceili(host.scene_w/spacing)+2):
 		var seed_value: int=absi((start+n)*137+kind*79)
-		var x: float=n*spacing-offset+seed_value%41
-		var y: float=host.ground-5
-		var color:=Color("58734a").lerp(Color("29434a"),night*.5)
-		if kind==1:color=Color("bfdce4")
-		elif kind==5:color=Color("b8796e")
-		if seed_value%3==0:
-			for leaf in 3:
-				host.draw_rect(Rect2(x+leaf*5,y-5-leaf%2*3,3,8+leaf%2*3),color)
-			if kind in [0,2,4]:
-				host.draw_rect(Rect2(x+6,y-11,4,4),Color("eaa0ad"))
-		elif seed_value%3==1:
-			host.draw_rect(Rect2(x,y-3,16,5),color.darkened(.2))
-			host.draw_rect(Rect2(x+3,y-6,10,4),color.lightened(.14))
-		else:
-			for leaf in 4:host.draw_rect(Rect2(x+leaf*5,y-leaf%2*3,4,3),color)
+		var x: float=n*spacing-offset+seed_value%71
+		var frame: int=poses[posmod(int(clock/0.65)+seed_value,4)] if host.decorative_motion() else 0
+		var pose: Dictionary=host.frames.pose("flora",kind,frame)
+		var tint:=Color.WHITE.lerp(Color("7b80a1"),night*.4)
+		tint.a=.88
+		host.draw_texture_rect(pose.texture,Rect2((Vector2(x,host.ground-5)+pose.offset*float(pose.scale)).round(),pose.texture.get_size()*float(pose.scale)),false,tint)

@@ -12,7 +12,7 @@ func _initialize() -> void:
 func run() -> void:
 	for pair in [["tr-TR","tr"],["en-GB","en"],["cs-CZ","cs"],["CS_cz","cs"],["de-DE","de"],["fr","fr"],["ja-JP","ja"],["ko_KR","ko"],["zh-Hant-TW","zh"],["az-AZ","az"],["es-ES","es"],["it-IT","it"],["cz","en"],["","en"]]:
 		check(Words.language_for_locale(pair[0]) == pair[1], "Locale selection: " + pair[0])
-	var names := {"tr":["Aion","Baykuş Ömer","Melun Bilge Kurt","Kutsanmış Cahil Koyun"],"en":["Aion","Omar the Owl","Accursed Wise Wolf","Blessed Ignorant Sheep"],"cs":["Aion","Sova Omar","Prokletý moudrý vlk","Požehnaná nevědomá ovečka"]}
+	var names := {"tr":["Aion","Ömer","Melun","Kutsanmış"],"en":["Aion","Ömer","Melun","Kutsanmış"],"cs":["Aion","Ömer","Melun","Kutsanmış"]}
 	for lang in Words.LANGUAGES:
 		var table: Dictionary = Words.EXTRA[lang].data if Words.EXTRA.has(lang) else Words.STRINGS[lang]
 		var complete: bool = table.size() == Words.STRINGS.en.size()
@@ -31,7 +31,7 @@ func run() -> void:
 	check(game.ui.find_children("StartSelect_*", "Button", true, false).size() == 5, "All five selectable character tiles exist before play")
 	game.select_character("wolf")
 	game.set_language("cs")
-	check(game.character_name("owl") == "Sova Omar" and game.language_override, "Manual Czech selection localizes names and overrides the default")
+	check(game.character_name("owl") == "Ömer" and game.language_override, "Manual Czech selection localizes names and overrides the default")
 	game.start_run()
 	game.select_character("owl")
 	check(game.character == "wolf", "Changing character during a run is rejected")

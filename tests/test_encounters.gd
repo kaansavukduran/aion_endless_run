@@ -72,7 +72,11 @@ func run() -> void:
 		w.step(0.01)
 		check(w.frontier.rage,"Each boss enters a faster second phase at half health: "+str(kind))
 		w.frontier.shoot_held = true
-		advance(w,18)
+		for tick in 6000:
+			if w.frontier.ammo==0:w.frontier.reload(w)
+			if kind==1 and w.y>=0:w.jump()
+			w.step(.01)
+			if w.frontier.wins>0:break
 		check(w.frontier.wins==1,"Real timed hero bolts can defeat the moving boss: "+str(kind))
 	w = arena()
 	w.character = "sheep"

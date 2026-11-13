@@ -1,3 +1,17 @@
+# Current handoff · 0.17.0 pistol and fitted menu
+
+Started clean on main74c00e6632c5d7cf01c7cd9f92f34daaa43d1848, Godot4.6.3. No AGENTS files found. Main was fetched, not reset to the older prompt commit.
+
+Proven: enlarged text previously made main a ScrollContainer; the reported light/200% combination reproduced overflow. Main now always fits its five portrait/name cards and three actions; 200% landscape uses a two-column split, portrait uses a compact two-column roster. Font size/theme are preserved. The previous language loader prioritized a saved override. The actual reason for the user's Italian preference cannot be recovered from a screenshot: a documented legacy-save fixture reproduces that state. A versioned one-time migration follows locale; new deliberate overrides persist. System language is selectable. Native OS locale is direct; browser Intl locale is the closest exposed system/browser setting, not privileged access to the OS.
+
+All heroes always carry the existing faithful pistol, five rounds and one-active-second manual reload. No user input reaches melee. Existing internal contact-attack model tests remain historical coverage; current UI/input tests assert firearm/no-melee behavior. Left/right click/F and RB/RT fire; R/J, X/Square and separate touch Reload refill. Bullets travel straight; ordinary enemies use swept hit tests, existing XP and one-hit defeat. Lightning attaches to an emitted normal-run bullet. Reload freezes across pause/hug/boss intro. Running and boss combat share the magazine.
+
+Preserve wolf four-legged gallop, owl calm glide and jump/roll/defeat poses. An isolated part from each hero's registered gun artwork overlays special mobility, never another hero's body. A real paused-wolf-pose regression found during this change was fixed. All45 pre-existing assets PNGs remain byte-identical; the additional original flora PNG has18 drawn poses and common root/scale registrations. Reduced motion keeps it still. No source PNG is retouched.
+
+15 active seconds advance each level; no distance gate, background catch-up or boss/hug time. Long level/XP bars removed; boss HP and numeric level/XP remain. Proper names across11 languages are exactly Aion, Kutsanmış, Melun, Ömer, Emre. New translations and offline CJK glyphs added. Save records, stable APK signer, Firefox loader2, offline updates and split touch preference remain.
+
+Tests and remaining platform limits: docs/evidence-v0170/. k44/Aionlaştır were not activated. Do not claim browser locale identifies OS when they differ, physical Poco tests, Apple distribution signing, or a background sync to Drive.
+
 # Current handoff · 0.16.0 Aionverse orchard and Emre
 
 Started clean on main d502658, Godot4.6.3. Verified actual cause: spawn_encounter appended one crystal at the same X/-112 altitude for every encounter including flying carriers. Normal collectible spawning now belongs to scripts/orchard.gd:3–5 mixed fruit per ribbon,650–1050 travel-unit gaps, ground-reachable-32..-40 Y, geometry clearance and revalidation against later hazards. Legacy gems counter/event/+25 score and fortune/magnet behavior remain for compatibility. Fragaria's rare cosmetic strawberry remains distinct. Six original scene panels render at uniform scale with mirrored edge repeats, shared travel/crossfade/day-night/weather and faster botanical foreground details.

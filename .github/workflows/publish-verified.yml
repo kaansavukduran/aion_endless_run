@@ -5,7 +5,7 @@ on:
       version:
         description: New version, preserving previously published releases
         required: true
-        default: "0.16.0"
+        default: "0.17.0"
       artifact_run_id:
         description: Successful test/package workflow run ID
         required: true

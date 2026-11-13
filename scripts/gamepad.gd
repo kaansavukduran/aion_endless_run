@@ -64,7 +64,7 @@ func build_settings(column: VBoxContainer) -> void:
 	column.add_child(host.button(host.text("pad_reset"),func():bindings=DEFAULT_BINDINGS.duplicate();deadzone=.55;haptics=false;host.save_settings();host.rebuild()))
 
 func prompts(boss: bool) -> String:
-	var ids: Array=["jump","shoot","duck"] if boss else ["jump","attack","duck"]
+	var ids: Array=["jump","shoot","attack","duck"]
 	var result: Array[String]=[]
 	for action in ids:result.append(binding_name(action)+" "+host.text("control_"+action))
 	return " · ".join(result)

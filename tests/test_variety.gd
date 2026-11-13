@@ -110,8 +110,8 @@ func run() -> void:
 	check(game.action_buttons.shoot.visible and game.action_buttons.attack.visible and game.action_buttons.duck.visible,"Normal mobile layout exposes lightning alongside melee and roll")
 	check(not game.action_buttons.shoot.get_global_rect().intersects(game.action_buttons.attack.get_global_rect()),"Bolt and melee touch areas are distinct")
 	game.press_shoot("mouse");game.press_shoot("mouse")
-	check(game.world.adventure.lightning_charges==1,"Holding right click casts once")
+	check(game.world.frontier.ammo==4 and game.world.adventure.lightning_charges==2,"Right click reserves one pistol round; lightning attaches when it emits")
 	game.release_shoot("mouse");game.world.adventure.lightning_cooldown=0;game.press_shoot("pad")
-	check(game.world.adventure.lightning_charges==0,"A fresh gamepad edge uses the same bolt action")
+	check(game.world.frontier.ammo==4,"A simultaneous gamepad edge respects the same firearm cooldown")
 	game.queue_free();await process_frame
 	print("RESULT: %d variety/transition/locale checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

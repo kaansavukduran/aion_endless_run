@@ -52,8 +52,8 @@ func run() -> void:
 	game.gamepad.bindings=game.gamepad.DEFAULT_BINDINGS.duplicate();game.gamepad.haptics=false
 	game.main_menu();game.select_character("aion");game.start_run();joy(game,JOY_BUTTON_A);game.world.step(.02)
 	check(game.world.y<0 and game.world.jump_held,"Default pad A still jumps and holds")
-	joy(game,JOY_BUTTON_A,false);joy(game,JOY_BUTTON_X);game.world.step(.02)
-	check(game.world.adventure.attack_time>0 and game.active_input=="gamepad","Pad attack reaches the actual action and updates input prompts")
+	joy(game,JOY_BUTTON_A,false);game.world.frontier.ammo=3;joy(game,JOY_BUTTON_X);game.world.step(.02)
+	check(game.world.frontier.reload_time>0 and game.active_input=="gamepad","Pad Reload reaches the actual action and updates input prompts")
 	joy(game,JOY_BUTTON_X,false);game.update_hud()
 	check(game.footer_label.text.contains(game.gamepad.binding_name("attack")),"Live pad prompts use actual current mapping")
 	game.on_gamepad_connection(0,false)
@@ -81,7 +81,7 @@ func run() -> void:
 							check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Actual portrait/name content stays inside its character card "+lang+str(tile.name))
 					check(screen.encloses(panel.get_global_rect()),"Panel fits "+str(dimensions)+lang+str(scale_value)+target)
 					var scrolls=panel.find_children("*","ScrollContainer",true,false)
-					check(scrolls.size()==(1 if target=="settings" or scale_value>1.25 else 0),"Only necessary settings/enlarged text pages scroll "+target)
+					check(scrolls.size()==(1 if target=="settings" or (scale_value>1.25 and target!="main") else 0),"Only necessary settings/enlarged text pages scroll "+target)
 					if not scrolls.is_empty():
 						var buttons=scrolls[0].find_children("*","Button",true,false)
 						if not buttons.is_empty():
