@@ -1,3 +1,7 @@
+# Current handoff · 0.17.1 help and native screenshot correction
+
+All11 secondary motion/gamepad/lightning explanations now describe15 active seconds and X/Square Reload;201 firearm/menu checks include22 assertions against help drift.16 source suites:5,720 checks.0.17.0 passed9 real ADB inputs, then failed the obsolete android-melee.png image gate; no release was published.0.17.1 checks actual fire/reload images. Stable-signed APK code21 derives from8d175d9; later changes only record release metadata/evidence. Current proof: docs/evidence-v0171/.
+
 # Current handoff · 0.17.0 pistol and fitted menu
 
 Started clean on main74c00e6632c5d7cf01c7cd9f92f34daaa43d1848, Godot4.6.3. No AGENTS files found. Main was fetched, not reset to the older prompt commit.
