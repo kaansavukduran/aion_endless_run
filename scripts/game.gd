@@ -10,15 +10,15 @@ const ACTION_SHEET = preload("res://assets/companion-actions.png")
 const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
-const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4}
-const GAME_VERSION = "0.18.0"
+const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
+const GAME_VERSION = "0.19.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
 const REGISTRATION = preload("res://assets/SPRITE-REGISTRATION.json")
 const NORMAL_HEIGHT := 90.0
 const FOLLOWER_RATIO := 0.72
-const FRIENDS := ["aion", "sheep", "wolf", "owl", "rabbit"]
+const FRIENDS := ["aion", "sheep", "wolf", "owl", "rabbit", "eren"]
 const COLORS := [Color("f4a7cd"), Color("ffca84"), Color("b8baf0"), Color("b8ebd3")]
 var interface_options := preload("res://scripts/interface_options.gd").new()
 var native_diagnostics := preload("res://scripts/native_diagnostics.gd").new()
@@ -810,11 +810,8 @@ func release_boost(source: String) -> void:
 	world.boost_held = not boost_sources.is_empty()
 
 func press_attack(source: String) -> void:
-	# Saved attack bindings now mean Reload; no melee input remains in play.
-	begin_playing()
-	if page!="" or world.state!="running" or attack_sources.has(source):return
-	attack_sources[source]=true
-	world.frontier.reload(world)
+	# Preserve saved X/J/R alternate bindings; all firearm inputs share cadence.
+	press_shoot("alternate:"+source)
 
 func press_shoot(source: String) -> void:
 	begin_playing()
@@ -830,8 +827,7 @@ func release_shoot(source: String) -> void:
 	world.frontier.shoot_held = not shoot_sources.is_empty()
 
 func release_attack(source: String) -> void:
-	attack_sources.erase(source)
-	world.adventure.attack_held = not attack_sources.is_empty()
+	release_shoot("alternate:"+source)
 
 func press_duck(source: String) -> void:
 	begin_playing()
@@ -852,10 +848,10 @@ func build_action_buttons() -> void:
 	var size_value := 96.0 if touch_mode else 80.0
 	var start := Vector2(view_w-294,view_h-108)
 	var positions := {"duck":Vector2.ZERO,"attack":Vector2(-6,-110),"jump":Vector2(184,0),"shoot":Vector2(92,-60),"boost":Vector2(-92,0)}
-	for id in ["jump","attack","duck","shoot","boost"]:
+	for id in ["jump","duck","shoot","boost"]:
 		var control := preload("res://scripts/touch_button.gd").new()
 		control.name = "Touch_"+id
-		control.action = "reload" if id=="attack" else id
+		control.action = id
 		control.caption = text("control_"+id)
 		if touch_mode and interface_options.touch_layout=="split":
 			var split: Dictionary={"jump":Vector2(22,view_h-108),"boost":Vector2(124,view_h-108),"duck":Vector2(view_w-210,view_h-108),"attack":Vector2(view_w-210,view_h-218),"shoot":Vector2(view_w-112,view_h-168)}
@@ -864,7 +860,12 @@ func build_action_buttons() -> void:
 		control.accessibility_name=control.caption
 		control.palette=interface_options.colors
 		ui.add_child(control)
-		position_control(control,start+positions[id],Vector2.ONE*size_value)
+		# Snap the entire hit target and texture to actual device pixels.
+		var unit: float=screen_transform.get_scale().x
+		var pixel_step: float=maxf(1,roundf(2.0*unit))
+		var pixels: float=maxf(24,roundf(size_value*unit/pixel_step/2.0)*2.0)*pixel_step
+		var physical: Vector2=(screen_transform*(start+positions[id])).round()
+		position_control(control,screen_transform.affine_inverse()*physical,Vector2.ONE*pixels/unit)
 		action_buttons[id]=control
 
 func to_game_point(point: Vector2) -> Vector2:
@@ -1171,7 +1172,7 @@ func update_hud() -> void:
 	boss_bar.modulate.a = exit_fade
 	boss_label.text = text(["boss_name","boss_ray","boss_root"][boss.boss_kind]) + "  ·  %d/%d  ·  " % [boss.hp,boss.max_hp] + text("boss_hearts") % boss.player_hp
 	if boss.warning != "": boss_label.text += " · " + text("boss_pattern_"+boss.pattern) + " · " + text("boss_dodge_"+boss.warning)
-	var ids: Array = ["jump","duck","shoot","attack"]
+	var ids: Array = ["jump","duck","shoot"]
 	if character=="wolf": ids.append("boost")
 	for id in action_buttons:
 		var index: int = ids.find(id)
@@ -1180,10 +1181,10 @@ func update_hud() -> void:
 			action_buttons[id].elemental=false
 			action_buttons[id].caption=text("control_shoot")
 			action_buttons[id].accessibility_name=text("control_shoot")
-	if action_buttons.has("attack"):
-		action_buttons.attack.modulate.a = 0.70 if world.adventure.attack_cooldown > 0 else 1.0
-		action_buttons.jump.modulate = Color("a9ead9") if world.jump_held else Color.WHITE
-		action_buttons.duck.modulate = Color("a9ead9") if world.adventure.ducking(world) else Color.WHITE
+	action_buttons.jump.pressed=world.jump_held
+	action_buttons.duck.pressed=world.adventure.ducking(world)
+	action_buttons.shoot.pressed=world.frontier.shoot_held
+	action_buttons.boost.pressed=world.boosting()
 	level_label.visible = page == "" or page == "paused"
 	level_progress.visible = false
 	level_label.text = text("level_short") % world.adventure.level
@@ -1194,13 +1195,10 @@ func update_hud() -> void:
 	xp_progress.value = world.adventure.run_xp % 100
 	for id in action_buttons:
 		var control=action_buttons[id]
-		control.disabled=world.adventure.hugging() or (id=="shoot" and (boss.ammo<=0 or boss.reload_time>0 or world.adventure.ducking(world))) or (id=="attack" and (boss.ammo>=boss.MAGAZINE_SIZE or boss.reload_time>0))
-		control.cooldown=boss.reload_time/boss.RELOAD_DURATION if id=="attack" else (boss.shot_cooldown/boss.SHOT_CADENCE if id=="shoot" else 0.0)
+		control.disabled=world.adventure.hugging() or (id=="shoot" and world.adventure.ducking(world))
+		control.cooldown=boss.shot_cooldown/boss.SHOT_CADENCE if id=="shoot" else 0.0
 		control.queue_redraw()
-	ammo_label.visible=page in ["","paused"]
-	ammo_label.text=(text("reloading") % boss.reload_time) if boss.reload_time>0 else (text("ammo")+" %d/%d" % [boss.ammo,boss.MAGAZINE_SIZE])
-	ammo_label.accessibility_name=ammo_label.text
-	if interface_options.text_scale>1:ammo_label.text=("↻ %.1f" % boss.reload_time) if boss.reload_time>0 else ("%d/%d" % [boss.ammo,boss.MAGAZINE_SIZE])
+	ammo_label.visible=false
 	if is_instance_valid(fragaria_panel): fragaria_panel.visible = world.adventure.fragaria_time>0 and page in ["","paused"] and interface_options.text_scale<=1.0
 	footer_label.visible = page==""
 	ability_label.visible = page=="" and not boss.active()
@@ -1260,6 +1258,14 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-combat-lunge",str(combat_lunge().x))
 	var gaze: Vector2 = friend_sprite.get_meta("eye_world",Vector2.ZERO)
 	canvas.setAttribute("data-gaze-x",str(gaze.x))
+	var head_probe: Vector2 = friend_sprite.get_meta("head_probe_world",Vector2(-999,-999))
+	canvas.setAttribute("data-head-probe-x",str(head_probe.x))
+	canvas.setAttribute("data-head-probe-y",str(head_probe.y))
+	canvas.setAttribute("data-actor-scale",str(friend_sprite.scale.x))
+	canvas.setAttribute("data-frame-count",str(frames.count(str(friend_sprite.get_meta("pose_key","runner-aion")),int(friend_sprite.get_meta("pose_row",0)))))
+	var menu_panel = menu_layer.get_node_or_null("PagePanel") if is_instance_valid(menu_layer) else null
+	var panel_rect: Rect2 = menu_panel.get_global_rect() if is_instance_valid(menu_panel) else Rect2()
+	canvas.setAttribute("data-main-panel",JSON.stringify([panel_rect.position.x,panel_rect.position.y,panel_rect.size.x,panel_rect.size.y]) if page=="main" else "[]")
 	canvas.setAttribute("data-pose-source",str(friend_sprite.get_meta("source_key","")))
 	canvas.setAttribute("data-source-frame",str(friend_sprite.get_meta("source_frame",0)))
 	canvas.setAttribute("data-source-row",str(friend_sprite.get_meta("source_row",0)))
@@ -1278,11 +1284,11 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-boss-max-hp",str(world.frontier.max_hp))
 	canvas.setAttribute("data-boss-player-hp",str(world.frontier.player_hp))
 	canvas.setAttribute("data-boss-shots",str(world.frontier.shots_fired))
-	canvas.setAttribute("data-ammo",str(world.frontier.ammo))
-	canvas.setAttribute("data-reloads",str(world.frontier.reloads))
+	canvas.setAttribute("data-ammo","infinite")
+	canvas.setAttribute("data-reloads","0")
 	canvas.setAttribute("data-shooting",str(world.frontier.shot_flash>0))
 	canvas.setAttribute("data-gun-overlay",str(gun_echo.visible))
-	canvas.setAttribute("data-reloading",str(world.frontier.reload_time))
+	canvas.setAttribute("data-reloading","0.0")
 	canvas.setAttribute("data-level-bar-visible",str(level_progress.visible))
 	canvas.setAttribute("data-boss-hits",str(world.frontier.hits))
 	canvas.setAttribute("data-boss-wins",str(world.frontier.wins))
@@ -1547,7 +1553,7 @@ func place_held_gun() -> void:
 	var row: int=COMBAT_ROWS[character]
 	var frame: int=f.gun_frame(frames.count(key,row)) if f.shot_flash>0 else 0
 	var cache_key:=character+":"+key+":"+str(frame)
-	var muzzle: Array=frames.EMRE.data.muzzle if character=="rabbit" else frames.CANONICAL.data.muzzles[character]
+	var muzzle: Array=frames.EREN.data.muzzle if character=="eren" else (frames.EMRE.data.muzzle if character=="rabbit" else frames.CANONICAL.data.muzzles[character])
 	if not gun_parts.has(cache_key):
 		var pose: Dictionary=frames.pose(key,row,frame)
 		var factor: float=pose.scale
@@ -1602,7 +1608,7 @@ func flight_frame(velocity: float, air_time: float, frame_count: int = 12) -> in
 	return clampi(int(phase*(frame_count-1)),0,frame_count-2)
 
 func place_companion(item: Sprite2D, id: String, row: int, frame: int, anchor: Vector2, scale_value: float = 0.62, action: bool = false) -> void:
-	if id=="rabbit":action=false
+	if id in ["rabbit","eren"]:action=false
 	var key := "actions" if action else "runner-"+id
 	var actual_row: int = int(ACTION_DATA.data.characters[id].row) if action else row
 	frames.place(item,key,actual_row,frame,anchor,scale_value/0.62)

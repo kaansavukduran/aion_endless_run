@@ -62,7 +62,7 @@ func run() -> void:
 	var game=load("res://main.tscn").instantiate();root.add_child(game);await process_frame;game.set_physics_process(false);game.set_process(false)
 	game.main_menu();game.select_character("rabbit");check(game.character=="rabbit" and game.character_name("rabbit")==Words.get_text(game.language,"name_rabbit"),"Fifth hero can be selected through the real existing menu action")
 	game.start_run();game.touch_tutorial_done=true;game.begin_playing();game.press_shoot("key");game.update_friend();check(game.friend_sprite.get_meta("source_key")=="emre-encounters" and game.friend_sprite.get_meta("source_row")==1,"Actual Emre uses his own pistol frames")
-	game.release_shoot("key");game.press_attack("key");check(game.world.frontier.reload_time==1 and game.world.adventure.attack_time==0,"Emre Reload uses the common magazine without melee")
+	game.release_shoot("key");game.press_attack("key");check(game.world.frontier.shoot_held and game.world.adventure.attack_time==0,"Emre alternate Fire uses the shared cadence without melee")
 	game.start_boss_practice(0)
 	for n in 120:game.world.step(1.0/60)
 	game.world.frontier.fire(game.world)

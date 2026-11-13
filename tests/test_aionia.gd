@@ -52,10 +52,10 @@ func run() -> void:
 	game.gamepad.bindings=game.gamepad.DEFAULT_BINDINGS.duplicate();game.gamepad.haptics=false
 	game.main_menu();game.select_character("aion");game.start_run();joy(game,JOY_BUTTON_A);game.world.step(.02)
 	check(game.world.y<0 and game.world.jump_held,"Default pad A still jumps and holds")
-	joy(game,JOY_BUTTON_A,false);game.world.frontier.ammo=3;joy(game,JOY_BUTTON_X);game.world.step(.02)
-	check(game.world.frontier.reload_time>0 and game.active_input=="gamepad","Pad Reload reaches the actual action and updates input prompts")
+	joy(game,JOY_BUTTON_A,false);joy(game,JOY_BUTTON_X);game.world.step(.02)
+	check(game.world.frontier.shoot_held and game.active_input=="gamepad","Saved pad alternate binding reaches actual Fire")
 	joy(game,JOY_BUTTON_X,false);game.update_hud()
-	check(game.footer_label.text.contains(game.gamepad.binding_name("attack")),"Live pad prompts use actual current mapping")
+	check(game.footer_label.text.contains(game.gamepad.binding_name("shoot")),"Live pad prompts use actual current mapping")
 	game.on_gamepad_connection(0,false)
 	check(game.page=="paused" and not game.world.jump_held and not game.world.boost_held and game.attack_sources.is_empty(),"Controller disconnect pauses and clears every held action")
 	game.interface_options.reduced_motion=true;game.motion=true
@@ -71,7 +71,7 @@ func run() -> void:
 					game.page=target;game.rebuild();await process_frame;await process_frame
 					var screen:=Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h))
 					var panel: Control=game.menu_layer.get_node("PagePanel")
-					if game.touch_mode and game.interface_options.touch_layout=="split":check(game.action_buttons.jump.position.x<game.view_w*.5 and game.action_buttons.attack.position.x>game.view_w*.5,"Approved split-thumb layout "+str(dimensions))
+					if game.touch_mode and game.interface_options.touch_layout=="split":check(game.action_buttons.jump.position.x<game.view_w*.5 and game.action_buttons.shoot.position.x>game.view_w*.5,"Approved split-thumb layout "+str(dimensions))
 					if target=="main" and scale_value==1.0:
 						var choose: Label=game.menu_layer.get_node("StartChooser")
 						check(not panel.get_global_rect().intersects(choose.get_global_rect()),"Character heading does not overlap main actions "+lang+str(dimensions))

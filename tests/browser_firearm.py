@@ -1,3 +1,6 @@
+# Historical 0.17/0.18 magazine regression driver. Current unlimited-fire
+# acceptance is tests/browser_quality.py; do not run this obsolete contract
+# against 0.19 and interpret its expected Reload failures as current behavior.
 """0.17 normal UI/input flows. A known legacy save fixture models the reported
 Italian/light/200% setup; no writable game/RNG/spawn/physics hooks are used.
 """

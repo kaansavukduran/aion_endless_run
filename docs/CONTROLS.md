@@ -1,26 +1,19 @@
-# Emre ve takla · 0.18.0
+# Kontroller · 0.19.0
 
-Emre: zıplama girişini basılı tut, sonra bırak.1,2 saniyede tam şarj; kısa tutuşta düşük, uzun tutuşta yüksek tek sıçrama. Havada şarj veya çift sıçrama yok. İptal/odak/yön değişimi şarjı güvenle bırakır; başka bir parmağın eylemi geçerli şarjı yanlışlıkla sonlandırmaz.
-
-Takla: Aşağı/S/Ctrl, B/○, Takla düğmesi veya aşağı kaydırma. Ayrı diz bükme/öne kıvrılma, alçak saat yönünde dönüş ve doğrulma pozları vardır. Basılı tutuşta yalnız alçak dönüş döngüsü sürer. Menü/ayar sayfalarında Önceki/Sonraki okları kullanılır; fare tekerleği gerekmez. Mevcut sayısal kaydırıcılar değer ayarlamak içindir, sayfayı kaydırmaz.
-
-# Güncel kontroller · 0.18.0
-
-Tabanca normal koşuda ve boss'ta sürekli elde. Beş mermi bittiğinde oyuncu elle doldurur; doldurma bir aktif saniye sürer. Duraklama, sarılma ve boss girişinde sayaç bekler. Yumruk kaldırıldı. Mevcut Attack eşlemesi kayıtlarda korunur fakat işlevi artık Doldur'dur; Fire eşlemesi ateştir. Yeniden atama desteği korunur.
+Tabanca her zaman elde; sınırsız mermi, 0,32 saniyelik atış aralığı. Doldurma veya yumruk yoktur. Eski kayıtlı Attack/X/J/R bağları silinmez, aynı ateş eyleminin alternatif girişidir. Bağımsız basılı girişler ortak bekleme süresini paylaşır; aynı anda iki tetik çift atış üretmez.
 
 | Eylem | Klavye / fare | Xbox / PlayStation | Dokunma |
 | --- | --- | --- | --- |
-| İleri ateş | Sol veya sağ tık / F basılı | RB/R1 veya RT/R2 | Ateş et basılı |
-| Doldur | R veya eski J | X/□ | Doldur |
-| Zıpla / süzül / şarj | Space | A/× | Solda Zıpla; Ömer için basılı; Emre için tutup bırak |
+| İleri ateş | Sol/sağ tık veya F basılı; J/R alternatif | RB/R1, RT/R2; X/□ alternatif | Ateş et basılı |
+| Zıpla / süzül / şarj | Space | A/× | Solda Zıpla |
 | Takla | Aşağı/S/Ctrl | B/○ | Takla veya aşağı kaydır |
-| Depar | Shift; Melun üstünde basılı | LB/L1 | Depar veya Melun üstünde basılı |
+| Melun deparı | Shift; karakter üstünde basılı | LB/L1 | Depar veya Melun üstünde basılı |
 | Duraklat | Esc | Start/Options | Duraklat |
 
-Kullanıcı daha önce **iki yana bölünmüş düğmeler** seçti. Solda Zıpla (Melun için Depar da), sağda ayrı Ateş et, Doldur ve Takla korunur. Eski sağ küme ayarlarda alternatiftir. Menüde A/× veya X/□ seçer, B/○ geri gider. Geçerli eşzamanlı giriş, iptal/odak/yön değişiminde bırakma ve kol bağlantısı kesilince duraklama korunur. Joystick eklenmedi.
+Kullanıcının seçtiği bölünmüş düzen: solda Zıpla (Melun için Depar da), sağda Ateş et ve Takla. Sağ küme ayarlarda alternatif kalır. Joystick eklenmedi. Simetrik piksel düğmelerinin maskesi ve gerçek dokunma alanı ortaktır; basılı görünüm ve bekleme çizgisi vardır. Düğmeler alttaki alana ikinci eylem göndermez. İptal/odak/yön değişimi girişleri bırakır.
 
-Toplanan şimşek normal koşudaki bir sonraki gerçek atışa ek alan etkisi verir; ayrı yumruk ya da şimşek düğmesi yoktur. Boss mermileri aynı şarjörü kullanır. Fiziksel Xbox/PS testi ile sanal Gamepad API testleri birbirinin yerine sayılmaz.
+Aion çift sıçrar. Ömer zıplama basılıyken süzülür. Melun dört ayak üstünde hızlanır. Kutsanmış'ın küçük takipçileri gecikmeli yolu izler. Emre yerde zıplamayı tutup bırakınca şarjlı tek sıçrama yapar;1,2 saniyede tam güç. Eren ayrı bir kahramandır; zıplama basıldığında anında tek sıçrar. İptal edilmiş Emre şarjı sıçrama üretmez.
 
-## Önceki kontrol kararı
+Takla bir kez eğilme/elleri yere koyma/omuz üzerinden ileri dönüş yapar; tutulursa alçakta bekler ve bırakınca doğrulur. Karakter küreye dönüşmez; çizim dikey sıkıştırılmaz. Takipçiler kendi gecikmeli takla kayıtlarını izler.
 
-12 Kasım 2026'da kullanıcıya sağ küme, iki yana bölünmüş düğmeler ve jest ağırlıklı düzen sunuldu. Kullanıcı ikinciyi seçti. 0.17'de kullanıcının yeni sürekli-tabanca isteğiyle eski Vur işlevi Doldur'a dönüştürüldü; zıplama, takla, depar ve kol menüsü eşlemeleri korundu.
+Menüde A/× veya X/□ seçer, B/○ geri gider. Ana ekranlar fare tekerleği istemez; uzun ayarlarda Önceki/Sonraki sayfa düğmeleri kullanılır. Kayıtlı dil, tema, yazı boyutu, kontroller ve rekorlar korunur.11 dilde gerçek kontrol yardım metinleri günceldir. Fiziksel Xbox/PS testi ile sanal Gamepad API testi birbirinin yerine sayılmaz.

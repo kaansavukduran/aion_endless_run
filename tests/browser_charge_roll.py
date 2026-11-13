@@ -35,8 +35,8 @@ with sync_playwright() as pw:
   page.wait_for_function('Number(document.querySelector("canvas").dataset.worldTime)>.02')
  cdp=ctx.new_cdp_session(page)
  def touch(point,down):cdp.send('Input.dispatchTouchEvent',{'type':'touchStart' if down else 'touchEnd','touchPoints':[{'x':point[0],'y':point[1],'id':0}] if down else []})
- def observe_roll():page.evaluate("window.rollObserver?.disconnect();window.roll=[];window.rollObserver=new MutationObserver(()=>{const d=document.querySelector('canvas').dataset;if(d.ducking==='true'&&d.poseSource==='low-rolls')roll.push({frame:Number(d.sourceFrame),height:Number(d.heroOpaqueHeight),y:Number(d.playerY),time:Number(d.worldTime)})});window.rollObserver.observe(document.querySelector('canvas'),{attributes:true})")
- for hero,kind in [('aion','key'),('owl','pad'),('sheep','touch'),('wolf','key'),('rabbit','key')]:
+ def observe_roll():page.evaluate("window.rollObserver?.disconnect();window.roll=[];window.rollObserver=new MutationObserver(()=>{const d=document.querySelector('canvas').dataset;if(d.ducking==='true'&&(d.poseSource==='shoulder-rolls'||d.poseSource==='eren-animations'))roll.push({frame:Number(d.sourceFrame),height:Number(d.heroOpaqueHeight),y:Number(d.playerY),time:Number(d.worldTime)})});window.rollObserver.observe(document.querySelector('canvas'),{attributes:true})")
+ for hero,kind in [('aion','key'),('owl','pad'),('sheep','touch'),('wolf','key'),('rabbit','key'),('eren','key')]:
   start(hero);height=float(d()['heroOpaqueHeight']);observe_roll()
   if kind=='key':page.keyboard.down('ArrowDown')
   elif kind=='pad':page.evaluate('padSet(1,true)')
@@ -48,7 +48,7 @@ with sync_playwright() as pw:
   try:page.wait_for_function('roll.some(p=>p.time-roll[0].time>.85)')
   except Exception:
    print('HOLD_FAILED',hero,{k:d().get(k) for k in ['state','page','ducking','touchTrace','worldTime']},page.evaluate('roll[-1]') if False else page.evaluate('roll.slice(-3)'),flush=True);raise
-  check(all(3<=x['frame']<=8 for x in page.evaluate('roll.filter(p=>p.time-roll[0].time>.7)')),'Holding roll keeps the compact rotation instead of standing: '+hero);rolls[hero]=page.evaluate('roll')
+  check(all(x['frame']==(2 if hero=='eren' else 3) for x in page.evaluate('roll.filter(p=>p.time-roll[0].time>.7)')),'One shoulder roll settles into a low held stance: '+hero);rolls[hero]=page.evaluate('roll')
   page.screenshot(path=str(a.evidence/(hero+'-low-roll.png')))
   if kind=='key':page.keyboard.up('ArrowDown')
   elif kind=='pad':page.evaluate('padSet(1,false)')

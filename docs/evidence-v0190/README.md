@@ -1,0 +1,11 @@
+# 0.19.0 quality evidence
+
+Implementation checkpoint. Final browser, native and public release checks are still in progress; this file is updated after actual results.18 strict Godot suites /9,295 checks pass (including a separately rerun independent near-iris assertion);7 web packaging and4 Android parser tests pass. Existing47 PNGs match baseline54a8136 byte for byte. New60 shoulder-roll drawings and79 Eren drawings are separate assets.
+
+Concrete cause: source-pixel comparisons found Aion gun-fire face spread28.507 logical pixels and Wolf12.390; normal gun-run fractional source phase also shimmered. Original measurements are in baseline-anatomy.json; final full-face source probes are assets/HEAD-REGISTRATION.json. Old eye_world assertions alone reused the same incorrect iris estimate and were insufficient. A reviewed near-iris golden test now checks actual rendered source landmarks rather than distance to the algorithm's marker. No actor-position or per-frame scale workaround.
+
+The source runner rejects SCRIPT ERROR even when Godot exits0, missing RESULT, FAIL and nonzero failure counts. Early failed browser driver attempts are not passes: synchronous screenshot work let an unattended normal run hit an approaching enemy; final action timing captures the actual continuous video without blocking inside the roll/recovery window. The first Emre sampling window missed frame0; the final driver waits for every actual frame instead of assuming a fixed millisecond window.
+
+Applied Fragaria Unslop and read the current owner's standardv1.7/reference index. Scope is the requested animation/menu/touch/firearm/Eren pass, not certification of every standard. The linked ChatGPT thread reader is unavailable; no thread access is claimed. Private reference originals and the private standard are not published. Eren's original sketch is primary; turnaround remains a draft reference, not a new canon approval.
+
+No physical Poco/iPhone/Xbox/PS claim. Native macOS remains ad-hoc, no Developer ID/notarization; native iOS still needs owner signing. Browser standard Gamepad API tests emulate the API and are identified as such. Platform/publication results will be recorded only after they finish.

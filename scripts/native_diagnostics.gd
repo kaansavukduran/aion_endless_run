@@ -26,7 +26,7 @@ func layout() -> void:
 func state() -> void:
 	if not OS.has_feature("android"):return
 	var w=host.world
-	var payload:=JSON.stringify({"page":host.page,"character":host.character,"state":w.state,"airborne":w.y<0,"charging":w.charging,"charge_ratio":w.charge_ratio(),"gliding":w.gliding,"attacking":w.adventure.attack_time>0,"shooting":w.frontier.shot_flash>0,"ammo":w.frontier.ammo,"reload_time":w.frontier.reload_time,"reloads":w.frontier.reloads,"rolling":w.adventure.ducking(w)})
+	var payload:=JSON.stringify({"page":host.page,"character":host.character,"state":w.state,"airborne":w.y<0,"charging":w.charging,"charge_ratio":w.charge_ratio(),"gliding":w.gliding,"attacking":w.adventure.attack_time>0,"shooting":w.frontier.shot_flash>0,"shots":w.frontier.shots_fired,"cooldown":w.frontier.shot_cooldown,"rolling":w.adventure.ducking(w)})
 	if stamp!=payload:stamp=payload;print("AION_STATE "+payload)
 
 func emit_packet(kind: String, payload: String) -> void:

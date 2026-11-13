@@ -195,12 +195,16 @@ func roll_frame(frame_count: int = 12) -> int:
 	return roll_pose(roll_elapsed,roll_time,duck_held,frame_count)
 
 func roll_pose(elapsed: float,remaining: float,held: bool,frame_count: int=12) -> int:
-	# Enter low once, keep rotating while held, recover only at the end.
-	var frame: int
-	if elapsed<0.14:frame=clampi(int(elapsed/0.14*3),0,2)
-	elif not held and remaining<0.15:frame=9+clampi(int((0.15-remaining)/0.15*3),0,2)
-	else:frame=3+posmod(int((elapsed-0.14)/0.38*6),6)
-	return mini(frame,frame_count-1)
+	# A single planted-hand shoulder roll, then a low crouch while held.
+	# Repeating the entry/recovery at high speed made the hero read as a ball.
+	var entry:=3 if frame_count>=12 else 2
+	var turn_count: int=frame_count-entry*2
+	var recovery: int=entry+turn_count
+	if not held and remaining<0.15:
+		return mini(frame_count-1,recovery+int((0.15-remaining)/0.15*entry))
+	if elapsed<0.14:return mini(entry-1,int(elapsed/0.14*entry))
+	if elapsed<0.53:return entry+mini(turn_count-1,int((elapsed-0.14)/0.39*turn_count))
+	return entry # Knees/hand low; never restart an endless spinning loop.
 
 func level_distance(world) -> float:
 	return maxf(0.0,world.distance-level_start_distance)

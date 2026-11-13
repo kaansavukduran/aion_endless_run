@@ -28,11 +28,6 @@ var projectiles: Array[Dictionary] = []
 var plants: Array[Dictionary] = []
 var plant_wait := 28.0
 var saved_powers := {}
-const MAGAZINE_SIZE := 5
-const RELOAD_DURATION := 1.0
-var ammo := MAGAZINE_SIZE
-var reload_time := 0.0
-var reloads := 0
 const SHOT_DURATION := 0.30
 const SHOT_CADENCE := 0.32
 const MUZZLES = preload("res://assets/CANONICAL-PROVENANCE.json")
@@ -50,9 +45,6 @@ func active() -> bool: return phase != "run"
 
 func reset() -> void:
 	phase = "run"
-	ammo = MAGAZINE_SIZE
-	reload_time = 0.0
-	reloads = 0
 	pending_level = 0
 	milestone = 0
 	stage_time = 0.0
@@ -149,22 +141,10 @@ func finish(world) -> void:
 	if hp==0: world.adventure.offer_fragaria(world,milestone)
 	world.event("boss_return")
 
-func reload(world) -> bool:
-	if world.state!="running" or world.adventure.hugging() or ammo>=MAGAZINE_SIZE or reload_time>0 or phase not in ["run","fight"]:return false
-	reload_time=RELOAD_DURATION
-	world.event("reload")
-	return true
-
 func step_weapon(world,dt: float) -> void:
 	if phase not in ["run","fight"]:return
 	shot_cooldown=maxf(0.0,shot_cooldown-dt)
 	shot_flash=maxf(0.0,shot_flash-dt)
-	if reload_time>0:
-		reload_time=maxf(0.0,reload_time-dt)
-		if reload_time<=0:
-			ammo=MAGAZINE_SIZE
-			reloads+=1
-			world.event("reloaded")
 	if pending_shot>=0:
 		pending_shot-=dt
 		if pending_shot<=0:
@@ -173,15 +153,14 @@ func step_weapon(world,dt: float) -> void:
 	if shoot_held:fire(world)
 
 func fire(world) -> bool:
-	if world.state!="running" or phase not in ["run","fight"] or world.adventure.hugging() or shot_cooldown>0 or reload_time>0 or ammo<=0 or world.adventure.ducking(world):return false
-	ammo-=1
+	if world.state!="running" or phase not in ["run","fight"] or world.adventure.hugging() or shot_cooldown>0 or world.adventure.ducking(world):return false
 	shot_cooldown=SHOT_CADENCE
 	shot_flash=SHOT_DURATION
 	pending_shot=0.075
 	return true
 
 func emit_hero_shot(world) -> void:
-	var muzzle: Array = preload("res://assets/EMRE-PROVENANCE.json").data.muzzle if world.character=="rabbit" else MUZZLES.data.muzzles[world.character]
+	var muzzle: Array = preload("res://assets/EREN-PROVENANCE.json").data.muzzle if world.character=="eren" else (preload("res://assets/EMRE-PROVENANCE.json").data.muzzle if world.character=="rabbit" else MUZZLES.data.muzzles[world.character])
 	var origin := Vector2(world.PLAYER_X+float(muzzle[0]),world.y+float(muzzle[1])+(14 if world.charging else 0))
 	shots_fired += 1
 	if not active() and world.adventure.lightning_charges>0:world.adventure.cast_lightning(world)

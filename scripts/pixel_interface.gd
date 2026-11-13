@@ -286,7 +286,19 @@ func main(column: VBoxContainer) -> Button:
 	choose.position=Vector2(28,roster_at-chooser_height()-6)
 	choose.size.y=chooser_height()
 	roster(h.menu_layer,Vector2(h.view_w*.4+14 if split_main() else 28,roster_at),roster_width())
+	fit_main.call_deferred(column,h.layout_generation)
 	return first
+
+func fit_main(column: VBoxContainer,generation: int) -> void:
+	if not is_instance_valid(host) or not host.is_inside_tree() or generation!=host.layout_generation or not is_instance_valid(column):return
+	var panel: PanelContainer=column.get_parent()
+	# Size the background to the real wrapped content instead of a large fixed
+	# preview slot. The font and chosen text scale remain unchanged.
+	var inset: Vector2=panel.get_theme_stylebox("panel").get_minimum_size()
+	var content_height: float=host.menu_pages.measure(column,panel.size.x-inset.x)
+	panel.size.y=ceilf(content_height+inset.y)
+	if split_main():panel.position.y=maxf(72,floorf((host.view_h-panel.size.y)*.5))
+
 
 func characters() -> void:
 	var h=host

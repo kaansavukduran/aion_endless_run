@@ -1,3 +1,17 @@
+# Current handoff · 0.19.0 registration, shoulder rolls and Eren
+
+Baseline main54a8136544bf1c741fa320915dbbf6826b84c444 was clean and up to date. Godot4.6.3 retained. Fragaria Unslop applied to this requested game/UI pass. Live owner standardv1.7 and reference/regression indices were read; this is scoped implementation and testing, not blanket certification. The linked ChatGPT thread was not readable because read_thread is unavailable. A macro definition alone does not activate k44/Aionlaştır/dynamic aionia. Private standard/reference contents are not copied wholesale into this public repo.
+
+Root cause verified in original pixels: Aion canonical gun-fire frame2 marked a lower blue feature as its eye (~28.5 source-pixel horizontal error); Wolf fire frame3 had a similar turquoise-feature registration error. Old eye_world tests reused that bad marker and therefore could not catch it. New full nose/cheek/face template registration fixes metadata, keeps one source pixel phase and physically unchanged actor/scale. Shared gun-run neutral reference aligns run/fire seams; wing/tail motion remains. Low-confidence blink comparisons are constrained to reviewed local anatomy to avoid tail/other-eye matches. No physics wobble workaround, no retouched prior PNG.
+
+New shoulder atlas60 cells; Eren own79 cells. Omuz roll enters once, turns forward once, settles low if held, and recovers on release. Emre charge/release1.2s and own clothing retained. Eren is independent, long-eared, eyelashed, freckled, dark teal jacket/striped tie; standard immediate single jump because owner specified no extra ability. Long ears are not squashed to force an arbitrary roll-height ratio.
+
+Unlimited Fire removes inventory/reload code, keeps0.32cadence/0.30animation/pending muzzle timing/damage/XP and saved mappings. Attack/X/J/R becomes an independent alternate source of shared Fire. No Reload control or magazine HUD remains. Passive browser ammo compatibility attributes are infinite/zero; there are no setters.
+
+Main panel sizes to shaped content plus real theme margins; enlarged split main vertically centres it. Six cards and all3 actions remain visible with saved font/theme/preferences. Touch skin/hit mask is one exact symmetric cut-corner family, proportional icon and label, integer device-pixel grid including DPR3. Approved split input and alternate right-cluster stay; no joystick. All11 help texts match actual controls, Eren has its own card/name/hints.
+
+Source runner now rejects Godot exit0 after SCRIPT ERROR, missing RESULT, FAIL lines or nonzero failure count. Independent source-pixel probes and actual six-hero browser inputs supplement the old iris tests. See docs/evidence-v0190 for concrete results and platform limits. Older notes below describe their historical versions, not current reload or roll behavior.
+
 # Current handoff · 0.18.0 low rolls, charged Emre and fitted pages
 
 Baseline mainc3b041f61480afc37c762f99ba0a6f7b364f92aa, clean. Godot4.6.3 retained. New macro definitions alone do not activate k44, Aionlaştır or dynamic aionia. Existing approved split touch,11 locales, dark/system-font defaults, stable APK signer,15-second levels, firearm5 rounds/1s reload, records and offline loader are preserved.

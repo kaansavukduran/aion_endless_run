@@ -1,15 +1,9 @@
-# Aion Endless Run 0.18.0
+# Aion Endless Run 0.19.0
 
-Beş karakter için60 yeni çizilmiş takla pozu: önce diz büküp yere alçalır, saat yönünde öne döner, sonra doğrulur. Takla basılıyken karakter tekrar ayağa kalkmaz. Tek fizik noktası/ölçek kullanılır; eski46 PNG korunur. Takipçi koyunlar aynı hareketi kendi gecikmeli yol kayıtlarında yapar.
+Aion ve diğer kahramanlarda bağımsız yüz-piksel kaydı; sabit fizik noktası, ortak kaynak piksel fazı ve tek karakter ölçeği. Beş kahramana60 omuz taklası pozu; Eren'e79 ayrı çizilmiş poz. Eren, Emre'den ayrı altıncı seçimdir. Eski karakter PNG'leri korunur.
 
-Emre: Space / A–× / Zıpla'yı basılı tutup bırakınca şarjlı sıçrama.1,2 saniyede tam güç. Kısa tutuş düşük, uzun tutuş yüksek tek sıçrama; havada şarj yok. İptal/odak/yön değişimi yanlış sıçrama üretmez. Tabanca5 mermi ve1 saniyelik elle doldurma korunur.
+Reload/şarjör sınırı kaldırıldı; sınırsız tabanca ve0,32 saniyelik atış aralığı. Kayıtlı X/J/R bağları alternatif ateş olur. Omuz taklası bir kez döner, basılı tutulunca alçakta bekler. Ana menü paneli gerçek içeriğine sığar; dokunma düğmeleri simetrik cihaz-piksel çizimi kullanır. Bölünmüş düzen,11 dil,15 aktif saniyelik seviyeler, özel yetenekler, kayıtlar ve çevrimdışı yükleyici korunur.
 
-Bütün menüler, dil listesi ve ilk yardım kaydırmasızdır. Uzun ayarlar ve büyük metin açıkça sayfalıdır; Önceki/Sonraki okları kullanılır. Sonuç işlemleri görünür kalır. Yazı boyutu, tema, rekor ve seçilmiş bölünmüş dokunma düzeni sıfırlanmaz.11 dilde yeni yardım;15 aktif saniyede seviye değişmez.
+[Gerçek testler ve ekranlar](evidence-v0190/README.md). [Oyna](https://kaansavukduran.github.io/aion_endless_run/) · [Sürüm paketleri](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.19.0).
 
-[Gerçek ekranlar ve doğrulama](evidence-v0180/README.md).
-
-## İndir ve kur
-
-[0.18.0 sürümü](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.18.0): Windows Setup.exe veya portable ZIP; Linux AppImage/DEB/portable; Mac Intel/Apple Silicon universal DMG/ZIP; Android ARM64/x64 APK, aynı imza/uygulama kimliği, versionCode22; yerel HTTP ile açılan offline web arşivi. Önceki sürümler korunur. Makbuz ve SHA256SUMS paketin kaynak ve özetlerini taşır.
-
-[Güncel oyunu GitHub Pages üzerinde oyna](https://kaansavukduran.github.io/aion_endless_run/). Gerçek Firefox/Chromium açılışı, kontroller, şarj ve yön değişimi doğrulandı.9 indirme paketi birlikte yayımlandı; APK imzası ve dosya özetleri doğrulandı. Vercel son geniş-font menü düzeltmesini günlük kota nedeniyle henüz almıyor. Vercel adresi/önceki kayıtları korunur; iki adresin kayıtları farklı origin'lerde ayrı kalır. macOS ad-hoc; Developer ID/noter ve Windows Authenticode yok. Yerel iOS mağaza dağıtımı sahibinin Apple imzasını bekler. Fiziksel Poco/iPhone/gamepad testi yapılmadı.
+Paketler: Windows Setup/portable; Linux AppImage/DEB/portable; macOS universal DMG/ZIP; Android ARM64/x64 APK, aynı imza/uygulama kimliği, versionCode23; offline web arşivi. Yayın tamamlanma durumu kanıt raporunda kaydedilir; yalnız hazırlanmış dosya yayımlanmış sayılmaz. Mac ad-hoc, Developer ID/noter ve Windows Authenticode yok. Native iOS sahibinin Apple imzasını bekler. Fiziksel Poco/iPhone/kol testi yapılmadı. Vercel kotası ayrı bir yayın engeli olabilir; iki adresin kayıtları farklı origin'lerde ayrı kalır.

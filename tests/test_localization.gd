@@ -28,7 +28,7 @@ func run() -> void:
 	await process_frame
 	game.set_physics_process(false)
 	game.set_process(false)
-	check(game.ui.find_children("StartSelect_*", "Button", true, false).size() == 5, "All five selectable character tiles exist before play")
+	check(game.ui.find_children("StartSelect_*", "Button", true, false).size() == 6, "All six selectable character tiles exist before play")
 	game.select_character("wolf")
 	game.set_language("cs")
 	check(game.character_name("owl") == "Ömer" and game.language_override, "Manual Czech selection localizes names and overrides the default")

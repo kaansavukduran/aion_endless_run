@@ -70,8 +70,8 @@ func model_tests() -> void:
 	w=arena();w.practice=true;w.adventure.level=100;w.adventure.offer_fragaria(w,100)
 	check(w.adventure.items.is_empty(),"Boss training cannot manufacture the rare collectible")
 func registration_tests() -> void:
-	# Independent, visually reviewed near-iris samples. These catch selecting
-	# a different body part even if metadata's own alignment math is consistent.
+	# Independent, visually reviewed near-iris samples. Test their rendered
+	# positions, not distance to a marker estimated by the registration itself.
 	var golden:={"aion":[[109,40],[98,40],[99,40],[99,42],[98,41],[99,41],[100,41]],"owl":[[96,54],[90,54],[88,54],[87,55],[92,55],[88,55],[89,55]],"sheep":[[83,67],[70,69],[70,68],[73,66],[71,64],[73,66],[72,67]],"wolf":[[77,58],[74,57],[75,58],[75,57],[74,57],[74,58],[75,57],[73,58]]}
 	var bank:=Bank.new()
 	var idle: Array=bank.CANONICAL.data.atlases["canonical-owl"].frames[0]
@@ -79,9 +79,13 @@ func registration_tests() -> void:
 	for hero in golden:
 		var d: Dictionary=bank.CANONICAL.data.atlases["canonical-"+hero]
 		var item:=Sprite2D.new();item.centered=false
+		var registered_irises:=[]
 		for frame in golden[hero].size():
 			var f: Dictionary=d.frames[1][frame]
-			check(Vector2(f.eye[0],f.eye[1]).distance_to(Vector2(golden[hero][frame][0],golden[hero][frame][1]))<2,"Correct near iris, not far eye, gill, halo or beak: "+hero+str(frame))
+			var iris:=Vector2(golden[hero][frame][0],golden[hero][frame][1])
+			var rendered: Vector2=(iris-Vector2(f.origin[0],f.origin[1]))*float(d.scale[1])
+			registered_irises.append(rendered)
+			check(absf(rendered.x-registered_irises[0].x)<=1.0 and absf(rendered.y-registered_irises[0].y)<=1.0,"Independent actual near iris stays within one logical source-pixel step: "+hero+str(frame))
 			bank.place(item,"runner-"+hero,1,frame,Vector2(288,500))
 			check(is_equal_approx(item.position.x,288) and is_equal_approx(item.scale.x,d.scale[1]),"Sprite physics anchor and per-hero scale stay constant through the full run loop")
 		item.free()
@@ -93,15 +97,15 @@ func scene_tests() -> void:
 	for i in 250:game._physics_process(.02)
 	check(game.world.time==0 and game.world.adventure.level_elapsed==0 and game.world.obstacles.is_empty(),"Reading the first tutorial cannot advance levels or kill an idle player")
 	game.press_shoot("key")
-	check(not game.tutorial_waiting() and game.world.frontier.ammo==4,"The first real gameplay action dismisses the tutorial and starts normally")
+	check(not game.tutorial_waiting() and game.world.frontier.shot_flash>0,"The first real gameplay action dismisses the tutorial and starts normally")
 	game.release_shoot("key");game.main_menu();game.start_run();game.world.obstacle_wait=99999;game.world.adventure.item_wait=99999;game.world.frontier.plant_wait=99999
 	var p: Vector2=button_center(game,"shoot")
 	touch(game,0,p,true)
-	check(game.world.frontier.ammo==4 and game.world.adventure.attack_time==0,"Actual touch Fire button spends one round")
+	check(game.world.frontier.shot_flash>0 and game.world.adventure.attack_time==0,"Actual touch Fire starts a real bullet sequence")
 	for i in 80:game.world.step(.02);game.touch_controls.step(.02)
-	check(game.world.frontier.shots_fired==5 and game.world.frontier.ammo==0,"Holding Fire stops after exactly five rounds")
+	check(game.world.frontier.shots_fired>=5,"Holding Fire continues at the original cadence without a magazine")
 	touch(game,0,p,false);touch(game,0,p,true)
-	check(game.world.frontier.ammo==0,"A fresh trigger cannot fire an empty magazine")
+	check(game.world.frontier.shoot_held,"A fresh trigger remains available after sustained fire")
 	drag(game,0,p+Vector2(160,0));touch(game,0,p+Vector2(160,0),false)
 	check(game.attack_sources.is_empty() and game.touch_controls.fingers.is_empty(),"Sliding off and releasing cannot leave attack held")
 	game.start_run();game.world.obstacle_wait=99999
@@ -111,19 +115,19 @@ func scene_tests() -> void:
 	game.start_run();touch(game,1,p,true);drag(game,1,p+Vector2(100,8));touch(game,1,p+Vector2(100,8),false);game.world.step(.01)
 	check(game.world.y==0 and game.world.adventure.roll_time==0,"Horizontal movement is neither a downward roll nor a tap jump")
 	p=button_center(game,"jump");touch(game,0,p,true);touch(game,2,button_center(game,"shoot"),true);game.world.step(.02)
-	check(game.world.y<0 and game.world.frontier.ammo==4,"Independent jump and attack fingers work together")
+	check(game.world.y<0 and game.world.frontier.shot_flash>0,"Independent jump and attack fingers work together")
 	touch(game,0,p,false,true);touch(game,2,button_center(game,"shoot"),false,true)
 	check(not game.world.jump_held and not game.world.adventure.attack_held and game.touch_controls.fingers.is_empty(),"Touch cancellation clears every held action")
-	game.start_run();game.action_buttons.attack.disabled=true
-	touch(game,0,button_center(game,"attack"),true);touch(game,0,button_center(game,"attack"),false);game.world.step(.01)
+	game.start_run();game.action_buttons.shoot.disabled=true
+	touch(game,0,button_center(game,"shoot"),true);touch(game,0,button_center(game,"shoot"),false);game.world.step(.01)
 	check(game.world.y==0 and game.world.adventure.swing_id==0,"A disabled action circle consumes its touch without leaking a world-tap jump")
-	game.action_buttons.attack.disabled=false;touch(game,0,button_center(game,"attack"),true);game.world.state="bonk";touch(game,0,button_center(game,"attack"),false)
+	game.action_buttons.shoot.disabled=false;touch(game,0,button_center(game,"shoot"),true);game.world.state="bonk";touch(game,0,button_center(game,"shoot"),false)
 	check(game.attack_sources.is_empty() and game.touch_controls.fingers.is_empty(),"Releasing a finger after defeat cannot leave a held attack")
 	game.start_run();var enemy: Dictionary=game.world.adventure.spawn_enemy(game.world,"crow",World.PLAYER_X+85,-40)
 	touch(game,0,button_center(game,"shoot"),true)
 	for i in 18:game.world.step(.01)
 	check(enemy.hp==0 and game.world.adventure.kills==1,"A normal touch shot reaches actual crow damage, not only its animation")
-	touch(game,0,button_center(game,"attack"),false)
+	touch(game,0,button_center(game,"shoot"),false)
 	for lang in ["tr","en","cs"]:
 		game.language=lang;game.main_menu()
 		for key in ["touch_hint","touch_skip","touch_ability_aion","touch_ability_owl","touch_ability_wolf","touch_ability_sheep","fragaria_found","fragaria_note"]:check(game.text(key)!=key,"New player-facing copy is translated: "+lang+"/"+key)

@@ -10,12 +10,19 @@ const CREATURES = preload("res://assets/CREATURES-PROVENANCE.json")
 const EMRE = preload("res://assets/EMRE-PROVENANCE.json")
 const FLORA=preload("res://assets/FLORA-PROVENANCE.json")
 const LOW_ROLLS=preload("res://assets/LOW-ROLLS-PROVENANCE.json")
+const SHOULDERS=preload("res://assets/SHOULDER-POSES-PROVENANCE.json")
+const EREN=preload("res://assets/EREN-PROVENANCE.json")
 const ORCHARD = preload("res://assets/ORCHARD-PROVENANCE.json")
 var images := {}
 var frames := {}
 
 func descriptor(key: String,row: int) -> Dictionary:
-	if key=="rolls":return {"key":"low-rolls","row":row,"data":LOW_ROLLS.data.atlas}
+	if key=="rolls":
+		return {"key":"eren-animations","row":5,"data":EREN.data.atlas} if row==5 else {"key":"shoulder-rolls","row":row,"data":SHOULDERS.data.atlas}
+	if key=="runner-eren":return {"key":"eren-animations","row":[0,1,2,7,8,9,2,2][clampi(row,0,7)],"data":EREN.data.atlas}
+	if key in ["gun-run","gun-fire","heroes"] and row==5:return {"key":"eren-animations","row":4 if key=="gun-fire" else 3,"data":EREN.data.atlas}
+	if key=="deaths" and row in [10,11]:return {"key":"eren-animations","row":6,"data":EREN.data.atlas}
+	if key=="strikes" and row in [10,11]:return {"key":"eren-animations","row":4,"data":EREN.data.atlas}
 	if key=="flora":return {"key":key,"row":row,"data":FLORA.data.atlas}
 	if key=="fruits":return {"key":key,"row":row,"data":ORCHARD.data.atlas}
 	if EMRE.data.atlases.has(key):return {"key":key,"row":row,"data":EMRE.data.atlases[key]}
@@ -92,6 +99,8 @@ func pose(key: String, row: int, column: int) -> Dictionary:
 		if f.has("registration"): result["registration"] = f.registration
 		result["source_column"] = int(f.source_column)
 		if f.eye != null: result["eye_local"] = Vector2(float(f.eye[0]-b[0])+2,float(f.eye[1]-b[1])+2)
+	if f.has("head_probe"):
+		result["probe_local"] = Vector2(float(f.head_probe[0]-b[0])+2,float(f.head_probe[1]-b[1])+2)
 	frames[cache_key] = result
 	return result
 
@@ -110,4 +119,7 @@ func place(item: Sprite2D,key: String,row: int,column: int,anchor: Vector2,growt
 	item.set_meta("pose_frame",column)
 	item.set_meta("pose_height",float(f.height)*growth)
 	item.set_meta("head_size",float(f.head)*growth)
+	for marker in ["eye_world","head_probe_world"]:
+		if item.has_meta(marker): item.remove_meta(marker)
 	if f.has("eye_local"): item.set_meta("eye_world",item.position+(f.offset+f.eye_local)*float(f.scale)*growth)
+	if f.has("probe_local"): item.set_meta("head_probe_world",item.position+(f.offset+f.probe_local)*float(f.scale)*growth)

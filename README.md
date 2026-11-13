@@ -1,16 +1,16 @@
 # Aion Endless Run
 
-Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.18.0**.
+Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.19.0**.
 
-**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.18.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.18.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA v1.4 uygulaması](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0180/README.md)
+**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.19.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.19.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA v1.4 uygulaması](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0190/README.md)
 
-![Pages üzerinde güncel ana menü](docs/evidence-v0180/screenshots/firefox-landscape-main.png)
+![Gerçek oyunun kompakt ana menüsü](docs/evidence-v0190/screenshots/main-dark.png)
 
-0.18.0: Beş karakter için eğilerek yere takla; Emre için basılı tutup bırakınca şarjlı sıçrama. Bütün menüler kaydırma yerine ekrana sığan sayfalar kullanır. GitHub Pages yayını gerçek Firefox ve Chromium girdileriyle doğrulandı. Vercel ilk0.18.0 adayını yayımladı; son geniş-font menü düzeltmesi günlük kotaya takıldığı için en güncel oyun Pages adresindedir. İki adresin rekorları ayrı saklanır.
+0.19.0: Eren, Emre'den ayrı altıncı kahraman. Aion ve diğer kahramanların kare hizaları bütün yüzün piksel karşılaştırmasıyla düzeltilir. Omuz üzerinden tek öne takla; basılı tutuşta alçak bekleme. Tabanca sınırsızdır, doldurma yoktur; 0,32 saniyelik atış aralığı korunur. Ana menü gerçek içeriği kadar yer kaplar; dokunma düğmeleri simetrik ve cihaz pikseline hizalıdır. [Gerçek doğrulama kapsamı](docs/evidence-v0190/README.md). İki oynama adresinin rekorları ayrı saklanır.
 
 ## Oyna
 
-Telefon kontrolleri seçimin üzerine iki yana bölündü: solda Zıpla, sağda Ateş et/Doldur/Takla. Tabanca her zaman elde; beş mermiden sonra elle doldurma bir aktif saniye sürer. Ayarlardan eski sağ küme seçilebilir. Koyu/açık/sistem teması, sistem/pixel yazı ve büyütülmüş menü metni saklanır. Kol eylemleri yeniden atanabilir; titreşim varsayılan kapalıdır. [Kontroller](docs/CONTROLS.md).
+Telefon kontrolleri seçimin üzerine iki yana bölündü: solda Zıpla, sağda Ateş et/Takla. Tabanca her zaman elde; sınırsız mermi, 0,32 saniyelik ortak atış aralığı. Doldurma yoktur. Ayarlardan eski sağ küme seçilebilir. Koyu/açık/sistem teması, sistem/pixel yazı ve büyütülmüş menü metni saklanır. Kol eylemleri yeniden atanabilir; titreşim varsayılan kapalıdır. [Kontroller](docs/CONTROLS.md).
 
 Başlangıç kartlarından karakterini seç; koşu sırasında karakter değişmez. İlk dil cihaz/tarayıcı dilidir; desteklenmeyen diller İngilizce açılır. **TR / EN / CS / AZ / DE / FR / JA / KO / ZH / ES / IT** menüsünden değiştirebilirsin; seçimin ve rekorun cihazda saklanır.
 
@@ -21,21 +21,30 @@ Başlangıç kartlarından karakterini seç; koşu sırasında karakter değişm
 | Melun | Shift / Depar basılı: dört ayakla hızlan |
 | Ömer | Zıpla ve basılı tut: süzül, hava akımını yakala |
 | Emre | Zıplamayı basılı tut: şarj et; bırak: sıçra |
+| Eren | Tek, anında sıçrama; kendine ait ayrı karakter paftası |
 
 | Eylem | Klavye / fare | Telefon | Standart Xbox / PlayStation |
 | --- | --- | --- | --- |
 | İleri ateş | Sol veya sağ tık / F basılı | Ateş et basılı | RB / R1 veya RT / R2 |
-| Doldur (1 saniye) | R; eski J de aynı eylem | Doldur | X / □ |
+| Ek ateş girişi | R / J basılı | Aynı Ateş et düğmesi | X / □ basılı |
 | Zıpla / süzül | Space; Ömer için basılı, Emre için tutup bırak | Zıpla; Emre için tutup bırak | A / ×; Emre için tutup bırak |
 | Takla | Aşağı / S / Ctrl | Aşağı kaydır veya Takla | B / ○ |
 | Melun deparı | Shift; karakterin üstünü basılı tut | Depar veya karakterin üstünü basılı tut | LB / L1 |
 | Duraklat | Esc | Duraklat | Start / Options |
 
-Yumruk eylemi kaldırıldı. Her kahraman düz ileri tabanca sıkar; beş mermi bittikten sonra oyuncu doldurur. Toplanan şimşek, normal koşudaki tabanca atışına ek alan etkisi verir. Düşerken düşmanın üstüne basarak sekebilirsin. Telefon hem dikey hem yatay oynanır; döndürmek koşuyu sıfırlamaz. İki parmakla eşzamanlı geçerli eylemler çalışır. Kısa telefon öğreticisini okurken dünya bekler.
+Yumruk eylemi kaldırıldı. Her kahraman düz ileri tabanca sıkar; mermi bittiği için durmaz; doldurma eylemi yoktur. Toplanan şimşek, normal koşudaki tabanca atışına ek alan etkisi verir. Düşerken düşmanın üstüne basarak sekebilirsin. Telefon hem dikey hem yatay oynanır; döndürmek koşuyu sıfırlamaz. İki parmakla eşzamanlı geçerli eylemler çalışır. Kısa telefon öğreticisini okurken dünya bekler.
 
 Altı biyom: Kehribar Çölü, Ayaz Vadisi, Sisli Bataklık, Bakır Şehir, Fener Ormanı ve Kor Sırtı. Gündüz/gece, hava olayları, kargalar, cüceler, seyrek ateş bitkileri, çukurlar ve kargaların taşıdığı üst engeller vardır. Her **15 saniyelik aktif normal koşu** yeni seviyedir; menü, duraklatma, sarılma ve boss zamanı bu sayaca girmez. Her on seviyede sarılma ve ve üç tasarımı dönen boss kovalamacası vardır. Boss arenasında normal parkur temizlenir. İsteğe bağlı antrenman üç boss’u doğrudan denetir ve rekoru değiştirmez.
 
 Meyveler +25, temiz aşılan engeller +10; mesafe de skor kazandırır. On toplanabilir güç bulunur. Sıçrama tılsımı 9 saniye daha yüksek zıplatır, şans parası 12 saniye meyve puanını ikiye katlar, buz feneri 8 saniye yakındaki yaklaşan düşmanları yavaşlatır. Dev mantar varsayılan %2 uygun eşya olasılığıyla nadirdir; ilk 20 saniyede ve önceki mantardan sonraki 45 saniyede gelmez. Mantar dalgasının toplam cüce üretimi yaklaşık yarıya indirildi; ortam cüceleri değişmedi. Her 100’ün katı eşiğinden sonraki ilk uygun boss zaferi **Fragaria çileğini** sunar. Bu nesne yalnız kısa kutlamadır; güç, puan veya başka oynanış ödülü vermez.
+
+## 0.19.0 · Sabit yüz hizası, omuz taklası, Eren
+
+Yanlış mavi renk işaretçisi Aion ve Melun'un bazı ateş karelerinde yüz yerine başka ayrıntıyı seçiyordu. Bütün yüzün burun/yanak/çevre piksellerini karşılaştıran kayıt, aynı fizik noktası ve karakter ölçeğinde gerçek yüzü sabitler. Kaynak piksel fazı da tüm döngüde aynıdır. Hareketli kanat ve kuyruklar dondurulmaz; eski PNG'ler değiştirilmez.
+
+Beş kahraman için60 gerçek omuz taklası pozu; Eren için79 ayrı çizilmiş hareket/ateş/takla/hasar pozu. Taklada diz bükme, ellerin yere inmesi, omuz üzerinden öne dönüş ve doğrulma okunur. Basılı takla sürekli top gibi dönmez, eğilerek bekler. Emre'nin şarjı, Ömer'in süzülmesi, Melun'un dört ayak deparı, Aion'un çift sıçraması ve gecikmeli koyun takipçileri korunur.
+
+Aşağıdaki sürüm bölümleri tarihçedir; eski şarjör/doldurma ve dönen top taklası güncel oyunda yoktur.
 
 ## 0.18.0 · Alçak takla ve şarjlı Emre sıçraması
 
@@ -83,7 +92,7 @@ Keskin çerçeveler, Pixelify Sans ve sıcak palet oyunun dünyasına uyar. Ana/
 
 ## İndir
 
-Windows: Setup ile kur veya portable ZIP’i tamamen çıkartıp EXE’yi aç. Linux: DEB, çalıştırma izni verilen AppImage veya portable tar.gz. macOS: universal DMG veya portable ZIP. Android: ARM64/x64 APK; önceki sürümle aynı uygulama kimliği ve imza, versionCode22. Gerçek paket listesi ve özetleri Releases içindedir. Önceki sürümler korunur.
+Windows: Setup ile kur veya portable ZIP’i tamamen çıkartıp EXE’yi aç. Linux: DEB, çalıştırma izni verilen AppImage veya portable tar.gz. macOS: universal DMG veya portable ZIP. Android: ARM64/x64 APK; önceki sürümle aynı uygulama kimliği ve imza, versionCode23. Gerçek paket listesi ve özetleri Releases içindedir. Önceki sürümler korunur.
 
 İlk web yüklemesi internet ister; doğrulanmış tüm dosyalar önbelleğe alındıktan sonra çevrimdışı açılır. Mac paketi ad-hoc imzalıdır; Developer ID/noter onayı ve Windows Authenticode yoktur. Yerel iPhone/TestFlight/App Store için sahibinin Apple imzalaması gerekir; yerel portable iPhone paketi sunulmaz. Safari web sürümü ayrı bir seçenektir.
 

@@ -1,0 +1,1178 @@
+[
+  {
+    "hero": "aion",
+    "atlas": "assets/canonical-aion.png",
+    "row": 0,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.052,
+        "world_x": 0.156,
+        "fix_source_x": 91.82
+      },
+      {
+        "frame": 1,
+        "match_error": 0.051,
+        "world_x": -0.236,
+        "fix_source_x": 81.82
+      },
+      {
+        "frame": 2,
+        "match_error": 0.088,
+        "world_x": -0.625,
+        "fix_source_x": 81.82
+      },
+      {
+        "frame": 3,
+        "match_error": 0.082,
+        "world_x": -0.037,
+        "fix_source_x": 82.82
+      },
+      {
+        "frame": 4,
+        "match_error": 0.055,
+        "world_x": 0.55,
+        "fix_source_x": 82.82
+      },
+      {
+        "frame": 5,
+        "match_error": 0.051,
+        "world_x": -0.29,
+        "fix_source_x": 81.82
+      },
+      {
+        "frame": 6,
+        "match_error": 0.051,
+        "world_x": -0.495,
+        "fix_source_x": 81.82
+      }
+    ],
+    "reference_patch": [
+      92,
+      24,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      91.81982690794649,
+      87.37231182795699
+    ]
+  },
+  {
+    "hero": "aion",
+    "atlas": "assets/canonical-aion.png",
+    "row": 1,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.049,
+        "world_x": 0.577,
+        "fix_source_x": 94.82
+      },
+      {
+        "frame": 1,
+        "match_error": 0.047,
+        "world_x": 0.268,
+        "fix_source_x": 83.82
+      },
+      {
+        "frame": 2,
+        "match_error": 0.051,
+        "world_x": 0.755,
+        "fix_source_x": 84.82
+      },
+      {
+        "frame": 3,
+        "match_error": 0.047,
+        "world_x": 0.15,
+        "fix_source_x": 84.82
+      },
+      {
+        "frame": 4,
+        "match_error": 0.045,
+        "world_x": 0.198,
+        "fix_source_x": 83.82
+      },
+      {
+        "frame": 5,
+        "match_error": 0.043,
+        "world_x": 0.166,
+        "fix_source_x": 84.82
+      },
+      {
+        "frame": 6,
+        "match_error": 0.045,
+        "world_x": 0.154,
+        "fix_source_x": 85.82
+      }
+    ],
+    "reference_patch": [
+      92,
+      24,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      91.81982690794649,
+      87.37231182795699
+    ]
+  },
+  {
+    "hero": "aion",
+    "atlas": "assets/canonical-aion.png",
+    "row": 7,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.0,
+        "world_x": 0.176,
+        "fix_source_x": 91.82
+      },
+      {
+        "frame": 1,
+        "match_error": 0.027,
+        "world_x": 0.516,
+        "fix_source_x": 81.82
+      },
+      {
+        "frame": 2,
+        "match_error": 0.031,
+        "world_x": -0.12,
+        "fix_source_x": 80.82
+      },
+      {
+        "frame": 3,
+        "match_error": 0.021,
+        "world_x": -0.418,
+        "fix_source_x": 79.82
+      },
+      {
+        "frame": 4,
+        "match_error": 0.017,
+        "world_x": 0.064,
+        "fix_source_x": 80.82
+      },
+      {
+        "frame": 5,
+        "match_error": 0.042,
+        "world_x": -0.462,
+        "fix_source_x": 80.82
+      },
+      {
+        "frame": 6,
+        "match_error": 0.013,
+        "world_x": -0.503,
+        "fix_source_x": 79.82
+      }
+    ],
+    "reference_patch": [
+      92,
+      24,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      91.81982690794649,
+      87.37231182795699
+    ]
+  },
+  {
+    "hero": "aion",
+    "atlas": "assets/canonical-aion.png",
+    "row": 8,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.045,
+        "world_x": -0.614,
+        "fix_source_x": 92.82
+      },
+      {
+        "frame": 1,
+        "match_error": 0.042,
+        "world_x": 0.396,
+        "fix_source_x": 79.82
+      },
+      {
+        "frame": 2,
+        "match_error": 0.041,
+        "world_x": -28.079,
+        "fix_source_x": 76.82
+      },
+      {
+        "frame": 3,
+        "match_error": 0.04,
+        "world_x": -0.233,
+        "fix_source_x": 69.82
+      },
+      {
+        "frame": 4,
+        "match_error": 0.033,
+        "world_x": -0.495,
+        "fix_source_x": 76.82
+      },
+      {
+        "frame": 5,
+        "match_error": 0.041,
+        "world_x": 0.36,
+        "fix_source_x": 80.82
+      },
+      {
+        "frame": 6,
+        "match_error": 0.042,
+        "world_x": 0.428,
+        "fix_source_x": 78.82
+      }
+    ],
+    "reference_patch": [
+      92,
+      24,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      91.81982690794649,
+      87.37231182795699
+    ]
+  },
+  {
+    "hero": "owl",
+    "atlas": "assets/canonical-owl.png",
+    "row": 0,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.133,
+        "world_x": 3.442,
+        "fix_source_x": 76.287
+      },
+      {
+        "frame": 1,
+        "match_error": 0.119,
+        "world_x": 2.703,
+        "fix_source_x": 67.287
+      },
+      {
+        "frame": 2,
+        "match_error": 0.121,
+        "world_x": 3.358,
+        "fix_source_x": 67.287
+      },
+      {
+        "frame": 3,
+        "match_error": 0.121,
+        "world_x": 4.29,
+        "fix_source_x": 68.287
+      },
+      {
+        "frame": 4,
+        "match_error": 0.107,
+        "world_x": 3.614,
+        "fix_source_x": 68.287
+      },
+      {
+        "frame": 5,
+        "match_error": 0.104,
+        "world_x": 2.938,
+        "fix_source_x": 67.287
+      },
+      {
+        "frame": 6,
+        "match_error": 0.124,
+        "world_x": 2.279,
+        "fix_source_x": 66.287
+      }
+    ],
+    "reference_patch": [
+      78,
+      30,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      74.28749351323302,
+      101.49682717431878
+    ]
+  },
+  {
+    "hero": "owl",
+    "atlas": "assets/canonical-owl.png",
+    "row": 1,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.125,
+        "world_x": 3.46,
+        "fix_source_x": 79.287
+      },
+      {
+        "frame": 1,
+        "match_error": 0.125,
+        "world_x": 3.562,
+        "fix_source_x": 73.287
+      },
+      {
+        "frame": 2,
+        "match_error": 0.115,
+        "world_x": 3.477,
+        "fix_source_x": 71.287
+      },
+      {
+        "frame": 3,
+        "match_error": 0.113,
+        "world_x": 3.244,
+        "fix_source_x": 70.287
+      },
+      {
+        "frame": 4,
+        "match_error": 0.122,
+        "world_x": 3.147,
+        "fix_source_x": 74.287
+      },
+      {
+        "frame": 5,
+        "match_error": 0.117,
+        "world_x": 2.866,
+        "fix_source_x": 70.287
+      },
+      {
+        "frame": 6,
+        "match_error": 0.12,
+        "world_x": 2.869,
+        "fix_source_x": 71.287
+      }
+    ],
+    "reference_patch": [
+      78,
+      30,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      74.28749351323302,
+      101.49682717431878
+    ]
+  },
+  {
+    "hero": "owl",
+    "atlas": "assets/canonical-owl.png",
+    "row": 7,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.0,
+        "world_x": 2.985,
+        "fix_source_x": 74.287
+      },
+      {
+        "frame": 1,
+        "match_error": 0.017,
+        "world_x": 2.764,
+        "fix_source_x": 57.287
+      },
+      {
+        "frame": 2,
+        "match_error": 0.037,
+        "world_x": 3.327,
+        "fix_source_x": 54.287
+      },
+      {
+        "frame": 3,
+        "match_error": 0.07,
+        "world_x": 2.527,
+        "fix_source_x": 54.287
+      },
+      {
+        "frame": 4,
+        "match_error": 0.054,
+        "world_x": 2.745,
+        "fix_source_x": 55.287
+      },
+      {
+        "frame": 5,
+        "match_error": 0.055,
+        "world_x": 3.087,
+        "fix_source_x": 54.287
+      },
+      {
+        "frame": 6,
+        "match_error": 0.066,
+        "world_x": 2.424,
+        "fix_source_x": 46.287
+      },
+      {
+        "frame": 7,
+        "match_error": 0.049,
+        "world_x": 2.766,
+        "fix_source_x": 53.287
+      }
+    ],
+    "reference_patch": [
+      78,
+      30,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      74.28749351323302,
+      101.49682717431878
+    ]
+  },
+  {
+    "hero": "owl",
+    "atlas": "assets/canonical-owl.png",
+    "row": 8,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.035,
+        "world_x": 3.125,
+        "fix_source_x": 75.287
+      },
+      {
+        "frame": 1,
+        "match_error": 0.036,
+        "world_x": 3.257,
+        "fix_source_x": 54.287
+      },
+      {
+        "frame": 2,
+        "match_error": 0.05,
+        "world_x": 4.943,
+        "fix_source_x": 53.287
+      },
+      {
+        "frame": 3,
+        "match_error": 0.036,
+        "world_x": 5.021,
+        "fix_source_x": 43.287
+      },
+      {
+        "frame": 4,
+        "match_error": 0.038,
+        "world_x": 2.688,
+        "fix_source_x": 42.287
+      },
+      {
+        "frame": 5,
+        "match_error": 0.029,
+        "world_x": 3.168,
+        "fix_source_x": 49.287
+      },
+      {
+        "frame": 6,
+        "match_error": 0.045,
+        "world_x": 3.07,
+        "fix_source_x": 46.287
+      },
+      {
+        "frame": 7,
+        "match_error": 0.041,
+        "world_x": 2.941,
+        "fix_source_x": 51.287
+      }
+    ],
+    "reference_patch": [
+      78,
+      30,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      74.28749351323302,
+      101.49682717431878
+    ]
+  },
+  {
+    "hero": "sheep",
+    "atlas": "assets/canonical-sheep.png",
+    "row": 0,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.095,
+        "world_x": 4.05,
+        "fix_source_x": 62.605
+      },
+      {
+        "frame": 1,
+        "match_error": 0.094,
+        "world_x": 3.657,
+        "fix_source_x": 49.605
+      },
+      {
+        "frame": 2,
+        "match_error": 0.108,
+        "world_x": 4.069,
+        "fix_source_x": 50.605
+      },
+      {
+        "frame": 3,
+        "match_error": 0.119,
+        "world_x": 3.775,
+        "fix_source_x": 51.605
+      },
+      {
+        "frame": 4,
+        "match_error": 0.107,
+        "world_x": 0.653,
+        "fix_source_x": 48.605
+      },
+      {
+        "frame": 5,
+        "match_error": 0.097,
+        "world_x": 3.892,
+        "fix_source_x": 53.605
+      },
+      {
+        "frame": 6,
+        "match_error": 0.106,
+        "world_x": 3.441,
+        "fix_source_x": 52.605
+      }
+    ],
+    "reference_patch": [
+      68,
+      43,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      62.60495801679328,
+      115.3385102099511
+    ]
+  },
+  {
+    "hero": "sheep",
+    "atlas": "assets/canonical-sheep.png",
+    "row": 1,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.073,
+        "world_x": 4.152,
+        "fix_source_x": 63.605
+      },
+      {
+        "frame": 1,
+        "match_error": 0.077,
+        "world_x": 3.839,
+        "fix_source_x": 50.605
+      },
+      {
+        "frame": 2,
+        "match_error": 0.075,
+        "world_x": 3.705,
+        "fix_source_x": 49.605
+      },
+      {
+        "frame": 3,
+        "match_error": 0.078,
+        "world_x": 3.454,
+        "fix_source_x": 52.605
+      },
+      {
+        "frame": 4,
+        "match_error": 0.077,
+        "world_x": 3.652,
+        "fix_source_x": 50.605
+      },
+      {
+        "frame": 5,
+        "match_error": 0.077,
+        "world_x": 3.453,
+        "fix_source_x": 52.605
+      },
+      {
+        "frame": 6,
+        "match_error": 0.094,
+        "world_x": 3.9,
+        "fix_source_x": 52.605
+      }
+    ],
+    "reference_patch": [
+      68,
+      43,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      62.60495801679328,
+      115.3385102099511
+    ]
+  },
+  {
+    "hero": "sheep",
+    "atlas": "assets/canonical-sheep.png",
+    "row": 7,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.0,
+        "world_x": 3.814,
+        "fix_source_x": 62.605
+      },
+      {
+        "frame": 1,
+        "match_error": 0.015,
+        "world_x": 3.841,
+        "fix_source_x": 45.605
+      },
+      {
+        "frame": 2,
+        "match_error": 0.023,
+        "world_x": 3.606,
+        "fix_source_x": 46.605
+      },
+      {
+        "frame": 3,
+        "match_error": 0.018,
+        "world_x": 3.695,
+        "fix_source_x": 49.605
+      },
+      {
+        "frame": 4,
+        "match_error": 0.031,
+        "world_x": 3.756,
+        "fix_source_x": 48.605
+      },
+      {
+        "frame": 5,
+        "match_error": 0.021,
+        "world_x": 4.103,
+        "fix_source_x": 52.605
+      },
+      {
+        "frame": 6,
+        "match_error": 0.02,
+        "world_x": 3.797,
+        "fix_source_x": 52.605
+      }
+    ],
+    "reference_patch": [
+      68,
+      43,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      62.60495801679328,
+      115.3385102099511
+    ]
+  },
+  {
+    "hero": "sheep",
+    "atlas": "assets/canonical-sheep.png",
+    "row": 8,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.049,
+        "world_x": 3.827,
+        "fix_source_x": 61.605
+      },
+      {
+        "frame": 1,
+        "match_error": 0.044,
+        "world_x": 3.809,
+        "fix_source_x": 46.605
+      },
+      {
+        "frame": 2,
+        "match_error": 0.039,
+        "world_x": 1.421,
+        "fix_source_x": 43.605
+      },
+      {
+        "frame": 3,
+        "match_error": 0.03,
+        "world_x": 3.982,
+        "fix_source_x": 41.605
+      },
+      {
+        "frame": 4,
+        "match_error": 0.027,
+        "world_x": 4.28,
+        "fix_source_x": 43.605
+      },
+      {
+        "frame": 5,
+        "match_error": 0.023,
+        "world_x": 3.945,
+        "fix_source_x": 52.605
+      },
+      {
+        "frame": 6,
+        "match_error": 0.031,
+        "world_x": 3.729,
+        "fix_source_x": 52.605
+      }
+    ],
+    "reference_patch": [
+      68,
+      43,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      62.60495801679328,
+      115.3385102099511
+    ]
+  },
+  {
+    "hero": "wolf",
+    "atlas": "assets/canonical-wolf.png",
+    "row": 0,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.13,
+        "world_x": 3.166,
+        "fix_source_x": 59.923
+      },
+      {
+        "frame": 1,
+        "match_error": 0.117,
+        "world_x": 2.397,
+        "fix_source_x": 55.923
+      },
+      {
+        "frame": 2,
+        "match_error": 0.114,
+        "world_x": 2.134,
+        "fix_source_x": 55.923
+      },
+      {
+        "frame": 3,
+        "match_error": 0.169,
+        "world_x": -30.198,
+        "fix_source_x": 15.923
+      },
+      {
+        "frame": 4,
+        "match_error": 0.17,
+        "world_x": 0.796,
+        "fix_source_x": 53.923
+      },
+      {
+        "frame": 5,
+        "match_error": 0.12,
+        "world_x": 2.563,
+        "fix_source_x": 55.923
+      },
+      {
+        "frame": 6,
+        "match_error": 0.126,
+        "world_x": 2.729,
+        "fix_source_x": 55.923
+      },
+      {
+        "frame": 7,
+        "match_error": 0.136,
+        "world_x": 2.112,
+        "fix_source_x": 54.923
+      }
+    ],
+    "reference_patch": [
+      63,
+      38,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      59.92276422764228,
+      109.21376811594203
+    ]
+  },
+  {
+    "hero": "wolf",
+    "atlas": "assets/canonical-wolf.png",
+    "row": 1,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.107,
+        "world_x": 2.465,
+        "fix_source_x": 59.923
+      },
+      {
+        "frame": 1,
+        "match_error": 0.1,
+        "world_x": 1.932,
+        "fix_source_x": 55.923
+      },
+      {
+        "frame": 2,
+        "match_error": 0.108,
+        "world_x": 2.054,
+        "fix_source_x": 56.923
+      },
+      {
+        "frame": 3,
+        "match_error": 0.105,
+        "world_x": 3.025,
+        "fix_source_x": 57.923
+      },
+      {
+        "frame": 4,
+        "match_error": 0.103,
+        "world_x": 2.694,
+        "fix_source_x": 56.923
+      },
+      {
+        "frame": 5,
+        "match_error": 0.108,
+        "world_x": 2.532,
+        "fix_source_x": 56.923
+      },
+      {
+        "frame": 6,
+        "match_error": 0.111,
+        "world_x": 2.97,
+        "fix_source_x": 57.923
+      },
+      {
+        "frame": 7,
+        "match_error": 0.097,
+        "world_x": 2.671,
+        "fix_source_x": 55.923
+      }
+    ],
+    "reference_patch": [
+      63,
+      38,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      59.92276422764228,
+      109.21376811594203
+    ]
+  },
+  {
+    "hero": "wolf",
+    "atlas": "assets/canonical-wolf.png",
+    "row": 7,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.0,
+        "world_x": 2.498,
+        "fix_source_x": 59.923
+      },
+      {
+        "frame": 1,
+        "match_error": 0.049,
+        "world_x": 2.513,
+        "fix_source_x": 52.923
+      },
+      {
+        "frame": 2,
+        "match_error": 0.053,
+        "world_x": 2.552,
+        "fix_source_x": 52.923
+      },
+      {
+        "frame": 3,
+        "match_error": 0.047,
+        "world_x": 3.651,
+        "fix_source_x": 52.923
+      },
+      {
+        "frame": 4,
+        "match_error": 0.038,
+        "world_x": 2.315,
+        "fix_source_x": 53.923
+      },
+      {
+        "frame": 5,
+        "match_error": 0.05,
+        "world_x": 2.837,
+        "fix_source_x": 54.923
+      },
+      {
+        "frame": 6,
+        "match_error": 0.034,
+        "world_x": 2.465,
+        "fix_source_x": 53.923
+      },
+      {
+        "frame": 7,
+        "match_error": 0.018,
+        "world_x": 2.309,
+        "fix_source_x": 52.923
+      }
+    ],
+    "reference_patch": [
+      63,
+      38,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      59.92276422764228,
+      109.21376811594203
+    ]
+  },
+  {
+    "hero": "wolf",
+    "atlas": "assets/canonical-wolf.png",
+    "row": 8,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.074,
+        "world_x": 2.606,
+        "fix_source_x": 58.923
+      },
+      {
+        "frame": 1,
+        "match_error": 0.047,
+        "world_x": 2.837,
+        "fix_source_x": 56.923
+      },
+      {
+        "frame": 2,
+        "match_error": 0.061,
+        "world_x": 1.887,
+        "fix_source_x": 54.923
+      },
+      {
+        "frame": 3,
+        "match_error": 0.072,
+        "world_x": -9.553,
+        "fix_source_x": 53.923
+      },
+      {
+        "frame": 4,
+        "match_error": 0.048,
+        "world_x": 2.072,
+        "fix_source_x": 54.923
+      },
+      {
+        "frame": 5,
+        "match_error": 0.039,
+        "world_x": 2.454,
+        "fix_source_x": 55.923
+      },
+      {
+        "frame": 6,
+        "match_error": 0.047,
+        "world_x": 2.025,
+        "fix_source_x": 54.923
+      },
+      {
+        "frame": 7,
+        "match_error": 0.044,
+        "world_x": 2.422,
+        "fix_source_x": 54.923
+      }
+    ],
+    "reference_patch": [
+      63,
+      38,
+      39,
+      34
+    ],
+    "reference_row": 7,
+    "reference_origin": [
+      59.92276422764228,
+      109.21376811594203
+    ]
+  },
+  {
+    "hero": "rabbit",
+    "atlas": "assets/emre-encounters.png",
+    "row": 0,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.0,
+        "world_x": 8.041,
+        "fix_source_x": 77.513
+      },
+      {
+        "frame": 1,
+        "match_error": 0.02,
+        "world_x": 7.47,
+        "fix_source_x": 77.513
+      },
+      {
+        "frame": 2,
+        "match_error": 0.022,
+        "world_x": 7.006,
+        "fix_source_x": 77.513
+      },
+      {
+        "frame": 3,
+        "match_error": 0.037,
+        "world_x": 6.87,
+        "fix_source_x": 76.513
+      },
+      {
+        "frame": 4,
+        "match_error": 0.035,
+        "world_x": 8.017,
+        "fix_source_x": 77.513
+      },
+      {
+        "frame": 5,
+        "match_error": 0.061,
+        "world_x": 7.675,
+        "fix_source_x": 76.513
+      },
+      {
+        "frame": 6,
+        "match_error": 0.051,
+        "world_x": 8.468,
+        "fix_source_x": 76.513
+      },
+      {
+        "frame": 7,
+        "match_error": 0.058,
+        "world_x": 7.033,
+        "fix_source_x": 75.513
+      },
+      {
+        "frame": 8,
+        "match_error": 0.042,
+        "world_x": 8.2,
+        "fix_source_x": 75.513
+      },
+      {
+        "frame": 9,
+        "match_error": 0.028,
+        "world_x": 8.134,
+        "fix_source_x": 76.513
+      },
+      {
+        "frame": 10,
+        "match_error": 0.031,
+        "world_x": 8.083,
+        "fix_source_x": 76.513
+      },
+      {
+        "frame": 11,
+        "match_error": 0.029,
+        "world_x": 8.122,
+        "fix_source_x": 75.513
+      }
+    ],
+    "reference_patch": [
+      89,
+      42,
+      39,
+      34
+    ],
+    "reference_row": 0,
+    "reference_origin": [
+      77.513,
+      140
+    ]
+  },
+  {
+    "hero": "rabbit",
+    "atlas": "assets/emre-encounters.png",
+    "row": 1,
+    "measurements": [
+      {
+        "frame": 0,
+        "match_error": 0.046,
+        "world_x": 7.99,
+        "fix_source_x": 67.513
+      },
+      {
+        "frame": 1,
+        "match_error": 0.055,
+        "world_x": 7.65,
+        "fix_source_x": 66.513
+      },
+      {
+        "frame": 2,
+        "match_error": 0.052,
+        "world_x": 7.296,
+        "fix_source_x": 65.513
+      },
+      {
+        "frame": 3,
+        "match_error": 0.055,
+        "world_x": 8.025,
+        "fix_source_x": 66.513
+      },
+      {
+        "frame": 4,
+        "match_error": 0.053,
+        "world_x": 7.868,
+        "fix_source_x": 68.513
+      },
+      {
+        "frame": 5,
+        "match_error": 0.062,
+        "world_x": 7.436,
+        "fix_source_x": 69.513
+      },
+      {
+        "frame": 6,
+        "match_error": 0.056,
+        "world_x": 7.325,
+        "fix_source_x": 67.513
+      },
+      {
+        "frame": 7,
+        "match_error": 0.053,
+        "world_x": 7.804,
+        "fix_source_x": 66.513
+      },
+      {
+        "frame": 8,
+        "match_error": 0.049,
+        "world_x": 7.609,
+        "fix_source_x": 65.513
+      },
+      {
+        "frame": 9,
+        "match_error": 0.047,
+        "world_x": 7.376,
+        "fix_source_x": 66.513
+      },
+      {
+        "frame": 10,
+        "match_error": 0.05,
+        "world_x": 7.321,
+        "fix_source_x": 66.513
+      },
+      {
+        "frame": 11,
+        "match_error": 0.045,
+        "world_x": 7.978,
+        "fix_source_x": 66.513
+      }
+    ],
+    "reference_patch": [
+      89,
+      42,
+      39,
+      34
+    ],
+    "reference_row": 0,
+    "reference_origin": [
+      77.513,
+      140
+    ]
+  }
+]

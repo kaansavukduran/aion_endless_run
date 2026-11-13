@@ -1,0 +1,10 @@
+{
+  "version": "0.19.0",
+  "source_and_scene_checks": 9295,
+  "browser_checks": 62,
+  "web_packaging_tests": 7,
+  "android_parser_tests": 4,
+  "browser_scope": "Focused actual normal-input run: Emre/Eren plus wolf sprint, owl glide, charge, gamepad A/X resume, touch cancellation and 200% portrait/landscape menus. Full six-hero final-build run and publication pending.",
+  "local_build": "8a7ef3c715318267",
+  "platform_status": "pending; not claimed released"
+}
