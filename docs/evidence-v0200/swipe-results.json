@@ -1,0 +1,56 @@
+{
+  "checks": [
+    "Actual DPR3 downward touch reaches the drawn ground shoulder roll",
+    "The gesture never creates a jump",
+    "One real gesture produces one roll and releases its finger",
+    "No browser errors during the trusted touch gesture"
+  ],
+  "errors": [],
+  "samples": [
+    {
+      "duck": false,
+      "source": "pixel-aion",
+      "row": 3,
+      "y": 0,
+      "jumps": 0,
+      "swipes": 0
+    },
+    {
+      "duck": false,
+      "source": "pixel-aion",
+      "row": 3,
+      "y": 0,
+      "jumps": 0,
+      "swipes": 0
+    },
+    {
+      "duck": true,
+      "source": "pixel-aion",
+      "row": 5,
+      "y": 0,
+      "jumps": 0,
+      "swipes": 1
+    },
+    {
+      "duck": true,
+      "source": "pixel-aion",
+      "row": 5,
+      "y": 0,
+      "jumps": 0,
+      "swipes": 1
+    },
+    {
+      "duck": true,
+      "source": "pixel-aion",
+      "row": 5,
+      "y": 0,
+      "jumps": 0,
+      "swipes": 1
+    }
+  ],
+  "build": {
+    "build": "3d62debbecdd2a59",
+    "version": "0.20.0"
+  },
+  "scope": "Trusted rapid CDP touch start/move/end in a Chromium DPR3 context. No state injection; no physical-device claim."
+}

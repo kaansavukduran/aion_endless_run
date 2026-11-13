@@ -1,0 +1,120 @@
+{
+  "url": "https://kaansavukduran.github.io/aion_endless_run/",
+  "browser": "firefox 153.0",
+  "build": {
+    "build": "323d157ff6249dfa",
+    "version": "0.20.0"
+  },
+  "checks": [
+    "Actual production0.20.0 boots with verified PCK, no missing-data fallback",
+    "All six real production character cards are visible",
+    "Complete production Aion run loop has stable face and actor anchors",
+    "Production touch Fire and held Fire pass five shots without Reload",
+    "Actual production portrait rotation preserves paused score and character",
+    "Production Eren uses his own art and immediate jump",
+    "Production Emre still builds charge on the ground",
+    "Production Emre release produces one charged leap",
+    "Production Roll touch selects the new faithful shoulder atlas",
+    "No script errors or missing-PCK alerts during live play"
+  ],
+  "dialogs": [],
+  "errors": [],
+  "face_samples": [
+    {
+      "f": 0,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 0,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 1,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 1,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 1,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 1,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 2,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 2,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 2,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 2,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 3,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 3,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 3,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 4,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 4,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 4,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 4,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 5,
+      "x": 292.390625,
+      "actor": 288
+    },
+    {
+      "f": 0,
+      "x": 292.390625,
+      "actor": 288
+    }
+  ],
+  "scope": "Actual public HTTPS bytes verified by loader; normal UI and browser touch/keys. Firefox is headed Gecko with Android UA, not a physical Poco. CA-forwarded diagnostic wrappers disable SW; actual offline worker is verified separately."
+}

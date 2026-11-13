@@ -5,12 +5,12 @@ on:
       source_run:
         description: Successful main Test and package run
         required: true
-        default: '43480686993'
+        default: '43501562033'
         type: string
       tag:
         description: Existing release tag with unchanged runtime sources
         required: true
-        default: v0.19.0
+        default: v0.20.0
         type: string
   repository_dispatch:
     types: [aion-verified-release]
@@ -25,8 +25,8 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       GH_TOKEN: ${{ github.token }}
-      SOURCE_RUN: ${{ inputs.source_run || github.event.client_payload.source_run || '43480686993' }}
-      AION_TAG: ${{ inputs.tag || github.event.client_payload.tag || 'v0.19.0' }}
+      SOURCE_RUN: ${{ inputs.source_run || github.event.client_payload.source_run || '43501562033' }}
+      AION_TAG: ${{ inputs.tag || github.event.client_payload.tag || 'v0.20.0' }}
     steps:
       - name: Validate dispatch values
         run: |

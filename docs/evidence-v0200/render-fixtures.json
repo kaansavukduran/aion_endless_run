@@ -1,0 +1,185 @@
+{
+  "scope": "36 actual Linux X11/llvmpipe Godot scene renders; explicit deterministic damage-state fixtures, not normal inputs or a physical phone. Reproduce with tests/render_pixel_states.gd.",
+  "files": [
+    {
+      "file": "aion-fire-000.png",
+      "bytes": 471655,
+      "sha256": "1536cc98e7774fbc87addacd41e9f7a0e31dfd4f4746074b8ce31ffc41e1960b"
+    },
+    {
+      "file": "eren-fire-070.png",
+      "bytes": 467538,
+      "sha256": "5f3bcb02e3b3741e6ce02e1f3424858b26b91ad37cc6bc7eefe18e72650552db"
+    },
+    {
+      "file": "rabbit-fire-070.png",
+      "bytes": 469641,
+      "sha256": "3db1f78b51569efc1484ceba8116923aa08a6cff338ba36735df691533bf047d"
+    },
+    {
+      "file": "owl-ice-070.png",
+      "bytes": 471983,
+      "sha256": "d4206f7d9672b68908a43ca690cbe9ab563d9b7aa03fcf26038b27061b0f72b8"
+    },
+    {
+      "file": "rabbit-ice-000.png",
+      "bytes": 469709,
+      "sha256": "634ff4bb0e339decdeaaeb1dbca330934766fec49ce5d12c1b5e47b4c1dda3d8"
+    },
+    {
+      "file": "rabbit-fire-000.png",
+      "bytes": 469590,
+      "sha256": "8a5e31136a4b12d214e1da0d62823d0c4372c75b40b06b88af352b0fe2d3d6dc"
+    },
+    {
+      "file": "sheep-ice-035.png",
+      "bytes": 471528,
+      "sha256": "f69a4829e63a3aa6a6255b993922227ceeb1d60c24232c2f2e8420bffdb276fb"
+    },
+    {
+      "file": "aion-ice-070.png",
+      "bytes": 473667,
+      "sha256": "853b8bbb828e3a1bb8c0de3d8591f13b4a5c00a227998c85f12eadc84de3d284"
+    },
+    {
+      "file": "wolf-ice-000.png",
+      "bytes": 470238,
+      "sha256": "b9629820f91064e6d467f73dd8206f9c47a098c927347a580ed2bc540711d004"
+    },
+    {
+      "file": "aion-fire-035.png",
+      "bytes": 472149,
+      "sha256": "2fa1e48053d238e51459a94dde1a415d5665a80e76577d8aa93c1fc0b0ad4da9"
+    },
+    {
+      "file": "sheep-fire-070.png",
+      "bytes": 470752,
+      "sha256": "49f3e29710d6520c197cce14a12843d01785eaafbed7b842ad24fd53b06e4c53"
+    },
+    {
+      "file": "eren-fire-035.png",
+      "bytes": 467877,
+      "sha256": "78ccab0c76ffc98e2bc4e7efaf0ff04738a23000aad9dc6087e18ef4deda3464"
+    },
+    {
+      "file": "rabbit-ice-035.png",
+      "bytes": 470117,
+      "sha256": "0b107acf419116ebad270b96f76b2e54fcc7051dd8fba742688c43403cee5e45"
+    },
+    {
+      "file": "owl-fire-070.png",
+      "bytes": 468267,
+      "sha256": "7370de0d60507c0139f11aab5ccf1c90dccec6510e377ba4acbcefb8a72d96d2"
+    },
+    {
+      "file": "wolf-fire-035.png",
+      "bytes": 469933,
+      "sha256": "8023f262d3ed44146eff75479192523d8bb3b4b5dccd608693c9085d99b54d4f"
+    },
+    {
+      "file": "eren-fire-000.png",
+      "bytes": 467592,
+      "sha256": "4a4c30bb55fb8b6871d7ba2f3af35440bcdbb9338ca750c2b17687fe17c1f16a"
+    },
+    {
+      "file": "rabbit-fire-035.png",
+      "bytes": 469972,
+      "sha256": "6cc6bb33dc0efb3221a22879ff3b1cfe22ba2ace253a50c0f688082d1a324506"
+    },
+    {
+      "file": "owl-ice-000.png",
+      "bytes": 468470,
+      "sha256": "5451d8859cdf2eec6899acedde598464e5f1e79a8c0c246a5efff5b25b85b455"
+    },
+    {
+      "file": "eren-ice-035.png",
+      "bytes": 469197,
+      "sha256": "de352bc8ca953789d11ddb003ccf4afc0c723c66e24442666c6fd391a6fadd7f"
+    },
+    {
+      "file": "wolf-ice-035.png",
+      "bytes": 471682,
+      "sha256": "c6a1aed7b9220727f2953a055d863e940a5f0ec9fe8f56fc8bb1395eb1d57df6"
+    },
+    {
+      "file": "sheep-ice-070.png",
+      "bytes": 474401,
+      "sha256": "8042053d69c0c97110acde0270378c51247c7a09ef3bfcb19e327315e5c8595a"
+    },
+    {
+      "file": "owl-ice-035.png",
+      "bytes": 470436,
+      "sha256": "9b450171b3ba879d10d6257cafedbc8a8c032d65131e19894375a34723df66f0"
+    },
+    {
+      "file": "owl-fire-035.png",
+      "bytes": 469525,
+      "sha256": "b530f6b9dd66d0d8f41d5f7399d245eb8095e0d6f192d01daec6ffaba696ccbf"
+    },
+    {
+      "file": "rabbit-ice-070.png",
+      "bytes": 472320,
+      "sha256": "787d373b153a4310373066245f7996bac27ffaed7ffc54cb7593510cc4c8b812"
+    },
+    {
+      "file": "aion-fire-070.png",
+      "bytes": 472039,
+      "sha256": "603f0ce9aab8158e86664a3308c2044b29267ac05d1976561417ba2b6bc30016"
+    },
+    {
+      "file": "aion-ice-000.png",
+      "bytes": 471577,
+      "sha256": "9e4e481805f3ed44eea5f09da2bdae8ba9f6e58e8793b06a3d813b6d10135241"
+    },
+    {
+      "file": "eren-ice-000.png",
+      "bytes": 467625,
+      "sha256": "78df06a47d25ef4663c2f828195514cc93c0311c74d9573ad05a1c053d798286"
+    },
+    {
+      "file": "wolf-fire-000.png",
+      "bytes": 470168,
+      "sha256": "d28e1c4e85443707e040eb46e0e27916c97c43e4b1b1602056d1e014c0839241"
+    },
+    {
+      "file": "wolf-fire-070.png",
+      "bytes": 469742,
+      "sha256": "0e264d1913d17bb3ba794a18ccb42f7fae5375c2c3df410d718929a951be09d8"
+    },
+    {
+      "file": "aion-ice-035.png",
+      "bytes": 473003,
+      "sha256": "b762ebda278c5440d27b08d03f3a9fbb1a544648d787217a947f3a6d9732c9b9"
+    },
+    {
+      "file": "sheep-fire-035.png",
+      "bytes": 471045,
+      "sha256": "3e37c6ef0bf484e9393b5ebc986a9eb99b8365a582e32ebde239def286620d68"
+    },
+    {
+      "file": "wolf-ice-070.png",
+      "bytes": 472225,
+      "sha256": "5222880a666da3192a83c5f156d8e3649f554ec4479b85752344df9c1b572594"
+    },
+    {
+      "file": "sheep-ice-000.png",
+      "bytes": 471072,
+      "sha256": "d00db8e780fa7edb8832c011f049ca51ea311171ed741b1666bbc2dd33082cf4"
+    },
+    {
+      "file": "eren-ice-070.png",
+      "bytes": 473205,
+      "sha256": "ece49389aa568ead52cc5bf60c2d1d2476a0793c47daa216b90e0a10492268c1"
+    },
+    {
+      "file": "sheep-fire-000.png",
+      "bytes": 470961,
+      "sha256": "a9a9e6e5f968be1dedb393eba5fc15c2c43f24f8ff1da93b7cd8eb9eb94c1fbd"
+    },
+    {
+      "file": "owl-fire-000.png",
+      "bytes": 468464,
+      "sha256": "47e3e0ecbf7d70ee79a7b0a3685755ab231d32731b01404e9cc0faa6aa836c79"
+    }
+  ]
+}

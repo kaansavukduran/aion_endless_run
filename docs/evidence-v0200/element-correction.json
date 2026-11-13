@@ -1,0 +1,20 @@
+{
+  "normal_jump_run_fire_roll_special_and_death_frames_unchanged": true,
+  "changed_rows": [
+    7,
+    8
+  ],
+  "new_measured_element_frames": 72,
+  "observed_before_max_frost_x_spread_logical_pixels": {
+    "pixel-aion": 3.2031,
+    "pixel-owl": 1.73,
+    "pixel-sheep": 4.1,
+    "pixel-wolf": 1.8707,
+    "pixel-rabbit": 1.8462,
+    "pixel-eren": 11.7366
+  },
+  "correction": "Bounded whole-face RGB/alpha matching inside anatomical head window; X anchored, existing ground Y and all scales retained. Heavy frost Emre tie false-match rejected by anatomical bounds.",
+  "pixel_suite_before": "1452 checks /72 failures",
+  "pixel_suite_after": "1596 checks /0 failures, including72 actual-scene fixtures",
+  "note": "Before positions use the final anatomically bounded source-face match projected through the old origins. An unconstrained heavy-frost Emre match at the tie is explicitly rejected, not used as a face measurement."
+}

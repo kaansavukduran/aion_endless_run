@@ -1,7 +1,19 @@
 {
   "version": "0.20.0",
-  "source_and_scene_checks": 10694,
-  "browser_checks": 139,
-  "native_status": "PENDING",
-  "publication_status": "PENDING"
+  "recorded_at": "2026-11-13T23:56:59.486552+03:00",
+  "timezone": "Europe/Istanbul",
+  "source_commit": "6de0867fdfa78cc8c5e1d8978624c82821692b93",
+  "android_application_source_commit": "bbf2ebdd678736be69d9ec685943f54a327494db",
+  "source_and_scene_checks": 10970,
+  "source_suites": 19,
+  "browser_checks": 166,
+  "native_android_checks": 11,
+  "deterministic_native_scene_renders": 36,
+  "pages_build": "323d157ff6249dfa",
+  "pages_status": "PASS: corrected source and actual Chromium/Firefox play",
+  "offline_status": "PASS: same-build worker, naturally earned record, offline Fire",
+  "vercel_status": "BLOCKED final elemental fix: Deployment rate limited — retry in 24 hours. Initial0.20.0 build6c16a911acb2a9f4 remains available.",
+  "publication_status": "VERIFIED_BUILD_AWAITING_PUBLICATION",
+  "physical_poco_iphone_gamepads": "NOT TESTED",
+  "ios_native": "Requires owner signing; unchanged limitation"
 }

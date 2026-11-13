@@ -1,0 +1,9 @@
+{
+  "application_source_commit": "bbf2ebdd678736be69d9ec685943f54a327494db",
+  "apk_sha256": "079e7b103fdcb808cbba739154199feae32b6c4e996825c1459cbdb006ff2399",
+  "embedded_asset_path": "assets/assets/PIXEL-HEROES-PROVENANCE.json",
+  "embedded_and_source_bytes_equal": true,
+  "json_sha256": "292b4c1390dd80e97501a4e5633e6c57b843ae9258de716f69d062cbc4914b7c",
+  "actual_face_records": 288,
+  "frost_and_fire_registered_frames": 72
+}
