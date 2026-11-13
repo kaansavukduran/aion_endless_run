@@ -1,0 +1,25 @@
+{
+  "url": "https://aionendlessrun.vercel.app/?build=49607fd4dd9c8030",
+  "build": {
+    "build": "49607fd4dd9c8030",
+    "version": "0.17.0"
+  },
+  "browser": "Firefox 153.0",
+  "checks": [
+    "The canonical production URL really boots 0.17.0 with a verified PCK in Firefox",
+    "Every actual Aion running frame keeps the corrected horizontal gaze on production",
+    "Firefox touch Fire spends a real pistol round",
+    "Firefox touch Reload starts the one-second magazine timer",
+    "Firefox touch Roll reaches the actual somersault action",
+    "Production rotates upright to portrait without resetting the paused run",
+    "No script errors or missing-PCK alert in live Firefox play"
+  ],
+  "dialogs": [],
+  "errors": [],
+  "boot": {
+    "phase": "ready",
+    "attempts": 1,
+    "error": ""
+  },
+  "scope": "Headed desktop Gecko with Android UA/touch, not physical Poco. Live HTTPS responses forwarded with system-CA TLS verification; SW disabled here and separately tested with real local workers."
+}

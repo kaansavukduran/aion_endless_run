@@ -23,3 +23,5 @@ Aşağıdaki iki görüntü gerçek Godot renderer'ında seçilmiş biyom ve bil
 ## Yeniden doğrula
 
 `tests/browser_firearm.py --menu-only --evidence ...` ve `--skip-menu --evidence ...` gerçek web çıktısını test eder. 0.16 ve öncesi browser sürücüleri tarihsel yakın-saldırı beklentileri taşır;0.17 silah davranışının kabul sürücüsü bu yeni dosyadır. CI on altı kaynak/sahne paketini ve gerçek yerel Android girişlerini çalıştırır. Üretim/paket sonuçları tamamlandıktan sonra aşağıya eklenir.
+
+Canlı0.17.0 Firefox153.0 üzerinde7 kontrol geçti: PCK açılışı, sabit Aion yüz referansı, gerçek dokunma ateş/doldur/takla, koşuyu koruyan yön değişimi ve hata/uyarı yokluğu. [Canlı sonuçlar](live-firefox.json). Ayrıca güncel yerel ServiceWorker ile3 çevrimdışı kontrol geçti: gerçek kayıt, internet kapalı yeniden açılış ve gerçek tabanca atışı.0.17.1, bu oyunun ikincil yardım metinlerindeki eski20 saniye/yakın saldırı açıklamalarını düzeltir.

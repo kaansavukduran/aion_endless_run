@@ -1,0 +1,12 @@
+{
+  "checks": [
+    "The current 0.17.0 build installs its actual service worker and complete asset cache",
+    "The actual offline reload preserves a naturally earned and saved record",
+    "Offline gameplay loads the current pistol assets and spends a real round"
+  ],
+  "build": {
+    "build": "bb637925f93b3b4a",
+    "version": "0.17.0"
+  },
+  "scope": "Real local ServiceWorker/CacheStorage, offline context, normal input and naturally earned record. No data clearing, scripted world changes or save fixture."
+}

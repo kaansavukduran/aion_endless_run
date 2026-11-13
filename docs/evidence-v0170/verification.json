@@ -147,5 +147,13 @@
     "Some historical model suites still cover the dormant contact-attack API. Current user-facing scene/browser tests assert pistol inputs and no melee animation.",
     "Physical Poco/iPhone/Xbox/PS testing and Apple Developer ID/iOS distribution signing are not available.",
     "Live production, CI native and public-package checks are recorded separately after completion."
-  ]
+  ],
+  "current_offline_checks": 3,
+  "offline_scope": "Actual current-build local ServiceWorker/CacheStorage, normal input, earned record, offline reload and actual pistol round. No save/world injection.",
+  "live_firefox_checks": 7,
+  "production_build": {
+    "build": "49607fd4dd9c8030",
+    "version": "0.17.0"
+  },
+  "production_commit": "32251ec9c93ffff3fa04417af464560c93f7cd6d"
 }

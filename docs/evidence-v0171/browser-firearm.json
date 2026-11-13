@@ -1,0 +1,85 @@
+{
+  "checks": [
+    "Exact visible hero name: Aion",
+    "Stable faithful pistol loop replaces melee: aion",
+    "R starts a visible reload without restoring early rounds",
+    "One-second reload restores all five rounds during normal running",
+    "No long level progress bar: aion",
+    "Exact visible hero name: Kutsanmış",
+    "Stable faithful pistol loop replaces melee: sheep",
+    "No long level progress bar: sheep",
+    "Exact visible hero name: Melun",
+    "Stable faithful pistol loop replaces melee: wolf",
+    "No long level progress bar: wolf",
+    "Wolf keeps four-legged sprint with his own pistol overlay",
+    "Exact visible hero name: Ömer",
+    "Stable faithful pistol loop replaces melee: owl",
+    "No long level progress bar: owl",
+    "Owl retains calm glide with the pistol",
+    "Exact visible hero name: Emre",
+    "Stable faithful pistol loop replaces melee: rabbit",
+    "No long level progress bar: rabbit",
+    "Held left click emits exactly five rounds and an empty magazine stops in real combat",
+    "RB fires real boss-damaging bullets and X/Square manually reloads",
+    "Pause and rotation preserve magazine, reload timer and run state",
+    "Cancelling a Fire touch releases the trigger without extra shots",
+    "Portrait Reload circle restores the shared five-round magazine",
+    "No browser or Godot script errors in all menu, gun, reload and rotation flows"
+  ],
+  "errors": [],
+  "gaze_samples": {
+    "aion": [
+      302,
+      302,
+      302,
+      302,
+      302,
+      302,
+      302
+    ],
+    "sheep": [
+      302,
+      302,
+      302,
+      302,
+      302,
+      302,
+      302
+    ],
+    "wolf": [
+      302,
+      302,
+      302,
+      302,
+      302,
+      302,
+      302,
+      302
+    ],
+    "owl": [
+      302,
+      302,
+      302,
+      302,
+      302,
+      302,
+      302,
+      302
+    ],
+    "rabbit": [
+      306,
+      306,
+      306,
+      306,
+      306,
+      306,
+      306,
+      306,
+      306,
+      306,
+      306,
+      306
+    ]
+  },
+  "scope": "Actual UI, key/mouse/touch and standard Gamepad API input. A documented legacy save fixture seeds settings/records only, never the running world."
+}
