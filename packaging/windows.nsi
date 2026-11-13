@@ -1,7 +1,7 @@
 Unicode true
 !include "MUI2.nsh"
 Name "Aion Endless Run"
-OutFile "..\build\AionEndlessRun-0.17.0-windows-x64-Setup.exe"
+OutFile "..\build\AionEndlessRun-0.17.1-windows-x64-Setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\Aion Endless Run"
 RequestExecutionLevel user
 !define MUI_ABORTWARNING
@@ -24,7 +24,7 @@ Section "Game"
   CreateShortcut "$SMPROGRAMS\Aion Endless Run\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
   CreateShortcut "$DESKTOP\Aion Endless Run.lnk" "$INSTDIR\AionEndlessRun.exe"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\AionEndlessRun" "DisplayName" "Aion Endless Run"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\AionEndlessRun" "DisplayVersion" "0.17.0"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\AionEndlessRun" "DisplayVersion" "0.17.1"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\AionEndlessRun" "UninstallString" '"$INSTDIR\Uninstall.exe"'
 SectionEnd
 Section "Uninstall"
