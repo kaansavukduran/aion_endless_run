@@ -12,11 +12,15 @@ const FLORA=preload("res://assets/FLORA-PROVENANCE.json")
 const LOW_ROLLS=preload("res://assets/LOW-ROLLS-PROVENANCE.json")
 const SHOULDERS=preload("res://assets/SHOULDER-POSES-PROVENANCE.json")
 const EREN=preload("res://assets/EREN-PROVENANCE.json")
+const PIXEL=preload("res://assets/PIXEL-HEROES-PROVENANCE.json")
 const ORCHARD = preload("res://assets/ORCHARD-PROVENANCE.json")
 var images := {}
 var frames := {}
 
 func descriptor(key: String,row: int) -> Dictionary:
+	if PIXEL.data.aliases.has(key):
+		var pixel: Dictionary=PIXEL.data.aliases[key][row]
+		return {"key":pixel.atlas,"row":int(pixel.row),"data":PIXEL.data.atlases[pixel.atlas]}
 	if key=="rolls":
 		return {"key":"eren-animations","row":5,"data":EREN.data.atlas} if row==5 else {"key":"shoulder-rolls","row":row,"data":SHOULDERS.data.atlas}
 	if key=="runner-eren":return {"key":"eren-animations","row":[0,1,2,7,8,9,2,2][clampi(row,0,7)],"data":EREN.data.atlas}

@@ -1,7 +1,8 @@
-# AIONIA v1.4 · Aion Endless Run
+# AIONIA · Güncel standart kaynağı
 
-Normatif kaynak: [AIONIA v1.4, 12 Kasım 2026](https://docs.google.com/document/d/16jj2cwbm8SiVWqDy3N3dzqxTlLoK7JR2_aH6hl4noWY/edit).
-Belge bu görevde bağlı Google Drive hesabından gerçekten okundu. [Okunan metin](docs/standards/AIONIA-v1.4.txt) SHA-256: `1447f031242ba5f4da5162c4be2427cd4531a594c328e2bb548002f6d4ae85cd`. Bu metin bir Google Docs revizyon yedeği değildir; okunan içerik anlık görüntüsüdür. Kullanıcının daha yeni açık talimatları önceliklidir.
+Normatif kaynak, [canlı AIONIA belgesinin](https://docs.google.com/document/d/16jj2cwbm8SiVWqDy3N3dzqxTlLoK7JR2_aH6hl4noWY/edit) güncel içeriğidir. Son gerçek okuma13 Kasım2026: v1.7; referans dizini rev3 ve oyun regresyon kaydı v1.1. Okuma, oyun kodunun veya bütün platformların otomatik onayı değildir. Kullanıcının daha yeni açık kararları önceliklidir.
+
+`docs/standards/AIONIA-v1.4.txt` eski bir tarihsel okuma anlık görüntüsüdür; güncel normatif kaynak veya Google Docs revizyon yedeği değildir. Yeni özel belge metinleri bu kamu deposuna kopyalanmadı.0.20.0 uygulama/kanıt kapsamı [buradadır](docs/evidence-v0200/README.md).
 
 Mevcut Godot 4.6.3 projesi geliştirilir. AIONIA bir evrendir; bu çalışma yeni bir motor, framework veya yeniden tasarlanmış kahramanlar oluşturmaz. Projenin uygulama sürümü, standardın 1.4 numarasından bağımsızdır.
 

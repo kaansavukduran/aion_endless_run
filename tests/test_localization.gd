@@ -50,25 +50,26 @@ func run() -> void:
 	# Head/ear span remains anatomically constant when poses lean or extend.
 	# Whole-pose height intentionally varies with bent knees and outstretched wings.
 	for id in ["owl","wolf","sheep"]:
+		var expected: float={"owl":57.434599,"wolf":52.380228,"sheep":63.076923}[id]
 		var sizes_ok := true
 		for row in [0,1,2,6,7]:
 			for frame in 6:
 				game.place_companion(game.friend_sprite,id,row,frame,Vector2.ZERO)
-				sizes_ok = sizes_ok and is_equal_approx(float(game.friend_sprite.get_meta("head_size")),65.0) and not game.friend_sprite.region_enabled
+				sizes_ok = sizes_ok and is_equal_approx(float(game.friend_sprite.get_meta("head_size")),expected) and not game.friend_sprite.region_enabled
 		for frame in 6:
 			game.place_companion(game.friend_sprite,id,6,frame,Vector2.ZERO,0.62,true)
-			sizes_ok = sizes_ok and is_equal_approx(float(game.friend_sprite.get_meta("head_size")),65.0)
+			sizes_ok = sizes_ok and is_equal_approx(float(game.friend_sprite.get_meta("head_size")),expected)
 		check(sizes_ok,"Run/jump/glide/updraft/dash use one anatomical head span across independent frames: " + id)
 	game.world.state = "running"
 	game.world.character = "sheep"
 	game.world.sheep_count = 3
 	game.world.y = 0.0
 	game.update_friend()
-	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),65.0),"Leader sheep keeps its normal anatomical size")
+	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),63.076923),"Leader sheep keeps its normal anatomical size")
 	for item in game.followers:
-		check(is_equal_approx(float(item.get_meta("head_size")),65.0*0.72),"Each following sheep is 72 percent of normal anatomical size")
+		check(is_equal_approx(float(item.get_meta("head_size")),63.076923*0.72),"Each following sheep is 72 percent of normal anatomical size")
 	game.place_companion(game.friend_sprite,"owl",6,2,Vector2.ZERO,0.62*1.65,true)
-	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),65.0*1.65),"Explicit mushroom growth remains independent of pose")
+	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),57.434599*1.65),"Explicit mushroom growth remains independent of pose")
 	game.set_language("cs")
 	game.save_settings()
 	var restored = load("res://main.tscn").instantiate()

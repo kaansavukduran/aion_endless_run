@@ -30,18 +30,18 @@ func run():
  var sprite:=Sprite2D.new();sprite.centered=false
  for row in 6:
   var n: int=bank.count("rolls",row)
-  check(n==(8 if row==5 else 12),"Actual shoulder pose count, no padded duplicates")
-  var upright:=bank.pose("rolls",row,0)
+  check(n==6,"Actual shoulder pose count, no padded duplicates")
+  var upright:=bank.pose("runner-"+["aion","owl","sheep","wolf","rabbit","eren"][row],0,0)
   # Eren retains his long ears; measure their actual unsquashed silhouette.
-  var low:=bank.pose("rolls",row,2 if row==5 else 3)
-  check(low.height<upright.height*(.85 if row==5 else .80),"Visible knee/hand bend lowers the hero: "+str(row))
+  var low:=bank.pose("rolls",row,5)
+  check(low.height<upright.height*(.85 if row>=4 else .80),"Visible knee/hand bend lowers the hero: "+str(row))
   for i in n:
    bank.place(sprite,"rolls",row,i,Vector2(288,500))
    check(sprite.position==Vector2(288,500) and is_equal_approx(sprite.scale.x,upright.scale),"No physical-position or per-frame scale workaround")
  var w=World.new();w.reset();w.obstacle_wait=999;w.adventure.item_wait=999;w.frontier.plant_wait=999;w.adventure.ambient_gnome_wait=999;w.adventure.press_roll(w)
  for tick in 100:w.step(.01)
- check(w.adventure.ducking(w) and w.adventure.roll_frame()==3,"One forward shoulder roll settles low; holding never spins a ball")
- check(w.adventure.roll_pose(1.0,.14,false)==9,"Release uses the authored recovery poses")
+ check(w.adventure.ducking(w) and w.adventure.roll_frame()==5,"One forward shoulder roll settles low; holding never spins a ball")
+ check(w.adventure.roll_pose(1.0,.14,false)==5,"Release uses the authored recovery poses")
  sprite.free()
  var g=load("res://main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.touch_tutorial_done=true
  for dims in [Vector2i(1152,648),Vector2i(393,873),Vector2i(873,393)]:
@@ -63,7 +63,7 @@ func run():
    for tick in 220:g.world.step(.01)
    check(g.world.frontier.shots_fired>=6,"Normal firearm input continues after five bullets")
    g.release_shoot("key");g.press_jump("key");g.world.step(.01);g.update_friend()
-   check(g.world.y<0 and not g.world.charging and g.friend_sprite.get_meta("source_key")=="eren-animations","Eren jumps using his own art, independently of Emre")
+   check(g.world.y<0 and not g.world.charging and g.friend_sprite.get_meta("source_key")=="pixel-eren","Eren jumps using his own art, independently of Emre")
    g.release_jump("key");g.main_menu()
  root.size=Vector2i(393,873);await process_frame;g.touch_mode=true;g.interface_options.text_scale=1.0;g.active_input="touch"
  for lang in g.Words.LANGUAGES:

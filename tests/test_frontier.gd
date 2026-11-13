@@ -154,7 +154,8 @@ func run() -> void:
 	await process_frame
 	game.set_physics_process(false)
 	for id in game.FRIENDS:
-		var target: float=84.0*game.frames.EREN.data.atlas.scale[0] if id=="eren" else (53.2 if id=="rabbit" else (70.0 if id == "aion" else 65.0))
+		var legacy_target: float=84.0*game.frames.EREN.data.atlas.scale[0] if id=="eren" else (53.2 if id=="rabbit" else (70.0 if id == "aion" else 65.0))
+		var target: float={"aion":60.859375,"owl":57.434599,"sheep":63.076923,"wolf":52.380228,"rabbit":36.923077,"eren":53.004115}[id]
 		for row in ([0,1,2] if id == "aion" else [0,1,2,6,7]):
 			for frame in 6:
 				game.place_companion(game.friend_sprite,id,row,frame,Vector2.ZERO)
@@ -167,7 +168,7 @@ func run() -> void:
 				var edges_clear := true
 				for x in image.get_width(): edges_clear = edges_clear and image.get_pixel(x,0).a == 0 and image.get_pixel(x,image.get_height()-1).a == 0
 				for y in image.get_height(): edges_clear = edges_clear and image.get_pixel(0,y).a == 0 and image.get_pixel(image.get_width()-1,y).a == 0
-				check(edges_clear and is_equal_approx(float(game.friend_sprite.get_meta("head_size")),target),"Both strikes have padded independent texture edges and stable anatomy: "+id+"/"+str(variant)+"/"+str(frame))
+				check(edges_clear and is_equal_approx(float(game.friend_sprite.get_meta("head_size")),legacy_target),"Both strikes have padded independent texture edges and stable anatomy: "+id+"/"+str(variant)+"/"+str(frame))
 		for frame in 6:
 			game.frames.place(game.friend_sprite,"heroes",game.COMBAT_ROWS[id],frame,Vector2.ZERO)
 			check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),target),"Gun poses retain the running character head size: "+id+"/"+str(frame))

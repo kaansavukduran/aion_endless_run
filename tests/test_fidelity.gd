@@ -25,7 +25,7 @@ func run() -> void:
     check(f.body_bounds[3]-f.body_bounds[1]>d.height/14*.35,"A row boundary does not crop through the face: "+hero+str(row)+":"+str(column))
  var roll: Dictionary = bank.CANONICAL.data.atlases["canonical-rolls"]
  for row in 4:
-  check(bank.count("rolls",row)==12,"Each low roll has twelve actual bend/rotation/recovery poses; the old eight-angle sheet remains archived")
+  check(bank.count("rolls",row)==6,"Each upgraded roll has six actually drawn shoulder poses; original sheets remain archived")
   for col in 8:
    var f: Dictionary = roll.frames[row][col]
    check(f.source_column==col and f.clockwise_degrees==col*45,"Visually reviewed clockwise source order is retained")

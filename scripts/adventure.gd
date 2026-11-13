@@ -191,10 +191,15 @@ func request_attack(world) -> bool:
 		return false
 	return attack(world)
 
-func roll_frame(frame_count: int = 12) -> int:
+func roll_frame(frame_count: int = 6) -> int:
 	return roll_pose(roll_elapsed,roll_time,duck_held,frame_count)
 
-func roll_pose(elapsed: float,remaining: float,held: bool,frame_count: int=12) -> int:
+func roll_pose(elapsed: float,remaining: float,held: bool,frame_count: int=6) -> int:
+	if frame_count==6:
+		# Six reviewed new poses: lower, hands, shoulder, hips over, feet,
+		# crouch. Never hold the upside-down shoulder pose or loop a ball.
+		if not held and remaining<0.15:return 5 if remaining>.075 else 0
+		return mini(5,int(maxf(0.0,elapsed)/0.53*6))
 	# A single planted-hand shoulder roll, then a low crouch while held.
 	# Repeating the entry/recovery at high speed made the hero read as a ball.
 	var entry:=3 if frame_count>=12 else 2
@@ -313,7 +318,7 @@ func attack(world) -> bool:
 func attack_active() -> bool:
 	return attack_time > 0.10 and attack_time <= 0.27
 
-func attack_frame(frame_count: int = 12) -> int:
+func attack_frame(frame_count: int = 6) -> int:
 	return clampi(int((ATTACK_DURATION-attack_time)/ATTACK_DURATION*frame_count),0,frame_count-1)
 
 func body_rect(world) -> Rect2:

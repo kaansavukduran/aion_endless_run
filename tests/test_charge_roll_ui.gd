@@ -27,18 +27,18 @@ func run():
  w=arena();w.jump();advance(w,.3);w.state="paused";w.step(.02)
  check(is_equal_approx(w.charge_time,.3),"Pause cannot advance the charge clock")
  var bank=Bank.new();var sprite:=Sprite2D.new();sprite.centered=false
- for row in 5:
-  check(bank.count("rolls",row)==12,"Twelve actual bend/rotation/recovery poses for hero "+str(row))
-  var first:=bank.pose("rolls",row,0);var low:=bank.pose("rolls",row,3)
+ for row in 6:
+  check(bank.count("rolls",row)==6,"Six actual bend/rotation/recovery poses for hero "+str(row))
+  var first:=bank.pose("gun-run",row,0);var low:=bank.pose("rolls",row,5)
   check(low.height<first.height*.9,"Drawn low pose visibly lowers the body without squashing "+str(row))
-  for frame in 12:
+  for frame in 6:
    bank.place(sprite,"rolls",row,frame,Vector2(288,500))
    var pose:=bank.pose("rolls",row,frame)
    check(sprite.position==Vector2(288,500) and is_equal_approx(sprite.scale.x,first.scale),"Fixed physical pivot and one uniform scale: "+str(row)+"/"+str(frame))
    check(absf(sprite.position.y+(pose.offset.y+pose.texture.get_height()-2)*pose.scale-500)<.01,"Every pose contacts the actual ground")
  sprite.free()
- for tick in range(20,200):check(w.adventure.roll_pose(tick*.02,0,true)==3 if tick*.02>=.53 else w.adventure.roll_pose(tick*.02,0,true) in [3,4,5,6,7,8],"One shoulder roll settles into a low crouch while held")
- check(w.adventure.roll_pose(.8,.14,false)==9 and w.adventure.roll_pose(.92,.02,false)==11,"Release shows authored recovery poses")
+ for tick in range(20,200):check(w.adventure.roll_pose(tick*.02,0,true)==5 if tick*.02>=.53 else w.adventure.roll_pose(tick*.02,0,true) in [2,3,4,5],"One shoulder roll settles into a low crouch while held")
+ check(w.adventure.roll_pose(.8,.14,false)==5 and w.adventure.roll_pose(.92,.02,false)==0,"Release shows authored recovery poses")
  var save_path:="user://save.cfg";var original:=FileAccess.get_file_as_bytes(save_path) if FileAccess.file_exists(save_path) else PackedByteArray()
  var g=load("res://main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.touch_tutorial_done=true
  for dims in [Vector2i(873,393),Vector2i(393,873),Vector2i(1152,648)]:

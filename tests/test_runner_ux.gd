@@ -87,7 +87,7 @@ func registration_tests() -> void:
 			registered_irises.append(rendered)
 			check(absf(rendered.x-registered_irises[0].x)<=1.0 and absf(rendered.y-registered_irises[0].y)<=1.0,"Independent actual near iris stays within one logical source-pixel step: "+hero+str(frame))
 			bank.place(item,"runner-"+hero,1,frame,Vector2(288,500))
-			check(is_equal_approx(item.position.x,288) and is_equal_approx(item.scale.x,d.scale[1]),"Sprite physics anchor and per-hero scale stay constant through the full run loop")
+			check(is_equal_approx(item.position.x,288) and is_equal_approx(item.scale.x,bank.PIXEL.data.atlases["pixel-"+hero].scale[1]),"Sprite physics anchor and per-hero scale stay constant through the full run loop")
 		item.free()
 func scene_tests() -> void:
 	var save_path:="user://save.cfg";var original:=FileAccess.get_file_as_bytes(save_path) if FileAccess.file_exists(save_path) else PackedByteArray()

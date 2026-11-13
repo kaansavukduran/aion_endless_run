@@ -1,3 +1,9 @@
+# Aion Endless Run 0.20.0
+
+Altı kahramanın396 yeni kaynak çizimi, bütün-yüz kaydı, tam kulak/ayak kesimi ve sabit karakter ölçeği. Ömer süzülmesi, Melun dört ayak deparı, Emre şarjlı sıçraması, ayrı Eren ve gecikmeli koyunlar korunur. Tek alçak omuz taklası ve dar silah eki; sınırsız tabancanın0,32s aralığı değişmez.
+
+[Gerçek testler](evidence-v0200/README.md) · [Oyna](https://kaansavukduran.github.io/aion_endless_run/) · [Paketler](https://github.com/kaansavukduran/aion_endless_run/releases).0.20.0 platform paketleri/yayın kontrolleri devam ediyor; önceki tamamlanmış sürüm aşağıdadır.
+
 # Aion Endless Run 0.19.0
 
 Aion ve diğer kahramanlarda bağımsız yüz-piksel kaydı; sabit fizik noktası, ortak kaynak piksel fazı ve tek karakter ölçeği. Beş kahramana60 omuz taklası pozu; Eren'e79 ayrı çizilmiş poz. Eren, Emre'den ayrı altıncı seçimdir. Eski karakter PNG'leri korunur.

@@ -1,12 +1,12 @@
 # Aion Endless Run
 
-Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.19.0**.
+Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.20.0**.
 
-**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.19.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.19.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0190/README.md)
+**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.20.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0200/README.md)
 
-![Gerçek oyunun kompakt ana menüsü](docs/evidence-v0190/screenshots/main-dark.png)
+![Gerçek oyunun kompakt ana menüsü](docs/evidence-v0200/screenshots/main-dark.png)
 
-0.19.0: Eren, Emre'den ayrı altıncı kahraman. Aion ve diğer kahramanların kare hizaları bütün yüzün piksel karşılaştırmasıyla düzeltilir. Omuz üzerinden tek öne takla; basılı tutuşta alçak bekleme. Tabanca sınırsızdır, doldurma yoktur; 0,32 saniyelik atış aralığı korunur. Ana menü gerçek içeriği kadar yer kaplar; dokunma düğmeleri simetrik ve cihaz pikseline hizalıdır. [Gerçek doğrulama kapsamı](docs/evidence-v0190/README.md). İki oynama adresinin rekorları ayrı saklanır.
+0.20.0: Altı kahraman için396 farklı çizilmiş poz içeren altı yeni pixel-art pafta; malzeme gölgeleri, seçici konturlar ve okunaklı hareket. Yüz hizası, tam kulak/ayak kesimi, tek alçak omuz taklası ve silah eki doğrulanır. Özgün kaynak PNG'ler korunur. Tabanca sınırsızdır;0,32 saniyelik atış aralığı ve mevcut yetenekler korunur. İki oynama adresinin rekorları ayrı saklanır.
 
 ## Oyna
 
@@ -37,6 +37,12 @@ Yumruk eylemi kaldırıldı. Her kahraman düz ileri tabanca sıkar; mermi bitti
 Altı biyom: Kehribar Çölü, Ayaz Vadisi, Sisli Bataklık, Bakır Şehir, Fener Ormanı ve Kor Sırtı. Gündüz/gece, hava olayları, kargalar, cüceler, seyrek ateş bitkileri, çukurlar ve kargaların taşıdığı üst engeller vardır. Her **15 saniyelik aktif normal koşu** yeni seviyedir; menü, duraklatma, sarılma ve boss zamanı bu sayaca girmez. Her on seviyede sarılma ve ve üç tasarımı dönen boss kovalamacası vardır. Boss arenasında normal parkur temizlenir. İsteğe bağlı antrenman üç boss’u doğrudan denetir ve rekoru değiştirmez.
 
 Meyveler +25, temiz aşılan engeller +10; mesafe de skor kazandırır. On toplanabilir güç bulunur. Sıçrama tılsımı 9 saniye daha yüksek zıplatır, şans parası 12 saniye meyve puanını ikiye katlar, buz feneri 8 saniye yakındaki yaklaşan düşmanları yavaşlatır. Dev mantar varsayılan %2 uygun eşya olasılığıyla nadirdir; ilk 20 saniyede ve önceki mantardan sonraki 45 saniyede gelmez. Mantar dalgasının toplam cüce üretimi yaklaşık yarıya indirildi; ortam cüceleri değişmedi. Her 100’ün katı eşiğinden sonraki ilk uygun boss zaferi **Fragaria çileğini** sunar. Bu nesne yalnız kısa kutlamadır; güç, puan veya başka oynanış ödülü vermez.
+
+## 0.20.0 · Yeni kahraman pixel-art paftaları
+
+Aion, Ömer, Melun, Kutsanmış, Emre ve Eren için6 yeni pafta,396 farklı çizilmiş poz. Daha belirgin malzeme gölgeleri, piksel kümeleri ve seçici konturlar; özgün renkler ve karakter kimlikleri korunur. Koşu/ateş/uçuş yüz kaydı, tam kulak/ayak kesimi, alçak tek omuz taklası ve dar silah eki aynı mevcut oyun akışına bağlıdır. Özgün PNG'ler saklanır.
+
+[Sanat sözleşmesi](docs/ART_BIBLE.md) · [Doğrulama](docs/evidence-v0200/README.md). Kontroller ve kayıt sistemi korunur; şarjör/reload geri eklenmez.
 
 ## 0.19.0 · Sabit yüz hizası, omuz taklası, Eren
 

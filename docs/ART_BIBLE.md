@@ -2,9 +2,9 @@
 
 ## Kimlik ve kaynak
 
-Aion, Baykuş Ömer, Melun Bilge Kurt ve Kutsanmış Cahil Koyun'un doğrulanmış paftaları temel kaynaktır. Bu görevde kahraman PNG'leri yeniden çizilmedi. Kaynak/provenans ve `SPRITE-REGISTRATION.json`, `CANONICAL-PROVENANCE.json`, `AGILITY-PROVENANCE.json` korunur. Eski Drive arşivi, güncel sanatı otomatik olarak geçersiz kılmaz.
+0.20.0 güncel sanat katmanı: Aion, Ömer, Melun, Kutsanmış, Emre ve Eren için altı yeni `pixel-*.png` paftası. Kullanıcının kedi referansı; malzeme gölgeleri, seçici koyu kontur, renk kümeleri ve okunaklı siluet için kalite yönüdür; kostüm veya tür kopyası değildir. Özgün model referanslarının renk, tür ve ayırt edici kıyafetleri korunur. Bu çizimler, kullanıcının istediği oyun içi render yenilemesidir; pafta dosya adları yeni kanon onayı anlamına gelmez. Eski bütün kahraman PNG'leri byte düzeyinde korunur. Güncel kaynak: `PIXEL-HEROES-PROVENANCE.json`; eski kayıtlar tarihsel/geri dönüş kaynağıdır.
 
-Kareler eşit varsayılan genişliğe körlemesine bölünmez: gerçek atlas bölgeleri, şeffaf kenarlar ve ortak anatomik referans kullanılır. Yatay hizalama yakın göz irisiyle, ters dönen koyun tekmesinde üst gövde referansıyla yapılır. Kapalı gözler doğru komşu karelerden, gerçek atlas aralıklarıyla ara değerlenir. Kuyruk/gaga/uzak göz/yüzgeç yanlış pivot olamaz. Fizik konumu kare hizasını örtmek için oynatılmaz.
+Kareler eşit varsayılan genişliğe körlemesine bölünmez: gerçek atlas bölgeleri, şeffaf kenarlar ve ortak anatomik referans kullanılır. Güncel yatay hizalama; burun, yanak, göz ve yüz konturunu birlikte içeren, elle incelenmiş bütün-yüz RGB/alpha şablonuyla ölçülür. Tek renkli iris araması kullanılmaz; Aion'un mavi rozeti veya silahı göz sayılmaz. Kapalı gözler de aynı bütün-yüz alanıyla kaydedilir. Gerçek kaynak bileşeni komşu satırın sınırına uzanıyorsa tam siluet geri alınır; kulak/ayak kesilmez ve komşu karakter yapıştırılmaz. Kuyruk/gaga/uzak göz/yüzgeç yanlış pivot olamaz. Fizik konumu kare hizasını örtmek için oynatılmaz.
 
 Paftaların mevcut piksel çözünürlükleri korunur; ortak yeni bir 16/32 piksel ızgarasına yeniden örneklenmez. Nearest filtre, izole kare dokuları ve piksele yuvarlanan çizim kullanılır. Kahraman başına ölçek animasyon boyunca sabittir. Mantarın amaçlı devliği ve küçük takipçiler ayrı davranıştır. Süre ve kare seçimi mevcut `frame_bank.gd`, `game.gd` ve provenance verisindedir; bütün hareketlere tek FPS dayatılmaz.
 
@@ -22,4 +22,24 @@ Kutlamada `evolution-celebrants.png` içindeki sekiz farklı mevcut kimlik kulla
 
 ## Zamanlama ve ölçüm
 
-Fizik 60 Hz, sunum hedefi 60 FPS'tir; bu fiziksel Poco'da ölçülmüş hız değildir. Koşu çevrimi 174 dünya pikselidir; Aion/baykuş/koyun 7, kurt 8 ana koşu karesi kullanır, dolayısıyla adım hızı dünya hızıyla artar. Baykuş süzülme çevrimi 1 saniye; zıplama kareleri hız/uçuş evresine bağlıdır. Takla en az 0,68 saniye ve ileri saat yönündedir. Saldırı/ateş için kendi keyframe ve temas zamanlamaları korunur. Tek küresel FPS ile bütün paftalar yeniden örneklenmez. Sunucu software-GPU rAF kayıtları Drive doğrulamasında tutulur; cihaz benchmark'ı sayılmaz.
+Fizik 60 Hz, sunum hedefi 60 FPS'tir; bu fiziksel Poco'da ölçülmüş hız değildir. Koşu çevrimi174 dünya pikselidir; altı kahraman da altı farklı çizilmiş ana koşu pozu kullanır. Adım hızı dünya hızıyla artar; kopya karelerle sayım şişirilmez. Baykuş süzülme çevrimi 1 saniye; zıplama kareleri hız/uçuş evresine bağlıdır. Takla en az 0,68 saniye ve ileri saat yönündedir. Saldırı/ateş için kendi keyframe ve temas zamanlamaları korunur. Tek küresel FPS ile bütün paftalar yeniden örneklenmez. Sunucu software-GPU rAF kayıtları Drive doğrulamasında tutulur; cihaz benchmark'ı sayılmaz.
+
+## 0.20.0 pafta sözleşmesi
+
+Altı kaynak paftada11 satır ×6 gerçek çizim =396 çizim vardır. Kaynak PNG'lere yeniden boyutlandırma, palet filtresi veya rötuş uygulanmaz. Keskin siluet için alpha192 altındaki puslu kenar artıkları çizim span'ına alınmaz; bu, yeni çizim veya ek kare diye sayılmaz. PNG'ler kullanıcı yetkisiyle görüntü üretim aracıyla oluşturuldu; elle çizilmiş üretim iddiası yoktur.
+
+| Satır | Eylem | Seçim |
+|---|---|---|
+| 0 | Bekleme |1,5s nefes/göz kırpma |
+| 1 | Silahsız koşu/takipçi |174 dünya px çevrim |
+| 2 | Sıçrama/iniş | Fizik hızına ve uçuş evresine bağlı |
+| 3 | Tabancalı koşu |174 dünya px çevrim |
+| 4 | Ateş | Mevcut0,30s animasyon;0,32s atış aralığı |
+| 5 | Alçak omuz taklası | Eğil → el/kanat yere → omuz → kalça → ayak → alçak bekle; tek tur |
+| 6 | Hasar/düşüş | Mevcut1,25s ölüm evresi |
+| 7–9 | Donma, yanma, kül | Mevcut durum süreleri |
+| 10 | Özel hareket | Aion çift sıçrama, Ömer kanatlı süzülme, Melun dört ayak depar, Emre şarj pozu; diğerleri kendi hoplama pozu |
+
+`frame_bank.gd` eski mantıksal eylemleri güncel paftalara yönlendirir. Her kahramanın bütün satırlarında tek ölçek vardır; zıplama/saldırı/depar boyut büyütmez. Takla fizik kökeni sabittir; omuz hareketi çizilmiş pozdan gelir. Basılı tutunca son alçak kare bekler, ters/top döngüsü yoktur. Ömer'in kanat hareketi korunur; yüz sağa sola gezmez. Emre'nin güç biriktirmesi takla satırından değil ayrı şarj satırından çizilir. Havada silah ekinin kesimi daraltılmıştır: ikinci yüz/yanak taşınmaz. Mermi çıkışı yeni namlu ölçüsünü kullanır. Çarpışma kutuları, seviye temposu, kayıtlar, kontrol şeması ve beceriler değiştirilmez.
+
+Kontrol: `python packaging/register_pixel_heroes.py` (Pillow/NumPy/SciPy; PNG'leri değiştirmez), `tests/test_pixel_heroes.gd`, `tests/browser_quality.py`. Başarılı derleme, sanatın kullanıcı tarafından onaylanması veya fiziksel cihaz testi yerine geçmez.

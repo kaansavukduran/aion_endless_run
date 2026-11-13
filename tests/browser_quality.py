@@ -64,7 +64,7 @@ with sync_playwright() as pw:
    fire_samples=[];shots=0
    for attempt in range(3):
     start(hero);observer();page.wait_for_timeout(attempt*37);page.keyboard.down('f');page.wait_for_timeout(2100);page.keyboard.up('f');rows=page.evaluate('poseSamples');page.keyboard.press('Escape')
-    shots=max(shots,max(x['shots'] for x in rows));fire_row=4 if hero=='eren' else (1 if hero=='rabbit' else 8)
+    shots=max(shots,max(x['shots'] for x in rows));fire_row=4
     fire_samples.extend(x for x in rows if x['row']==fire_row)
     if fire_samples and len({x['frame'] for x in fire_samples})==max(x['count'] for x in fire_samples):break
    check(shots>=6,hero+' fires more than five bullets with no reload');stable(hero+' gun-fire',samples=fire_samples);check(d()['ammo']=='infinite' and 'attack' not in json.loads(d()['controls']),hero+' has no magazine or Reload control')
@@ -76,17 +76,17 @@ with sync_playwright() as pw:
    if roll_input=='key':page.keyboard.up('ArrowDown')
    elif roll_input=='pad':page.evaluate('padSet(1,false)')
    else:touch(None,False)
-   recovery_row=3 if hero=='eren' else (0 if hero=='rabbit' else 7)
+   recovery_row=3
    page.wait_for_function('(v)=>poseSamples.some(p=>p.time>v.time&&p.state==="running"&&!p.duck&&p.row===v.row)',arg={'time':rows[-1]['time'],'row':recovery_row},timeout=1500)
    recovered=page.evaluate('(v)=>poseSamples.find(p=>p.time>v.time&&p.state==="running"&&!p.duck&&p.row===v.row)',{'time':rows[-1]['time'],'row':recovery_row});page.keyboard.press('Escape')
-   check(any(x['frame']>=4 for x in rows) and bool(late) and all(x['frame']==(2 if hero=='eren' else 3) for x in late),hero+' bends, shoulder rolls once, then remains visibly low')
+   check(any(x['frame']>=4 for x in rows) and bool(late) and all(x['frame']==5 for x in late),hero+' bends, shoulder rolls once, then remains visibly low')
    check(min(x['height'] for x in rows)<height*.93 and all(x['y']==0 for x in rows),hero+' lowers the actual drawing while staying on the ground')
    check(recovered['state']=='running' and not recovered['duck'],hero+' visibly recovers to its own pistol-run design before the next hazard')
   if not args.menu_only:
-   start('wolf');observer();page.keyboard.down('Shift');wait('[data-boosting="true"]');page.wait_for_timeout(900);stable('Wolf four-leg sprint','agility-wolf');page.keyboard.up('Shift')
-   start('owl');page.keyboard.down('Space');wait('[data-gliding="true"]');observer();page.wait_for_timeout(1100);stable('Owl steady glide','agility-owl');page.screenshot(path=str(args.evidence/'owl-gliding.png'));page.keyboard.up('Space')
+   start('wolf');observer();page.keyboard.down('Shift');wait('[data-boosting="true"]');page.wait_for_timeout(900);stable('Wolf four-leg sprint','pixel-wolf');page.keyboard.up('Shift')
+   start('owl');page.keyboard.down('Space');wait('[data-gliding="true"]');observer();page.wait_for_timeout(1100);stable('Owl steady glide','pixel-owl');page.screenshot(path=str(args.evidence/'owl-gliding.png'));page.keyboard.up('Space')
    start('rabbit');page.keyboard.down('Space');wait('[data-charging="true"]');page.wait_for_function('Number(document.querySelector("canvas").dataset.chargeRatio)>.7');check(d()['airborne']=='false','Emre still charges on the ground');page.keyboard.up('Space');wait('[data-airborne="true"]');check(d()['character']=='rabbit','Emre releases his own charged leap')
-   start('eren');page.keyboard.down('Space');wait('[data-airborne="true"]');check(d()['charging']=='false' and d()['poseSource']=='eren-animations','Eren has his own immediate single jump');page.screenshot(path=str(args.evidence/'eren-jumping.png'));page.keyboard.up('Space')
+   start('eren');page.keyboard.down('Space');wait('[data-airborne="true"]');check(d()['charging']=='false' and d()['poseSource']=='pixel-eren','Eren has his own immediate single jump');page.screenshot(path=str(args.evidence/'eren-jumping.png'));page.keyboard.up('Space')
    start('aion');touch(action('shoot'),True);page.wait_for_function('Number(document.querySelector("canvas").dataset.bossShots)>=2');cdp.send('Input.dispatchTouchEvent',{'type':'touchCancel','touchPoints':[]});page.wait_for_timeout(450);shots=d()['bossShots'];page.wait_for_timeout(400);check(d()['bossShots']==shots,'Cancelling a Fire touch never leaves the trigger latched')
    for confirm in [0,2]:
     start('aion');page.evaluate('padSet(9,true)');wait('[data-page="paused"]');page.evaluate('padSet(9,false)');page.wait_for_timeout(120);page.evaluate('(n)=>padSet(n,true)',confirm);wait('[data-state="running"]');page.evaluate('(n)=>padSet(n,false)',confirm);check(True,'Gamepad Start and '+('A/×' if confirm==0 else 'X/□')+' actually pause and resume the selected menu action')

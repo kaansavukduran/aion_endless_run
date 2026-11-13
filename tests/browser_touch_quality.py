@@ -34,7 +34,9 @@ with sync_playwright() as pw:
   v=controls[name];x,y=xy(v['x']+v['w']/2,v['y']+v['h']/2);return {'x':x,'y':y,'id':id}
  cdp=c.new_cdp_session(page);shoot=point('shoot',0);jump=point('jump',1);start();cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[shoot,jump]});wait('[data-airborne="true"]');page.wait_for_function('Number(document.querySelector("canvas").dataset.bossShots)>0');check(True,'Two real fingers jump and hold Fire simultaneously')
  cdp.send('Input.dispatchTouchEvent',{'type':'touchCancel','touchPoints':[]});wait('[data-jump-held="false"]');page.wait_for_timeout(400);shots=d()['bossShots'];page.wait_for_timeout(350);check(d()['bossShots']==shots and d()['touchFingers']=='0','Touch cancellation releases both real owners without a latched trigger')
- page.keyboard.press('Escape');wait('[data-page="paused"]')
+ # Inspection at DPR3 can outlast a normal hazard window. Rotation has its
+ # own fresh run rather than assuming the earlier cancellation run survived.
+ main();start();page.keyboard.press('Escape');wait('[data-page="paused"]')
  before=d();page.set_viewport_size({'width':393,'height':873});wait('[data-orientation="portrait"][data-ui-ready="true"]');check(d()['character']==before['character'] and d()['score']==before['score'],'DPR3 rotation keeps the same paused run');page.screenshot(path=str(a.evidence/'dpr3-portrait-paused.png'))
  check(page.evaluate('document.documentElement.scrollHeight<=innerHeight+1&&document.documentElement.scrollWidth<=innerWidth+1'),'DPR3 browser document has no page scroll');check(not errors,'No script or browser errors during DPR3 simultaneous/cancel input');(a.evidence/'results.json').write_text(json.dumps({'checks':checks,'errors':errors,'controls':visible,'physical_transform':t,'build':page.evaluate('AION_BUILD'),'scope':'Real Chromium CDP touch at deviceScaleFactor3, not a physical phone. No world/save/RNG setters.'},ensure_ascii=False,indent=2)+'\n');c.close();b.close()
 print('RESULT:',len(checks),'DPR3 touch checks')

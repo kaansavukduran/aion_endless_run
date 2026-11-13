@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.19.0"
+const GAME_VERSION = "0.20.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -1539,7 +1539,7 @@ func update_friend() -> void:
 	if world.state in ["running","paused"] and not a.ducking(world) and not a.hugging() and (world.y<0 or world.boosting() or (world.state=="paused" and character=="wolf" and friend_row==6)):
 		place_held_gun()
 	if world.charging:
-		frames.place(friend_sprite,"rolls",4,mini(2,int(world.charge_ratio()*3)),Vector2(World.PLAYER_X,ground))
+		frames.place(friend_sprite,"runner-rabbit",6,frames.progress("runner-rabbit",6,world.charge_ratio()),Vector2(World.PLAYER_X,ground))
 		place_held_gun()
 		gun_echo.position.y+=14
 	if world.state == "bonk":
@@ -1557,7 +1557,7 @@ func update_friend() -> void:
 			var frame := flight_frame(float(pose.velocity), float(pose.air_time), frames.count("runner-sheep",2)) if in_air else (frames.count("runner-sheep",2)-1 if landing else frames.cycle("runner-sheep",1,world.travel_distance()-World.FLOCK_GAP*(i+1),174.0))
 			place_companion(followers[i], "sheep", row, frame if motion else 0, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), 0.62 * FOLLOWER_RATIO, in_air or landing)
 			if float(pose.get("duck", 0.0)) > 0.5:
-				place_combat(followers[i], "sheep", 6, a.roll_pose(float(pose.get("roll_phase",0.0)),float(pose.get("roll_remaining",0.0)),bool(pose.get("roll_held",false))) if motion else 4, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
+				place_combat(followers[i], "sheep", 6, a.roll_pose(float(pose.get("roll_phase",0.0)),float(pose.get("roll_remaining",0.0)),bool(pose.get("roll_held",false)),frames.count("rolls",2)) if motion else 5, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
 
 func place_held_gun() -> void:
@@ -1568,13 +1568,14 @@ func place_held_gun() -> void:
 	var row: int=COMBAT_ROWS[character]
 	var frame: int=f.gun_frame(frames.count(key,row)) if f.shot_flash>0 else 0
 	var cache_key:=character+":"+key+":"+str(frame)
-	var muzzle: Array=frames.EREN.data.muzzle if character=="eren" else (frames.EMRE.data.muzzle if character=="rabbit" else frames.CANONICAL.data.muzzles[character])
+	var muzzle: Array=frames.PIXEL.data.muzzles[character]
 	if not gun_parts.has(cache_key):
 		var pose: Dictionary=frames.pose(key,row,frame)
 		var factor: float=pose.scale
 		var point:=Vector2(muzzle[0],muzzle[1])
-		var from: Vector2=((point-Vector2(35,11))/factor-pose.offset).floor()
-		var wanted:=Rect2i(Vector2i(from),Vector2i(ceilf(52/factor),ceilf(29/factor)))
+		# Only barrel/grip pixels, never a second cheek/eye from the atlas.
+		var from: Vector2=((point-Vector2(24,5))/factor-pose.offset).floor()
+		var wanted:=Rect2i(Vector2i(from),Vector2i(ceilf(37/factor),ceilf(12/factor)))
 		var image: Image=pose.texture.get_image()
 		var region:=wanted.intersection(Rect2i(Vector2i.ZERO,image.get_size()))
 		gun_parts[cache_key]={"texture":ImageTexture.create_from_image(image.get_region(region)),"offset":pose.offset+Vector2(region.position),"scale":factor}

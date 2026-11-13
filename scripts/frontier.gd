@@ -30,7 +30,7 @@ var plant_wait := 28.0
 var saved_powers := {}
 const SHOT_DURATION := 0.30
 const SHOT_CADENCE := 0.32
-const MUZZLES = preload("res://assets/CANONICAL-PROVENANCE.json")
+const MUZZLES = preload("res://assets/PIXEL-HEROES-PROVENANCE.json")
 var boss_kind := 0
 var pattern := "high"
 var pattern_bag: Array[String] = []
@@ -160,7 +160,7 @@ func fire(world) -> bool:
 	return true
 
 func emit_hero_shot(world) -> void:
-	var muzzle: Array = preload("res://assets/EREN-PROVENANCE.json").data.muzzle if world.character=="eren" else (preload("res://assets/EMRE-PROVENANCE.json").data.muzzle if world.character=="rabbit" else MUZZLES.data.muzzles[world.character])
+	var muzzle: Array = MUZZLES.data.muzzles[world.character]
 	var origin := Vector2(world.PLAYER_X+float(muzzle[0]),world.y+float(muzzle[1])+(14 if world.charging else 0))
 	shots_fired += 1
 	if not active() and world.adventure.lightning_charges>0:world.adventure.cast_lightning(world)

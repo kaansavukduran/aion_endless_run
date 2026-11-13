@@ -110,7 +110,7 @@ func run() -> void:
 		for key_row in [["runner-"+hero,1],["runner-"+hero,2],["strikes",hero_index*2],["strikes",hero_index*2+1],["heroes",hero_index],["rolls",hero_index]]:
 			var key: String = key_row[0]
 			var row: int = key_row[1]
-			check(bank.count(key,row) == (12 if key=="rolls" else (8 if hero=="wolf" or (hero=="owl" and key in ["heroes","strikes"]) else 7)),"Every animation uses its observed drawn poses: "+hero+"/"+key+"/"+str(row))
+			check(bank.count(key,row) == ((8 if hero in ["wolf","owl"] else 7) if key=="strikes" else 6),"Every animation uses its observed drawn poses: "+hero+"/"+key+"/"+str(row))
 			var scale := -1.0
 			var textures := {}
 			for column in bank.count(key,row):
@@ -124,7 +124,7 @@ func run() -> void:
 				for py in image.get_height(): clear = clear and image.get_pixel(0,py).a == 0 and image.get_pixel(image.get_width()-1,py).a == 0
 				check(clear,"Each drawn frame has independent transparent boundaries: "+hero+"/"+key+"/"+str(column))
 			check(textures.size() == bank.count(key,row),"All registered poses are distinct artwork: "+hero+"/"+key+"/"+str(row))
-	check(bank.pose("heroes",3,5).source_key == "canonical-wolf" and bank.pose("heroes",3,5).source_row == 7,"The wolf gun animation uses its own bare-fur sheet")
+	check(bank.pose("heroes",3,5).source_key == "pixel-wolf" and bank.pose("heroes",3,5).source_row == 3,"The wolf gun animation uses its own bare-fur sheet")
 	check(bank.count("owl-peck") == 8 and bank.pose("owl-peck",0,5).source_row == 3,"Airborne beak attacks use their own eight-pose row")
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)

@@ -13,19 +13,21 @@ func run() -> void:
  game.set_physics_process(false)
  var bank=game.frames
  for hero in ["wolf","owl"]:
-  var a:Dictionary=bank.AGILITY.data.atlases["agility-"+hero]
-  var expected_scale:float=a.scale[0]
   for row in 4:
-   for col in 8:
-    var f:Dictionary=a.frames[row][col]
+   var a:Dictionary=bank.PIXEL.data.atlases["pixel-"+hero] if row==0 else bank.AGILITY.data.atlases["agility-"+hero]
+   var expected_scale:float=a.scale[0]
+   for col in (6 if row==0 else 8):
+    var f:Dictionary=a.frames[10 if row==0 else row][col]
     var logical_key:String="runner-"+hero if row==0 else ("wolf-dash-bite" if hero=="wolf" and row==3 else "owl-peck" if row==3 else "strikes")
     var logical_row:int=6 if row==0 else (0 if row==3 else (6 if hero=="wolf" else 2)+row-1)
     var pose:Dictionary=bank.pose(logical_key,logical_row,col)
-    check(pose.source_key=="agility-"+hero and pose.source_row==row,"Actual pose dispatch uses its own movement or contact row")
+    check(pose.source_key==("pixel-"+hero if row==0 else "agility-"+hero) and pose.source_row==(10 if row==0 else row),"Actual pose dispatch uses its own movement or contact row")
     var eye:Vector2=(pose.offset+Vector2(float(f.eye[0]-f.bounds[0])+2,float(f.eye[1]-f.bounds[1])+2))*pose.scale
-    check(eye.distance_to(Vector2(a.target_eyes[row][0],a.target_eyes[row][1]))<0.01 and is_equal_approx(pose.scale,expected_scale),"Rendered near-eye stays aligned at one hero scale")
+    var target: Vector2=Vector2(14,-39 if hero=="wolf" else a.target_eye[1]) if row==0 else Vector2(a.target_eyes[row][0],a.target_eyes[row][1])
+    check(eye.distance_to(target)<0.01 and is_equal_approx(pose.scale,expected_scale),"Rendered near-eye stays aligned at one hero scale")
     if hero=="wolf" and row==0:check(float(f.body_bounds[2]-f.body_bounds[0])/float(f.body_bounds[3]-f.body_bounds[1])>1.3,"Four-legged gallop has a low horizontal silhouette")
-    if hero=="owl" and row in [0,3]:check(float(f.body_bounds[2]-f.body_bounds[0])/float(f.body_bounds[3]-f.body_bounds[1])>1.3,"Glide and aerial beak strike keep spread airborne wings")
+    if hero=="owl" and row==0:check(float(f.body_bounds[2]-f.body_bounds[0])>float(a.frames[0][0].body_bounds[2]-a.frames[0][0].body_bounds[0])*1.15,"Every flight pose spreads its actual wings beyond the folded neutral silhouette")
+    if hero=="owl" and row==3:check(float(f.body_bounds[2]-f.body_bounds[0])/float(f.body_bounds[3]-f.body_bounds[1])>1.3,"Legacy aerial beak strike keeps spread airborne wings")
  game.character="wolf"
  game.world.character="wolf"
  game.world.reset()
@@ -70,7 +72,7 @@ func run() -> void:
   for i in 8:
    game.world.time=float(i)/8
    game.update_friend()
-   check(game.friend_sprite.get_meta("source_key")=="agility-owl" and game.friend_sprite.get_meta("source_row")==0,"Glide stays on the same calm row entering or leaving a gust")
+   check(game.friend_sprite.get_meta("source_key")=="pixel-owl" and game.friend_sprite.get_meta("source_row")==10,"Glide stays on the same calm row entering or leaving a gust")
    check(game.friend_sprite.position.x==World.PLAYER_X,"Wind and animation never displace the gliding sprite sideways")
  check(bank.pose("strikes",0,3).source_key=="canonical-aion" and bank.pose("strikes",4,3).source_key=="canonical-sheep","Accepted Aion and sheep artwork is unchanged")
  game.queue_free()
