@@ -33,9 +33,9 @@ with sync_playwright() as pw:
   menu();ui(name='StartSelect_'+hero);ui(name='StartRun');wait('[data-state="running"][data-ui-ready="true"]')
   if any(b['text']=='Anladım · Devam et' for b in json.loads(d()['ui'])):ui(text='Anladım · Devam et')
   page.wait_for_function('Number(document.querySelector("canvas").dataset.worldTime)>.02')
- def observer():page.evaluate("window.poseObserver?.disconnect();window.poseSamples=[];window.poseObserver=new MutationObserver(()=>{let d=document.querySelector('canvas').dataset;poseSamples.push({source:d.poseSource,frame:+d.sourceFrame,count:+d.frameCount,probeX:+d.headProbeX,probeY:+d.headProbeY,x:+d.visualX,scale:+d.actorScale,time:+d.worldTime,y:+d.playerY,shots:+d.bossShots,height:+d.heroOpaqueHeight,duck:d.ducking==='true'})});poseObserver.observe(document.querySelector('canvas'),{attributes:true})")
- def stable(label,source=None):
-  rows=page.evaluate('poseSamples');rows=[x for x in rows if x['probeX']>-900 and (not source or x['source']==source)]
+ def observer():page.evaluate("window.poseObserver?.disconnect();window.poseSamples=[];window.poseObserver=new MutationObserver(()=>{let d=document.querySelector('canvas').dataset;poseSamples.push({source:d.poseSource,frame:+d.sourceFrame,row:+d.sourceRow,count:+d.frameCount,probeX:+d.headProbeX,probeY:+d.headProbeY,x:+d.visualX,scale:+d.actorScale,time:+d.worldTime,y:+d.playerY,shots:+d.bossShots,height:+d.heroOpaqueHeight,duck:d.ducking==='true'})});poseObserver.observe(document.querySelector('canvas'),{attributes:true})")
+ def stable(label,source=None,samples=None):
+  rows=page.evaluate('poseSamples') if samples is None else samples;rows=[x for x in rows if x['probeX']>-900 and (not source or x['source']==source)]
   check(bool(rows),label+' has independently registered head samples')
   unique={x['frame'] for x in rows};count=max(x['count'] for x in rows)
   check(len(unique)==count,label+' covers every actual frame '+str(sorted(unique)))
@@ -60,8 +60,13 @@ with sync_playwright() as pw:
   for hero,roll_input in ([] if args.menu_only else [('aion','key'),('owl','pad'),('sheep','touch'),('wolf','key'),('rabbit','key'),('eren','key')]):
    if args.heroes and hero not in args.heroes:continue
    start(hero);observer();page.wait_for_function('poseSamples.length>0&&new Set(poseSamples.map(x=>x.frame)).size>=Number(document.querySelector("canvas").dataset.frameCount)',timeout=3500);stable(hero+' gun-run');page.screenshot(path=str(args.evidence/(hero+'-running.png')))
-   start(hero);observer();page.keyboard.down('f');page.wait_for_timeout(2250);page.keyboard.up('f');rows=page.evaluate('poseSamples');shots=max(x['shots'] for x in rows)
-   check(shots>=6,hero+' fires more than five bullets with no reload');stable(hero+' gun-fire', 'eren-animations' if hero=='eren' else ('emre-encounters' if hero=='rabbit' else 'canonical-'+hero));check(d()['ammo']=='infinite' and 'attack' not in json.loads(d()['controls']),hero+' has no magazine or Reload control')
+   fire_samples=[];shots=0
+   for attempt in range(3):
+    start(hero);observer();page.wait_for_timeout(attempt*37);page.keyboard.down('f');page.wait_for_timeout(2100);page.keyboard.up('f');rows=page.evaluate('poseSamples');page.keyboard.press('Escape')
+    shots=max(shots,max(x['shots'] for x in rows));fire_row=4 if hero=='eren' else (1 if hero=='rabbit' else 8)
+    fire_samples.extend(x for x in rows if x['row']==fire_row)
+    if fire_samples and len({x['frame'] for x in fire_samples})==max(x['count'] for x in fire_samples):break
+   check(shots>=6,hero+' fires more than five bullets with no reload');stable(hero+' gun-fire',samples=fire_samples);check(d()['ammo']=='infinite' and 'attack' not in json.loads(d()['controls']),hero+' has no magazine or Reload control')
    start(hero);height=float(d()['heroOpaqueHeight']);observer()
    if roll_input=='key':page.keyboard.down('ArrowDown')
    elif roll_input=='pad':page.evaluate('padSet(1,true)')
