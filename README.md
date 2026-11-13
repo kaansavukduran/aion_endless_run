@@ -2,7 +2,7 @@
 
 Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.19.0**.
 
-**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.19.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.19.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA v1.4 uygulaması](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0190/README.md)
+**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.19.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.19.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0190/README.md)
 
 ![Gerçek oyunun kompakt ana menüsü](docs/evidence-v0190/screenshots/main-dark.png)
 
@@ -10,7 +10,7 @@ Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile m
 
 ## Oyna
 
-Telefon kontrolleri seçimin üzerine iki yana bölündü: solda Zıpla, sağda Ateş et/Takla. Tabanca her zaman elde; sınırsız mermi, 0,32 saniyelik ortak atış aralığı. Doldurma yoktur. Ayarlardan eski sağ küme seçilebilir. Koyu/açık/sistem teması, sistem/pixel yazı ve büyütülmüş menü metni saklanır. Kol eylemleri yeniden atanabilir; titreşim varsayılan kapalıdır. [Kontroller](docs/CONTROLS.md).
+Telefon kontrolleri seçimin üzerine iki yana bölündü: solda Zıpla, sağda Ateş et/Takla. Tabanca her zaman elde; sınırsız mermi, 0,32 saniyelik ortak atış aralığı. Doldurma yoktur. Dikey ekranda kısa canlı yetenek durumları okunaklı kalır. Ayarlardan eski sağ küme seçilebilir. Koyu/açık/sistem teması, sistem/pixel yazı ve büyütülmüş menü metni saklanır. Kol eylemleri yeniden atanabilir; titreşim varsayılan kapalıdır. [Kontroller](docs/CONTROLS.md).
 
 Başlangıç kartlarından karakterini seç; koşu sırasında karakter değişmez. İlk dil cihaz/tarayıcı dilidir; desteklenmeyen diller İngilizce açılır. **TR / EN / CS / AZ / DE / FR / JA / KO / ZH / ES / IT** menüsünden değiştirebilirsin; seçimin ve rekorun cihazda saklanır.
 

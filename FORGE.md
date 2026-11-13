@@ -1,3 +1,9 @@
+# Delivery update · 0.19.0 final portrait HUD
+
+Application537391a, verified CI4fea30b /43480686993, Pages43482053479.9,556 source checks; final17 DPR,40 live and3 actual-release-archive offline checks;11 native Android inputs. Original47 PNGs unchanged. Native touch fonts have a24 minimum: long portrait ability instructions exceeded the slot. The slot now shows live one-line jump count/flock/glide/boost/charge with full accessible/tutorial guidance, without shrinking text or covering Jump. All11 locales and active states have actual shaped bounds checks. The language code control has its own minimum and covers no roster card at200%.
+
+Reproduce rapid trusted DPR3 swipes with browser_swipe_quality.py; avoid converting a fast gesture into a long press by waiting for separate remote acknowledgements. The126-check pose tour predates only the final HUD patch; source hashes/functions prove every animation/input path unchanged. Godot strict runner rejects exit0 after SCRIPT ERROR. Delivery reuses exact fully successful CI artifacts rather than rebuilding identical runtime sources for documentation-only tags. Record artifact source commit separately from release tag/documentation commit. APK stable signer/code23 retained; no private signing keys in source or staging.
+
 # Current handoff · 0.19.0 registration, shoulder rolls and Eren
 
 Baseline main54a8136544bf1c741fa320915dbbf6826b84c444 was clean and up to date. Godot4.6.3 retained. Fragaria Unslop applied to this requested game/UI pass. Live owner standardv1.7 and reference/regression indices were read; this is scoped implementation and testing, not blanket certification. The linked ChatGPT thread was not readable because read_thread is unavailable. A macro definition alone does not activate k44/Aionlaştır/dynamic aionia. Private standard/reference contents are not copied wholesale into this public repo.

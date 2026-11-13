@@ -1,0 +1,126 @@
+{
+  "accepted_pose_source": "97d6437a696db402cccce15f93e838c6c6a0014e",
+  "final_verified_source": "4fea30b894f64aefba3e658b48dda3826568414f",
+  "byte_identical_files": [
+    {
+      "path": "scripts/frame_bank.gd",
+      "sha256": "a9d072f965e3d5681f901e3a1dfdafb013db7c2834504ab813c49d5405de134c"
+    },
+    {
+      "path": "scripts/world.gd",
+      "sha256": "bdf0dd1b7990ecde278641597447d0be03aac24827016ffb1b7b5a8e869036a1"
+    },
+    {
+      "path": "scripts/adventure.gd",
+      "sha256": "d7c3f3c2461978449d88cf44646bda7a776bfd46a667f00de14adbeceecb8a55"
+    },
+    {
+      "path": "scripts/frontier.gd",
+      "sha256": "2bcfc982a3a8ce1f4f41a718ec6c6953773835075a8187a1fd683bbc2c22c40c"
+    },
+    {
+      "path": "scripts/gamepad.gd",
+      "sha256": "0a6cafc6f6bdd94b97e8add251b6b8b55c9692868aec2d23d27ae45d6d5076e1"
+    },
+    {
+      "path": "scripts/touch_controls.gd",
+      "sha256": "37339b4b37a9304558a3bf7583581ac38b0f3fb39682846bc19857a8179af433"
+    },
+    {
+      "path": "scripts/touch_button.gd",
+      "sha256": "3838faef14be5c009b81527daceaac60ed6ad38df50655af4ccf97097ad21ea3"
+    },
+    {
+      "path": "assets/FLORA-PROVENANCE.json",
+      "sha256": "a0c233baecf7969e5c2960d7d83773b92cee9af464e843a3407ff7bcdaa29a90"
+    },
+    {
+      "path": "assets/ACTION-PROVENANCE.json",
+      "sha256": "1f15fdf70e0712cdedcd1b0d401d07e97c905aae33a6cc51ef8a89201232ba18"
+    },
+    {
+      "path": "assets/SHOULDER-POSES-PROVENANCE.json",
+      "sha256": "a0723b0f6e2f664e19335d463df266dc5360a90f458e90ffa41f448bb8c78882"
+    },
+    {
+      "path": "assets/COMPANION-RUNNER-PROVENANCE.json",
+      "sha256": "4bd821a4faea72f72bb27d71f1afcc5aa501eb43294aad315345852ffc9bec08"
+    },
+    {
+      "path": "assets/AGILITY-PROVENANCE.json",
+      "sha256": "f22e0d7c3dfa68ef4ce99b0fb48d14ce887ba1080f48013e15a39437cc1496fb"
+    },
+    {
+      "path": "assets/MOTION-PROVENANCE.json",
+      "sha256": "911839fac156c8dc3ba40eed79b88ff1e214bdb1572214545e447365b0757254"
+    },
+    {
+      "path": "assets/FRONTIER-PROVENANCE.json",
+      "sha256": "66c06d9a630762581e4da9c99794474feb59333b545249d2184ed14a966c8798"
+    },
+    {
+      "path": "assets/EVOLUTION-PROVENANCE.json",
+      "sha256": "b6f3adf3df96767fd13add7162ddf043f36d4e06a6253994a1dcc1207a433fe0"
+    },
+    {
+      "path": "assets/RUNNER-PROVENANCE.json",
+      "sha256": "c41a3fd9b114528d7c9e01c7206cc1ec84b10a3c50792beb9ebfe349ead37625"
+    },
+    {
+      "path": "assets/EMRE-PROVENANCE.json",
+      "sha256": "b56f2fd9bd1fcee74987267debcd6bb230ef928d7432e8a050c5479156432315"
+    },
+    {
+      "path": "assets/LOW-ROLLS-PROVENANCE.json",
+      "sha256": "637fd6cea33f8a2c6684c076b9de695082963901fdfbd64c27ba7716ac162634"
+    },
+    {
+      "path": "assets/ORCHARD-PROVENANCE.json",
+      "sha256": "0bcb78a53c9463043718c2c06025dedb839c7c3ebf369b2c0503cc5b81c21bd9"
+    },
+    {
+      "path": "assets/LANDSCAPE-PROVENANCE.json",
+      "sha256": "cf5a7536cd0d1235454fa94e11efcbe73d89b84fbcbd25ad1060eea0379b08f5"
+    },
+    {
+      "path": "assets/CANONICAL-PROVENANCE.json",
+      "sha256": "4cd957ff9e3fa2bc30a4b78a3a6176cbb107f30141461482d15b7ecc2f38cc19"
+    },
+    {
+      "path": "assets/ENCOUNTERS-PROVENANCE.json",
+      "sha256": "45d5785e841b6d0be2fd6e0215ecff77c6a5e05e59aef8f9e8e8759db1343041"
+    },
+    {
+      "path": "assets/CREATURES-PROVENANCE.json",
+      "sha256": "3d7edff26b7e1f5c1dc401fbacb58b3262666568475300d27089018d719efe71"
+    },
+    {
+      "path": "assets/CHARACTERS-PROVENANCE.json",
+      "sha256": "d1b93200a1b4670b22ecb96f338f1f38d16ed7113d8f1694670638f27bde06db"
+    },
+    {
+      "path": "assets/EREN-PROVENANCE.json",
+      "sha256": "59546116ae61dde693f9593db547fffac27a83a80416742950decb1f21a3751d"
+    },
+    {
+      "path": "assets/ADVENTURE-PROVENANCE.json",
+      "sha256": "4c796a40c55d7b4ddbbeb9e4224aeb8771510facaa7abc6be3205025f333919b"
+    },
+    {
+      "path": "assets/FULL-RUNNER-PROVENANCE.json",
+      "sha256": "7b658f4787742dec09047c3a569995a985c9517bff9b86b3b8f8eb4b59fdc344"
+    },
+    {
+      "path": "assets/FRAGARIA-PROVENANCE.json",
+      "sha256": "3454f2cc2d17ffe2625ecd3d77d9369d61032d5fc4979d25539aae62c066e180"
+    },
+    {
+      "path": "assets/HEAD-REGISTRATION.json",
+      "sha256": "67df7493367f04cd9a76c367b753ff449f63e65374114e44fd4b68bd96bdd1f1"
+    }
+  ],
+  "game_functions_changed": [
+    "update_hud"
+  ],
+  "scope": "All player rendering, placement, input and physics functions remain byte-identical after the126-check pose/input run. Final changes only fit portrait live HUD status; final9556 source checks,17 DPR checks and40 live checks exercise that final build."
+}

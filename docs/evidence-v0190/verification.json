@@ -1,10 +1,41 @@
 {
   "version": "0.19.0",
-  "source_and_scene_checks": 9295,
-  "browser_checks": 62,
+  "recorded_at": "2026-11-13T21:49:50+03:00",
+  "timezone": "Europe/Istanbul",
+  "baseline_commit": "54a8136544bf1c741fa320915dbbf6826b84c444",
+  "application_commit": "537391a5da9d2f6751da7812f21dbbe09e6ee9c7",
+  "verified_ci_commit": "4fea30b894f64aefba3e658b48dda3826568414f",
+  "verification_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43480686993",
+  "pages_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43482053479",
+  "source_and_scene_checks": 9556,
+  "source_suites": 18,
+  "browser_checks": 186,
+  "browser_checks_by_scope": {
+    "six_hero_pose_input_acceptance": 126,
+    "final_dpr3_geometry_multitouch_cancel_rotation": 13,
+    "final_dpr3_downward_swipe": 4,
+    "actual_final_public_play": 40,
+    "actual_release_archive_offline_records": 3
+  },
+  "native_android_checks": 11,
   "web_packaging_tests": 7,
   "android_parser_tests": 4,
-  "browser_scope": "Focused actual normal-input run: Emre/Eren plus wolf sprint, owl glide, charge, gamepad A/X resume, touch cancellation and 200% portrait/landscape menus. Full six-hero final-build run and publication pending.",
-  "local_build": "8a7ef3c715318267",
-  "platform_status": "pending; not claimed released"
+  "final_local_build": "043a57538f6884e8",
+  "accepted_pose_build": "66119a4b09427c4b",
+  "pages_build": "6dc3e2ada4d32fd2",
+  "vercel_build": "4e1c3abf41362288",
+  "platform_status": "PASS: exact successful CI artifacts assembled as9 validated packages. Public publication is tracked separately.",
+  "limits": [
+    "No physical Poco/iPhone/Xbox/PS test. Browser Gamepad API is emulated; DPR3 touch is trusted Chromium CDP.",
+    "Firefox uses headed desktop Gecko with Android UA; this is not a physical Android Firefox test.",
+    "Live HTTPS forwarding validates system CA TLS and loader SHA; diagnostic16MiB ranges avoid Chromium DevTools100MiB transfer ceiling. SW is blocked only for these live diagnostics; actual offline worker is separately tested from the release archive.",
+    "macOS ad-hoc only; no Developer ID/notarization or Windows Authenticode. Native iOS requires owner signing.",
+    "The126-check six-hero pose/input run predates a portrait-HUD-only patch. pose-code-integrity.json proves unchanged animation/input code; final build has9556 CI checks,17 DPR checks and40 live checks."
+  ],
+  "publication": {
+    "state": "ready_for_upload",
+    "tag": "v0.19.0",
+    "artifact_source_commit": "4fea30b894f64aefba3e658b48dda3826568414f",
+    "packages": 9
+  }
 }

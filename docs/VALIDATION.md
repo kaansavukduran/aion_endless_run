@@ -1,4 +1,8 @@
-# Current verification · 0.18.0
+# Current verification · 0.19.0
+
+[Somut sonuçlar, ekranlar ve kapsam](evidence-v0190/README.md).18 gerçek Godot grubu /9,556 CI kontrolü;126 altı-kahraman normal giriş kontrolü, son derlemede17 DPR3,40 canlı Firefox/Chromium,3 gerçek offline arşiv kontrolü ve11 offline native Android ADB kontrolü geçer.7 web paketleme ve4 Android parser testi de geçer.126 turundan sonraki portre-HUD değişikliği ile değişmeyen çizim/giriş kodu ayrıca belgelenmiştir. Fiziksel telefon/kol ve yerel iOS dağıtımı ayrı sınırlar olarak raporlanır.
+
+# Historical verification · 0.18.0
 
 [Actual evidence, screenshots and inputs](evidence-v0180/README.md).17 Godot suites:8,492 local checks,8,579 CI checks, zero failures. Font-dependent visible-page assertions explain the count difference. Both DejaVu Sans and Liberation Sans at200% now explicitly cover the remote overflow regression.89 normal-input Chromium checks pass on the final local candidate;18 actual Pages play checks pass in Firefox153 and Chromium151;3 real subpath offline checks,7 web packaging and4 Android parser checks pass.
 

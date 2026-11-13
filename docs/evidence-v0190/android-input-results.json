@@ -1,0 +1,16 @@
+{
+  "checks": [
+    "Native system-font menu and heading/roster stay separated: tr",
+    "Native system-font menu and heading/roster stay separated: cs",
+    "Native system-font menu and heading/roster stay separated: en",
+    "Real native Jump hold reaches an airborne owl glide",
+    "Real native Fire touch emits a normal-run bullet",
+    "Real native held Fire continues beyond five bullets without reload in the training arena",
+    "Real native Roll touch reaches the actual roll state",
+    "Eren is independently selectable and jumps without Emre charge",
+    "Native Emre holds on the ground and accumulates charge",
+    "Native Emre releases a real charged leap",
+    "Native landscape resize preserves the paused character, score and level"
+  ],
+  "scope": "API30 emulator, real ADB touches, offline and display resize; no physical phone/gamepad claim."
+}

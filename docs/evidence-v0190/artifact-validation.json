@@ -1,0 +1,34 @@
+[
+  {
+    "artifact": "android-test-evidence",
+    "id": 14065756320,
+    "source": "4fea30b894f64aefba3e658b48dda3826568414f",
+    "zip_sha256": "0aadc61bc509764178ac68b4d8b80e00b84f51499f7090943b9ffbb09c0413e7",
+    "bytes": 6088244,
+    "crc_ok": true
+  },
+  {
+    "artifact": "desktop-Linux",
+    "id": 14065406600,
+    "source": "4fea30b894f64aefba3e658b48dda3826568414f",
+    "zip_sha256": "5a9bfc4d2f4703148beb6a38b9e677406df3acc99fcbd215afb089394b352fa4",
+    "bytes": 448843931,
+    "crc_ok": true
+  },
+  {
+    "artifact": "desktop-macOS",
+    "id": 14064733559,
+    "source": "4fea30b894f64aefba3e658b48dda3826568414f",
+    "zip_sha256": "e27a7d572518f589a81766f9d1eb052bfcdb76b13206a60515cf0e3eb2b4cc57",
+    "bytes": 315045292,
+    "crc_ok": true
+  },
+  {
+    "artifact": "desktop-Windows",
+    "id": 14063819717,
+    "source": "4fea30b894f64aefba3e658b48dda3826568414f",
+    "zip_sha256": "688d934d6676992e648c83e0a74d379fae01fbdeca2b576b40621f13d1a43e43",
+    "bytes": 256051167,
+    "crc_ok": true
+  }
+]

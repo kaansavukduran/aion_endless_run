@@ -1,4 +1,8 @@
 {
+  "source_commit": "4fea30b894f64aefba3e658b48dda3826568414f",
+  "run_id": 43480686993,
+  "job_id": 132076066549,
+  "checks": 9556,
   "suites": [
     {
       "suite": "game",
@@ -141,10 +145,10 @@
       "passed": true,
       "script_error": false,
       "assertion_error": false,
-      "checks": 239,
+      "checks": 238,
       "results": [
         [
-          "239",
+          "238",
           "runner UX checks",
           "0"
         ]
@@ -171,10 +175,10 @@
       "passed": true,
       "script_error": false,
       "assertion_error": false,
-      "checks": 709,
+      "checks": 710,
       "results": [
         [
-          "709",
+          "710",
           "AIONIA checks",
           "0"
         ]
@@ -246,10 +250,10 @@
       "passed": true,
       "script_error": false,
       "assertion_error": false,
-      "checks": 2619,
+      "checks": 2679,
       "results": [
         [
-          "2619",
+          "2679",
           "charge/roll/paged UI checks",
           "0"
         ]
@@ -261,16 +265,14 @@
       "passed": true,
       "script_error": false,
       "assertion_error": false,
-      "checks": 742,
+      "checks": 943,
       "results": [
         [
-          "742",
+          "943",
           "Unslop quality checks",
           "0"
         ]
       ]
     }
-  ],
-  "checks": 9295,
-  "scope": "18 actual strict source suites. runner_ux rerun after replacing a superseded metadata-marker distance assertion with independent reviewed near-iris world-coordinate assertions; no application changes after the other17 suites."
+  ]
 }
