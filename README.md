@@ -1,12 +1,12 @@
 # Aion Endless Run
 
-Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.20.0**.
+Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.21.0**.
 
 **[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.20.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.20.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0200/README.md)
 
 ![Gerçek oyunun kompakt ana menüsü](docs/evidence-v0200/screenshots/main-dark.png)
 
-0.20.0: Altı kahraman için396 farklı çizilmiş poz içeren altı yeni pixel-art pafta; malzeme gölgeleri, seçici konturlar ve okunaklı hareket. Yüz hizası, tam kulak/ayak kesimi, tek alçak omuz taklası ve silah eki doğrulanır. Özgün kaynak PNG'ler korunur. Tabanca sınırsızdır;0,32 saniyelik atış aralığı ve mevcut yetenekler korunur. İki oynama adresinin rekorları ayrı saklanır.
+0.21.0: Boss’lar5 seviyede bir gelir. Üç boss için farklı konuşmalar, altı kahramanın şaşırma çizimleri ve kırmızı tabanca teslimi eklendi. Ara sahnede koşu donar; Devam/Atla klavye, dokunma ve kolla çalışır. Kırmızı tabanca koşu boyunca boss’a iki kat hasar verir. Yerdeki altı kahramanın ayak hizası düzeltildi; basılı takla döngülüdür ve skor bandı inceltildi. Sınırsız0,32s ateş,15s seviyeler,11 dil, yetenekler ve kayıtlar korunur. [Bu sürümün kanıtı](docs/evidence-v0210/README.md).
 
 ## Oyna
 
@@ -37,6 +37,10 @@ Yumruk eylemi kaldırıldı. Her kahraman düz ileri tabanca sıkar; mermi bitti
 Altı biyom: Kehribar Çölü, Ayaz Vadisi, Sisli Bataklık, Bakır Şehir, Fener Ormanı ve Kor Sırtı. Gündüz/gece, hava olayları, kargalar, cüceler, seyrek ateş bitkileri, çukurlar ve kargaların taşıdığı üst engeller vardır. Her **15 saniyelik aktif normal koşu** yeni seviyedir; menü, duraklatma, sarılma ve boss zamanı bu sayaca girmez. Her on seviyede sarılma ve ve üç tasarımı dönen boss kovalamacası vardır. Boss arenasında normal parkur temizlenir. İsteğe bağlı antrenman üç boss’u doğrudan denetir ve rekoru değiştirmez.
 
 Meyveler +25, temiz aşılan engeller +10; mesafe de skor kazandırır. On toplanabilir güç bulunur. Sıçrama tılsımı 9 saniye daha yüksek zıplatır, şans parası 12 saniye meyve puanını ikiye katlar, buz feneri 8 saniye yakındaki yaklaşan düşmanları yavaşlatır. Dev mantar varsayılan %2 uygun eşya olasılığıyla nadirdir; ilk 20 saniyede ve önceki mantardan sonraki 45 saniyede gelmez. Mantar dalgasının toplam cüce üretimi yaklaşık yarıya indirildi; ortam cüceleri değişmedi. Her 100’ün katı eşiğinden sonraki ilk uygun boss zaferi **Fragaria çileğini** sunar. Bu nesne yalnız kısa kutlamadır; güç, puan veya başka oynanış ödülü vermez.
+
+## 0.21.0 · Beş seviyede bir hikâyeli boss
+
+Normal koşuda5/10/15… seviyelerde üç boss sırayla döner.10 seviyelik sarılmalar korunur. Boss konuşur, kahraman şaşırır, yardımcısı kırmızı tabancayı uzatır. Okuma süresi sınırlı değildir; **Devam** veya **Atla** ile ilerlenir. Antrenman hızlı girişini korur. Kırmızı tabancanın gerçek mermileri boss’a2 hasar verir; yeni koşuda normal tabanca geri gelir. Taklayı basılı tutmak düşük omuz taklası karelerini tekrarlar; topa dönüşme veya fizik konumunu oynatma yoktur.
 
 ## 0.20.0 · Yeni kahraman pixel-art paftaları
 
@@ -123,4 +127,4 @@ FireAxolotl/Extension kaynakları ve önceki paftalar korunur. Güncel kahraman 
 
 ## English
 
-An offline Godot pixel runner with five original heroes and six biomes. Version 0.17 uses an always-equipped, straight-firing pistol with five rounds and a one-second manual reload. Short proper names are identical in all eleven languages. The main menu fits at 100–200% text, including portrait and landscape. A one-time legacy language migration follows the device/browser locale without clearing records or appearance settings; later explicit choices persist. Levels take 15 active seconds. Eighteen new botanical poses add gentle wind animation while all 45 previous asset PNGs remain unchanged. Installers and portable editions are under Releases; evidence distinguishes browser/native-emulator tests from physical device and Apple distribution checks.
+An offline Godot pixel runner with five original heroes and six biomes. Version0.21 uses an always-equipped, straight-firing pistol with infinite ammunition at0.32s cadence. Boss encounters occur every five levels, with skippable dialogue and a red-pistol upgrade. Short proper names are identical in all eleven languages. The main menu fits at 100–200% text, including portrait and landscape. A one-time legacy language migration follows the device/browser locale without clearing records or appearance settings; later explicit choices persist. Levels take 15 active seconds. Eighteen new botanical poses add gentle wind animation while all 45 previous asset PNGs remain unchanged. Installers and portable editions are under Releases; evidence distinguishes browser/native-emulator tests from physical device and Apple distribution checks.

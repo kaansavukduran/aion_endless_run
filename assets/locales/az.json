@@ -66,7 +66,7 @@
   "boss_dodge_low": "TULLAN!",
   "boss_dodge_high": "MAYALLAQ!",
   "boss_intro": "TAPANÇA HAZIRDIR · ROBOTU TUT!",
-  "boss_fight": "Sol klik / F: atəş · R: doldur · Space: tullan · ↓: yuvarlan",
+  "boss_fight": "Sol/sağ klik və ya F: atəş · Space: tullan · ↓: mayallaq · Esc: fasilə",
   "boss_won": "ROBOT MƏĞLUB OLDU! +%d",
   "boss_return": "SƏYAHƏT DAVAM EDİR",
   "boss_player_hit": "VURULDUN · DAVAM ET",
@@ -228,5 +228,14 @@
   "name_eren": "Eren",
   "ability_eren": "Tək tullanış",
   "touch_ability_eren": "↑ Tullan",
-  "pad_ability_eren": "%s: tək tullanış"
+  "pad_ability_eren": "%s: tək tullanış",
+  "story_next": "Davam et",
+  "story_skip": "Keç",
+  "story_startled": "Nə?! Bu haradan çıxdı?",
+  "story_taunt_0": "HAHAHA! Axmaq məxluq, sonun çatdı!",
+  "story_taunt_1": "Küləkdən qaça bilməzsən. Səma mənimdir!",
+  "story_taunt_2": "Köklərim hər yolun altındadır. Qaça bilməzsən!",
+  "story_ally_0": "Bunu al! Qırmızı tapança zirehə daha güclü vurur.",
+  "story_ally_1": "Qırmızı tapança ilə fırtınanı yar!",
+  "story_ally_2": "Bu qırmızı tapança onun köklərini qırar. Get!"
 }

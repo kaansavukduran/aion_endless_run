@@ -32,10 +32,13 @@ func run():
 				texture_hashes[hash(pose.texture.get_image().get_data())]=true
 				check(sprite.position==Vector2(288,500) and is_equal_approx(sprite.scale.x,a.scale[0]),"No actor-position or scaling compensation: "+hero+"/"+logical)
 				check(pose.source_key=="pixel-"+hero,"The actual renderer selects this hero's new drawing")
-				if logical!="rolls":probes.append(sprite.get_meta("head_probe_world"))
-			for p in probes:check(p.distance_to(probes[0])<.001,"Independent nose/cheek probe remains registered")
+				if logical!="rolls":
+					probes.append(sprite.get_meta("head_probe_world"))
+					var source: Dictionary=a.frames[3 if logical=="gun-run" else 4][col]
+					check(absf((source.body_bounds[3]-source.origin[1])*a.scale[0])<.001,"Opaque foot contacts the fixed ground in every run/fire pose: "+hero+"/"+logical+"/"+str(col))
+			for p in probes:check(absf(p.x-probes[0].x)<.001,"Independent nose/cheek probe stays horizontally registered while planted feet allow natural vertical stride")
 		check(texture_hashes.size()==18,"All eighteen live run/fire/roll drawings are distinct: "+hero)
-		check(bank.pose("rolls",index,5).height<bank.pose("runner-"+hero,0,0).height*.9,"Final held crouch is visibly low: "+hero)
+		check(bank.pose("rolls",index,5).height<bank.pose("runner-"+hero,0,0).height*.9,"Recovery pose is visibly low: "+hero)
 		for state_row in [3,4]:
 			for col in 6:
 				var element:=bank.pose("runner-"+hero,state_row,col)

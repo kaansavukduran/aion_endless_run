@@ -1,0 +1,210 @@
+{
+  "checks": [
+    "A normal unmodified run naturally reaches its first boss at level5",
+    "Level5 selects the first boss without waiting for level10",
+    "Dialogue freezes real gameplay and refuses held Fire",
+    "Continue selects the actual surprised hands-to-face sheet",
+    "Pause and portrait rotation preserve the same cinematic and run",
+    "Gamepad A activates the real cinematic Continue action",
+    "Touch Skip grants the upgrade and carries no jump input into the chase",
+    "Real red-pistol projectiles collide with the moving boss and lower HP",
+    "Real inputs defeat the boss and complete the smooth return",
+    "The upgraded gun survives the return; the boss does not farm normal levels",
+    "No script or browser errors on the natural story and boss route"
+  ],
+  "errors": [],
+  "timeline": [
+    {
+      "bossPhase": "fight",
+      "bossHp": "26",
+      "bossShots": "179",
+      "bossHits": "5",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "1655.50000000001"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "24",
+      "bossShots": "179",
+      "bossHits": "6",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "1944.25000000001"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "22",
+      "bossShots": "181",
+      "bossHits": "7",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "2239.41666666667"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "20",
+      "bossShots": "182",
+      "bossHits": "8",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "2425.5"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "16",
+      "bossShots": "184",
+      "bossHits": "10",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "2618.0"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "14",
+      "bossShots": "184",
+      "bossHits": "11",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "2855.41666666666"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "14",
+      "bossShots": "184",
+      "bossHits": "11",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "3092.83333333332"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "14",
+      "bossShots": "185",
+      "bossHits": "11",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "3317.41666666665"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "10",
+      "bossShots": "187",
+      "bossHits": "13",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "3529.16666666664"
+    },
+    {
+      "bossPhase": "fight",
+      "bossHp": "6",
+      "bossShots": "189",
+      "bossHits": "15",
+      "bossPlayerHp": "3",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "3830.74999999997"
+    },
+    {
+      "bossPhase": "victory",
+      "bossHp": "0",
+      "bossShots": "192",
+      "bossHits": "18",
+      "bossPlayerHp": "2",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "4234.99999999997"
+    },
+    {
+      "bossPhase": "victory",
+      "bossHp": "0",
+      "bossShots": "192",
+      "bossHits": "18",
+      "bossPlayerHp": "2",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "4542.99999999998"
+    },
+    {
+      "bossPhase": "return",
+      "bossHp": "0",
+      "bossShots": "192",
+      "bossHits": "18",
+      "bossPlayerHp": "2",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "4786.84739806599"
+    },
+    {
+      "bossPhase": "return",
+      "bossHp": "0",
+      "bossShots": "192",
+      "bossHits": "18",
+      "bossPlayerHp": "2",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "4909.838026489"
+    },
+    {
+      "bossPhase": "return",
+      "bossHp": "0",
+      "bossShots": "192",
+      "bossHits": "18",
+      "bossPlayerHp": "2",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "5035.83590469432"
+    },
+    {
+      "bossPhase": "return",
+      "bossHp": "0",
+      "bossShots": "192",
+      "bossHits": "18",
+      "bossPlayerHp": "2",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20497.4227721038",
+      "travelDistance": "5165.03694301336"
+    },
+    {
+      "bossPhase": "run",
+      "bossHp": "0",
+      "bossShots": "192",
+      "bossHits": "18",
+      "bossPlayerHp": "2",
+      "level": "5",
+      "redWeapon": "true",
+      "worldDistance": "20531.1590197291",
+      "travelDistance": "5287.23659558265"
+    }
+  ],
+  "build": {
+    "build": "b9276afcf05f9ee6",
+    "version": "0.21.0"
+  },
+  "scope": "Normal UI and real keyboard/touch/browser-gamepad input. Passive observations only. No state/RNG/save/health setters. Not a physical controller or phone."
+}

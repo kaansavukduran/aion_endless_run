@@ -66,7 +66,7 @@
   "boss_dodge_low": "SPRINGEN!",
   "boss_dodge_high": "ROLLEN!",
   "boss_intro": "ENERGIEPISTOLE BEREIT · VERFOLGE DEN ROBOTER!",
-  "boss_fight": "Linksklick / F: Feuer · R: laden · Space: Sprung · ↓: Rolle",
+  "boss_fight": "Links-/Rechtsklick oder F: Feuer · Space: Sprung · ↓: Rolle · Esc: Pause",
   "boss_won": "ROBOTER BESIEGT! +%d",
   "boss_return": "DIE REISE GEHT WEITER",
   "boss_player_hit": "GETROFFEN · WEITERLAUFEN",
@@ -228,5 +228,14 @@
   "name_eren": "Eren",
   "ability_eren": "Einzelsprung",
   "touch_ability_eren": "↑ Springen",
-  "pad_ability_eren": "%s: Einzelsprung"
+  "pad_ability_eren": "%s: Einzelsprung",
+  "story_next": "Weiter",
+  "story_skip": "Überspringen",
+  "story_startled": "Was?! Wo kam das denn her?",
+  "story_taunt_0": "HAHAHA! Törichtes Wesen, dein Ende ist da!",
+  "story_taunt_1": "Dem Wind entkommst du nicht. Der Himmel gehört mir!",
+  "story_taunt_2": "Meine Wurzeln liegen unter jedem Weg. Kein Entkommen!",
+  "story_ally_0": "Nimm sie! Die rote Pistole trifft die Panzerung härter.",
+  "story_ally_1": "Durchbrich den Sturm mit dieser roten Pistole!",
+  "story_ally_2": "Diese rote Pistole bricht seine Wurzeln. Los!"
 }

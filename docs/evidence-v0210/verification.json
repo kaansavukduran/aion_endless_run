@@ -1,0 +1,17 @@
+{
+  "version": "0.21.0",
+  "recorded_at": "2026-11-14T00:39:42.012170+03:00",
+  "timezone": "Europe/Istanbul",
+  "base_commit": "16c40b3cf7f989d6501d9b589a506de4ad075ad7",
+  "source_and_scene_checks": 11953,
+  "source_suites": 20,
+  "browser_checks": 149,
+  "browser_scope": "138 normal-input six-hero/foot/roll/glide/sprint/menu checks and11 naturally reached level5 dialogue/upgrade/victory checks, before a story-prop-only foreground placement adjustment. No world/save/RNG setters, physical phone or physical gamepad claim. Final DPR and public-browser checks are recorded separately.",
+  "publication_status": "NOT_YET_PUBLISHED",
+  "physical_poco_iphone_gamepads": "NOT TESTED",
+  "ios_native": "Requires owner signing; unchanged limitation",
+  "browser_build": {
+    "build": "b9276afcf05f9ee6",
+    "version": "0.21.0"
+  }
+}

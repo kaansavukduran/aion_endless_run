@@ -40,7 +40,7 @@ func run():
    check(sprite.position==Vector2(288,500) and is_equal_approx(sprite.scale.x,upright.scale),"No physical-position or per-frame scale workaround")
  var w=World.new();w.reset();w.obstacle_wait=999;w.adventure.item_wait=999;w.frontier.plant_wait=999;w.adventure.ambient_gnome_wait=999;w.adventure.press_roll(w)
  for tick in 100:w.step(.01)
- check(w.adventure.ducking(w) and w.adventure.roll_frame()==5,"One forward shoulder roll settles low; holding never spins a ball")
+ check(w.adventure.ducking(w) and w.adventure.roll_frame()==3,"Held shoulder-roll repeats the low authored poses without rotating a bitmap")
  check(w.adventure.roll_pose(1.0,.14,false)==5,"Release uses the authored recovery poses")
  sprite.free()
  var g=load("res://main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.touch_tutorial_done=true

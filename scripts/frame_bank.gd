@@ -14,10 +14,12 @@ const SHOULDERS=preload("res://assets/SHOULDER-POSES-PROVENANCE.json")
 const EREN=preload("res://assets/EREN-PROVENANCE.json")
 const PIXEL=preload("res://assets/PIXEL-HEROES-PROVENANCE.json")
 const ORCHARD = preload("res://assets/ORCHARD-PROVENANCE.json")
+const STORY=preload("res://assets/STORY-PROVENANCE.json")
 var images := {}
 var frames := {}
 
 func descriptor(key: String,row: int) -> Dictionary:
+	if key=="boss-story-reactions":return {"key":key,"row":row,"data":STORY.data.atlas}
 	if PIXEL.data.aliases.has(key):
 		var pixel: Dictionary=PIXEL.data.aliases[key][row]
 		return {"key":pixel.atlas,"row":int(pixel.row),"data":PIXEL.data.atlases[pixel.atlas]}
@@ -105,6 +107,8 @@ func pose(key: String, row: int, column: int) -> Dictionary:
 		if f.eye != null: result["eye_local"] = Vector2(float(f.eye[0]-b[0])+2,float(f.eye[1]-b[1])+2)
 	if f.has("head_probe"):
 		result["probe_local"] = Vector2(float(f.head_probe[0]-b[0])+2,float(f.head_probe[1]-b[1])+2)
+	if f.has("ground_contact"):
+		result["foot_local"]=Vector2(0,float(f.body_bounds[3]-b[1])+2)
 	frames[cache_key] = result
 	return result
 
@@ -123,7 +127,8 @@ func place(item: Sprite2D,key: String,row: int,column: int,anchor: Vector2,growt
 	item.set_meta("pose_frame",column)
 	item.set_meta("pose_height",float(f.height)*growth)
 	item.set_meta("head_size",float(f.head)*growth)
-	for marker in ["eye_world","head_probe_world"]:
+	for marker in ["eye_world","head_probe_world","foot_world"]:
 		if item.has_meta(marker): item.remove_meta(marker)
+	if f.has("foot_local"): item.set_meta("foot_world",item.position+(f.offset+f.foot_local)*float(f.scale)*growth)
 	if f.has("eye_local"): item.set_meta("eye_world",item.position+(f.offset+f.eye_local)*float(f.scale)*growth)
 	if f.has("probe_local"): item.set_meta("head_probe_world",item.position+(f.offset+f.probe_local)*float(f.scale)*growth)

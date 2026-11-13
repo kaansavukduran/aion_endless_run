@@ -33,7 +33,7 @@ with sync_playwright() as pw:
   menu();ui(name='StartSelect_'+hero);ui(name='StartRun');wait('[data-state="running"][data-ui-ready="true"]')
   if any(b['text']=='Anladım · Devam et' for b in json.loads(d()['ui'])):ui(text='Anladım · Devam et')
   page.wait_for_function('Number(document.querySelector("canvas").dataset.worldTime)>.02')
- def observer():page.evaluate("window.poseObserver?.disconnect();window.poseSamples=[];window.poseObserver=new MutationObserver(()=>{let d=document.querySelector('canvas').dataset;poseSamples.push({state:d.state,source:d.poseSource,frame:+d.sourceFrame,row:+d.sourceRow,count:+d.frameCount,probeX:+d.headProbeX,probeY:+d.headProbeY,x:+d.visualX,scale:+d.actorScale,time:+d.worldTime,y:+d.playerY,shots:+d.bossShots,height:+d.heroOpaqueHeight,duck:d.ducking==='true'})});poseObserver.observe(document.querySelector('canvas'),{attributes:true})")
+ def observer():page.evaluate("window.poseObserver?.disconnect();window.poseSamples=[];window.poseObserver=new MutationObserver(()=>{let d=document.querySelector('canvas').dataset;poseSamples.push({state:d.state,source:d.poseSource,frame:+d.sourceFrame,row:+d.sourceRow,count:+d.frameCount,probeX:+d.headProbeX,probeY:+d.headProbeY,x:+d.visualX,scale:+d.actorScale,time:+d.worldTime,y:+d.playerY,shots:+d.bossShots,height:+d.heroOpaqueHeight,duck:d.ducking==='true',footY:+d.footY,groundY:+d.groundY})});poseObserver.observe(document.querySelector('canvas'),{attributes:true})")
  def stable(label,source=None,samples=None):
   rows=page.evaluate('poseSamples') if samples is None else samples;rows=[x for x in rows if x['probeX']>-900 and (not source or x['source']==source)]
   check(bool(rows),label+' has independently registered head samples')
@@ -42,6 +42,8 @@ with sync_playwright() as pw:
   check(max(x['probeX'] for x in rows)-min(x['probeX'] for x in rows)<.01,label+' face stays horizontally registered')
   check(max(x['x'] for x in rows)-min(x['x'] for x in rows)<.01,label+' physics anchor is never shifted to hide a bad frame')
   check(max(x['scale'] for x in rows)-min(x['scale'] for x in rows)<.00001,label+' has one consistent scale')
+  if 'gun-run' in label or 'gun-fire' in label:
+   check(all(x['y']==0 and abs(x['footY']-x['groundY'])<=.501 for x in rows),label+' every actual run/fire pose plants its opaque foot on the road')
   clips[label]=rows
  def fitted(label):
   v=d();buttons=json.loads(v['ui']);w,h=float(v['viewWidth']),float(v['viewHeight']);cards=[b for b in buttons if b['name'].startswith('StartSelect_')]
@@ -83,7 +85,7 @@ with sync_playwright() as pw:
    recovery_row=3
    page.wait_for_function('(v)=>poseSamples.some(p=>p.time>v.time&&p.state==="running"&&!p.duck&&p.row===v.row)',arg={'time':rows[-1]['time'],'row':recovery_row},timeout=1500)
    recovered=page.evaluate('(v)=>poseSamples.find(p=>p.time>v.time&&p.state==="running"&&!p.duck&&p.row===v.row)',{'time':rows[-1]['time'],'row':recovery_row});page.keyboard.press('Escape')
-   check(any(x['frame']>=4 for x in rows) and bool(late) and all(x['frame']==5 for x in late),hero+' bends, shoulder rolls once, then remains visibly low')
+   check(any(x['frame']>=4 for x in rows) and bool(late) and len({x['frame'] for x in late})>=3,hero+' keeps cycling authored low shoulder-roll poses while held')
    check(min(x['height'] for x in rows)<height*.93 and all(x['y']==0 for x in rows),hero+' lowers the actual drawing while staying on the ground')
    check(recovered['state']=='running' and not recovered['duck'],hero+' visibly recovers to its own pistol-run design before the next hazard')
   if not args.menu_only:

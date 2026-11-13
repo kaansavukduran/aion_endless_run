@@ -58,11 +58,23 @@ func _draw() -> void:
 			var low: bool = f.warning == "low"
 			draw_line(Vector2(f.boss_x-95,ground+(-14 if low else -82)),Vector2(f.boss_x-190,ground+(-14 if low else -82)),Color(1,0.72,0.38,0.5),2)
 			object("power",9,8+posmod(int(clock*8),2),Vector2(f.boss_x-120,ground-195),40,true)
-		if f.phase == "intro" and f.stage_time < 0.85 and world.adventure.celebrations_enabled and not world.practice:
+		if f.phase == "intro" and f.stage_time < 0.85 and world.adventure.celebrations_enabled and not world.practice and not f.red_weapon:
 			var p: float = smoothstep(0.0,0.85,f.stage_time)
 			object("boss",5,host.frames.progress("boss",5,f.stage_time/0.85),Vector2(world.PLAYER_X+92-p*44,ground-58-sin(p*PI)*25),42,true)
 
+	if f.storytelling() and f.story_index==2:
+		var girl: int=maxi(0,world.adventure.girl_index)
+		var half: int=host.frames.count("celebrants",girl)/2
+		var progress: float=smoothstep(0,1.2,f.story_time) if host.decorative_motion() else 1.0
+		var anchor:=Vector2(world.PLAYER_X+100-progress*45,ground)
+		host.evolution_view.girl(self,girl,half+4,anchor,1.0)
+
 	for p in f.projectiles:
+		if p.owner=="hero" and bool(p.get("red",false)):
+			var point:=Vector2(p.x,ground+p.y).round()
+			draw_rect(Rect2(point-Vector2(18,4),Vector2(28,8)),Color("dd3b45"))
+			draw_rect(Rect2(point-Vector2(9,2),Vector2(21,4)),Color("ffd69c"))
+			continue
 		var icon := 0 if p.owner == "hero" else (2 if p.kind in ["ember","seed"] else 1)
 		var frame := icon*2+posmod(int(clock*8),2)
 		object("power",9,frame,Vector2(p.x,ground+p.y),39 if p.owner == "hero" else 33,true)

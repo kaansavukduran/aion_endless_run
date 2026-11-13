@@ -93,7 +93,7 @@ jobs:
           v['android_application_source_commit']=meta['application_source_commit']
           v['publication_run']=v['verification_run'];v['verification_run']=run['html_url']
           v['source_provenance_note']='Exact unchanged artifacts from the successful main CI run; release tag adds delivery documentation only. Runtime source equality was checked before publication.'
-          v['browser_scope']='126 normal six-hero pose/input checks with unchanged pose code; final17 DPR,40 live and3 actual-release-archive offline checks. No physical-device claim.'
+          v['browser_scope']=json.load(open('docs/evidence-v'+os.environ['VERSION'].replace('.', '')+'/verification.json')).get('browser_scope','See the versioned evidence; no physical-device claim.')
           p.write_text(json.dumps(v,indent=2)+'\n')
           with (root/'SHA256SUMS').open('w') as f:
             for name in sorted([*v['files'],'BUILD-RECEIPT.json']):f.write(hashlib.file_digest((root/name).open('rb'),'sha256').hexdigest()+'  '+name+'\n')

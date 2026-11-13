@@ -47,7 +47,7 @@ func _draw() -> void:
 	draw_scene(self,false)
 
 func draw_scene(canvas: Node2D,background: bool) -> void:
-	if host == null: return
+	if host == null or host.world.frontier.storytelling(): return
 	var w = host.world
 	var a = w.adventure
 	if background and w.state in ["running","paused"]:fragaria(canvas)

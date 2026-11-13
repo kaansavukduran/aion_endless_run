@@ -66,7 +66,7 @@
   "boss_dodge_low": "점프!",
   "boss_dodge_high": "구르기!",
   "boss_intro": "권총 준비 · 로봇을 쫓아라!",
-  "boss_fight": "왼쪽 클릭 / F: 발사 · R: 장전 · Space: 점프 · ↓: 구르기",
+  "boss_fight": "왼쪽/오른쪽 클릭 또는 F: 사격 · Space: 점프 · ↓: 구르기 · Esc: 일시 정지",
   "boss_won": "로봇 격파! +%d",
   "boss_return": "여행은 계속된다",
   "boss_player_hit": "피격 · 계속 달려요",
@@ -228,5 +228,14 @@
   "name_eren": "Eren",
   "ability_eren": "한 번 점프",
   "touch_ability_eren": "↑ 점프",
-  "pad_ability_eren": "%s: 한 번 점프"
+  "pad_ability_eren": "%s: 한 번 점프",
+  "story_next": "계속",
+  "story_skip": "건너뛰기",
+  "story_startled": "뭐야?! 어디서 나타난 거지?",
+  "story_taunt_0": "하하하! 어리석은 생명체여, 네 끝이다!",
+  "story_taunt_1": "바람을 앞지를 순 없다. 하늘은 내 것이다!",
+  "story_taunt_2": "모든 길 아래에 내 뿌리가 있다. 도망 못 간다!",
+  "story_ally_0": "이걸 받아! 빨간 권총은 장갑에도 더 강해.",
+  "story_ally_1": "이 빨간 권총으로 폭풍을 뚫어!",
+  "story_ally_2": "이 빨간 권총으로 뿌리를 끊을 수 있어. 가!"
 }

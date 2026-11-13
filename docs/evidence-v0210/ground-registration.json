@@ -1,0 +1,105 @@
+{
+  "scope": "Source silhouette boundary in world pixels; positive gap means the grounded foot floated above the road. No actor X or per-frame scale compensation. Tests additionally inspect the actual scene and passive browser foot position.",
+  "before_gun_run": {
+    "aion": [
+      1.922,
+      1.922,
+      1.922,
+      4.484,
+      0.641,
+      2.562
+    ],
+    "owl": [
+      6.92,
+      9.688,
+      4.152,
+      6.92,
+      6.228,
+      6.228
+    ],
+    "sheep": [
+      5.046,
+      3.785,
+      4.415,
+      6.938,
+      6.308,
+      5.677
+    ],
+    "wolf": [
+      2.494,
+      2.494,
+      -0.624,
+      4.989,
+      4.365,
+      2.494
+    ],
+    "rabbit": [
+      1.231,
+      1.846,
+      -1.846,
+      8.615,
+      0.615,
+      -1.231
+    ],
+    "eren": [
+      4.543,
+      6.058,
+      0.757,
+      8.329,
+      1.514,
+      0.0
+    ]
+  },
+  "after_gun_run": {
+    "aion": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "owl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "sheep": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "wolf": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rabbit": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "eren": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "cause": "The earlier full-face registration fixed Y as well as X in grounded stride poses. Grounded rows now retain face X but anchor Y to the opaque planted foot. Airborne owl/head registration is preserved.",
+  "original_png_pixels_changed": false
+}

@@ -37,7 +37,7 @@ func run():
    check(sprite.position==Vector2(288,500) and is_equal_approx(sprite.scale.x,first.scale),"Fixed physical pivot and one uniform scale: "+str(row)+"/"+str(frame))
    check(absf(sprite.position.y+(pose.offset.y+pose.texture.get_height()-2)*pose.scale-500)<.01,"Every pose contacts the actual ground")
  sprite.free()
- for tick in range(20,200):check(w.adventure.roll_pose(tick*.02,0,true)==5 if tick*.02>=.53 else w.adventure.roll_pose(tick*.02,0,true) in [2,3,4,5],"One shoulder roll settles into a low crouch while held")
+ for tick in range(20,200):check(w.adventure.roll_pose(tick*.02,0,true)==posmod(int(tick*.02/.62*6),6),"Held low roll repeats all six authored frames on a continuous 0.62s cycle")
  check(w.adventure.roll_pose(.8,.14,false)==5 and w.adventure.roll_pose(.92,.02,false)==0,"Release shows authored recovery poses")
  var save_path:="user://save.cfg";var original:=FileAccess.get_file_as_bytes(save_path) if FileAccess.file_exists(save_path) else PackedByteArray()
  var g=load("res://main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.touch_tutorial_done=true

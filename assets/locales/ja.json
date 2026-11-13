@@ -66,7 +66,7 @@
   "boss_dodge_low": "ジャンプ！",
   "boss_dodge_high": "回転！",
   "boss_intro": "銃の準備完了・ロボットを追え！",
-  "boss_fight": "左クリック / F: 射撃 · R: 装填 · Space: ジャンプ · ↓: 回転",
+  "boss_fight": "左/右クリック・F：射撃 · Space：ジャンプ · ↓：前転 · Esc：停止",
   "boss_won": "ロボット撃破！ +%d",
   "boss_return": "冒険は続く",
   "boss_player_hit": "被弾・走り続けよう",
@@ -228,5 +228,14 @@
   "name_eren": "Eren",
   "ability_eren": "1段ジャンプ",
   "touch_ability_eren": "↑ ジャンプ",
-  "pad_ability_eren": "%s：1段ジャンプ"
+  "pad_ability_eren": "%s：1段ジャンプ",
+  "story_next": "続ける",
+  "story_skip": "スキップ",
+  "story_startled": "えっ？！いったいどこから？",
+  "story_taunt_0": "ハハハ！愚かな生き物よ、お前もここまでだ！",
+  "story_taunt_1": "風からは逃げられない。空は私のものだ！",
+  "story_taunt_2": "どの道の下にも私の根がある。逃がさない！",
+  "story_ally_0": "これを使って！赤い銃なら装甲にも強く効くよ。",
+  "story_ally_1": "この赤い銃で嵐を切り開いて！",
+  "story_ally_2": "この赤い銃で根を断ち切れるよ。さあ！"
 }

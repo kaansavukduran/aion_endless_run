@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.20.0"
+const GAME_VERSION = "0.21.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -25,6 +25,7 @@ var native_diagnostics := preload("res://scripts/native_diagnostics.gd").new()
 var web_accessibility := preload("res://scripts/web_accessibility.gd").new()
 var active_input := "keyboard"
 var theme_check := 0.0
+var story_ui := preload("res://scripts/boss_story.gd").new()
 var pixel_ui := preload("res://scripts/pixel_interface.gd").new()
 var touch_controls := preload("res://scripts/touch_controls.gd").new()
 var scene_w := 1152.0
@@ -127,6 +128,7 @@ var layout_generation := 0
 
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("0a1222"))
+	story_ui.host = self
 	pixel_ui.host = self
 	touch_controls.host = self
 	touch_mode = OS.has_feature("mobile")
@@ -409,6 +411,7 @@ func rebuild() -> void:
 	if page != "":
 		build_page()
 	build_language_picker()
+	story_ui.build()
 	if previous_name!="":
 		var replacement=ui.find_child(previous_name,true,false)
 		if replacement is Control and replacement.is_visible_in_tree():focus_later.call_deferred(replacement)
@@ -784,7 +787,7 @@ func begin_playing() -> void:
 
 func press_jump(source: String) -> void:
 	begin_playing()
-	if page != "" or world.state != "running" or world.adventure.hugging() or jump_sources.has(source): return
+	if page != "" or world.state != "running" or world.adventure.hugging() or world.frontier.storytelling() or jump_sources.has(source): return
 	world.character = character
 	jump_sources[source] = true
 	world.jump_held = true
@@ -803,7 +806,7 @@ func cancel_web_touch(_arguments: Array) -> void:
 
 func press_boost(source: String) -> void:
 	begin_playing()
-	if page != "" or world.state != "running" or world.adventure.hugging(): return
+	if page != "" or world.state != "running" or world.adventure.hugging() or world.frontier.storytelling(): return
 	world.character = character
 	boost_sources[source] = true
 	world.boost_held = true
@@ -818,7 +821,7 @@ func press_attack(source: String) -> void:
 
 func press_shoot(source: String) -> void:
 	begin_playing()
-	if page != "" or world.state != "running" or world.adventure.hugging(): return
+	if page != "" or world.state != "running" or world.adventure.hugging() or world.frontier.storytelling(): return
 	if shoot_sources.has(source): return
 	var first := shoot_sources.is_empty()
 	shoot_sources[source] = true
@@ -834,7 +837,7 @@ func release_attack(source: String) -> void:
 
 func press_duck(source: String) -> void:
 	begin_playing()
-	if page != "" or world.state != "running" or world.adventure.hugging(): return
+	if page != "" or world.state != "running" or world.adventure.hugging() or world.frontier.storytelling(): return
 	duck_sources[source] = true
 	world.cancel_charge()
 	world.adventure.press_roll(world)
@@ -900,6 +903,13 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventScreenTouch and is_instance_valid(tutorial_panel) and tutorial_panel.is_visible_in_tree() and tutorial_panel.get_global_rect().has_point(screen_transform.affine_inverse()*event.position): return
+	if page=="" and world.frontier.storytelling():
+		if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_SPACE,KEY_ENTER]:
+			story_ui.advance();get_viewport().set_input_as_handled();return
+		if event is InputEventJoypadButton or event is InputEventJoypadMotion:
+			if gamepad.handle(event):get_viewport().set_input_as_handled()
+			return
+		if event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventMouseButton:return
 	if touch_controls.handle(event):
 		get_viewport().set_input_as_handled()
 		return
@@ -980,7 +990,7 @@ func on_gamepad_connection(id: int,connected: bool) -> void:
 		if page=="": pause_run()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if page != "": return
+	if page != "" or world.frontier.storytelling(): return
 	if event is InputEventMouseButton and event.device != -1 and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 		press_shoot("mouse")
 		get_viewport().set_input_as_handled()
@@ -1023,6 +1033,7 @@ func _physics_process(dt: float) -> void:
 	if world.state != "paused" and not world.adventure.hugging(): visual_size = move_toward(visual_size, world.adventure.size_multiplier(), dt * 3.0) if motion else world.adventure.size_multiplier()
 	apply_scene_transform()
 	update_friend()
+	update_weapon_visual()
 	update_hud()
 	native_diagnostics.state()
 	evolution_view.z_index = 1 if world.adventure.hugging() else 0
@@ -1032,6 +1043,7 @@ func _physics_process(dt: float) -> void:
 	queue_redraw()
 
 func handle_event(value: String) -> void:
+	if value in ["story_start","story_beat","story_end"]:clear_held_controls()
 	if value=="fragaria_found":
 		notice=text("fragaria_found")
 		notice_time=3.8
@@ -1238,6 +1250,10 @@ func update_hud() -> void:
 			ability_label.text=ability_label.text.replace("・","·").get_slice("·",0).strip_edges()
 	if interface_options.text_scale>1.0:
 		biome_label.hide();power_label.hide();goal_label.hide();ability_label.hide();footer_label.hide()
+	story_ui.update()
+	if boss.storytelling() and page=="":
+		hud.hide();boss_label.hide();boss_bar.hide();notice_label.hide();ability_label.hide();footer_label.hide()
+		for control in action_buttons.values():control.hide()
 	publish_web_status()
 
 func publish_web_status() -> void:
@@ -1247,6 +1263,7 @@ func publish_web_status() -> void:
 	stamp += ":" + world.frontier.phase + ":" + str(world.frontier.hp) + ":" + str(world.frontier.shot_flash)
 	stamp += ":" + str(language_picker_open)+":"+interface_options.theme_mode+":"+str(interface_options.dark)+":"+interface_options.font_mode+":"+str(interface_options.text_scale)+":"+str(interface_options.reduced_motion)+":"+active_input
 	stamp += ":"+interface_options.touch_layout
+	if world.frontier.storytelling():stamp+=":"+str(world.frontier.story_index)+":"+str(world.frontier.story_time)
 	stamp += ":" + str(effects_enabled) + ":" + str(motion) + ":" + str(audio_enabled) + ":" + str(world.adventure.celebrations_enabled)
 	stamp += ":%.2f:%s:%d:%d:%s" % [world.y, world.riding_gust, friend_row, friend_frame, friend_action]
 	if character == "sheep": stamp += ":%.2f:%.2f" % [world.flock_pose(0).y, world.flock_pose(1).y]
@@ -1287,6 +1304,8 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-boss-active",str(world.frontier.active()))
 	canvas.setAttribute("data-boss-phase",world.frontier.phase)
 	canvas.setAttribute("data-boss-kind",str(world.frontier.boss_kind))
+	canvas.setAttribute("data-story-index",str(world.frontier.story_index))
+	canvas.setAttribute("data-red-weapon",str(world.frontier.red_weapon))
 	canvas.setAttribute("data-boss-pattern",world.frontier.pattern)
 	canvas.setAttribute("data-boss-attacks",str(world.frontier.attacks_cast))
 	canvas.setAttribute("data-practice",str(world.practice))
@@ -1303,6 +1322,8 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-reloads","0")
 	canvas.setAttribute("data-shooting",str(world.frontier.shot_flash>0))
 	canvas.setAttribute("data-gun-overlay",str(gun_echo.visible))
+	canvas.setAttribute("data-ground-y",str(ground))
+	canvas.setAttribute("data-foot-y",str(friend_sprite.get_meta("foot_world",Vector2(-1,-1)).y))
 	canvas.setAttribute("data-reloading","0.0")
 	canvas.setAttribute("data-level-bar-visible",str(level_progress.visible))
 	canvas.setAttribute("data-boss-hits",str(world.frontier.hits))
@@ -1546,6 +1567,16 @@ func update_friend() -> void:
 		var row: int = COMBAT_ROWS[character]*2+(1 if world.death_cause=="enemy" else 0)
 		frames.place(friend_sprite,"deaths",row,frames.progress("deaths",row,world.hit_time/1.25) if motion else frames.count("deaths",row)-1,Vector2(World.PLAYER_X,ground+world.y),visual_size)
 
+	if world.frontier.storytelling():
+		var f=world.frontier
+		var phase: float=clampf(f.story_time/2.4,0,1)
+		var reaction: int=maxi(1,frames.progress("boss-story-reactions",COMBAT_ROWS[character],phase)) if f.story_index==1 and motion else (4 if f.story_index==1 else 1)
+		frames.place(friend_sprite,"boss-story-reactions",COMBAT_ROWS[character],reaction,Vector2(World.PLAYER_X,ground))
+		gun_echo.hide()
+		if f.story_index==2:
+			var offer: float=smoothstep(0,1.2,f.story_time) if decorative_motion() else 1.0
+			frames.place(gun_echo,"boss-story-reactions",6,0,Vector2(World.PLAYER_X+74-offer*35,ground-30))
+			gun_echo.show()
 	friend_sprite.modulate = Color.WHITE
 	if character == "sheep":
 		for i in 2:
@@ -1568,7 +1599,7 @@ func place_held_gun() -> void:
 	var row: int=COMBAT_ROWS[character]
 	var frame: int=f.gun_frame(frames.count(key,row)) if f.shot_flash>0 else 0
 	var cache_key:=character+":"+key+":"+str(frame)
-	var muzzle: Array=frames.PIXEL.data.muzzles[character]
+	var muzzle: Array=frames.PIXEL.data.atlases["pixel-"+character].frames[4 if f.shot_flash>0 else 3][frame].muzzle
 	if not gun_parts.has(cache_key):
 		var pose: Dictionary=frames.pose(key,row,frame)
 		var factor: float=pose.scale
@@ -1765,8 +1796,27 @@ func start_boss_practice(kind: int) -> void:
 	world.practice = true
 	if is_instance_valid(tutorial_panel): tutorial_panel.hide()
 	if character=="sheep": world.sheep_count = 3
-	world.frontier.request_boss((clampi(kind,0,2)+1)*10)
+	world.frontier.request_boss((clampi(kind,0,2)+1)*world.frontier.BOSS_INTERVAL)
 
 func retry_run() -> void:
 	if world.practice: start_boss_practice(world.frontier.boss_kind)
 	else: start_run()
+
+func update_weapon_visual() -> void:
+	var mat: ShaderMaterial=friend_sprite.material
+	mat.set_shader_parameter("weapon_red",false)
+	var overlay_mat: ShaderMaterial=gun_echo.material
+	overlay_mat.set_shader_parameter("weapon_red",world.frontier.red_weapon)
+	overlay_mat.set_shader_parameter("weapon_uv",Vector4(0,0,1,1))
+	if not world.frontier.red_weapon:return
+	if friend_sprite.get_meta("pose_key","") not in ["gun-run","gun-fire"]:return
+	var key: String=friend_sprite.get_meta("pose_key")
+	var row: int=COMBAT_ROWS[character]
+	var col: int=friend_sprite.get_meta("source_frame")
+	var pose: Dictionary=frames.pose(key,row,col)
+	var data: Dictionary=frames.PIXEL.data.atlases["pixel-"+character]
+	var m: Array=data.frames[4 if key=="gun-fire" else 3][col].muzzle
+	var lo: Vector2=(Vector2(m[0]-24,m[1]-6)/pose.scale-pose.offset)/pose.texture.get_size()
+	var hi: Vector2=(Vector2(m[0]+13,m[1]+8)/pose.scale-pose.offset)/pose.texture.get_size()
+	mat.set_shader_parameter("weapon_uv",Vector4(lo.x,lo.y,hi.x,hi.y))
+	mat.set_shader_parameter("weapon_red",true)

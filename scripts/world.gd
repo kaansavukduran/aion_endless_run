@@ -128,7 +128,7 @@ func biome() -> int:
 	return int(distance / BIOME_DISTANCE) % BIOME_NAMES.size()
 
 func jump() -> void:
-	if state != "running" or adventure.hugging(): return
+	if state != "running" or adventure.hugging() or frontier.storytelling(): return
 	if character=="rabbit":
 		if y>=0 and not adventure.ducking(self) and not charging:
 			charging=true
@@ -257,6 +257,9 @@ func step(dt: float) -> void:
 		adventure.advance_hug(self, dt)
 		return
 	if frontier.pending_level > 0 and y >= 0.0 and not frontier.active(): frontier.begin(self)
+	if frontier.storytelling():
+		frontier.step_story(self,dt)
+		return
 	frontier.step_weapon(self,dt)
 	adventure.before_step(self, dt)
 	if charging:
@@ -338,7 +341,7 @@ func step(dt: float) -> void:
 	if adventure.enabled: frontier.step_plants(self,dt,movement)
 	orchard.step(self,movement)
 	record_trail()
-	if state != "running" or adventure.hugging(): return
+	if state != "running" or adventure.hugging() or frontier.storytelling(): return
 	for obstacle in obstacles:
 		obstacle.x -= movement
 		var collides := false

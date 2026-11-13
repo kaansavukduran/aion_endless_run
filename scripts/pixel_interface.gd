@@ -25,17 +25,20 @@ func hud() -> void:
 	h.hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	h.ui.add_child(h.hud)
 	var band := Panel.new()
+	band.name="ScoreBand"
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	band.add_theme_stylebox_override("panel",h.box("211c29ed","6e556d"))
 	h.hud.add_child(band)
-	h.position_control(band,Vector2.ZERO,Vector2(h.view_w,64))
+	h.position_control(band,Vector2.ZERO,Vector2(h.view_w,ceilf(h.ui_size(24)*1.25+16)))
 	var stats := HBoxContainer.new()
+	stats.name="ScoreStats"
 	stats.add_theme_constant_override("separation",24)
+	if h.portrait:stats.add_theme_constant_override("separation",14)
 	h.hud.add_child(stats)
 	stats.position = Vector2(18,8)
 	for key in ["score","best","gems"]:
-		var stack := VBoxContainer.new()
-		stack.add_theme_constant_override("separation",0)
+		var stack := HBoxContainer.new()
+		stack.add_theme_constant_override("separation",8)
 		stats.add_child(stack)
 		stack.add_child(h.label(h.text(key),14,"c6a8a5"))
 		var value: Label = h.label("00000",24,"f8db96" if key=="score" else "f5e6ce")
@@ -44,12 +47,20 @@ func hud() -> void:
 		elif key=="best":h.best_label=value
 		else:h.crystal_label=value
 	h.pause_button=h.button(h.text("pause"),h.pause_run)
-	h.pause_button.add_theme_font_size_override("font_size",20)
+	h.pause_button.name="PauseRun"
+	h.pause_button.custom_minimum_size=Vector2.ZERO
+	h.pause_button.add_theme_font_size_override("font_size",h.ui_size(24 if h.touch_mode else 20))
+	for state in ["normal","hover","pressed","focus","disabled"]:
+		var style: StyleBoxFlat=h.pause_button.get_theme_stylebox(state).duplicate()
+		style.content_margin_top=4;style.content_margin_bottom=4
+		h.pause_button.add_theme_stylebox_override(state,style)
 	h.hud.add_child(h.pause_button)
-	h.position_control(h.pause_button,Vector2(h.view_w-132,8),Vector2(116,48))
+	var pause_width: float=maxf(116,h.pause_button.get_combined_minimum_size().x)
+	h.position_control(h.pause_button,Vector2(h.view_w-pause_width-8,4),Vector2(pause_width,band.size.y-8))
+	if h.portrait:stats.get_child(1).hide()
 	h.biome_label=h.label("",18,"eed3b4")
 	h.hud.add_child(h.biome_label)
-	h.position_control(h.biome_label,Vector2(18,72),Vector2(h.view_w-36,28))
+	h.position_control(h.biome_label,Vector2(18,band.size.y+6),Vector2(h.view_w-36,28))
 	h.biome_label.clip_text=true
 	h.progress=ProgressBar.new()
 	h.progress.max_value=h.world.BIOME_DISTANCE
@@ -58,7 +69,7 @@ func hud() -> void:
 	h.hud.add_child(h.progress)
 	h.level_label=h.label("",19,"f8db96")
 	h.hud.add_child(h.level_label)
-	h.position_control(h.level_label,Vector2(18,102),Vector2(210,26))
+	h.position_control(h.level_label,Vector2(18,band.size.y+36),Vector2(210,26))
 	h.ammo_label=h.label("",18,"f8db96")
 	h.hud.add_child(h.ammo_label)
 	h.position_control(h.ammo_label,Vector2(18,130),Vector2(420,28))
@@ -76,7 +87,7 @@ func hud() -> void:
 	h.xp_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 	h.xp_label.clip_text=true
 	h.hud.add_child(h.xp_label)
-	h.position_control(h.xp_label,Vector2(h.view_w-238,102),Vector2(220,26))
+	h.position_control(h.xp_label,Vector2(h.view_w-238,band.size.y+36),Vector2(220,26))
 	h.xp_progress=ProgressBar.new()
 	h.xp_progress.max_value=100
 	h.xp_progress.show_percentage=false
@@ -123,13 +134,13 @@ func hud() -> void:
 	h.notice_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	h.position_control(h.notice_label,Vector2(12,338 if h.portrait else 272),Vector2(h.view_w-24,62 if h.portrait else 34))
 	if h.interface_options.text_scale>1.0:
-		band.size.y=122
+		band.size.y=ceilf(h.ui_size(24)*1.25+16)
 		stats.add_theme_constant_override("separation",20)
 		stats.get_child(1).hide()
 		stats.get_child(2).hide()
-		h.position_control(h.pause_button,Vector2(h.view_w-224,12),Vector2(208,96))
-		h.pause_button.add_theme_font_size_override("font_size",h.ui_size(24))
-		h.position_control(h.level_label,Vector2(18,136),Vector2(h.view_w-36,65))
+		h.position_control(h.pause_button,Vector2(h.view_w-pause_width-8,4),Vector2(pause_width,band.size.y-8))
+		h.pause_button.add_theme_font_size_override("font_size",h.ui_size(24 if h.touch_mode else 20))
+		h.position_control(h.level_label,Vector2(18,band.size.y+8),Vector2(h.view_w-36,65))
 		h.position_control(h.ammo_label,Vector2(h.view_w-234,136),Vector2(216,65))
 		h.position_control(h.boss_label,Vector2(18,228),Vector2(h.view_w-36,190))
 		h.position_control(h.boss_bar,Vector2(18,426),Vector2(h.view_w-36,12))

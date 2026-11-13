@@ -98,10 +98,10 @@ func clear() -> void:
 	axes = Vector2.ZERO
 	direction = -1
 	repeat_left = 0.0
-func menu_active() -> bool: return host.page != ""
+func menu_active() -> bool: return host.page != "" or host.world.frontier.storytelling()
 func candidates() -> Array[Control]:
 	var choices: Array[Control] = []
-	var container: Node = host.language_picker if host.language_picker_open else host.menu_layer
+	var container: Node = host.language_picker if host.language_picker_open else (host.story_ui.layer if host.page=="" and host.world.frontier.storytelling() else host.menu_layer)
 	for item in container.find_children("*","Control",true,false):
 		if item.is_visible_in_tree() and item.focus_mode == Control.FOCUS_ALL and (not item is BaseButton or not item.disabled): choices.append(item)
 	return choices
@@ -128,6 +128,7 @@ func navigate(side: int) -> void:
 		next = current.find_prev_valid_focus() if side in [SIDE_TOP,SIDE_LEFT] else current.find_next_valid_focus()
 	if is_instance_valid(next) and next.is_visible_in_tree(): next.grab_focus()
 func back() -> void:
+	if host.page=="" and host.world.frontier.storytelling():host.story_ui.skip();return
 	if host.language_picker_open:
 		host.toggle_language_picker()
 	elif host.page=="paused": host.resume_run()

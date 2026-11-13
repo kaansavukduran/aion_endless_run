@@ -11,6 +11,8 @@ func _initialize() -> void: call_deferred("run")
 func arena() -> RunnerWorld:
 	var w := World.new()
 	w.reset()
+	# Combat-only fixtures bypass the separately tested cinematic.
+	w.practice = true
 	w.obstacle_wait = 9999
 	w.adventure.item_wait = 9999
 	w.frontier.plant_wait = 9999
@@ -54,9 +56,9 @@ func run() -> void:
 	check(is_equal_approx(float(w.flock_pose(0).y),float(pose.y)),"Returning from the chase rebases history without teleporting a follower")
 	for kind in 3:
 		w = arena()
-		w.frontier.request_boss((kind+1)*10)
+		w.frontier.request_boss((kind+1)*5)
 		advance(w,1.7)
-		check(w.frontier.boss_kind==kind,"Tenth-level milestones select a different boss: "+str(kind))
+		check(w.frontier.boss_kind==kind,"Fifth-level milestones select a different boss: "+str(kind))
 		w.invulnerable = 999
 		var patterns := {}
 		var xs := []

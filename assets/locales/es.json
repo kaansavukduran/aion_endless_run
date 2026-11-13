@@ -66,7 +66,7 @@
   "boss_dodge_low": "¡SALTA!",
   "boss_dodge_high": "¡RUEDA!",
   "boss_intro": "PISTOLA LISTA · ¡ALCANZA AL ROBOT!",
-  "boss_fight": "Clic izquierdo / F: disparar · R: recargar · Space: saltar · ↓: rodar",
+  "boss_fight": "Clic izquierdo/derecho o F: disparar · Espacio: saltar · ↓: rodar · Esc: pausa",
   "boss_won": "¡ROBOT DERROTADO! +%d",
   "boss_return": "EL VIAJE CONTINÚA",
   "boss_player_hit": "TE HAN DADO · SIGUE",
@@ -228,5 +228,14 @@
   "name_eren": "Eren",
   "ability_eren": "Salto simple",
   "touch_ability_eren": "↑ Saltar",
-  "pad_ability_eren": "%s: salto simple"
+  "pad_ability_eren": "%s: salto simple",
+  "story_next": "Continuar",
+  "story_skip": "Saltar",
+  "story_startled": "¡¿Qué?! ¿De dónde ha salido eso?",
+  "story_taunt_0": "¡JAJAJA! ¡Criatura necia, ha llegado tu fin!",
+  "story_taunt_1": "No puedes escapar del viento. ¡El cielo es mío!",
+  "story_taunt_2": "Mis raíces están bajo cada camino. ¡No escaparás!",
+  "story_ally_0": "¡Toma! La pistola roja golpea más fuerte la armadura.",
+  "story_ally_1": "¡Atraviesa la tormenta con esta pistola roja!",
+  "story_ally_2": "Esta pistola roja puede romper sus raíces. ¡Vamos!"
 }

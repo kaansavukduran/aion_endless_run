@@ -93,7 +93,7 @@ def atlas(hero):
 def main():
     atlases={};arrays={}
     for hero in HEROES:arrays[hero],atlases['pixel-'+hero]=atlas(hero)
-    data={'version':'0.20.0','status':'New game rendering; owner art approval is separate from technical validation. Original source/model sheets retained.','method':'New drawn poses, unchanged original generated PNGs; registered isolated alpha spans, a single scale per hero and independently reviewed full-face probes.','animations':ANIMATIONS,'generation_sources':dict(zip(HEROES,SOURCES)),'atlases':atlases,'aliases':{},'muzzles':{}}
+    data={'version':'0.21.0','status':'New game rendering; owner art approval is separate from technical validation. Original source/model sheets retained.','method':'New drawn poses, unchanged original generated PNGs; registered isolated alpha spans, a single scale per hero and independently reviewed full-face probes.','animations':ANIMATIONS,'generation_sources':dict(zip(HEROES,SOURCES)),'atlases':atlases,'aliases':{},'muzzles':{}}
     data['reference_policy']='Owner model references and existing original sheets determine identity. The inline black-cat image informs pixel clusters/material lighting only; no cat pixels, outfit or species are incorporated. Private references are not republished.'
     data['identities']={'aion':'Pink axolotl; cyan-tipped pink gills, blue eyes, white scientist coat/badges and DNA tail.','owl':'Orange/brown owl; cream facial disk/chest, amber eyes, feathered wings and yellow beak/talons.','sheep':'Cream wool sheep; amber eyes, drooping ears, brown hooves and gold halo.','wolf':'Purple/gray wolf; cyan eyes, cream muzzle/chest/tailtip, purple forearm rune; no shirt or lab coat.','rabbit':'Emre: tan rabbit, green eyes, blue shirt/plain red tie, dark trousers, bare rabbit feet.','eren':'Eren: orange-brown rabbit, dark plum eyes/black eyelashes, freckles, spiky cheek tufts, dark teal jacket/striped tie, brown shoes.'}
     report=[]
@@ -121,7 +121,9 @@ def main():
                 f['origin']=[marker[0]-target_row[0]/factor,marker[1]-target_row[1]/factor]
                 # Emre's charge visibly lowers knees/body instead of fixing Y.
                 if row==10 and hero=='rabbit':f['origin'][1]=float(f['body_bounds'][3])
-                if row in [7,8]:f['origin'][1]=float(f['body_bounds'][3])
+                if row in [0,1,3,4,7,8] or (row==10 and hero in ['wolf','rabbit']):
+                    f['origin'][1]=float(f['body_bounds'][3])
+                    f['ground_contact']=True
                 f['registration']='whole-face'
                 report.append({'hero':hero,'row':row,'frame':col,'residual':round(error,5),'probe':f['head_probe'],'eye':marker})
         # Projectiles and airborne weapon overlays share this measured barrel.
@@ -129,6 +131,10 @@ def main():
         muzzle_mask=(q[:,:,3]>=192);muzzle_mask[:round(f['eye'][1]+6)]=False;muzzle_mask[round(f['eye'][1]+45):]=False
         yy,xx=np.where(muzzle_mask);front=xx>=xx.max()-2
         data['muzzles'][hero]=[float((xx.max()+1-f['origin'][0])*factor),float((np.median(yy[front])-f['origin'][1])*factor)]
+        eye_to_barrel=float(np.median(yy[front])-f['eye'][1])
+        for row in [3,4]:
+            for frame in a['frames'][row]:
+                frame['muzzle']=[data['muzzles'][hero][0],float((frame['eye'][1]+eye_to_barrel-frame['origin'][1])*factor)]
         data['aliases']['runner-'+hero]=[{'atlas':'pixel-'+hero,'row':r} for r in [0,1,2,7,8,9,10,2]]
     for key,row in [('gun-run',3),('gun-fire',4),('heroes',3),('rolls',5)]:data['aliases'][key]=[{'atlas':'pixel-'+hero,'row':row} for hero in HEROES]
     data['aliases']['deaths']=[{'atlas':'pixel-'+hero,'row':6} for hero in HEROES for _ in range(2)]

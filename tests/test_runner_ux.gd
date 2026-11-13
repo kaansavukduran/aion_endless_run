@@ -56,7 +56,7 @@ func model_tests() -> void:
 	check(w.adventure.level_elapsed==0,"Boss introduction freezes normal level time")
 	for milestone in [10,20,30,40,100,200,300]:
 		w=arena();w.frontier.request_boss(milestone);w.frontier.begin(w)
-		check(w.frontier.boss_kind==posmod(milestone/10-1,3),"Boss designs keep rotating after the first three milestones")
+		check(w.frontier.boss_kind==posmod(milestone/5-1,3),"Boss designs keep rotating after the first three milestones")
 	w=arena();w.adventure.level=99;w.adventure.offer_fragaria(w,90)
 	check(w.adventure.items.is_empty(),"No rare strawberry before a hundred-level threshold")
 	w.adventure.level=100;w.adventure.offer_fragaria(w,100);w.adventure.offer_fragaria(w,110)

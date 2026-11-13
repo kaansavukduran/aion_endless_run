@@ -24,7 +24,7 @@ func run() -> void:
     check(pose.source_key==("pixel-"+hero if row==0 else "agility-"+hero) and pose.source_row==(10 if row==0 else row),"Actual pose dispatch uses its own movement or contact row")
     var eye:Vector2=(pose.offset+Vector2(float(f.eye[0]-f.bounds[0])+2,float(f.eye[1]-f.bounds[1])+2))*pose.scale
     var target: Vector2=Vector2(14,-39 if hero=="wolf" else a.target_eye[1]) if row==0 else Vector2(a.target_eyes[row][0],a.target_eyes[row][1])
-    check(eye.distance_to(target)<0.01 and is_equal_approx(pose.scale,expected_scale),"Rendered near-eye stays aligned at one hero scale")
+    check((absf(eye.x-target.x)<.01 and (absf((f.body_bounds[3]-f.origin[1])*pose.scale)<.01 if hero=="wolf" and row==0 else absf(eye.y-target.y)<.01)) and is_equal_approx(pose.scale,expected_scale),"Head X and one scale remain stable; grounded sprint paws contact floor while owl flight retains stable head Y")
     if hero=="wolf" and row==0:check(float(f.body_bounds[2]-f.body_bounds[0])/float(f.body_bounds[3]-f.body_bounds[1])>1.3,"Four-legged gallop has a low horizontal silhouette")
     if hero=="owl" and row==0:check(float(f.body_bounds[2]-f.body_bounds[0])>float(a.frames[0][0].body_bounds[2]-a.frames[0][0].body_bounds[0])*1.15,"Every flight pose spreads its actual wings beyond the folded neutral silhouette")
     if hero=="owl" and row==3:check(float(f.body_bounds[2]-f.body_bounds[0])/float(f.body_bounds[3]-f.body_bounds[1])>1.3,"Legacy aerial beak strike keeps spread airborne wings")

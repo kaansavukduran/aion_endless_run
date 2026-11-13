@@ -196,12 +196,12 @@ func roll_frame(frame_count: int = 6) -> int:
 
 func roll_pose(elapsed: float,remaining: float,held: bool,frame_count: int=6) -> int:
 	if frame_count==6:
-		# Six reviewed new poses: lower, hands, shoulder, hips over, feet,
-		# crouch. Never hold the upside-down shoulder pose or loop a ball.
+		# Repeat the authored low shoulder-roll while held. The actor origin and
+		# collision height stay fixed; no spinning/ball transformation is used.
 		if not held and remaining<0.15:return 5 if remaining>.075 else 0
-		return mini(5,int(maxf(0.0,elapsed)/0.53*6))
-	# A single planted-hand shoulder roll, then a low crouch while held.
-	# Repeating the entry/recovery at high speed made the hero read as a ball.
+		return posmod(int(maxf(0.0,elapsed)/0.62*6),6) if held else mini(5,int(maxf(0.0,elapsed)/0.53*6))
+	# Archived longer clips repeat their interior poses at the same low
+	# posture, keeping entry and release recovery separate.
 	var entry:=3 if frame_count>=12 else 2
 	var turn_count: int=frame_count-entry*2
 	var recovery: int=entry+turn_count
@@ -209,7 +209,7 @@ func roll_pose(elapsed: float,remaining: float,held: bool,frame_count: int=6) ->
 		return mini(frame_count-1,recovery+int((0.15-remaining)/0.15*entry))
 	if elapsed<0.14:return mini(entry-1,int(elapsed/0.14*entry))
 	if elapsed<0.53:return entry+mini(turn_count-1,int((elapsed-0.14)/0.39*turn_count))
-	return entry # Knees/hand low; never restart an endless spinning loop.
+	return entry+posmod(int(maxf(0.0,elapsed-.14)/.62*turn_count),turn_count) if held else entry
 
 func level_distance(world) -> float:
 	return maxf(0.0,world.distance-level_start_distance)
@@ -260,7 +260,7 @@ func update_level(world) -> void:
 		if celebration_style == previous_style: celebration_style = (celebration_style+1)%4
 		celebration_time = 5.0
 		world.event("level_up")
-		if level % 10 == 0 and not celebrations_enabled: world.frontier.request_boss(level)
+		if level % world.frontier.BOSS_INTERVAL == 0 and (level % 10 != 0 or not celebrations_enabled): world.frontier.request_boss(level)
 		if level % 10 == 0 and celebrations_enabled:
 			hug_queue.append({"level":level,"girl":girl_index,"style":celebration_style})
 			last_hug_girl = girl_index

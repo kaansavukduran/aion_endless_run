@@ -11,6 +11,8 @@ func _initialize() -> void: call_deferred("run")
 func arena() -> RunnerWorld:
 	var w = World.new()
 	w.reset()
+	# Combat-only fixtures bypass the separately tested cinematic.
+	w.practice = true
 	w.obstacle_wait = 999
 	w.adventure.item_wait = 999
 	w.adventure.ambient_gnome_wait = 999

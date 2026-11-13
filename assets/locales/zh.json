@@ -66,7 +66,7 @@
   "boss_dodge_low": "跳跃！",
   "boss_dodge_high": "翻滚！",
   "boss_intro": "手枪就绪·追上机器人！",
-  "boss_fight": "左键 / F: 射击 · R: 装填 · Space: 跳跃 · ↓: 翻滚",
+  "boss_fight": "左/右键或F：射击 · Space：跳跃 · ↓：翻滚 · Esc：暂停",
   "boss_won": "机器人已击败！ +%d",
   "boss_return": "旅途继续",
   "boss_player_hit": "受击·继续前进",
@@ -228,5 +228,14 @@
   "name_eren": "Eren",
   "ability_eren": "单次跳跃",
   "touch_ability_eren": "↑ 跳跃",
-  "pad_ability_eren": "%s：单次跳跃"
+  "pad_ability_eren": "%s：单次跳跃",
+  "story_next": "继续",
+  "story_skip": "跳过",
+  "story_startled": "什么？！这是从哪里来的？",
+  "story_taunt_0": "哈哈哈！愚蠢的生物，你的末日到了！",
+  "story_taunt_1": "你跑不过风。天空属于我！",
+  "story_taunt_2": "每条路下都有我的根。你逃不掉！",
+  "story_ally_0": "拿着！红色手枪能更有力地击穿装甲。",
+  "story_ally_1": "用这把红色手枪冲破风暴！",
+  "story_ally_2": "这把红色手枪能打断它的根。上吧！"
 }

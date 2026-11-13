@@ -35,6 +35,7 @@ func update() -> void:
 	if host.page=="paused":summary=host.text("paused")
 	elif host.page=="settings":summary=host.text("settings")
 	elif host.page!="finished":summary=host.text("fragaria_found") if host.world.adventure.fragaria_time>0 else "Aion Endless Run"
+	if host.world.frontier.storytelling() and host.page=="":summary=host.story_ui.speaker.text+" · "+host.story_ui.dialogue.text
 	var payload:=JSON.stringify({"items":entries,"language":host.language,"page":host.page,"summary":summary})
 	if stamp==payload:return
 	stamp=payload

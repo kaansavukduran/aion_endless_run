@@ -66,7 +66,7 @@
   "boss_dodge_low": "SAUTEZ !",
   "boss_dodge_high": "ROULEZ !",
   "boss_intro": "PISTOLET PRÊT · RATTRAPEZ LE ROBOT !",
-  "boss_fight": "Clic gauche / F : tirer · R : recharger · Space : sauter · ↓ : roulade",
+  "boss_fight": "Clic gauche/droit ou F : tirer · Espace : saut · ↓ : roulade · Échap : pause",
   "boss_won": "ROBOT VAINCU ! +%d",
   "boss_return": "LE VOYAGE CONTINUE",
   "boss_player_hit": "TOUCHÉ · CONTINUEZ",
@@ -228,5 +228,14 @@
   "name_eren": "Eren",
   "ability_eren": "Saut simple",
   "touch_ability_eren": "↑ Saut",
-  "pad_ability_eren": "%s : saut simple"
+  "pad_ability_eren": "%s : saut simple",
+  "story_next": "Continuer",
+  "story_skip": "Passer",
+  "story_startled": "Quoi ?! Mais ça sort d’où ?",
+  "story_taunt_0": "HAHAHA ! Créature stupide, ta fin est proche !",
+  "story_taunt_1": "Tu ne peux pas fuir le vent. Le ciel est à moi !",
+  "story_taunt_2": "Mes racines sont sous chaque route. Aucune issue !",
+  "story_ally_0": "Prends ceci ! Le pistolet rouge frappe plus fort.",
+  "story_ally_1": "Traverse la tempête avec ce pistolet rouge !",
+  "story_ally_2": "Ce pistolet rouge peut briser ses racines. Vas-y !"
 }

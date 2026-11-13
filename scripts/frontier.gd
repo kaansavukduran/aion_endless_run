@@ -1,7 +1,30 @@
 class_name RunnerFrontier
 extends RefCounted
 
+const BOSS_INTERVAL := 5
 const RETURN_DURATION := 1.25
+var story_index := 0
+var story_time := 0.0
+var red_weapon := false
+
+func storytelling() -> bool: return phase == "story"
+
+func next_story(world,skip: bool=false) -> void:
+	if not storytelling():return
+	story_index += 1
+	story_time = 0.0
+	world.release_controls()
+	if story_index >= 3 or skip:
+		red_weapon = true
+		phase = "intro"
+		stage_time = 0.0
+		world.event("story_end")
+	else:world.event("story_beat")
+
+func step_story(world,dt: float) -> void:
+	story_time = minf(4.0,story_time+dt)
+	# Dialogue waits for Continue/Skip; reading speed never costs a beat.
+
 var return_start_speed := 0.0
 var phase := "run"
 var pending_level := 0
@@ -62,6 +85,9 @@ func reset() -> void:
 	shots_fired = 0
 	hits = 0
 	wins = 0
+	red_weapon = false
+	story_index = 0
+	story_time = 0.0
 	projectiles.clear()
 	plants.clear()
 	plant_wait = 28.0
@@ -79,7 +105,7 @@ func request_boss(level: int) -> void:
 
 func begin(world) -> void:
 	milestone = pending_level
-	boss_kind = posmod(milestone/10-1,3)
+	boss_kind = posmod(milestone/BOSS_INTERVAL-1,3)
 	pattern_bag.clear()
 	salvo.clear()
 	pending_shot = -1
@@ -87,14 +113,16 @@ func begin(world) -> void:
 	cast_flash = 0
 	rage = false
 	pending_level = 0
-	phase = "intro"
+	phase = "intro" if world.practice else "story"
+	story_index = 0
+	story_time = 0.0
 	stage_time = 0.0
 	clock = 0.0
 	chase_distance = world.travel_distance()
-	max_hp = 36 + mini(36,maxi(0,milestone/10-1)*6)
+	max_hp = 36 + mini(36,maxi(0,milestone/BOSS_INTERVAL-1)*6)
 	hp = max_hp
 	player_hp = 3
-	boss_x = world.field_width + 160.0
+	boss_x = world.field_width-180.0 if storytelling() else world.field_width + 160.0
 	boss_y = -110.0
 	pattern_wait = 1.1
 	warning = ""
@@ -119,7 +147,7 @@ func begin(world) -> void:
 	world.y = 0.0
 	world.velocity = 0.0
 	world.invulnerable = 1.0
-	world.event("boss_intro")
+	world.event("boss_intro" if world.practice else "story_start")
 
 func finish(world) -> void:
 	phase = "run"
@@ -160,13 +188,16 @@ func fire(world) -> bool:
 	return true
 
 func emit_hero_shot(world) -> void:
-	var muzzle: Array = MUZZLES.data.muzzles[world.character]
+	var atlas: Dictionary = MUZZLES.data.atlases["pixel-"+world.character]
+	var frame := gun_frame(atlas.frames[4].size())
+	var muzzle: Array = atlas.frames[4][frame].muzzle
+	# Air/sprint overlays use the same registered frame and barrel geometry.
 	var origin := Vector2(world.PLAYER_X+float(muzzle[0]),world.y+float(muzzle[1])+(14 if world.charging else 0))
 	shots_fired += 1
 	if not active() and world.adventure.lightning_charges>0:world.adventure.cast_lightning(world)
 	# Energy bolts leave the measured muzzle, then gently converge on the core.
 	var vertical := 0.0 # Every shot travels straight forward; no automatic boss aiming.
-	projectiles.append({"owner":"hero","kind":"energy","x":origin.x,"y":origin.y,"vx":1050.0,"vy":vertical,"r":12.0})
+	projectiles.append({"owner":"hero","kind":"energy","x":origin.x,"y":origin.y,"vx":1050.0,"vy":vertical,"r":12.0,"damage":2 if red_weapon else 1,"red":red_weapon})
 	world.event("shot")
 
 func gun_frame(frame_count: int) -> int:
@@ -213,7 +244,7 @@ func update_projectiles(world,dt: float) -> void:
 			var target := boss_rect()
 			if phase == "fight" and target.grow(p.r).has_point(Vector2(p.x,p.y)):
 				p.x = -1000.0
-				hp = maxi(0,hp-1)
+				hp = maxi(0,hp-int(p.get("damage",1)))
 				hits += 1
 				world.event("boss_hit")
 				if hp == 0:
