@@ -26,7 +26,7 @@ receipt = {
     'version': a.version, 'source_commit': source, 'verified_application_commit': source,
     'verification_run': f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["GITHUB_RUN_ID"]}',
     'source_and_scene_checks': proof['source_and_scene_checks'], 'browser_checks': proof['browser_checks'],
-    'android_native': 'API30 offline emulator: real Jump/glide, Attack, Roll, paused resize and actual menu-region separation. No physical phone claim.',
+    'android_native': 'API30 offline emulator: real Jump/glide, Fire, one-second Reload, Roll, paused resize and actual menu-region separation. No physical phone claim.',
     'android_signer_sha256': '50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36',
     'apple_status': 'macOS ad-hoc only; no Developer ID/notarization. Native iOS awaits owner signing.',
     'files': files,

@@ -1,10 +1,10 @@
 {
-  "version": "0.16.0",
-  "name": "AionEndlessRun-0.16.0-android-arm64-x64.apk",
-  "sha256": "293d99ef8b034db1a9b503868071e4fd66135ff16fade8e68bc8e9b05e37170e",
-  "bytes": 136127336,
-  "version_code": 19,
+  "version": "0.17.0",
+  "name": "AionEndlessRun-0.17.0-android-arm64-x64.apk",
+  "sha256": "0165e3f7df870dac0a5b76119104c9f9b2918c78798b42b481eada117cd190cb",
+  "bytes": 138224781,
+  "version_code": 20,
   "signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
-  "application_source_commit": "932c3e75da3d6dbc589bc7326e2bce39dff99505",
+  "application_source_commit": "96c033b37d69ebd56326b7e84930cafea896a4f0",
   "provenance_note": "Stable-signed APK exported locally from this application commit. Later commits only record package metadata and delivery evidence; gameplay, scenes, resources and project settings match this commit."
 }

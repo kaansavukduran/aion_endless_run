@@ -1,3 +1,7 @@
+# Current verification · 0.17.0
+
+[Evidence, screenshots and scope](evidence-v0170/README.md). 16 Godot suites /5,698 checks passed in isolated XDG data directories;34 actual Chromium checks (9 menu/locale and25 real gun/touch/gamepad flows),7 packaging and4 Android packet parser tests passed. Main fits all5 heroes/3 actions at200% in2048×1024,393×873,768×1024 and873×393. Existing45 asset PNGs are unchanged. The known preference fixture is distinguished from natural running-world input. Current browser acceptance driver is tests/browser_firearm.py; historical melee drivers below describe their old releases.
+
 # 0.16.0 · Güncel doğrulama
 
 [Gerçek ekranlar, kayıtlar ve kapsam](evidence-v0160/README.md).15 Godot kaynak/sahne paketi, **5531 kontrol**;7 web paketleme ve4 Android kayıt ayrıştırma testi. Yeni `test_orchard.gd` ve normal girdili `browser_orchard.py`, erişilebilir meyve yerleşimini ve Emre akışını denetler. `browser_runner_ux.py` artık beş kahramanın gerçek animasyon döngüsünü kontrol eder;31 kontrol geçti. Bunlara8 gerçek meyve/Emre/boss/yön kontrolü eklenir. Aşağıdaki sürüm notları tarihçedir.

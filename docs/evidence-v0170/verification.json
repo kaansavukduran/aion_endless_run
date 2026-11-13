@@ -1,0 +1,151 @@
+{
+  "version": "0.17.0",
+  "baseline_commit": "74c00e6632c5d7cf01c7cd9f92f34daaa43d1848",
+  "engine": "4.6.3",
+  "application_source_commit": "96c033b",
+  "source_and_scene_checks": 5698,
+  "source_suites": [
+    {
+      "suite": "game",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 124 checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "adventure",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 58 adventure checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "localization",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 51 localization/registration checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "evolution",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 122 evolution checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "frontier",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 272 frontier checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "motion",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 447 motion checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "encounters",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 108 encounter/gamepad checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "fidelity",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 685 fidelity checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "agility",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 198 agility checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "runner_ux",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 219 runner UX checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "boss_hud",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 30 boss HUD checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "aionia",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 669 AIONIA checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "variety",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 551 variety/transition/locale checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "visual_polish",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 152 visual polish checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "orchard",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 1833 orchard/Emre checks, 0 failures"
+      ]
+    },
+    {
+      "suite": "firearm",
+      "exit_code": 0,
+      "result": [
+        "RESULT: 179 firearm/menu checks, 0 failures"
+      ]
+    }
+  ],
+  "browser_checks": 34,
+  "browser_menu_checks": 9,
+  "browser_firearm_checks": 25,
+  "web_packaging_tests": 7,
+  "android_packet_parser_tests": 4,
+  "local_web_build": "bb637925f93b3b4a",
+  "existing_asset_pngs_byte_identical": 45,
+  "new_flora_drawn_poses": 18,
+  "android_local": {
+    "version": "0.17.0",
+    "name": "AionEndlessRun-0.17.0-android-arm64-x64.apk",
+    "sha256": "0165e3f7df870dac0a5b76119104c9f9b2918c78798b42b481eada117cd190cb",
+    "bytes": 138224781,
+    "version_code": 20,
+    "signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+    "application_source_commit": "96c033b37d69ebd56326b7e84930cafea896a4f0",
+    "provenance_note": "Stable-signed APK exported locally from this application commit. Later commits only record package metadata and delivery evidence; gameplay, scenes, resources and project settings match this commit."
+  },
+  "proven_causes": [
+    "The enlarged main page used a ScrollContainer and could overflow.",
+    "Saved explicit language preference took priority over browser/OS detection."
+  ],
+  "limits_and_assumptions": [
+    "The user device save was not available: why Italian was originally saved cannot be proved. A documented legacy save fixture reproduces the reported Italian/light/200% combination.",
+    "Browser Intl locale cannot guarantee the underlying OS language when browser and OS differ. Native uses OS locale.",
+    "The browser harness seeds settings and records only; the running world, RNG, enemies, physics and inventory are not injected.",
+    "Some historical model suites still cover the dormant contact-attack API. Current user-facing scene/browser tests assert pistol inputs and no melee animation.",
+    "Physical Poco/iPhone/Xbox/PS testing and Apple Developer ID/iOS distribution signing are not available.",
+    "Live production, CI native and public-package checks are recorded separately after completion."
+  ]
+}
