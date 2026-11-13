@@ -30,7 +30,16 @@ with sync_playwright() as pw:
   wait(page,'[data-ui-ready="true"]');items=json.loads(d(page)['ui']);matches=[b for b in items if (b['name']==name if name else b['text']==text)];
   if not matches:raise AssertionError(('MISSING_BUTTON',name,text,d(page)))
   b=matches[0];page.touchscreen.tap(*xy(page,b['x']+b['w']/2,b['y']+b['h']/2))
- def semantic(page,pattern):page.locator('#aion-accessibility-controls').get_by_role('button',name=re.compile(pattern)).press('Enter')
+ def semantic(page,pattern):
+  found=page.locator('#aion-accessibility-controls').get_by_role('button',name=re.compile(pattern))
+  if found.count():found.press('Enter');return
+  while int(d(page).get('menuPage','0'))>0:
+   old=d(page)['menuPage'];click(page,name='PreviousPage');page.wait_for_function('(n)=>document.querySelector("canvas").dataset.menuPage!==n',arg=old);wait(page,'[data-ui-ready="true"]')
+  for _ in range(60):
+   found=page.locator('#aion-accessibility-controls').get_by_role('button',name=re.compile(pattern))
+   if found.count():found.press('Enter');return
+   old=d(page)['menuPage'];click(page,name='NextPage');page.wait_for_function('(n)=>document.querySelector("canvas").dataset.menuPage!==n',arg=old);wait(page,'[data-ui-ready="true"]')
+  raise AssertionError('No reachable option: '+pattern)
  def action(page,name):
   v=d(page);b=json.loads(v['controls'])[name];return xy(page,b['x']+b['w']/2,b['y']+b['h']/2)
  def menu(page,english=False):

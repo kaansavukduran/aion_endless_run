@@ -1,3 +1,17 @@
+# Current handoff · 0.18.0 low rolls, charged Emre and fitted pages
+
+Baseline mainc3b041f61480afc37c762f99ba0a6f7b364f92aa, clean. Godot4.6.3 retained. New macro definitions alone do not activate k44, Aionlaştır or dynamic aionia. Existing approved split touch,11 locales, dark/system-font defaults, stable APK signer,15-second levels, firearm5 rounds/1s reload, records and offline loader are preserved.
+
+New60-pose low-somersault sheet keeps original46 PNGs. Dedicated low-roll alias precedes old Emre/canonical mappings. Enter crouch once, loop compact angles while held, recover on release; follower trail records roll remaining/held state at each spatial sample. No vertical squash or frame-dependent character scaling. New PNG remains unchanged; registration reads alpha only.
+
+Emre charges while grounded and releases one jump:1.2s cap, impulse0.65–1.35×JUMP_SPEED plus existing power multipliers. No automatic launch at cap, no airborne recharge, no latent launch after cancel/pause/rotation. Multiple input sources commit only on the final valid release. Charge stance uses drawn crouch poses and the same original pistol overlay; emitted muzzle shares its14-unit lowered offset. Charge body height follows its drawn stance. Roll and damage cancel charge. Short phone hint and five small charge pips avoid an oversized progress bar.
+
+Proven UI causes: settings/enlarged pages/language/tutorial instantiated ScrollContainers; hidden autowrapped Labels could expose one-pixel paragraph measurement until shaped. RunnerMenuPages forces Label.get_line_count before reading minimum size, pages actual controls and long paragraphs, reflows wide rows, pins results actions, retains focused option across option rebuilds, keeps range name/control together. Settings no longer force wheel use. Normal main geometry/approved preferences are unchanged. Avoid asynchronous RefCounted callbacks across scene shutdown; an initially observed exit crash was fixed by using the host Node's own deferred metadata refresh.
+
+User explicitly authorized an additional GitHub Pages address after the Vercel daily quota blocked recent deployments. User then enabled Pages Source=GitHub Actions; API read confirmed workflow mode. A separate workflow deploys the exact successful main-run Linux web archive after source, native Android and desktop gates. Keep Vercel and its origin-local records. Different origin has separate records; do not claim migration.
+
+Local evidence and final platform/publication states: docs/evidence-v0180/. Verify real runtime before reporting a deploy as playable. Native iOS/Apple Developer ID remain owner-signing limitations; no physical phone/controller claim.
+
 # Current handoff · 0.17.1 help and native screenshot correction
 
 All11 secondary motion/gamepad/lightning explanations now describe15 active seconds and X/Square Reload;201 firearm/menu checks include22 assertions against help drift.16 source suites:5,720 checks.0.17.0 passed9 real ADB inputs, then failed the obsolete android-melee.png image gate; no release was published.0.17.1 checks actual fire/reload images. Stable-signed APK code21 derives from8d175d9; later changes only record release metadata/evidence. Current proof: docs/evidence-v0171/.

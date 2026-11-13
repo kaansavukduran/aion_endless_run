@@ -145,7 +145,7 @@ func card(width: float) -> VBoxContainer:
 	var enlarged: bool=h.interface_options.text_scale>1.0
 	if enlarged and h.page!="main":width=h.view_w-40
 	var height: float=minf(h.view_h-120,410 if h.page!="main" else 340)
-	if h.page=="settings" or (enlarged and h.page!="main"):height=h.view_h-110
+	if h.page=="settings" or (enlarged and h.page!="main"):height=h.view_h-92
 	if h.page=="main":
 		var top: float=stage_y()+26 if h.portrait else (24 if enlarged else 56)
 		height=minf(292,roster_y()-chooser_height()-6-top-8)
@@ -161,14 +161,13 @@ func card(width: float) -> VBoxContainer:
 	var column:=VBoxContainer.new()
 	column.add_theme_constant_override("separation",8)
 	column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	if h.page=="settings" or (enlarged and h.page!="main"):
-		var scroll:=ScrollContainer.new()
-		scroll.name="SettingsScroll" if h.page=="settings" else "AccessiblePageScroll"
-		scroll.follow_focus=true
-		scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-		scroll.custom_minimum_size=Vector2(width-28,height-28)
-		panel.add_child(scroll)
-		scroll.add_child(column)
+	if h.page!="main":
+		var root:=VBoxContainer.new()
+		panel.add_child(root)
+		root.add_child(column)
+		column.size_flags_vertical=Control.SIZE_EXPAND_FILL
+		column.set_meta("page_width",width-28)
+		column.set_meta("page_height",height-28)
 	else:panel.add_child(column)
 	return column
 
@@ -290,14 +289,15 @@ func main(column: VBoxContainer) -> Button:
 func characters() -> void:
 	var h=host
 	var column: VBoxContainer=card(760)
-	column.add_child(h.label(h.text("choose"),26))
-	var grid_host:=Control.new()
-	grid_host.custom_minimum_size.y=roster_geometry(minf(760,h.view_w-40)-28,true).total_height
-	column.add_child(grid_host)
-	roster(grid_host,Vector2.ZERO,minf(760,h.view_w-40)-28,true)
-	var back: Button=h.button(h.text("back"),func():h.show_page(h.return_page))
-	column.add_child(back)
-	h.focus_later.call_deferred(back)
+	column.add_child(h.wrap_label(h.text("choose"),26))
+	for id in h.FRIENDS:
+		var choice: Button=h.button(h.character_name(id),func():h.select_character(id),id==h.character)
+		choice.name="Select_"+id
+		choice.icon=h.frames.pose("runner-"+id,0,0).texture
+		choice.expand_icon=true
+		choice.add_theme_constant_override("icon_max_width",50)
+		column.add_child(choice)
+	h.menu_pages.prepare(column,Vector2(float(column.get_meta("page_width")),float(column.get_meta("page_height"))))
 
 func tutorial() -> void:
 	var h=host
@@ -308,14 +308,7 @@ func tutorial() -> void:
 	if h.interface_options.text_scale>1.0:
 		h.position_control(panel,Vector2(18,84),Vector2(h.view_w-36,floorf(h.view_h-124)))
 	var column:=VBoxContainer.new()
-	if h.interface_options.text_scale>1.0:
-		var scroll:=ScrollContainer.new()
-		scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-		scroll.follow_focus=true
-		scroll.custom_minimum_size=Vector2(h.view_w-64,floorf(h.view_h-148))
-		panel.add_child(scroll);scroll.add_child(column)
-		column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	else:panel.add_child(column)
+	panel.add_child(column)
 	column.add_child(h.wrap_label(h.text("touch_tutorial"),20))
 	var done: Button=h.button(h.text("touch_skip"),func():
 		h.touch_tutorial_done=true

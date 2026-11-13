@@ -1,0 +1,45 @@
+name: Publish verified web game to GitHub Pages
+on:
+  workflow_run:
+    workflows: ['Test and package']
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: aion-pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+          name: desktop-Linux
+          path: packages
+      - name: Extract the web archive from the successful platform run
+        run: |
+          VERSION=$(python3 -c 'import re; print(re.search(r"config/version=\"([^\"]+)\"",open("project.godot").read()).group(1))')
+          mkdir site
+          tar -xzf "packages/AionEndlessRun-$VERSION-web-offline.tar.gz" -C site
+          test -f site/index.html
+          test -f site/build.json
+          touch site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - uses: actions/deploy-pages@v4
+        id: deployment

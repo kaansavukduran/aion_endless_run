@@ -192,7 +192,15 @@ func request_attack(world) -> bool:
 	return attack(world)
 
 func roll_frame(frame_count: int = 12) -> int:
-	return posmod(int(roll_elapsed / 0.68 * frame_count),frame_count)
+	return roll_pose(roll_elapsed,roll_time,duck_held,frame_count)
+
+func roll_pose(elapsed: float,remaining: float,held: bool,frame_count: int=12) -> int:
+	# Enter low once, keep rotating while held, recover only at the end.
+	var frame: int
+	if elapsed<0.14:frame=clampi(int(elapsed/0.14*3),0,2)
+	elif not held and remaining<0.15:frame=9+clampi(int((0.15-remaining)/0.15*3),0,2)
+	else:frame=3+posmod(int((elapsed-0.14)/0.38*6),6)
+	return mini(frame,frame_count-1)
 
 func level_distance(world) -> float:
 	return maxf(0.0,world.distance-level_start_distance)
@@ -276,6 +284,7 @@ func advance_hug(world, dt: float) -> void:
 		world.frontier.request_boss(hug_level)
 
 func body_height(world) -> float:
+	if world.charging:return lerpf(72.0,56.0,world.charge_ratio())*size_multiplier()
 	return (52.0 if ducking(world) else 82.0) * size_multiplier()
 
 func speed_multiplier() -> float:

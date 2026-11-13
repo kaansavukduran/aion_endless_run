@@ -99,8 +99,8 @@ func run() -> void:
 		game.toggle_language_picker();await process_frame;await process_frame
 		await process_frame;await process_frame
 		var selected: Control=game.language_picker.find_child("Language_"+lang,true,false)
-		var clip: Control=game.language_picker.find_child("LanguageScroll",true,false)
-		check(clip.get_global_rect().grow(2).encloses(selected.get_global_rect()),"Selected language really scrolls into the touch viewport: "+lang)
+		var clip: Control=game.language_picker
+		check(clip.get_global_rect().grow(2).encloses(selected.get_global_rect()),"Every selected language fits directly in the popup: "+lang)
 		check(game.language_picker.size.y<=game.view_h-90,"Eleven-language picker fits viewport: "+lang)
 		game.toggle_language_picker()
 	var fill: StyleBoxFlat=game.xp_progress.get_theme_stylebox("fill")

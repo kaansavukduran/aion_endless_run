@@ -37,8 +37,10 @@ func run() -> void:
 	w=arena();w.orchard.wait_distance=123;w.state="paused";w.step(.02);check(w.orchard.wait_distance==123,"Pause freezes fruit scheduling")
 	w.state="running";w.frontier.request_boss(10);w.step(.02);var wait_distance: float=w.orchard.wait_distance;w.step(.02)
 	check(w.orchard.wait_distance==wait_distance and w.pickups.is_empty(),"Boss arenas do not spawn normal fruit ribbons")
-	w=arena();w.character="rabbit";w.jump();w.step(.016);var emre_speed: float=w.velocity;w.jump();w.step(.016)
-	check(w.jumps_used==1 and emre_speed<World.JUMP_SPEED,"Emre has one powerful leap and cannot double-jump")
+	w=arena();w.character="rabbit";w.jump()
+	for i in 120:w.step(.01)
+	w.release_charged_jump();w.step(.016);var emre_speed: float=w.velocity;w.jump();w.step(.016)
+	check(w.jumps_used==1 and emre_speed<World.JUMP_SPEED,"Emre releases one charged leap and cannot double-jump")
 	var bank=Bank.new();var scale_values:={}
 	for key in ["emre-movement","emre-encounters"]:
 		for row in 6:

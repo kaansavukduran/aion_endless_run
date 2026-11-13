@@ -14,7 +14,7 @@ func clear() -> void:
 	if trace.size()>24:trace.pop_front()
 	fingers.clear()
 	refresh()
-func action(id: String,source: String,down: bool) -> void:
+func action(id: String,source: String,down: bool,cancelled: bool=false) -> void:
 	if down:
 		match id:
 			"jump":host.press_jump(source)
@@ -23,7 +23,7 @@ func action(id: String,source: String,down: bool) -> void:
 			"shoot":host.press_shoot(source)
 			"boost":host.press_boost(source)
 	else:
-		host.release_jump(source);host.release_attack(source);host.release_duck(source);host.release_shoot(source);host.release_boost(source)
+		host.release_jump(source,not cancelled);host.release_attack(source);host.release_duck(source);host.release_shoot(source);host.release_boost(source)
 func refresh() -> void:
 	for id in host.action_buttons:
 		var b=host.action_buttons[id]
@@ -64,7 +64,7 @@ func handle(event: InputEvent) -> bool:
 			if fingers.has(index):
 				var finger: Dictionary=fingers[index]
 				if not event.canceled and finger.role=="world" and not finger.jumped and not finger.moving and clock-finger.at<0.4:host.press_jump(source)
-				action(str(finger.role),source,false)
+				action(str(finger.role),source,false,event.canceled)
 				fingers.erase(index)
 			refresh()
 		return true
@@ -75,7 +75,7 @@ func handle(event: InputEvent) -> bool:
 	last_input["jumped"]=f.jumped
 	f.last=point
 	if f.role in host.action_buttons:
-		if not host.action_buttons[f.role].hit(point):action(f.role,source,false);f.role="cancelled";refresh()
+		if not host.action_buttons[f.role].hit(point):action(f.role,source,false,true);f.role="cancelled";refresh()
 	elif f.role=="world" and not f.jumped:
 		var delta: Vector2=point-f.start
 		if delta.length()>10:f.moving=true

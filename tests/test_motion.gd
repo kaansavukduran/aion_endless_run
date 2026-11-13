@@ -110,7 +110,7 @@ func run() -> void:
 		for key_row in [["runner-"+hero,1],["runner-"+hero,2],["strikes",hero_index*2],["strikes",hero_index*2+1],["heroes",hero_index],["rolls",hero_index]]:
 			var key: String = key_row[0]
 			var row: int = key_row[1]
-			check(bank.count(key,row) == (8 if key=="rolls" or hero=="wolf" or (hero=="owl" and key in ["heroes","strikes"]) else 7),"Every animation uses its observed drawn poses: "+hero+"/"+key+"/"+str(row))
+			check(bank.count(key,row) == (12 if key=="rolls" else (8 if hero=="wolf" or (hero=="owl" and key in ["heroes","strikes"]) else 7)),"Every animation uses its observed drawn poses: "+hero+"/"+key+"/"+str(row))
 			var scale := -1.0
 			var textures := {}
 			for column in bank.count(key,row):

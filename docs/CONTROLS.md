@@ -1,4 +1,10 @@
-# Güncel kontroller · 0.17.0
+# Emre ve takla · 0.18.0
+
+Emre: zıplama girişini basılı tut, sonra bırak.1,2 saniyede tam şarj; kısa tutuşta düşük, uzun tutuşta yüksek tek sıçrama. Havada şarj veya çift sıçrama yok. İptal/odak/yön değişimi şarjı güvenle bırakır; başka bir parmağın eylemi geçerli şarjı yanlışlıkla sonlandırmaz.
+
+Takla: Aşağı/S/Ctrl, B/○, Takla düğmesi veya aşağı kaydırma. Ayrı diz bükme/öne kıvrılma, alçak saat yönünde dönüş ve doğrulma pozları vardır. Basılı tutuşta yalnız alçak dönüş döngüsü sürer. Menü/ayar sayfalarında Önceki/Sonraki okları kullanılır; fare tekerleği gerekmez. Mevcut sayısal kaydırıcılar değer ayarlamak içindir, sayfayı kaydırmaz.
+
+# Güncel kontroller · 0.18.0
 
 Tabanca normal koşuda ve boss'ta sürekli elde. Beş mermi bittiğinde oyuncu elle doldurur; doldurma bir aktif saniye sürer. Duraklama, sarılma ve boss girişinde sayaç bekler. Yumruk kaldırıldı. Mevcut Attack eşlemesi kayıtlarda korunur fakat işlevi artık Doldur'dur; Fire eşlemesi ateştir. Yeniden atama desteği korunur.
 
@@ -6,7 +12,7 @@ Tabanca normal koşuda ve boss'ta sürekli elde. Beş mermi bittiğinde oyuncu e
 | --- | --- | --- | --- |
 | İleri ateş | Sol veya sağ tık / F basılı | RB/R1 veya RT/R2 | Ateş et basılı |
 | Doldur | R veya eski J | X/□ | Doldur |
-| Zıpla / süzül | Space | A/× | Solda Zıpla; Ömer için basılı |
+| Zıpla / süzül / şarj | Space | A/× | Solda Zıpla; Ömer için basılı; Emre için tutup bırak |
 | Takla | Aşağı/S/Ctrl | B/○ | Takla veya aşağı kaydır |
 | Depar | Shift; Melun üstünde basılı | LB/L1 | Depar veya Melun üstünde basılı |
 | Duraklat | Esc | Start/Options | Duraklat |

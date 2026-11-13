@@ -130,12 +130,10 @@ func scene_tests() -> void:
 		for target in ["main","paused","finished","settings","characters","bosses"]:
 			game.page=target;game.rebuild();await process_frame;await process_frame
 			var scrolls: Array=game.menu_layer.find_children("*","ScrollContainer",true,false)
-			check(scrolls.size()==(1 if target=="settings" else 0),"Only long settings use scrolling: "+lang+"/"+target)
+			check(scrolls.is_empty(),"All menus use fitted pages rather than wheel scrolling: "+lang+"/"+target)
 			if target=="settings":
-				scrolls[0].scroll_vertical=100000
-				await process_frame;await process_frame
-				var back_button: Button=scrolls[0].find_children("*","VBoxContainer",false,false)[0].get_children()[-1]
-				check(scrolls[0].get_global_rect().encloses(back_button.get_global_rect()),"The last settings action is reachable by real scrolling")
+				var back_button: Button=game.menu_layer.find_child("PageBack",true,false)
+				check(back_button!=null and back_button.is_visible_in_tree() and Rect2(0,0,game.view_w,game.view_h).encloses(back_button.get_global_rect()),"Settings Back remains visible without scrolling")
 			for control in game.menu_layer.find_children("*","Button",true,false):
 				if target!="settings" and control.is_visible_in_tree():check(Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h)).encloses(control.get_global_rect()),"Menu action fits on screen: "+lang+"/"+target+"/"+str(control.name))
 	game.queue_free();await process_frame

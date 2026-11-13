@@ -182,7 +182,7 @@ func fire(world) -> bool:
 
 func emit_hero_shot(world) -> void:
 	var muzzle: Array = preload("res://assets/EMRE-PROVENANCE.json").data.muzzle if world.character=="rabbit" else MUZZLES.data.muzzles[world.character]
-	var origin := Vector2(world.PLAYER_X+float(muzzle[0]),world.y+float(muzzle[1]))
+	var origin := Vector2(world.PLAYER_X+float(muzzle[0]),world.y+float(muzzle[1])+(14 if world.charging else 0))
 	shots_fired += 1
 	if not active() and world.adventure.lightning_charges>0:world.adventure.cast_lightning(world)
 	# Energy bolts leave the measured muzzle, then gently converge on the core.
@@ -195,6 +195,7 @@ func gun_frame(frame_count: int) -> int:
 
 func hit_player(world) -> bool:
 	if phase != "fight" or world.invulnerable > 0.0: return false
+	world.cancel_charge()
 	player_hp -= 1
 	world.invulnerable = 1.1
 	world.event("boss_player_hit")

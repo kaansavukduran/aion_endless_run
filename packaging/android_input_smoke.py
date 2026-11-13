@@ -65,6 +65,12 @@ pause();main();menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']
 gesture=hold('duck',600)
 try:latest('AION_STATE ',lambda s:s['rolling']);capture('duck');check(True,'Real native Roll touch reaches the actual roll state')
 finally:gesture.wait(timeout=5)
+pause();main();menu_button(name='StartSelect_rabbit');latest('AION_UI ',lambda s:s['character']=='rabbit' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
+gesture=hold('jump',1000)
+try:
+ latest('AION_STATE ',lambda s:s['charging'] and not s['airborne'] and s['charge_ratio']>.1);capture('rabbit-charge');check(True,'Native Emre holds on the ground and accumulates charge')
+finally:gesture.wait(timeout=5)
+latest('AION_STATE ',lambda s:s['airborne'] and not s['charging']);capture('rabbit-leap');check(True,'Native Emre releases a real charged leap')
 pause();old=latest('AION_UI ',lambda s:s['page']=='paused');adb('shell','wm','size','2560x1440')
 try:
  rotated=latest('AION_UI ',lambda s:s['page']=='paused' and s['orientation']=='landscape');capture('landscape-paused')

@@ -1,12 +1,12 @@
 # Aion Endless Run
 
-Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.17.1**.
+Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.18.0**.
 
-**[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA v1.4 uygulaması](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0171/README.md)
+**[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA v1.4 uygulaması](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0180/README.md)
 
 ![Tabancalı normal koşu](docs/evidence-v0171/screenshots/aion-pistol.png)
 
-Canlı sürüm0.17.0 yeni mekanikleri içerir.0.17.1’in ikincil yardım metni düzeltmesi Vercel’in günlük ücretsiz derleme sınırını bekliyor; indirme sürümü ayrı doğrulanır.
+0.18.0: Beş karakter için eğilerek yere takla; Emre için basılı tutup bırakınca şarjlı sıçrama. Bütün menüler kaydırma yerine ekrana sığan sayfalar kullanır. GitHub Pages ikinci oynama adresi olarak kullanıcı tarafından onaylandı; gerçek yayın durumu doğrulama raporunda belirtilir.
 
 ## Oyna
 
@@ -20,13 +20,13 @@ Başlangıç kartlarından karakterini seç; koşu sırasında karakter değişm
 | Kutsanmış | En fazla üç can; küçük takipçiler gecikmeli zıplar |
 | Melun | Shift / Depar basılı: dört ayakla hızlan |
 | Ömer | Zıpla ve basılı tut: süzül, hava akımını yakala |
-| Emre | Güçlü tek sıçrama |
+| Emre | Zıplamayı basılı tut: şarj et; bırak: sıçra |
 
 | Eylem | Klavye / fare | Telefon | Standart Xbox / PlayStation |
 | --- | --- | --- | --- |
 | İleri ateş | Sol veya sağ tık / F basılı | Ateş et basılı | RB / R1 veya RT / R2 |
 | Doldur (1 saniye) | R; eski J de aynı eylem | Doldur | X / □ |
-| Zıpla / süzül | Space; Ömer için basılı | Zıpla; basılı tut | A / × |
+| Zıpla / süzül | Space; Ömer için basılı, Emre için tutup bırak | Zıpla; Emre için tutup bırak | A / ×; Emre için tutup bırak |
 | Takla | Aşağı / S / Ctrl | Aşağı kaydır veya Takla | B / ○ |
 | Melun deparı | Shift; karakterin üstünü basılı tut | Depar veya karakterin üstünü basılı tut | LB / L1 |
 | Duraklat | Esc | Duraklat | Start / Options |
@@ -36,6 +36,14 @@ Yumruk eylemi kaldırıldı. Her kahraman düz ileri tabanca sıkar; beş mermi 
 Altı biyom: Kehribar Çölü, Ayaz Vadisi, Sisli Bataklık, Bakır Şehir, Fener Ormanı ve Kor Sırtı. Gündüz/gece, hava olayları, kargalar, cüceler, seyrek ateş bitkileri, çukurlar ve kargaların taşıdığı üst engeller vardır. Her **15 saniyelik aktif normal koşu** yeni seviyedir; menü, duraklatma, sarılma ve boss zamanı bu sayaca girmez. Her on seviyede sarılma ve ve üç tasarımı dönen boss kovalamacası vardır. Boss arenasında normal parkur temizlenir. İsteğe bağlı antrenman üç boss’u doğrudan denetir ve rekoru değiştirmez.
 
 Meyveler +25, temiz aşılan engeller +10; mesafe de skor kazandırır. On toplanabilir güç bulunur. Sıçrama tılsımı 9 saniye daha yüksek zıplatır, şans parası 12 saniye meyve puanını ikiye katlar, buz feneri 8 saniye yakındaki yaklaşan düşmanları yavaşlatır. Dev mantar varsayılan %2 uygun eşya olasılığıyla nadirdir; ilk 20 saniyede ve önceki mantardan sonraki 45 saniyede gelmez. Mantar dalgasının toplam cüce üretimi yaklaşık yarıya indirildi; ortam cüceleri değişmedi. Her 100’ün katı eşiğinden sonraki ilk uygun boss zaferi **Fragaria çileğini** sunar. Bu nesne yalnız kısa kutlamadır; güç, puan veya başka oynanış ödülü vermez.
+
+## 0.18.0 · Alçak takla ve şarjlı Emre sıçraması
+
+Beş kahramana12'şer yeni çizilmiş poz: diz bükme, yere yaklaşma, saat yönünde öne takla ve doğrulma. Sabit fizik noktası/tek ölçek kullanılır; karakter çizimi ezilip dikey olarak sıkıştırılmaz. Basılı taklada giriş pozu tekrar etmez, karakter alçakta dönmeye devam eder. Koyun takipçileri kendi gecikmeli yol kayıtlarına göre aynı hareketi yapar.
+
+Emre zıplama basılıyken yerde güç biriktirir, bırakınca sıçrar.1,2 saniyede tam güce ulaşır; kısa basış alçak, uzun basış yüksek tek sıçrama verir. Klavye, dokunma ve gamepad aynı eylemi kullanır. Havada ikinci şarj yoktur. Dokunma iptali/odak kaybı/yön değişimi birikmiş gücü yanlışlıkla sıçratmaz. Şarj oranı küçük piksel işaretleriyle görünür; uzun seviye barı geri eklenmedi.
+
+Ana menü, sonuç, duraklatma, karakterler, diller, ilk yardım ve uzun ayarlar fare tekerleği istemez. Uzun içerikte Önceki/Sonraki okları kullanılır; sonuçta Yeniden koş ve Ana menü erişilebilir kalır. %200 yazı ve mevcut tema/font tercihi korunur. Sayısal ayarın adı ile kaydırıcısı aynı gruptadır. Seçilen iki yana bölünmüş mobil düzen ve5 mermili tabanca korunur.
 
 ## 0.17.0 · Her zaman tabanca, kompakt menü
 
@@ -75,7 +83,7 @@ Keskin çerçeveler, Pixelify Sans ve sıcak palet oyunun dünyasına uyar. Ana/
 
 ## İndir
 
-Windows: Setup ile kur veya portable ZIP’i tamamen çıkartıp EXE’yi aç. Linux: DEB, çalıştırma izni verilen AppImage veya portable tar.gz. macOS: universal DMG veya portable ZIP. Android: ARM64/x64 APK; önceki sürümle aynı uygulama kimliği ve imza, versionCode21. Gerçek paket listesi ve özetleri Releases içindedir. Önceki sürümler korunur.
+Windows: Setup ile kur veya portable ZIP’i tamamen çıkartıp EXE’yi aç. Linux: DEB, çalıştırma izni verilen AppImage veya portable tar.gz. macOS: universal DMG veya portable ZIP. Android: ARM64/x64 APK; önceki sürümle aynı uygulama kimliği ve imza, versionCode22. Gerçek paket listesi ve özetleri Releases içindedir. Önceki sürümler korunur.
 
 İlk web yüklemesi internet ister; doğrulanmış tüm dosyalar önbelleğe alındıktan sonra çevrimdışı açılır. Mac paketi ad-hoc imzalıdır; Developer ID/noter onayı ve Windows Authenticode yoktur. Yerel iPhone/TestFlight/App Store için sahibinin Apple imzalaması gerekir; yerel portable iPhone paketi sunulmaz. Safari web sürümü ayrı bir seçenektir.
 

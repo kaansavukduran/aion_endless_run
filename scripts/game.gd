@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4}
-const GAME_VERSION = "0.17.1"
+const GAME_VERSION = "0.18.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -81,6 +81,7 @@ var friend_frame := 0
 var friend_character := ""
 var friend_action := false
 var jump_sources := {}
+var menu_pages=preload("res://scripts/menu_pages.gd").new()
 var boost_sources := {}
 var ability_label: Label
 var last_event := 0
@@ -101,6 +102,7 @@ var ui_theme: Theme
 var portrait := false
 var web_stamp := ""
 var web_update_callback: JavaScriptObject
+var web_touch_cancel_callback: JavaScriptObject
 var gamepad := preload("res://scripts/gamepad.gd").new()
 var effects_enabled := true
 var canvas_layer: CanvasLayer
@@ -155,6 +157,11 @@ func _ready() -> void:
 	if OS.has_feature("web"):
 		web_update_callback = JavaScriptBridge.create_callback(prepare_web_update)
 		JavaScriptBridge.get_interface("window").aionSaveForUpdate = web_update_callback
+		web_touch_cancel_callback=JavaScriptBridge.create_callback(cancel_web_touch)
+		JavaScriptBridge.get_interface("window").aionCancelTouches=web_touch_cancel_callback
+		# Some web engine paths map DOM touchcancel to an ordinary release.
+		# Clear ownership in capture phase before such a release can launch Emre.
+		JavaScriptBridge.eval("if(!window.aionTouchCancelInstalled){window.aionTouchCancelInstalled=true;for(const type of ['touchcancel','pointercancel'])window.addEventListener(type,()=>window.aionCancelTouches?.(),{capture:true,passive:true})}")
 		JavaScriptBridge.eval("document.getElementById('canvas').addEventListener('contextmenu',e=>{if(e.currentTarget.dataset.page==='')e.preventDefault()})")
 	for i in 2:
 		followers.append(make_companion_sprite())
@@ -350,6 +357,7 @@ func rebuild() -> void:
 		return
 	var previous_focus:=get_viewport().gui_get_focus_owner()
 	var previous_name: String=str(previous_focus.name) if is_instance_valid(previous_focus) else ""
+	menu_pages.focus_name=previous_name
 	var raw := get_viewport_rect().size
 	if layout_size != Vector2.ZERO and not layout_size.is_equal_approx(raw): clear_held_controls()
 	layout_size = raw
@@ -425,12 +433,15 @@ func wrap_label(value: String, size: int = 15, color: String = "a6b8d1") -> Labe
 	return item
 
 func show_page(value: String) -> void:
+	if value!=page:menu_pages.reset(value)
 	if value == "characters" and world.state != "ready": return
 	language_picker_open = false
 	page = value
 	rebuild()
 
 func build_page() -> void:
+	menu_pages.host=self
+	if page=="main":menu_pages.pages=[];menu_pages.current=0
 	if page not in ["main"]:
 		var shade := ColorRect.new()
 		shade.color = Color("17121cc4")
@@ -456,14 +467,16 @@ func build_page() -> void:
 		column.add_child(wrap_label(text("frozen" if world.state == "ice" else ("bonked" if world.state == "bonk" else "burnt")), 26))
 		var result := HBoxContainer.new()
 		column.add_child(result)
-		result.add_child(label("%05d" % world.score, 44, "f8db96"))
+		result.add_child(label("%05d" % world.score, 30, "f8db96"))
 		result.add_child(label(text("score"), 13, "e6c8b0"))
 		column.add_child(wrap_label(text("best")+"  %05d" % best+(" · "+text("new_best") if not world.practice and world.score>best_at_start else ""),20,"f3c788"))
 		column.add_child(wrap_label(text("runstats") % [world.passed, world.gems],18))
 		column.add_child(wrap_label(text("level_record") % [world.adventure.level,best_level],13))
 		first = button(text("again"), retry_run, true)
+		first.set_meta("menu_pin",true)
 		column.add_child(first)
 		var actions := HBoxContainer.new()
+		actions.set_meta("menu_pin",true)
 		column.add_child(actions)
 		for entry in [button(text("menu"),main_menu),button(text("settings"),func():open_subpage("settings"))]:
 			entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -480,13 +493,10 @@ func build_page() -> void:
 	elif page == "settings":
 		column.add_child(wrap_label(text("settings"), 28))
 		column.add_child(wrap_label(text("language"), 13, "d4b6b2"))
-		var row: Container = VBoxContainer.new() if portrait else HBoxContainer.new()
-		column.add_child(row)
-		for lang in Words.LANGUAGES:
-			var option := button(("[x]  " if language == lang else "") + Words.LANGUAGE_NAMES[lang], func(): set_language(lang))
-			option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			row.add_child(option)
-			if lang==language: first=option
+		var choose_language:=button(Words.LANGUAGE_NAMES[language]+"  ▾",toggle_language_picker)
+		choose_language.name="SettingsLanguage"
+		column.add_child(choose_language)
+		first=choose_language
 		column.add_child(wrap_label(text("language_hint"), 12))
 		column.add_child(wrap_label(text("appearance"), 14, "d4b6b2"))
 		add_choice(column,"theme",[["dark","theme_dark"],["light","theme_light"],["system","theme_system"]],interface_options.theme_mode,func(v):apply_interface_option("theme_mode",v))
@@ -536,8 +546,7 @@ func build_page() -> void:
 		for power in world.adventure.POWER_NAMES:
 			column.add_child(wrap_label(("✓ " if world.adventure.discoveries.has(power) else "○ ") + text("power_" + power) + " · " + text("desc_" + power), 12))
 		column.add_child(wrap_label(text("version"), 11, "c6a8a5"))
-		var back := button("‹  " + text("back"), func(): show_page(return_page))
-		column.add_child(back)
+	if page!="main":menu_pages.prepare(column,Vector2(float(column.get_meta("page_width")),float(column.get_meta("page_height"))))
 	if is_instance_valid(first):
 		focus_later.call_deferred(first)
 
@@ -559,28 +568,26 @@ func build_language_picker() -> void:
 	language_picker.z_index = 100
 	language_picker.add_theme_stylebox_override("panel", box("18283d", "79d7c7", 12))
 	ui.add_child(language_picker)
-	var picker_width := minf(330,view_w-60)
-	language_picker.position = Vector2(view_w-picker_width-40,80 if touch_mode else 64)
-	var lang_scroll := ScrollContainer.new()
-	lang_scroll.name = "LanguageScroll"
-	lang_scroll.custom_minimum_size = Vector2(picker_width,minf(480,view_h-128))
-	lang_scroll.follow_focus = true
-	lang_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	language_picker.add_child(lang_scroll)
-	var options := VBoxContainer.new()
-	options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	lang_scroll.add_child(options)
-	var auto_option:=button(text("language_system")+" · "+Words.LANGUAGE_NAMES[default_language()],func():set_language("system"),not language_override)
+	var picker_width: float=view_w-56
+	language_picker.position=Vector2(28,76)
+	var options:=VBoxContainer.new()
+	language_picker.add_child(options)
+	var auto_option:=button(text("language_system"),func():set_language("system"),not language_override)
 	auto_option.name="Language_system"
-	auto_option.custom_minimum_size.y=48
 	auto_option.add_theme_font_size_override("font_size",ui_size(24))
 	options.add_child(auto_option)
+	var grid:=GridContainer.new()
+	grid.columns=2 if portrait else 4
+	grid.add_theme_constant_override("h_separation",8)
+	grid.add_theme_constant_override("v_separation",8)
+	options.add_child(grid)
 	for lang in Words.LANGUAGES:
-		var option := button(lang.to_upper() + "  " + Words.LANGUAGE_NAMES[lang], func(): set_language(lang), lang == language)
-		option.name = "Language_" + lang
-		option.custom_minimum_size = Vector2(0,48)
+		var option:=button(Words.LANGUAGE_NAMES[lang],func():set_language(lang),lang==language)
+		option.name="Language_"+lang
+		option.accessibility_name=lang.to_upper()+"  "+Words.LANGUAGE_NAMES[lang]
+		option.custom_minimum_size.x=(picker_width-28-8*(grid.columns-1))/grid.columns
 		option.add_theme_font_size_override("font_size",ui_size(24))
-		options.add_child(option)
+		grid.add_child(option)
 	language_picker.visible = language_picker_open and page != ""
 
 func toggle_language_picker() -> void:
@@ -598,9 +605,7 @@ func focus_language_option(generation: int) -> void:
 	await get_tree().process_frame
 	if generation != layout_generation or not language_picker_open or not is_instance_valid(language_picker): return
 	var option: Control = language_picker.find_child("Language_"+language,true,false)
-	var scroll: ScrollContainer = language_picker.find_child("LanguageScroll",true,false)
 	option.grab_focus()
-	scroll.ensure_control_visible(option)
 	refresh_interface_metadata.call_deferred(generation)
 
 func character_portrait(id: String) -> TextureRect:
@@ -651,9 +656,11 @@ func add_toggle(column: VBoxContainer, key: String, value: bool, callback: Calla
 		callback.call(enabled))
 
 func add_range_setting(column: VBoxContainer,key: String,value: float,callback: Callable,id: String) -> void:
-	column.add_child(wrap_label(text(key),14))
+	var group:=VBoxContainer.new()
+	column.add_child(group)
+	group.add_child(wrap_label(text(key),14))
 	var row := HBoxContainer.new()
-	column.add_child(row)
+	group.add_child(row)
 	var slider := HSlider.new()
 	slider.accessibility_name=text(key)
 	slider.min_value = 0
@@ -778,9 +785,16 @@ func press_jump(source: String) -> void:
 	world.jump_held = true
 	world.jump()
 
-func release_jump(source: String) -> void:
+func release_jump(source: String,launch: bool=true) -> void:
+	var owned: bool=jump_sources.has(source)
 	jump_sources.erase(source)
 	world.jump_held = not jump_sources.is_empty()
+	if owned and jump_sources.is_empty():
+		if launch:world.release_charged_jump()
+		else:world.cancel_charge()
+
+func cancel_web_touch(_arguments: Array) -> void:
+	clear_held_controls()
 
 func press_boost(source: String) -> void:
 	begin_playing()
@@ -821,11 +835,15 @@ func press_duck(source: String) -> void:
 	begin_playing()
 	if page != "" or world.state != "running" or world.adventure.hugging(): return
 	duck_sources[source] = true
+	world.cancel_charge()
 	world.adventure.press_roll(world)
 
 func release_duck(source: String) -> void:
+	var owned: bool=duck_sources.has(source)
 	duck_sources.erase(source)
 	world.adventure.duck_held = not duck_sources.is_empty()
+	if owned and duck_sources.is_empty() and world.adventure.roll_time<=0 and world.adventure.roll_elapsed>0:
+		world.adventure.roll_time=0.15
 
 func build_action_buttons() -> void:
 	action_buttons.clear()
@@ -1194,8 +1212,12 @@ func update_hud() -> void:
 		if active_input=="gamepad":
 			ability_label.text=text("pad_ability_"+character)
 			if character!="sheep":ability_label.text=ability_label.text % gamepad.binding_name("boost" if character=="wolf" else "jump")
+		if portrait and character=="rabbit" and active_input=="gamepad":ability_label.text=gamepad.binding_name("jump")+" ↑"
 		if world.frontier.active(): ability_label.text = text("boss_hearts") % world.frontier.player_hp
 		elif character == "sheep": ability_label.text = text("flock") % world.sheep_count
+		elif world.charging:
+			ability_label.text="↑ %d%%" % roundi(world.charge_ratio()*100)
+			ability_label.accessibility_name=text("charging") % roundi(world.charge_ratio()*100)
 		elif world.riding_gust: ability_label.text = text("riding_gust") if world.wind_kind() == "up" else text("riding_"+world.wind_kind())
 		elif world.gliding: ability_label.text = text("gliding")
 		elif world.boosting(): ability_label.text = text("boosting")
@@ -1283,6 +1305,10 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-attacking", str(world.adventure.attack_time > 0.0))
 	canvas.setAttribute("data-swing-id",str(world.adventure.swing_id))
 	canvas.setAttribute("data-jump-held",str(world.jump_held))
+	canvas.setAttribute("data-charging",str(world.charging))
+	canvas.setAttribute("data-charge-ratio",str(world.charge_ratio()))
+	canvas.setAttribute("data-menu-page",str(menu_pages.current))
+	canvas.setAttribute("data-menu-pages",str(menu_pages.pages.size()))
 	canvas.setAttribute("data-attack-cooldown", str(world.adventure.attack_cooldown))
 	canvas.setAttribute("data-giant", str(world.adventure.giant()))
 	canvas.setAttribute("data-kills", str(world.adventure.kills))
@@ -1489,6 +1515,10 @@ func update_friend() -> void:
 		frames.place(friend_sprite,key,row,shooting,Vector2(World.PLAYER_X,ground+world.y))
 	if world.state in ["running","paused"] and not a.ducking(world) and not a.hugging() and (world.y<0 or world.boosting() or (world.state=="paused" and character=="wolf" and friend_row==6)):
 		place_held_gun()
+	if world.charging:
+		frames.place(friend_sprite,"rolls",4,mini(2,int(world.charge_ratio()*3)),Vector2(World.PLAYER_X,ground))
+		place_held_gun()
+		gun_echo.position.y+=14
 	if world.state == "bonk":
 		var row: int = COMBAT_ROWS[character]*2+(1 if world.death_cause=="enemy" else 0)
 		frames.place(friend_sprite,"deaths",row,frames.progress("deaths",row,world.hit_time/1.25) if motion else frames.count("deaths",row)-1,Vector2(World.PLAYER_X,ground+world.y),visual_size)
@@ -1504,7 +1534,7 @@ func update_friend() -> void:
 			var frame := flight_frame(float(pose.velocity), float(pose.air_time), frames.count("runner-sheep",2)) if in_air else (frames.count("runner-sheep",2)-1 if landing else frames.cycle("runner-sheep",1,world.travel_distance()-World.FLOCK_GAP*(i+1),174.0))
 			place_companion(followers[i], "sheep", row, frame if motion else 0, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), 0.62 * FOLLOWER_RATIO, in_air or landing)
 			if float(pose.get("duck", 0.0)) > 0.5:
-				place_combat(followers[i], "sheep", 6, posmod(int(float(pose.get("roll_phase",0.0))/0.68*frames.count("rolls",2)),frames.count("rolls",2)) if motion else 4, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
+				place_combat(followers[i], "sheep", 6, a.roll_pose(float(pose.get("roll_phase",0.0)),float(pose.get("roll_remaining",0.0)),bool(pose.get("roll_held",false))) if motion else 4, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
 
 func place_held_gun() -> void:
@@ -1626,6 +1656,9 @@ func _draw() -> void:
 	if not is_instance_valid(ui): return
 	draw_scenery()
 	draw_wind()
+	if world.charging:
+		for i in 5:
+			draw_rect(Rect2(World.PLAYER_X-28+i*12,ground-94,8,8),Color("f8d9b1") if world.charge_ratio()>=float(i+1)/5 else Color("554154"))
 	if character == "sheep" and not world.sheep_pickups.is_empty() and world.sheep_count < 3:
 		var x: float = world.sheep_pickups[0].x
 		draw_rect(Rect2(x - 10, ground - 104, 20, 20), Color("ad536e"))

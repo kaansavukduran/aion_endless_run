@@ -81,12 +81,11 @@ func run() -> void:
 							check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Actual portrait/name content stays inside its character card "+lang+str(tile.name))
 					check(screen.encloses(panel.get_global_rect()),"Panel fits "+str(dimensions)+lang+str(scale_value)+target)
 					var scrolls=panel.find_children("*","ScrollContainer",true,false)
-					check(scrolls.size()==(1 if target=="settings" or (scale_value>1.25 and target!="main") else 0),"Only necessary settings/enlarged text pages scroll "+target)
-					if not scrolls.is_empty():
-						var buttons=scrolls[0].find_children("*","Button",true,false)
-						if not buttons.is_empty():
-							scrolls[0].ensure_control_visible(buttons[-1]);await process_frame;await process_frame
-							check(scrolls[0].get_global_rect().encloses(buttons[-1].get_global_rect()),"Last enlarged/long-menu action is reachable "+lang+target)
+					check(scrolls.is_empty(),"All content uses explicit fitted pages: "+target)
+					if target!="main" and game.menu_pages.pages.size()>1:
+						game.menu_pages.select(game.menu_pages.pages.size()-1,false);await process_frame;await process_frame
+						check(game.menu_pages.previous.is_visible_in_tree() and screen.encloses(game.menu_pages.previous.get_global_rect()),"Last content page is reachable without a wheel "+lang+target)
+
 	root.size=Vector2i(1200,540);await process_frame
 	game.interface_options.text_scale=1;game.language="cs";game.page="main"
 	for family in ["DejaVu Sans","Liberation Sans"]:

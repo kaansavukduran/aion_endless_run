@@ -4,6 +4,10 @@ extends RefCounted
 const PLAYER_X := 288.0
 const GRAVITY := 1700.0
 const JUMP_SPEED := -650.0
+const CHARGE_SECONDS := 1.2
+var charging := false
+var charge_time := 0.0
+var charged_jump_multiplier := 1.0
 const BIOME_DISTANCE := 6500.0
 const BIOME_NAMES := ["desert", "snow", "swamp", "city", "forest", "volcano"]
 var boss_travel_offset := 0.0
@@ -74,6 +78,9 @@ func reset() -> void:
 	practice = false
 	obstacle_wait = 2.1
 	jump_buffer = 0.0
+	charging = false
+	charge_time = 0.0
+	charged_jump_multiplier = 1.0
 	jumps_used = 0
 	jump_held = false
 	boost_held = false
@@ -106,6 +113,7 @@ func max_jumps() -> int:
 	return 2 if character == "aion" else 1
 
 func release_controls() -> void:
+	cancel_charge()
 	jump_held = false
 	boost_held = false
 	frontier.shoot_held = false
@@ -121,6 +129,11 @@ func biome() -> int:
 
 func jump() -> void:
 	if state != "running" or adventure.hugging(): return
+	if character=="rabbit":
+		if y>=0 and not adventure.ducking(self) and not charging:
+			charging=true
+			charge_time=0.0
+		return
 	if y < 0.0 and character == "aion" and jumps_used < 2:
 		velocity = JUMP_SPEED * adventure.jump_multiplier() * (1.12 if character=="rabbit" else 1.0)
 		jumps_used += 1
@@ -130,6 +143,21 @@ func jump() -> void:
 	else:
 		jump_buffer = 0.12
 
+func charge_ratio() -> float:
+	return clampf(charge_time/CHARGE_SECONDS,0.0,1.0)
+
+func cancel_charge() -> void:
+	charging=false
+	charge_time=0.0
+
+func release_charged_jump() -> void:
+	if not charging:return
+	var power:=charge_ratio()
+	cancel_charge()
+	if character!="rabbit" or state!="running" or y<0 or adventure.hugging():return
+	charged_jump_multiplier=lerpf(0.65,1.35,power)
+	jump_buffer=0.12
+
 func event(value: String) -> void:
 	last_event = value
 	event_id += 1
@@ -138,6 +166,7 @@ func event(value: String) -> void:
 
 func take_hit(kind: String,cause: String = "") -> bool:
 	if invulnerable > 0.0: return false
+	cancel_charge()
 	if frontier.active(): return frontier.hit_player(self)
 	if adventure.absorb_hit(self): return true
 	if character == "sheep" and sheep_count > 1:
@@ -169,6 +198,8 @@ func flock_pose(index: int) -> Dictionary:
 		if float(left.get("duck",0.0)) > 0.5 and float(right.get("duck",0.0)) > 0.5:
 			pose["roll_phase"] = lerpf(float(left.get("roll_phase",0.0)),float(right.get("roll_phase",0.0)),weight)
 		else: pose["roll_phase"] = right.get("roll_phase",0.0) if float(right.get("duck",0.0)) > 0.5 else left.get("roll_phase",0.0)
+		pose["roll_remaining"]=lerpf(float(left.get("roll_remaining",0.0)),float(right.get("roll_remaining",0.0)),weight)
+		pose["roll_held"]=bool(right.get("roll_held",false))
 		pose["duck"] = lerpf(float(left.get("duck", 0.0)), float(right.get("duck", 0.0)), weight)
 		return pose
 	return trail[-1].duplicate()
@@ -177,7 +208,7 @@ func travel_distance() -> float:
 	return frontier.chase_distance if frontier.active() else distance + boss_travel_offset
 
 func record_trail() -> void:
-	trail.append({"distance":travel_distance(), "y":y, "velocity":velocity, "air_time":air_time, "landing_time":landing_time, "duck":1.0 if adventure.ducking(self) else 0.0, "roll_phase":adventure.roll_elapsed})
+	trail.append({"distance":travel_distance(), "y":y, "velocity":velocity, "air_time":air_time, "landing_time":landing_time, "duck":1.0 if adventure.ducking(self) else 0.0, "roll_phase":adventure.roll_elapsed,"roll_remaining":adventure.roll_time,"roll_held":adventure.duck_held})
 	while trail.size() > 2 and float(trail[1].distance) < travel_distance() - FLOCK_GAP * 2.0 - 32.0:
 		trail.pop_front()
 
@@ -228,6 +259,9 @@ func step(dt: float) -> void:
 	if frontier.pending_level > 0 and y >= 0.0 and not frontier.active(): frontier.begin(self)
 	frontier.step_weapon(self,dt)
 	adventure.before_step(self, dt)
+	if charging:
+		if y<0:cancel_charge()
+		else:charge_time=minf(CHARGE_SECONDS,charge_time+dt)
 	var previous_y := y
 	time += dt
 	landing_time = maxf(0.0, landing_time - dt)
@@ -237,7 +271,7 @@ func step(dt: float) -> void:
 	if not frontier.active(): advance_gusts(movement)
 	invulnerable = maxf(0.0, invulnerable - dt)
 	if jump_buffer > 0.0 and y >= 0.0:
-		velocity = JUMP_SPEED * adventure.jump_multiplier() * (1.12 if character=="rabbit" else 1.0)
+		velocity = JUMP_SPEED * adventure.jump_multiplier() * (charged_jump_multiplier if character=="rabbit" else 1.0)
 		jumps_used = 1
 		air_time = 0.0
 		landing_time = 0.0

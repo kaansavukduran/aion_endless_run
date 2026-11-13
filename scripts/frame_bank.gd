@@ -9,11 +9,13 @@ const AGILITY = preload("res://assets/AGILITY-PROVENANCE.json")
 const CREATURES = preload("res://assets/CREATURES-PROVENANCE.json")
 const EMRE = preload("res://assets/EMRE-PROVENANCE.json")
 const FLORA=preload("res://assets/FLORA-PROVENANCE.json")
+const LOW_ROLLS=preload("res://assets/LOW-ROLLS-PROVENANCE.json")
 const ORCHARD = preload("res://assets/ORCHARD-PROVENANCE.json")
 var images := {}
 var frames := {}
 
 func descriptor(key: String,row: int) -> Dictionary:
+	if key=="rolls":return {"key":"low-rolls","row":row,"data":LOW_ROLLS.data.atlas}
 	if key=="flora":return {"key":key,"row":row,"data":FLORA.data.atlas}
 	if key=="fruits":return {"key":key,"row":row,"data":ORCHARD.data.atlas}
 	if EMRE.data.atlases.has(key):return {"key":key,"row":row,"data":EMRE.data.atlases[key]}
