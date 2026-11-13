@@ -24,7 +24,7 @@
   "accepted_pose_build": "66119a4b09427c4b",
   "pages_build": "6dc3e2ada4d32fd2",
   "vercel_build": "4e1c3abf41362288",
-  "platform_status": "PASS: exact successful CI artifacts assembled as9 validated packages. Public publication is tracked separately.",
+  "platform_status": "PASS: verified CI platform builds and11 offline Android input/rendering checks; all9 public package digests, actual downloaded stable APK bytes/signature/versionCode23 and downloaded universal Mac ZIP CRC/CPUs verified.",
   "limits": [
     "No physical Poco/iPhone/Xbox/PS test. Browser Gamepad API is emulated; DPR3 touch is trusted Chromium CDP.",
     "Firefox uses headed desktop Gecko with Android UA; this is not a physical Android Firefox test.",
@@ -33,9 +33,15 @@
     "The126-check six-hero pose/input run predates a portrait-HUD-only patch. pose-code-integrity.json proves unchanged animation/input code; final build has9556 CI checks,17 DPR checks and40 live checks."
   ],
   "publication": {
-    "state": "ready_for_upload",
+    "state": "published",
     "tag": "v0.19.0",
+    "release_url": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.19.0",
+    "publication_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43488404252",
     "artifact_source_commit": "4fea30b894f64aefba3e658b48dda3826568414f",
-    "packages": 9
+    "release_tag_commit": "f2b7f792187258da28ef8e7c06063843b9cfd567",
+    "packages": 9,
+    "receipts": 2,
+    "all11_uploaded_assets_verified": true,
+    "recorded_at": "2026-11-13T22:12:30+03:00"
   }
 }

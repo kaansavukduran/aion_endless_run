@@ -1,6 +1,6 @@
 # Current verification · 0.19.0
 
-[Somut sonuçlar, ekranlar ve kapsam](evidence-v0190/README.md).18 gerçek Godot grubu /9,556 CI kontrolü;126 altı-kahraman normal giriş kontrolü, son derlemede17 DPR3,40 canlı Firefox/Chromium,3 gerçek offline arşiv kontrolü ve11 offline native Android ADB kontrolü geçer.7 web paketleme ve4 Android parser testi de geçer.126 turundan sonraki portre-HUD değişikliği ile değişmeyen çizim/giriş kodu ayrıca belgelenmiştir. Fiziksel telefon/kol ve yerel iOS dağıtımı ayrı sınırlar olarak raporlanır.
+[Somut sonuçlar, ekranlar ve kapsam](evidence-v0190/README.md).18 gerçek Godot grubu /9,556 CI kontrolü;126 altı-kahraman normal giriş kontrolü, son derlemede17 DPR3,40 canlı Firefox/Chromium,3 gerçek offline arşiv kontrolü ve11 offline native Android ADB kontrolü geçer.7 web paketleme ve4 Android parser testi de geçer.126 turundan sonraki portre-HUD değişikliği ile değişmeyen çizim/giriş kodu ayrıca belgelenmiştir. 9 paket ve2 makbuz yayımlandı; sunucu özetleri, indirilen APK imzası/sürümü ve Mac ZIP CRC/universal CPU başlığı doğrulandı. Fiziksel telefon/kol ve yerel iOS dağıtımı ayrı sınırlar olarak raporlanır.
 
 # Historical verification · 0.18.0
 

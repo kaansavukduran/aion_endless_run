@@ -1,3 +1,9 @@
+# Published delivery · 0.19.0
+
+Releasev0.19.0 is public with9 platform packages and2 receipts. Exact artifacts from verified run43480686993 (source4fea30b), documentation tagf2b7f79 and stable APK application537391a are recorded separately. All11 server asset digests verified before publication; actual public APK bytes/signer/code23 and Mac ZIP CRC/universal CPUs verified afterward. Pages and Vercel actual final build IDs/scopes are in docs/evidence-v0190/verification.json. Runtime unchanged after the final HUD fix.
+
+Managed direct uploads.github.com returned401. The scoped GitHub-owned publisher37b396d /run43488404252 solved delivery using existing repository authorization and GITHUB_TOKEN, not another local credential. Manual/repository dispatch requires a successful main Test and package run, all5 platform gates, matching version and byte-identical runtime source; it restores only the matching stable APK, uploads the existing draft, validates every server digest and then publishes. Do not overwrite a published release or delete release-assets/v0.19.0, which is needed for reproducing the signed APK. No signing keys were committed. Source/tests/assets/scene/loader contents were unchanged by this publication workflow.
+
 # Delivery update · 0.19.0 final portrait HUD
 
 Application537391a, verified CI4fea30b /43480686993, Pages43482053479.9,556 source checks; final17 DPR,40 live and3 actual-release-archive offline checks;11 native Android inputs. Original47 PNGs unchanged. Native touch fonts have a24 minimum: long portrait ability instructions exceeded the slot. The slot now shows live one-line jump count/flock/glide/boost/charge with full accessible/tutorial guidance, without shrinking text or covering Jump. All11 locales and active states have actual shaped bounds checks. The language code control has its own minimum and covers no roster card at200%.
