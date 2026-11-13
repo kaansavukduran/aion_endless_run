@@ -1,12 +1,20 @@
-# Current verification · 0.17.1
+# Current verification · 0.18.0
+
+[Actual evidence, screenshots and inputs](evidence-v0180/README.md).17 Godot suites:8,492 local checks,8,579 CI checks, zero failures. Font-dependent visible-page assertions explain the count difference. Both DejaVu Sans and Liberation Sans at200% now explicitly cover the remote overflow regression.89 normal-input Chromium checks pass on the final local candidate;18 actual Pages play checks pass in Firefox153 and Chromium151;3 real subpath offline checks,7 web packaging and4 Android parser checks pass.
+
+Main/tag CI43350354438/43351637933 pass actual Windows install/run, Linux portable/DEB/AppImage run, macOS app/DMG and11 offline native Android ADB checks.9 published packages and2 receipts are verified; downloaded stable APK bytes/hash/v2-v3 signer/versionCode22 and downloaded Mac ZIP CRC/universal CPUs are checked. No physical Poco/iPhone/controller claim. Live diagnostics use CA-verified forwarding, with a documented Chromium DevTools transfer-size workaround; the offline worker run is separate.
+
+Reproduce with `tests/browser_charge_roll.py`, `tests/browser_firearm.py --menu-only` and `--skip-menu`, the17 suites listed in `.github/workflows/build.yml`, and `packaging/android_input_smoke.py`. Main menus and results have no ScrollContainer; long settings use explicit pages. Original46 asset PNGs are byte-identical to baselinec3b041f. App commitdc3bcf4 is unchanged by later delivery evidence commits. Older sections below are history.
+
+# Historical verification · 0.17.1
 
 [Current evidence](evidence-v0171/README.md).16 suites /5,720 checks, including201 firearm/menu checks.34 real Chromium checks on the0.17.1 candidate; exact final-build, live and native scope are recorded there.22 new assertions align all11 secondary help texts with15 seconds and Reload.0.17.0 CI failed at an obsolete screenshot filename after9 native input passes; it is not an overall pass.
 
-# Current verification · 0.17.1
+# Historical verification · 0.17.1
 
 [Evidence, screenshots and scope](evidence-v0171/README.md). 16 Godot suites /5,720 checks passed in isolated XDG data directories;34 actual Chromium checks (9 menu/locale and25 real gun/touch/gamepad flows),7 packaging and4 Android packet parser tests passed. Main fits all5 heroes/3 actions at200% in2048×1024,393×873,768×1024 and873×393. Existing45 asset PNGs are unchanged. The known preference fixture is distinguished from natural running-world input. Current browser acceptance driver is tests/browser_firearm.py; historical melee drivers below describe their old releases.
 
-# Current verification · 0.17.0
+# Historical verification · 0.17.0
 
 [Evidence, screenshots and scope](evidence-v0170/README.md). 16 Godot suites /5,698 checks passed in isolated XDG data directories;34 actual Chromium checks (9 menu/locale and25 real gun/touch/gamepad flows),7 packaging and4 Android packet parser tests passed. Main fits all5 heroes/3 actions at200% in2048×1024,393×873,768×1024 and873×393. Existing45 asset PNGs are unchanged. The known preference fixture is distinguished from natural running-world input. Current browser acceptance driver is tests/browser_firearm.py; historical melee drivers below describe their old releases.
 

@@ -38,4 +38,19 @@ Android API30 emülatöründe internet kapalıyken11 gerçek ADB giriş kontrol�
 ![Android dokunarak şarj](screenshots/android-rabbit-charge.png)
 ![Android bırakınca sıçrama](screenshots/android-rabbit-leap.png)
 
-Pages dağıtımı43351182798 başarılı, sürüm0.18.0 ve içerik kimliği2dc5e96fab077b9f gerçek HTTPS manifestinden okundu. Canlı tarayıcı doğrulaması ayrıca eklenecek.
+Pages dağıtımı43351182798 başarılı, sürüm0.18.0 ve içerik kimliği2dc5e96fab077b9f gerçek HTTPS manifestinden okundu. Canlı tarayıcı doğrulaması aşağıda tamamlandı.
+
+## Gerçek yayın ve indirmeler
+
+[GitHub Pages'te oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.18.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.18.0).
+
+Gerçek Pages adresinde Firefox153 ve Chromium151 ile9'ar kontrol geçti: SHA doğrulanan PCK ile açılış, Aion'un tam7 koşu karesinde sabit yatay referans, dokunarak ateş/doldur/takla, duraklamada dikey dönüşün korunması, Emre'nin yerde şarjı ve bırakınca tek sıçrama. Hata/diyalog yok. [Firefox](live-firefox.json) · [Chromium](live-chromium.json). Bunlar fiziksel Poco/iPhone testleri değildir.
+
+![Gerçek Firefox üretim ana menüsü](screenshots/firefox-landscape-main.png)
+![Gerçek Chromium üretim şarjı](screenshots/chromium-portrait-charge.png)
+
+Bulut tarayıcısının sertifika deposu yürütücünün proxy CA'sını tanımadığı için üretim HTTPS yanıtları sistem CA deposuyla doğrulanarak tarayıcıya iletildi; TLS doğrulaması kapatılmadı. İlk Chromium denemesinde91MB PCK'nin base64 CDP yanıtı100MiB DevTools boru sınırını aştı; log açıkça `not enough capacity` gösterdi. Bu tanı aracı sınırını16MiB aralıklı iletimle çözdük. Birleştirilen gerçek üretim baytları oyunun mevcut SHA-256 doğrulamasından geçti. Oyun/manifest değiştirilmedi. Firefox tam yanıtı kullandı. Bu canlı tanıdaki ServiceWorker kapalıdır; gerçek alt dizin çevrimdışı testi ayrı kaydedildi.
+
+[Etiket CI43351637933](https://github.com/kaansavukduran/aion_endless_run/actions/runs/43351637933) tüm platform kapılarını tekrar geçti ve9 paketi birlikte yayımladı. [Kamuya açık paket doğrulaması](public-packages.json), [kaynak/derleme makbuzu](BUILD-RECEIPT.json), [SHA-256 listesi](SHA256SUMS).9 dosyanın GitHub içerik özetleri makbuzla eşleşiyor. Gerçek indirilen Android APK bytes/SHA ve v2/v3 imzası beklenen kalıcı imzayla aynı; versionCode22/0.18.0/uygulama kimliği doğrulandı. Gerçek indirilen Mac ZIP CRC hatasız, Mach-O Intel x86_64 ve Apple Silicon arm64 içeriyor. Native iOS, Apple Developer ID/noter ve Windows Authenticode sınırlamaları değişmedi.
+
+Kayıt zamanı `verification.json` içinde Europe/Istanbul saat dilimindedir. Pages ve Vercel farklı origin'lerdir; eski Vercel kayıtları yerinde kalır, yeni adresteki rekorlar ayrıdır. Bu bir otomatik kayıt taşıma veya Drive senkronizasyonu değildir.

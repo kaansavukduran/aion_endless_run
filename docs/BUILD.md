@@ -34,3 +34,9 @@ macOS packaging uses `packaging/macos_dmg.py` to reserve explicit HFS+ capacity 
 ## 0.13 touch and registration checks
 
 Run tests/test_runner_ux.gd alongside the existing nine suites. The new pixel interface, touch router and portrait scene transform use the same Godot actions on web and native. Registration tools need Pillow/NumPy/SciPy only during maintenance; PNGs are preserved. Pixelify Sans and its OFL are bundled. packaging/archive_project.py creates a dated Istanbul-time immutable tracked-tree snapshot, inventory and source receipt; no history backup or continuous sync is configured.
+
+## Verified secondary web publication · 0.18.0
+
+GitHub Pages is enabled by the owner in Actions mode. `publish-pages.yml` consumes the successful main run's `web-game` artifact, validates the exact project version and every immutable asset hash/size, then publishes the unmodified subpath-safe site. It never starts another engine/export or takes an unverified directory. Main run43350354438 and Pages run43351182798 passed. Web uses single-threaded Godot4.6.3, so Pages does not need custom COOP/COEP headers. Original offline integrity/update/save code remains; a real worker/offline reload is separately tested at `/aion_endless_run/`.
+
+Current stable-signed Android metadata is in `packaging/release_android.json`, version0.18.0/code22, source appdc3bcf4. Same-repository `release-assets/v0.18.0` holds only hash-verified APK parts and a manifest for repeatable tag packaging when CI signing is unavailable. It contains no signing key. Public releasev0.18.0 contains the reconstructed exact APK, all desktop formats and offline web archive, plusSHA256SUMS/BUILD-RECEIPT.json. This source snapshot is not a Git history backup or continuous Drive sync.

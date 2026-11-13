@@ -1,6 +1,10 @@
-# 13 Kasım 2026 yayın durumu
+# 13 Kasım 2026 · Güncel iki oyun adresi
 
-Canlı `https://aionendlessrun.vercel.app/`:0.17.0, `49607fd4dd9c8030`, kaynak32251ec. Yeni tabanca/şarjör/menü/15 saniye mekanikleri Firefox'ta doğrulandı. Sonraki0.17.1 yardım metni yaması için GitHub Vercel durumu: **Deployment rate limited — retry in 24 hours.**5d02d01 ve a41eb06 derlemeleri bu sınır nedeniyle başlamadı. Ücretli plana geçilmedi. Kota yenilendikten sonra güncel main için yeni yayın başlatılmalıdır; otomatik yeniden deneme veya başarılı0.17.1 yayını iddia edilmez. [Kanıtlar](evidence-v0171/README.md).
+**[Güncel0.18.0 / GitHub Pages](https://kaansavukduran.github.io/aion_endless_run/)**, kaynakdc3bcf4, içerik2dc5e96fab077b9f. Kullanıcı Pages → Source → GitHub Actions seçti; API workflow modunu doğruladı. [Yayın koşusu43351182798](https://github.com/kaansavukduran/aion_endless_run/actions/runs/43351182798) başarılı. Gerçek Firefox153 ve Chromium151 ile açılış, PCK doğrulaması, dokunma kontrolleri, Emre şarjı ve yön değişimi test edildi. Ayrı bir yerel alt-dizin deneyi gerçek çevrimdışı worker/kayıt korunmasını doğruladı. [Kanıtlar](evidence-v0180/README.md).
+
+Vercel adresi https://aionendlessrun.vercel.app/ korunuyor. İlk0.18.0 adayı (`c75d65b445ea55a7`, kaynakc9ab407) gerçekten yayımlandı. Sonraki geniş sistem fontu menü düzeltmesi için dc3bcf4 durum kaydı **Deployment rate limited — retry in24 hours** döndü. Ücretli plana geçilmedi; otomatik tekrar veya son düzeltmenin Vercel'e ulaştığı iddia edilmez. Güncel sürüm için Pages'i kullan. Kayıtlar origin'e aittir; Vercel rekoru silinmez, Pages rekoru ayrı başlar.
+
+`.github/workflows/publish-pages.yml`, başarılı main platform testinin exact web-game çıktısını alır; proje sürümü ve bütün fingerprint dosyalarının bytes/SHA-256 bilgilerini denetleyip Pages'e yollar. Yeniden farklı bir motorla veya test edilmemiş bir web uygulamasıyla derleme yapmaz. Windows/macOS/Linux/Android indirmeleri GitHub Releases içindedir.
 
 # Vercel ile ücretsiz web oyunu
 

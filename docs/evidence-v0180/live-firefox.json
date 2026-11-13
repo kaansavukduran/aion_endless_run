@@ -1,0 +1,27 @@
+{
+  "url": "https://kaansavukduran.github.io/aion_endless_run/?build=2dc5e96fab077b9f",
+  "build": {
+    "build": "2dc5e96fab077b9f",
+    "version": "0.18.0"
+  },
+  "browser": "Firefox 153.0",
+  "checks": [
+    "The GitHub Pages production URL really boots 0.18.0 with a verified PCK in Firefox",
+    "Every actual Aion running frame keeps the corrected horizontal gaze on production",
+    "Firefox touch Fire spends a real pistol round",
+    "Firefox touch Reload starts the one-second magazine timer",
+    "Firefox touch Roll reaches the actual somersault action",
+    "Production rotates upright to portrait without resetting the paused run",
+    "Live Emre holds a charge on the ground",
+    "Live Emre release launches exactly one charged leap",
+    "No script errors or missing-PCK alert in live Firefox play"
+  ],
+  "dialogs": [],
+  "errors": [],
+  "boot": {
+    "phase": "ready",
+    "attempts": 1,
+    "error": ""
+  },
+  "scope": "Headed desktop Gecko with Android UA/touch, not physical Poco. Live HTTPS responses forwarded with system-CA TLS verification; SW disabled here and separately tested with real local workers."
+}

@@ -153,16 +153,22 @@
       "url": "https://kaansavukduran.github.io/aion_endless_run/",
       "build": "2dc5e96fab077b9f",
       "deployment_run": 43351182798,
-      "state": "Successfully deployed; live-browser acceptance next, not yet claimed tested."
+      "state": "Verified actual production boot and play in Firefox153 and Chromium151 (touch emulation),9 checks each; no script errors or missing-PCK alert."
     },
     "main_ci": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43350354438",
-    "vercel": "0.18.0 c75d65b445ea55a7 from c9ab407 now live; later dc3bcf4 wide-font fix blocked by renewed daily quota. Final Pages deployment awaits platform gates."
+    "vercel": "0.18.0 c75d65b445ea55a7 from c9ab407 now live; later dc3bcf4 wide-font fix blocked by renewed daily quota. Final Pages deployment awaits platform gates.",
+    "release": {
+      "url": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.18.0",
+      "tag_commit": "295b00837267f7d87dbb987053f96f8de34a6b65",
+      "run_id": 43351637933,
+      "status": "Public prerelease,9 actual packages and2 receipts verified."
+    }
   },
   "recorded_at": "2026-11-13T05:13:53.650910+03:00",
   "timezone": "Europe/Istanbul",
   "limits": [
     "Desktop Chromium via software GPU and standard Gamepad API, not physical phone/controller.",
-    "Native Android API30 and three desktop platform gates passed in main CI. Public package and live Pages play outcomes are recorded after completion.",
+    "No physical Poco/iPhone/controller claim. Live CA-verified HTTP diagnostic relay blocks SW; offline SW is separately real-tested at local subpath. Chromium PCK relayed in16MiB diagnostic ranges to avoid the100MiB DevTools pipe cap; actual loader SHA checks stay enabled.",
     "macOS ad-hoc, no Developer ID/notarization; native iOS awaits owner signing."
   ],
   "previous_ci_failure": {
@@ -175,5 +181,9 @@
   },
   "ci_source_and_scene_checks": 8579,
   "native_android_input_checks": 11,
-  "release_prepared_at": "2026-11-13T05:21:45.881589+03:00"
+  "release_prepared_at": "2026-11-13T05:21:45.881589+03:00",
+  "live_browser_checks": 18,
+  "public_package_count": 9,
+  "public_apk_signature_verified": true,
+  "final_verified_at": "2026-11-13T05:31:17.753219+03:00"
 }

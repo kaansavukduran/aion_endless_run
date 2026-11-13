@@ -2,11 +2,11 @@
 
 Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.18.0**.
 
-**[Tarayıcıda oyna](https://aionendlessrun.vercel.app/) · [İndirilebilir sürümler](https://github.com/kaansavukduran/aion_endless_run/releases)** · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA v1.4 uygulaması](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0180/README.md)
+**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.18.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.18.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA v1.4 uygulaması](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0180/README.md)
 
-![Tabancalı normal koşu](docs/evidence-v0171/screenshots/aion-pistol.png)
+![Pages üzerinde güncel ana menü](docs/evidence-v0180/screenshots/firefox-landscape-main.png)
 
-0.18.0: Beş karakter için eğilerek yere takla; Emre için basılı tutup bırakınca şarjlı sıçrama. Bütün menüler kaydırma yerine ekrana sığan sayfalar kullanır. GitHub Pages ikinci oynama adresi olarak kullanıcı tarafından onaylandı; gerçek yayın durumu doğrulama raporunda belirtilir.
+0.18.0: Beş karakter için eğilerek yere takla; Emre için basılı tutup bırakınca şarjlı sıçrama. Bütün menüler kaydırma yerine ekrana sığan sayfalar kullanır. GitHub Pages yayını gerçek Firefox ve Chromium girdileriyle doğrulandı. Vercel ilk0.18.0 adayını yayımladı; son geniş-font menü düzeltmesi günlük kotaya takıldığı için en güncel oyun Pages adresindedir. İki adresin rekorları ayrı saklanır.
 
 ## Oyna
 
