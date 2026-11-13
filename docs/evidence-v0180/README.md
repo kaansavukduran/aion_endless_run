@@ -17,7 +17,7 @@ Menü sürücüsündeki ilk deneme, Godot'un düğüm adlarında noktayı alt ç
 
 Ana menü dört ekran ölçüsünde ve200% yazıda tek bakışta sığar. Uzun ayarlar açıkça sayfalıdır; bütün font/kol seçeneklerine gerçek Önceki/Sonraki dokunmalarıyla ulaşıldı. Sonuç işlemleri sayfalarda görünür kalır. Gizli autowrap Label ölçümü gerçek şekillendirme sonrası alınır; yazı/tema tercihi küçültülerek taşma saklanmaz. [9 menü/dil kontrolü](browser-menu.json).
 
-[25 tabanca regresyonu](browser-firearm.json): beş karakterin tam tabancalı koşu döngüsü,5 mermi, boş şarjör,1 aktif saniyelik elle doldurma, gerçek boss hasarı, RB/X, baykuş süzülmesi, dört ayaklı kurt, dokunma iptali ve yön değişimi. Bu grup son web-only touchcancel daraltmasından önceki aynı uygulama mekaniğinde çalıştırıldı; yeni55'lik grup son daraltmayı kapsar. Dünya, düşman, fizik veya RNG enjekte edilmedi.9'luk menü grubunda açıkça belgelenen eski İtalyanca/tema/rekor kayıt fixture'ı kullanılır.
+[25 tabanca regresyonu](browser-firearm.json): beş karakterin tam tabancalı koşu döngüsü,5 mermi, boş şarjör,1 aktif saniyelik elle doldurma, gerçek boss hasarı, RB/X, baykuş süzülmesi, dört ayaklı kurt, dokunma iptali ve yön değişimi. Bu grup ve55'lik grup son `b22e878bec53d134` uygulama çıktısında yeniden geçti. Dünya, düşman, fizik veya RNG enjekte edilmedi.9'luk menü grubunda açıkça belgelenen eski İtalyanca/tema/rekor kayıt fixture'ı kullanılır.
 
 ## Çevrimdışı ve platform sınırı
 
@@ -27,4 +27,15 @@ Yerel tarayıcı denemeleri yazılımsal GPU ile Chromium'dur; fiziksel Poco/iPh
 
 ## Uzak ortamda bulunan geniş font regresyonu
 
-İlk GitHub CI koşusu43349358325, yereldeki varsayılan fonttan daha geniş DejaVu Sans ile200%/960×540 düzeninde son karakter kartını ve üç dil seçeneğini ekran dışında buldu. Yerelde aynı gerçek fontla yeniden üretildi. Büyütülmüş yatay menüde karakterlere60%, ana eylemlere40% alan verildi; kart yüksekliği Label şekillendirmesinden ölçülüyor. Sistem dili, diğer11 dil ile aynı ızgarada: fazladan yüksek satır yok. DejaVu Sans ve Liberation Sans, TR/EN ve iki yön için348 ek kontrol eklendi. Son kaynak paketi8.492 kontrol geçti. Son menü tarayıcı deneyi ve gerçek alt-dizin çevrimdışı deneyi yeni `b22e878bec53d134` web çıktısında tekrar geçti.55 davranış ve25 tabanca kontrolünün önceki aday kapsamı ilgili JSON'da korunur; üretim davranışı ayrıca doğrulanır.
+İlk GitHub CI koşusu43349358325, yereldeki varsayılan fonttan daha geniş DejaVu Sans ile200%/960×540 düzeninde son karakter kartını ve üç dil seçeneğini ekran dışında buldu. Yerelde aynı gerçek fontla yeniden üretildi. Büyütülmüş yatay menüde karakterlere60%, ana eylemlere40% alan verildi; kart yüksekliği Label şekillendirmesinden ölçülüyor. Sistem dili, diğer11 dil ile aynı ızgarada: fazladan yüksek satır yok. DejaVu Sans ve Liberation Sans, TR/EN ve iki yön için348 ek kontrol eklendi. Son kaynak paketi8.492 kontrol geçti. Son menü tarayıcı deneyi ve gerçek alt-dizin çevrimdışı deneyi yeni `b22e878bec53d134` web çıktısında tekrar geçti.55 davranış ve25 tabanca kontrolü de son adayda tekrar geçti; üretim davranışı ayrıca doğrulanır.
+
+## Platform kapıları tamamlandı
+
+[main CI43350354438](https://github.com/kaansavukduran/aion_endless_run/actions/runs/43350354438):17 kaynak paketi, Windows installer/portable gerçek çalıştırma, Linux portable/DEB/AppImage gerçek çalıştırma ve macOS uygulama/DMG kapıları geçti. Uzak kaynak kontrolü8.579; yerelde8.492. Fark, sistem fontuna göre gerçekten görünür sayfalardaki denetlenen kontrol sayısından gelir; iki ortamda da sıfır hata. [CI özeti](ci-results.json).
+
+Android API30 emülatöründe internet kapalıyken11 gerçek ADB giriş kontrolü geçti. Dokunarak şarj/bırakma, takla, süzülme, ateş ve gerçek5 mermi doldurma; duraklatıp yön değiştirme dahildir. Sekiz gerçek renderer ekranı boş olmadığı için ayrı denetlendi. CI APK'sı geçici test imzalıdır; indirilecek APK ayrıca sabit imzayla yerelde üretildi ve hash/imza eşlemesiyle sahnelendi. [Android sonuçları](android-input-results.json).
+
+![Android dokunarak şarj](screenshots/android-rabbit-charge.png)
+![Android bırakınca sıçrama](screenshots/android-rabbit-leap.png)
+
+Pages dağıtımı43351182798 başarılı, sürüm0.18.0 ve içerik kimliği2dc5e96fab077b9f gerçek HTTPS manifestinden okundu. Canlı tarayıcı doğrulaması ayrıca eklenecek.

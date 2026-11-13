@@ -35,7 +35,7 @@ with sync_playwright() as pw:
   page.wait_for_function('Number(document.querySelector("canvas").dataset.worldTime)>.02')
  cdp=ctx.new_cdp_session(page)
  def touch(point,down):cdp.send('Input.dispatchTouchEvent',{'type':'touchStart' if down else 'touchEnd','touchPoints':[{'x':point[0],'y':point[1],'id':0}] if down else []})
- def observe_roll():page.evaluate("window.rollObserver?.disconnect();window.roll=[];window.rollObserver=new MutationObserver(()=>{const d=document.querySelector('canvas').dataset;if(d.ducking==='true'&&d.poseSource==='low-rolls')roll.push({frame:Number(d.sourceFrame),height:Number(d.heroOpaqueHeight),y:Number(d.playerY),time:Number(d.worldTime)})}).observe(document.querySelector('canvas'),{attributes:true})")
+ def observe_roll():page.evaluate("window.rollObserver?.disconnect();window.roll=[];window.rollObserver=new MutationObserver(()=>{const d=document.querySelector('canvas').dataset;if(d.ducking==='true'&&d.poseSource==='low-rolls')roll.push({frame:Number(d.sourceFrame),height:Number(d.heroOpaqueHeight),y:Number(d.playerY),time:Number(d.worldTime)})});window.rollObserver.observe(document.querySelector('canvas'),{attributes:true})")
  for hero,kind in [('aion','key'),('owl','pad'),('sheep','touch'),('wolf','key'),('rabbit','key')]:
   start(hero);height=float(d()['heroOpaqueHeight']);observe_roll()
   if kind=='key':page.keyboard.down('ArrowDown')
@@ -54,7 +54,7 @@ with sync_playwright() as pw:
   elif kind=='pad':page.evaluate('padSet(1,false)')
   else:touch(None,False)
   wait('[data-ducking="false"]');check(d()['attacking']=='false','Release recovers to pistol running without melee: '+hero);menu()
- def observe_jump():page.evaluate("window.leapObserver?.disconnect();window.leap={peak:0,last:0,air:false,apex:false};window.leapObserver=new MutationObserver(()=>{const y=Number(document.querySelector('canvas').dataset.playerY);if(y<0){leap.air=true;leap.peak=Math.max(leap.peak,-y);if(y>leap.last+.01&&leap.last<-10)leap.apex=true;leap.last=y}}).observe(document.querySelector('canvas'),{attributes:true})")
+ def observe_jump():page.evaluate("window.leapObserver?.disconnect();window.leap={peak:0,last:0,air:false,apex:false,maxJumps:0,launches:0,lastAir:false};window.leapObserver=new MutationObserver(()=>{const d=document.querySelector('canvas').dataset;const y=Number(d.playerY);if(y<0&&!leap.lastAir)leap.launches++;leap.lastAir=y<0;if(y<0){leap.air=true;leap.maxJumps=Math.max(leap.maxJumps,Number(d.jumps));leap.peak=Math.max(leap.peak,-y);if(y>leap.last+.01&&leap.last<-10)leap.apex=true;leap.last=y}});window.leapObserver.observe(document.querySelector('canvas'),{attributes:true})")
  for kind,ratio in [('key',.1),('pad',.5),('touch',1.0)]:
   start('rabbit');observe_jump();point=action('jump')
   if kind=='key':page.keyboard.down('Space')
@@ -67,7 +67,7 @@ with sync_playwright() as pw:
   elif kind=='pad':page.evaluate('padSet(0,false)')
   else:touch(None,False)
   wait('[data-charging="false"][data-airborne="true"]');page.wait_for_function('leap.apex',timeout=20000);peaks[kind]=page.evaluate('leap.peak')
-  check(d()['jumps']=='1','Release produces exactly one real leap through '+kind)
+  check(page.evaluate('leap.maxJumps===1&&leap.launches===1'),'Release produces exactly one real leap through '+kind)
   if kind=='touch':page.screenshot(path=str(a.evidence/'emre-high-leap.png'))
   menu()
  check(peaks['key']<peaks['pad']<peaks['touch'],'Measured real leap apex increases with the held charge time')

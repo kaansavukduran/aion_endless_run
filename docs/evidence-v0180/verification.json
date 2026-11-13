@@ -135,7 +135,7 @@
   "web_packaging_checks": 7,
   "android_packet_parser_checks": 4,
   "local_browser_build": {
-    "build": "9a49115f1e5797c8",
+    "build": "b22e878bec53d134",
     "version": "0.18.0"
   },
   "native_android_package": {
@@ -149,7 +149,12 @@
     "provenance_note": "Stable-signed APK exported locally from this application commit. Later commits only record package metadata and delivery evidence; gameplay, scenes, resources and project settings match this commit."
   },
   "publication": {
-    "pages": "Owner enabled Source=GitHub Actions; real platform run and deployment in progress. Not yet claimed playable.",
+    "pages": {
+      "url": "https://kaansavukduran.github.io/aion_endless_run/",
+      "build": "2dc5e96fab077b9f",
+      "deployment_run": 43351182798,
+      "state": "Successfully deployed; live-browser acceptance next, not yet claimed tested."
+    },
     "main_ci": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43350354438",
     "vercel": "0.18.0 c75d65b445ea55a7 from c9ab407 now live; later dc3bcf4 wide-font fix blocked by renewed daily quota. Final Pages deployment awaits platform gates."
   },
@@ -157,7 +162,7 @@
   "timezone": "Europe/Istanbul",
   "limits": [
     "Desktop Chromium via software GPU and standard Gamepad API, not physical phone/controller.",
-    "Public Pages play, exact CI packages and Android emulator outcomes are recorded separately after actual completion.",
+    "Native Android API30 and three desktop platform gates passed in main CI. Public package and live Pages play outcomes are recorded after completion.",
     "macOS ad-hoc, no Developer ID/notarization; native iOS awaits owner signing."
   ],
   "previous_ci_failure": {
@@ -167,5 +172,8 @@
   "final_ui_browser_build": {
     "build": "b22e878bec53d134",
     "version": "0.18.0"
-  }
+  },
+  "ci_source_and_scene_checks": 8579,
+  "native_android_input_checks": 11,
+  "release_prepared_at": "2026-11-13T05:21:45.881589+03:00"
 }

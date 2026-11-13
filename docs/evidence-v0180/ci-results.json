@@ -1,0 +1,107 @@
+{
+  "run_id": 43350354438,
+  "commit": "dc3bcf4a44e0b132d6771a6bf6cbf08452472734",
+  "url": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43350354438",
+  "source_checks": 8579,
+  "source_results": [
+    {
+      "checks": 124,
+      "suite": "checks",
+      "failures": 0
+    },
+    {
+      "checks": 58,
+      "suite": "adventure checks",
+      "failures": 0
+    },
+    {
+      "checks": 51,
+      "suite": "localization/registration checks",
+      "failures": 0
+    },
+    {
+      "checks": 122,
+      "suite": "evolution checks",
+      "failures": 0
+    },
+    {
+      "checks": 272,
+      "suite": "frontier checks",
+      "failures": 0
+    },
+    {
+      "checks": 479,
+      "suite": "motion checks",
+      "failures": 0
+    },
+    {
+      "checks": 108,
+      "suite": "encounter/gamepad checks",
+      "failures": 0
+    },
+    {
+      "checks": 685,
+      "suite": "fidelity checks",
+      "failures": 0
+    },
+    {
+      "checks": 198,
+      "suite": "agility checks",
+      "failures": 0
+    },
+    {
+      "checks": 235,
+      "suite": "runner UX checks",
+      "failures": 0
+    },
+    {
+      "checks": 30,
+      "suite": "boss HUD checks",
+      "failures": 0
+    },
+    {
+      "checks": 690,
+      "suite": "AIONIA checks",
+      "failures": 0
+    },
+    {
+      "checks": 551,
+      "suite": "variety/transition/locale checks",
+      "failures": 0
+    },
+    {
+      "checks": 152,
+      "suite": "visual polish checks",
+      "failures": 0
+    },
+    {
+      "checks": 1833,
+      "suite": "orchard/Emre checks",
+      "failures": 0
+    },
+    {
+      "checks": 201,
+      "suite": "firearm/menu checks",
+      "failures": 0
+    },
+    {
+      "checks": 2790,
+      "suite": "charge/roll/paged UI checks",
+      "failures": 0
+    }
+  ],
+  "jobs": {
+    "test": "success",
+    "desktop_linux": "success",
+    "desktop_windows": "success",
+    "desktop_macos": "success",
+    "android_native_smoke": "success",
+    "stable_android_CI_signing": "skipped; stable-signed APK exported locally and staged after SHA/signer verification"
+  },
+  "pages": {
+    "run_id": 43351182798,
+    "status": "success",
+    "url": "https://kaansavukduran.github.io/aion_endless_run/",
+    "build": "2dc5e96fab077b9f"
+  }
+}
