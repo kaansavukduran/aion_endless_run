@@ -4,14 +4,14 @@ Gamepad events use the standard browser API, not a physical controller.
 import argparse,json,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-parser=argparse.ArgumentParser();parser.add_argument('--url',default='http://127.0.0.1:8781');parser.add_argument('--evidence',type=Path,required=True);parser.add_argument('--menu-only',action='store_true');parser.add_argument('--heroes',nargs='*');args=parser.parse_args();args.evidence.mkdir(parents=True,exist_ok=True)
+parser=argparse.ArgumentParser();parser.add_argument('--url',default='http://127.0.0.1:8781');parser.add_argument('--evidence',type=Path,required=True);parser.add_argument('--menu-only',action='store_true');parser.add_argument('--heroes',nargs='*');parser.add_argument('--record-video',action='store_true');args=parser.parse_args();args.evidence.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];clips={};menu_results=[]
 def check(ok,label):
  assert ok,label
  checks.append(label);print('PASS',label,flush=True)
 with sync_playwright() as pw:
  browser=pw.chromium.launch(args=['--no-sandbox','--enable-unsafe-swiftshader'])
- ctx=browser.new_context(viewport={'width':1280,'height':720},locale='tr-TR',has_touch=True,service_workers='block',record_video_dir=str(args.evidence/'video'))
+ ctx=browser.new_context(viewport={'width':1280,'height':720},locale='tr-TR',has_touch=True,service_workers='block',**({'record_video_dir':str(args.evidence/'video')} if args.record_video else {}))
  ctx.add_init_script("const pad={id:'Xbox Controller',index:0,connected:true,mapping:'standard',timestamp:0,axes:[0,0,0,0],buttons:Array.from({length:17},()=>({pressed:false,touched:false,value:0}))};Object.defineProperty(navigator,'getGamepads',{value:()=>[pad]});window.padSet=(i,v)=>{pad.buttons[i]={pressed:v,touched:v,value:v?1:0};pad.timestamp=performance.now()};")
  page=ctx.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.on('console',lambda m:errors.append(m.text) if 'SCRIPT ERROR' in m.text else None)
  page.goto(args.url);page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
@@ -33,7 +33,7 @@ with sync_playwright() as pw:
   menu();ui(name='StartSelect_'+hero);ui(name='StartRun');wait('[data-state="running"][data-ui-ready="true"]')
   if any(b['text']=='Anladım · Devam et' for b in json.loads(d()['ui'])):ui(text='Anladım · Devam et')
   page.wait_for_function('Number(document.querySelector("canvas").dataset.worldTime)>.02')
- def observer():page.evaluate("window.poseObserver?.disconnect();window.poseSamples=[];window.poseObserver=new MutationObserver(()=>{let d=document.querySelector('canvas').dataset;poseSamples.push({source:d.poseSource,frame:+d.sourceFrame,row:+d.sourceRow,count:+d.frameCount,probeX:+d.headProbeX,probeY:+d.headProbeY,x:+d.visualX,scale:+d.actorScale,time:+d.worldTime,y:+d.playerY,shots:+d.bossShots,height:+d.heroOpaqueHeight,duck:d.ducking==='true'})});poseObserver.observe(document.querySelector('canvas'),{attributes:true})")
+ def observer():page.evaluate("window.poseObserver?.disconnect();window.poseSamples=[];window.poseObserver=new MutationObserver(()=>{let d=document.querySelector('canvas').dataset;poseSamples.push({state:d.state,source:d.poseSource,frame:+d.sourceFrame,row:+d.sourceRow,count:+d.frameCount,probeX:+d.headProbeX,probeY:+d.headProbeY,x:+d.visualX,scale:+d.actorScale,time:+d.worldTime,y:+d.playerY,shots:+d.bossShots,height:+d.heroOpaqueHeight,duck:d.ducking==='true'})});poseObserver.observe(document.querySelector('canvas'),{attributes:true})")
  def stable(label,source=None,samples=None):
   rows=page.evaluate('poseSamples') if samples is None else samples;rows=[x for x in rows if x['probeX']>-900 and (not source or x['source']==source)]
   check(bool(rows),label+' has independently registered head samples')
@@ -76,10 +76,12 @@ with sync_playwright() as pw:
    if roll_input=='key':page.keyboard.up('ArrowDown')
    elif roll_input=='pad':page.evaluate('padSet(1,false)')
    else:touch(None,False)
-   wait('[data-ducking="false"]');recovered=d();page.keyboard.press('Escape')
+   recovery_row=3 if hero=='eren' else (0 if hero=='rabbit' else 7)
+   page.wait_for_function('(v)=>poseSamples.some(p=>p.time>v.time&&p.state==="running"&&!p.duck&&p.row===v.row)',arg={'time':rows[-1]['time'],'row':recovery_row},timeout=1500)
+   recovered=page.evaluate('(v)=>poseSamples.find(p=>p.time>v.time&&p.state==="running"&&!p.duck&&p.row===v.row)',{'time':rows[-1]['time'],'row':recovery_row});page.keyboard.press('Escape')
    check(any(x['frame']>=4 for x in rows) and bool(late) and all(x['frame']==(2 if hero=='eren' else 3) for x in late),hero+' bends, shoulder rolls once, then remains visibly low')
    check(min(x['height'] for x in rows)<height*.93 and all(x['y']==0 for x in rows),hero+' lowers the actual drawing while staying on the ground')
-   check(recovered['state']=='running',hero+' safely recovers to its own pistol-run design')
+   check(recovered['state']=='running' and not recovered['duck'],hero+' visibly recovers to its own pistol-run design before the next hazard')
   if not args.menu_only:
    start('wolf');observer();page.keyboard.down('Shift');wait('[data-boosting="true"]');page.wait_for_timeout(900);stable('Wolf four-leg sprint','agility-wolf');page.keyboard.up('Shift')
    start('owl');page.keyboard.down('Space');wait('[data-gliding="true"]');observer();page.wait_for_timeout(1100);stable('Owl steady glide','agility-owl');page.screenshot(path=str(args.evidence/'owl-gliding.png'));page.keyboard.up('Space')

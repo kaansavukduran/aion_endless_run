@@ -65,6 +65,22 @@ func run():
    g.release_shoot("key");g.press_jump("key");g.world.step(.01);g.update_friend()
    check(g.world.y<0 and not g.world.charging and g.friend_sprite.get_meta("source_key")=="eren-animations","Eren jumps using his own art, independently of Emre")
    g.release_jump("key");g.main_menu()
+ root.size=Vector2i(393,873);await process_frame;g.touch_mode=true;g.interface_options.text_scale=1.0;g.active_input="touch"
+ for lang in g.Words.LANGUAGES:
+  g.set_language(lang)
+  for hero in g.FRIENDS:
+   g.main_menu();g.select_character(hero);g.start_run();await process_frame;g.update_hud();g.ability_label.get_line_count()
+   check(not g.ability_label.visible or (g.ability_label.get_minimum_size().y<=g.ability_label.size.y and g.ability_label.get_minimum_size().x<=g.ability_label.size.x),"Actual shaped portrait ability text fits in full: "+lang+"/"+hero)
+   for id in ["jump","shoot","duck","boost"]:
+    if g.ability_label.visible and g.action_buttons[id].visible:check(not g.ability_label.get_global_rect().intersects(g.action_buttons[id].get_global_rect()),"Ability text does not enter a touch target: "+lang+"/"+hero+"/"+id)
+  for status in ["glide","sprint","charge"]:
+   var hero: String={"glide":"owl","sprint":"wolf","charge":"rabbit"}[status]
+   g.main_menu();g.select_character(hero);g.start_run();await process_frame
+   if status=="glide":g.world.y=-100;g.world.gliding=true
+   elif status=="sprint":g.world.boost_held=true
+   else:g.world.charging=true;g.world.charge_time=.6
+   g.update_hud();g.ability_label.get_line_count()
+   check(g.ability_label.visible and g.ability_label.get_minimum_size().y<=g.ability_label.size.y and g.ability_label.get_minimum_size().x<=g.ability_label.size.x,"Live ability status fits without shrinking mobile text: "+lang+"/"+status)
  var button=Touch.new();button.size=Vector2(96,96)
  for side in [28,35,48,64]:
   var image: Image=button.skin_image(side);var symmetric:=true

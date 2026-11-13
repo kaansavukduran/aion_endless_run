@@ -105,7 +105,8 @@ func hud() -> void:
 		h.footer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	h.ability_label=h.wrap_label("",18,"eedbb6")
 	h.ui.add_child(h.ability_label)
-	h.position_control(h.ability_label,Vector2(18,h.view_h-162 if h.touch_mode else h.view_h-56),Vector2(210 if h.portrait else h.view_w-360,32))
+	h.position_control(h.ability_label,Vector2(18,h.view_h-(164 if h.portrait else 162) if h.touch_mode else h.view_h-56),Vector2(220 if h.portrait else h.view_w-360,40 if h.portrait and h.touch_mode else 32))
+	if h.portrait and h.touch_mode:h.ability_label.autowrap_mode=TextServer.AUTOWRAP_OFF
 	h.boss_label=h.label("",21,"f4c68b")
 	h.ui.add_child(h.boss_label)
 	h.boss_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART

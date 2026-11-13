@@ -1224,6 +1224,18 @@ func update_hud() -> void:
 		elif world.riding_gust: ability_label.text = text("riding_gust") if world.wind_kind() == "up" else text("riding_"+world.wind_kind())
 		elif world.gliding: ability_label.text = text("gliding")
 		elif world.boosting(): ability_label.text = text("boosting")
+		if portrait and touch_mode:
+			# The narrow lane above Jump shows live ability state. Full input
+			# instructions stay in the tutorial/help and accessibility name.
+			ability_label.accessibility_name=ability_label.text if not world.charging else text("charging") % roundi(world.charge_ratio()*100)
+			if character=="sheep":ability_label.text=ability_label.text.replace("・","·").get_slice("·",0).strip_edges()
+			elif world.charging:ability_label.text="↑ %d%%" % roundi(world.charge_ratio()*100)
+			elif world.riding_gust:ability_label.text="↑" if world.wind_kind()=="up" else ("→" if world.wind_kind()=="forward" else "↑→")
+			elif world.gliding:ability_label.text=text("gliding")
+			elif world.boosting():ability_label.text=text("boosting")
+			elif character=="aion":ability_label.text="↑ ×%d" % maxi(0,2-world.jumps_used)
+			else:ability_label.hide()
+			ability_label.text=ability_label.text.replace("・","·").get_slice("·",0).strip_edges()
 	if interface_options.text_scale>1.0:
 		biome_label.hide();power_label.hide();goal_label.hide();ability_label.hide();footer_label.hide()
 	publish_web_status()
