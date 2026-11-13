@@ -1,5 +1,6 @@
 extends SceneTree
 const Bank=preload("res://scripts/frame_bank.gd")
+const World=preload("res://scripts/world.gd")
 var checks:=0
 var failures:=0
 func check(ok: bool,message: String) -> void:
@@ -44,4 +45,19 @@ func run():
 	for probe in bank.PIXEL.data.face_registration:
 		check(float(probe.residual)<(.35 if int(probe.row)==7 else .15),"Whole-face source pixel fit remains inside reviewed error: "+str(probe.hero))
 	sprite.free()
+	# Exercise the real scene selector as well as the bank. These are explicit
+	# deterministic damage-state fixtures, separate from normal-input browsers.
+	var game=load("res://main.tscn").instantiate();root.add_child(game);await process_frame;game.set_physics_process(false)
+	for hero in ["aion","owl","sheep","wolf","rabbit","eren"]:
+		game.character=hero;game.world.character=hero
+		for state in ["ice","fire"]:
+			game.world.state=state
+			var first_x: float=-9999
+			for col in 6:
+				game.world.hit_time=col*.7/5;game.update_friend()
+				var item: Sprite2D=game.friend_sprite
+				var probe: Vector2=item.get_meta("head_probe_world")
+				if col==0:first_x=probe.x
+				check(item.get_meta("source_key")=="pixel-"+hero and item.get_meta("source_row")== (7 if state=="ice" else 8) and is_equal_approx(probe.x,first_x) and is_equal_approx(item.position.x,World.PLAYER_X),"Actual scene selects a fixed elemental face at a fixed actor origin: "+hero+"/"+state+"/"+str(col))
+	game.queue_free();await process_frame
 	print("RESULT: %d pixel hero checks, %d failures"%[checks,failures]);quit(1 if failures else 0)
