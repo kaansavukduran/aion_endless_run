@@ -1,3 +1,7 @@
+# 13 Kasım 2026 yayın durumu
+
+Canlı `https://aionendlessrun.vercel.app/`:0.17.0, `49607fd4dd9c8030`, kaynak32251ec. Yeni tabanca/şarjör/menü/15 saniye mekanikleri Firefox'ta doğrulandı. Sonraki0.17.1 yardım metni yaması için GitHub Vercel durumu: **Deployment rate limited — retry in 24 hours.**5d02d01 ve a41eb06 derlemeleri bu sınır nedeniyle başlamadı. Ücretli plana geçilmedi. Kota yenilendikten sonra güncel main için yeni yayın başlatılmalıdır; otomatik yeniden deneme veya başarılı0.17.1 yayını iddia edilmez. [Kanıtlar](evidence-v0171/README.md).
+
 # Vercel ile ücretsiz web oyunu
 
 Bu depodaki `vercel.json`, Godot oyununu gerçek kaynak koddan derleyip `build/web` klasörünü yayımlar. Sunucu, veritabanı, API anahtarı veya MCP gerekmez. Vercel Hobby kişisel projeler için ücretsizdir ve planın kullanım sınırlarına tabidir. Windows/Android gibi indirilebilir paketler GitHub Releases'ta kalır.

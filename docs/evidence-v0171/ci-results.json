@@ -1,0 +1,48 @@
+{
+  "run_id": 43338268399,
+  "source_commit": "a41eb06d0ba327c79e5d1a5b2fcc9cd781bbbd1f",
+  "jobs": [
+    {
+      "id": 131599873011,
+      "name": "test",
+      "conclusion": "success",
+      "html_url": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43338268399/job/131599873011"
+    },
+    {
+      "id": 131600315097,
+      "name": "desktop (windows-latest)",
+      "conclusion": "success",
+      "html_url": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43338268399/job/131600315097"
+    },
+    {
+      "id": 131600315100,
+      "name": "desktop (ubuntu-24.04)",
+      "conclusion": "success",
+      "html_url": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43338268399/job/131600315100"
+    },
+    {
+      "id": 131600315103,
+      "name": "android_smoke",
+      "conclusion": "success",
+      "html_url": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43338268399/job/131600315103"
+    },
+    {
+      "id": 131600315196,
+      "name": "desktop (macos-15-intel)",
+      "conclusion": "success",
+      "html_url": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43338268399/job/131600315196"
+    },
+    {
+      "id": 131600318396,
+      "name": "android",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43338268399/job/131600318396"
+    },
+    {
+      "id": 131602385469,
+      "name": "release",
+      "conclusion": "success",
+      "html_url": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43338268399/job/131602385469"
+    }
+  ]
+}

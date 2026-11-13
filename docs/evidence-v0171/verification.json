@@ -148,13 +148,43 @@
     "Physical Poco/iPhone/Xbox/PS testing and Apple Developer ID/iOS distribution signing are not available.",
     "Live production, CI native and public-package checks are recorded separately after completion."
   ],
-  "browser_web_build": "8e3dcd00a0152cb6",
-  "browser_candidate_note": "34 browser checks ran on the 0.17.1 candidate before the final translated gamepad-help correction. Source tests cover all eleven corrected help strings. Final-build and live checks are recorded after completion.",
+  "browser_web_build": "2fccbc2982cd517b",
+  "browser_candidate_note": "All34 Chromium checks were repeated successfully on the final0.17.1 build, including the corrected gamepad-help strings. Menu/world screenshot/recording copies were replaced with this final run.",
   "ci_candidate_0170": {
     "run_id": 43336925320,
     "result": "failure",
     "actual_android_input_checks": 9,
     "cause": "All real native inputs passed; image gate referenced obsolete android-melee.png. The 0.17.1 gate checks actual fire/reload images. No 0.17.0 release was published."
   },
-  "reused_visual_fixtures": "Two illustrated flora fixtures originate in the 0.17.0 renderer; identical scenery/hero/prop art is retained."
+  "reused_visual_fixtures": "Two illustrated flora fixtures originate in the 0.17.0 renderer; identical scenery/hero/prop art is retained.",
+  "ci_run_id": 43338268399,
+  "production_version": "0.17.0",
+  "production_build": "49607fd4dd9c8030",
+  "production_patch_blocker": {
+    "service": "Vercel Hobby",
+    "status": "failure",
+    "message": "Deployment rate limited — retry in 24 hours.",
+    "affected_commits": [
+      "5d02d01",
+      "a41eb06"
+    ],
+    "effect": "The0.17.1 secondary-help-only patch could not deploy. The full0.17.0 requested gameplay remains live and passed7 Firefox checks. No billing upgrade or retry success is claimed."
+  },
+  "current_offline_checks": 3,
+  "live_firefox_checks": 7,
+  "live_firefox_version_scope": "The canonical production0.17.0 build contains all requested new mechanics. The0.17.1 help-only patch was blocked by the Vercel daily limit; no live0.17.1 claim.",
+  "release_candidate_tag_repair": "An initial unpublished0.17.1 tag at5d02d01 lacked the verification manifest after a documentation-copy failure. Only this task’s unpublished tag was corrected with an explicit force-with-lease to a41eb06 after verifying no release existed. Earlier versions/tags remain. Obsolete candidate CI runs were cancelled; only run43338268399 is the final acceptance gate.",
+  "verification_time_istanbul": "2026-11-13T03:44:10.961052+03:00",
+  "ci_result": "success",
+  "native_android_checks": 9,
+  "native_android_scope": "API30 debug export from the release source, real ADB touches, offline play, six rendered-screen checks and paused resize. Public stable-signed APK bytes/signature verified separately; no physical-device installation claim.",
+  "application_files_match_apk_source": true,
+  "public_release": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.17.1",
+  "public_packages_verified": 9,
+  "public_apk_signature_verified": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
+  "public_apk_hash_and_bytes_verified": true,
+  "mac_zip_crc_and_universal_cpus_verified": [
+    "x86_64",
+    "arm64"
+  ]
 }

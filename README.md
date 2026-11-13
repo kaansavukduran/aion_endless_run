@@ -6,6 +6,8 @@ Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile m
 
 ![Tabancalı normal koşu](docs/evidence-v0171/screenshots/aion-pistol.png)
 
+Canlı sürüm0.17.0 yeni mekanikleri içerir.0.17.1’in ikincil yardım metni düzeltmesi Vercel’in günlük ücretsiz derleme sınırını bekliyor; indirme sürümü ayrı doğrulanır.
+
 ## Oyna
 
 Telefon kontrolleri seçimin üzerine iki yana bölündü: solda Zıpla, sağda Ateş et/Doldur/Takla. Tabanca her zaman elde; beş mermiden sonra elle doldurma bir aktif saniye sürer. Ayarlardan eski sağ küme seçilebilir. Koyu/açık/sistem teması, sistem/pixel yazı ve büyütülmüş menü metni saklanır. Kol eylemleri yeniden atanabilir; titreşim varsayılan kapalıdır. [Kontroller](docs/CONTROLS.md).
