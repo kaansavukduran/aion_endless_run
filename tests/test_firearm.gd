@@ -32,6 +32,8 @@ func run():
  var save_path:="user://save.cfg";var original:=FileAccess.get_file_as_bytes(save_path) if FileAccess.file_exists(save_path) else PackedByteArray()
  for lang in Words.LANGUAGES:
   check(Words.get_text(lang,"motion_help")==Words.get_text(lang,"help") and Words.get_text(lang,"motion_help").contains("15"),"Secondary help matches the current fifteen-second firearm controls: "+lang)
+ for lang in Words.LANGUAGES:
+  check(Words.get_text(lang,"gamepad_help").contains("X/□ "+Words.get_text(lang,"control_attack")),"Gamepad help describes the actual Reload binding: "+lang)
  var g=load("res://main.tscn").instantiate();root.add_child(g);await process_frame;g.set_process(false);g.set_physics_process(false);g.touch_tutorial_done=true;g.select_character("aion");g.start_run();g.press_shoot("key");g.world.step(.02);g.update_friend();g.update_hud()
  check(g.world.frontier.ammo==4 and g.world.adventure.attack_time==0 and g.friend_sprite.get_meta("pose_key")=="gun-fire","Normal input and actual sprite use pistol, never punch")
  g.release_shoot("key");g.press_attack("key");check(g.world.frontier.reload_time==1 and g.world.adventure.attack_time==0,"Old attack binding is now Reload, with no melee")

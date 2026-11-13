@@ -180,7 +180,7 @@ jobs:
             adb shell pidof com.kaansavukduran.aionendlessrun
             adb logcat -d > build/android-logcat.txt
             python3 packaging/check_android_log.py build/android-logcat.txt
-            python3 packaging/check_android_images.py build/android-first-launch.png build/android-paused.png build/android-owl-glide.png build/android-melee.png build/android-duck.png
+            python3 packaging/check_android_images.py build/android-first-launch.png build/android-paused.png build/android-owl-glide.png build/android-fire.png build/android-reload.png build/android-duck.png
       - uses: actions/upload-artifact@v4
         if: always()
         with:

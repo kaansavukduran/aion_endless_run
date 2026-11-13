@@ -43,7 +43,7 @@
   "boss_training_help": "選んだキャラクターで各ボスに挑戦。記録は変わりません。",
   "boss_ray": "嵐のエイ",
   "boss_root": "根のエンジン",
-  "gamepad_help": "Xbox / PlayStation：メニューは十字キーか左スティックで移動、A/×かX/□で決定、B/○で戻る。A/×ジャンプ、X/□攻撃、B/○回転、LB/L1ダッシュ、RB/R1かRT/R2射撃、Start/Options一時停止。",
+  "gamepad_help": "Xbox / PlayStation：メニューは十字キーか左スティックで移動、A/×かX/□で決定、B/○で戻る。A/×ジャンプ、X/□ 装填、B/○回転、LB/L1ダッシュ、RB/R1かRT/R2射撃、Start/Options一時停止。",
   "boss_pattern_high": "上段射撃",
   "boss_pattern_low": "低い光球",
   "boss_pattern_burst": "3連射",
