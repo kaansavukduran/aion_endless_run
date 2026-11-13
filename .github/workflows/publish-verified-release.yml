@@ -1,0 +1,127 @@
+name: Publish verified release artifacts
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: Successful main Test and package run
+        required: true
+        default: '43480686993'
+        type: string
+      tag:
+        description: Existing release tag with unchanged runtime sources
+        required: true
+        default: v0.19.0
+        type: string
+  repository_dispatch:
+    types: [aion-verified-release]
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: verified-release-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN: ${{ inputs.source_run || github.event.client_payload.source_run || '43480686993' }}
+      AION_TAG: ${{ inputs.tag || github.event.client_payload.tag || 'v0.19.0' }}
+    steps:
+      - name: Validate dispatch values
+        run: |
+          python3 - <<'PY'
+          import os,re
+          assert os.environ['SOURCE_RUN'].isdigit()
+          assert re.fullmatch(r'v\d+\.\d+\.\d+',os.environ['AION_TAG'])
+          assert os.environ['GITHUB_REPOSITORY']=='kaansavukduran/aion_endless_run'
+          PY
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.AION_TAG }}
+      - name: Require verified source, platform gates and matching runtime
+        id: proof
+        run: |
+          mkdir -p build
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN" > build/source-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN/jobs?per_page=100" > build/source-jobs.json
+          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > build/releases.json
+          python3 - <<'PY'
+          import os,json,re,subprocess
+          from pathlib import Path
+          run=json.load(open('build/source-run.json'))
+          assert run['conclusion']=='success' and run['head_branch']=='main'
+          assert run['path']=='.github/workflows/build.yml'
+          assert run['head_repository']['full_name']==os.environ['GITHUB_REPOSITORY']
+          jobs={j['name']:j['conclusion'] for j in json.load(open('build/source-jobs.json'))['jobs']}
+          required=['test','android_smoke','desktop (ubuntu-24.04)','desktop (windows-latest)','desktop (macos-15-intel)']
+          assert all(jobs.get(n)=='success' for n in required),jobs
+          meta=json.load(open('packaging/release_android.json'))
+          version=re.search(r'config/version="([^"]+)"',Path('project.godot').read_text())[1]
+          assert meta['version']==version and os.environ['AION_TAG']=='v'+version
+          release=next(r for r in json.load(open('build/releases.json')) if r['tag_name']==os.environ['AION_TAG'])
+          assert release['draft'],'Published releases must not be overwritten'
+          subprocess.run(['git','fetch','--no-tags','--depth=1','origin',run['head_sha']],check=True)
+          paths=['scripts','assets','project.godot','main.tscn','export_presets.cfg','packaging/build_web.py','packaging/web_updates.py','packaging/web_boot.js','packaging/web_update.js','packaging/web_worker.js','packaging/web_splash.html','packaging/web_accessibility.js','packaging/web_storage.js','packaging/release_android.json']
+          subprocess.run(['git','diff','--exit-code',run['head_sha'],'HEAD','--',*paths],check=True)
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('version='+version+'\nrelease_id='+str(release['id'])+'\nsource_sha='+run['head_sha']+'\n')
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ env.SOURCE_RUN }}
+          pattern: desktop-*
+          path: release
+          merge-multiple: true
+      - name: Restore exact stable-signed APK and build receipt
+        env:
+          VERSION: ${{ steps.proof.outputs.version }}
+        run: |
+          git fetch --no-tags --depth=1 origin "release-assets/v$VERSION"
+          python3 - <<'PY'
+          import json,subprocess,os
+          m=json.load(open('packaging/release_android.json'))
+          subprocess.run(['python3','packaging/restore_staged_apk.py','--version',m['version'],'--sha256',m['sha256'],'--output','release/'+m['name']],check=True)
+          subprocess.run(['python3','packaging/write_release_receipt.py','--directory','release','--version',m['version']],check=True)
+          PY
+          python3 - <<'PY'
+          import json,hashlib,os,subprocess
+          from pathlib import Path
+          root=Path('release');p=root/'BUILD-RECEIPT.json';v=json.loads(p.read_text());run=json.load(open('build/source-run.json'));meta=json.load(open('packaging/release_android.json'))
+          v['release_tag_commit']=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          v['source_commit']=run['head_sha'];v['verified_application_commit']=run['head_sha']
+          v['android_application_source_commit']=meta['application_source_commit']
+          v['publication_run']=v['verification_run'];v['verification_run']=run['html_url']
+          v['source_provenance_note']='Exact unchanged artifacts from the successful main CI run; release tag adds delivery documentation only. Runtime source equality was checked before publication.'
+          v['browser_scope']='126 normal six-hero pose/input checks with unchanged pose code; final17 DPR,40 live and3 actual-release-archive offline checks. No physical-device claim.'
+          p.write_text(json.dumps(v,indent=2)+'\n')
+          with (root/'SHA256SUMS').open('w') as f:
+            for name in sorted([*v['files'],'BUILD-RECEIPT.json']):f.write(hashlib.file_digest((root/name).open('rb'),'sha256').hexdigest()+'  '+name+'\n')
+          PY
+      - name: Upload complete draft, verify server digests, then publish
+        env:
+          RELEASE_ID: ${{ steps.proof.outputs.release_id }}
+        run: |
+          gh release upload "$AION_TAG" release/* --clobber
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" > build/uploaded-release.json
+          python3 - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          remote=json.load(open('build/uploaded-release.json'));assert remote['draft']
+          expected={p.name:p for p in Path('release').iterdir() if p.is_file()}
+          assets={a['name']:a for a in remote['assets']};assert set(assets)==set(expected)
+          for name,p in expected.items():
+            a=assets[name];assert a['state']=='uploaded' and a['size']==p.stat().st_size
+            assert a['digest']=='sha256:'+hashlib.file_digest(p.open('rb'),'sha256').hexdigest()
+          Path('build/publication-validation.json').write_text(json.dumps({'release_id':remote['id'],'tag':remote['tag_name'],'all11_uploaded_assets_verified':True,'files':{n:{'bytes':a['size'],'digest':a['digest']} for n,a in assets.items()}},indent=2)+'\n')
+          PY
+          gh release edit "$AION_TAG" --draft=false --prerelease
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-publication-evidence
+          path: |
+            release/BUILD-RECEIPT.json
+            release/SHA256SUMS
+            build/publication-validation.json
+          if-no-files-found: warn
