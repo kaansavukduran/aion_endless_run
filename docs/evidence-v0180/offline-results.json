@@ -5,7 +5,7 @@
     "Offline gameplay loads the current pistol assets and spends a real round"
   ],
   "build": {
-    "build": "9a49115f1e5797c8",
+    "build": "b22e878bec53d134",
     "version": "0.18.0"
   },
   "scope": "Real local ServiceWorker/CacheStorage, offline context, normal input and naturally earned record. No data clearing, scripted world changes or save fixture."

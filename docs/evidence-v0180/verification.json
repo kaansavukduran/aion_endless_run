@@ -2,8 +2,8 @@
   "version": "0.18.0",
   "baseline_commit": "c3b041f61480afc37c762f99ba0a6f7b364f92aa",
   "engine": "4.6.3",
-  "application_source_commit": "c9ab4077e10d3b6d80b4209a9612b7c42830d29d",
-  "source_and_scene_checks": 8144,
+  "application_source_commit": "dc3bcf4a44e0b132d6771a6bf6cbf08452472734",
+  "source_and_scene_checks": 8492,
   "source_suites": [
     {
       "suite": "game",
@@ -121,7 +121,7 @@
       "suite": "charge_roll_ui",
       "exit_code": 0,
       "result": [
-        "RESULT: 2355 charge/roll/paged UI checks, 0 failures"
+        "RESULT: 2703 charge/roll/paged UI checks, 0 failures"
       ]
     }
   ],
@@ -141,23 +141,31 @@
   "native_android_package": {
     "version": "0.18.0",
     "name": "AionEndlessRun-0.18.0-android-arm64-x64.apk",
-    "sha256": "200ea6fb9108c7b77f9f9c08a90a8b13d47660ccb4085264d85d80bdefd58713",
+    "sha256": "46e1e311733f5e5b58b3cbf3dcc2ab065a9d4422eb1b3661ab4ae3ba387821ca",
     "bytes": 139970129,
     "version_code": 22,
     "signer_sha256": "50a9ebeabb42d34a1397fade51c1aae2ebf446f4fe77a45f200c54e4e372ed36",
-    "application_source_commit": "c9ab4077e10d3b6d80b4209a9612b7c42830d29d",
+    "application_source_commit": "dc3bcf4a44e0b132d6771a6bf6cbf08452472734",
     "provenance_note": "Stable-signed APK exported locally from this application commit. Later commits only record package metadata and delivery evidence; gameplay, scenes, resources and project settings match this commit."
   },
   "publication": {
     "pages": "Owner enabled Source=GitHub Actions; real platform run and deployment in progress. Not yet claimed playable.",
-    "main_ci": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43349358325",
-    "vercel": "Last checked 0.17.0; daily quota blocked later builds."
+    "main_ci": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43350354438",
+    "vercel": "0.18.0 c75d65b445ea55a7 from c9ab407 now live; later dc3bcf4 wide-font fix blocked by renewed daily quota. Final Pages deployment awaits platform gates."
   },
-  "recorded_at": "2026-11-13T05:05:21.908332+03:00",
+  "recorded_at": "2026-11-13T05:13:53.650910+03:00",
   "timezone": "Europe/Istanbul",
   "limits": [
     "Desktop Chromium via software GPU and standard Gamepad API, not physical phone/controller.",
     "Public Pages play, exact CI packages and Android emulator outcomes are recorded separately after actual completion.",
     "macOS ad-hoc, no Developer ID/notarization; native iOS awaits owner signing."
-  ]
+  ],
+  "previous_ci_failure": {
+    "run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43349358325",
+    "actual_cause": "DejaVu system font at200% in960x540 logical view: fifth hero card plus three language options outside screen. Reproduced locally, fixed geometry, added two-font regression."
+  },
+  "final_ui_browser_build": {
+    "build": "b22e878bec53d134",
+    "version": "0.18.0"
+  }
 }
