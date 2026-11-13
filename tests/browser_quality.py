@@ -47,6 +47,7 @@ with sync_playwright() as pw:
   v=d();buttons=json.loads(v['ui']);w,h=float(v['viewWidth']),float(v['viewHeight']);cards=[b for b in buttons if b['name'].startswith('StartSelect_')]
   check(len(cards)==6,label+' shows Eren and Emre as separate visible choices')
   check(all(b['x']>=-1 and b['y']>=-1 and b['x']+b['w']<=w+1 and b['y']+b['h']<=h+1 for b in buttons),label+' all real buttons fit without a wheel')
+  lang=next(b for b in buttons if b['name']=='LanguageMenu');overlap=lambda a,b:a['x']<b['x']+b['w'] and a['x']+a['w']>b['x'] and a['y']<b['y']+b['h'] and a['y']+a['h']>b['y'];check(all(not overlap(lang,b) for b in cards),label+' language control covers no character card')
   rect=json.loads(v['mainPanel']);actions=[b for b in buttons if not b['name'].startswith('StartSelect_') and b['name']!='LanguageButton'];bottom=max(b['y']+b['h'] for b in actions if b['x']<rect[0]+rect[2] and b['y']>=rect[1] and b['y']<rect[1]+rect[3]);gap=rect[1]+rect[3]-bottom
   check(-1<=gap<=32,label+' menu panel ends at actual content, gap='+str(round(gap,2)))
   menu_results.append({'label':label,'panel':rect,'bottom_gap':gap,'buttons':buttons})
@@ -86,8 +87,8 @@ with sync_playwright() as pw:
    start('eren');page.keyboard.down('Space');wait('[data-airborne="true"]');check(d()['charging']=='false' and d()['poseSource']=='eren-animations','Eren has his own immediate single jump');page.screenshot(path=str(args.evidence/'eren-jumping.png'));page.keyboard.up('Space')
    start('aion');touch(action('shoot'),True);page.wait_for_function('Number(document.querySelector("canvas").dataset.bossShots)>=2');cdp.send('Input.dispatchTouchEvent',{'type':'touchCancel','touchPoints':[]});page.wait_for_timeout(450);shots=d()['bossShots'];page.wait_for_timeout(400);check(d()['bossShots']==shots,'Cancelling a Fire touch never leaves the trigger latched')
    for confirm in [0,2]:
-    page.evaluate('padSet(9,true)');wait('[data-page="paused"]');page.evaluate('padSet(9,false)');page.wait_for_timeout(120);page.evaluate('(n)=>padSet(n,true)',confirm);wait('[data-state="running"]');page.evaluate('(n)=>padSet(n,false)',confirm);check(True,'Gamepad Start and '+('A/×' if confirm==0 else 'X/□')+' actually pause and resume the selected menu action')
-   page.keyboard.press('Escape');wait('[data-page="paused"]');before=d();resize(393,873);after=d();check(before['score']==after['score'] and before['character']==after['character'],'Paused rotation preserves the run and character');page.screenshot(path=str(args.evidence/'portrait-paused.png'));menu()
+    start('aion');page.evaluate('padSet(9,true)');wait('[data-page="paused"]');page.evaluate('padSet(9,false)');page.wait_for_timeout(120);page.evaluate('(n)=>padSet(n,true)',confirm);wait('[data-state="running"]');page.evaluate('(n)=>padSet(n,false)',confirm);check(True,'Gamepad Start and '+('A/×' if confirm==0 else 'X/□')+' actually pause and resume the selected menu action')
+   start('aion');page.keyboard.press('Escape');wait('[data-page="paused"]');before=d();resize(393,873);after=d();check(before['score']==after['score'] and before['character']==after['character'],'Paused rotation preserves the run and character');page.screenshot(path=str(args.evidence/'portrait-paused.png'));menu()
   def option(name):
    for _ in range(30):
     names=[b['name'] for b in json.loads(d()['ui'])]

@@ -54,9 +54,16 @@ try:
 finally:gesture.wait(timeout=5)
 pause();capture('paused');main()
 menu_button(name='StartSelect_aion');latest('AION_UI ',lambda s:s['character']=='aion' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-gesture=hold('shoot',2300)
-try:latest('AION_STATE ',lambda s:s['shooting'] and s['shots']>=6);capture('held-fire');check(True,'Real native Fire continues beyond five bullets without reload')
-finally:gesture.wait(timeout=6)
+gesture=hold('shoot',700)
+try:latest('AION_STATE ',lambda s:s['shooting'] and s['shots']>0);capture('normal-fire');check(True,'Real native Fire touch emits a normal-run bullet')
+finally:gesture.wait(timeout=5)
+pause();main();menu_button(text=r'^Boss training$');latest('AION_UI ',lambda s:s['page']=='bosses');menu_button(name='PracticeBoss_0');latest('AION_STATE ',lambda s:s['practice'] and s['boss_phase']=='fight',timeout=25)
+# A slow software-rendered emulator advances less active game time per wall
+# second. Use the real training arena (3HP, no parkour) to observe a full hold;
+# normal-run input is checked above. Never remove the six-shot assertion.
+gesture=hold('shoot',5200)
+try:latest('AION_STATE ',lambda s:s['shots']>=6);capture('held-fire');check(True,'Real native held Fire continues beyond five bullets without reload in the training arena')
+finally:gesture.wait(timeout=8)
 pause();main();menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 gesture=hold('duck',600)
 try:latest('AION_STATE ',lambda s:s['rolling']);capture('duck');check(True,'Real native Roll touch reaches the actual roll state')

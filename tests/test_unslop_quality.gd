@@ -54,6 +54,8 @@ func run():
    var measured: float=g.menu_pages.measure(content,panel.size.x-inset.x)
    check(panel.size.y<=measured+inset.y+2,"Main background fits real content without a blank slab "+str(dims)+str(scale_value)+" actual="+str(panel.size.y)+" content="+str(measured)+" minimum="+str(content.get_combined_minimum_size()))
    check(g.menu_layer.find_children("StartSelect_*","Button",true,false).size()==6,"Eren and Emre have separate visible cards")
+   for choice in g.menu_layer.find_children("StartSelect_*","Button",true,false):
+    check(not g.language_button.get_global_rect().intersects(choice.get_global_rect()),"Compact language control never covers a character card at enlarged text")
    g.select_character("eren");check(g.character_name("eren")=="Eren" and g.character=="eren","Eren selection follows the real menu action")
    g.start_run();g.world.obstacle_wait=999;g.world.frontier.plant_wait=999;g.world.adventure.item_wait=999;g.world.adventure.ambient_gnome_wait=999;g.update_friend();g.update_hud()
    check(not g.action_buttons.has("attack") and not g.ammo_label.visible,"No Reload button or magazine HUD exists")

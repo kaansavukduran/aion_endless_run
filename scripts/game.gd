@@ -555,6 +555,9 @@ func build_language_picker() -> void:
 	language_button = button(language.to_upper(), toggle_language_picker)
 	language_button.name = "LanguageMenu"
 	language_button.tooltip_text = text("language")
+	# Two-letter language control has its own48px geometry, not the generic
+	# enlarged menu-action minimum (86px at200%), which covered a roster card.
+	language_button.custom_minimum_size=Vector2(84,48)
 	var chevron := Control.new()
 	chevron.set_script(preload("res://scripts/language_chevron.gd"))
 	chevron.mouse_filter = Control.MOUSE_FILTER_IGNORE
