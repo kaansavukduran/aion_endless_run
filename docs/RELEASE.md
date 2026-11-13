@@ -1,13 +1,11 @@
-# Aion Endless Run 0.20.0
+# Aion Endless Run0.21.0
 
-Altı kahramanın yeni pixel-art paftaları,396 kaynak kare. Özgün kimlikler korunur; kürk/tüy/yün/kumaş gölgeleri ve hareket pozları yenilendi. Bütün-yüz kaydı, tam kulak/ayak kesimi, tek ölçek, alçak tek omuz taklası ve dar namlu eki. Son72 donma/yanma pozu da ortak X'e bağlandı. Eski49 PNG saklanır.
+[Oyna · Vercel](https://aionendlessrun.vercel.app/) · [Oyna · GitHub Pages](https://kaansavukduran.github.io/aion_endless_run/) · [0.21.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.21.0) · [Doğrulama](evidence-v0210/README.md).
 
-[Oyna — güncel GitHub Pages](https://kaansavukduran.github.io/aion_endless_run/) · [İndir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.20.0) · [Gerçek doğrulama](evidence-v0200/README.md).
+Boss’lar5 seviyede bir: farklı taunt/yanıt, karakterin yüzüne ellerini götürdüğü animasyon ve yardımcının kırmızı tabancayı uzatması. Devam/Atla; klavye, split touch ve gamepad. Konuşmada koşu/seviye/hasar durur; yön değiştirme ve pause aynı sahneyi korur. Kırmızı tabanca boss’a2 hasar verir, koşu boyunca kalır; yeni koşuda normal silah döner.15s seviyeler ve10 seviye sarılmaları korunur. Altı kahramanın yerdeki ayak kaydı düzeltilir; havada baykuş gövdesi sabittir. Basılı giriş alçak omuz taklasını tekrarlar. Skor bandı46px;200% metinde76px. Kaynak PNG’ler, sınırsız0,32s tabanca, yetenekler,11 dil ve kayıtlar korunur.
 
-Dokuz paket: Windows Setup/portable; Linux AppImage/DEB/portable; macOS universal DMG/ZIP; Android ARM64/x64 APK; offline web arşivi. BUILD-RECEIPT.json ve SHA256SUMS da yayımlandı. Bütün sunucu özetleri/boyutları; indirilen APK hash'i ve macOS ZIP CRC/universal CPU'ları doğrulandı. Android versionCode24 ve önceki imza/kimlik korunur. CI kaynağı6de0867, Android uygulama kaynağıbbf2ebd, etiket2569d22 ayrı kaydedilir.
+Dokuz paket: Windows Setup/portable; Linux AppImage/DEB/portable; macOS universal DMG/ZIP; Android ARM64/x64 APK; offline web arşivi. BUILD-RECEIPT.json ve SHA256SUMS ile11 dosya kamuya açılmadan sunucu özeti/boyutu doğrulandı. İndirilen APK özeti ile Mac ZIP CRC/universal mimarileri ayrıca doğrulandı. Android versionCode25; önceki imza ve uygulama kimliği korunur.
 
-19 temiz Godot paketi/10970 kontrol,166 tarayıcı kontrolü ve11 Wi-Fi kapalı native Android emülatör girişi geçti. Windows/Linux/macOS gerçek paket açılış smoke'ları da geçti.36 ek hasar render'ı açık durum fixture'ıdır; normal giriş testi değildir.
+Uygulama/APK kaynağı072b1b8; bütün platformların doğrulandığı temiz CI kaynağıa26766c; yayın etiketi0bf9694. Son etiketin ekleri belge/test/yayın akışıdır; runtime kaynakları eşitliği yayın kapısında kontrol edilir.20 Godot grubu/12013 kontrol,209 tarayıcı,11 native Android emülatör girişi PASS.30 görsel açık durum fixture’ıdır; normal koşu yerine gösterilmez.
 
-Vercel son element yamasında günlük ücretsiz kota nedeniyle BLOCKED; orada ilk0.20.0 sanat sürümü durur. Güncel Pages build323d157ff6249dfa'dır. İki origin'in rekorları ayrı saklanır. Sınırsız tabanca/0,32s aralık,15s seviyeler,11 dil, yetenekler, split touch, gamepad ve kayıtlar korunur.
-
-Fiziksel Poco/iPhone/Safari/kol denemesi yapılmadı. Mac ad-hoc; Developer ID/noter ve Windows Authenticode yok. Native iOS sahibinin Apple imzasını gerektirir. [Önceki0.19.0](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.19.0) ve diğer sürümler korunur.
+Pages020a6c0cc31d0fdc; Vercela1477e9143d34430, ikisi de0.21.0 gerçek Chromium/Firefox oyunuyla doğrulandı. İki origin'in rekorları ayrıdır. Mac ad-hoc; Developer ID/noter ve Windows Authenticode yok. Native iOS sahibinin Apple imzasını gerektirir. Fiziksel Poco/iPhone/Safari/kol denemesi yapılmadı. Eski sürümler değişmedi.

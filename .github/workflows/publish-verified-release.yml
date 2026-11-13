@@ -81,7 +81,7 @@ jobs:
             notes=Path('build/release-notes.md')
             notes.write_text('Boss encounters every five levels, three localized boss stories, six faithful surprise animations and a red pistol with twice boss damage. Grounded hero feet, repeating held low rolls and a thinner HUD.\n\nVerified source and platform jobs: '+run['html_url']+'\nEvidence: docs/evidence-v0210/README.md. Physical phones/controllers were not tested. macOS ad-hoc; native iOS requires owner signing.\n')
             subprocess.run(['gh','release','create',os.environ['AION_TAG'],'--verify-tag','--draft','--prerelease','--title','Aion Endless Run '+version,'--notes-file',str(notes)],check=True)
-            release=json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/releases/tags/'+os.environ['AION_TAG']],text=True))
+            release=next(r for r in json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/releases?per_page=100'],text=True)) if r['tag_name']==os.environ['AION_TAG'])
           assert release['draft'],'Published releases must not be overwritten'
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('version='+version+'\nrelease_id='+str(release['id'])+'\nsource_sha='+run['head_sha']+'\n')
           PY

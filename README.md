@@ -2,9 +2,9 @@
 
 Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.21.0**.
 
-**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.20.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.20.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0200/README.md)
+**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.21.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.21.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0210/README.md)
 
-![Gerçek oyunun kompakt ana menüsü](docs/evidence-v0200/screenshots/main-dark.png)
+![Gerçek oyunun kompakt ana menüsü](docs/evidence-v0210/screenshots/main-dark.png)
 
 0.21.0: Boss’lar5 seviyede bir gelir. Üç boss için farklı konuşmalar, altı kahramanın şaşırma çizimleri ve kırmızı tabanca teslimi eklendi. Ara sahnede koşu donar; Devam/Atla klavye, dokunma ve kolla çalışır. Kırmızı tabanca koşu boyunca boss’a iki kat hasar verir. Yerdeki altı kahramanın ayak hizası düzeltildi; basılı takla döngülüdür ve skor bandı inceltildi. Sınırsız0,32s ateş,15s seviyeler,11 dil, yetenekler ve kayıtlar korunur. [Bu sürümün kanıtı](docs/evidence-v0210/README.md).
 

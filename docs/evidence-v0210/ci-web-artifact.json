@@ -1,0 +1,9 @@
+{
+  "artifact_id": 14079188239,
+  "zip_sha256": "10826915f97546fa780b68e44c9b8cfe6cb5e3ed5e3522f6abac6e4910439ecf",
+  "expected_digest": "sha256:10826915f97546fa780b68e44c9b8cfe6cb5e3ed5e3522f6abac6e4910439ecf",
+  "source_commit": "a26766c93cfb468feb7825cee94bfe4b8ec8094a",
+  "build": "020a6c0cc31d0fdc",
+  "version": "0.21.0",
+  "crc_ok": true
+}

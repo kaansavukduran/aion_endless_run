@@ -1,3 +1,7 @@
+## Güncel0.21.0 doğrulaması
+
+[Kanıtlar ve kapsam](evidence-v0210/README.md): temiz kaynak CI20 grup/12013 kontrol; Windows/Linux/macOS gerçek paket açılışları;11 native Android emülatör girişi;209 tarayıcı kontrolü;30 açık durum render fixture’ı. Son doğal koşu5. seviyeden konuşma, şaşırma, kırmızı tabanca, gerçek hasar, zafer ve yumuşak koşu dönüşünü tamamlar. Her iki canlı origin Chromium/Firefox’ta açılır. Kamu offline arşivi19 dosyada worker-testli CI çıktısına eşittir; doğal rekor offline reload ile korunur.9 paket ve2 makbuz yayımlandı, sunucu özetleri ve gerçek APK/Mac indirmeleri doğrulandı. Fiziksel telefon/kol ve native iOS ayrı sınırlardır. Aşağıdakiler tarihî kayıtlardır.
+
 ## Güncel0.20.0 kapsamı
 
 Kaynak6de0867:19 Godot paketi/10970 kontrol, native Android11, Windows/Linux/macOS paket açılışları PASS. Pages323d157ff6249dfa Chromium/Firefox gerçek açılış/oynanış PASS; toplam166 tarayıcı kontrolü, doğal rekorla gerçek offline reload, önce başarısız olan72 element regresyonu ve36 açık durum render fixture'ı. Dokuz kamu paketinin özetleri ve indirilen APK/Mac ZIP doğrulandı. [Kanıt ve sınırlar](evidence-v0200/README.md). Vercel son yamada kotadan BLOCKED; fiziksel Poco/iPhone/kol NOT TESTED. Aşağıdakiler önceki sürüm kayıtlarıdır.
