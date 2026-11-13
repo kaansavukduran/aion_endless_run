@@ -58,6 +58,9 @@ with sync_playwright() as pw:
  try:
   check(page.locator('canvas').get_attribute('lang')=='tr','Fresh profile uses the actual browser language')
   fitted('Dark desktop 100%');page.screenshot(path=str(args.evidence/'main-dark.png'))
+  # Capture touch coordinates before the world starts. Inspecting transforms
+  # mid-run must not consume the real obstacle/recovery reaction window.
+  roll_point=action('duck')
   for hero,roll_input in ([] if args.menu_only else [('aion','key'),('owl','pad'),('sheep','touch'),('wolf','key'),('rabbit','key'),('eren','key')]):
    if args.heroes and hero not in args.heroes:continue
    start(hero);observer();page.wait_for_function('poseSamples.length>0&&new Set(poseSamples.map(x=>x.frame)).size>=Number(document.querySelector("canvas").dataset.frameCount)',timeout=3500);stable(hero+' gun-run');page.screenshot(path=str(args.evidence/(hero+'-running.png')))
@@ -71,11 +74,12 @@ with sync_playwright() as pw:
    start(hero);height=float(d()['heroOpaqueHeight']);observer()
    if roll_input=='key':page.keyboard.down('ArrowDown')
    elif roll_input=='pad':page.evaluate('padSet(1,true)')
-   else:touch(action('duck'),True)
-   wait('[data-ducking="true"]');page.wait_for_timeout(920);rows=[x for x in page.evaluate('poseSamples') if x['duck']];late=[x for x in rows if x['time']-rows[0]['time']>.75]
+   else:touch(roll_point,True)
+   wait('[data-ducking="true"]');page.wait_for_timeout(920)
    if roll_input=='key':page.keyboard.up('ArrowDown')
    elif roll_input=='pad':page.evaluate('padSet(1,false)')
    else:touch(None,False)
+   rows=[x for x in page.evaluate('poseSamples') if x['duck']];late=[x for x in rows if x['time']-rows[0]['time']>.75]
    recovery_row=3
    page.wait_for_function('(v)=>poseSamples.some(p=>p.time>v.time&&p.state==="running"&&!p.duck&&p.row===v.row)',arg={'time':rows[-1]['time'],'row':recovery_row},timeout=1500)
    recovered=page.evaluate('(v)=>poseSamples.find(p=>p.time>v.time&&p.state==="running"&&!p.duck&&p.row===v.row)',{'time':rows[-1]['time'],'row':recovery_row});page.keyboard.press('Escape')

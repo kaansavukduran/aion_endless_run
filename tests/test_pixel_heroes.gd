@@ -35,7 +35,13 @@ func run():
 			for p in probes:check(p.distance_to(probes[0])<.001,"Independent nose/cheek probe remains registered")
 		check(texture_hashes.size()==18,"All eighteen live run/fire/roll drawings are distinct: "+hero)
 		check(bank.pose("rolls",index,5).height<bank.pose("runner-"+hero,0,0).height*.9,"Final held crouch is visibly low: "+hero)
+		for state_row in [3,4]:
+			for col in 6:
+				var element:=bank.pose("runner-"+hero,state_row,col)
+				var registered: bool=element.has("probe_local")
+				if registered:registered=is_equal_approx((element.offset.x+element.probe_local.x)*element.scale,(a.target_eye[0]-15*a.scale[0]))
+				check(registered,"Element effects keep the actual face horizontally registered: "+hero+"/"+str(state_row)+"/"+str(col))
 	for probe in bank.PIXEL.data.face_registration:
-		check(float(probe.residual)<.15,"Whole-face source pixel fit remains inside reviewed error: "+str(probe.hero))
+		check(float(probe.residual)<(.35 if int(probe.row)==7 else .15),"Whole-face source pixel fit remains inside reviewed error: "+str(probe.hero))
 	sprite.free()
 	print("RESULT: %d pixel hero checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

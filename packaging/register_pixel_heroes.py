@@ -19,11 +19,14 @@ SOURCES=['dc96f86c-5dbc-4086-ac2b-4213ff6c9edb','b558fb0b-9c7e-4cec-a607-1a5e524
 # so a similarly coloured science badge, coat or muzzle cannot replace a face.
 NEUTRAL={'aion':[119,58],'owl':[150,58],'sheep':[145,68],'wolf':[114,63],'rabbit':[110,74],'eren':[151,55]}
 
-def face_fit(q,t):
+def face_fit(q,t,expected=None,radius=None):
     q=q.astype(float)/255;t=t.astype(float)/255
     s=fftconvolve((q*q).sum(2),np.ones(t.shape[:2]),mode='valid')
     cross=sum(fftconvolve(q[:,:,c],t[::-1,::-1,c],mode='valid') for c in range(4))
     ssd=np.maximum(0,s+(t*t).sum()-2*cross)
+    if expected is not None:
+        yy,xx=np.indices(ssd.shape)
+        ssd[(abs(xx+15-expected[0])>radius[0])|(abs(yy+17-expected[1])>radius[1])]=np.inf
     y,x=np.unravel_index(np.argmin(ssd),ssd.shape)
     return int(x),int(y),float(ssd[y,x]/max(.001,(t*t).sum()))
 
@@ -100,18 +103,25 @@ def main():
         t=isolated(source,ref)[y:y+38,x:x+43]
         target=[14.,float((eye[1]-ref['body_bounds'][3])*factor)]
         a['target_eye']=target;a['head_spans']=[float({'aion':95,'owl':83,'sheep':100,'wolf':84,'rabbit':60,'eren':70}[hero])]*11
-        for row in [0,1,2,3,4,10]:
+        for row in [0,1,2,3,4,7,8,10]:
             target_row=target.copy()
             if row==10 and hero=='wolf':target_row[1]=-39.
             if row==10 and hero=='owl':target_row[1]=target[1]
             for col,f in enumerate(a['frames'][row]):
-                xx,yy,error=face_fit(isolated(source,f),t)
+                expected=None;radius=None
+                if row in [7,8]:
+                    b=f['body_bounds'];rb=ref['body_bounds']
+                    ratios=[(eye[i]-rb[i])/(rb[i+2]-rb[i]) for i in [0,1]]
+                    expected=[b[i]+ratios[i]*(b[i+2]-b[i]) for i in [0,1]]
+                    radius=[(b[2]-b[0])*.24,(b[3]-b[1])*.10]
+                xx,yy,error=face_fit(isolated(source,f),t,expected,radius)
                 if error>.48:raise ValueError(('Anatomical face review required',hero,row,col,error))
                 marker=[xx+15,yy+17]
                 f['eye']=marker;f['head_probe']=[xx,yy,43,38]
                 f['origin']=[marker[0]-target_row[0]/factor,marker[1]-target_row[1]/factor]
                 # Emre's charge visibly lowers knees/body instead of fixing Y.
                 if row==10 and hero=='rabbit':f['origin'][1]=float(f['body_bounds'][3])
+                if row in [7,8]:f['origin'][1]=float(f['body_bounds'][3])
                 f['registration']='whole-face'
                 report.append({'hero':hero,'row':row,'frame':col,'residual':round(error,5),'probe':f['head_probe'],'eye':marker})
         # Projectiles and airborne weapon overlays share this measured barrel.

@@ -13,16 +13,16 @@ async def run():
    s=await data();u=next(u for u in json.loads(s['ui']) if u['name']==name or u['text']==name);await page.touchscreen.tap(*xy(u['x']+u['w']/2,u['y']+u['h']/2))
   x,y=xy(float(v['viewWidth'])*.54,210);cdp=await c.new_cdp_session(page);await ui('StartRun');await page.wait_for_selector('canvas[data-state="running"][data-ui-ready="true"]')
   if any(u['text']=='Anladım · Devam et' for u in json.loads((await data())['ui'])):await ui('Anladım · Devam et')
-  await page.evaluate("window.swipeSamples=[];new MutationObserver(()=>{let d=document.querySelector('canvas').dataset;if(d.state==='running')swipeSamples.push({duck:d.ducking==='true',source:d.poseSource,y:+d.playerY,jumps:+d.jumps,swipes:+d.touchSwipes})}).observe(document.querySelector('canvas'),{attributes:true})")
+  await page.evaluate("window.swipeSamples=[];new MutationObserver(()=>{let d=document.querySelector('canvas').dataset;if(d.state==='running')swipeSamples.push({duck:d.ducking==='true',source:d.poseSource,row:+d.sourceRow,y:+d.playerY,jumps:+d.jumps,swipes:+d.touchSwipes})}).observe(document.querySelector('canvas'),{attributes:true})")
   # Enqueue the three trusted input events in order without round-trip waits
   # between movement samples. Software DPR3 rendering must not turn a rapid
   # gesture into a long hold while Python waits on individual acknowledgements.
   await asyncio.gather(cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y,'id':3}]}),cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x,'y':y+80,'id':3}]}),cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]}))
-  await page.wait_for_function("swipeSamples.some(p=>p.duck&&p.source==='shoulder-rolls')",timeout=3000);await page.keyboard.press('Escape');await page.wait_for_selector('canvas[data-page="paused"]');samples=await page.evaluate('swipeSamples');v=await data();checks=[]
+  await page.wait_for_function("swipeSamples.some(p=>p.duck&&p.source==='pixel-aion'&&p.row===5)",timeout=3000);await page.keyboard.press('Escape');await page.wait_for_selector('canvas[data-page="paused"]');samples=await page.evaluate('swipeSamples');v=await data();checks=[]
   def check(ok,label):
    assert ok,(label,v.get('touchTrace'),samples)
    checks.append(label);print('PASS',label,flush=True)
-  check(any(p['duck'] and p['y']==0 and p['source']=='shoulder-rolls' for p in samples),'Actual DPR3 downward touch reaches the drawn ground shoulder roll')
+  check(any(p['duck'] and p['y']==0 and p['source']=='pixel-aion' and p['row']==5 for p in samples),'Actual DPR3 downward touch reaches the drawn ground shoulder roll')
   check(max(p['jumps'] for p in samples)==0,'The gesture never creates a jump')
   check(v['touchFingers']=='0' and v['touchSwipes']=='1','One real gesture produces one roll and releases its finger')
   check(not errors,'No browser errors during the trusted touch gesture');await page.screenshot(path=str(a.evidence/'dpr3-swipe-paused.png'));(a.evidence/'results.json').write_text(json.dumps({'checks':checks,'errors':errors,'samples':samples,'build':await page.evaluate('AION_BUILD'),'scope':'Trusted rapid CDP touch start/move/end in a Chromium DPR3 context. No state injection; no physical-device claim.'},ensure_ascii=False,indent=2)+'\n');await c.close();await b.close()
