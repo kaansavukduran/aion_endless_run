@@ -129,6 +129,12 @@ def main():
         # Projectiles and airborne weapon overlays share this measured barrel.
         f=a['frames'][3][0];q=isolated(source,f)
         muzzle_mask=(q[:,:,3]>=192);muzzle_mask[:round(f['eye'][1]+6)]=False;muzzle_mask[round(f['eye'][1]+45):]=False
+        if hero=='sheep':
+            # Its short barrel sits below the long pink nose. Silhouette max-X
+            # selected the nose, so identify the actual cyan barrel here.
+            rgb=q.astype(np.int16);cy, cx=np.indices(q.shape[:2])
+            muzzle_mask=(q[:,:,3]>=192)&(rgb[:,:,1]>rgb[:,:,0]+20)&(rgb[:,:,2]>rgb[:,:,0]+25)&(cx>f['eye'][0]+8)&(cy>f['eye'][1]+5)
+            if not muzzle_mask.any():raise ValueError('Sheep barrel source marker missing')
         yy,xx=np.where(muzzle_mask);front=xx>=xx.max()-2
         data['muzzles'][hero]=[float((xx.max()+1-f['origin'][0])*factor),float((np.median(yy[front])-f['origin'][1])*factor)]
         eye_to_barrel=float(np.median(yy[front])-f['eye'][1])

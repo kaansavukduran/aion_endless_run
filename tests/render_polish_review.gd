@@ -18,6 +18,9 @@ func run():
    await process_frame;await process_frame;await RenderingServer.frame_post_draw
    root.get_texture().get_image().save_png("res://build/polish-scenes/%s-roll-%d.png"%[hero,n])
   game.world.adventure.duck_held=false;game.world.adventure.roll_time=0
+  game.world.y=-90;game.world.velocity=-150;game.world.air_time=.2;game.world.gliding=hero=="owl"
+  game.update_friend();game.update_hud();game.queue_redraw();await process_frame;await process_frame;await RenderingServer.frame_post_draw
+  root.get_texture().get_image().save_png("res://build/polish-scenes/%s-air-weapon.png"%hero)
  game.main_menu();game.select_character("eren");game.start_run();game.set_physics_process(false)
  for charge in [true,false]:
   game.world.charging=charge;game.world.charge_time=1.2;game.world.y=0 if charge else -90;game.world.velocity=-150;game.world.air_time=.2
@@ -32,4 +35,4 @@ func run():
   for layer in game.find_children("*","Node2D",true,false):layer.queue_redraw()
   await process_frame;await process_frame;await RenderingServer.frame_post_draw
   root.get_texture().get_image().save_png("res://build/polish-scenes/biome-%d.png"%biome)
- game.queue_free();await process_frame;print("Captured80 explicit real-rendered pixel scenes");quit()
+ game.queue_free();await process_frame;print("Captured86 explicit real-rendered pixel scenes");quit()

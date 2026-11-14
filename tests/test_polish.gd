@@ -34,6 +34,9 @@ func run():
  var used: int=w.owl_flaps_used;w.jump();check(w.owl_flaps_used==used,"Fourth flap is refused")
  w.state="paused";var saved: float=w.y;advance(w,.5);check(w.y==saved and w.owl_flaps_used==3,"Pause freezes altitude and flap resource")
  w.state="running";w.release_controls();advance(w,2);check(w.y==0 and w.owl_flaps_used==0,"Landing refills all three flaps")
+ var sheep=arena("sheep");sheep.frontier.shot_flash=.3
+ var barrel: Vector2=sheep.frontier.weapon_muzzle(sheep)
+ check(barrel.y> -45 and barrel.y< -30,"Sheep projectile is below the muzzle/face, at the actual short cyan pistol barrel")
  var bank=Bank.new();var sprite=Sprite2D.new();sprite.centered=false
  for clip in ["owl-flap","runner-owl","runner-eren"]:
   var row: int=0 if clip=="owl-flap" else 6
