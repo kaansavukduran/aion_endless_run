@@ -35,9 +35,12 @@ var touch_actions: Dictionary = {}
 var held: Dictionary = {}
 var left_down := false
 var right_down := false
+var up_down := false
+var down_down := false
 var mouse_stick := false
 var mouse_axis := Vector2.ZERO
 var pad_axis := Vector2.ZERO
+var pad_look := Vector2.ZERO
 var fade := -1.
 var fade_loaded := false
 var fade_panel: ColorRect
@@ -312,7 +315,7 @@ func save_checkpoint() -> void:
 	if save_ok:saved=data.duplicate(true)
 
 func release_all() -> void:
-	held.clear();touch_actions.clear();stick_touch=-1;left_down=false;right_down=false;mouse_stick=false;mouse_axis=Vector2.ZERO;pad_axis=Vector2.ZERO
+	held.clear();touch_actions.clear();stick_touch=-1;left_down=false;right_down=false;up_down=false;down_down=false;mouse_stick=false;mouse_axis=Vector2.ZERO;pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
 	world.stop_inputs()
 	if is_instance_valid(stick):stick.axis=Vector2.ZERO;stick.active=false;stick.queue_redraw()
 
@@ -329,7 +332,9 @@ func set_action(key: String,source: String,down: bool,canceled: bool=false) -> v
 			if after:world.jump_press()
 			else:world.jump_release(not canceled)
 		"attack":
-			if after:world.attack_press()
+			if after:
+				update_arcade_aim()
+				world.attack_press()
 			else:world.attack_release()
 		"grenade":
 			if after:world.throw_grenade()
@@ -395,6 +400,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.physical_keycode:
 			KEY_A,KEY_LEFT:left_down=event.pressed
 			KEY_D,KEY_RIGHT:right_down=event.pressed
+			KEY_W,KEY_UP:up_down=event.pressed
+			KEY_S,KEY_DOWN:down_down=event.pressed
 			KEY_SPACE:set_action("jump","keyboard",event.pressed)
 			KEY_F,KEY_J:set_action("attack","key"+str(event.physical_keycode),event.pressed)
 			KEY_G:set_action("grenade","keyboard",event.pressed)
@@ -420,7 +427,7 @@ func pad_help() -> String:
 	return t("move")+" ← → · "+pad.binding_name("jump")+" "+old("control_jump")+" · "+pad.binding_name("shoot")+" "+old("control_shoot")+" · "+pad.binding_name("duck")+" "+t("grenade")+" · "+str(pad.NAMES[interact_binding()])+" "+t("ride")
 
 func poll_pad() -> void:
-	pad_axis=Vector2.ZERO
+	pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
 	var pads:=Input.get_connected_joypads()
 	if pads.is_empty():return
 	var id: int=pads[0]
@@ -433,9 +440,35 @@ func poll_pad() -> void:
 	if absf(axis)>pad.deadzone:pad_axis.x=signf(axis)*inverse_lerp(pad.deadzone,1.,absf(axis))
 	if Input.is_joy_button_pressed(id,JOY_BUTTON_DPAD_LEFT):pad_axis.x=-1.
 	if Input.is_joy_button_pressed(id,JOY_BUTTON_DPAD_RIGHT):pad_axis.x=1.
+	var vertical: float=Input.get_joy_axis(id,JOY_AXIS_LEFT_Y)
+	if absf(vertical)>pad.deadzone:pad_axis.y=signf(vertical)*inverse_lerp(pad.deadzone,1.,absf(vertical))
+	if Input.is_joy_button_pressed(id,JOY_BUTTON_DPAD_UP):pad_axis.y=-1.
+	if Input.is_joy_button_pressed(id,JOY_BUTTON_DPAD_DOWN):pad_axis.y=1.
+	var look_x:float=Input.get_joy_axis(id,JOY_AXIS_RIGHT_X)
+	var look_y:float=Input.get_joy_axis(id,JOY_AXIS_RIGHT_Y)
+	if Vector2(look_x,look_y).length()>maxf(.25,pad.deadzone):pad_look=Vector2(look_x,look_y).normalized()
 
 func start_travel() -> void:
 	release_all();fade=0.;fade_loaded=false
+
+func update_arcade_aim() -> void:
+	# Left stick controls movement in X and 8-way aiming in XY. Right stick,
+	# when active, overrides aiming without changing movement (twin-stick).
+	var axis: float=float(right_down)-float(left_down)
+	var vertical: float=float(down_down)-float(up_down)
+	if absf(pad_axis.x)>.01:axis=pad_axis.x
+	if absf(pad_axis.y)>.01:vertical=pad_axis.y
+	if mouse_stick:
+		axis=mouse_axis.x;vertical=mouse_axis.y
+	if stick_touch>=0 and is_instance_valid(stick):
+		axis=stick.axis.x;vertical=stick.axis.y
+	var raw:=Vector2(axis,vertical)
+	if pad_look.length_squared()>.25:raw=pad_look
+	if raw.length_squared()<.04:raw=Vector2(world.facing,0.)
+	var snapped:=Vector2(signf(raw.x) if absf(raw.x)>.25 else 0.,signf(raw.y) if absf(raw.y)>.25 else 0.)
+	if snapped.length_squared()<.5:snapped=Vector2(world.facing,0.)
+	world.aim_direction=snapped.normalized()
+	world.move_axis=Vector2(axis,0.)
 
 func _process(dt: float) -> void:
 	if not is_instance_valid(view):return
@@ -443,12 +476,8 @@ func _process(dt: float) -> void:
 	pad_menu_wait=maxf(0.,pad_menu_wait-dt)
 	poll_pad()
 	if world.state=="playing" and menu_kind=="" and fade<0.:
-		var axis: float=float(right_down)-float(left_down)
-		if absf(pad_axis.x)>.01:axis=pad_axis.x
-		if mouse_stick:axis=mouse_axis.x
-		if stick_touch>=0 and is_instance_valid(stick):axis=stick.axis.x
-		world.move_axis=Vector2(axis,0)
-		if world.character=="wolf" and (stick_touch>=0 or mouse_stick):world.boost_held=absf(axis)>.85 or not Dictionary(held.get("boost",{})).is_empty()
+		update_arcade_aim()
+		if world.character=="wolf" and (stick_touch>=0 or mouse_stick):world.boost_held=absf(world.move_axis.x)>.85 or not Dictionary(held.get("boost",{})).is_empty()
 		world.step(dt)
 	if world.state=="travel" and fade<0.:start_travel()
 	if world.state in ["victory","dying"]:world.step(dt)
