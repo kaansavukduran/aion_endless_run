@@ -1,6 +1,6 @@
-# Current local handoff · 0.24.0 Mission 1 expansion
+# Publication handoff · 0.24.0 Mission 1 expansion
 
-**LOCAL ONLY** on `feat/keeper-rescue`, based on clean/up-to-date `90055c5abf7e339c4cf30ad698f8c9f6383b59ae`. Remote main was rechecked and still matched the baseline. The user-adopted writing-block.md explicitly requires separate approval for external publication. No push, PR, merge, release, Pages or Vercel mutation was performed. Older published records below remain historical.
+The owner explicitly approved Vercel publication on 2026-11-14 after the local review. PR #2 (`feat/keeper-rescue`) is based on `90055c5abf7e339c4cf30ad698f8c9f6383b59ae`; initial implementation is `15c0c74e7b48dff1ce817199a2408216011ade54`. This supersedes the attachment's earlier publication hold. Initial CI passed source, Android smoke, macOS and Windows; Linux's actual browser/offline flow passed but the new audio test could not read an optional cgroup metric on the hosted runner. The test now records null when unavailable; actual WebAudio assertions remain mandatory. Older local/publication records below are historical; a READY preview alone is not proof of a verified production release.
 
 Existing Godot 4.6.3, endless runner, six identities/abilities, old PNGs/saves, eleven locales and approved arcade joystick/fire/jump/grenade controls retained. Added actual one-press knife rescues, tied/thanks/gift/departure artwork, 43 stable NPC opportunities, six roles, route encounters/rooms, nine regional normal types, four heavies, three different guardians, ten special weapons, eight support effects, twelve environment classes, three new rideable types plus legacy skimmer, carried surviving route vehicles and Root Engine expansion. New art/lore is TASLAK. Existing 65 PNGs are byte-identical.
 
@@ -12,7 +12,7 @@ Reviewed web build **3639f7fe926a22c1 / 0.24.0** is local. Final 29 strict Godot
 
 Measured software Firefox/llvmpipe 1280×720 DPR1:54.35 mean FPS,16.92ms median,33.28ms p95 over6s after a rescue. This does not meet a measured60FPS claim. Physical Poco/iPhone/controllers, native0.24 packages, human9–13 minute exploration and full post-fix Chromium mission remain NOT TESTED. Fast Firefox automation completed in304.69s wall /299.30s active,15 rescues,0 retries. Secret rooms use elevated side areas rather than fully separate underwater/subterranean tunnel scenes; legacy skimmer has no newly drawn wreck atlas. User final art/canon approval is not implied.
 
-[Design/production inventory](docs/CAMPAIGN-EXPANSION.md). Private standards/reference originals and the full uploaded attachment remain outside the public source tree. Any later remote publication needs the user's separate approval; preserve old releases and saves.
+[Design/production inventory](docs/CAMPAIGN-EXPANSION.md). Private standards/reference originals and the full uploaded attachment remain outside the public source tree. Vercel publication is now approved; preserve old releases and saves. A new native GitHub Release was not requested.
 
 # Ground material update · scope and handoff
 

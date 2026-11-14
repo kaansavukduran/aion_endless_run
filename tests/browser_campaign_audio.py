@@ -5,6 +5,16 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 import json,time,sys,shutil,argparse
 parser=argparse.ArgumentParser();parser.add_argument('--url',required=True);parser.add_argument('--evidence',type=Path,required=True);parser.add_argument('--seconds',type=int,default=35);parser.add_argument('--expect-restart-bug',action='store_true');args=parser.parse_args();url=args.url;out=args.evidence;out.mkdir(parents=True,exist_ok=True)
+
+def cgroup_memory_bytes():
+ """Optional environment metric; hosted runners need not expose cgroup files."""
+ for name in ('/sys/fs/cgroup/memory.current','/sys/fs/cgroup/memory/memory.usage_in_bytes'):
+  try:
+   return int(Path(name).read_text().strip())
+  except (OSError,ValueError):
+   continue
+ return None
+
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox','--enable-unsafe-swiftshader'])
  c=b.new_context(viewport={'width':1280,'height':720},locale='en-US');c.add_init_script('''(()=>{window.audioProbe={starts:0,longStarts:0,buffers:0,longBuffers:0};const start=AudioBufferSourceNode.prototype.start;AudioBufferSourceNode.prototype.start=function(...args){audioProbe.starts++;if(this.buffer?.duration>20)audioProbe.longStarts++;return start.apply(this,args)};const make=BaseAudioContext.prototype.createBuffer;BaseAudioContext.prototype.createBuffer=function(...args){audioProbe.buffers++;if(args[1]/args[2]>20)audioProbe.longBuffers++;return make.apply(this,args)}})()''')
@@ -17,8 +27,8 @@ with sync_playwright() as p:
  for i in range(args.seconds):
   if i==10:page.keyboard.press('Escape')
   if i==20:page.keyboard.press('Escape')
-  sample={'wall':time.monotonic()-start,'audio':page.evaluate('window.audioProbe'),'heap':cd.send('Runtime.getHeapUsage'),'cgroup':int(Path('/sys/fs/cgroup/memory.current').read_text()),'menu':data()['menu'],'music_starts':data().get('music_starts')};samples.append(sample);print(json.dumps(sample),flush=True)
-  if sample['cgroup']>12*1024**3:break
+  sample={'wall':time.monotonic()-start,'audio':page.evaluate('window.audioProbe'),'heap':cd.send('Runtime.getHeapUsage'),'cgroup':cgroup_memory_bytes(),'menu':data()['menu'],'music_starts':data().get('music_starts')};samples.append(sample);print(json.dumps(sample),flush=True)
+  if sample['cgroup'] is not None and sample['cgroup']>12*1024**3:break
   page.wait_for_timeout(1000)
  (out/'audio-probe.json').write_text(json.dumps({'url':url,'instrumentation':'WebAudio start/createBuffer counters; wraps original methods without changing their result. Real menu/input.','samples':samples,'errors':errors,'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(v=>v.build)")},indent=2)+'\n');c.close();b.close()
 
