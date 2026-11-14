@@ -1,0 +1,1442 @@
+[
+  {
+    "clip": "run",
+    "frame": 0,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 3,
+      "source": "pixel-aion"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 1,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 3,
+      "source": "pixel-aion"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 2,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 3,
+      "source": "pixel-aion"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 3,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 3,
+      "source": "pixel-aion"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 4,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 3,
+      "source": "pixel-aion"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 5,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 3,
+      "source": "pixel-aion"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 0,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 1,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 2,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 3,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 4,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 5,
+    "hero": "aion",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 0,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-sheep"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 1,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-sheep"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 2,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-sheep"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 3,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-sheep"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 4,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-sheep"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 5,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-sheep"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 0,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 1,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 2,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 3,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 4,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 5,
+    "hero": "sheep",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 0,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-wolf"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 1,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-wolf"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 2,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-wolf"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 3,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-wolf"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 4,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-wolf"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 5,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-wolf"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 0,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 1,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 2,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 3,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 4,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 5,
+    "hero": "wolf",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 0,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-owl"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 1,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-owl"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 2,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-owl"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 3,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-owl"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 4,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-owl"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 5,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-owl"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 0,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 1,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 2,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 3,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 4,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 5,
+    "hero": "owl",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 0,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-rabbit"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 1,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-rabbit"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 2,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-rabbit"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 3,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-rabbit"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 4,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-rabbit"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 5,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-rabbit"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 0,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 1,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 2,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 3,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 4,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 5,
+    "hero": "rabbit",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 0,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-eren"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 1,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-eren"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 2,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-eren"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 3,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-eren"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 4,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-eren"
+    }
+  },
+  {
+    "clip": "run",
+    "frame": 5,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 2,
+      "row": 4,
+      "source": "pixel-eren"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 0,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 1,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 2,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 3,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 4,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  },
+  {
+    "clip": "melee",
+    "frame": 5,
+    "hero": "eren",
+    "physics_anchor": [
+      400.0,
+      0.0
+    ],
+    "source": {
+      "anchor": [
+        400.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 0,
+      "source": "campaign-melee"
+    }
+  }
+]
