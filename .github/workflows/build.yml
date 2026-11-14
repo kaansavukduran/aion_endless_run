@@ -36,6 +36,12 @@ jobs:
       - name: Physics, menus, input and persistence
         run: |
           python3 packaging/run_source_tests.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-test-evidence
+          path: build/test-results/
+          if-no-files-found: warn
 
   desktop:
     if: github.event_name != 'workflow_dispatch' || inputs.android_only != true

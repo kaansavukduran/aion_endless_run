@@ -18,6 +18,11 @@ for name in suites:
  passed=code==0 and bool(lines) and all(int(x[2])==0 for x in lines) and not script_error and not assertion_error
  row={'suite':name,'exit_code':code,'passed':passed,'script_error':script_error,'assertion_error':assertion_error,'checks':sum(int(x[0]) for x in lines),'results':lines};results.append(row)
  print(json.dumps(row),flush=True)
+ if not passed:
+  # Keep full files as artifacts, and show the actual failing assertions in
+  # job logs instead of only a failure count on an ephemeral runner.
+  relevant=[line for line in log.splitlines() if re.search(r'^FAIL[: ]|SCRIPT ERROR:|Parse Error:|^ERROR:',line)]
+  for line in (relevant or log.splitlines()[-60:])[:100]:print(name+': '+line,flush=True)
 (a.output/'source-results.json').write_text(json.dumps(results,indent=2)+'\n')
 if not all(x['passed'] for x in results):raise SystemExit(1)
 print('ALL SOURCE SUITES PASS:',sum(x['checks'] for x in results),'checks')
