@@ -195,7 +195,16 @@ func build_menu() -> void:
 			action(t("restart") if not saved.is_empty() and not bool(saved.get("completed",false)) else t("start"),begin_new,true).name="CampaignBegin"
 			action(t("back"),return_main)
 		"help":
-			var pages: Array[String]=[t("help"),t("touch") if touch_mode else pad_help() if not Input.get_connected_joypads().is_empty() else t("keys")]
+			# Two short instruction pairs keep the real chosen font and 200%
+			# text readable. System fonts have different line heights on Linux,
+			# Windows and mobile; do not shrink text or hide the Skip action.
+			var pages: Array[String]=[]
+			var sentences: PackedStringArray=t("help").split(". ",false)
+			for index in range(0,sentences.size(),2):
+				var message: String=". ".join(sentences.slice(index,mini(index+2,sentences.size())))
+				if not message.ends_with(".") and not message.ends_with("。"):message+="."
+				pages.append(message)
+			pages.append(t("touch") if touch_mode else pad_help() if not Input.get_connected_joypads().is_empty() else t("keys"))
 			if world.character in ["rabbit","eren","owl"]:pages.append(t("owl" if world.character=="owl" else "special"))
 			column.add_child(paragraph(pages[clampi(help_step,0,pages.size()-1)]))
 			action(t("next"),func():

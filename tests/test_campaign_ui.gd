@@ -17,10 +17,19 @@ func run() -> void:
 			for language in GameText.LANGUAGES:
 				game.language=language;game.resize()
 				for kind in ["briefing","help","paused","fork_one","fork_two","boss","dead","outro","complete"]:
+					if kind=="help":game.help_step=0
 					game.menu_kind=kind;game.build_ui();await process_frame;await process_frame
 					var view:=Rect2(0,0,game.view_w,game.view_h)
 					check(view.encloses(game.menu.get_global_rect()),"Whole dialog fits without scrolling: "+str(viewport)+" "+str(scale)+" "+language+" "+kind+" "+str(game.menu.get_global_rect()))
 					for button in game.buttons:check(view.encloses(button.get_global_rect()),"Dialog action is visible and reachable")
+					if kind=="help":
+						var steps:=0
+						while game.menu_kind=="help" and steps<8:
+							game.buttons[0].pressed.emit();steps+=1;await process_frame;await process_frame
+							if game.menu_kind=="help":
+								check(view.encloses(game.menu.get_global_rect()),"Every tutorial page fits the selected system font: "+language+" "+str(scale))
+								for button in game.buttons:check(view.encloses(button.get_global_rect()),"Next and Skip stay reachable on later tutorial pages")
+						check(game.menu_kind=="","Actual Next actions eventually enter gameplay without scrolling")
 	game.options.text_scale=1.;game.language="tr";game.menu_kind="briefing";game.build_ui();await process_frame;await process_frame
 	game._input(event(JOY_BUTTON_A));await process_frame
 	check(game.menu_kind=="help","Xbox A / PS Cross activates actual briefing button")
