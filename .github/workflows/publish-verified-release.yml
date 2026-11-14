@@ -1,18 +1,18 @@
 name: Publish verified release artifacts
 on:
   push:
-    branches: [release-publication/v0.21.0]
+    branches: [release-publication/v0.22.0]
   workflow_dispatch:
     inputs:
       source_run:
         description: Successful main Test and package run
         required: true
-        default: '43513378584'
+        default: '43576807904'
         type: string
       tag:
         description: Existing release tag with unchanged runtime sources
         required: true
-        default: v0.21.0
+        default: v0.22.0
         type: string
   repository_dispatch:
     types: [aion-verified-release]
@@ -27,8 +27,8 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       GH_TOKEN: ${{ github.token }}
-      SOURCE_RUN: ${{ inputs.source_run || github.event.client_payload.source_run || '43513378584' }}
-      AION_TAG: ${{ inputs.tag || github.event.client_payload.tag || 'v0.21.0' }}
+      SOURCE_RUN: ${{ inputs.source_run || github.event.client_payload.source_run || '43576807904' }}
+      AION_TAG: ${{ inputs.tag || github.event.client_payload.tag || 'v0.22.0' }}
     steps:
       - name: Validate dispatch values
         run: |
@@ -69,8 +69,8 @@ jobs:
             # A versioned publication branch is an explicit one-release request.
             # Runtime equality and all platform gates above run BEFORE any tag.
             assert os.environ['GITHUB_EVENT_NAME']=='push'
-            assert os.environ['GITHUB_REF']=='refs/heads/release-publication/v0.21.0'
-            assert version=='0.21.0' and os.environ['SOURCE_RUN']=='43513378584'
+            assert os.environ['GITHUB_REF']=='refs/heads/release-publication/v0.22.0'
+            assert version=='0.22.0' and os.environ['SOURCE_RUN']=='43576807904'
             target=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
             ref='repos/'+os.environ['GITHUB_REPOSITORY']+'/git/ref/tags/'+os.environ['AION_TAG']
             existing=subprocess.run(['gh','api',ref],text=True,capture_output=True)

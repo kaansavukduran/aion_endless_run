@@ -1,0 +1,472 @@
+{
+  "checks": [
+    "Actual startup preparation/complete segments and percentage/ellipsis are strawberry red",
+    "key initial takeoff and held glide preserve three flap charges",
+    "key flap 1 selects its actual airborne wing animation",
+    "key flap 1 increases actual altitude",
+    "key flap 2 selects its actual airborne wing animation",
+    "key flap 2 increases actual altitude",
+    "key flap 3 selects its actual airborne wing animation",
+    "key flap 3 increases actual altitude",
+    "key cannot spend a fourth charge",
+    "touch initial takeoff and held glide preserve three flap charges",
+    "touch flap 1 selects its actual airborne wing animation",
+    "touch flap 1 increases actual altitude",
+    "touch flap 2 selects its actual airborne wing animation",
+    "touch flap 2 increases actual altitude",
+    "touch flap 3 selects its actual airborne wing animation",
+    "touch flap 3 increases actual altitude",
+    "touch cannot spend a fourth charge",
+    "pad initial takeoff and held glide preserve three flap charges",
+    "pad flap 1 selects its actual airborne wing animation",
+    "pad flap 1 increases actual altitude",
+    "pad flap 2 selects its actual airborne wing animation",
+    "pad flap 2 increases actual altitude",
+    "pad flap 3 selects its actual airborne wing animation",
+    "pad flap 3 increases actual altitude",
+    "pad cannot spend a fourth charge",
+    "eren remains grounded while holding 180ms",
+    "eren remains grounded while holding 800ms",
+    "eren longer held charge yields a visibly higher release leap",
+    "rabbit remains grounded while holding 180ms",
+    "rabbit remains grounded while holding 800ms",
+    "rabbit longer held charge yields a visibly higher release leap",
+    "No script errors during the real keyboard/touch/gamepad ability matrix"
+  ],
+  "flaps": [
+    {
+      "input": "key",
+      "flap": 1,
+      "samples": [
+        {
+          "left": 2,
+          "y": -63.7691666666665,
+          "t": 1.7,
+          "flap": 0.26666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -70.9538888888887,
+          "t": 1.73333333333333,
+          "flap": 0.23333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -74.0858333333332,
+          "t": 1.75,
+          "flap": 0.21666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -79.4288888888887,
+          "t": 1.78333333333333,
+          "flap": 0.18333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -81.6399999999999,
+          "t": 1.8,
+          "flap": 0.16666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        }
+      ]
+    },
+    {
+      "input": "key",
+      "flap": 2,
+      "samples": [
+        {
+          "left": 1,
+          "y": -96.9358333333332,
+          "t": 1.95,
+          "flap": 0.26666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -100.681666666667,
+          "t": 1.96666666666666,
+          "flap": 0.25,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -107.2525,
+          "t": 2,
+          "flap": 0.21666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -110.0775,
+          "t": 2.01666666666666,
+          "flap": 0.2,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -112.595555555555,
+          "t": 2.03333333333333,
+          "flap": 0.18333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        }
+      ]
+    },
+    {
+      "input": "key",
+      "flap": 3,
+      "samples": [
+        {
+          "left": 0,
+          "y": -142.135833333333,
+          "t": 2.21666666666666,
+          "flap": 0.2,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -148.769166666667,
+          "t": 2.26666666666666,
+          "flap": 0.15,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -151.656666666667,
+          "t": 2.3,
+          "flap": 0.11666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -152.64,
+          "t": 2.31666666666666,
+          "flap": 0.1,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -153.316388888889,
+          "t": 2.33333333333333,
+          "flap": 0.08333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        }
+      ]
+    },
+    {
+      "input": "touch",
+      "flap": 1,
+      "samples": [
+        {
+          "left": 2,
+          "y": -88.2519444444444,
+          "t": 1.5,
+          "flap": 0.28333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -92.3047222222222,
+          "t": 1.51666666666667,
+          "flap": 0.26666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -96.0505555555555,
+          "t": 1.53333333333333,
+          "flap": 0.25,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -99.4894444444444,
+          "t": 1.55,
+          "flap": 0.23333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -105.446388888889,
+          "t": 1.58333333333333,
+          "flap": 0.2,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        }
+      ]
+    },
+    {
+      "input": "touch",
+      "flap": 2,
+      "samples": [
+        {
+          "left": 1,
+          "y": -125.471388888889,
+          "t": 1.76666666666667,
+          "flap": 0.26666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -129.217222222222,
+          "t": 1.78333333333333,
+          "flap": 0.25,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -132.656111111111,
+          "t": 1.8,
+          "flap": 0.23333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -135.788055555556,
+          "t": 1.81666666666667,
+          "flap": 0.21666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -138.613055555556,
+          "t": 1.83333333333333,
+          "flap": 0.2,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        }
+      ]
+    },
+    {
+      "input": "touch",
+      "flap": 3,
+      "samples": [
+        {
+          "left": 0,
+          "y": -153.789444444444,
+          "t": 2.03333333333333,
+          "flap": 0.28333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -157.842222222222,
+          "t": 2.05,
+          "flap": 0.26666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -161.588055555556,
+          "t": 2.06666666666666,
+          "flap": 0.25,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -165.026944444444,
+          "t": 2.08333333333333,
+          "flap": 0.23333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -168.158888888889,
+          "t": 2.1,
+          "flap": 0.21666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        }
+      ]
+    },
+    {
+      "input": "pad",
+      "flap": 1,
+      "samples": [
+        {
+          "left": 2,
+          "y": -59.7163888888887,
+          "t": 2.08333333333333,
+          "flap": 0.28333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -67.5149999999999,
+          "t": 2.11666666666666,
+          "flap": 0.25,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -70.9538888888887,
+          "t": 2.13333333333333,
+          "flap": 0.23333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 2,
+          "y": -76.9108333333332,
+          "t": 2.16666666666666,
+          "flap": 0.2,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        }
+      ]
+    },
+    {
+      "input": "pad",
+      "flap": 2,
+      "samples": [
+        {
+          "left": 1,
+          "y": -92.8205555555554,
+          "t": 2.31666666666666,
+          "flap": 0.28333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -100.619166666667,
+          "t": 2.35,
+          "flap": 0.25,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -104.058055555555,
+          "t": 2.36666666666666,
+          "flap": 0.23333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 1,
+          "y": -110.015,
+          "t": 2.4,
+          "flap": 0.2,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        }
+      ]
+    },
+    {
+      "input": "pad",
+      "flap": 3,
+      "samples": [
+        {
+          "left": 0,
+          "y": -125.555277777778,
+          "t": 2.53333333333333,
+          "flap": 0.28333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -133.353888888889,
+          "t": 2.56666666666666,
+          "flap": 0.25,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -136.792777777778,
+          "t": 2.58333333333333,
+          "flap": 0.23333333333333,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        },
+        {
+          "left": 0,
+          "y": -139.924722222222,
+          "t": 2.6,
+          "flap": 0.21666666666667,
+          "source": "polish-abilities",
+          "row": 1,
+          "state": "running"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "scope": "Real exported game via ordinary UI/input; standard API gamepad emulation, not a physical controller."
+}

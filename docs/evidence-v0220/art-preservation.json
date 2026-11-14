@@ -1,0 +1,13 @@
+{
+  "baseline": "f2e513ac5166f3347cb65ba2395f617e99750c22",
+  "original_png_count": 56,
+  "modified_original_pngs": [],
+  "new_pngs": [
+    "assets/polish-sheep.png",
+    "assets/polish-abilities.png",
+    "assets/polish-pickups.png",
+    "assets/polish-aion.png",
+    "assets/polish-rolls.png",
+    "assets/polish-enemies.png"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "checks": [
+    "Only the three meaningful Aion actions appear; no Reload",
+    "Square symmetric control bounds: duck",
+    "Every visible and touch-bound edge shares the physical DPR3 pixel grid: duck",
+    "Square symmetric control bounds: jump",
+    "Every visible and touch-bound edge shares the physical DPR3 pixel grid: jump",
+    "Square symmetric control bounds: shoot",
+    "Every visible and touch-bound edge shares the physical DPR3 pixel grid: shoot",
+    "Owner-approved left Jump / right Fire-Roll split is preserved",
+    "Two real fingers jump and hold Fire simultaneously",
+    "Touch cancellation releases both real owners without a latched trigger",
+    "DPR3 rotation keeps the same paused run",
+    "DPR3 browser document has no page scroll",
+    "No script or browser errors during DPR3 simultaneous/cancel input"
+  ],
+  "errors": [],
+  "controls": {
+    "duck": {
+      "disabled": false,
+      "h": 96.6666564941406,
+      "visible": true,
+      "w": 96.6666259765625,
+      "x": 989.166625976562,
+      "y": 431.666656494141
+    },
+    "jump": {
+      "disabled": false,
+      "h": 96.6666564941406,
+      "visible": true,
+      "w": 96.6666641235352,
+      "x": 21.6666660308838,
+      "y": 431.666656494141
+    },
+    "shoot": {
+      "disabled": false,
+      "h": 96.6666564941406,
+      "visible": true,
+      "w": 96.6666259765625,
+      "x": 1087.5,
+      "y": 371.666656494141
+    }
+  },
+  "physical_transform": [
+    1.20000004768372,
+    0.0,
+    0.0,
+    1.20000004768372,
+    0.0,
+    0.0
+  ],
+  "build": {
+    "build": "eedd94ca14a373de",
+    "version": "0.22.0"
+  },
+  "scope": "Real Chromium CDP touch at deviceScaleFactor3, not a physical phone. No world/save/RNG setters."
+}

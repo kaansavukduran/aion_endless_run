@@ -1,0 +1,293 @@
+{
+  "scope": "Six actual native rendered run frames each; independent RGB crop matching, separate from world/probe metadata. Not a physical-device test. Natural blinking and subpixel rasterization change the best fit by a pixel.",
+  "characters": [
+    {
+      "hero": "aion",
+      "reference_rect": [
+        290,
+        473,
+        34,
+        30
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 2.480437349239326e-16
+        },
+        {
+          "frame": 1,
+          "pixel_dx": 0,
+          "pixel_dy": 2,
+          "normalized_error": 0.04883714001046467
+        },
+        {
+          "frame": 2,
+          "pixel_dx": 0,
+          "pixel_dy": 3,
+          "normalized_error": 0.05849198095047566
+        },
+        {
+          "frame": 3,
+          "pixel_dx": 0,
+          "pixel_dy": 2,
+          "normalized_error": 0.04658797399926549
+        },
+        {
+          "frame": 4,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.046296922628131953
+        },
+        {
+          "frame": 5,
+          "pixel_dx": 0,
+          "pixel_dy": 2,
+          "normalized_error": 0.021377843582885008
+        }
+      ],
+      "horizontal_pixel_range": 0
+    },
+    {
+      "hero": "sheep",
+      "reference_rect": [
+        291,
+        465,
+        32,
+        28
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.0
+        },
+        {
+          "frame": 1,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.05836158089851125
+        },
+        {
+          "frame": 2,
+          "pixel_dx": 0,
+          "pixel_dy": 1,
+          "normalized_error": 0.054143624194027996
+        },
+        {
+          "frame": 3,
+          "pixel_dx": 0,
+          "pixel_dy": -2,
+          "normalized_error": 0.054216463814976
+        },
+        {
+          "frame": 4,
+          "pixel_dx": 0,
+          "pixel_dy": -3,
+          "normalized_error": 0.029224848021098582
+        },
+        {
+          "frame": 5,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.03890056492899209
+        }
+      ],
+      "horizontal_pixel_range": 0
+    },
+    {
+      "hero": "owl",
+      "reference_rect": [
+        292,
+        479,
+        30,
+        26
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.0
+        },
+        {
+          "frame": 1,
+          "pixel_dx": 0,
+          "pixel_dy": 3,
+          "normalized_error": 0.02953964750356844
+        },
+        {
+          "frame": 2,
+          "pixel_dx": 1,
+          "pixel_dy": -2,
+          "normalized_error": 0.053792647970043884
+        },
+        {
+          "frame": 3,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.030358490772444922
+        },
+        {
+          "frame": 4,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.02604587508264308
+        },
+        {
+          "frame": 5,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.04376306616299618
+        }
+      ],
+      "horizontal_pixel_range": 1
+    },
+    {
+      "hero": "wolf",
+      "reference_rect": [
+        293,
+        473,
+        27,
+        24
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.0
+        },
+        {
+          "frame": 1,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.04754689573423697
+        },
+        {
+          "frame": 2,
+          "pixel_dx": 1,
+          "pixel_dy": -3,
+          "normalized_error": 0.05751242939300608
+        },
+        {
+          "frame": 3,
+          "pixel_dx": 1,
+          "pixel_dy": 2,
+          "normalized_error": 0.07511818896766646
+        },
+        {
+          "frame": 4,
+          "pixel_dx": 1,
+          "pixel_dy": 2,
+          "normalized_error": 0.06066194844820797
+        },
+        {
+          "frame": 5,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.023639407726763092
+        }
+      ],
+      "horizontal_pixel_range": 1
+    },
+    {
+      "hero": "rabbit",
+      "reference_rect": [
+        293,
+        469,
+        26,
+        23
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.0
+        },
+        {
+          "frame": 1,
+          "pixel_dx": 0,
+          "pixel_dy": 1,
+          "normalized_error": 0.05439254280209429
+        },
+        {
+          "frame": 2,
+          "pixel_dx": 0,
+          "pixel_dy": -3,
+          "normalized_error": 0.053206420891895985
+        },
+        {
+          "frame": 3,
+          "pixel_dx": 0,
+          "pixel_dy": 7,
+          "normalized_error": 0.06816003455030537
+        },
+        {
+          "frame": 4,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 0.049852143721347705
+        },
+        {
+          "frame": 5,
+          "pixel_dx": 0,
+          "pixel_dy": -3,
+          "normalized_error": 0.0588122113524535
+        }
+      ],
+      "horizontal_pixel_range": 0
+    },
+    {
+      "hero": "eren",
+      "reference_rect": [
+        291,
+        470,
+        33,
+        29
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "pixel_dx": 0,
+          "pixel_dy": 0,
+          "normalized_error": 4.565069649687365e-16
+        },
+        {
+          "frame": 1,
+          "pixel_dx": -1,
+          "pixel_dy": 2,
+          "normalized_error": 0.059452629095833924
+        },
+        {
+          "frame": 2,
+          "pixel_dx": 0,
+          "pixel_dy": -3,
+          "normalized_error": 0.0589352021386238
+        },
+        {
+          "frame": 3,
+          "pixel_dx": -1,
+          "pixel_dy": 4,
+          "normalized_error": 0.0735775544521008
+        },
+        {
+          "frame": 4,
+          "pixel_dx": -1,
+          "pixel_dy": -3,
+          "normalized_error": 0.06863317522550602
+        },
+        {
+          "frame": 5,
+          "pixel_dx": 0,
+          "pixel_dy": -4,
+          "normalized_error": 0.060035714748860235
+        }
+      ],
+      "horizontal_pixel_range": 1
+    }
+  ]
+}

@@ -1,12 +1,22 @@
 # Aion Endless Run
 
-Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.21.0**.
+Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.22.0**.
 
-**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.21.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.21.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0210/README.md)
+**[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.22.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.22.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0220/README.md)
 
-![Gerçek oyunun kompakt ana menüsü](docs/evidence-v0210/screenshots/main-dark.png)
+![Gerçek oyunun kompakt ana menüsü](docs/evidence-v0220/screenshots/menu.png)
 
 0.21.0: Boss’lar5 seviyede bir gelir. Üç boss için farklı konuşmalar, altı kahramanın şaşırma çizimleri ve kırmızı tabanca teslimi eklendi. Ara sahnede koşu donar; Devam/Atla klavye, dokunma ve kolla çalışır. Kırmızı tabanca koşu boyunca boss’a iki kat hasar verir. Yerdeki altı kahramanın ayak hizası düzeltildi; basılı takla döngülüdür ve skor bandı inceltildi. Sınırsız0,32s ateş,15s seviyeler,11 dil, yetenekler ve kayıtlar korunur. [Bu sürümün kanıtı](docs/evidence-v0210/README.md).
+
+## 0.22.0 · Paftaya sadık görsel yenileme
+
+Aion'un pembe derisi, mavi uçlu pembe solungaçları, bilim önlüğü ve DNA kuyruğu korunur. Kutsanmış artık özgün modelindeki gibi **iki ayaklı** koşar; küçük takipçiler aynı kaynağı kullanır. Yeni karga/cüce, sekiz meyve ve on güç simgesi ortak pixel-art malzeme/ışık dili kullanır.56 eski PNG değişmez; altı yeni pafta eklenir.
+
+**Ömer:** zıpla ve basılı tutarak süzül; havada bırakıp yeniden basarak üç kez kanat çırp. İlk sıçrama hakkı tüketmez; yere inince üç hak yenilenir. **Emre ve Eren:** Zıpla'yı tutarak güç biriktir, bırakınca sıçra;1,2 saniyede tam güç. Eren kendi ayrı çizimini ve kimliğini korur.
+
+Yükleyicide dolan tüm segmentler, yüzde ve hazırlık noktaları çilek kırmızısıdır; gerçek ilerleme ölçülemiyorsa yüzde uydurulmaz. Opak ayak/kök hizaları ve Aion'un gerçek çizilmiş yüzü denetlenir. Sınırsız0,32s tabanca,15 aktif saniyelik seviyeler,5 seviyede bir boss ve mevcut ara sahneler, kayıtlar,11 dil ve bölünmüş dokunma düzeni korunur.
+
+[Gerçek ekranlar, testler ve platform sınırları](docs/evidence-v0220/README.md). Fiziksel Poco/iPhone veya fiziksel kol denendiği iddia edilmez. Sonraki bölümler önceki sürümlerin tarihsel geliştirme notlarını içerir.
 
 ## Oyna
 
@@ -21,13 +31,13 @@ Başlangıç kartlarından karakterini seç; koşu sırasında karakter değişm
 | Melun | Shift / Depar basılı: dört ayakla hızlan |
 | Ömer | Zıpla ve basılı tut: süzül, hava akımını yakala |
 | Emre | Zıplamayı basılı tut: şarj et; bırak: sıçra |
-| Eren | Tek, anında sıçrama; kendine ait ayrı karakter paftası |
+| Eren | Tut: şarj et; bırak: sıçra; kendine ait ayrı karakter paftası |
 
 | Eylem | Klavye / fare | Telefon | Standart Xbox / PlayStation |
 | --- | --- | --- | --- |
 | İleri ateş | Sol veya sağ tık / F basılı | Ateş et basılı | RB / R1 veya RT / R2 |
 | Ek ateş girişi | R / J basılı | Aynı Ateş et düğmesi | X / □ basılı |
-| Zıpla / süzül | Space; Ömer için basılı, Emre için tutup bırak | Zıpla; Emre için tutup bırak | A / ×; Emre için tutup bırak |
+| Zıpla / süzül | Space; Ömer için tut/yeniden bas, Emre/Eren için tutup bırak | Zıpla; Emre/Eren için tutup bırak | A / ×; Emre/Eren için tutup bırak |
 | Takla | Aşağı / S / Ctrl | Aşağı kaydır veya Takla | B / ○ |
 | Melun deparı | Shift; karakterin üstünü basılı tut | Depar veya karakterin üstünü basılı tut | LB / L1 |
 | Duraklat | Esc | Duraklat | Start / Options |
@@ -127,4 +137,4 @@ FireAxolotl/Extension kaynakları ve önceki paftalar korunur. Güncel kahraman 
 
 ## English
 
-An offline Godot pixel runner with five original heroes and six biomes. Version0.21 uses an always-equipped, straight-firing pistol with infinite ammunition at0.32s cadence. Boss encounters occur every five levels, with skippable dialogue and a red-pistol upgrade. Short proper names are identical in all eleven languages. The main menu fits at 100–200% text, including portrait and landscape. A one-time legacy language migration follows the device/browser locale without clearing records or appearance settings; later explicit choices persist. Levels take 15 active seconds. Eighteen new botanical poses add gentle wind animation while all 45 previous asset PNGs remain unchanged. Installers and portable editions are under Releases; evidence distinguishes browser/native-emulator tests from physical device and Apple distribution checks.
+An offline Godot pixel runner with six original heroes and six biomes. Version0.22 uses an always-equipped, straight-firing pistol with infinite ammunition at0.32s cadence. Boss encounters occur every five levels, with skippable dialogue and a red-pistol upgrade. Short proper names are identical in all eleven languages. The main menu fits at 100–200% text, including portrait and landscape. A one-time legacy language migration follows the device/browser locale without clearing records or appearance settings; later explicit choices persist. Levels take 15 active seconds. Eighteen new botanical poses add gentle wind animation while all 45 previous asset PNGs remain unchanged. Installers and portable editions are under Releases; evidence distinguishes browser/native-emulator tests from physical device and Apple distribution checks.

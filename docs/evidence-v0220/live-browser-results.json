@@ -1,0 +1,197 @@
+{
+  "scope": "Real public HTTPS through system-CA verified forwarding; SW disabled only in these diagnostic drivers. Desktop Firefox with Android UA is not a physical Poco. Real offline worker proof is separate.",
+  "results": [
+    {
+      "url": "https://aionendlessrun.vercel.app/",
+      "browser": "firefox 153.0",
+      "build": {
+        "build": "f53c824a46ce2b73",
+        "version": "0.22.0"
+      },
+      "checks": [
+        "Actual production0.22.0 boots with verified PCK, no missing-data fallback",
+        "All six real production character cards are visible",
+        "Complete production Aion run loop has stable face and actor anchors",
+        "Production touch Fire and held Fire pass five shots without Reload",
+        "Actual production portrait rotation preserves paused score and character",
+        "Production Eren charges on the ground",
+        "Production Eren releases his own drawn charged jump",
+        "Production Emre still builds charge on the ground",
+        "Production Emre release produces one charged leap",
+        "Production Roll touch selects the new faithful shoulder atlas",
+        "No script errors or missing-PCK alerts during live play"
+      ],
+      "dialogs": [],
+      "errors": [],
+      "face_samples": [
+        {
+          "f": 0,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 1,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 1,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 1,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 2,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 2,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 2,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 2,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 3,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 3,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 3,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 4,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 4,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 4,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 4,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 5,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 5,
+          "x": 290.058258056641,
+          "actor": 288
+        }
+      ],
+      "scope": "Actual public HTTPS bytes verified by loader; normal UI and browser touch/keys. Firefox is headed Gecko with Android UA, not a physical Poco. CA-forwarded diagnostic wrappers disable SW; actual offline worker is verified separately."
+    },
+    {
+      "url": "https://aionendlessrun.vercel.app/",
+      "browser": "chromium 151.0.7922.34",
+      "build": {
+        "build": "f53c824a46ce2b73",
+        "version": "0.22.0"
+      },
+      "checks": [
+        "Actual production0.22.0 boots with verified PCK, no missing-data fallback",
+        "All six real production character cards are visible",
+        "Complete production Aion run loop has stable face and actor anchors",
+        "Production touch Fire and held Fire pass five shots without Reload",
+        "Actual production portrait rotation preserves paused score and character",
+        "Production Eren charges on the ground",
+        "Production Eren releases his own drawn charged jump",
+        "Production Emre still builds charge on the ground",
+        "Production Emre release produces one charged leap",
+        "Production Roll touch selects the new faithful shoulder atlas",
+        "No script errors or missing-PCK alerts during live play"
+      ],
+      "dialogs": [],
+      "errors": [],
+      "face_samples": [
+        {
+          "f": 1,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 1,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 2,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 2,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 3,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 3,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 4,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 4,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 5,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 5,
+          "x": 290.058258056641,
+          "actor": 288
+        },
+        {
+          "f": 0,
+          "x": 290.058258056641,
+          "actor": 288
+        }
+      ],
+      "scope": "Actual public HTTPS bytes verified by loader; normal UI and browser touch/keys. Firefox is headed Gecko with Android UA, not a physical Poco. CA-forwarded diagnostic wrappers disable SW; actual offline worker is verified separately."
+    }
+  ]
+}

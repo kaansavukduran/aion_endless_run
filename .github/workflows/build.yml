@@ -183,6 +183,7 @@ jobs:
             build/android-logcat.txt
             build/android-input-results.json
             build/android-owl-flight-states.json
+            build/android-touch-driver.txt
           if-no-files-found: warn
   android:
     if: github.event_name != 'pull_request' && vars.AION_ANDROID_SIGNING_READY == 'true'

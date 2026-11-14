@@ -1,3 +1,15 @@
+# Aion Endless Run0.22.0
+
+[Oyna · Vercel](https://aionendlessrun.vercel.app/) · [Oyna · GitHub Pages](https://kaansavukduran.github.io/aion_endless_run/) · [0.22.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.22.0) · [Doğrulama ve yayın durumu](evidence-v0220/verification.json).
+
+Aion ve Kutsanmış'ın paftaya sadık yeni çizimleri, iki ayaklı koyun koşusu, altı karakterin sabit yüz/gerçek ayak kaydı, üç havada kanat çırpışı ve Eren'in tut/bırak şarjı. Yeni karga/cüce ve18 meyve/güç simgesi. Kökler gerçek zemin çizgisinde; yükleyici tüm dolanlar/yüzde/noktalarda çilek kırmızısı. Eren'in el-silah bağlantısı ve koyunun gerçek mavi namlusu ayrıca düzeltildi. Sonsuz tabanca,15s seviyeler,5 seviyede bir boss/ara sahne ve onaylı split touch korunur.
+
+Dokuz paket hedefi: Windows Setup/portable; Linux AppImage/DEB/portable; macOS universal DMG/ZIP; Android ARM64/x64 APK; offline web arşivi. Paket/yayın doğrulaması tamamlanmadan başarı varsayılmaz; gerçek durum sürümlü teslim JSON'undadır. Android versionCode26, aynı uygulama kimliği ve kalıcı imza. Son uygulama kaynağı7f499f9; sonraki teslim commit'leri belgeler/test/yayın akışını kaydeder.
+
+Native iOS sahibinin Apple imzasını gerektirir. Mac ad-hoc; Developer ID/noter, Windows Authenticode, fiziksel Poco/iPhone/kol veya gerçek telefon performansı doğrulanmış değildir. Browser Gamepad API, CDP dokunma ve Android API30 emülatörü fiziksel cihaz sayılmaz. Rekorlar iki web origin'inde ayrı saklanır.
+
+## Önceki teslim ·0.21.0
+
 # Aion Endless Run0.21.0
 
 [Oyna · Vercel](https://aionendlessrun.vercel.app/) · [Oyna · GitHub Pages](https://kaansavukduran.github.io/aion_endless_run/) · [0.21.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.21.0) · [Doğrulama](evidence-v0210/README.md).

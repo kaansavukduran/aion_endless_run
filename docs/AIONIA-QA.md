@@ -1,3 +1,21 @@
+# 0.22.0 ek doğrulama kaydı
+
+[Son kanıt ve platform kapsamı](evidence-v0220/README.md). Aşağıdaki0.14.1 kaydı tarihsel olarak korunur; eski PASS yeni sürümün kanıtı sayılmaz. Güncel canlı standart1.7 okunmuştur; son kullanıcı yetenek/renk kararları eskilerden önceliklidir.
+
+| Kayıt | Güncel sonuç | Kanıt ve neden |
+| --- | --- | --- |
+| AER-001 | PASS · yerel export | Altı kahramanın tam run/fire döngüsü, ayrı fizik kökü/baş probu/ayak tabanı;139 normal giriş kontrolü. Yeni Aion çizimleri özgün solungaç/önlük/kuyruğu korur. |
+| AER-002 | PASS · export | Sabit baş/gövde referansıyla süzülme; klavye/dokunma/sanal kol üzerinden üç gerçek yükselme ve dördüncü isteğin reddi. |
+| AER-005/006/007 | PASS · kaynak/export | Tüm menü/ayar/sonuç sayfaları;100–200% yazı, iki sistem fontu, TR/EN, iki yön ve dar ekran. Ana menü gereksiz boşluk veya wheel gerektirmez. |
+| AER-014 | PASS · export; fiziksel NOT TESTED | Simetrik hit-mask/çizim ve DPR3 koordinatları; bölünmüş düzen, bağımsız parmaklar, iptal, aşağı swipe, yön değişimi. |
+| AER-012/015 | PASS · headed Firefox export | On segment, gerçek bayt oranı, tüm dolanlar/yüzde/noktalar çilek kırmızısı; bozuk veri/retry/cache/offline/kayıt19 kontrol. |
+| Kutsanmış anatomisi | PASS · görsel inceleme | Önceki koşu dört ayaklıydı; özgün iki ayaklı paftaya göre yeni run/gun-run; arka küçük takipçiler aynı yeni kaynağı kullanır. |
+| Zemin teması | PASS · kaynak/native render | Yeni karelerde gerçek ayak tabanı; florada opak kök bileşeni ve5 piksel üst yerleşimin kaldırılması; altı biyom/üç rüzgâr pozu. |
+
+Emre'nin yeteneği korunur; Eren de tutarak şarj edip bırakınca daha güçlü sıçrar. İlk yerden zıplama Ömer'in üç ek kanat hakkını tüketmez; yere iniş yeniler. İptal/menü dokunması örtük sıçrama üretmez. Son yayın ve fiziksel test ayrımı teslim JSON'undadır.
+
+---
+
 # AIONIA v1.4 · Doğrulama ve teslim kapıları
 
 Bu dosya 0.14.1 kaynak commit'i hazırlanırkenki kayıttır. [Makine sonuçları ve gerçek görüntüler](evidence-v0141/README.md). Yayın sonrasında native/URL/paket sonucu, sürümün `BUILD-RECEIPT.json` dosyasında ve Drive teslim raporunda tutulur; kaynak öncesi tahmin başarılı test diye yazılmaz.

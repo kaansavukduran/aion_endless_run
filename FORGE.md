@@ -1,3 +1,11 @@
+# 0.22.0 · Model-faithful visual and ability revision
+
+Six new original AI-assisted sheets preserve model identity: upright biped sheep, original Aion gills/coat/DNA-tail, low shoulder rotations, steady owl glide/flaps, Eren charge/leap, crow/gnome material detail and18 distinct collectibles.56 prior PNGs remain byte-identical. New sources are isolated by actual alpha spans with anatomical anchors and one calibrated scale per source; physical actors are not shifted to mask frame errors.
+
+Owl gets three upward airborne flaps on fresh Jump presses, held glide remains and landing refills. Eren now shares hold/release charge with Emre, without changing their distinct art. Branded loader fills/percent/ellipsis are uniformly strawberry red. Flora uses opaque connected roots and the actual support plane. Existing weapons, bosses/story, saves, gamepad and split-touch layout remain.
+
+[Evidence and current delivery scope](docs/evidence-v0220/README.md).21 strict Godot suites; real exported controls plus independent rendered-face RGB checks. New art is technically reviewed; final owner art approval is separate. Older records follow without losing their historical scope.
+
 ## 0.21.0 · Hikâyeli boss, gerçek ayak teması
 
 Kullanıcının son kararı, önceki tek takla+baskıda çömelme davranışını değiştirir: basılı giriş altı alçak omuz taklası karesini döndürür. Boss aralığı5; sarılmalar10 olarak kalır. Üç farklı boss konuşması, altı kahramanın yüzüne ellerini götürdüğü çizimler, yardımcının kırmızı tabanca teslimi, Devam/Atla, duraklatma ve yön değiştirme desteklenir. Ara sahne normal fizik/koşu/seviye sayaçlarını durdurur. Kaynak kenarına değen ilk nötr kuyruk pozu seçilmez; eksiksiz ikinci nötr kullanılır. Yeni kaynak paftada42 çizim vardır; bunların hepsi ayrı canlı oynatma karesi gibi sayılmaz.

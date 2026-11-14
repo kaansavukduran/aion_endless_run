@@ -1,0 +1,317 @@
+[
+  {
+    "suite": "game",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 127,
+    "results": [
+      [
+        "127",
+        "checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "adventure",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 58,
+    "results": [
+      [
+        "58",
+        "adventure checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "localization",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 51,
+    "results": [
+      [
+        "51",
+        "localization/registration checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "evolution",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 139,
+    "results": [
+      [
+        "139",
+        "evolution checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "frontier",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 320,
+    "results": [
+      [
+        "320",
+        "frontier checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "motion",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 399,
+    "results": [
+      [
+        "399",
+        "motion checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "encounters",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 96,
+    "results": [
+      [
+        "96",
+        "encounter/gamepad checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "fidelity",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 685,
+    "results": [
+      [
+        "685",
+        "fidelity checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "agility",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 186,
+    "results": [
+      [
+        "186",
+        "agility checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "runner_ux",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 238,
+    "results": [
+      [
+        "238",
+        "runner UX checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "boss_hud",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 30,
+    "results": [
+      [
+        "30",
+        "boss HUD checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "aionia",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 710,
+    "results": [
+      [
+        "710",
+        "AIONIA checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "variety",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 551,
+    "results": [
+      [
+        "551",
+        "variety/transition/locale checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "visual_polish",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 152,
+    "results": [
+      [
+        "152",
+        "visual polish checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "orchard",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 1833,
+    "results": [
+      [
+        "1833",
+        "orchard/Emre checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "firearm",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 255,
+    "results": [
+      [
+        "255",
+        "firearm/menu checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "charge_roll_ui",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 2648,
+    "results": [
+      [
+        "2648",
+        "charge/roll/paged UI checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "unslop_quality",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 917,
+    "results": [
+      [
+        "917",
+        "Unslop quality checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "pixel_heroes",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 1668,
+    "results": [
+      [
+        "1668",
+        "pixel hero checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "boss_story",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 971,
+    "results": [
+      [
+        "971",
+        "boss story checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "polish",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 107,
+    "results": [
+      [
+        "107",
+        "polish/ability checks",
+        "0"
+      ]
+    ]
+  }
+]

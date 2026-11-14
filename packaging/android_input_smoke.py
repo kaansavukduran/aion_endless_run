@@ -1,5 +1,5 @@
 """Use real ADB gestures and passive Godot layout/state logs; no state injection."""
-import argparse,json,re,subprocess,time
+import argparse,json,re,subprocess,time,os
 from android_packets import decode_packets
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=Path('build'));a=p.parse_args();a.output.mkdir(exist_ok=True,parents=True)
@@ -48,16 +48,25 @@ for code in ['tr','cs','en']:
  capture('main-'+code)
 menu_button(name='StartSelect_owl');latest('AION_UI ',lambda s:s['character']=='owl' and s['page']=='main')
 menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-# One device-side sequence avoids host round-trip delays. Each swipe emits
-# a complete Android DOWN/UP pair with a shared downTime; separate motionevent
-# invocations do not provide the same native event-stream contract.
+# Complete touch pairs share one Android input VM. Starting a new VM for
+# every contact adds device-dependent gaps and may land between real presses.
+# This input-only driver calls the SAME standard Android input command; it has
+# no access to game internals. Preserve the actual state history for review.
+sdk=Path(os.environ.get('ANDROID_HOME') or os.environ['ANDROID_SDK_ROOT'])
+android_jar=max(sdk.glob('platforms/android-*/android.jar'),key=lambda p:int(p.parent.name.split('-')[1]))
+d8=max(sdk.glob('build-tools/*/d8'),key=lambda p:tuple(int(n) for n in re.findall(r'\d+',p.parent.name)))
+classes=a.output/'adb-flight';classes.mkdir(exist_ok=True)
+source=Path(__file__).resolve().parents[1]/'tests/native/AionTouchFlight.java'
+subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-source','8','-target','8','-bootclasspath',str(android_jar),'-d',str(classes),str(source)],check=True)
+subprocess.run([str(d8),'--min-api','26','--lib',str(android_jar),'--output',str(classes/'driver.zip'),str(classes/'AionTouchFlight.class')],check=True)
+adb('push',classes/'driver.zip','/data/local/tmp/aion-touch-driver.zip')
 layout=latest('AION_UI ',lambda s:'jump' in s['actions']);x,y=layout['actions']['jump']
 before_flight=len(packets('AION_STATE '))
-def stationary_touch(ms):return 'input touchscreen swipe '+str(x)+' '+str(y)+' '+str(x)+' '+str(y)+' '+str(ms)
-sequence=[stationary_touch(900)]+[stationary_touch(350) for _ in range(3)]
-sequence+=['screencap -p /data/local/tmp/aion-owl-flight.png']
-gesture=subprocess.Popen(['adb','shell','; '.join(sequence)],stdout=subprocess.DEVNULL)
-gesture.wait(timeout=12)
+started=time.monotonic()
+output=adb('shell','CLASSPATH=/data/local/tmp/aion-touch-driver.zip:/system/framework/input.jar','app_process','/system/bin','AionTouchFlight',x,y,text=True)
+(a.output/'android-touch-driver.txt').write_text(output+'\nwall_seconds='+str(time.monotonic()-started)+'\n')
+print(output,flush=True)
+adb('shell','screencap','-p','/data/local/tmp/aion-owl-flight.png')
 flight=packets('AION_STATE ')[before_flight:]
 (a.output/'android-owl-glide.png').write_bytes(adb('exec-out','cat','/data/local/tmp/aion-owl-flight.png'))
 (a.output/'android-owl-flight-states.json').write_text(json.dumps(flight,indent=2)+'\n')

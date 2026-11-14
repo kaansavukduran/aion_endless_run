@@ -1,3 +1,11 @@
+# 0.22.0 doğrulaması
+
+[Kaynak, gerçek giriş ve teslim kanıtı](evidence-v0220/README.md). Son yerel21 Godot grubunda12.127 kontrol PASS; diğer test/CI/yayın sonuçları sürümlü teslim kaydında ayrı tutulur. Bağımsız RGB ölçümü36 gerçek render karesinde yüz kaymasını0–1 ekran pikseli aralığında sınar. Normal oyuna dünya/sağlık/RNG setter eklenmedi.
+
+Aion'un modeli korunur; Kutsanmış koşuda iki ayaklıdır. Ömer üç ek havada kanat çırpışını her yeni Jump basışında kullanır; tutma süzülmeyi sürdürür, iniş yeniler. Emre ve Eren tut/bırak şarjını aynı ortak girişlerden kullanır. Silahlar gerçek el/namlu kayıtlarına bağlıdır. Eski56 PNG değişmez;6 yeni sheet eklenir. Fiziksel cihazlar ve sanatın kullanıcı tarafından nihai onayı otomatik test PASS'iyle eşit sayılmaz.
+
+Aşağıdaki kayıtlar kendi tarihî sürümlerine aittir.
+
 ## Güncel0.21.0 doğrulaması
 
 [Kanıtlar ve kapsam](evidence-v0210/README.md): temiz kaynak CI20 grup/12013 kontrol; Windows/Linux/macOS gerçek paket açılışları;11 native Android emülatör girişi;209 tarayıcı kontrolü;30 açık durum render fixture’ı. Son doğal koşu5. seviyeden konuşma, şaşırma, kırmızı tabanca, gerçek hasar, zafer ve yumuşak koşu dönüşünü tamamlar. Her iki canlı origin Chromium/Firefox’ta açılır. Kamu offline arşivi19 dosyada worker-testli CI çıktısına eşittir; doğal rekor offline reload ile korunur.9 paket ve2 makbuz yayımlandı, sunucu özetleri ve gerçek APK/Mac indirmeleri doğrulandı. Fiziksel telefon/kol ve native iOS ayrı sınırlardır. Aşağıdakiler tarihî kayıtlardır.
