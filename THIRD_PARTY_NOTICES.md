@@ -1,5 +1,11 @@
 # Third-party notices
 
+## 0.23 arcade additions
+
+`assets/arcade-machines.png`, `assets/campaign-melee.png` and `assets/campaign-eren-melee.png` are three new owner-authorized AI-assisted outputs, comprising 48 machine and 36 close-attack drawings. Existing hero reference crops were taken from the approved public project artwork; no unrelated private project files were transferred. Generated PNG bytes are retained unchanged. `ARCADE-MACHINES-PROVENANCE.json` and `CAMPAIGN-MELEE-PROVENANCE.json` record hashes, generation identifiers, actual source silhouettes and anatomical/saddle anchors. All 62 prior PNGs are byte-identical to the starting repository. The existing MPL-2.0 artwork terms and AI-output limitations below apply. No claim of hand-drawn manufacture or final owner art approval is made.
+
+Metal Slug 3 is studied for game structure and arcade interaction only. No SNK sprites, music, maps, characters, names for new Aionia entities, or ripped artwork are included. The research citations are in `docs/ARCADE-PLAN.md`; the new mission, machines and Omega-3 story follow the user's Aionia request.
+
 Original game code is MPL-2.0 (`LICENSE`).
 
 ## Owner-authorized artwork
