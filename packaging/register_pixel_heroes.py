@@ -14,10 +14,10 @@ from scipy.signal import find_peaks,fftconvolve
 ROOT=Path(__file__).resolve().parents[1]
 HEROES=['aion','owl','sheep','wolf','rabbit','eren']
 ANIMATIONS=['idle','run','jump','gun-run','gun-fire','shoulder-roll','hurt-fall','freeze','burn','ash','special']
-SOURCES=['dc96f86c-5dbc-4086-ac2b-4213ff6c9edb','b558fb0b-9c7e-4cec-a607-1a5e524a237f','b14fe9f8-cd83-433a-ac5b-9e11ca8cc092','3a85d0bd-0b88-4616-bd48-4ebfd5a03c30','cc5e6f75-827e-4a6f-b045-1b0d18ff5189','006d49b9-1f9d-468b-b366-17b43d7daa79']
+SOURCES=['2ca57534-a51b-4b7a-a661-d15d512f8af1','b558fb0b-9c7e-4cec-a607-1a5e524a237f','61f185b1-e658-455a-99b5-bf53d00f17c6','3a85d0bd-0b88-4616-bd48-4ebfd5a03c30','cc5e6f75-827e-4a6f-b045-1b0d18ff5189','006d49b9-1f9d-468b-b366-17b43d7daa79']
 # Reviewed neutral near-eye landmarks. Full patches include cheek/nose/outline,
 # so a similarly coloured science badge, coat or muzzle cannot replace a face.
-NEUTRAL={'aion':[119,58],'owl':[150,58],'sheep':[145,68],'wolf':[114,63],'rabbit':[110,74],'eren':[151,55]}
+NEUTRAL={'aion':[178,97],'owl':[150,58],'sheep':[174,75],'wolf':[114,63],'rabbit':[110,74],'eren':[151,55]}
 
 def face_fit(q,t,expected=None,radius=None):
     q=q.astype(float)/255;t=t.astype(float)/255
@@ -54,8 +54,8 @@ def isolated(a,f):
     q[~mask]=0
     return q
 
-def atlas(hero):
-    path=ROOT/'assets'/('pixel-'+hero+'.png');a=np.array(Image.open(path).convert('RGBA'));h,w=a.shape[:2]
+def atlas(hero,path_override=None):
+    path=path_override or ROOT/'assets'/({'aion':'polish-aion.png','sheep':'polish-sheep.png'}.get(hero,'pixel-'+hero+'.png'));a=np.array(Image.open(path).convert('RGBA'));h,w=a.shape[:2]
     global_labels,_=label(a[:,:,3]>=192,np.ones((3,3)));objects=find_objects(global_labels)
     ys=cuts((a[:,:,3]>=192).sum(1),11);rows=[]
     for row in range(11):
@@ -68,7 +68,7 @@ def atlas(hero):
             for k in range(1,n+1):
                 if sizes[k]<max(4,sizes.max()*.002):continue
                 yy,xx=np.where(labs==k)
-                if (hero=='sheep' and yy.max()<bb[1]+(bb[3]-bb[1])*.3) or row in [7,8,9] or (row==4 and xx.min()>bb[0]+(bb[2]-bb[0])*.7):keep|=labs==k
+                if (hero=='sheep' and yy.min()>1 and yy.max()<bb[1]+(bb[3]-bb[1])*.3) or row in [7,8,9] or (row==4 and xx.min()>bb[0]+(bb[2]-bb[0])*.7):keep|=labs==k
             # A high ear / airborne foot can cross the row's nominal gutter.
             # Recover the COMPLETE connected silhouette from source coordinates,
             # without copying neighbouring sprites or changing source pixels.
@@ -93,7 +93,7 @@ def atlas(hero):
 def main():
     atlases={};arrays={}
     for hero in HEROES:arrays[hero],atlases['pixel-'+hero]=atlas(hero)
-    data={'version':'0.21.0','status':'New game rendering; owner art approval is separate from technical validation. Original source/model sheets retained.','method':'New drawn poses, unchanged original generated PNGs; registered isolated alpha spans, a single scale per hero and independently reviewed full-face probes.','animations':ANIMATIONS,'generation_sources':dict(zip(HEROES,SOURCES)),'atlases':atlases,'aliases':{},'muzzles':{}}
+    data={'version':'0.22.0','status':'New game rendering; owner art approval is separate from technical validation. Original source/model sheets retained.','method':'New drawn poses, unchanged original generated PNGs; registered isolated alpha spans, a single scale per hero and independently reviewed full-face probes.','animations':ANIMATIONS,'generation_sources':dict(zip(HEROES,SOURCES)),'atlases':atlases,'aliases':{},'muzzles':{}}
     data['reference_policy']='Owner model references and existing original sheets determine identity. The inline black-cat image informs pixel clusters/material lighting only; no cat pixels, outfit or species are incorporated. Private references are not republished.'
     data['identities']={'aion':'Pink axolotl; cyan-tipped pink gills, blue eyes, white scientist coat/badges and DNA tail.','owl':'Orange/brown owl; cream facial disk/chest, amber eyes, feathered wings and yellow beak/talons.','sheep':'Cream wool sheep; amber eyes, drooping ears, brown hooves and gold halo.','wolf':'Purple/gray wolf; cyan eyes, cream muzzle/chest/tailtip, purple forearm rune; no shirt or lab coat.','rabbit':'Emre: tan rabbit, green eyes, blue shirt/plain red tie, dark trousers, bare rabbit feet.','eren':'Eren: orange-brown rabbit, dark plum eyes/black eyelashes, freckles, spiky cheek tufts, dark teal jacket/striped tie, brown shoes.'}
     report=[]
@@ -102,7 +102,7 @@ def main():
         ref=a['frames'][0][0];eye=NEUTRAL[hero];x,y=eye[0]-15,eye[1]-17
         t=isolated(source,ref)[y:y+38,x:x+43]
         target=[14.,float((eye[1]-ref['body_bounds'][3])*factor)]
-        a['target_eye']=target;a['head_spans']=[float({'aion':95,'owl':83,'sheep':100,'wolf':84,'rabbit':60,'eren':70}[hero])]*11
+        a['target_eye']=target;a['head_spans']=[float({'aion':80,'owl':83,'sheep':86,'wolf':84,'rabbit':60,'eren':70}[hero])]*11
         for row in [0,1,2,3,4,7,8,10]:
             target_row=target.copy()
             if row==10 and hero=='wolf':target_row[1]=-39.
@@ -146,13 +146,15 @@ def main():
         a['frames'].append(a['frames'][6][2:]);a['row_counts'].append(4)
         a['scale'].append(a['scale'][0]);a['anchor_x'].append(0);a['head_spans'].append(a['head_spans'][0])
     data['aliases']['deaths']=[{'atlas':'pixel-'+hero,'row':r} for hero in HEROES for r in [6,11]]
-    data['new_drawn_poses']=396
+    data['new_drawn_poses']=132
+    data['retained_drawn_poses']=264
+    data['biped_sheep']='Original model has two legs and two separate forearms. Ground running and pistol running are authored upright biped clips; rolling briefly uses forelimb support.'
     data['playback_note']='Rows0..10 are the 396 unique authored source drawings. Virtual row11 reuses four forward-fall drawings per hero for enemy faceplants; it is not counted as new artwork.'
     data['face_registration']=report
     # A first-pass contact sheet is for manual anatomical registration review.
-    preview=Image.new('RGBA',(1200,260),(30,27,37,255))
+    preview=Image.new('RGBA',(1800,260),(30,27,37,255))
     for i,hero in enumerate(HEROES):
-        f=atlases['pixel-'+hero]['frames'][0][0];q=Image.fromarray(isolated(arrays[hero],f));preview.alpha_composite(q,(200*i,0))
+        f=atlases['pixel-'+hero]['frames'][0][0];q=Image.fromarray(isolated(arrays[hero],f));preview.alpha_composite(q,(300*i,0))
         print(hero,'first neutral crop',f['rect'],'body',f['body_bounds'],'scale',atlases['pixel-'+hero]['scale'][0])
     out=ROOT/'build/pixel-review';out.mkdir(parents=True,exist_ok=True);preview.save(out/'neutral-contact-sheet.png')
     (ROOT/'assets/PIXEL-HEROES-PROVENANCE.json').write_text(json.dumps(data,separators=(',',':'))+'\n')

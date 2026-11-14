@@ -18,11 +18,11 @@ async def run():
   # between movement samples. Software DPR3 rendering must not turn a rapid
   # gesture into a long hold while Python waits on individual acknowledgements.
   await asyncio.gather(cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y,'id':3}]}),cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x,'y':y+80,'id':3}]}),cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]}))
-  await page.wait_for_function("swipeSamples.some(p=>p.duck&&p.source==='pixel-aion'&&p.row===5)",timeout=3000);await page.keyboard.press('Escape');await page.wait_for_selector('canvas[data-page="paused"]');samples=await page.evaluate('swipeSamples');v=await data();checks=[]
+  await page.wait_for_function("swipeSamples.some(p=>p.duck&&p.source==='polish-rolls'&&p.row===0)",timeout=3000);await page.keyboard.press('Escape');await page.wait_for_selector('canvas[data-page="paused"]');samples=await page.evaluate('swipeSamples');v=await data();checks=[]
   def check(ok,label):
    assert ok,(label,v.get('touchTrace'),samples)
    checks.append(label);print('PASS',label,flush=True)
-  check(any(p['duck'] and p['y']==0 and p['source']=='pixel-aion' and p['row']==5 for p in samples),'Actual DPR3 downward touch reaches the drawn ground shoulder roll')
+  check(any(p['duck'] and p['y']==0 and p['source']=='polish-rolls' and p['row']==0 for p in samples),'Actual DPR3 downward touch reaches the drawn ground shoulder roll')
   check(max(p['jumps'] for p in samples)==0,'The gesture never creates a jump')
   check(v['touchFingers']=='0' and v['touchSwipes']=='1','One real gesture produces one roll and releases its finger')
   check(not errors,'No browser errors during the trusted touch gesture');await page.screenshot(path=str(a.evidence/'dpr3-swipe-paused.png'));(a.evidence/'results.json').write_text(json.dumps({'checks':checks,'errors':errors,'samples':samples,'build':await page.evaluate('AION_BUILD'),'scope':'Trusted rapid CDP touch start/move/end in a Chromium DPR3 context. No state injection; no physical-device claim.'},ensure_ascii=False,indent=2)+'\n');await c.close();await b.close()

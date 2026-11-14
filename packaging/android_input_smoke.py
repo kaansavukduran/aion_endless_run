@@ -52,6 +52,12 @@ gesture=hold('jump',2200)
 try:
  latest('AION_STATE ',lambda s:s['gliding'] and s['airborne']);capture('owl-glide');check(True,'Real native Jump hold reaches an airborne owl glide')
 finally:gesture.wait(timeout=5)
+for flap in range(1,4):
+ gesture=hold('jump',350)
+ try:
+  latest('AION_STATE ',lambda s:s['airborne'] and s['owl_flaps_used']==flap)
+  check(True,'Real native Jump repress consumes airborne flap '+str(flap))
+ finally:gesture.wait(timeout=5)
 pause();capture('paused');main()
 menu_button(name='StartSelect_aion');latest('AION_UI ',lambda s:s['character']=='aion' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 gesture=hold('shoot',700)
@@ -70,8 +76,9 @@ try:latest('AION_STATE ',lambda s:s['rolling']);capture('duck');check(True,'Real
 finally:gesture.wait(timeout=5)
 pause();main();menu_button(name='StartSelect_eren');latest('AION_UI ',lambda s:s['character']=='eren' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 gesture=hold('jump',500)
-try:latest('AION_STATE ',lambda s:s['airborne'] and not s['charging']);capture('eren');check(True,'Eren is independently selectable and jumps without Emre charge')
+try:latest('AION_STATE ',lambda s:s['charging'] and not s['airborne']);check(True,'Native Eren independently charges while grounded')
 finally:gesture.wait(timeout=5)
+latest('AION_STATE ',lambda s:s['airborne'] and not s['charging']);capture('eren');check(True,'Native Eren releases his own charged leap')
 pause();main();menu_button(name='StartSelect_rabbit');latest('AION_UI ',lambda s:s['character']=='rabbit' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 gesture=hold('jump',1000)
 try:

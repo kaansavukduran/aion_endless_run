@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.21.0"
+const GAME_VERSION = "0.22.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -1227,14 +1227,14 @@ func update_hud() -> void:
 		if active_input=="gamepad":
 			ability_label.text=text("pad_ability_"+character)
 			if character!="sheep":ability_label.text=ability_label.text % gamepad.binding_name("boost" if character=="wolf" else "jump")
-		if portrait and character=="rabbit" and active_input=="gamepad":ability_label.text=gamepad.binding_name("jump")+" ↑"
+		if portrait and character in World.CHARGE_HEROES and active_input=="gamepad":ability_label.text=gamepad.binding_name("jump")+" ↑"
 		if world.frontier.active(): ability_label.text = text("boss_hearts") % world.frontier.player_hp
 		elif character == "sheep": ability_label.text = text("flock") % world.sheep_count
 		elif world.charging:
 			ability_label.text="↑ %d%%" % roundi(world.charge_ratio()*100)
 			ability_label.accessibility_name=text("charging") % roundi(world.charge_ratio()*100)
 		elif world.riding_gust: ability_label.text = text("riding_gust") if world.wind_kind() == "up" else text("riding_"+world.wind_kind())
-		elif world.gliding: ability_label.text = text("gliding")
+		elif world.gliding: ability_label.text = text("owl_flaps") % maxi(0,World.OWL_FLAPS-world.owl_flaps_used)
 		elif world.boosting(): ability_label.text = text("boosting")
 		if portrait and touch_mode:
 			# The narrow lane above Jump shows live ability state. Full input
@@ -1243,7 +1243,7 @@ func update_hud() -> void:
 			if character=="sheep":ability_label.text=ability_label.text.replace("・","·").get_slice("·",0).strip_edges()
 			elif world.charging:ability_label.text="↑ %d%%" % roundi(world.charge_ratio()*100)
 			elif world.riding_gust:ability_label.text="↑" if world.wind_kind()=="up" else ("→" if world.wind_kind()=="forward" else "↑→")
-			elif world.gliding:ability_label.text=text("gliding")
+			elif world.gliding:ability_label.text=text("owl_flaps") % maxi(0,World.OWL_FLAPS-world.owl_flaps_used)
 			elif world.boosting():ability_label.text=text("boosting")
 			elif character=="aion":ability_label.text="↑ ×%d" % maxi(0,2-world.jumps_used)
 			else:ability_label.hide()
@@ -1262,6 +1262,7 @@ func publish_web_status() -> void:
 	stamp += ":" + str(world.adventure.hug_time) + ":" + str(world.adventure.attack_variant) + ":" + str(world.adventure.mushroom_chance) + ":" + str(prism_intensity)
 	stamp += ":" + world.frontier.phase + ":" + str(world.frontier.hp) + ":" + str(world.frontier.shot_flash)
 	stamp += ":" + str(language_picker_open)+":"+interface_options.theme_mode+":"+str(interface_options.dark)+":"+interface_options.font_mode+":"+str(interface_options.text_scale)+":"+str(interface_options.reduced_motion)+":"+active_input
+	stamp += ":"+str(world.owl_flaps_used)+":"+str(world.owl_flap_time)
 	stamp += ":"+interface_options.touch_layout
 	if world.frontier.storytelling():stamp+=":"+str(world.frontier.story_index)+":"+str(world.frontier.story_time)
 	stamp += ":" + str(effects_enabled) + ":" + str(motion) + ":" + str(audio_enabled) + ":" + str(world.adventure.celebrations_enabled)
@@ -1349,6 +1350,8 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-attacking", str(world.adventure.attack_time > 0.0))
 	canvas.setAttribute("data-swing-id",str(world.adventure.swing_id))
 	canvas.setAttribute("data-jump-held",str(world.jump_held))
+	canvas.setAttribute("data-owl-flaps-left",str(World.OWL_FLAPS-world.owl_flaps_used))
+	canvas.setAttribute("data-owl-flap-time",str(world.owl_flap_time))
 	canvas.setAttribute("data-charging",str(world.charging))
 	canvas.setAttribute("data-charge-ratio",str(world.charge_ratio()))
 	canvas.setAttribute("data-menu-page",str(menu_pages.current))
@@ -1557,10 +1560,12 @@ func update_friend() -> void:
 		var shooting: int = world.frontier.gun_frame(frames.count(key,row)) if firing else frames.cycle(key,row,world.travel_distance(),174.0)
 		if not motion: shooting = 3 if firing else 0
 		frames.place(friend_sprite,key,row,shooting,Vector2(World.PLAYER_X,ground+world.y))
+	if character=="owl" and world.owl_flap_time>0 and world.state in ["running","paused"] and not a.ducking(world):
+		frames.place(friend_sprite,"owl-flap",0,frames.progress("owl-flap",0,1-world.owl_flap_time/World.OWL_FLAP_DURATION) if motion else 2,Vector2(World.PLAYER_X,ground+world.y))
 	if world.state in ["running","paused"] and not a.ducking(world) and not a.hugging() and (world.y<0 or world.boosting() or (world.state=="paused" and character=="wolf" and friend_row==6)):
 		place_held_gun()
 	if world.charging:
-		frames.place(friend_sprite,"runner-rabbit",6,frames.progress("runner-rabbit",6,world.charge_ratio()),Vector2(World.PLAYER_X,ground))
+		frames.place(friend_sprite,"runner-"+character,6,frames.progress("runner-"+character,6,world.charge_ratio()),Vector2(World.PLAYER_X,ground))
 		place_held_gun()
 		gun_echo.position.y+=14
 	if world.state == "bonk":
@@ -1656,6 +1661,9 @@ func flight_frame(velocity: float, air_time: float, frame_count: int = 12) -> in
 
 func place_companion(item: Sprite2D, id: String, row: int, frame: int, anchor: Vector2, scale_value: float = 0.62, action: bool = false) -> void:
 	if id in ["rabbit","eren"]:action=false
+	if id=="owl" and action:
+		action=false
+		row=6
 	var key := "actions" if action else "runner-"+id
 	var actual_row: int = int(ACTION_DATA.data.characters[id].row) if action else row
 	frames.place(item,key,actual_row,frame,anchor,scale_value/0.62)
@@ -1727,9 +1735,8 @@ func _draw() -> void:
 		draw_texture_rect(tex,Rect2(Vector2(o.x-38,ground+3-tex.get_height()*factor).round(),tex.get_size()*factor),false)
 	for pickup in world.pickups:
 		var kind: int=maxi(0,world.orchard.KINDS.find(str(pickup.get("kind","apple"))))
-		var pose: Dictionary=frames.pose("fruits",kind/4,kind%4)
-		var spec: Dictionary=frames.ORCHARD.data.atlas.frames[kind/4][kind%4]
-		var factor: float=spec.display_scale
+		var pose: Dictionary=frames.pickup_pose(world.orchard.KINDS[kind])
+		var factor: float=pose.scale
 		var bob: float=sin(animation_clock()*3.5+float(pickup.get("id",0)))*2.0 if decorative_motion() else 0.0
 		var point:=Vector2(pickup.x,ground+pickup.y+bob)
 		draw_texture_rect(pose.texture,Rect2((point+pose.offset*factor).round(),pose.texture.get_size()*factor),false)

@@ -45,4 +45,4 @@ func foreground(host,scroll: float,night: float) -> void:
 		var pose: Dictionary=host.frames.pose("flora",kind,frame)
 		var tint:=Color.WHITE.lerp(Color("7b80a1"),night*.4)
 		tint.a=.88
-		host.draw_texture_rect(pose.texture,Rect2((Vector2(x,host.ground-5)+pose.offset*float(pose.scale)).round(),pose.texture.get_size()*float(pose.scale)),false,tint)
+		host.draw_texture_rect(pose.texture,Rect2((Vector2(x,host.ground)+pose.offset*float(pose.scale)).round(),pose.texture.get_size()*float(pose.scale)),false,tint)

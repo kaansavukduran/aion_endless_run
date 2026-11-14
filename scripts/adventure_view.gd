@@ -14,7 +14,7 @@ func atlas(name: String, row: int, frame: int, anchor: Vector2, width: float, ce
 	var tex: Texture2D = f.texture
 	var factor: float = width/f.cell_width
 	var offset: Vector2 = f.offset
-	if centered: offset.y = f.top-f.cell_height*0.5-2
+	if centered and f.get("registration","")!="body-air": offset.y = f.top-f.cell_height*0.5-2
 	draw_texture_rect(tex,Rect2((anchor+offset*factor).round(),tex.get_size()*factor),false)
 
 func creature(enemy: Dictionary, ground: float) -> void:
@@ -66,14 +66,12 @@ func _draw() -> void:
 	for item in a.items:
 		var bob := sin(clock * 4.0 + item.id) * 3.0
 		var point := Vector2(item.x, ground + item.y + bob)
-		var frame: int = host.frames.cycle("power",0,clock,1.0)
 		if item.kind=="fragaria":
 			draw_texture_rect(FRAGARIA,Rect2(point-Vector2(22,42),Vector2(44,62)),false)
-		elif item.kind in ["spring","fortune","frost"]: PixelArt.item(self,point,item.kind)
-		elif item.kind == "mushroom": atlas("power", 0, frame, point, 63, true)
 		else:
-			var icons := {"lightning":0,"slow":1,"haste":2,"shield":3,"magnet":4,"leaf":5}
-			atlas("power",int(icons[item.kind])+1,host.frames.cycle("power",int(icons[item.kind])+1,clock,1.0),point,46,true)
+			var icon: Dictionary=host.frames.pickup_pose(item.kind)
+			var texture: Texture2D=icon.texture
+			draw_texture_rect(texture,Rect2((point+icon.offset*float(icon.scale)).round(),texture.get_size()*float(icon.scale)),false)
 	for enemy in a.enemies:
 		if enemy.kind in ["bat","slime","beetle","wisp"]:
 			creature(enemy,ground)
@@ -90,7 +88,7 @@ func _draw() -> void:
 		elif enemy.kind == "gnome" and enemy.x < world.PLAYER_X + 160:
 			row = 4
 			frame = host.frames.cycle("enemies",row,clock,0.75)
-		var anchor := Vector2(enemy.x, ground + enemy.y + (24.0 if enemy.kind == "crow" else 23.0))
+		var anchor := Vector2(enemy.x, ground + enemy.y + (0.0 if enemy.kind == "crow" else 23.0))
 		atlas("enemies", row, frame, anchor, 80 if enemy.kind == "crow" else 65)
 		if enemy.hp > 0 and enemy.hp < enemy.max_hp:
 			draw_rect(Rect2(enemy.x - 15, ground + enemy.y - 39, 30, 4), Color("34283c"))

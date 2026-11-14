@@ -5,6 +5,12 @@ const PLAYER_X := 288.0
 const GRAVITY := 1700.0
 const JUMP_SPEED := -650.0
 const CHARGE_SECONDS := 1.2
+const CHARGE_HEROES := ["rabbit","eren"]
+const OWL_FLAPS := 3
+const OWL_FLAP_SPEED := -280.0
+const OWL_FLAP_DURATION := 0.30
+var owl_flaps_used := 0
+var owl_flap_time := 0.0
 var charging := false
 var charge_time := 0.0
 var charged_jump_multiplier := 1.0
@@ -82,6 +88,8 @@ func reset() -> void:
 	charge_time = 0.0
 	charged_jump_multiplier = 1.0
 	jumps_used = 0
+	owl_flaps_used = 0
+	owl_flap_time = 0.0
 	jump_held = false
 	boost_held = false
 	gliding = false
@@ -129,10 +137,20 @@ func biome() -> int:
 
 func jump() -> void:
 	if state != "running" or adventure.hugging() or frontier.storytelling(): return
-	if character=="rabbit":
+	if character in CHARGE_HEROES:
 		if y>=0 and not adventure.ducking(self) and not charging:
 			charging=true
 			charge_time=0.0
+		return
+	if character=="owl" and y<0:
+		if owl_flaps_used<OWL_FLAPS:
+			owl_flaps_used+=1
+			owl_flap_time=OWL_FLAP_DURATION
+			velocity=minf(velocity,OWL_FLAP_SPEED)
+			gliding=true
+			air_time=0.0
+			jump_buffer=0.0
+			event("owl_flap")
 		return
 	if y < 0.0 and character == "aion" and jumps_used < 2:
 		velocity = JUMP_SPEED * adventure.jump_multiplier() * (1.12 if character=="rabbit" else 1.0)
@@ -154,7 +172,7 @@ func release_charged_jump() -> void:
 	if not charging:return
 	var power:=charge_ratio()
 	cancel_charge()
-	if character!="rabbit" or state!="running" or y<0 or adventure.hugging():return
+	if character not in CHARGE_HEROES or state!="running" or y<0 or adventure.hugging():return
 	charged_jump_multiplier=lerpf(0.65,1.35,power)
 	jump_buffer=0.12
 
@@ -274,7 +292,7 @@ func step(dt: float) -> void:
 	if not frontier.active(): advance_gusts(movement)
 	invulnerable = maxf(0.0, invulnerable - dt)
 	if jump_buffer > 0.0 and y >= 0.0:
-		velocity = JUMP_SPEED * adventure.jump_multiplier() * (charged_jump_multiplier if character=="rabbit" else 1.0)
+		velocity = JUMP_SPEED * adventure.jump_multiplier() * (charged_jump_multiplier if character in CHARGE_HEROES else 1.0)
 		jumps_used = 1
 		air_time = 0.0
 		landing_time = 0.0
@@ -289,10 +307,13 @@ func step(dt: float) -> void:
 	if riding_gust:
 		velocity = move_toward(velocity, WIND_RISE_SPEED * wind_components().y, 850.0 * gust_strength() * dt)
 		if not was_riding: event("updraft")
+	elif owl_flap_time>0:
+		velocity += GRAVITY * 0.65 * dt
 	elif gliding:
 		velocity = minf(GLIDE_FALL_SPEED, velocity + GRAVITY * 0.18 * dt)
 	else:
 		velocity += GRAVITY * dt
+	owl_flap_time=maxf(0.0,owl_flap_time-dt)
 	y = minf(0.0, y + velocity * dt)
 	if character == "owl" and y < WIND_CEILING:
 		y = WIND_CEILING
@@ -301,6 +322,8 @@ func step(dt: float) -> void:
 	if y >= 0.0:
 		velocity = 0.0
 		jumps_used = 0
+		owl_flaps_used = 0
+		owl_flap_time = 0.0
 		gliding = false
 		riding_gust = false
 		air_time = 0.0

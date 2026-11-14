@@ -52,10 +52,10 @@ func ability_tests() -> void:
 	var v: float = owl.velocity
 	owl.jump()
 	owl.step(1.0 / 60)
-	check(owl.jumps_used == 1 and owl.velocity >= v, "Owl has one jump and cannot gain height by pressing again")
+	check(owl.jumps_used == 1 and owl.owl_flaps_used == 1 and owl.velocity < v, "A fresh airborne press produces a separate real flap without another ground jump")
 	owl.jump_held = false
 	owl.step(1.0 / 60)
-	check(not owl.gliding and owl.velocity > World.GLIDE_FALL_SPEED, "Release immediately restores normal falling gravity")
+	check(not owl.gliding and owl.velocity > World.OWL_FLAP_SPEED, "Release stops glide while the physical flap momentum remains continuous")
 	var flights := []
 	for held in [false, true]:
 		owl.reset()

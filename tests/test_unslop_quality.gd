@@ -37,7 +37,7 @@ func run():
   check(low.height<upright.height*(.85 if row>=4 else .80),"Visible knee/hand bend lowers the hero: "+str(row))
   for i in n:
    bank.place(sprite,"rolls",row,i,Vector2(288,500))
-   check(sprite.position==Vector2(288,500) and is_equal_approx(sprite.scale.x,upright.scale),"No physical-position or per-frame scale workaround")
+   check(sprite.position==Vector2(288,500) and is_equal_approx(sprite.scale.x,bank.pose("rolls",row,0).scale),"No physical-position or per-frame scale workaround")
  var w=World.new();w.reset();w.obstacle_wait=999;w.adventure.item_wait=999;w.frontier.plant_wait=999;w.adventure.ambient_gnome_wait=999;w.adventure.press_roll(w)
  for tick in 100:w.step(.01)
  check(w.adventure.ducking(w) and w.adventure.roll_frame()==3,"Held shoulder-roll repeats the low authored poses without rotating a bitmap")
@@ -62,8 +62,8 @@ func run():
    g.press_shoot("key")
    for tick in 220:g.world.step(.01)
    check(g.world.frontier.shots_fired>=6,"Normal firearm input continues after five bullets")
-   g.release_shoot("key");g.press_jump("key");g.world.step(.01);g.update_friend()
-   check(g.world.y<0 and not g.world.charging and g.friend_sprite.get_meta("source_key")=="pixel-eren","Eren jumps using his own art, independently of Emre")
+   g.release_shoot("key");g.press_jump("key");g.world.step(.01);check(g.world.charging and g.world.y==0,"Eren holds on the ground before release");g.release_jump("key");g.world.step(.01);g.update_friend()
+   check(g.world.y<0 and not g.world.charging and g.friend_sprite.get_meta("source_key")=="polish-abilities","Eren jumps using his own art, independently of Emre")
    g.release_jump("key");g.main_menu()
  root.size=Vector2i(393,873);await process_frame;g.touch_mode=true;g.interface_options.text_scale=1.0;g.active_input="touch"
  for lang in g.Words.LANGUAGES:

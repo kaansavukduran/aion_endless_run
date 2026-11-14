@@ -74,14 +74,13 @@ func _draw() -> void:
 	centered("Fragaria Interactive",Vector2(x,y+112),34)
 	var bar_y:=logical.y*.63 if portrait else logical.y*.64
 	centered(phrases[lang][2 if failed else (1 if starting else 0)],Vector2(x,bar_y-44),24)
-	centered((str(floori(progress*100))+"%") if progress>=0 else "…",Vector2(x,bar_y-12),24,Color("97ff52"))
+	centered((str(floori(progress*100))+"%") if progress>=0 else "…",Vector2(x,bar_y-12),24,Color("ed394e"))
 	var width:=360.0
 	draw_rect(Rect2(x-width*.5-6,bar_y,width+12,38),Color("403a4e"))
 	for i in 10:
 		var filled: bool=progress>=0 and i<floori(progress*10)
 		var color:=Color("d7d7da")
-		if filled:color=Color("ed394e") if i<3 else (Color("f88c9a") if i<7 else Color("97ff52"))
-		if progress<0 and i in [4,5]:color=Color("97ff52")
+		if filled or progress<0:color=Color("ed394e")
 		draw_rect(Rect2(x-width*.5+i*36+2,bar_y+5,32,28),color)
 	draw_string(PIXEL,Vector2(20,logical.y-22),"v"+str(ProjectSettings.get_setting("application/config/version")),HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color.WHITE)
 	if is_instance_valid(retry):

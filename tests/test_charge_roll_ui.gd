@@ -34,7 +34,7 @@ func run():
   for frame in 6:
    bank.place(sprite,"rolls",row,frame,Vector2(288,500))
    var pose:=bank.pose("rolls",row,frame)
-   check(sprite.position==Vector2(288,500) and is_equal_approx(sprite.scale.x,first.scale),"Fixed physical pivot and one uniform scale: "+str(row)+"/"+str(frame))
+   check(sprite.position==Vector2(288,500) and is_equal_approx(sprite.scale.x,bank.pose("rolls",row,0).scale),"Fixed physical pivot and one uniform scale: "+str(row)+"/"+str(frame))
    check(absf(sprite.position.y+(pose.offset.y+pose.texture.get_height()-2)*pose.scale-500)<.01,"Every pose contacts the actual ground")
  sprite.free()
  for tick in range(20,200):check(w.adventure.roll_pose(tick*.02,0,true)==posmod(int(tick*.02/.62*6),6),"Held low roll repeats all six authored frames on a continuous 0.62s cycle")

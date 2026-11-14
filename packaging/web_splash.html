@@ -10,15 +10,15 @@ html,body{margin:0;background:#000;overflow:hidden;overscroll-behavior:none}
 .fragaria-loading-label{font-family:AionPixel,monospace;font-size:24px;text-align:center;margin-bottom:12px}
 html[data-boot-state="failed"] .fragaria-segments,html[data-boot-state="failed"] .fragaria-loading-label{display:none}
 .fragaria-download{width:min(76vw,380px);text-align:left}
-#aion-loading-percent{display:block;text-align:center;color:#97ff52;font-size:20px;min-height:24px}
+#aion-loading-percent{display:block;text-align:center;color:#ed394e;font-size:20px;min-height:24px}
 #status-progress{position:absolute!important;width:1px!important;height:1px!important;opacity:0;overflow:hidden}
 .fragaria-segments{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;height:22px;padding:3px;background:#17121c;border:3px solid #403a4e;margin:8px 0}
-.fragaria-segments i{background:#d7d7da}.fragaria-segments i.filled{background:#ed394e}.fragaria-segments i.filled:nth-child(n+4){background:#f88c9a}.fragaria-segments i.filled:nth-child(n+8){background:#97ff52}
-.fragaria-segments.indeterminate i{background:#d7d7da}.fragaria-segments.indeterminate i:nth-child(5),.fragaria-segments.indeterminate i:nth-child(6){background:#97ff52}
-#status-notice button{font:inherit;min-height:48px;padding:8px 16px;color:#fff;background:#81374e;border:2px solid #fff5e5}#status-notice button:focus-visible{outline:3px solid #97ff52;outline-offset:4px}
+.fragaria-segments i{background:#d7d7da}.fragaria-segments i.filled{background:#ed394e}
+.fragaria-segments.indeterminate i{background:#ed394e;opacity:.65}
+#status-notice button{font:inherit;min-height:48px;padding:8px 16px;color:#fff;background:#81374e;border:2px solid #fff5e5}#status-notice button:focus-visible{outline:3px solid #ed394e;outline-offset:4px}
 #status-progress::-webkit-progress-bar{background:#d7d7da}
-#status-progress::-webkit-progress-value{background:repeating-linear-gradient(90deg,transparent 0 28px,#17121c 28px 31px),linear-gradient(90deg,#ed142a,#f45b66,#8efd3c)}
-#status-progress::-moz-progress-bar{background:repeating-linear-gradient(90deg,transparent 0 28px,#17121c 28px 31px),linear-gradient(90deg,#ed142a,#f45b66,#8efd3c)}
+#status-progress::-webkit-progress-value{background:repeating-linear-gradient(90deg,transparent 0 28px,#17121c 28px 31px),linear-gradient(90deg,#ed394e,#ed394e)}
+#status-progress::-moz-progress-bar{background:repeating-linear-gradient(90deg,transparent 0 28px,#17121c 28px 31px),linear-gradient(90deg,#ed394e,#ed394e)}
 #status-notice{position:static!important;display:block;max-width:100%;box-sizing:border-box;white-space:normal;background:none!important;border:0!important;padding:8px 0!important;margin:0!important;font-family:system-ui,sans-serif;font-size:20px!important;line-height:1.35;color:#eee!important;text-align:center}
 .fragaria-version{font-family:AionPixel,monospace;position:absolute;bottom:max(18px,env(safe-area-inset-bottom));left:max(20px,env(safe-area-inset-left));font-size:16px}
 @media(orientation:portrait){.fragaria-brand{gap:12px}.fragaria-shell{gap:clamp(20px,5vh,50px)}#status .fragaria-brand img{height:132px!important}.fragaria-name{font-size:32px}}

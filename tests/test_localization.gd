@@ -50,7 +50,7 @@ func run() -> void:
 	# Head/ear span remains anatomically constant when poses lean or extend.
 	# Whole-pose height intentionally varies with bent knees and outstretched wings.
 	for id in ["owl","wolf","sheep"]:
-		var expected: float={"owl":57.434599,"wolf":52.380228,"sheep":63.076923}[id]
+		var expected: float={"owl":57.434599,"wolf":52.380228,"sheep":64.109091}[id]
 		var sizes_ok := true
 		for row in [0,1,2,6,7]:
 			for frame in 6:
@@ -65,9 +65,9 @@ func run() -> void:
 	game.world.sheep_count = 3
 	game.world.y = 0.0
 	game.update_friend()
-	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),63.076923),"Leader sheep keeps its normal anatomical size")
+	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),64.109091),"Leader sheep keeps its normal anatomical size")
 	for item in game.followers:
-		check(is_equal_approx(float(item.get_meta("head_size")),63.076923*0.72),"Each following sheep is 72 percent of normal anatomical size")
+		check(is_equal_approx(float(item.get_meta("head_size")),64.109091*0.72),"Each following sheep is 72 percent of normal anatomical size")
 	game.place_companion(game.friend_sprite,"owl",6,2,Vector2.ZERO,0.62*1.65,true)
 	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),57.434599*1.65),"Explicit mushroom growth remains independent of pose")
 	game.set_language("cs")

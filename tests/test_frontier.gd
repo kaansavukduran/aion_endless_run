@@ -157,7 +157,7 @@ func run() -> void:
 	game.set_physics_process(false)
 	for id in game.FRIENDS:
 		var legacy_target: float=84.0*game.frames.EREN.data.atlas.scale[0] if id=="eren" else (53.2 if id=="rabbit" else (70.0 if id == "aion" else 65.0))
-		var target: float={"aion":60.859375,"owl":57.434599,"sheep":63.076923,"wolf":52.380228,"rabbit":36.923077,"eren":53.004115}[id]
+		var target: float={"aion":63.689320,"owl":57.434599,"sheep":64.109091,"wolf":52.380228,"rabbit":36.923077,"eren":53.004115}[id]
 		for row in ([0,1,2] if id == "aion" else [0,1,2,6,7]):
 			for frame in 6:
 				game.place_companion(game.friend_sprite,id,row,frame,Vector2.ZERO)

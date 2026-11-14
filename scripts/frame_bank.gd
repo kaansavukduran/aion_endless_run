@@ -12,6 +12,7 @@ const FLORA=preload("res://assets/FLORA-PROVENANCE.json")
 const LOW_ROLLS=preload("res://assets/LOW-ROLLS-PROVENANCE.json")
 const SHOULDERS=preload("res://assets/SHOULDER-POSES-PROVENANCE.json")
 const EREN=preload("res://assets/EREN-PROVENANCE.json")
+const POLISH=preload("res://assets/POLISH-PROVENANCE.json")
 const PIXEL=preload("res://assets/PIXEL-HEROES-PROVENANCE.json")
 const ORCHARD = preload("res://assets/ORCHARD-PROVENANCE.json")
 const STORY=preload("res://assets/STORY-PROVENANCE.json")
@@ -20,6 +21,9 @@ var frames := {}
 
 func descriptor(key: String,row: int) -> Dictionary:
 	if key=="boss-story-reactions":return {"key":key,"row":row,"data":STORY.data.atlas}
+	if POLISH.data.aliases.has(key) and row<POLISH.data.aliases[key].size() and POLISH.data.aliases[key][row]!=null:
+		var alias: Dictionary=POLISH.data.aliases[key][row]
+		return {"key":alias.atlas,"row":int(alias.row),"data":POLISH.data.atlases[alias.atlas]}
 	if PIXEL.data.aliases.has(key):
 		var pixel: Dictionary=PIXEL.data.aliases[key][row]
 		return {"key":pixel.atlas,"row":int(pixel.row),"data":PIXEL.data.atlases[pixel.atlas]}
@@ -132,3 +136,8 @@ func place(item: Sprite2D,key: String,row: int,column: int,anchor: Vector2,growt
 	if f.has("foot_local"): item.set_meta("foot_world",item.position+(f.offset+f.foot_local)*float(f.scale)*growth)
 	if f.has("eye_local"): item.set_meta("eye_world",item.position+(f.offset+f.eye_local)*float(f.scale)*growth)
 	if f.has("probe_local"): item.set_meta("head_probe_world",item.position+(f.offset+f.probe_local)*float(f.scale)*growth)
+
+func pickup_pose(kind: String) -> Dictionary:
+	var index: int=POLISH.data.pickup_order.find(kind)
+	assert(index>=0,"Unregistered collectible: "+kind)
+	return pose("pickups",index/6,index%6)
