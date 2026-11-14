@@ -37,6 +37,7 @@ var section := "shore"
 var player := Vector2(140, 0)
 var velocity := Vector2.ZERO
 var facing := 1
+var aim_direction := Vector2.RIGHT # Eight-direction Arcade fire; not the Endless runner
 var move_axis := Vector2.ZERO
 var time := 0.0
 var run_seed := 7719
@@ -132,7 +133,7 @@ func begin(hero: String) -> void:
 	state = "briefing"
 
 func stop_inputs() -> void:
-	move_axis = Vector2.ZERO; fire_held = false; jump_held = false
+	move_axis = Vector2.ZERO; aim_direction = Vector2(facing,0.); fire_held = false; jump_held = false
 	charging = false; charge_time = 0.; boost_held = false; gliding = false
 	melee_latched = false
 	rescue_latched=false
@@ -258,6 +259,8 @@ func jump_release(launch: bool = true) -> void:
 		charging = false; charge_time = 0.
 
 func close_enemy() -> Dictionary:
+	# Up/down aiming is ranged fire, never an accidental knife/rescue.
+	if absf(aim_direction.y) > .25: return {}
 	for e in enemies:
 		if bool(e.defeated): continue
 		var dx: float = (float(e.x)-player.x)*facing
@@ -267,7 +270,7 @@ func close_enemy() -> Dictionary:
 
 func attack_press() -> void:
 	if state != "playing": return
-	if not fire_held and close_enemy().is_empty() and CampaignRescue.begin(self):return
+	if not fire_held and absf(aim_direction.y)<.25 and close_enemy().is_empty() and CampaignRescue.begin(self):return
 	if rescue_time>0. or rescue_latched:return
 	fire_held = true; melee_latched = false
 	attack()
