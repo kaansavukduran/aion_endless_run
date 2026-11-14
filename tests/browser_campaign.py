@@ -6,7 +6,7 @@ import argparse,json,math,time,os,shutil
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-p=argparse.ArgumentParser();p.add_argument('--url',required=True);p.add_argument('--evidence',type=Path,required=True);p.add_argument('--route',choices=['water','terrace','roots'],default='water');p.add_argument('--play-through',action='store_true');p.add_argument('--browser',choices=['chromium','firefox'],default='chromium');p.add_argument('--offline',action='store_true');a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--url',required=True);p.add_argument('--evidence',type=Path,required=True);p.add_argument('--route',choices=['water','terrace','roots'],default='water');p.add_argument('--play-through',action='store_true');p.add_argument('--browser',choices=['chromium','firefox'],default='chromium');p.add_argument('--offline',action='store_true');p.add_argument('--expanded-rescue',action='store_true');p.add_argument('--rescue-only',action='store_true');p.add_argument('--record-video',action='store_true');p.add_argument('--profile',action='store_true');p.add_argument('--debug-port',type=int);p.add_argument('--headed',action='store_true');p.add_argument('--angle-gl',action='store_true');p.add_argument('--steering-file',type=Path);a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];console=[]
 def check(condition,message):
     assert condition,message
@@ -16,8 +16,8 @@ with sync_playwright() as pw:
     if a.browser=='firefox':
         browser=pw.firefox.launch(headless=False,env=dict(os.environ,MOZ_DISABLE_CONTENT_SANDBOX='1',LIBGL_ALWAYS_SOFTWARE='1'),firefox_user_prefs={'webgl.force-enabled':True,'dom.w3c_touch_events.enabled':1})
     else:
-        browser=pw.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox','--enable-unsafe-swiftshader'])
-    context=browser.new_context(viewport={'width':1280,'height':720},locale='tr-TR',has_touch=True)
+        browser=pw.chromium.launch(executable_path=shutil.which('chromium'),headless=not a.headed,args=['--no-sandbox','--enable-unsafe-swiftshader']+(['--remote-debugging-port='+str(a.debug_port)] if a.debug_port else [])+(['--use-angle=gl'] if a.angle_gl else []))
+    context=browser.new_context(viewport={'width':1280,'height':720},locale='tr-TR',has_touch=True,**({'record_video_dir':str(a.evidence/'video'),'record_video_size':{'width':1280,'height':720}} if a.record_video else {}))
     page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
     def message(m):
         console.append({'time':time.monotonic(),'type':m.type,'text':m.text})
@@ -30,6 +30,14 @@ with sync_playwright() as pw:
     page.touchscreen.tap(rect['x']+(tr[0]*xx+tr[2]*yy+tr[4])/float(initial['rawWidth'])*rect['width'],rect['y']+(tr[1]*xx+tr[3]*yy+tr[5])/float(initial['rawHeight'])*rect['height'])
     page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")',timeout=45000)
     def data():return json.loads(canvas.get_attribute('data-campaign'))
+    import sys
+    default_hook=sys.excepthook
+    def failure_hook(kind,value,tb):
+        try:
+            (a.evidence/'failure.json').write_text(json.dumps({'error':str(value),'state':data(),'console_errors':errors},indent=2)+'\n');page.screenshot(path=str(a.evidence/'failure.png'))
+        except Exception:pass
+        default_hook(kind,value,tb)
+    sys.excepthook=failure_hook
     def xy(x,y):
         d=data();r=canvas.bounding_box();tr=d['transform'];raw=d.get('raw',[d['view'][0]*tr[0],d['view'][1]*tr[0]])
         return r['x']+(x*tr[0]+tr[1])/raw[0]*r['width'],r['y']+(y*tr[0]+tr[2])/raw[1]*r['height']
@@ -73,14 +81,14 @@ with sync_playwright() as pw:
     else:
         r=d['actions']['jump'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2));page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-10',timeout=10000);check(True,'Firefox actual touch reaches the same jump action; CDP multitouch is Chromium-only')
     page.set_viewport_size({'width':1280,'height':720});page.wait_for_timeout(700);page.screenshot(path=str(a.evidence/'landscape-playing.png'));canvas.focus()
-    if a.play_through:
-        held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False
+    if a.play_through or a.rescue_only:
+        held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None
         def keys(wanted):
             global held
             for k in held-set(wanted):page.keyboard.up(k)
             for k in set(wanted)-held:page.keyboard.down(k)
             held=set(wanted)
-        while time.monotonic()-started<600:
+        while time.monotonic()-started<1000:
             d=data();now=time.monotonic();state=d['state'];section=d['section']
             if d['menu'] and not d.get('ui_ready',True):keys([]);page.wait_for_timeout(50);continue
             if section not in stages:stages.append(section);page.screenshot(path=str(a.evidence/(section+'.png')));print('STAGE',section,'HP',d['hp'],'score',d['score'],flush=True)
@@ -99,41 +107,93 @@ with sync_playwright() as pw:
                 elif d['menu']=='paused':button(text='Devam et')
                 page.wait_for_timeout(120);canvas.focus();continue
             if state!='playing':keys([]);page.wait_for_timeout(80);continue
-            x,y=d['player'];onfloor=d.get('grounded',y==0);enemies=d['enemies'];targets=[e for e in enemies if abs(e['x']-x)<650]
-            direction='d'
-            gate=next((g for g in d['gates'] if g['closed'] and 0<=g['x']-x<100),None)
-            if gate and targets:
-                target=min(targets,key=lambda e:abs(e['x']-x));direction='d' if target['x']>=x else 'a'
+            if a.steering_file and a.steering_file.exists():
+                command=json.loads(a.steering_file.read_text())
+                if command.get('id')!=steering_id:
+                    steering_id=command.get('id');keys(command.get('keys',[]))
+                    if command.get('jump'):page.keyboard.press('Space')
+                    page.wait_for_timeout(min(5000,max(0,int(command.get('milliseconds',300)))));keys([])
+                    (a.evidence/('guided-input-'+str(steering_id)+'.json')).write_text(json.dumps({'command':command,'state_after':data()},indent=2)+'\n')
+                    continue
+            x,y=d['player'];onfloor=d.get('grounded',y==0);targets=[e for e in d['enemies'] if abs(e['x']-x)<680]
+            target=min(targets,key=lambda e:abs(e['x']-x)) if targets else None
+            direction='d';wanted=['f']
+            closed=any(g['closed'] and 0<=g['x']-x<180 for g in d['gates'])
+            if target and (closed or abs(target['x']-x)<320):
+                facing=1 if target['x']>=x else -1;direction='d' if facing==1 else 'a'
+                if target['y']<-65 and abs(target['x']-x)<280 and d['facing']==facing:direction=''
             if section=='arena':
-                direction='d' if x<1000 else ('a' if x>1080 else '')
-            wanted=['f']+([direction] if direction else [])
+                desired=float(d.get('boss_x',1400))-210
+                direction='d' if x<desired-35 else ('a' if x>desired+35 else ('d' if d['facing']<0 else ''))
+                if target and abs(target['x']-x)<450:
+                    facing=1 if target['x']>=x else -1;direction='' if d['facing']==facing else ('d' if facing==1 else 'a')
+                if d.get('boss_warning',0)>0 and abs(x-d.get('boss_beam_x',-999))<95:direction='a'
+            if target and target['y']<-65 and abs((y-46)-(target['y']-30))>34:wanted=[]
+            if direction:wanted.append(direction)
             keys(wanted)
-            # Jump when an approaching flyer, gap or low incoming projectile
-            # warrants it. All decisions observe the public frame, never mutate it.
-            flyer=any(e['kind'] in ['crow','drone','moth','wisp'] and abs(e['x']-x)<420 for e in targets)
-            gap=any(0<p[0]-x<180 for p in d['pits'])
-            danger=any(0<(b[0]-x)*(-1 if b[2]>0 else 1)<210 and abs(b[1]-(y-35))<65 for b in d.get('bullets',[]))
-            if onfloor and (flyer or gap or danger or section=='arena') and now-last_jump>.85:
+            flyer=target and target['y']<-65 and abs(target['x']-x)<450
+            gap=any(0<p[0]-x<150 for p in d['pits'])
+            object_gate=not targets and any(o['kind']=='gate' and not o['active'] and 0<o['x']-x<110 for o in d.get('objects',[]))
+            danger=any(math.hypot(b[0]-x,b[1]-(y-37))<100 for b in d.get('bullets',[]))
+            if onfloor and (flyer or gap or danger or object_gate) and now-last_jump>.85:
                 page.keyboard.press('Space');last_jump=now
-            near=any(abs(e['x']-x)<105 and abs(e['y']-y)<75 for e in targets)
-            if near and now-last_melee>.5:page.keyboard.up('f');page.keyboard.down('f');last_melee=now
-            if d['grenades']>0 and now-last_bomb>4 and len([e for e in targets if 100<e['x']-x<440])>=3:page.keyboard.press('g');last_bomb=now
-            if section=='arena' and d['grenades']>0 and now-last_bomb>1.3 and x>900:page.keyboard.press('g');last_bomb=now
+            near=any(abs(e['x']-x)<95 and abs(e['y']-y)<75 for e in targets)
+            if near and now-last_melee>.35:page.keyboard.up('f');page.keyboard.down('f');last_melee=now
+            if d['grenades']>0 and now-last_bomb>3 and (len([e for e in targets if 100<e['x']-x<440])>=3 or (target and target['hp']>1 and abs(target['x']-x)<400) or (section=='arena' and abs(float(d.get('boss_x',1400))-x)<430)):
+                page.keyboard.press('g');last_bomb=now
+            if a.expanded_rescue:
+                # Fresh touch Fire near a captive, never a state setter or save injection.
+                captive=next((n for n in d.get('npcs',[]) if not n['freed'] and not n['secret'] and 15<(n['x']-x)*d['facing']<95 and abs(n['y']-y)<20 and d.get('rescue_candidate',n['id'])==n['id']),None)
+                if captive and onfloor and not any(abs(e['x']-x)<170 for e in targets):
+                    keys([]);page.wait_for_timeout(150);fresh=data()
+                    if fresh.get('rescue_candidate',captive['id'])!=captive['id']:continue
+                    r=fresh['actions']['attack'];anchor=fresh['player'];shot_count=fresh['shots']
+                    page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2))
+                    page.wait_for_function('id=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.rescue_time>0 || d.rescued.includes(id)}',arg=captive['id'],timeout=15000)
+                    page.wait_for_timeout(160);mid=data()
+                    check(mid['shots']==shot_count,'Contextual touch Fire cuts ropes without firing a shot')
+                    check(abs(mid['player'][0]-anchor[0])<1,'Actual cut keeps the physical actor in place')
+                    page.screenshot(path=str(a.evidence/('rescue-'+str(len(rescues_tested))+'-cut.png')))
+                    page.wait_for_function('id=>JSON.parse(document.querySelector("canvas").dataset.campaign).awarded[id+":gift"]===true',arg=captive['id'],timeout=15000)
+                    done=data();check(captive['id'] in done['rescued'],'Knife contact actually frees that captive')
+                    saved=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
+                    check(saved['awarded'].get(captive['id']+':gift') and captive['id'] in saved['rescued'],'Actual rescue and handover reach persistent browser storage')
+                    page.screenshot(path=str(a.evidence/('rescue-'+str(len(rescues_tested))+'-thanks.png')))
+                    rescues_tested.append({'id':captive['id'],'gift':captive['gift'],'weapon_after':done['weapon'],'ammo_after':done['ammunition']})
+                    if a.profile and not (a.evidence/'performance.json').exists():
+                        timings=page.evaluate("""async()=>{
+                            const times=[];let previous=performance.now(),start=previous;
+                            await new Promise(resolve=>{function frame(t){times.push(t-previous);previous=t;if(t-start<6000)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
+                            const gl=document.querySelector('canvas').getContext('webgl2'),debug=gl&&gl.getExtension('WEBGL_debug_renderer_info');
+                            return {interval_ms:times.slice(2),renderer:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):'unavailable',viewport:[innerWidth,innerHeight],dpr:devicePixelRatio};
+                        }""")
+                        samples=sorted(timings.pop('interval_ms'));timings.update({'scope':'Actual active mission, standing after a rescue; motion enabled. Not a physical phone or peak-load certification.','samples':len(samples),'mean_fps':1000/(sum(samples)/len(samples)),'median_frame_ms':samples[len(samples)//2],'p95_frame_ms':samples[int(len(samples)*.95)],'frames_over_50ms':sum(v>50 for v in samples),'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(v=>v.build)")})
+                        (a.evidence/'performance.json').write_text(json.dumps(timings,indent=2)+'\n')
+                    if a.rescue_only:break
+                    continue
             # Visible contextual button, never a hidden teleport or mount setter.
             if section in ['quay','water'] and not d['mounted'] and 280<x<420:page.keyboard.press('e');page.wait_for_timeout(80)
-            if now-last_report>15:print('PLAY',section,round(x),'HP',d['hp'],'boss',d['boss_hp'],'retry',retries,flush=True);last_report=now
+            if now-last_report>15:
+                (a.evidence/'latest-state.json').write_text(json.dumps(d,indent=2)+'\n')
+                if a.browser=='chromium':
+                    sample={'elapsed':now-started,'heap':cdp.send('Runtime.getHeapUsage'),'dom':cdp.send('Memory.getDOMCounters')}
+                    with (a.evidence/'browser-memory.jsonl').open('a') as log:log.write(json.dumps(sample)+'\n')
+                print('PLAY',section,round(x),'y',round(y),'HP',d['hp'],'boss',d['boss_hp'],'retry',retries,flush=True);last_report=now
             page.wait_for_timeout(65)
         keys([])
-        (a.evidence/'playthrough.json').write_text(json.dumps({'completed':completed,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'final':data()},indent=2)+'\n')
-        check(completed,'Mission 1 is completable with actual keyboard/mouse-equivalent gameplay')
-        check(a.route in data()['route'],'The chosen branch was actually recorded')
-        saved=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
-        check(saved['completed'] and saved['best_score']>=data()['score'],'Actual completed checkpoint and campaign best are persisted')
-        button(text='Ana menü');page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]')
-        check(canvas.get_attribute('data-campaign') is None,'Return to the original runner clears stale campaign observations')
-        check(page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1')).completed"),'Returning to main preserves the completed campaign')
-        # Re-enter via the real semantic counterpart of the actual Godot button.
-        page.get_by_role('button',name='Arcade',exact=True).focus();page.keyboard.press('Enter');page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
+        (a.evidence/'playthrough.json').write_text(json.dumps({'completed':completed,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'final':data()},indent=2)+'\n')
+        if a.rescue_only:check(bool(rescues_tested),'An actual captive was reached, cut free and rewarded through ordinary controls')
+        else:
+            check(completed,'Mission 1 is completable with actual keyboard/mouse-equivalent gameplay')
+            check(a.route in data()['route'],'The chosen branch was actually recorded')
+        if not a.rescue_only:
+            saved=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
+            check(saved['completed'] and saved['best_score']>=data()['score'],'Actual completed checkpoint and campaign best are persisted')
+            button(text='Ana menü');page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]')
+            check(canvas.get_attribute('data-campaign') is None,'Return to the original runner clears stale campaign observations')
+            check(page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1')).completed"),'Returning to main preserves the completed campaign')
+            # Re-enter via the real semantic counterpart of the actual Godot button.
+            page.get_by_role('button',name='Arcade',exact=True).focus();page.keyboard.press('Enter');page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
     if a.offline:
         if data()['state']=='playing':canvas.focus();page.keyboard.press('Escape');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
         before=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
@@ -149,4 +209,4 @@ with sync_playwright() as pw:
     (a.evidence/'console.json').write_text(json.dumps(console,indent=2)+'\n')
     check(not errors,'No browser or Godot script errors during the actual flow: '+str(errors[:3]))
     (a.evidence/'results.json').write_text(json.dumps({'checks':checks,'errors':errors,'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(x=>x.build)"),'final':data()},indent=2)+'\n')
-    browser.close()
+    context.close();browser.close()

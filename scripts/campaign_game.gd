@@ -50,6 +50,10 @@ var motion_enabled := true
 var audio_volume := .45
 var voices: Array[AudioStreamPlayer] = []
 var sound_cache: Dictionary = {}
+var ambient: AudioStreamPlayer
+var ambient_key:=""
+var ambient_started:=false
+var ambient_starts:=0
 var accessibility_callback: JavaScriptObject
 var accessibility_stamp := ""
 var active_input := "keyboard"
@@ -435,6 +439,7 @@ func start_travel() -> void:
 
 func _process(dt: float) -> void:
 	if not is_instance_valid(view):return
+	update_ambient()
 	pad_menu_wait=maxf(0.,pad_menu_wait-dt)
 	poll_pad()
 	if world.state=="playing" and menu_kind=="" and fade<0.:
@@ -460,8 +465,8 @@ func _process(dt: float) -> void:
 		if world.state=="complete":menu_kind="outro";save_checkpoint()
 		build_ui()
 	for event in world.pending_events:
-		if event=="checkpoint" and menu_kind!="briefing":save_checkpoint()
-		if event in ["shot","melee","grenade","blast","pickup","rescue","hurt"]:sound(event)
+		if event in ["checkpoint","rescue","rescue_gift","secret","mechanism"] and menu_kind!="briefing":save_checkpoint()
+		if event in ["shot","melee","grenade","blast","pickup","rescue","hurt","cut","rescue_gift","secret","mechanism","enemy_shot","guardian","boss_attack","complete"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	view.camera_x=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
@@ -475,33 +480,61 @@ func _process(dt: float) -> void:
 func update_hud() -> void:
 	if not is_instance_valid(hud):return
 	hud.text="%05d" % world.score+("\n" if portrait or options.text_scale>1. else "  ·  ")+t("lives")+" %d/%d" % [world.hp,world.max_hp]+"  ·  "+t("grenade")+" %d" % world.grenades
-	subtitle.text=t("mission")+" · "+t(world.section)
+	var region: String=world.section
+	if CampaignContent.SCENES.has(region):region=str(CampaignContent.SCENES[region][clampi(int(world.player.x/world.length()*3.),0,2)])
+	subtitle.text=t("mission")+" · "+t(region)
 	if world.weapon!="pistol":subtitle.text+="\n"+t(world.weapon)+" %d" % world.ammunition
 	elif world.shield>0:subtitle.text+=" · "+t("shield")+" %d" % world.shield
 	if world.notice_time>0. and world.notice!="":subtitle.text+="\n"+t(world.notice)
 	if not save_ok:subtitle.text+="\n"+t("save_failed")
+	if bool(world.mount.ridden):subtitle.text+=" · "+t(CampaignVehicles.kind(world))+" %d/4" % int(world.mount.hp)
 	var active_controls: bool=menu_kind=="" and fade<0. and world.state=="playing"
 	pause_button.visible=active_controls
 	boss_health.visible=world.section=="arena" and bool(world.boss.active) and menu_kind==""
 	boss_health.value=world.boss.hp
+	subtitle.position.y=boss_health.position.y+(20. if boss_health.visible else 0.)
 	ride_button.visible=active_controls and bool(world.mount.available) and int(world.mount.hp)>0 and (bool(world.mount.ridden) or absf(world.player.x-float(world.mount.x))<110.)
+	ride_button.text=t("exit_vehicle") if bool(world.mount.ridden) else t("board")
 	if is_instance_valid(stick):stick.visible=active_controls
 	for key in actions:
 		var item: AionCampaignTouch=actions[key];item.visible=active_controls;item.pressed=not Dictionary(held.get(key,{})).is_empty()
 		if key=="attack":
 			var near:=not world.close_enemy().is_empty() and not bool(world.mount.ridden)
-			item.action="melee" if near else "shoot";item.caption=t("melee") if near else old("control_shoot");item.cooldown=world.fire_time/.32
+			var captive:=not CampaignRescue.nearest(world).is_empty() and not near
+			item.action="cut" if captive else ("melee" if near else "shoot");item.caption=t("cut") if captive else (t("melee") if near else old("control_shoot"));item.cooldown=world.fire_time/.32
 		if key=="grenade":item.disabled=world.grenades<=0;item.cooldown=world.grenade_time/.55
+		if key=="jump":
+			var diving: bool=bool(world.mount.ridden) and CampaignVehicles.kind(world)=="shell"
+			item.caption=t("dive") if diving else old("control_jump");item.action="dive" if diving else "jump"
 		item.queue_redraw()
+
+func update_ambient() -> void:
+	if not audio_enabled:
+		if ambient_started and is_instance_valid(ambient):ambient.stop()
+		ambient_started=false
+		return
+	var key: String=world.section if world.section in ["water","roots"] else ("garden" if world.section in ["canopy","terrace"] else ("boss" if world.section=="arena" else "shore"))
+	if not is_instance_valid(ambient):
+		ambient=AudioStreamPlayer.new();ambient.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(ambient)
+	if ambient_key!=key:
+		ambient.stop();ambient_started=false
+		var stream: AudioStreamWAV=load("res://assets/audio/campaign-"+key+".wav").duplicate()
+		stream.loop_mode=AudioStreamWAV.LOOP_FORWARD;stream.loop_begin=0;stream.loop_end=int(stream.get_length()*stream.mix_rate)
+		ambient.stream=stream;ambient_key=key
+	ambient.volume_db=linear_to_db(maxf(.001,audio_volume*.28))
+	# Web sample playback does not provide a reliable frame-by-frame playing
+	# signal for a paused/looping source. Start once at a track/unmute boundary.
+	if not ambient_started:ambient.play();ambient_started=true;ambient_starts+=1
+	ambient.stream_paused=menu_kind!="" or world.state not in ["playing","victory"]
 
 func sound(event: String) -> void:
 	if not audio_enabled:return
 	if voices.is_empty():
 		for i in 6:
-			var voice:=AudioStreamPlayer.new();add_child(voice);voices.append(voice)
+			var voice:=AudioStreamPlayer.new();voice.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(voice);voices.append(voice)
 	if not sound_cache.has(event):
 		var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else 1400
-		var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.}[event]
+		var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.}[event]
 		for i in count:
 			var phase: float=float(i)/22050.;var envelope: float=pow(1.-float(i)/count,2.)
 			var sample:=sin(phase*pitch*TAU*(1.-float(i)/count*.4))*envelope*.22
@@ -533,6 +566,9 @@ func metadata() -> void:
 	data.ui_ready=ui_ready
 	data.raw=[get_viewport_rect().size.x,get_viewport_rect().size.y]
 	data.velocity=[world.velocity.x,world.velocity.y]
+	data.npcs=[]
+	for n in world.npcs:data.npcs.append({"id":n.id,"x":n.x,"y":n.y,"freed":n.freed,"age":n.free_age,"gift":n.gift,"secret":n.secret})
+	data.boss_warning=world.boss.get("beam_warning",0.);data.boss_beam_x=world.boss.get("beam_x",-999.);data.boss_x=world.boss.x;data.boss_phase=world.boss.phase;data.mount_type=CampaignVehicles.kind(world);data.music_starts=ambient_starts;data.native_memory=Performance.get_monitor(Performance.MEMORY_STATIC);data.node_count=Performance.get_monitor(Performance.OBJECT_NODE_COUNT);data.rescue_candidate=CampaignRescue.nearest(world).get("id","");data.rescue_time=world.rescue_time;data.weapon=world.weapon;data.ammunition=world.ammunition;data.objects=world.objects;data.rooms=world.rooms
 	data.bullets=[]
 	for bullet in world.bullets:
 		if bullet.owner=="enemy":data.bullets.append([bullet.p.x,bullet.p.y,bullet.v.x,bullet.v.y])

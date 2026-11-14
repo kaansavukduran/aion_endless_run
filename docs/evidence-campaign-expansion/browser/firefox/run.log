@@ -1,0 +1,113 @@
+PASS Visible reachable menu action: @Button@97
+PASS Visible reachable menu action: CampaignBegin
+PASS Visible reachable menu action: @Button@110
+PASS Visible reachable menu action: CampaignGo
+PASS Main menu → Arcade → mission → play through normal buttons
+PASS D moves the player right; this is not automatic scrolling
+PASS A moves and faces left
+PASS Held fire produces real, spaced gunshots
+PASS G spends exactly one energy grenade
+PASS Actual right Fire touch reaches a gunshot or contextual close strike
+PASS Actual right Grenade touch spends one bomb without a second underlying command
+PASS Pause freezes the active mission
+PASS Visible reachable menu action: @Button@169
+PASS Visible reachable menu action: @Button@170
+PASS Visible reachable menu action: @Button@171
+PASS Portrait rotation preserves checkpoint and score
+PASS Approved fixed left stick and three right actions exist
+PASS Touch target is inside portrait viewport: attack
+PASS Touch target is inside portrait viewport: grenade
+PASS Touch target is inside portrait viewport: jump
+PASS Firefox actual touch reaches the same jump action; CDP multitouch is Chromium-only
+STAGE shore HP 1 score 425
+PLAY shore 3338 y -183 HP 1 boss 90 retry 0
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY shore 4472 y 0 HP 3 boss 90 retry 0
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY shore 7587 y 0 HP 3 boss 90 retry 0
+STAGE quay HP 3 score 5350
+PLAY quay 3744 y -91 HP 3 boss 90 retry 0
+PLAY quay 7434 y -42 HP 3 boss 90 retry 0
+STAGE water HP 3 score 9050
+PLAY water 1157 y 0 HP 3 boss 90 retry 0
+PLAY water 4454 y 0 HP 3 boss 90 retry 0
+PLAY water 7687 y -55 HP 3 boss 90 retry 0
+PLAY water 11094 y -116 HP 3 boss 90 retry 0
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY water 14705 y -54 HP 3 boss 90 retry 0
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY water 17642 y 0 HP 3 boss 90 retry 0
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY water 20639 y 0 HP 3 boss 90 retry 0
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY water 23609 y 0 HP 3 boss 90 retry 0
+PLAY water 27420 y 0 HP 3 boss 90 retry 0
+STAGE relay HP 3 score 19600
+PLAY relay 838 y 0 HP 3 boss 90 retry 0
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY relay 3851 y 0 HP 3 boss 90 retry 0
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY relay 6357 y 0 HP 3 boss 90 retry 0
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY relay 9350 y 0 HP 3 boss 90 retry 0
+STAGE arena HP 3 score 26000
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY arena 1603 y 0 HP 3 boss 90 retry 0
+PASS Contextual touch Fire cuts ropes without firing a shot
+PASS Actual cut keeps the physical actor in place
+PASS Knife contact actually frees that captive
+PASS Actual rescue and handover reach persistent browser storage
+PLAY arena 2362 y 0 HP 3 boss 16 retry 0
+PASS Mission 1 is completable with actual keyboard/mouse-equivalent gameplay
+PASS The chosen branch was actually recorded
+PASS Actual completed checkpoint and campaign best are persisted
+PASS Return to the original runner clears stale campaign observations
+PASS Returning to main preserves the completed campaign
+PASS Offline reload starts the real game and preserves its separate campaign checkpoint
+PASS No browser or Godot script errors during the actual flow: []

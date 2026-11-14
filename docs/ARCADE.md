@@ -1,5 +1,7 @@
 # Sönen Fenerler · İlk arcade görev
 
+Güncel **0.24 yerel genişleme**: [içerik/varlık envanteri ve yeni kurallar](CAMPAIGN-EXPANSION.md), [doğrulama ve açık sınırlar](evidence-campaign-expansion/README.md). Altı kahraman Ateş düğmesiyle bağlı NPC'yi bıçakla kurtarır; 43 sabit fırsat, 10 özel silah, dört araç ve üç farklı mini boss vardır. Bu sürüm yayımlanmamıştır. Aşağıdaki metin önceki 0.23 temel uygulamayı kaydeder; yeni silah ve kurtarma davranışında güncel genişleme belgesi geçerlidir.
+
 Bu mod mevcut Godot 4.6.3 oyununa eklenir. Sonsuz koşunun otomatik hareketi, 15 saniyelik seviyeleri, beş seviyede bir boss takvimi ve kayıtları değiştirilmez. Yeni modun sonlu haritası, elle hareketi, kontrol noktaları ve görev sonu vardır. Görev 2–5 yalnız plandır; bu sürüm Metal Slug 3'ün bütün uzunluğuna veya üretim hacmine ulaşmış sayılmaz.
 
 ## Oynama yolu

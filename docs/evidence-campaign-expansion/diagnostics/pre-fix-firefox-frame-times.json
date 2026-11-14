@@ -1,0 +1,15 @@
+{
+  "renderer": "llvmpipe, or similar",
+  "viewport": [
+    1280,
+    720
+  ],
+  "dpr": 1,
+  "scope": "Actual active mission, standing after a rescue; motion enabled. Not a physical phone or peak-load certification.",
+  "samples": 116,
+  "mean_fps": 19.541515612997124,
+  "median_frame_ms": 50.15999999999622,
+  "p95_frame_ms": 83.72000000000116,
+  "frames_over_50ms": 60,
+  "build": "938cff2cba20fe93"
+}

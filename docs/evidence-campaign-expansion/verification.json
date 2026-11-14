@@ -1,0 +1,135 @@
+{
+  "version": "0.24.0",
+  "candidate_build": "3639f7fe926a22c1",
+  "source_fingerprint": "61b86d90f655495a2ad9e9f50ba8aafc33f8c28cd6d1dd6bbeddfb47d13b2343",
+  "base_commit": "90055c5abf7e339c4cf30ad698f8c9f6383b59ae",
+  "branch": "feat/keeper-rescue",
+  "recorded_at_utc": "2026-11-14T19:58:53.209300+00:00",
+  "recorded_at_istanbul": "2026-11-14T22:58:53.209300+03:00",
+  "publication": {
+    "status": "NOT PUBLISHED",
+    "remote_push": false,
+    "merge": false,
+    "release": false,
+    "vercel": false,
+    "pages": false,
+    "reason": "User-adopted writing-block.md requires separate approval for external publication."
+  },
+  "engine": "4.6.3.stable.official.7d41c59c4",
+  "source_tests": {
+    "status": "PASS",
+    "suites": 29,
+    "checks": 20677
+  },
+  "model_routes": {
+    "status": "PASS",
+    "cases": 18,
+    "completions": 18,
+    "scope": "Same world action API with ordinary movement/fire/jump/grenade; UI transition/boss-dialog acknowledgements adapted at their normal boundaries. No invulnerability, enemy removal, teleport progression or damage injection. Not browser/physical-device playthroughs."
+  },
+  "secret_approaches": {
+    "status": "PASS",
+    "cases": 36,
+    "scope": "Isolated authored approach fixtures retain actual pits/platforms and use jump/charge/fire. Hostiles removed; not full missions."
+  },
+  "native_render": {
+    "status": "PASS",
+    "checks": 48,
+    "scope": "Authored visual fixtures, not ordinary full playthroughs."
+  },
+  "browser": {
+    "firefox": {
+      "status": "PASS",
+      "checks": 88,
+      "errors": [],
+      "full_mission": true,
+      "rescues": 15,
+      "retries": 0,
+      "active_model_seconds": 299.298401030299,
+      "wall_play_seconds": 304.6893040130017,
+      "offline": true,
+      "scope": "Actual browser input, emulated touch/viewports; no state setters or save injection. No guided-input file was used."
+    },
+    "chromium": {
+      "status": "PASS",
+      "checks": 30,
+      "errors": [],
+      "full_mission": false,
+      "scope": "Actual rescue, touch/multitouch, rotation, persistence and offline reopening; full post-fix Chromium mission NOT TESTED."
+    }
+  },
+  "audio_regression": {
+    "status": "PASS",
+    "web_checks": 3,
+    "before_build": "938cff2cba20fe93",
+    "after_build": "3639f7fe926a22c1",
+    "before_long_sample_starts": 118,
+    "after_long_sample_starts": 0,
+    "after_music_starts": 1,
+    "scope": "Instrumented WebAudio counters preserve original methods. This is not a physical audio listening test."
+  },
+  "performance": {
+    "status": "FAIL for 60 FPS in this measured software environment; physical targets NOT TESTED",
+    "measurement": {
+      "renderer": "llvmpipe, or similar",
+      "viewport": [
+        1280,
+        720
+      ],
+      "dpr": 1,
+      "scope": "Actual active mission, standing after a rescue; motion enabled. Not a physical phone or peak-load certification.",
+      "samples": 326,
+      "mean_fps": 54.35217542081256,
+      "median_frame_ms": 16.919999999998254,
+      "p95_frame_ms": 33.279999999998836,
+      "frames_over_50ms": 2,
+      "build": "3639f7fe926a22c1"
+    },
+    "environment_memory": {
+      "peak_bytes": 4006416384,
+      "oom_kill_delta": 0,
+      "scope": "Whole review environment; one browser and overlapping headless source/model checks after the six-second frame-time sample. Not browser-only or phone RAM."
+    }
+  },
+  "lifecycle": {
+    "status": "PASS",
+    "cycles": 4,
+    "node_count_baseline": 1,
+    "node_count_after": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "scope": "Headless node/orphan lifetime; not GPU/WASM peak memory."
+  },
+  "packaging": {
+    "status": "PASS",
+    "unit_fixtures": 14,
+    "scope": "7 web contracts + 4 Android packet fixtures + 3 mocked macOS hdiutil/retry fixtures. No new installed platform package is implied."
+  },
+  "preserved_art": {
+    "status": "PASS",
+    "original_pngs": 65,
+    "byte_identical": true
+  },
+  "not_tested": [
+    "Physical Poco X7 / iPhone / Xbox / PlayStation controller",
+    "60 FPS on target physical devices",
+    "9–13 minute human exploration target; fast automated mission was about five minutes",
+    "New signed Android/iOS packages; new Windows/macOS/Linux installers",
+    "Full mission in current Chromium candidate",
+    "Professional Foley/mix on speakers or headphones"
+  ],
+  "known_content_limits": [
+    "Legacy skimmer has no newly drawn wreck atlas; the three new vehicles do.",
+    "Secret areas use raised side-platform rooms; fully separate submerged/underground tunnel scenes are not implemented.",
+    "New art and lore are TASLAK, without owner canon/art approval."
+  ],
+  "diagnostics": [
+    "Earlier model controller runs failed and are retained; the final 18-case run passes.",
+    "Pre-fix Firefox hit the 16 GiB environment limit and was OOM-killed; pre-fix Chromium consumed high memory and its stalled run was stopped.",
+    "A requested OpenGL ANGLE diagnostic backend lacked WebGL2 in this environment; it did not run the game.",
+    "Paused/looping music was being repeatedly started. Boundary-only starts and stream playback removed repeated long WebAudio samples; the final full Firefox run had no new OOM event."
+  ]
+}

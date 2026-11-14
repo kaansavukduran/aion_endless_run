@@ -8,15 +8,29 @@ const COLORS := {"aion":"ef86b7", "sheep":"f5d6a6", "wolf":"aa84d2", "owl":"e8a3
 const HERO_ART=preload("res://assets/PIXEL-HEROES-PROVENANCE.json")
 const ABILITY_ART=preload("res://assets/POLISH-PROVENANCE.json")
 const STAGES := {
-	"shore": {"length":2600., "biome":4, "title":"arc_shore", "next":"quay"},
-	"quay": {"length":2600., "biome":4, "title":"arc_quay", "next":"fork_one"},
-	"canopy": {"length":2200., "biome":4, "title":"arc_canopy", "next":"fork_two"},
-	"water": {"length":5000., "biome":2, "title":"arc_water", "next":"relay"},
-	"terrace": {"length":3600., "biome":4, "title":"arc_terrace", "next":"relay"},
-	"roots": {"length":3600., "biome":2, "title":"arc_roots", "next":"relay"},
-	"relay": {"length":3200., "biome":3, "title":"arc_relay", "next":"arena"},
-	"arena": {"length":1800., "biome":4, "title":"arc_arena", "next":"complete"}
+	"shore": {"length":7800., "biome":4, "title":"arc_shore", "next":"quay"},
+	"quay": {"length":9500., "biome":4, "title":"arc_quay", "next":"fork_one"},
+	"canopy": {"length":3600., "biome":4, "title":"arc_canopy", "next":"fork_two"},
+	"water": {"length":30000., "biome":2, "title":"arc_water", "next":"relay"},
+	"terrace": {"length":28000., "biome":4, "title":"arc_terrace", "next":"relay"},
+	"roots": {"length":29000., "biome":2, "title":"arc_roots", "next":"relay"},
+	"relay": {"length":10000., "biome":3, "title":"arc_relay", "next":"arena"},
+	"arena": {"length":3000., "biome":4, "title":"arc_arena", "next":"complete"}
 }
+var discovered: Dictionary={}
+var activated: Dictionary={}
+var buffs: Dictionary={}
+var encounters: Array[Dictionary]=[]
+var objects: Array[Dictionary]=[]
+var zones: Array[Dictionary]=[]
+var rooms: Array[Dictionary]=[]
+var hazards: Array[Dictionary]=[]
+var disabled_platforms: Dictionary={}
+var platform_timers: Dictionary={}
+var rescue_time:=0.
+var rescue_target:=""
+var rescue_contact:=false
+var rescue_latched:=false
 var character := "aion"
 var state := "briefing"
 var section := "shore"
@@ -95,12 +109,14 @@ func floor_at(x: float) -> float:
 func crossing_floor(x: float,old_y: float,new_y: float,falling_speed: float) -> float:
 	var support:=floor_at(x)
 	for platform in platforms:
+		if disabled_platforms.has(platform.position.x):continue
 		if x>=platform.position.x-9. and x<=platform.end.x+9. and old_y<=platform.position.y+.01 and new_y>=platform.position.y and falling_speed>=0.:support=minf(support,platform.position.y)
 	return support
 func grounded() -> bool:
 	if bool(mount.ridden): return player.y >= -42. - .1 and absf(velocity.y) < 1.
 	if absf(player.y) < .1 and floor_at(player.x) == 0.: return true
 	for platform in platforms:
+		if disabled_platforms.has(platform.position.x):continue
 		if player.x >= platform.position.x - 9. and player.x <= platform.end.x + 9. and absf(player.y - platform.position.y) < .1: return true
 	return false
 
@@ -110,6 +126,7 @@ func begin(hero: String) -> void:
 	time=0.;walk_distance=0.;victory_time=0.
 	var run_rng:=RandomNumberGenerator.new();run_rng.randomize();run_seed=run_rng.randi_range(1,2000000000)
 	rescued.clear(); awarded.clear(); taken.clear(); route.clear()
+	discovered.clear();activated.clear();buffs.clear()
 	completed = false; flock = 1; weapon = "pistol"; ammunition = 0; shield = 0
 	load_section("shore")
 	state = "briefing"
@@ -118,19 +135,28 @@ func stop_inputs() -> void:
 	move_axis = Vector2.ZERO; fire_held = false; jump_held = false
 	charging = false; charge_time = 0.; boost_held = false; gliding = false
 	melee_latched = false
+	rescue_latched=false
 
 func spawn_enemy(kind: String, x: float, y: float, index: int, mini: bool = false) -> void:
-	enemies.append({"id":section+":enemy:"+str(index), "kind":kind, "x":x, "y":y, "home":Vector2(x,y), "hp":12 if mini else 1, "max_hp":12 if mini else 1, "mini":mini, "age":0., "wait":1.1+float(index%4)*.23, "windup":0., "attacks":0, "facing":-1, "active":false, "defeated":false})
+	if not CampaignContent.flying(kind):
+		for pit in pits:
+			if x>pit.x-30. and x<pit.y+30.:x=pit.x-55.
+	var health:=12 if mini else (8 if kind in CampaignContent.HEAVIES else 1)
+	enemies.append({"id":section+":enemy:"+str(index), "kind":kind, "x":x, "y":y, "home":Vector2(x,y), "hp":health, "max_hp":health, "mini":mini,"heavy":kind in CampaignContent.HEAVIES,"armour":2 if kind in CampaignContent.HEAVIES else 0, "age":0., "wait":1.1+float(index%4)*.23, "windup":0., "attacks":0, "facing":-1, "active":false, "defeated":false})
 
 func load_section(id: String) -> void:
 	assert(STAGES.has(id))
+	var carried: Dictionary={}
+	if section in ["water","terrace","roots","relay"] and id in ["relay","arena"] and bool(mount.get("ridden",false)) and int(mount.hp)>0:carried=mount.duplicate(true)
 	section = id; checkpoint = id; checkpoint_ready = true
 	player = Vector2(140, 0); velocity = Vector2.ZERO; facing=1; stop_inputs()
 	jumps = 0; flap_count = 0; air_time = 0.; fire_time = 0.; melee_time = 0.
 	melee_target="";melee_hit_done=true
+	rescue_time=0.;rescue_target="";rescue_contact=false;rescue_latched=false
 	invulnerable = 1.2; hurt_time = 0.; flap_time = 0.
 	enemies.clear(); bullets.clear(); bombs.clear(); blasts.clear(); pickups.clear()
 	platforms.clear(); pits.clear(); crates.clear(); gates.clear(); npcs.clear(); trail.clear()
+	platform_timers.clear();disabled_platforms.clear()
 	mount = {"available":false, "ridden":false, "x":0., "hp":4}
 	boss = {"active":false, "engaged":false, "hp":90, "max_hp":90, "x":length()-420., "y":0., "clock":0., "attack":0, "windup":0., "wait":1.4, "phase":1}
 	var types: Array = ["gnome", "beetle", "seed", "crow"]
@@ -140,7 +166,7 @@ func load_section(id: String) -> void:
 	if section != "arena":
 		var layout_rng:=RandomNumberGenerator.new();layout_rng.seed=run_seed+abs(section.hash())
 		var spawn_x:=500.;var spawn_index:=0
-		while spawn_x<length()-260.:
+		while spawn_x<minf(length()-260.,1600.):
 			var kind: String = str(types[spawn_index] if spawn_index<types.size() else types[layout_rng.randi_range(0,types.size()-1)])
 			spawn_enemy(kind, spawn_x, -115. if kind in ["crow","moth","wisp","drone"] else 0., spawn_index)
 			spawn_x+=layout_rng.randf_range(125.,270.);spawn_index+=1
@@ -161,8 +187,6 @@ func load_section(id: String) -> void:
 		for i in range(1, int(length()/220.)):
 			var key: String = section+":fruit:"+str(i)
 			if not taken.has(key): pickups.append({"id":key, "x":i*220.+35., "y":-40., "kind":"fruit_"+str(i%8)})
-		var npc_id: String = section+":keeper"
-		npcs.append({"id":npc_id, "x":length()*.55, "y":0., "freed":rescued.has(npc_id), "variant":posmod(STAGES.keys().find(section),8)})
 		if section in ["quay", "water"]:
 			mount = {"available":true, "ridden":false, "x":360., "hp":4}
 			var repair_key:=section+":repair"
@@ -189,6 +213,10 @@ func load_section(id: String) -> void:
 		platforms.append(Rect2(690., -75., 175., 20.))
 		platforms.append(Rect2(980., -135., 150., 20.))
 		boss.active = true
+	CampaignContent.populate(self)
+	CampaignRescue.populate(self)
+	if not carried.is_empty():
+		mount=carried;mount.x=player.x;player.y=-42.;mount.hurt=0.
 	state = "playing"
 	notice = "arc_checkpoint"; notice_time = 2.
 	pending_events.append("checkpoint")
@@ -210,8 +238,9 @@ func finish_travel() -> void:
 	if state == "travel" and STAGES.has(travel_target): load_section(travel_target)
 
 func jump_press() -> void:
-	if state != "playing": return
+	if state != "playing" or rescue_time>0.: return
 	jump_held = true
+	if CampaignVehicles.jump(self):return
 	if grounded() and character in ["rabbit","eren"] and not bool(mount.ridden):
 		charging = true; charge_time = 0.; return
 	if grounded():
@@ -238,9 +267,11 @@ func close_enemy() -> Dictionary:
 
 func attack_press() -> void:
 	if state != "playing": return
+	if not fire_held and close_enemy().is_empty() and CampaignRescue.begin(self):return
+	if rescue_time>0. or rescue_latched:return
 	fire_held = true; melee_latched = false
 	attack()
-func attack_release() -> void: fire_held = false; melee_latched = false
+func attack_release() -> void: fire_held = false; melee_latched = false;rescue_latched=false
 
 func muzzle_offset() -> Vector2:
 	if bool(mount.ridden):return Vector2(61,16)
@@ -255,7 +286,7 @@ func muzzle_offset() -> Vector2:
 	return Vector2(point[0],point[1])+Vector2(0,14 if charging else 0)
 
 func attack() -> void:
-	if fire_time > 0. or state != "playing": return
+	if fire_time > 0. or state != "playing" or rescue_time>0.: return
 	var close: Dictionary = close_enemy()
 	if not close.is_empty() and not bool(mount.ridden):
 		if melee_latched: return
@@ -265,18 +296,7 @@ func attack() -> void:
 		pending_events.append("melee")
 		return
 	melee_latched = false
-	shot_flash=.18
-	var muzzle:=muzzle_offset()
-	var origin := player + Vector2(facing*muzzle.x,muzzle.y)
-	var speed := 760.
-	var rays: Array = [-.17,0.,.17] if weapon == "scatter" else [0.]
-	for angle in rays:
-		bullets.append({"p":origin, "v":Vector2(facing*cos(angle),sin(angle))*speed, "owner":"hero", "age":0., "kind":weapon, "damage":2 if bool(mount.ridden) else 1, "pierce":2 if weapon == "arc" else 0, "hit":[]})
-	shots += 1; fire_time = .18 if weapon != "pistol" or bool(mount.ridden) else .32
-	shot_flash = .18; pending_events.append("shot")
-	if weapon != "pistol":
-		ammunition -= 1
-		if ammunition <= 0: weapon = "pistol"; ammunition = 0
+	CampaignWeapons.fire(self)
 
 func throw_grenade() -> bool:
 	if state != "playing" or grenades <= 0 or grenade_time > 0.: return false
@@ -299,11 +319,12 @@ func award(id: String, points: int) -> void:
 
 func damage_enemy(e: Dictionary, amount: int) -> void:
 	if bool(e.defeated): return
+	if int(e.get("armour",0))>0:e.armour=int(e.armour)-1;e.flash=.25;return
 	e.hp = int(e.hp)-amount
 	if int(e.hp) > 0: return
 	e.defeated = true; e.dead_age = 0.
 	if not awarded.has(str(e.id)): kills += 1
-	award(str(e.id),500 if bool(e.mini) else 100)
+	award(str(e.id),500 if bool(e.mini) else (400 if bool(e.get("heavy",false)) else 100))
 	blasts.append({"p":Vector2(float(e.x),float(e.y)-25.), "age":0., "radius":40., "color":"85d7c4"})
 	pending_events.append("enemy")
 
@@ -319,9 +340,10 @@ func damage_player(cause: String="enemy") -> void:
 	invulnerable = 1.2; hurt_time = .3
 	if shield > 0: shield -= 1
 	elif bool(mount.ridden):
+		mount.hurt=.4
 		mount.hp = int(mount.hp)-1
 		if int(mount.hp)<=0:
-			mount.ridden = false; mount.available = false; player.y -= 30.; velocity.y = -260.
+			CampaignVehicles.eject(self)
 	elif character == "sheep" and flock > 1: flock -= 1
 	else: hp -= 1
 	pending_events.append("hurt")
@@ -335,8 +357,7 @@ func explode(bomb: Dictionary) -> void:
 	if bool(boss.active) and p.distance_to(Vector2(float(boss.x),float(boss.y)-70.))<200.: damage_boss(8)
 	for crate in crates:
 		if p.distance_to(Vector2(float(crate.x),float(crate.y)-20.))<150.: open_crate(crate)
-	for npc in npcs:
-		if p.distance_to(Vector2(float(npc.x),float(npc.y)-40.))<150.: rescue(npc)
+	CampaignContent.hit_object(self,p,3)
 	pending_events.append("blast")
 
 func open_crate(crate: Dictionary) -> void:
@@ -348,6 +369,7 @@ func open_crate(crate: Dictionary) -> void:
 func rescue(npc: Dictionary) -> void:
 	if bool(npc.freed): return
 	npc.freed = true
+	npc.free_age=0.
 	var id: String = str(npc.id)
 	if not rescued.has(id):
 		rescued.append(id); award(id,300); grenades = mini(9,grenades+1)
@@ -361,11 +383,13 @@ func collect(item: Dictionary) -> void:
 	taken[id] = true
 	var kind: String = str(item.kind)
 	if kind.begins_with("fruit_"): award(id,25)
-	elif kind in ["scatter","arc"]: weapon = kind; ammunition = 36
+	elif kind in CampaignWeapons.SPECIAL: weapon = kind; ammunition = int(CampaignWeapons.SPECS[kind].ammo)
 	elif kind == "grenade": grenades = mini(9,grenades+3)
 	elif kind == "shield": shield = mini(3,shield+2)
 	elif kind == "heal": hp = mini(max_hp,hp+1)
 	elif kind == "repair": mount.hp = mini(4,int(mount.hp)+2)
+	elif kind=="points":award(id,500)
+	elif kind in ["haste","power","reveal","magnet"]:buffs[kind]=12.
 	else: return
 	pending_events.append("pickup")
 
@@ -375,6 +399,7 @@ func gate_closed(gate: Dictionary) -> bool:
 	return false
 
 func enemy_shot(e: Dictionary, fan: bool = false) -> void:
+	pending_events.append("enemy_shot")
 	e.flash=.24
 	if e.kind in ["gnome","beetle","slime"]:
 		e.dash=.45 if e.kind=="gnome" else .65
@@ -398,6 +423,7 @@ func step_enemies(dt: float) -> void:
 		e.active = true; e.age = float(e.age)+dt
 		e.flash=maxf(0.,float(e.get("flash",0.))-dt)
 		e.facing = -1 if float(e.x)>player.x else 1
+		if CampaignEnemies.step(self,e,dt):continue
 		var dx: float = player.x-float(e.x)
 		var flying: bool = e.kind in ["crow","moth","drone","wisp"]
 		if flying:
@@ -438,9 +464,16 @@ func step_boss(dt: float) -> void:
 	boss.phase = 1 + int(int(boss.hp)<60) + int(int(boss.hp)<30)
 	boss.x = length()-420.+sin(float(boss.clock)*.65)*75.
 	boss.y = 0. # A walking root machine stays on its actual collision floor.
+	boss.beam_warning=maxf(0.,float(boss.get("beam_warning",0.))-dt)
+	if float(boss.beam_warning)>0. and float(boss.beam_warning)<=dt:
+		if absf(player.x-float(boss.get("beam_x",-999.)))<36.:damage_player("beam")
+		blasts.append({"p":Vector2(float(boss.beam_x),-100.),"age":0.,"radius":65.,"color":"efc97e"})
 	if float(boss.windup)>0.:
 		boss.windup = maxf(0.,float(boss.windup)-dt)
 		if float(boss.windup)==0.:
+			pending_events.append("boss_attack")
+			if int(boss.phase)>=2 and int(boss.attack)%2==1:
+				boss.beam_x=player.x;boss.beam_warning=.9
 			var attack: int = int(boss.attack)%3
 			if attack == 0:
 				for offset in [-.32,-.16,0.,.16,.32]:
@@ -457,6 +490,9 @@ func step_boss(dt: float) -> void:
 
 func step_bullets(dt: float) -> void:
 	for b in bullets:
+		if CampaignWeapons.step(self,b,dt):continue
+		var previous: Vector2=b.get("start",b.p)
+		b.erase("start")
 		if b.has("gravity"):b.v=Vector2(b.v)+Vector2(0,float(b.gravity)*dt)
 		b.age = float(b.age)+dt; b.p = Vector2(b.p)+Vector2(b.v)*dt
 		if b.owner == "enemy":
@@ -465,20 +501,32 @@ func step_bullets(dt: float) -> void:
 			continue
 		for e in enemies:
 			if bool(e.defeated) or str(e.id) in b.hit: continue
-			var radius: float = 58. if bool(e.mini) else 34.
-			if Vector2(b.p).distance_to(Vector2(float(e.x),float(e.y)-30.))<radius:
+			if CampaignEnemies.hidden(e):continue
+			var radius: float = 58. if bool(e.mini) or bool(e.get("heavy",false)) else float(CampaignContent.NEW_ENEMIES.get(str(e.kind),{}).get("radius",34.))
+			var target:=Vector2(float(e.x),float(e.y)-30.)
+			if Geometry2D.get_closest_point_to_segment(target,previous,b.p).distance_to(target)<radius:
+				if bool(e.mini) and float(e.windup)<=.3 and float(e.get("flash",0.))<=0. and int(e.hp)>5:b.age=99.;break
+				if str(e.kind)=="mirror" and float(e.windup)>0.:
+					b.owner="enemy";b.v=-Vector2(b.v);b.age=0.;break
+				if b.kind=="nova":CampaignWeapons.blast(self,b.p,170.,int(b.damage),str(b.colour));b.age=99.;break
 				damage_enemy(e,int(b.damage)); b.hit.append(str(e.id)); b.pierce = int(b.pierce)-1
 				if int(b.pierce)<0: b.age = 99.; break
 		if float(b.age)>3.:continue
-		if bool(boss.active) and Vector2(b.p).distance_to(Vector2(float(boss.x),float(boss.y)-75.))<105. and not "boss" in b.hit:
-			damage_boss(int(b.damage)); b.hit.append("boss"); b.age = 99.
+		if bool(boss.active) and Geometry2D.get_closest_point_to_segment(Vector2(float(boss.x),float(boss.y)-75.),previous,b.p).distance_to(Vector2(float(boss.x),float(boss.y)-75.))<105. and not "boss" in b.hit:
+			if boss_vulnerable():damage_boss(int(b.damage))
+			b.hit.append("boss"); b.age = 99.
 		if float(b.age)>3.:continue
 		for crate in crates:
 			if int(crate.hp)>0 and Vector2(b.p).distance_to(Vector2(float(crate.x),float(crate.y)-24.))<30.: open_crate(crate); b.age = 99.;break
 		if float(b.age)>3.:continue
-		for npc in npcs:
-			if not bool(npc.freed) and Vector2(b.p).distance_to(Vector2(float(npc.x),float(npc.y)-35.))<35.: rescue(npc); b.age = 99.
-	bullets = bullets.filter(func(b):return float(b.age)<3. and float(b.p.x)>-80. and float(b.p.x)<length()+100.)
+		if CampaignContent.hit_object(self,b.p,int(b.damage),previous):b.age=99.
+	bullets = bullets.filter(func(b):return float(b.age)<float(b.get("life",3.)) and float(b.p.x)>-80. and float(b.p.x)<length()+100.)
+
+func boss_vulnerable() -> bool:
+	# Phase two exposes the core during its charge and recovery. A long
+	# closed shield made ordinary-pistol attempts spend most of the fight
+	# dealing no damage; the visible opening now spans the same real window.
+	return int(boss.phase)!=2 or float(boss.windup)>.15 or float(boss.wait)>.8
 
 func step(dt: float) -> void:
 	if state=="dying":
@@ -490,12 +538,15 @@ func step(dt: float) -> void:
 		if death_time>=.8 and (grounded() or player.y>180. or death_time>1.8):state="dead"
 		return
 	if state=="victory":
+		CampaignRescue.step(self,clampf(dt,0.,.05))
 		victory_time+=clampf(dt,0.,.05);boss.clock=float(boss.clock)+clampf(dt,0.,.05)
 		if victory_time>=1.2:state="complete"
 		return
 	if state != "playing": return
 	dt = clampf(dt,0.,.05)
 	time += dt
+	CampaignRescue.step(self,dt)
+	CampaignContent.step(self,dt)
 	for property in ["invulnerable","hurt_time","fire_time","shot_flash","melee_time","grenade_time","flap_time","notice_time"]: set(property,maxf(0.,float(get(property))-dt))
 	if not melee_hit_done and melee_time<=.14:
 		melee_hit_done=true
@@ -506,9 +557,10 @@ func step(dt: float) -> void:
 				if str(enemy.id)==melee_target and absf(float(enemy.x)-player.x)<125. and absf(float(enemy.y)-player.y)<85.:damage_enemy(enemy,2)
 	var on_floor := grounded()
 	if charging: charge_time = minf(1.2,charge_time+dt)
-	var speed: float = 235.*(1.55 if character == "wolf" and boost_held else 1.)*(1.35 if bool(mount.ridden) else 1.)
+	var speed: float = 235.*(1.55 if character == "wolf" and boost_held else 1.)*(1.35 if bool(mount.ridden) else 1.)*(1.25 if float(buffs.get("haste",0.))>0. else 1.)*(.65 if float(buffs.get("slow",0.))>0. else 1.)
 	velocity.x = move_axis.x*speed*(.3 if charging else 1.)
-	if absf(move_axis.x)>.1: facing = 1 if move_axis.x>0. else -1
+	if rescue_time>0.:velocity.x=0.
+	if absf(move_axis.x)>.1 and rescue_time<=0.: facing = 1 if move_axis.x>0. else -1
 	var old_x: float = player.x
 	player.x = clampf(player.x+velocity.x*dt,35.,length()-90.)
 	for gate in gates:
@@ -517,9 +569,7 @@ func step(dt: float) -> void:
 	var old_y: float = player.y
 	if bool(mount.ridden):
 		mount.x = player.x
-		velocity.y += 1700.*dt; player.y += velocity.y*dt
-		if player.y >= -42.: player.y = -42.; velocity.y = 0.; jumps = 0; air_time = 0.
-		else: air_time += dt
+		CampaignVehicles.step(self,dt)
 	else:
 		gliding = character == "owl" and jump_held and velocity.y>0. and not on_floor
 		velocity.y += 1700.*(.12 if gliding else 1.)*dt
@@ -535,7 +585,7 @@ func step(dt: float) -> void:
 		if state == "playing": player = Vector2(maxf(70.,old_x-160.),-80.); velocity = Vector2(0,-300.)
 	if velocity.y>0.:
 		for enemy in enemies:
-			if bool(enemy.defeated):continue
+			if bool(enemy.defeated) or CampaignEnemies.hidden(enemy):continue
 			var top: float=float(enemy.y)-58.
 			if absf(player.x-float(enemy.x))<34. and old_y<=top and player.y>=top:
 				damage_enemy(enemy,2 if bool(enemy.mini) else 1);player.y=top-2.;velocity.y=-420.;jumps=1;air_time=0.;pending_events.append("melee");break
@@ -549,13 +599,14 @@ func step(dt: float) -> void:
 	for blast in blasts: blast.age = float(blast.age)+dt
 	blasts = blasts.filter(func(b):return float(b.age)<.5)
 	for item in pickups:
+		if item.has("secret") and not discovered.has(str(item.secret)):continue
 		if not taken.has(str(item.id)) and player.distance_to(Vector2(float(item.x),float(item.y)))<63.: collect(item)
-	for npc in npcs:
-		if not bool(npc.freed) and absf(player.x-float(npc.x))<52. and absf(player.y-float(npc.y))<80.: rescue(npc)
 	trail.append({"p":player,"time":time,"facing":facing})
 	while trail.size()>1 and time-float(trail[0].time)>4.: trail.pop_front()
 	if player.x>=length()-130. and section != "arena":
 		var blocked := false
+		for npc in npcs:
+			if bool(npc.freed) and not awarded.has(str(npc.id)+":gift"):blocked=true
 		for e in enemies:
 			if not bool(e.defeated) and (bool(e.mini) or float(e.x)>length()-650.): blocked = true
 		if not blocked:
@@ -564,16 +615,16 @@ func step(dt: float) -> void:
 			else: travel_target = next; state = "travel"; stop_inputs()
 
 func snapshot() -> Dictionary:
-	return {"schema":1,"run_seed":run_seed,"character":character,"checkpoint":checkpoint,"checkpoint_ready":checkpoint_ready,"score":score,"kills":kills,"rescued":rescued,"awarded":awarded,"taken":taken,"route":route,"completed":completed,"time":time,"flock":flock}
+	return {"schema":2,"run_seed":run_seed,"character":character,"checkpoint":checkpoint,"checkpoint_ready":checkpoint_ready,"score":score,"kills":kills,"rescued":rescued,"awarded":awarded,"taken":taken,"route":route,"completed":completed,"time":time,"flock":flock,"discovered":discovered,"activated":activated}.duplicate(true)
 
 func restore(data: Dictionary) -> bool:
-	if int(data.get("schema",0))!=1 or not STAGES.has(str(data.get("checkpoint",""))): return false
+	if int(data.get("schema",0)) not in [1,2] or not STAGES.has(str(data.get("checkpoint",""))): return false
 	if str(data.get("character","")) not in HEROES: return false
 	for key in ["rescued","route"]:
 		if not data.get(key,[]) is Array or data.get(key,[]).size()>512:return false
 		for item in data.get(key,[]):
 			if not item is String:return false
-	for key in ["awarded","taken"]:
+	for key in ["awarded","taken","discovered","activated"]:
 		if not data.get(key,{}) is Dictionary or data.get(key,{}).size()>4096:return false
 	for key in ["score","kills","time","flock"]:
 		var number=data.get(key,0)
@@ -582,6 +633,9 @@ func restore(data: Dictionary) -> bool:
 	character = str(data.character); score = maxi(0,int(data.get("score",0))); kills = maxi(0,int(data.get("kills",0)))
 	run_seed=clampi(int(data.get("run_seed",7719)),1,2000000000)
 	rescued.assign(Array(data.get("rescued",[]))); awarded = Dictionary(data.get("awarded",{})); taken = Dictionary(data.get("taken",{}))
+	discovered=Dictionary(data.get("discovered",{}));activated=Dictionary(data.get("activated",{}))
+	if int(data.schema)==1:
+		for id in rescued:awarded[str(id)+":gift"]=true # Old rescues must not manufacture new supplies.
 	route.assign(Array(data.get("route",[]))); completed = bool(data.get("completed",false)); time = maxf(0.,float(data.get("time",0.)))
 	flock = clampi(int(data.get("flock",1)),1,3); hp = max_hp; grenades = 5
 	load_section(str(data.checkpoint))

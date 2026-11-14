@@ -1,0 +1,160 @@
+{
+  "base_commit": "90055c5abf7e339c4cf30ad698f8c9f6383b59ae",
+  "status": "local_unpublished_draft",
+  "normal_enemies": 17,
+  "heavy_enemies": 4,
+  "mini_bosses": 3,
+  "boss_phases": 3,
+  "npc_roles": 6,
+  "npc_points": 43,
+  "route_rescue_counts": {
+    "A": 22,
+    "B": 23,
+    "C": 24
+  },
+  "special_weapons": 10,
+  "support_items": 8,
+  "environment_classes": 12,
+  "vehicles": 4,
+  "new_sprite_atlases": 10,
+  "new_usable_frames": 659,
+  "new_animation_groups": 114,
+  "excluded": [
+    {
+      "atlas": "environment",
+      "row": 4,
+      "column": 2,
+      "reason": "Connected silhouette crosses into another source drawing; not usable, not counted."
+    }
+  ],
+  "backdrop_panels": 3,
+  "original_ambient_loops": 5,
+  "duration_goal_minutes": [
+    9,
+    13
+  ],
+  "human_duration_measured": false,
+  "canon_status": "TASLAK",
+  "assets": [
+    {
+      "path": "assets/campaign-rescue-heroes.png",
+      "sha256": "229f1e9ad5d708aa918e033a14cef38c8061b6d02a997dd3f2d04d0277a55c09",
+      "dimensions": [
+        1266,
+        1243
+      ],
+      "rows": 6,
+      "columns": 6,
+      "generation": "exec-19c5ee09-9b2d-4d34-97cd-ed1f613d5f64",
+      "usable_frames": 36
+    },
+    {
+      "path": "assets/campaign-rescue-npcs.png",
+      "sha256": "20d3de3b08646d211ed76423e8d99a826666bc884da16ba184860ac21191f2aa",
+      "dimensions": [
+        1263,
+        1246
+      ],
+      "rows": 8,
+      "columns": 8,
+      "generation": "exec-5da02983-ad29-4679-9912-b9ce09a3bda6",
+      "usable_frames": 64
+    },
+    {
+      "path": "assets/campaign-water-enemies.png",
+      "sha256": "dc119787d89bdc7a11fa2e279486abbf87318693b98054641ddfa05d4bb60aa4",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "rows": 12,
+      "columns": 6,
+      "generation": "exec-b3e1a87f-9fd5-42bf-ba84-50ecae93b62a",
+      "usable_frames": 72
+    },
+    {
+      "path": "assets/campaign-garden-enemies.png",
+      "sha256": "d0013f085ee7387d042d3a746af5239e340f103dfc2140993461670648bc15da",
+      "dimensions": [
+        1199,
+        1312
+      ],
+      "rows": 12,
+      "columns": 6,
+      "generation": "exec-a468c208-150c-44e2-b762-16b537a3f097",
+      "usable_frames": 72
+    },
+    {
+      "path": "assets/campaign-heavy-machines.png",
+      "sha256": "53f669ff1af7af7f700f5d59e532af32f456f364560feda5f27995d35309288f",
+      "dimensions": [
+        1217,
+        1293
+      ],
+      "rows": 16,
+      "columns": 5,
+      "generation": "exec-1d8213dc-8549-4010-a7ea-accb0cc92e5e",
+      "usable_frames": 80
+    },
+    {
+      "path": "assets/campaign-mini-bosses.png",
+      "sha256": "df3f61be172d8842337ea247d603667be1e268846476e71fc0356098c4c8a49a",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "rows": 12,
+      "columns": 6,
+      "generation": "exec-62d0de69-73e1-4cba-a34c-3820d8f8ac2a",
+      "usable_frames": 72
+    },
+    {
+      "path": "assets/campaign-vehicles.png",
+      "sha256": "413a65311a01350ecf7f001289363d9bd8c0a0e398a96a3be7a14db79ff13b8c",
+      "dimensions": [
+        887,
+        1774
+      ],
+      "rows": 12,
+      "columns": 6,
+      "generation": "exec-21dcbf36-fc53-48bb-81d4-a37a5c7c1b90",
+      "usable_frames": 72
+    },
+    {
+      "path": "assets/campaign-root-engine.png",
+      "sha256": "8bf83048ae959dfb72cfc40b518e3fed283edfd0db2d50bbfb0d5df73bd41454",
+      "dimensions": [
+        887,
+        1774
+      ],
+      "rows": 12,
+      "columns": 6,
+      "generation": "exec-5300ea0e-000b-4909-982d-54d8d3f8404c",
+      "usable_frames": 72
+    },
+    {
+      "path": "assets/campaign-environment.png",
+      "sha256": "dc770f7bf3f50cd9ff86e0935c877257525a21fc2b1fdeb0ba273ce137df27fc",
+      "dimensions": [
+        1145,
+        1374
+      ],
+      "rows": 12,
+      "columns": 4,
+      "generation": "exec-d6b5c50b-da8f-43a3-b0b2-b247eea681e7",
+      "usable_frames": 47
+    },
+    {
+      "path": "assets/campaign-root-enemies.png",
+      "sha256": "f5ed470ca60ff359ccdc00cdb2dbce5dfc43cc1ad7921b547af06d4b1357cfd8",
+      "dimensions": [
+        1145,
+        1374
+      ],
+      "rows": 12,
+      "columns": 6,
+      "generation": "exec-7eb26c22-16cf-4175-b73c-ba0ed6e9aa93",
+      "usable_frames": 72
+    }
+  ]
+}

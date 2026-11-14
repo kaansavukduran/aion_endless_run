@@ -1,0 +1,123 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+STAGE aion/water shore HP 3
+STAGE aion/water quay HP 3
+STAGE aion/water water HP 3
+STAGE aion/water relay HP 3
+STAGE aion/water arena HP 3
+{"boss_hp":0,"completed":true,"frames":16743,"hero":"aion","hp":3,"objects":[],"remaining":[{"active":true,"age":0.62,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2456.712, -135.0)","hp":1,"id":"arena:enemy:222","kind":"drone","max_hp":1,"mini":false,"wait":0.94,"windup":0.0,"x":2441.95219708315,"y":-115.426125360788},{"active":true,"age":0.62,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2346.712, -160.0)","hp":1,"id":"arena:enemy:223","kind":"drone","max_hp":1,"mini":false,"wait":1.17,"windup":0.0,"x":2346.71219708314,"y":-140.426125360788}],"rescues":20,"retries":1,"route":"water","seconds":332.719999999987,"section":"arena","stages":["shore","quay","water","relay","arena"],"state":"complete","weapon":"pistol","x":2203.28979492188,"y":-65.7199935913086}
+STAGE aion/terrace shore HP 3
+STAGE aion/terrace quay HP 3
+STAGE aion/terrace canopy HP 3
+STAGE aion/terrace terrace HP 3
+STAGE aion/terrace relay HP 3
+STAGE aion/terrace arena HP 3
+{"boss_hp":0,"completed":true,"frames":16973,"hero":"aion","hp":3,"objects":[],"remaining":[{"active":true,"age":0.56,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2456.712, -135.0)","hp":1,"id":"arena:enemy:222","kind":"drone","max_hp":1,"mini":false,"wait":1.0,"windup":0.0,"x":2456.71219708314,"y":-116.136892160734},{"active":true,"age":0.56,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2346.712, -160.0)","hp":1,"id":"arena:enemy:223","kind":"drone","max_hp":1,"mini":false,"wait":1.23,"windup":0.0,"x":2346.71219708314,"y":-141.136892160734}],"rescues":21,"retries":0,"route":"terrace","seconds":338.099999999982,"section":"arena","stages":["shore","quay","canopy","terrace","relay","arena"],"state":"complete","weapon":"pistol","x":2226.78955078125,"y":-87.9199981689453}
+STAGE aion/roots shore HP 3
+STAGE aion/roots quay HP 3
+STAGE aion/roots canopy HP 3
+STAGE aion/roots roots HP 3
+STAGE aion/roots relay HP 1
+STAGE aion/roots arena HP 3
+{"boss_hp":0,"completed":true,"frames":17825,"hero":"aion","hp":3,"objects":[],"remaining":[{"active":true,"age":0.56,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2456.712, -135.0)","hp":1,"id":"arena:enemy:222","kind":"drone","max_hp":1,"mini":false,"wait":1.0,"windup":0.0,"x":2456.71219708314,"y":-116.136892160734},{"active":true,"age":0.56,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2346.712, -160.0)","hp":1,"id":"arena:enemy:223","kind":"drone","max_hp":1,"mini":false,"wait":1.23,"windup":0.0,"x":2346.71219708314,"y":-141.136892160734}],"rescues":21,"retries":0,"route":"roots","seconds":355.139999999967,"section":"arena","stages":["shore","quay","canopy","roots","relay","arena"],"state":"complete","weapon":"pistol","x":2226.78955078125,"y":-87.9199981689453}
+STAGE sheep/water shore HP 3
+STAGE sheep/water quay HP 3
+STAGE sheep/water water HP 3
+STAGE sheep/water relay HP 3
+STAGE sheep/water arena HP 3
+{"boss_hp":0,"completed":true,"frames":16176,"hero":"sheep","hp":3,"objects":[],"remaining":[{"active":true,"age":0.06,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2456.712, -135.0)","hp":1,"id":"arena:enemy:222","kind":"drone","max_hp":1,"mini":false,"wait":1.5,"windup":0.0,"x":2456.71219708314,"y":-132.367659883663},{"active":true,"age":0.06,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2346.712, -160.0)","hp":1,"id":"arena:enemy:223","kind":"drone","max_hp":1,"mini":false,"wait":1.73,"windup":0.0,"x":2346.71219708314,"y":-157.367659883663}],"rescues":20,"retries":0,"route":"water","seconds":322.199999999997,"section":"arena","stages":["shore","quay","water","relay","arena"],"state":"complete","weapon":"pistol","x":2306.68872070312,"y":-34.9199981689453}
+STAGE sheep/terrace shore HP 3
+STAGE sheep/terrace quay HP 3
+STAGE sheep/terrace canopy HP 3
+STAGE sheep/terrace terrace HP 3
+STAGE sheep/terrace relay HP 3
+STAGE sheep/terrace arena HP 3
+{"boss_hp":0,"completed":true,"frames":17147,"hero":"sheep","hp":3,"objects":[],"remaining":[{"active":true,"age":0.06,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2456.712, -135.0)","hp":1,"id":"arena:enemy:222","kind":"drone","max_hp":1,"mini":false,"wait":1.5,"windup":0.0,"x":2456.71219708314,"y":-132.367659883663},{"active":true,"age":0.06,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2346.712, -160.0)","hp":1,"id":"arena:enemy:223","kind":"drone","max_hp":1,"mini":false,"wait":1.73,"windup":0.0,"x":2346.71219708314,"y":-157.367659883663}],"rescues":21,"retries":0,"route":"terrace","seconds":341.579999999979,"section":"arena","stages":["shore","quay","canopy","terrace","relay","arena"],"state":"complete","weapon":"pistol","x":2306.68872070312,"y":-34.9199981689453}
+STAGE sheep/roots shore HP 3
+STAGE sheep/roots quay HP 3
+STAGE sheep/roots canopy HP 3
+STAGE sheep/roots roots HP 3
+STAGE sheep/roots relay HP 3
+STAGE sheep/roots arena HP 3
+{"boss_hp":0,"completed":true,"frames":17858,"hero":"sheep","hp":3,"objects":[],"remaining":[{"active":true,"age":0.06,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2456.712, -135.0)","hp":1,"id":"arena:enemy:222","kind":"drone","max_hp":1,"mini":false,"wait":1.5,"windup":0.0,"x":2456.71219708314,"y":-132.367659883663},{"active":true,"age":0.06,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2346.712, -160.0)","hp":1,"id":"arena:enemy:223","kind":"drone","max_hp":1,"mini":false,"wait":1.73,"windup":0.0,"x":2346.71219708314,"y":-157.367659883663}],"rescues":21,"retries":0,"route":"roots","seconds":355.799999999966,"section":"arena","stages":["shore","quay","canopy","roots","relay","arena"],"state":"complete","weapon":"pistol","x":2306.68872070312,"y":-34.9199981689453}
+STAGE wolf/water shore HP 3
+STAGE wolf/water quay HP 3
+STAGE wolf/water water HP 3
+STAGE wolf/water relay HP 3
+STAGE wolf/water arena HP 3
+{"boss_hp":0,"completed":true,"frames":16154,"hero":"wolf","hp":3,"objects":[],"remaining":[{"active":true,"age":0.48,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2445.111, -135.0)","hp":1,"id":"arena:enemy:222","kind":"drone","max_hp":1,"mini":false,"wait":1.08,"windup":0.0,"x":2445.11072136863,"y":-117.592139592048},{"active":true,"age":0.48,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2335.111, -160.0)","hp":1,"id":"arena:enemy:223","kind":"drone","max_hp":1,"mini":false,"wait":1.31,"windup":0.0,"x":2335.11072136863,"y":-142.592139592048}],"rescues":20,"retries":0,"route":"water","seconds":321.759999999997,"section":"arena","stages":["shore","quay","water","relay","arena"],"state":"complete","weapon":"pistol","x":2231.48950195312,"y":-108.0}
+STAGE wolf/terrace shore HP 3
+STAGE wolf/terrace quay HP 3
+STAGE wolf/terrace canopy HP 3
+STAGE wolf/terrace terrace HP 3
+STAGE wolf/terrace relay HP 3
+STAGE wolf/terrace arena HP 2
+{"boss_hp":0,"completed":true,"frames":16973,"hero":"wolf","hp":3,"objects":[],"remaining":[{"active":true,"age":0.48,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2445.111, -135.0)","hp":1,"id":"arena:enemy:222","kind":"drone","max_hp":1,"mini":false,"wait":1.08,"windup":0.0,"x":2445.11072136863,"y":-117.592139592048},{"active":true,"age":0.48,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2335.111, -160.0)","hp":1,"id":"arena:enemy:223","kind":"drone","max_hp":1,"mini":false,"wait":1.31,"windup":0.0,"x":2335.11072136863,"y":-142.592139592048}],"rescues":21,"retries":0,"route":"terrace","seconds":338.099999999982,"section":"arena","stages":["shore","quay","canopy","terrace","relay","arena"],"state":"complete","weapon":"pistol","x":2231.48950195312,"y":-108.0}
+STAGE wolf/roots shore HP 3
+STAGE wolf/roots quay HP 3
+STAGE wolf/roots canopy HP 3
+STAGE wolf/roots roots HP 3
+STAGE wolf/roots relay HP 1
+STAGE wolf/roots arena HP 3
+{"boss_hp":0,"completed":true,"frames":17813,"hero":"wolf","hp":3,"objects":[],"remaining":[{"active":true,"age":0.48,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2445.111, -135.0)","hp":1,"id":"arena:enemy:222","kind":"drone","max_hp":1,"mini":false,"wait":1.08,"windup":0.0,"x":2445.11072136863,"y":-117.592139592048},{"active":true,"age":0.48,"armour":0,"attacks":0,"defeated":false,"facing":-1,"flash":0.0,"heavy":false,"home":"(2335.111, -160.0)","hp":1,"id":"arena:enemy:223","kind":"drone","max_hp":1,"mini":false,"wait":1.31,"windup":0.0,"x":2335.11072136863,"y":-142.592139592048}],"rescues":21,"retries":0,"route":"roots","seconds":354.899999999967,"section":"arena","stages":["shore","quay","canopy","roots","relay","arena"],"state":"complete","weapon":"pistol","x":2231.48950195312,"y":-108.0}
+STAGE owl/water shore HP 3
+STAGE owl/water quay HP 3
+STAGE owl/water water HP 3
+STAGE owl/water relay HP 3
+STAGE owl/water arena HP 3
+{"boss_hp":0,"completed":true,"frames":16509,"hero":"owl","hp":3,"objects":[],"remaining":[],"rescues":20,"retries":0,"route":"water","seconds":328.859999999991,"section":"arena","stages":["shore","quay","water","relay","arena"],"state":"complete","weapon":"pistol","x":2090.49096679688,"y":-98.1199798583984}
+STAGE owl/terrace shore HP 3
+STAGE owl/terrace quay HP 3
+STAGE owl/terrace canopy HP 3
+STAGE owl/terrace terrace HP 1
+STAGE owl/terrace relay HP 3
+STAGE owl/terrace arena HP 3
+{"boss_hp":0,"completed":true,"frames":17096,"hero":"owl","hp":3,"objects":[],"remaining":[],"rescues":21,"retries":0,"route":"terrace","seconds":340.55999999998,"section":"arena","stages":["shore","quay","canopy","terrace","relay","arena"],"state":"complete","weapon":"pistol","x":2090.49096679688,"y":-98.1199798583984}
+STAGE owl/roots shore HP 3
+STAGE owl/roots quay HP 3
+STAGE owl/roots canopy HP 3
+STAGE owl/roots roots HP 1
+STAGE owl/roots relay HP 1
+STAGE owl/roots arena HP 3
+{"boss_hp":0,"completed":true,"frames":17822,"hero":"owl","hp":3,"objects":[],"remaining":[],"rescues":21,"retries":0,"route":"roots","seconds":355.079999999967,"section":"arena","stages":["shore","quay","canopy","roots","relay","arena"],"state":"complete","weapon":"pistol","x":2090.49096679688,"y":-98.1199798583984}
+STAGE rabbit/water shore HP 3
+STAGE rabbit/water quay HP 3
+STAGE rabbit/water water HP 3
+STAGE rabbit/water relay HP 3
+STAGE rabbit/water arena HP 3
+{"boss_hp":0,"completed":true,"frames":18462,"hero":"rabbit","hp":3,"objects":[],"remaining":[],"rescues":20,"retries":0,"route":"water","seconds":367.919999999955,"section":"arena","stages":["shore","quay","water","relay","arena"],"state":"complete","weapon":"pistol","x":2102.71826171875,"y":0.0}
+STAGE rabbit/terrace shore HP 3
+STAGE rabbit/terrace quay HP 3
+STAGE rabbit/terrace canopy HP 3
+STAGE rabbit/terrace terrace HP 2
+STAGE rabbit/terrace relay HP 3
+STAGE rabbit/terrace arena HP 3
+{"boss_hp":0,"completed":true,"frames":19305,"hero":"rabbit","hp":3,"objects":[],"remaining":[],"rescues":20,"retries":0,"route":"terrace","seconds":384.73999999994,"section":"arena","stages":["shore","quay","canopy","terrace","relay","arena"],"state":"complete","weapon":"pistol","x":2102.71826171875,"y":0.0}
+STAGE rabbit/roots shore HP 3
+STAGE rabbit/roots quay HP 3
+STAGE rabbit/roots canopy HP 3
+STAGE rabbit/roots roots HP 2
+STAGE rabbit/roots relay HP 1
+STAGE rabbit/roots arena HP 3
+{"boss_hp":0,"completed":true,"frames":41994,"hero":"rabbit","hp":3,"objects":[],"remaining":[],"rescues":22,"retries":4,"route":"roots","seconds":835.21999999953,"section":"arena","stages":["shore","quay","canopy","roots","relay","arena"],"state":"complete","weapon":"pistol","x":2002.14086914062,"y":0.0}
+STAGE eren/water shore HP 3
+STAGE eren/water quay HP 3
+STAGE eren/water water HP 3
+STAGE eren/water relay HP 3
+STAGE eren/water arena HP 3
+{"boss_hp":0,"completed":true,"frames":18586,"hero":"eren","hp":3,"objects":[],"remaining":[],"rescues":19,"retries":0,"route":"water","seconds":370.399999999953,"section":"arena","stages":["shore","quay","water","relay","arena"],"state":"complete","weapon":"pistol","x":2029.86743164062,"y":0.0}
+STAGE eren/terrace shore HP 3
+STAGE eren/terrace quay HP 3
+STAGE eren/terrace canopy HP 3
+STAGE eren/terrace terrace HP 1
+STAGE eren/terrace relay HP 3
+STAGE eren/terrace arena HP 3
+{"boss_hp":0,"completed":true,"frames":19581,"hero":"eren","hp":3,"objects":[],"remaining":[],"rescues":20,"retries":0,"route":"terrace","seconds":390.259999999935,"section":"arena","stages":["shore","quay","canopy","terrace","relay","arena"],"state":"complete","weapon":"pistol","x":2029.86743164062,"y":0.0}
+STAGE eren/roots shore HP 3
+STAGE eren/roots quay HP 3
+STAGE eren/roots canopy HP 3
+STAGE eren/roots roots HP 1
+STAGE eren/roots relay HP 3
+STAGE eren/roots arena HP 3
+{"boss_hp":0,"completed":true,"frames":25100,"hero":"eren","hp":3,"objects":[],"remaining":[],"rescues":21,"retries":1,"route":"roots","seconds":499.819999999835,"section":"arena","stages":["shore","quay","canopy","roots","relay","arena"],"state":"complete","weapon":"pistol","x":1983.80908203125,"y":0.0}
+RESULT: 18 model route completions, 0 failures
