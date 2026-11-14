@@ -48,7 +48,9 @@ for code in ['tr','cs','en']:
  capture('main-'+code)
 menu_button(name='StartSelect_owl');latest('AION_UI ',lambda s:s['character']=='owl' and s['page']=='main')
 menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-gesture=hold('jump',2200)
+# Observe glide, then release while still airborne. Waiting2.2s can land
+# before the first repress, which tests a second takeoff rather than a flap.
+gesture=hold('jump',700)
 try:
  latest('AION_STATE ',lambda s:s['gliding'] and s['airborne']);capture('owl-glide');check(True,'Real native Jump hold reaches an airborne owl glide')
 finally:gesture.wait(timeout=5)
