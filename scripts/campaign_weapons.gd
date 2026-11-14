@@ -27,16 +27,24 @@ static func fire(w) -> void:
 	var angles: Array=[-.17,0.,.17] if w.weapon=="scatter" else ([-.4,-.2,0.,.2,.4] if w.weapon=="spore" else [0.])
 	if w.weapon=="seeker":angles=[-.15,0.,.15]
 	if riding:angles=[-.2,0.,.2] if CampaignVehicles.kind(w)=="wind" else [0.]
-	var offset: Vector2=w.muzzle_offset();var origin: Vector2=w.player+Vector2(w.facing*offset.x,offset.y)
+	var aim: Vector2=Vector2(w.aim_direction)
+	if aim.length_squared()<.01:aim=Vector2(w.facing,0.)
+	aim=aim.normalized()
+	var offset: Vector2=w.muzzle_offset()
+	var origin: Vector2=w.player+Vector2(w.facing*offset.x,offset.y)
+	# For vertical fire, position the muzzle above the collision floor and
+	# along the actual angled barrel. Straight down works from the air and ground.
+	if absf(aim.y)>.15:origin=w.player+Vector2(aim.x*minf(absf(offset.x),40.),-55.+aim.y*20.)
 	var index:=0
 	for angle in angles:
 		var target: String=""
 		var eligible: Array=w.enemies.filter(func(e):return not bool(e.defeated) and absf(float(e.x)-w.player.x)<900.)
 		eligible.sort_custom(func(a,b):return absf(float(a.x)-w.player.x)<absf(float(b.x)-w.player.x))
 		if w.weapon=="seeker" and not eligible.is_empty():target=str(eligible[mini(index,eligible.size()-1)].id)
-		var b: Dictionary={"p":origin,"v":Vector2(w.facing*cos(angle),sin(angle))*float(spec.speed),"owner":"hero","age":0.,"kind":"vehicle" if riding else w.weapon,"damage":int(spec.damage)+int(riding)+int(float(w.buffs.get("power",0.))>0.),"pierce":int(spec.pierce),"hit":[],"life":float(spec.life),"colour":str(spec.colour),"target":target,"bounces":0}
-		b.start=w.player+Vector2(0,offset.y)
+		var b: Dictionary={"p":origin,"v":aim.rotated(angle)*float(spec.speed),"owner":"hero","age":0.,"kind":"vehicle" if riding else w.weapon,"damage":int(spec.damage)+int(riding)+int(float(w.buffs.get("power",0.))>0.),"pierce":int(spec.pierce),"hit":[],"life":float(spec.life),"colour":str(spec.colour),"target":target,"bounces":0}
+		b.start=w.player+Vector2(0,-50. if absf(aim.y)>.15 else offset.y)
 		if w.weapon=="trap":b.gravity=550.;b.p=w.player+Vector2(w.facing*35.,-15.)
+		b.aim=aim
 		w.bullets.append(b);index+=1
 	w.shots+=1;w.fire_time=float(spec.interval);w.shot_flash=.18;w.pending_events.append("shot")
 	if w.weapon!="pistol" and not riding:
