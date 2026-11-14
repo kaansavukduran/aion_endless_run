@@ -9,6 +9,8 @@
     "A moves and faces left",
     "Held fire produces real, spaced gunshots",
     "G spends exactly one energy grenade",
+    "Actual right Fire touch reaches a gunshot or contextual close strike",
+    "Actual right Grenade touch spends one bomb without a second underlying command",
     "Pause freezes the active mission",
     "Visible reachable menu action: @Button@168",
     "Visible reachable menu action: @Button@169",
@@ -64,71 +66,64 @@
         "hp": 1,
         "kind": "gnome",
         "windup": 0.0,
-        "x": 429.758,
+        "x": 443.305,
         "y": 0.0
       },
       {
         "hp": 1,
         "kind": "beetle",
         "windup": 0.0,
-        "x": 600.480337158203,
+        "x": 705.851327921549,
         "y": 0.0
       },
       {
         "hp": 1,
         "kind": "seed",
         "windup": 0.0,
-        "x": 882.836807250977,
+        "x": 941.95426940918,
         "y": 0.0
       },
       {
         "hp": 1,
         "kind": "crow",
         "windup": 0.0,
-        "x": 1149.38758850098,
+        "x": 1127.02159118652,
         "y": -115.0
       },
       {
         "hp": 1,
         "kind": "beetle",
         "windup": 0.0,
-        "x": 1322.04695129395,
+        "x": 1348.02421569824,
         "y": 0.0
       },
       {
         "hp": 1,
-        "kind": "beetle",
+        "kind": "gnome",
         "windup": 0.0,
-        "x": 1554.20381164551,
-        "y": 0.0
-      },
-      {
-        "hp": 1,
-        "kind": "seed",
-        "windup": 0.0,
-        "x": 1749.10762023926,
-        "y": 0.0
-      },
-      {
-        "hp": 1,
-        "kind": "beetle",
-        "windup": 0.0,
-        "x": 2008.16120910645,
-        "y": 0.0
-      },
-      {
-        "hp": 1,
-        "kind": "seed",
-        "windup": 0.0,
-        "x": 2135.99175262451,
+        "x": 1516.89697265625,
         "y": 0.0
       },
       {
         "hp": 1,
         "kind": "crow",
         "windup": 0.0,
-        "x": 2313.21907806396,
+        "x": 1680.67822265625,
         "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 1941.4609375,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 2155.15559387207,
+        "y": 0.0
       }
     ],
     "facing": 1,
@@ -142,7 +137,7 @@
     "grenades": 5,
     "grounded": true,
     "hp": 3,
-    "invulnerable": 0.691,
+    "invulnerable": 0.789166666666667,
     "kills": 2,
     "melee": 0.0,
     "menu": "",
@@ -189,7 +184,7 @@
     ],
     "rescued": [],
     "route": [],
-    "run_seed": 1441715904,
+    "run_seed": 178651072,
     "save_ok": true,
     "schema": 1,
     "score": 225,
@@ -205,7 +200,7 @@
     "taken": {
       "shore:fruit:1": true
     },
-    "time": 4.57062794612794,
+    "time": 5.31997979797979,
     "transform": [
       1.0,
       0.0,

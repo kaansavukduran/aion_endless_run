@@ -1,0 +1,234 @@
+{
+  "checks": [
+    "Visible reachable menu action: @Button@97",
+    "Visible reachable menu action: CampaignBegin",
+    "Visible reachable menu action: @Button@109",
+    "Visible reachable menu action: CampaignGo",
+    "Main menu \u2192 Arcade \u2192 mission \u2192 play through normal buttons",
+    "D moves the player right; this is not automatic scrolling",
+    "A moves and faces left",
+    "Held fire produces real, spaced gunshots",
+    "G spends exactly one energy grenade",
+    "Actual right Fire touch reaches a gunshot or contextual close strike",
+    "Actual right Grenade touch spends one bomb without a second underlying command",
+    "Pause freezes the active mission",
+    "Visible reachable menu action: @Button@168",
+    "Visible reachable menu action: @Button@169",
+    "Visible reachable menu action: @Button@170",
+    "Portrait rotation preserves checkpoint and score",
+    "Approved fixed left stick and three right actions exist",
+    "Touch target is inside portrait viewport: attack",
+    "Touch target is inside portrait viewport: grenade",
+    "Touch target is inside portrait viewport: jump",
+    "Real multitouch moves and jumps simultaneously",
+    "Touch cancellation releases the joystick without a stuck direction",
+    "Mission 1 is completable with actual keyboard/mouse-equivalent gameplay",
+    "The chosen branch was actually recorded",
+    "Actual completed checkpoint and campaign best are persisted",
+    "Return to the original runner clears stale campaign observations",
+    "Returning to main preserves the completed campaign",
+    "Offline reload starts the real game and preserves its separate campaign checkpoint",
+    "No browser or Godot script errors during the actual flow: []"
+  ],
+  "errors": [],
+  "build": "6dd043210443d464",
+  "final": {
+    "actions": {
+      "attack": [
+        977.0,
+        413.0,
+        100.0,
+        100.0
+      ],
+      "grenade": [
+        922.0,
+        523.0,
+        100.0,
+        100.0
+      ],
+      "jump": [
+        1032.0,
+        523.0,
+        100.0,
+        100.0
+      ]
+    },
+    "awarded": {},
+    "boss_hp": 90,
+    "bullets": [],
+    "buttons": {
+      "@Button@97": [
+        172.0,
+        403.0,
+        808.0,
+        54.0,
+        "Ana men\u00fc"
+      ],
+      "CampaignBegin": [
+        172.0,
+        345.0,
+        808.0,
+        48.0,
+        "G\u00f6reve ba\u015fla"
+      ]
+    },
+    "camera": 0.0,
+    "character": "aion",
+    "checkpoint": "shore",
+    "checkpoint_ready": true,
+    "completed": false,
+    "enemies": [
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 500.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 742.639190673828,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 968.083541870117,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1206.87565612793,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 1453.4568939209,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 1687.46334838867,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 1854.86471557617,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 2042.86126708984,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2270.49078369141,
+        "y": 0.0
+      }
+    ],
+    "facing": 1,
+    "flock": 1,
+    "gates": [
+      {
+        "closed": true,
+        "x": 1080.0
+      }
+    ],
+    "grenades": 5,
+    "grounded": true,
+    "hp": 3,
+    "invulnerable": 1.2,
+    "kills": 0,
+    "melee": 0.0,
+    "menu": "briefing",
+    "mounted": false,
+    "pits": [],
+    "platforms": [
+      [
+        650.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1300.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1950.0,
+        -70.0,
+        170.0,
+        20.0
+      ]
+    ],
+    "player": [
+      140.0,
+      0.0
+    ],
+    "pose": {
+      "anchor": [
+        140.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 3,
+      "source": "pixel-aion"
+    },
+    "raw": [
+      1152.0,
+      648.0
+    ],
+    "rescued": [],
+    "route": [],
+    "run_seed": 823418657,
+    "save_ok": true,
+    "schema": 1,
+    "score": 0,
+    "section": "shore",
+    "shots": 0,
+    "state": "briefing",
+    "stick": [
+      24.0,
+      471.0,
+      150.0,
+      150.0
+    ],
+    "taken": {},
+    "time": 0.0,
+    "transform": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "ui_generation": 1,
+    "ui_ready": true,
+    "velocity": [
+      0.0,
+      0.0
+    ],
+    "view": [
+      1152.0,
+      648.0
+    ]
+  }
+}

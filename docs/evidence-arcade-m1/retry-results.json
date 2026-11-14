@@ -1,0 +1,408 @@
+{
+  "method": "Ordinary right movement into authored danger, actual death UI and actual Retry touch; no state setters.",
+  "passed": true,
+  "dead": {
+    "actions": {
+      "attack": [
+        977.0,
+        413.0,
+        100.0,
+        100.0
+      ],
+      "grenade": [
+        922.0,
+        523.0,
+        100.0,
+        100.0
+      ],
+      "jump": [
+        1032.0,
+        523.0,
+        100.0,
+        100.0
+      ]
+    },
+    "awarded": {
+      "shore:enemy:0": true,
+      "shore:enemy:1": true,
+      "shore:enemy:2": true,
+      "shore:fruit:1": true,
+      "shore:fruit:2": true,
+      "shore:fruit:3": true,
+      "shore:fruit:4": true
+    },
+    "boss_hp": 90,
+    "bullets": [],
+    "buttons": {
+      "@Button@195": [
+        172.0,
+        368.0,
+        808.0,
+        54.0,
+        "Ana men\u00fc"
+      ],
+      "CampaignRetry": [
+        172.0,
+        310.0,
+        808.0,
+        48.0,
+        "Kontrol noktas\u0131ndan dene"
+      ]
+    },
+    "camera": 688.32,
+    "character": "aion",
+    "checkpoint": "shore",
+    "checkpoint_ready": true,
+    "completed": false,
+    "enemies": [
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 862.52783203125,
+        "y": -115.019945617211
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.3,
+        "x": 944.77783203125,
+        "y": -130.15400678245
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 1524.9207611084,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 1303.05395008138,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1929.04922485352,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 2121.0153503418,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 2284.38328552246,
+        "y": 0.0
+      }
+    ],
+    "facing": 1,
+    "flock": 1,
+    "gates": [
+      {
+        "closed": true,
+        "x": 1080.0
+      }
+    ],
+    "grenades": 3,
+    "grounded": true,
+    "hp": 0,
+    "invulnerable": 1.2,
+    "kills": 3,
+    "melee": 0.0,
+    "menu": "dead",
+    "mounted": false,
+    "pits": [],
+    "platforms": [
+      [
+        650.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1300.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1950.0,
+        -70.0,
+        170.0,
+        20.0
+      ]
+    ],
+    "player": [
+      1080.0,
+      0.0
+    ],
+    "pose": {
+      "anchor": [
+        1080.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 3,
+      "row": 11,
+      "source": "pixel-aion"
+    },
+    "raw": [
+      1152.0,
+      648.0
+    ],
+    "rescued": [],
+    "route": [],
+    "run_seed": 344185144,
+    "save_ok": true,
+    "schema": 1,
+    "score": 400,
+    "section": "shore",
+    "shots": 3,
+    "state": "dead",
+    "stick": [
+      24.0,
+      471.0,
+      150.0,
+      150.0
+    ],
+    "taken": {
+      "shore:crate:1": true,
+      "shore:fruit:1": true,
+      "shore:fruit:2": true,
+      "shore:fruit:3": true,
+      "shore:fruit:4": true
+    },
+    "time": 14.5198396825398,
+    "transform": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "ui_generation": 10,
+    "ui_ready": true,
+    "velocity": [
+      0.0,
+      0.0
+    ],
+    "view": [
+      1152.0,
+      648.0
+    ]
+  },
+  "restored": {
+    "actions": {
+      "attack": [
+        977.0,
+        413.0,
+        100.0,
+        100.0
+      ],
+      "grenade": [
+        922.0,
+        523.0,
+        100.0,
+        100.0
+      ],
+      "jump": [
+        1032.0,
+        523.0,
+        100.0,
+        100.0
+      ]
+    },
+    "awarded": {
+      "shore:enemy:0": true,
+      "shore:enemy:1": true,
+      "shore:enemy:2": true,
+      "shore:fruit:1": true,
+      "shore:fruit:2": true,
+      "shore:fruit:3": true,
+      "shore:fruit:4": true
+    },
+    "boss_hp": 90,
+    "bullets": [],
+    "buttons": {},
+    "camera": 0.0,
+    "character": "aion",
+    "checkpoint": "shore",
+    "checkpoint_ready": true,
+    "completed": false,
+    "enemies": [
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 486.2,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 664.861334228516,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 929.685607910156,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1125.84146118164,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1366.90495300293,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 1524.9207611084,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 1724.03341674805,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1929.04922485352,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 2121.0153503418,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 2284.38328552246,
+        "y": 0.0
+      }
+    ],
+    "facing": 1,
+    "flock": 1,
+    "gates": [
+      {
+        "closed": true,
+        "x": 1080.0
+      }
+    ],
+    "grenades": 3,
+    "grounded": true,
+    "hp": 3,
+    "invulnerable": 1.1,
+    "kills": 3,
+    "melee": 0.0,
+    "menu": "",
+    "mounted": false,
+    "pits": [],
+    "platforms": [
+      [
+        650.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1300.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1950.0,
+        -70.0,
+        170.0,
+        20.0
+      ]
+    ],
+    "player": [
+      140.0,
+      0.0
+    ],
+    "pose": {
+      "anchor": [
+        140.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 3,
+      "source": "pixel-aion"
+    },
+    "raw": [
+      1152.0,
+      648.0
+    ],
+    "rescued": [],
+    "route": [],
+    "run_seed": 344185144,
+    "save_ok": true,
+    "schema": 1,
+    "score": 400,
+    "section": "shore",
+    "shots": 3,
+    "state": "playing",
+    "stick": [
+      24.0,
+      471.0,
+      150.0,
+      150.0
+    ],
+    "taken": {
+      "shore:crate:1": true,
+      "shore:fruit:1": true,
+      "shore:fruit:2": true,
+      "shore:fruit:3": true,
+      "shore:fruit:4": true
+    },
+    "time": 14.6198396825398,
+    "transform": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "ui_generation": 11,
+    "ui_ready": true,
+    "velocity": [
+      0.0,
+      0.0
+    ],
+    "view": [
+      1152.0,
+      648.0
+    ]
+  }
+}

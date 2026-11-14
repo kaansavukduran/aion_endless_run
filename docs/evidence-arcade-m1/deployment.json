@@ -1,0 +1,71 @@
+{
+  "observed_at_utc": "2026-11-14T15:55:20.458956+00:00",
+  "version": "0.23.0",
+  "merged_source_commit": "8a93f8dfbb30eb694074e6a481d2e1d7c03c3533",
+  "source_tree": "9adc3455c7fea20ed6a274c5928156d317fd84c3",
+  "pull_request": "https://github.com/kaansavukduran/aion_endless_run/pull/1",
+  "ci": {
+    "pr_run": 43610641847,
+    "main_run": 43611409619,
+    "source_suites": 25,
+    "source_checks": 18883,
+    "source_result": "passed",
+    "windows": "passed",
+    "linux": "passed",
+    "macos_intel": "passed",
+    "android_emulator_legacy_regression": "passed",
+    "signed_android_release_job": "skipped",
+    "new_native_release_published": false
+  },
+  "vercel": {
+    "public_url": "https://aionendlessrun.vercel.app/",
+    "build": "6dd043210443d464",
+    "deployment_id": "dpl_9E5J9Hyn5Tno9KhGyDHaBH74wbTF",
+    "built_source_commit": "a7a415743292122806fef49bcc65a50fddf380ef",
+    "same_source_tree_as_merge": true,
+    "delivery": "The existing READY static preview was assigned to the existing primary public alias. This is not a newly built production-environment deployment.",
+    "automatic_main_build": "Blocked by daily build rate limit; GitHub Vercel status remains failure.",
+    "promote_api": "Returned HTTP 422; not reported as successful.",
+    "project_protection": "Unchanged. No authentication bypass or share token created.",
+    "secondary_alias_probe": "Returned existing login protection and was restored to its original deployment; primary public alias separately returned the actual 0.23 JSON manifest.",
+    "previous_primary_deployment": "dpl_EGMxX5Tbe3wzSBWyEKMb1ZYhvL6J"
+  },
+  "github_pages": {
+    "public_url": "https://kaansavukduran.github.io/aion_endless_run/",
+    "build": "48a12e699b25e92f",
+    "source_commit": "8a93f8dfbb30eb694074e6a481d2e1d7c03c3533",
+    "publish_workflow_run": 43612266409,
+    "publish_result": "passed"
+  },
+  "browser_verification": {
+    "live-vercel": {
+      "checks": 23,
+      "build": "6dd043210443d464",
+      "errors": 0
+    },
+    "live-pages": {
+      "checks": 28,
+      "build": "48a12e699b25e92f",
+      "errors": 0
+    },
+    "public-mirror": {
+      "checks": 29,
+      "build": "6dd043210443d464",
+      "errors": 0
+    },
+    "firefox": {
+      "checks": 24,
+      "build": "69f32a110a9e3532",
+      "errors": 0
+    }
+  },
+  "public_https_driver": "System-CA-verified request forwarding because Chromium in this executor rejects the cloud proxy CA. No certificate verification disabled. Direct live runs block service workers and use identical-byte Blob worklets; they verify live controls and gameplay, not production-origin worker installation.",
+  "public_mirror": "18 worker-listed files fetched unchanged from Vercel over system-CA-verified TLS, with exact SHA-256/byte counts. Real ServiceWorker/cache/save/offline and full water route tested at localhost with this same bundle.",
+  "not_tested": [
+    "Physical Poco/iPhone",
+    "Physical Xbox/PS controller",
+    "Native Apple ARM hardware",
+    "Direct production-origin worker installation"
+  ],
+  "roadmap": "Mission 1 is a short first playable implementation. Missions 2–5 remain planned."
+}

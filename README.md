@@ -2,13 +2,15 @@
 
 ## 0.23.0 · İlk arcade görev: Sönen Fenerler
 
+[Vercel'de oyna](https://aionendlessrun.vercel.app/) · [GitHub Pages'te oyna](https://kaansavukduran.github.io/aion_endless_run/) · [Gerçek testler ve yayın kaydı](docs/evidence-arcade-m1/README.md)
+
 Ana menüde **Arcade** yeni sonlu görevi, **Sonsuz / Endless** önceki koşu oyununu açar. Altı mevcut kahraman korunur. Yeni modda karakter sağa ve sola yürür; iki ardışık yol ayrımı üç farklı son rotaya açılır. Fener bekçilerini kurtar, ikmal sandıklarını aç, Fener Kızağı’na bin ve Kök Motoru’nu durdur. Yakındaki düşmanda ateş düğmesi karaktere uygun tek bir temas saldırısına dönüşür. Bombalar kahramanın rengini taşır; doldurma yoktur.
 
 **Telefon:** solda sabit joystick; sağda Zıpla, Ateş/Yakın saldırı ve Bomba. **Klavye:** A/D veya oklar, Space, F/sol tık, G bomba, E bin/in. **Kol:** sol çubuk/yön tuşları, A/× zıpla, RB/R1 veya X/□ ateş, B/○ bomba, Y/△ bin/in; kayıtlı eşlemeler dikkate alınır. [Yeni modun kuralları ve kontrolleri](docs/ARCADE.md).
 
 Bu, beş görevlik dönüşümün ilk oynanabilir bölümüdür; Görev 2–5 henüz oynanabilir değildir. [Metal Slug 3 araştırması ve beş görevlik özgün plan](docs/ARCADE-PLAN.md). Mevcut sonsuz koşu, rekorları ve ayarları ayrı kalır. Kampanya kontrol noktası kendi kaydını kullanır. Daha önce yayımlanan 0.22.0 indirme paketleri değiştirilmez; yeni web ve yeni paketlerin durumunu teslim raporundan ayırarak kontrol et.
 
-Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Godot **4.6.3**, oyun **0.22.0**.
+**Önceki sonsuz mod ve 0.22.0 indirmeleri:** Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile mola ver.** İleri ateş et, engellerin altından takla at, çukurları aş ve kendi rekorunu geç. Motor Godot **4.6.3**; yukarıdaki yeni arcade web sürümü **0.23.0**.
 
 **[Güncel oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [0.22.0 indir](https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.22.0)** · [Vercel adresi](https://aionendlessrun.vercel.app/) · [Paket ve platform durumu](docs/RELEASE.md) · [AIONIA uygulama notları](AIONIA_STANDARD.md) · [Doğrulama](docs/evidence-v0220/README.md)
 
