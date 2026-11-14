@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-11-14T12:35:54.220819+03:00",
+  "recorded_at": "2026-11-14T12:49:52.358609+03:00",
   "baseline_commit": "f2142f96d06e6d793547a7fd75fb30f2cf00d660",
-  "status": "LOCAL_PASS_DEPLOY_PENDING",
+  "status": "PASS_WEB_DEPLOYED",
   "engine": "Godot4.6.3",
   "observed_standard": "AIONIA1.7, regression record1.1; live documents reread for relevant art/ground-contact scope. Private text not redistributed.",
   "scope": "Ground drawing only: six biome materials. Existing character assets, physics/collisions, timing, saves, preferences and approved touch scheme unchanged.",
@@ -24,5 +24,33 @@
   "pixel_contract": "One source pixel =2 world pixels. Six cached1024x96 RGBA materials,2048-world-pixel period. Ground never receives height offsets; no RNG is consumed.",
   "baseline_screenshot_scope": "Old native fixture has inherited CS/200% UI; final fixtures explicitly use TR/100%. Comparison concerns the same ground renderer/support level, not a controlled UI typography comparison.",
   "native_download_release": "Existing v0.22.0 release packages are preserved; they are not overwritten by this web visual update.",
-  "physical_phone_gamepad": "NOT TESTED"
+  "physical_phone_gamepad": "NOT TESTED",
+  "implementation_commit": "5f0b1b8935157c698ea97972f962cb43aa19f7e6",
+  "ci_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43581375714",
+  "ci_source_suites": 22,
+  "ci_source_checks": 12324,
+  "ci_ground_render_checks": 40,
+  "ci_native_android_input_checks": 15,
+  "ci_platform_gates": {
+    "test": "PASS",
+    "Linux_packages_launch_and_rendered_ground": "PASS",
+    "Windows_packages_install_launch": "PASS",
+    "macOS_universal_packages_launch": "PASS",
+    "Android_API30_offline_emulator_15_inputs": "PASS"
+  },
+  "pages_deploy_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43581945616",
+  "public_browser_checks": 32,
+  "public_browser_matrix": {
+    "Vercel_Chromium": "PASS8",
+    "Vercel_Firefox": "PASS8",
+    "Pages_Chromium": "PASS8",
+    "Pages_Firefox": "PASS8"
+  },
+  "pages_build": "201a9517fa34d77a",
+  "vercel_build": "e93a2d8213c68e9d",
+  "public_test_scope": "Actual public HTTPS entry, loader-verified PCK and screenshot pixel comparison with the new sandstone palette; material region has6+ substantial color clusters. Normal held Fire, pause and rotate/resume. Diagnostic CA-verified forwarding blocks ServiceWorker; offline was unchanged and was not retested in this pass.",
+  "first_public_build_attempt": "Expected intermediate buildc9260f9e69e728fe changed to e93a2d8213c68e9d while production deployed. The strict expected-build assertion rejected the mismatch. Final matrix uses the settled actual production build; no assertion was removed.",
+  "pages_chromium_first_attempt": "Four checks passed, then waiting for paused page timed out. No failure-state capture was available; root cause NOT PROVEN. A focused repeat with diagnostic state logging passed all8 assertions, observing state running/time3.633 before pause. No application change was made for this non-reproduced failure.",
+  "firefox_harness": "An initial headed Firefox attempt stalled inside BrowserType.launch before navigation and was interrupted. Reusing the existing driver pattern with writable XDG cache/config directories completed the real8-check flow. Exact startup-stall cause was not proven; this is not recorded as an application defect.",
+  "artifact_delivery": "Source and both public web sites updated. Existing immutable0.22.0 release packages remain unchanged. CI built and launched new native artifacts; this task did not publish another download release."
 }

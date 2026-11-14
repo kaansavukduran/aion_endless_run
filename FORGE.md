@@ -1,5 +1,7 @@
 # Ground material update · scope and handoff
 
+Final implementation5f0b1b8; CI43581375714 all five gatesPASS,22 suites12324, real CI ground40, Android15; Pages43581945616 successful. Both actual public sites pass8 checks each in Chromium and Firefox (32total), including screenshot RGB/material verification. Evidence and transient test failures are recorded honestly in docs/evidence-terrain/verification.json. Existing release downloads unchanged; web-only delivery scope.
+
 Baseline clean main f2142f9. Live AIONIA1.7/regression1.1 read. Replace game.gd flat road/regular dashes with cached authored pixel-material strips in terrain_view.gd; six biome palettes, fixed real ground, preserved pits/props/characters/input/saves.146 terrain coverage/alpha/grid/RNG tests;1136 focused source checks PASS;40 real-render fixture checks PASS including50% blend/pit/rotation.88 normal browser assertions pass on candidateac5c460bbdcc83eb; final change only corrects double-compositing the biome fill. Source runtime and release assets otherwise preserved. Production verification is recorded in docs/evidence-terrain. Existing0.22.0 packages are not overwritten.
 
 # 0.22.0 · Model-faithful visual and ability revision

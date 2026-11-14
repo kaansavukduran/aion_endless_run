@@ -17,3 +17,13 @@ Bu görüntüler açıkça seçilmiş görsel inceleme sahneleridir. Oyuncunun b
 İlk görüntü testinde pencerenin ölçek dönüşümü hesaba katılmadığından yanlış pikseller örneklendi. Test, gerçek viewport dönüşümünü kullanacak şekilde düzeltildi; karakter konumu değiştirilmedi. Biyom karışımında yeni yarı saydam dolgunun ikinci kez üst üste karıştırılması da çizim aşamasında giderildi ve gerçek yüzde 50 rengi sınandı.
 
 Kahraman görselleri, fizik, çarpışmalar, kayıtlar ve onaylı kontrol düzeni değiştirilmedi. Fiziksel telefon veya kontrolcü testi yapılmadı. Yerel, CI ve yayımlanmış sonuçlar [teslim kaydında](verification.json) ayrı tutulur. Bu web güncellemesi mevcut 0.22.0 indirme paketlerini değiştirmez.
+
+## Yayın sonucu
+
+[Kaynak5f0b1b8 / CI43581375714](https://github.com/kaansavukduran/aion_endless_run/actions/runs/43581375714):22 Godot grubu,12.324 kontrol PASS; Linux CI içinde40 gerçek çizim kontrolü de geçti. Windows/Linux/macOS paket açılışları ve Android API30 emülatöründeki15 gerçek giriş kontrolü PASS. Bu sonuçlar fiziksel telefon veya fiziksel kol testi değildir.
+
+[İki adres × iki tarayıcı](live-browser-results.json):32 gerçek canlı kontrol PASS. Vercel build`e93a2d8213c68e9d`; Pages build`201a9517fa34d77a`. Yalnız sürüm metni yerine ekranın basma kenarı RGB değeri ve yeni malzeme kümeleri de denetlendi. [Gerçek canlı yatay](screenshots/live-landscape-running.png) ve [dikey](screenshots/live-portrait-running.png) görüntüler normal kullanıcı girişinden alınır. Yayın öncesindeki88 kontrol, son yalnız-çizim karışım düzeltmesinden önceki adayda çalıştı; final çizim CI40 ve canlı32 kontrolle ayrıca doğrulandı.
+
+İlk canlı test sırasında yayın build kimliği değişti; katı kimlik denetimi bunu reddetti. İlk Pages/Chromium denemesinde dört kontrolün ardından pause bekleme süresi doldu; hata anındaki durum kaydedilmediğinden kesin neden bilinmiyor. Tanılama kaydı eklenen odaklı tekrar, çalışan koşudan pause/döndür/devam et adımlarını tamamladı. Bu olaylar oyun hatası düzeltilmiş gibi etiketlenmez. İlk Firefox başlatma denemesi sayfaya gitmeden durakladı; yazılabilir test profili dizinleriyle sonraki gerçek tur geçti. Ayrıntılar teslim JSON'undadır.
+
+Her iki web adresi güncellendi. Mevcut0.22.0 Release paketleri korunur; yeni native CI çıktıları ayrıca oluştu fakat bu görevde yeni bir indirme Release'ı yayımlanmadı.

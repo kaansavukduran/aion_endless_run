@@ -1,0 +1,126 @@
+[
+  {
+    "url": "https://aionendlessrun.vercel.app/",
+    "browser": "chromium",
+    "build": {
+      "version": "0.22.0",
+      "build": "e93a2d8213c68e9d"
+    },
+    "checks": [
+      "The normal entry loads the expected public build",
+      "Actual screenshot has the new sandstone walking rim, not the old flat road",
+      "The actual floor contains material clusters, embedded stone and soil depth",
+      "Ordinary held Fire continues while the new ground scrolls",
+      "Pause freezes the normal run and scrolling time",
+      "Portrait rotation preserves the real paused score and character",
+      "The same run resumes in portrait with its ground and controls",
+      "No script or browser errors in the actual ground flow"
+    ],
+    "rim_rgb_actual": [
+      189,
+      150,
+      118
+    ],
+    "rim_rgb_expected": [
+      188.5841750737971,
+      150.12944970044833,
+      117.81513422629341
+    ],
+    "material_colors": 6,
+    "errors": [],
+    "scope": "Normal public HTTPS entry, screenshot pixels, keyboard/touch and actual rotation. No state setters. Firefox is desktop Gecko with touch enabled, not a physical phone. CA-forwarded diagnostic wrappers block SW; offline is unchanged and was not retested in this ground-only pass."
+  },
+  {
+    "url": "https://aionendlessrun.vercel.app/",
+    "browser": "firefox",
+    "build": {
+      "version": "0.22.0",
+      "build": "e93a2d8213c68e9d"
+    },
+    "checks": [
+      "The normal entry loads the expected public build",
+      "Actual screenshot has the new sandstone walking rim, not the old flat road",
+      "The actual floor contains material clusters, embedded stone and soil depth",
+      "Ordinary held Fire continues while the new ground scrolls",
+      "Pause freezes the normal run and scrolling time",
+      "Portrait rotation preserves the real paused score and character",
+      "The same run resumes in portrait with its ground and controls",
+      "No script or browser errors in the actual ground flow"
+    ],
+    "rim_rgb_actual": [
+      189,
+      150,
+      118
+    ],
+    "rim_rgb_expected": [
+      188.57770337894323,
+      150.12467435889155,
+      117.81243562430147
+    ],
+    "material_colors": 6,
+    "errors": [],
+    "scope": "Normal public HTTPS entry, screenshot pixels, keyboard/touch and actual rotation. No state setters. Firefox is desktop Gecko with touch enabled, not a physical phone. CA-forwarded diagnostic wrappers block SW; offline is unchanged and was not retested in this ground-only pass."
+  },
+  {
+    "url": "https://kaansavukduran.github.io/aion_endless_run/",
+    "browser": "chromium",
+    "build": {
+      "version": "0.22.0",
+      "build": "201a9517fa34d77a"
+    },
+    "checks": [
+      "The normal entry loads the expected public build",
+      "Actual screenshot has the new sandstone walking rim, not the old flat road",
+      "The actual floor contains material clusters, embedded stone and soil depth",
+      "Ordinary held Fire continues while the new ground scrolls",
+      "Pause freezes the normal run and scrolling time",
+      "Portrait rotation preserves the real paused score and character",
+      "The same run resumes in portrait with its ground and controls",
+      "No script or browser errors in the actual ground flow"
+    ],
+    "rim_rgb_actual": [
+      189,
+      150,
+      118
+    ],
+    "rim_rgb_expected": [
+      188.58579287771937,
+      150.13064344744586,
+      117.81580882684023
+    ],
+    "material_colors": 6,
+    "errors": [],
+    "scope": "Normal public HTTPS entry, screenshot pixels, keyboard/touch and actual rotation. No state setters. Firefox is desktop Gecko with touch enabled, not a physical phone. CA-forwarded diagnostic wrappers block SW; offline is unchanged and was not retested in this ground-only pass."
+  },
+  {
+    "url": "https://kaansavukduran.github.io/aion_endless_run/",
+    "browser": "firefox",
+    "build": {
+      "version": "0.22.0",
+      "build": "201a9517fa34d77a"
+    },
+    "checks": [
+      "The normal entry loads the expected public build",
+      "Actual screenshot has the new sandstone walking rim, not the old flat road",
+      "The actual floor contains material clusters, embedded stone and soil depth",
+      "Ordinary held Fire continues while the new ground scrolls",
+      "Pause freezes the normal run and scrolling time",
+      "Portrait rotation preserves the real paused score and character",
+      "The same run resumes in portrait with its ground and controls",
+      "No script or browser errors in the actual ground flow"
+    ],
+    "rim_rgb_actual": [
+      189,
+      151,
+      118
+    ],
+    "rim_rgb_expected": [
+      188.58850836944427,
+      150.1326471575672,
+      117.81694114712778
+    ],
+    "material_colors": 6,
+    "errors": [],
+    "scope": "Normal public HTTPS entry, screenshot pixels, keyboard/touch and actual rotation. No state setters. Firefox is desktop Gecko with touch enabled, not a physical phone. CA-forwarded diagnostic wrappers block SW; offline is unchanged and was not retested in this ground-only pass."
+  }
+]
