@@ -61,5 +61,20 @@ func run():
   check(g.world.owl_flaps_used==n+1 and g.friend_sprite.get_meta("pose_key")=="owl-flap","Shared input selects real airborne flap drawing")
   g.press_jump("key");check(g.world.owl_flaps_used==n+1,"Duplicate held source is ignored")
   advance(g.world,.31)
+ # Explicit weapon/grip fixtures, separate from ordinary browser input proof.
+ g.main_menu();g.select_character("eren");g.start_run()
+ for charge in [true,false]:
+  for n in 6:
+   g.world.charging=charge;g.world.charge_time=n/5.*g.world.CHARGE_SECONDS;g.world.y=0 if charge else -90;g.world.air_time=0 if n==0 else .2;g.world.velocity=-650+n*260.;g.world.frontier.shot_flash=.12;g.update_friend()
+   var column: int=g.frames.progress("runner-eren",6,g.world.charge_ratio()) if charge else g.flight_frame(g.world.velocity,g.world.air_time,6)
+   var atlas: Dictionary=g.frames.POLISH.data.atlases["polish-abilities"];var row: int=2 if charge else 3;var f: Dictionary=atlas.frames[row][column]
+   var hand: Vector2=(Vector2(f.weapon_grip[0],f.weapon_grip[1])-Vector2(f.origin[0],f.origin[1]))*float(atlas.scale[row])
+   var muzzle: Vector2=g.world.frontier.weapon_muzzle(g.world)
+   check(muzzle.distance_to(hand+Vector2(23,-5))<.001,"Air/charge pistol attaches to the reviewed skin-colored hand landmark")
+   var gun_frame: int=g.world.frontier.gun_frame(6);var original: Array=g.frames.PIXEL.data.atlases["pixel-eren"].frames[4][gun_frame].muzzle
+   var drawn: Vector2=g.gun_echo.position+Vector2(original[0],original[1])
+   check(drawn.distance_to(Vector2(g.world.PLAYER_X,g.ground+g.world.y)+muzzle)<.51,"Rendered barrel and emitted projectile share the actual hand-bound muzzle")
+   g.world.frontier.emit_hero_shot(g.world);var shot: Dictionary=g.world.frontier.projectiles[-1]
+   check(Vector2(shot.x-g.world.PLAYER_X,shot.y-g.world.y).distance_to(muzzle)<.001,"Bullet starts at the same registered barrel, never the previous sheet position")
  g.queue_free();await process_frame
  print("RESULT: %d polish/ability checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

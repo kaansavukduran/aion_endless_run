@@ -1567,7 +1567,7 @@ func update_friend() -> void:
 	if world.charging:
 		frames.place(friend_sprite,"runner-"+character,6,frames.progress("runner-"+character,6,world.charge_ratio()),Vector2(World.PLAYER_X,ground))
 		place_held_gun()
-		gun_echo.position.y+=14
+		if character=="rabbit":gun_echo.position.y+=14
 	if world.state == "bonk":
 		var row: int = COMBAT_ROWS[character]*2+(1 if world.death_cause=="enemy" else 0)
 		frames.place(friend_sprite,"deaths",row,frames.progress("deaths",row,world.hit_time/1.25) if motion else frames.count("deaths",row)-1,Vector2(World.PLAYER_X,ground+world.y),visual_size)
@@ -1618,6 +1618,8 @@ func place_held_gun() -> void:
 	var part: Dictionary=gun_parts[cache_key]
 	gun_echo.region_enabled=false;gun_echo.texture=part.texture;gun_echo.offset=part.offset
 	gun_echo.position=Vector2(World.PLAYER_X,ground+world.y).round()
+	if character=="eren" and friend_sprite.get_meta("source_key")=="polish-abilities":
+		gun_echo.position+=(f.weapon_muzzle(world)-Vector2(muzzle[0],muzzle[1]))*visual_size
 	gun_echo.scale=Vector2.ONE*float(part.scale)*visual_size
 	gun_echo.modulate=Color.WHITE;gun_echo.visible=true
 
@@ -1655,9 +1657,7 @@ func registered_height(item: Sprite2D) -> float:
 	return float(item.get_meta("pose_height",0.0)) if item.visible else 0.0
 
 func flight_frame(velocity: float, air_time: float, frame_count: int = 12) -> int:
-	if air_time < 0.03: return 0
-	var phase := 0.5 + clampf(velocity / absf(World.JUMP_SPEED),-1.0,1.0)*0.5
-	return clampi(int(phase*(frame_count-1)),0,frame_count-2)
+	return World.flight_frame_for(velocity,air_time,frame_count)
 
 func place_companion(item: Sprite2D, id: String, row: int, frame: int, anchor: Vector2, scale_value: float = 0.62, action: bool = false) -> void:
 	if id in ["rabbit","eren"]:action=false

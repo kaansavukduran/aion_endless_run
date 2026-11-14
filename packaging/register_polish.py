@@ -61,6 +61,11 @@ def main():
  eren_factor=eren['head_spans'][0]*eren['scale'][0]/101
  face_rows(a,abilities,[0,1],[177,104],owl['target_eye'],owl_factor)
  face_rows(a,abilities,[2,3],[170,101],eren['target_eye'],eren_factor)
+ # Reviewed forward-paw centers in ORIGINAL source coordinates. The pistol
+ # attaches to the hand, not to a previous drawing's body-relative position.
+ grips={2:[(186,682),(435,682),(689,678),(937,680),(1195,686),(1451,699)],3:[(196,946),(451,909),(710,881),(952,868),(1201,902),(1451,945)]}
+ for row,points in grips.items():
+  for f,(x,y) in zip(abilities['frames'][row],points):f['weapon_grip']=[x-f['rect'][0],y-f['rect'][1]]
  abilities['head_spans']=[102,102,101,101]
  for f in abilities['frames'][2]:f['origin'][1]=float(f['body_bounds'][3]);f['ground_contact']=True;f['registration']='face-x-and-planted-shoes'
  atlases['polish-abilities']=abilities

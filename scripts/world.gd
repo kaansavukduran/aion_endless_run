@@ -429,3 +429,8 @@ func step(dt: float) -> void:
 
 func recompute_score() -> void:
 	score = int(distance / 32.0) + passed * 10 + gems * 25 + int(adventure.bonus_score)
+
+static func flight_frame_for(air_velocity: float,elapsed: float,count: int) -> int:
+	if elapsed<0.03:return 0
+	var phase:=0.5+clampf(air_velocity/absf(JUMP_SPEED),-1.0,1.0)*0.5
+	return clampi(int(phase*(count-1)),0,count-2)

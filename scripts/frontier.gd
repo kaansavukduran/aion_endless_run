@@ -54,6 +54,7 @@ var saved_powers := {}
 const SHOT_DURATION := 0.30
 const SHOT_CADENCE := 0.32
 const MUZZLES = preload("res://assets/PIXEL-HEROES-PROVENANCE.json")
+const POLISHED = preload("res://assets/POLISH-PROVENANCE.json")
 var boss_kind := 0
 var pattern := "high"
 var pattern_bag: Array[String] = []
@@ -188,11 +189,7 @@ func fire(world) -> bool:
 	return true
 
 func emit_hero_shot(world) -> void:
-	var atlas: Dictionary = MUZZLES.data.atlases["pixel-"+world.character]
-	var frame := gun_frame(atlas.frames[4].size())
-	var muzzle: Array = atlas.frames[4][frame].muzzle
-	# Air/sprint overlays use the same registered frame and barrel geometry.
-	var origin := Vector2(world.PLAYER_X+float(muzzle[0]),world.y+float(muzzle[1])+(14 if world.charging else 0))
+	var origin := Vector2(world.PLAYER_X,world.y)+weapon_muzzle(world)
 	shots_fired += 1
 	if not active() and world.adventure.lightning_charges>0:world.adventure.cast_lightning(world)
 	# Energy bolts leave the measured muzzle, then gently converge on the core.
@@ -385,3 +382,14 @@ func step_plants(world,dt: float,movement: float) -> void:
 		elif world.adventure.body_rect(world).intersects(rect) and plant.hurt <= 0.0: world.take_hit("bonk","enemy")
 	plants = plants.filter(func(p):return p.x > -100 and p.hp > 0)
 	update_projectiles(world,dt)
+
+func weapon_muzzle(world) -> Vector2:
+	if world.character=="eren" and (world.charging or world.y<0):
+		var atlas: Dictionary=POLISHED.data.atlases["polish-abilities"]
+		var row: int=2 if world.charging else 3
+		var column: int=clampi(int(world.charge_ratio()*6),0,5) if world.charging else world.flight_frame_for(world.velocity,world.air_time,6)
+		var frame: Dictionary=atlas.frames[row][column]
+		return (Vector2(frame.weapon_grip[0],frame.weapon_grip[1])-Vector2(frame.origin[0],frame.origin[1]))*float(atlas.scale[row])+Vector2(23,-5)
+	var atlas: Dictionary=MUZZLES.data.atlases["pixel-"+world.character]
+	var frame: Dictionary=atlas.frames[4 if shot_flash>0 else 3][gun_frame(6) if shot_flash>0 else 0]
+	return Vector2(frame.muzzle[0],frame.muzzle[1])+Vector2(0,14 if world.charging else 0)
