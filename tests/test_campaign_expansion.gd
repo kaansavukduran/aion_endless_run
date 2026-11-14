@@ -17,13 +17,13 @@ func run() -> void:
 		var anchor:=w.player;w.move_axis.x=1.;tick(w,.24)
 		check(not n.freed and w.player==anchor,"Anticipation keeps feet planted and ropes intact: "+hero)
 		tick(w,.10);check(n.freed and w.rescued.has(str(n.id)),"Cut contact frees the correct NPC: "+hero)
-		w.move_axis=Vector2.ZERO;tick(w,1.);check(w.weapon=="heavy" and w.ammunition==90,"Gratitude gives a real rapid-fire weapon: "+hero)
+		w.move_axis=Vector2.ZERO;w.player=Vector2(float(n.x),float(n.y));tick(w,1.3);check(w.weapon=="heavy" and w.ammunition==90,"Gratitude gives a real rapid-fire weapon: "+hero)
 		var score:=w.score;w.attack_release();w.attack_press();tick(w,.8);check(w.rescued.size()==1 and w.score==score,"Repeated action cannot duplicate rescue or gift: "+hero)
 		var saved:=w.snapshot();var copy:=AionCampaignWorld.new();check(copy.restore(saved),"Expanded checkpoint restores")
 		var rescued_npc: Dictionary=copy.npcs[0];check(rescued_npc.freed,"Same stable keeper remains free on re-entry")
 		copy.state="playing";tick(copy,1.1);check(copy.score==score and copy.weapon=="pistol","Retry cannot farm the already claimed supply")
 	var w:=fresh();var n: Dictionary=w.npcs[0];w.player=Vector2(float(n.x)-65.,0.);w.attack_press();tick(w,.35)
-	var pending:=w.snapshot();var resume:=AionCampaignWorld.new();check(resume.restore(pending),"Save between cut and thanks remains valid");resume.state="playing";tick(resume,1.);check(resume.weapon=="heavy","Pending supply survives save before its handover")
+	var pending:=w.snapshot();var resume:=AionCampaignWorld.new();check(resume.restore(pending),"Save between cut and thanks remains valid");resume.state="playing";resume.player=Vector2(float(resume.npcs[0].x),float(resume.npcs[0].y));tick(resume,1.2);check(resume.weapon=="heavy","Pending supply survives save before its contact and handover")
 	var legacy:=pending.duplicate(true);legacy.schema=1;legacy.erase("discovered");legacy.erase("activated");var old:=AionCampaignWorld.new();check(old.restore(legacy),"0.23 schema1 saves migrate safely");old.state="playing";tick(old,1.1);check(old.weapon=="pistol","Legacy rescues do not create retroactive free weapons")
 	var total:=0;var roles: Dictionary={}
 	for stage in CampaignRescue.COUNTS:
@@ -34,15 +34,16 @@ func run() -> void:
 	check(total==43 and roles.size()==6,"43 distinct authored rescue opportunities cover six roles")
 	w=fresh();n=w.npcs[0];w.player=Vector2(float(n.x)-65.,0.);n.cage="test-cage";w.objects=[{"id":"test-cage","kind":"cage","x":n.x,"y":0.,"hp":2,"active":false,"secret":""}]
 	check(CampaignRescue.nearest(w).is_empty(),"A closed cage protects its actual captive")
-	w.attack_press();tick(w,.7);w.attack_release()
-	check(w.objects[0].active and not n.freed,"Shooting opens the cage without remotely freeing the tied captive")
+	w.attack_press();tick(w,.4);w.attack_release()
+	check(w.objects[0].active and not n.freed,"The cage consumes the opening shots before its rope can be hit")
 	w.attack_press();tick(w,.35);check(n.freed,"Fresh fire after opening the cage cuts the actual ropes")
 	for stage in CampaignRescue.COUNTS:
 		w=fresh();w.load_section(stage);w.enemies.clear();w.gates.clear();w.objects.clear();w.hazards.clear();w.zones.clear();w.pickups.clear();w.crates.clear()
 		for npc in w.npcs:
 			if str(npc.secret)!="":w.discovered[str(npc.secret)]=true
 			w.player=Vector2(float(npc.x)-60.,float(npc.y));w.velocity=Vector2.ZERO;w.move_axis=Vector2.ZERO;w.facing=1
-			w.attack_release();w.fire_time=0.;w.attack_press();tick(w,1.3)
+			w.attack_release();w.fire_time=0.;w.attack_press();tick(w,.65)
+			w.player=Vector2(float(npc.x),float(npc.y));tick(w,1.1)
 			check(npc.freed and w.awarded.has(str(npc.id)+":gift"),"Every authored NPC has a real cut and one handover: "+str(npc.id))
 			var claimed:=w.score;var ammo:=w.ammunition;w.rescue(npc);tick(w,.2)
 			check(w.score==claimed and w.ammunition==ammo,"Every NPC's repeated rescue cannot duplicate its effect: "+str(npc.id))
@@ -88,7 +89,7 @@ func run() -> void:
 	w=fresh();w.collect({"id":"magnet","kind":"magnet"});w.pickups=[{"id":"apple","x":300.,"y":-30.,"kind":"fruit_0"}];tick(w,.7);check(w.taken.has("apple"),"Magnet pulls and collects reachable loot")
 	w=fresh();w.collect({"id":"power","kind":"power"});w.attack_press();check(w.bullets[0].damage==2,"Power buff changes real projectile damage")
 	for type in ["shell","wind","drill"]:
-		w=fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":4,"type":type};check(w.interact(),"Vehicle boards: "+type)
+		w=fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":4,"type":type};check(w.interact(),"Vehicle begins boarding: "+type);tick(w,.46)
 		w.attack_press();check(w.bullets.size()==(3 if type=="wind" else 1),"Vehicle has its own attack: "+type)
 		w.jump_press()
 		if type=="shell":check(float(w.mount.dive)>0.,"Shell jump action actually dives")

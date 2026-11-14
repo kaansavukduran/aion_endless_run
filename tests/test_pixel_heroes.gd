@@ -31,7 +31,7 @@ func run():
 				var pose:=bank.pose(logical,index,col)
 				texture_hashes[hash(pose.texture.get_image().get_data())]=true
 				check(sprite.position==Vector2(288,500) and is_equal_approx(sprite.scale.x,first.scale),"No actor-position or scaling compensation: "+hero+"/"+logical)
-				check(pose.source_key==("polish-rolls" if logical=="rolls" and hero in ["aion","sheep"] else "pixel-"+hero),"The actual renderer selects this hero's new drawing")
+				check(pose.source_key==("forge-mouth-carry" if hero=="wolf" and logical in ["gun-run","gun-fire"] else ("polish-rolls" if logical=="rolls" and hero in ["aion","sheep"] else "pixel-"+hero)),"The actual renderer selects this hero's new drawing")
 				if logical!="rolls":
 					probes.append(sprite.get_meta("head_probe_world"))
 					var source: Dictionary=a.frames[3 if logical=="gun-run" else 4][col]

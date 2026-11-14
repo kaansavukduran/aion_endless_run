@@ -18,6 +18,7 @@ const ORCHARD = preload("res://assets/ORCHARD-PROVENANCE.json")
 const STORY=preload("res://assets/STORY-PROVENANCE.json")
 var images := {}
 var frames := {}
+var forge_art := ForgeHeroArt.new()
 
 func descriptor(key: String,row: int) -> Dictionary:
 	if key=="boss-story-reactions":return {"key":key,"row":row,"data":STORY.data.atlas}
@@ -81,7 +82,26 @@ func cycle(key: String,row: int,clock: float,seconds: float) -> int:
 func progress(key: String,row: int,phase: float) -> int:
 	return clampi(int(clampf(phase,0.0,1.0)*count(key,row)),0,count(key,row)-1)
 
-func pose(key: String, row: int, column: int) -> Dictionary:
+func pose(key: String, row: int, column: int, original_source: bool=false) -> Dictionary:
+	var mouth_hero: String=""
+	if (key in ["gun-run","gun-fire"] and row==3) or (key=="runner-wolf" and row==6):mouth_hero="wolf"
+	elif (key=="runner-owl" and row in [2,6]) or key=="owl-flap":mouth_hero="owl"
+	if not mouth_hero.is_empty() and not original_source:
+		var carry: Dictionary=forge_art.mouth(mouth_hero,column,key=="owl-flap",key=="gun-fire").duplicate()
+		var atlas: Dictionary=ForgeHeroArt.DATA.data.atlases["mouth-carry"]
+		var r: int=carry.source_row
+		var source_frame: Dictionary=atlas.frames[r][posmod(column,6)]
+		var factor: float=atlas.scales[r]
+		carry.offset=Vector2(carry.offset)/factor
+		carry.scale=factor
+		carry.height=float(source_frame.body_bounds[3]-source_frame.body_bounds[1])*factor
+		carry.head=float(atlas.calibration[mouth_hero].neutral_world_head_span)
+		carry["source_column"]=column
+		var b: Array=source_frame.bounds
+		carry["eye_local"]=Vector2(float(source_frame.face_landmark[0]-b[0])+2.,float(source_frame.face_landmark[1]-b[1])+2.)
+		carry["probe_local"]=Vector2(float(source_frame.face_patch[0]-b[0])+2.,float(source_frame.face_patch[1]-b[1])+2.)
+		if mouth_hero=="wolf":carry["foot_local"]=Vector2(0.,float(source_frame.body_bounds[3]-b[1])+2.)
+		return carry
 	var spec := descriptor(key,row)
 	key = str(spec.key)
 	row = int(spec.row)
@@ -112,6 +132,9 @@ func pose(key: String, row: int, column: int) -> Dictionary:
 			largest = maxf(largest,maxf(bounds[2]-bounds[0],bounds[3]-bounds[1]))
 		factor = 64.0/largest
 	var result := {"texture":ImageTexture.create_from_image(isolated),"offset":Vector2(float(b[0])-float(f.get("anchor_x",d.anchor_x[row]))-2.0,float(b[1])-float(b[3])-2.0),"scale":factor,"height":float(b[3]-b[1])*factor,"head":float(d.head_spans[row])*factor if d.has("head_spans") else 0.0,"source_key":key,"source_row":row,"source_frame":column,"cell_width":float(d.width)/float(d.columns),"cell_height":float(d.height)/float(d.rows),"center_y":float(f.get("anchor_y",float(d.height)/float(d.rows)*0.5)),"top":float(b[1]),"left":float(b[0]),"baseline":float(d.baselines[row]) if d.has("baselines") else float(b[3])}
+	# Shared draw contract: size is already in world units, offset remains source
+	# pixels with scale. This does not change actor transforms or registration.
+	result["size"]=Vector2(isolated.get_size())*factor
 	if f.has("origin"):
 		result.offset = Vector2(float(b[0])-float(f.origin[0])-2.0,float(b[1])-float(f.origin[1])-2.0)
 		result["registration"] = "head" if f.eye != null and row not in [5,9,10,12,13] else ("roll-center" if key=="canonical-rolls" or row==5 else "floor")
@@ -138,6 +161,7 @@ func place(item: Sprite2D,key: String,row: int,column: int,anchor: Vector2,growt
 	item.set_meta("pose_key",key)
 	item.set_meta("pose_row",row)
 	item.set_meta("pose_frame",column)
+	item.set_meta("gun_embedded",bool(f.get("gun_embedded",false)))
 	item.set_meta("pose_height",float(f.height)*growth)
 	item.set_meta("head_size",float(f.head)*growth)
 	for marker in ["eye_world","head_probe_world","foot_world"]:

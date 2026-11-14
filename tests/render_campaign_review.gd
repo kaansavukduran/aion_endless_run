@@ -35,6 +35,9 @@ func run() -> void:
 	var fixture_data:=[]
 	for hero in AionCampaignWorld.HEROES:
 		game.world.begin(hero);stage("shore",400.);game.world.enemies.clear();game.world.crates.clear();game.world.pickups.clear();game.world.npcs.clear();game.world.platforms.clear();game.world.gates.clear()
+		# This frozen fixture deliberately set .12s air-fire on the previous
+		# hero. Clear it before capturing the next hero's ordinary run cycle.
+		game.world.shot_flash=0.
 		var row: int=game.view.frames.hero_row(hero)
 		for clip in ["run","melee"]:
 			var count: int=6 if clip=="melee" else game.view.frames.count("gun-run",row)
@@ -50,7 +53,11 @@ func run() -> void:
 				sheet.fill_rect(Rect2i(frame*180,140,180,1),Color("e87e9a"))
 				fixture_data.append({"hero":hero,"clip":clip,"frame":frame,"physics_anchor":[game.world.player.x,game.world.player.y],"source":game.view.hero_marker})
 				check(game.world.player.is_equal_approx(Vector2(400,0)),"Art never changes the physics anchor: "+hero+" "+clip)
-				if clip=="run":check(game.view.hero_marker.source=="pixel-"+hero,"Actual rendered source matches hero identity: "+hero)
+				if clip=="run":
+					# Wolf's new mouth-carry run is intentionally in the shared
+					# atlas. Verify its exact wolf row so an owl row cannot pass.
+					var correct_identity: bool=str(game.view.hero_marker.source)=="forge-mouth-carry" and int(game.view.hero_marker.row)==2 if hero=="wolf" else str(game.view.hero_marker.source)=="pixel-"+hero and int(game.view.hero_marker.row)==3
+					check(correct_identity,"Actual rendered source and row match hero identity: "+hero)
 			sheet.save_png(output+"/"+hero+"-"+clip+"-cycle.png")
 		game.world.melee_time=0.;game.world.player.y=-110.;game.world.air_time=.3;game.world.velocity=Vector2(0,-150.);game.world.shot_flash=.12
 		await capture(hero+"-air-fire")

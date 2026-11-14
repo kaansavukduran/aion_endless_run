@@ -30,12 +30,13 @@ func panorama(host,kind: int,scroll: float,night: float,alpha: float=1.0) -> voi
 		host.draw_texture_rect(texture,Rect2(0,0,width+1,height),false,tint)
 	host.draw_set_transform(Vector2.ZERO,0,Vector2.ONE)
 
-func foreground(host,scroll: float,night: float) -> void:
+func foreground(host,scroll: float,night: float,biome_override: int=-1) -> void:
 	var spacing:=350.0
 	var travel: float=scroll*.38
 	var start: int=floori(travel/spacing)
 	var offset: float=fposmod(travel,spacing)
 	var kind: int=host.world.biome()
+	if biome_override>=0:kind=biome_override
 	var clock: float=host.animation_clock() if host.decorative_motion() else 0.0
 	var poses:=[0,1,0,2]
 	for n in range(-1,ceili(host.scene_w/spacing)+2):

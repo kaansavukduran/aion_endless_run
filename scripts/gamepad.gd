@@ -132,7 +132,7 @@ func back() -> void:
 	if host.language_picker_open:
 		host.toggle_language_picker()
 	elif host.page=="paused": host.resume_run()
-	elif host.page in ["settings","characters"]: host.show_page(host.return_page)
+	elif host.page in ["settings","characters","help"]: host.show_page(host.return_page)
 	elif host.page in ["finished","bosses"]: host.main_menu()
 func step(dt: float) -> void:
 	if not menu_active(): return

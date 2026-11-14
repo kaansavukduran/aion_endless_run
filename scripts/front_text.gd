@@ -1,0 +1,37 @@
+class_name RunnerFrontText
+extends RefCounted
+# New front-of-house copy lives here; existing game/campaign translations remain authoritative.
+const KEYS := ["skip","demo","how","attract","intro","hero","confirm","move","jump","shoot","grenade","vehicle","rescue","secret","route","ability","previous","next"]
+const WORDS := {
+	"tr":["Atla","TANITIM · Herhangi bir tuşla dön","Nasıl oynanır?","Boştayken oynanış tanıtımı","Açılışı tekrar izle","Kahramanın","Seçimi onayla","Yürü ve nişan al","Zıpla","Ateş ve yakın etkileşim","Enerji bombası","Araca bin / araçtan in","Fener bekçilerini kurtar","Gizli alanları keşfet","Kendi rotanı seç","Kahramanın yeteneği","Önceki","Sonraki"],
+	"en":["Skip","DEMO · Any input returns","How to play","Idle gameplay demonstration","Replay opening","Your hero","Confirm selection","Move and aim","Jump","Fire and close interaction","Energy grenade","Enter / leave vehicle","Rescue lantern keepers","Discover hidden areas","Choose your route","Your hero's ability","Previous","Next"],
+	"cs":["Přeskočit","UKÁZKA · Návrat libovolným vstupem","Jak hrát","Ukázka při nečinnosti","Přehrát úvod","Tvůj hrdina","Potvrdit výběr","Pohyb a míření","Skok","Střelba a blízká interakce","Energetický granát","Nastoupit / vystoupit","Zachraň strážce luceren","Objev skryté oblasti","Vyber si cestu","Schopnost hrdiny","Předchozí","Další"],
+	"az":["Keç","TƏQDİMAT · Qayıtmaq üçün toxun","Necə oynanılır?","Boş vaxtda oyun təqdimatı","Açılışı yenidən göstər","Qəhrəmanın","Seçimi təsdiqlə","Hərəkət və nişan","Tullan","Atəş və yaxın əlaqə","Enerji bombası","Nəqliyyata min / en","Fənər gözətçilərini xilas et","Gizli yerləri kəşf et","Yolunu seç","Qəhrəmanın bacarığı","Əvvəlki","Sonrakı"],
+	"de":["Überspringen","DEMO · Beliebige Eingabe zurück","Spielanleitung","Spielvorführung bei Inaktivität","Intro wiederholen","Dein Held","Auswahl bestätigen","Bewegen und zielen","Springen","Feuern und Nahinteraktion","Energiegranate","Einsteigen / aussteigen","Laternenwächter retten","Geheime Orte entdecken","Route wählen","Heldenfähigkeit","Zurück","Weiter"],
+	"fr":["Passer","DÉMO · Toute entrée pour revenir","Comment jouer","Démonstration après inactivité","Revoir l'introduction","Votre héros","Confirmer le choix","Se déplacer et viser","Sauter","Tir et interaction proche","Grenade d'énergie","Monter / descendre","Sauver les gardiens","Découvrir les zones cachées","Choisir sa route","Capacité du héros","Précédent","Suivant"],
+	"ja":["スキップ","デモ · 操作すると戻ります","遊び方","待機中のプレイデモ","オープニング再生","ヒーロー","選択を決定","移動と照準","ジャンプ","射撃と近距離操作","エネルギー爆弾","乗る・降りる","灯りの番人を救出","隠しエリアを探す","ルートを選ぶ","ヒーローの能力","前へ","次へ"],
+	"ko":["건너뛰기","데모 · 조작하면 돌아갑니다","플레이 방법","대기 중 플레이 시연","오프닝 다시 보기","영웅","선택 확인","이동과 조준","점프","사격과 근접 상호작용","에너지 폭탄","탑승 / 하차","등불지기 구출","숨은 장소 발견","경로 선택","영웅 능력","이전","다음"],
+	"zh":["跳过","演示 · 任意操作返回","玩法说明","闲置时演示游戏","重播开场","你的英雄","确认选择","移动与瞄准","跳跃","射击和近距离互动","能量炸弹","上车 / 下车","救出灯塔守卫","探索隐藏区域","选择路线","英雄能力","上一页","下一页"],
+	"es":["Saltar","DEMO · Cualquier entrada para volver","Cómo jugar","Demostración al estar inactivo","Repetir introducción","Tu héroe","Confirmar selección","Moverse y apuntar","Saltar","Disparo e interacción cercana","Granada de energía","Subir / bajar del vehículo","Rescatar guardianas","Descubrir zonas secretas","Elegir ruta","Habilidad del héroe","Anterior","Siguiente"],
+	"it":["Salta","DEMO · Qualsiasi comando per tornare","Come giocare","Dimostrazione durante l'inattività","Rivedi introduzione","Il tuo eroe","Conferma scelta","Muoversi e mirare","Saltare","Fuoco e interazione vicina","Granata d'energia","Salire / scendere","Salvare le guardiane","Scoprire zone segrete","Scegliere il percorso","Abilità dell'eroe","Precedente","Avanti"]
+}
+static func word(language: String,key: String) -> String:
+	var index:=KEYS.find(key)
+	return str(WORDS.get(language,WORDS.en)[index]) if index>=0 else key
+
+const ABILITIES := {
+	"tr":["İki kez bas: çift sıçrama","Üç koyun birlikte","Basılı tut: dört ayak depar","Tut: süzül · Üç kez kanat çırp","Bas: 1,75× · Tut: 4×","Bas: 1,75× · Tut: 4×"],
+	"en":["Press twice: double jump","A flock of three","Hold: four-legged sprint","Hold: glide · Three wing flaps","Tap: 1.75× · Hold: 4×","Tap: 1.75× · Hold: 4×"],
+	"cs":["Dva stisky: dvojskok","Stádo tří ovcí","Drž: sprint po čtyřech","Drž: plachti · Tři mávnutí","Stisk: 1,75× · Drž: 4×","Stisk: 1,75× · Drž: 4×"],
+	"az":["İki dəfə bas: ikiqat tullan","Üç qoyun birlikdə","Tut: dörd ayaqla qaçış","Tut: süz · Üç qanad çırpma","Bas: 1,75× · Tut: 4×","Bas: 1,75× · Tut: 4×"],
+	"de":["Zweimal drücken: Doppelsprung","Eine Herde aus drei Schafen","Halten: Sprint auf vier Pfoten","Halten: gleiten · Drei Flügelschläge","Kurz: 1,75× · Lang: 4×","Kurz: 1,75× · Lang: 4×"],
+	"fr":["Deux pressions : double saut","Un troupeau de trois","Maintenir : sprint à quatre pattes","Maintenir : planer · Trois battements","Bref : 1,75× · Long : 4×","Bref : 1,75× · Long : 4×"],
+	"ja":["2回押す：二段ジャンプ","3匹の群れ","長押し：四足ダッシュ","長押し：滑空・3回の羽ばたき","短押し1.75×・長押し4×","短押し1.75×・長押し4×"],
+	"ko":["두 번 누르기: 이단 점프","세 마리의 양 떼","길게: 네 발 달리기","길게: 활공 · 세 번 날갯짓","짧게 1.75× · 길게 4×","짧게 1.75× · 길게 4×"],
+	"zh":["按两次：二段跳","三只羊的队伍","长按：四足冲刺","长按：滑翔・三次振翅","短按1.75×・长按4×","短按1.75×・长按4×"],
+	"es":["Pulsa dos veces: doble salto","Un rebaño de tres","Mantén: carrera a cuatro patas","Mantén: planear · Tres aleteos","Toca: 1,75× · Mantén: 4×","Toca: 1,75× · Mantén: 4×"],
+	"it":["Premi due volte: doppio salto","Un gregge di tre","Tieni: corsa a quattro zampe","Tieni: plana · Tre battiti d'ali","Tocco: 1,75× · Tieni: 4×","Tocco: 1,75× · Tieni: 4×"]
+}
+static func ability(language: String,hero: String) -> String:
+	var index: int=["aion","sheep","wolf","owl","rabbit","eren"].find(hero)
+	return str(ABILITIES.get(language,ABILITIES.en)[maxi(0,index)])

@@ -1,0 +1,13 @@
+[
+  "Legacy PWA really opens offline with its saved owl",
+  "Reproduced the previous export before migration",
+  "Old cached shell migrates to the current build automatically",
+  "Migration preserves character and language in IndexedDB",
+  "Migration preserves the earned best score",
+  "Migrated owl uses the actual running sprite row",
+  "Migrated build supports the requested hold-to-glide input",
+  "New full export reloads offline after migration",
+  "Subsequent update offers a button without interrupting an active run",
+  "Update button saves, pauses and opens the new shell with preferences intact",
+  "No uncaught browser errors during legacy migration or offline updates"
+]

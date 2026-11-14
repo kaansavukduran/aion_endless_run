@@ -35,9 +35,12 @@ var touch_actions: Dictionary = {}
 var held: Dictionary = {}
 var left_down := false
 var right_down := false
+var up_down := false
+var down_down := false
 var mouse_stick := false
 var mouse_axis := Vector2.ZERO
 var pad_axis := Vector2.ZERO
+var pad_look := Vector2.ZERO
 var fade := -1.
 var fade_loaded := false
 var fade_panel: ColorRect
@@ -63,11 +66,34 @@ var leaving_scene := false
 var pad_menu_wait := 0.0
 var help_step := 0
 var outro_step := 0
+var hud_panel: CampaignHUD
+var hud_items := ForgeItemBank.new()
+var presentation_stage := ""
+var presentation_time := 0.0
+var presentation: CampaignPresentation
+var presentation_skip: Button
+var intro_pending := false
+var complete_presented := false
+var help_return := ""
+var detail_page := 0
+var settings_page := 0
+var menu_previous := "paused"
+var result_records: Dictionary = {}
+var new_best := false
+var resume_on_ready := false
+var application_active := true
+var control_hint: Label
+var checkpoint_invalid := false
+var tutorial_seen := false
+var settings_ok := true
+var route_icons: Dictionary = {}
 
 func _ready() -> void:
 	var cfg := ConfigFile.new(); cfg.load("user://save.cfg")
+	RunnerBrowserSave.restore(cfg)
 	options.load_from(cfg); pad.load_from(cfg)
 	audio_enabled=bool(cfg.get_value("prefs","audio",true));audio_volume=float(cfg.get_value("prefs","volume",.45))
+	tutorial_seen=bool(cfg.get_value("prefs","campaign_help_seen",false))
 	motion_enabled=bool(cfg.get_value("prefs","motion",true))
 	touch_mode=OS.has_feature("mobile")
 	if OS.has_feature("web"): touch_mode=bool(JavaScriptBridge.eval("matchMedia('(pointer:coarse)').matches"))
@@ -83,6 +109,7 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(resize)
 	Input.joy_connection_changed.connect(func(_id,_connected):release_all())
 	resize()
+	if resume_on_ready and not saved.is_empty() and not bool(saved.get("completed",false)):resume_saved.call_deferred()
 
 func _exit_tree() -> void:
 	if OS.has_feature("web"):
@@ -93,6 +120,8 @@ func t(key: String) -> String:
 	return Words.word(language,key)
 func old(key: String) -> String: return GameText.get_text(language,key)
 func font_size(size: int) -> int: return roundi(size*options.text_scale)
+func menu_title() -> String:
+	return t({"briefing":"title","help":"controls","paused":"pause","fork_one":"fork","fork_two":"fork","boss":"arena","dead":"dead","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
 
 func safe_rect(raw: Vector2) -> Rect2:
 	if OS.has_feature("web"):
@@ -131,7 +160,8 @@ func paragraph(value: String,size: int=20) -> Label:
 func action(value: String,callback: Callable,primary: bool=false) -> Button:
 	var item:=Button.new();item.text=value;item.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	item.custom_minimum_size.y=maxf(48.,font_size(20)*1.4+12.)
-	item.add_theme_font_size_override("font_size",font_size(20));item.pressed.connect(callback)
+	item.add_theme_font_size_override("font_size",font_size(20));item.pressed.connect(func():sound("menu_confirm");callback.call())
+	item.focus_entered.connect(func():sound("menu_focus"))
 	if primary:item.add_theme_stylebox_override("normal",options.style("primary","accent",8))
 	buttons.append(item);column.add_child(item);return item
 
@@ -143,21 +173,23 @@ func build_ui() -> void:
 		if child is CanvasItem:child.hide()
 		child.queue_free()
 	buttons.clear();actions.clear(); menu=null
-	var band:=Panel.new();band.mouse_filter=Control.MOUSE_FILTER_IGNORE;band.add_theme_stylebox_override("panel",options.style("surface","border",0));ui.add_child(band)
-	band.position=Vector2.ZERO;band.size=Vector2(view_w,maxf(44,font_size(17)*(2.7 if portrait or options.text_scale>1. else 1.4)+12.))
-	hud=label("",17);ui.add_child(hud);hud.position=Vector2(12,6);hud.size=Vector2(view_w-140,band.size.y-8);hud.clip_text=true
+	hud_panel=CampaignHUD.new();hud_panel.host=self;hud_panel.mouse_filter=Control.MOUSE_FILTER_IGNORE;ui.add_child(hud_panel);hud_panel.refresh()
+	var band_height: float=hud_panel.strip_height
+	hud=label("",17);ui.add_child(hud);hud.hide()
 	pause_button=Button.new();pause_button.name="CampaignPause";pause_button.text="II";pause_button.tooltip_text=old("pause");pause_button.add_theme_font_size_override("font_size",font_size(20));ui.add_child(pause_button)
-	pause_button.position=Vector2(view_w-72,4);pause_button.size=Vector2(64,band.size.y-8);pause_button.pressed.connect(toggle_pause)
-	subtitle=label("",16);ui.add_child(subtitle);subtitle.position=Vector2(12,band.size.y+6);subtitle.size=Vector2(view_w-24,90);subtitle.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	pause_button.position=Vector2(view_w-72,4);pause_button.size=Vector2(64,maxf(44.,band_height-8));pause_button.pressed.connect(toggle_pause)
+	subtitle=label("",16);ui.add_child(subtitle);subtitle.position=Vector2(12,band_height+6);subtitle.size=Vector2(view_w-24,90);subtitle.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	subtitle.add_theme_color_override("font_color",Color("fff3d8"));subtitle.add_theme_color_override("font_shadow_color",Color("211c29"));subtitle.add_theme_constant_override("shadow_outline_size",4)
-	boss_health=ProgressBar.new();ui.add_child(boss_health);boss_health.show_percentage=false;boss_health.max_value=90;boss_health.position=Vector2(view_w*.27,band.size.y+6);boss_health.size=Vector2(view_w*.46,12)
+	boss_health=ProgressBar.new();ui.add_child(boss_health);boss_health.show_percentage=false;boss_health.max_value=world.boss.max_hp;boss_health.position=Vector2(12,band_height+6);boss_health.size=Vector2(view_w-24,12)
 	boss_health.add_theme_stylebox_override("background",options.style("surface","border",1));boss_health.add_theme_stylebox_override("fill",options.style("primary","accent",1))
 	if touch_mode: build_touch()
 	else:
-		var help:=paragraph(t("keys"),15);ui.add_child(help);help.position=Vector2(16,view_h-48);help.size=Vector2(view_w-32,45)
+		control_hint=paragraph(t("keys"),15);ui.add_child(control_hint);control_hint.position=Vector2(16,view_h-48);control_hint.size=Vector2(view_w-32,45)
 	ride_button=Button.new();ride_button.name="CampaignRide";ride_button.text=t("ride")+ (" · E" if not touch_mode else "");ride_button.add_theme_font_size_override("font_size",font_size(17));ride_button.pressed.connect(func():world.interact());ui.add_child(ride_button)
 	ride_button.position=Vector2(view_w*.5-110,view_h-(190 if touch_mode else 98));ride_button.size=Vector2(220,52)
 	fade_panel=ColorRect.new();fade_panel.color=Color(0.06,.06,.09,0);fade_panel.mouse_filter=Control.MOUSE_FILTER_IGNORE;fade_panel.size=Vector2(view_w,view_h);ui.add_child(fade_panel)
+	presentation=null;presentation_skip=null
+	if presentation_stage!="":build_presentation()
 	if menu_kind!="": build_menu()
 	update_hud()
 	finish_layout.call_deferred(ui_generation)
@@ -188,15 +220,19 @@ func build_menu() -> void:
 	menu.custom_minimum_size.x=minf(view_w-32,840. if not portrait else 508.)
 	menu.size.x=menu.custom_minimum_size.x
 	column=VBoxContainer.new();column.add_theme_constant_override("separation",10);menu.add_child(column)
-	var title:=label(t({"briefing":"title","help":"title","paused":"pause","fork_one":"fork","fork_two":"fork","boss":"arena","dead":"dead","complete":"won","outro":"won","settings":"settings_hint"}.get(menu_kind,"title")),24)
+	var title:=label(menu_title(),24)
 	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(title)
 	match menu_kind:
 		"briefing":
+			if checkpoint_invalid:column.add_child(paragraph(t("save_corrupt"),17))
 			column.add_child(paragraph(t("mission")+" · "+old("name_"+selected_hero),18))
 			column.add_child(paragraph(t("brief")))
 			if not saved.is_empty() and not bool(saved.get("completed",false)):
 				action(t("continue")+" · "+old("name_"+str(saved.get("character","aion"))),resume_saved,true).name="CampaignContinue"
 			action(t("restart") if not saved.is_empty() and not bool(saved.get("completed",false)) else t("start"),begin_new,true).name="CampaignBegin"
+			if not saved.is_empty() and bool(saved.get("completed",false)):
+				action(t("report"),func():
+					if world.restore(saved):menu_kind="complete";new_best=false;build_ui()).name="CampaignLastReport"
 			action(t("back"),return_main)
 		"help":
 			# Two short instruction pairs keep the real chosen font and 200%
@@ -209,23 +245,31 @@ func build_menu() -> void:
 				if not message.ends_with(".") and not message.ends_with("。"):message+="."
 				pages.append(message)
 			pages.append(t("touch") if touch_mode else pad_help() if not Input.get_connected_joypads().is_empty() else t("keys"))
+			pages.append(t("help_rescue"))
+			pages.append(t("help_route"))
 			if world.character in ["rabbit","eren","owl"]:pages.append(t("owl" if world.character=="owl" else "special"))
 			column.add_child(paragraph(pages[clampi(help_step,0,pages.size()-1)]))
+			if options.text_scale<=1.5:
+				var example:=CampaignPresentation.new();example.host=self;example.tutorial_topic="help";example.topic_index=mini(help_step,4);example.custom_minimum_size=Vector2(180,68);example.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(example)
 			action(t("next"),func():
 				help_step+=1
-				if help_step>=pages.size():close_menu()
+				if help_step>=pages.size():finish_help()
 				else:build_ui(),true).name="CampaignGo"
-			action(old("story_skip"),close_menu)
+			action(old("story_skip"),finish_help)
 		"paused":
 			action(old("resume"),close_menu,true)
-			action(t("save_retry"),func():save_checkpoint();build_ui())
+			action(t("retry"),retry_checkpoint)
+			action(t("controls"),func():help_return="paused";menu_kind="help";help_step=0;build_ui())
+			action(t("settings"),func():menu_previous="paused";menu_kind="settings";settings_page=0;build_ui())
 			action(t("back"),return_main)
-			column.add_child(paragraph(t("settings_hint"),16))
 		"fork_one","fork_two":
-			column.add_child(paragraph(t(menu_kind)))
+			if options.text_scale<1.5:column.add_child(paragraph(t(menu_kind),17))
 			var choices: Array = ["canopy","water"] if menu_kind=="fork_one" else ["terrace","roots"]
 			for choice in choices:
-				action(t(choice),func():world.choose_route(choice);menu_kind="";start_travel();build_ui(),choice==choices[0]).name="Route_"+choice
+				var route_button:=action(t(choice),func():world.choose_route(choice);menu_kind="";start_travel();build_ui(),choice==choices[0]);route_button.name="Route_"+choice
+				route_button.tooltip_text=t("route_"+choice)
+				if options.text_scale<=1.2:route_button.icon=route_icon(choice)
+				if options.text_scale<=1. and not portrait:column.add_child(paragraph(t("route_"+choice),16))
 			action(t("back"),return_main)
 		"boss":
 			column.add_child(paragraph(t("boss_intro")))
@@ -233,14 +277,17 @@ func build_menu() -> void:
 			action(t("back"),return_main)
 		"dead":
 			column.add_child(paragraph(old("score")+" %05d · " % world.score+t(world.checkpoint),20))
-			action(t("retry"),func():world.retry();menu_kind="";boss_announced=false;view.camera_x=0.;save_checkpoint();build_ui(),true).name="CampaignRetry"
+			action(t("retry"),retry_checkpoint,true).name="CampaignRetry"
 			action(t("back"),return_main)
 		"complete":
-			column.add_child(paragraph(old("score")+" %05d · " % world.score+t("keepers")+" %d" % world.rescued.size(),20))
-			column.add_child(paragraph(old("best")+" %05d" % int(saved.get("best_score",world.score)),18))
-			column.add_child(paragraph(t("route")+": "+" → ".join(world.route.map(func(s):return t(s))),18))
-			action(t("restart"),begin_new,true)
-			action(t("back"),return_main)
+			column.add_child(paragraph(old("name_"+world.character)+" · "+old("score")+" %05d"%world.score,22))
+			column.add_child(paragraph(t("keepers")+" %d · "%world.rescued.size()+t("elapsed")+" "+elapsed_time(world.time),18))
+			if new_best:column.add_child(paragraph(t("new_best"),17))
+			action(t("restart"),begin_new,true).name="CampaignReplay"
+			action(t("details"),func():detail_page=0;menu_kind="result_details";build_ui()).name="CampaignReportDetails"
+			action(t("back"),return_main).name="CampaignReportMain"
+		"result_details":build_report_details()
+		"settings":build_settings()
 		"outro":
 			var sentences: PackedStringArray=t("won_text").split(". ")
 			var message: String=sentences[clampi(outro_step,0,sentences.size()-1)]
@@ -263,14 +310,142 @@ func fit_menu(target: PanelContainer) -> void:
 	target.position=Vector2(floorf((view_w-target.size.x)*.5),maxf(8.,floorf((view_h-height)*.5)))
 	if not buttons.is_empty():focus_index=0;buttons[0].grab_focus()
 
+func elapsed_time(seconds: float) -> String:
+	return "%02d:%02d"%[int(seconds)/60,int(seconds)%60]
+
+func route_icon(choice: String) -> Texture2D:
+	if route_icons.has(choice):return route_icons[choice]
+	var source: Texture2D=CampaignEnvironmentView.PANORAMA
+	var row: int=["water","terrace","roots"].find(choice)
+	var region: Rect2i
+	if row>=0:
+		var h:=source.get_height()/3
+		region=Rect2i((source.get_width()-h*2)/2,row*h,h*2,h)
+	else:
+		source=RunnerLandscapeView.SOURCE
+		var source_region: Array=RunnerLandscapeView.META.data.panels[4]
+		var h:=int(source_region[3])
+		region=Rect2i(int(source_region[0])+(int(source_region[2])-h*2)/2,int(source_region[1]),h*2,h)
+	var image:=source.get_image()
+	if image.is_compressed():image.decompress()
+	var thumbnail:=image.get_region(region);thumbnail.resize(96,48,Image.INTERPOLATE_NEAREST)
+	route_icons[choice]=ImageTexture.create_from_image(thumbnail)
+	return route_icons[choice]
+
+func report_lines() -> Array[String]:
+	var gun_names: Array=[]
+	var vehicle_names: Array=[]
+	for key in world.weapons_used:gun_names.append(t(key))
+	for key in world.vehicles_used:vehicle_names.append(t(key))
+	var roles: Dictionary={}
+	for role in world.rescue_roles.values():roles[str(role)]=int(roles.get(str(role),0))+1
+	var roles_text: Array[String]=[]
+	for role in roles:roles_text.append(t(str(role))+" ×"+str(roles[role]))
+	var record: Dictionary=Dictionary(Dictionary(saved.get("performance",{})).get("hero:"+world.character,{}))
+	var values: Array[String]=[t("route")+": "+" → ".join(world.route.map(func(s):return t(s))),
+		t("elapsed")+": "+elapsed_time(world.time)+" · "+t("defeated")+": "+str(world.kills),
+		t("damage_taken")+": "+str(world.losses)+" · "+t("secrets_found")+": "+str(world.discovered.size()),
+		t("keepers")+": "+str(world.rescued.size())+" · "+t("arena")+": "+t("won"),
+		old("best")+": %05d"%int(saved.get("best_score",world.score)),
+		t("fastest")+": "+elapsed_time(float(record.get("time",world.time)))+" · "+t("best_rescues")+": "+str(record.get("rescues",world.rescued.size()))]
+	# Long inventories are individual facts, so ten weapons cannot create one
+	# unbounded paragraph at 200% text in a short landscape viewport.
+	for group in [["used_weapons",gun_names],["used_vehicles",vehicle_names],["rescued_roles",roles_text]]:
+		if group[1].is_empty():values.append(t(group[0])+": —")
+		else:
+			for entry in group[1]:values.append(t(group[0])+": "+str(entry))
+	return values
+
+func build_report_details() -> void:
+	var values:=report_lines()
+	# One or two complete facts per page preserve 200% text without clipping.
+	var count:=1 if options.text_scale>=1.5 else 2
+	var page_count:=ceili(float(values.size())/count)
+	detail_page=clampi(detail_page,0,page_count-1)
+	for index in range(detail_page*count,mini(values.size(),(detail_page+1)*count)):
+		column.add_child(paragraph(values[index],19))
+	column.add_child(label("%d / %d"%[detail_page+1,page_count],16))
+	if detail_page<page_count-1:action(t("next"),func():detail_page+=1;build_ui(),true).name="CampaignReportNext"
+	if detail_page>0:action(t("previous"),func():detail_page-=1;build_ui()).name="CampaignReportPrevious"
+	action(t("summary"),func():menu_kind="complete";build_ui()).name="CampaignReportBack"
+
+func settings_change(key: String) -> void:
+	match key:
+		"theme":options.theme_mode=["dark","light","system"][( ["dark","light","system"].find(options.theme_mode)+1)%3];options.resolve_theme()
+		"font":options.font_mode="pixel" if options.font_mode=="system" else "system"
+		"text":options.text_scale=1. if options.text_scale>=2. else options.text_scale+.5
+		"motion":options.reduced_motion=not options.reduced_motion
+		"audio":audio_enabled=not audio_enabled
+		"language":
+			var locales: Array=GameText.LANGUAGES
+			language=str(locales[(locales.find(language)+1)%locales.size()])
+	var cfg:=ConfigFile.new();cfg.load("user://save.cfg");RunnerBrowserSave.restore(cfg);options.save_to(cfg)
+	cfg.set_value("prefs","audio",audio_enabled)
+	cfg.set_value("prefs","language",language)
+	if key=="language":cfg.set_value("prefs","language_override",true);cfg.set_value("prefs","language_mode_revision",2)
+	settings_ok=persist_preferences(cfg)
+	ui.theme=options.theme(FONT);view.font=options.font_for(FONT);build_ui()
+
+func persist_preferences(cfg: ConfigFile) -> bool:
+	# Use the same revisioned browser recovery channel as the main menu, so a
+	# quick reload cannot lose a language choice before asynchronous IDBFS sync.
+	var revision:=maxi(int(cfg.get_value("meta","revision",0))+1,int(Time.get_unix_time_from_system()*1000.))
+	cfg.set_value("meta","schema",1);cfg.set_value("meta","revision",revision)
+	var mirror:=RunnerBrowserSave.persist(cfg,revision)
+	var result:=cfg.save("user://campaign-prefs.tmp")
+	if result==OK:result=DirAccess.rename_absolute("user://campaign-prefs.tmp","user://save.cfg")
+	if OS.has_feature("web"):JavaScriptBridge.force_fs_sync()
+	return result==OK or mirror
+
+func build_settings() -> void:
+	if not settings_ok:column.add_child(paragraph(t("prefs_failed"),17))
+	var groups: Array= [
+		[["language",str(GameText.LANGUAGE_NAMES.get(language,language))],["theme",old("theme_"+options.theme_mode)],["font",old("font_"+options.font_mode)]],
+		[["text",str(roundi(options.text_scale*100.))+"%"],["motion",old("on") if options.reduced_motion else old("off")]],
+		[["audio",old("on") if audio_enabled else old("off")]]]
+	for item in groups[settings_page]:
+		var key: String=item[0]
+		action((old("language") if key=="language" else t("setting_"+key))+": "+str(item[1]),func():settings_change(key),false)
+	action(t("next")+" %d/3"%[settings_page+1],func():settings_page=(settings_page+1)%3;build_ui())
+	action(old("resume"),func():menu_kind=menu_previous;build_ui())
+
+func retry_checkpoint() -> void:
+	release_all();world.retry();menu_kind="";boss_announced=false;view.camera_x=0.;view.camera_y=0.;presentation_stage="";save_checkpoint();build_ui()
+
+func finish_help() -> void:
+	if help_return!="":menu_kind=help_return;help_return="";build_ui();return
+	if not tutorial_seen:
+		tutorial_seen=true
+		var cfg:=ConfigFile.new();cfg.load("user://save.cfg");RunnerBrowserSave.restore(cfg);cfg.set_value("prefs","campaign_help_seen",true);settings_ok=persist_preferences(cfg)
+	close_menu()
+
+func build_presentation() -> void:
+	presentation=CampaignPresentation.new();presentation.host=self;presentation.clock=presentation_time;presentation.mouse_filter=Control.MOUSE_FILTER_IGNORE;presentation.size=Vector2(view_w,view_h);ui.add_child(presentation)
+	presentation_skip=Button.new();presentation_skip.name="CampaignSkipPresentation";presentation_skip.text=old("story_skip");presentation_skip.add_theme_font_size_override("font_size",font_size(18));ui.add_child(presentation_skip)
+	presentation_skip.position=Vector2(16,view_h-76);presentation_skip.size=Vector2(view_w-32,58);presentation_skip.pressed.connect(skip_presentation)
+	buttons.append(presentation_skip)
+
+func start_presentation(stage: String) -> void:
+	release_all();presentation_stage=stage;presentation_time=0.;menu_kind="";world.state="story" if stage=="intro" else "complete";sound("mission_start" if stage=="intro" else "victory");build_ui()
+
+func skip_presentation() -> void:
+	var stage:=presentation_stage
+	if stage=="":return
+	presentation_stage="";presentation_time=0.;release_all()
+	if stage=="intro":world.state="playing";save_checkpoint()
+	else:menu_kind="outro";outro_step=0;save_checkpoint()
+	build_ui()
+
 func begin_new() -> void:
-	world.begin(selected_hero);world.state="story";menu_kind="help";help_step=0;outro_step=0;boss_announced=false;view.camera_x=0.;save_checkpoint();build_ui()
+	checkpoint_invalid=false;world.begin(selected_hero);world.state="story";menu_kind="help";help_step=0;outro_step=0;boss_announced=false;view.camera_x=0.;complete_presented=false;intro_pending=true;new_best=false;save_checkpoint();build_ui()
+	if tutorial_seen:close_menu()
 func resume_saved() -> void:
 	if not world.restore(saved): saved.clear();begin_new();return
-	menu_kind="help";help_step=0;world.state="story";boss_announced=false;view.camera_x=0.;build_ui()
+	menu_kind="";help_step=0;world.state="playing";boss_announced=false;view.camera_x=0.;intro_pending=false;build_ui()
 func close_menu() -> void:
 	if menu_kind=="boss":world.boss.engaged=true
 	release_all();menu_kind="";world.state="playing";build_ui()
+	if intro_pending:intro_pending=false;start_presentation("intro")
 func toggle_pause() -> void:
 	if world.state=="playing":
 		release_all();world.state="paused";menu_kind="paused";save_checkpoint();build_ui()
@@ -293,11 +468,26 @@ func load_checkpoint() -> void:
 	var parsed=JSON.parse_string(content)
 	if parsed is Dictionary:
 		var probe:=AionCampaignWorld.new()
-		if probe.restore(parsed):saved=parsed
+		if probe.restore(parsed):
+			if not parsed.get("performance",{}) is Dictionary:parsed.performance={}
+			saved=parsed;return
+	checkpoint_invalid=true
 
 func save_checkpoint() -> void:
 	var data:=world.snapshot()
 	data.best_score=maxi(int(saved.get("best_score",0)),world.score if world.completed else 0)
+	var records: Dictionary=Dictionary(saved.get("performance",{})).duplicate(true)
+	if world.completed:
+		var route_key: String="/".join(world.route)
+		for key in ["hero:"+world.character,"route:"+route_key]:
+			var record: Dictionary=Dictionary(records.get(key,{}))
+			new_best=new_best or world.score>int(record.get("score",-1))
+			record.score=maxi(world.score,int(record.get("score",0)))
+			record.time=minf(world.time,float(record.get("time",world.time)))
+			record.rescues=maxi(world.rescued.size(),int(record.get("rescues",0)))
+			record.losses=mini(world.losses,int(record.get("losses",world.losses)))
+			records[key]=record
+	data.performance=records
 	var content:=JSON.stringify(data)
 	var file:=FileAccess.open("user://campaign.tmp",FileAccess.WRITE)
 	var disk_ok:=false
@@ -312,7 +502,7 @@ func save_checkpoint() -> void:
 	if save_ok:saved=data.duplicate(true)
 
 func release_all() -> void:
-	held.clear();touch_actions.clear();stick_touch=-1;left_down=false;right_down=false;mouse_stick=false;mouse_axis=Vector2.ZERO;pad_axis=Vector2.ZERO
+	held.clear();touch_actions.clear();stick_touch=-1;left_down=false;right_down=false;up_down=false;down_down=false;mouse_stick=false;mouse_axis=Vector2.ZERO;pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
 	world.stop_inputs()
 	if is_instance_valid(stick):stick.axis=Vector2.ZERO;stick.active=false;stick.queue_redraw()
 
@@ -329,7 +519,9 @@ func set_action(key: String,source: String,down: bool,canceled: bool=false) -> v
 			if after:world.jump_press()
 			else:world.jump_release(not canceled)
 		"attack":
-			if after:world.attack_press()
+			if after:
+				update_arcade_aim()
+				world.attack_press()
 			else:world.attack_release()
 		"grenade":
 			if after:world.throw_grenade()
@@ -337,10 +529,19 @@ func set_action(key: String,source: String,down: bool,canceled: bool=false) -> v
 
 func _notification(what: int) -> void:
 	if what==NOTIFICATION_APPLICATION_FOCUS_OUT or what==NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		application_active=false
 		release_all()
 		if is_instance_valid(ui) and world.state=="playing":toggle_pause()
+	elif what==NOTIFICATION_APPLICATION_FOCUS_IN or what==NOTIFICATION_WM_WINDOW_FOCUS_IN:application_active=true
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:active_input="touch"
+	elif event is InputEventJoypadButton or event is InputEventJoypadMotion:active_input="gamepad"
+	elif event is InputEventKey or (event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION):active_input="keyboard"
+	if presentation_stage!="":
+		if (event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ENTER,KEY_SPACE,KEY_ESCAPE]) or (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_A,JOY_BUTTON_X,JOY_BUTTON_B,JOY_BUTTON_START]) or (event is InputEventScreenTouch and event.pressed and not event.canceled):
+			skip_presentation();get_viewport().set_input_as_handled()
+		return
 	if event is InputEventJoypadMotion and event.axis==JOY_AXIS_TRIGGER_RIGHT:
 		if menu_kind=="":set_action("attack","trigger",event.axis_value>.5)
 		get_viewport().set_input_as_handled();return
@@ -395,6 +596,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.physical_keycode:
 			KEY_A,KEY_LEFT:left_down=event.pressed
 			KEY_D,KEY_RIGHT:right_down=event.pressed
+			KEY_W,KEY_UP:up_down=event.pressed
+			KEY_S,KEY_DOWN:down_down=event.pressed
 			KEY_SPACE:set_action("jump","keyboard",event.pressed)
 			KEY_F,KEY_J:set_action("attack","key"+str(event.physical_keycode),event.pressed)
 			KEY_G:set_action("grenade","keyboard",event.pressed)
@@ -417,10 +620,10 @@ func interact_binding() -> int:
 	return JOY_BUTTON_Y
 
 func pad_help() -> String:
-	return t("move")+" ← → · "+pad.binding_name("jump")+" "+old("control_jump")+" · "+pad.binding_name("shoot")+" "+old("control_shoot")+" · "+pad.binding_name("duck")+" "+t("grenade")+" · "+str(pad.NAMES[interact_binding()])+" "+t("ride")
+	return t("move")+" ↖ ↑ ↗ ← → ↙ ↓ ↘ · "+pad.binding_name("jump")+" "+old("control_jump")+" · "+pad.binding_name("shoot")+" "+old("control_shoot")+" · "+pad.binding_name("duck")+" "+t("grenade")+" · "+str(pad.NAMES[interact_binding()])+" "+t("ride")
 
 func poll_pad() -> void:
-	pad_axis=Vector2.ZERO
+	pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
 	var pads:=Input.get_connected_joypads()
 	if pads.is_empty():return
 	var id: int=pads[0]
@@ -433,22 +636,48 @@ func poll_pad() -> void:
 	if absf(axis)>pad.deadzone:pad_axis.x=signf(axis)*inverse_lerp(pad.deadzone,1.,absf(axis))
 	if Input.is_joy_button_pressed(id,JOY_BUTTON_DPAD_LEFT):pad_axis.x=-1.
 	if Input.is_joy_button_pressed(id,JOY_BUTTON_DPAD_RIGHT):pad_axis.x=1.
+	var vertical: float=Input.get_joy_axis(id,JOY_AXIS_LEFT_Y)
+	if absf(vertical)>pad.deadzone:pad_axis.y=signf(vertical)*inverse_lerp(pad.deadzone,1.,absf(vertical))
+	if Input.is_joy_button_pressed(id,JOY_BUTTON_DPAD_UP):pad_axis.y=-1.
+	if Input.is_joy_button_pressed(id,JOY_BUTTON_DPAD_DOWN):pad_axis.y=1.
+	var look_x:float=Input.get_joy_axis(id,JOY_AXIS_RIGHT_X)
+	var look_y:float=Input.get_joy_axis(id,JOY_AXIS_RIGHT_Y)
+	if Vector2(look_x,look_y).length()>maxf(.25,pad.deadzone):pad_look=Vector2(look_x,look_y).normalized()
 
 func start_travel() -> void:
 	release_all();fade=0.;fade_loaded=false
 
+func update_arcade_aim() -> void:
+	# Left stick controls movement in X and 8-way aiming in XY. Right stick,
+	# when active, overrides aiming without changing movement (twin-stick).
+	var axis: float=float(right_down)-float(left_down)
+	var vertical: float=float(down_down)-float(up_down)
+	if absf(pad_axis.x)>.01:axis=pad_axis.x
+	if absf(pad_axis.y)>.01:vertical=pad_axis.y
+	if mouse_stick:
+		axis=mouse_axis.x;vertical=mouse_axis.y
+	if stick_touch>=0 and is_instance_valid(stick):
+		axis=stick.axis.x;vertical=stick.axis.y
+	var raw:=Vector2(axis,vertical)
+	if pad_look.length_squared()>.25:raw=pad_look
+	if raw.length_squared()<.04:raw=Vector2(world.facing,0.)
+	var snapped:=Vector2(signf(raw.x) if absf(raw.x)>.25 else 0.,signf(raw.y) if absf(raw.y)>.25 else 0.)
+	if snapped.length_squared()<.5:snapped=Vector2(world.facing,0.)
+	world.aim_direction=snapped.normalized()
+	world.move_axis=Vector2(axis,0.)
+
 func _process(dt: float) -> void:
+	world.pose_motion_enabled=motion_enabled and not options.reduced_motion
 	if not is_instance_valid(view):return
+	if presentation_stage!="" and application_active:
+		presentation_time+=clampf(dt,0.,.05)
+		if presentation_time>=(2. if presentation_stage=="intro" else 1.8):skip_presentation()
 	update_ambient()
 	pad_menu_wait=maxf(0.,pad_menu_wait-dt)
 	poll_pad()
 	if world.state=="playing" and menu_kind=="" and fade<0.:
-		var axis: float=float(right_down)-float(left_down)
-		if absf(pad_axis.x)>.01:axis=pad_axis.x
-		if mouse_stick:axis=mouse_axis.x
-		if stick_touch>=0 and is_instance_valid(stick):axis=stick.axis.x
-		world.move_axis=Vector2(axis,0)
-		if world.character=="wolf" and (stick_touch>=0 or mouse_stick):world.boost_held=absf(axis)>.85 or not Dictionary(held.get("boost",{})).is_empty()
+		update_arcade_aim()
+		if world.character=="wolf" and (stick_touch>=0 or mouse_stick):world.boost_held=absf(world.move_axis.x)>.85 or not Dictionary(held.get("boost",{})).is_empty()
 		world.step(dt)
 	if world.state=="travel" and fade<0.:start_travel()
 	if world.state in ["victory","dying"]:world.step(dt)
@@ -460,13 +689,16 @@ func _process(dt: float) -> void:
 		if fade>=.36:fade=-1.;fade_panel.color.a=0.
 	if fade<0. and world.section=="arena" and not boss_announced and world.state=="playing" and absf(world.player.x-float(world.boss.x))<view.scene_w*.40:
 		boss_announced=true;world.stop_inputs();world.state="story";menu_kind="boss";build_ui()
-	if menu_kind=="" and world.state in ["fork_one","fork_two","dead","complete"]:
+	if menu_kind=="" and presentation_stage=="" and world.state in ["fork_one","fork_two","dead","complete"]:
 		menu_kind=world.state;release_all()
-		if world.state=="complete":menu_kind="outro";save_checkpoint()
-		build_ui()
+		if world.state=="complete" and not complete_presented:
+			complete_presented=true;save_checkpoint();start_presentation("victory")
+		else:
+			if world.state=="complete":menu_kind="outro";save_checkpoint()
+			build_ui()
 	for event in world.pending_events:
 		if event in ["checkpoint","rescue","rescue_gift","secret","mechanism"] and menu_kind!="briefing":save_checkpoint()
-		if event in ["shot","melee","grenade","blast","pickup","rescue","hurt","cut","rescue_gift","secret","mechanism","enemy_shot","guardian","boss_attack","complete"]:sound(event)
+		if event in ["shot","melee","grenade","blast","pickup","rescue","hurt","cut","rescue_gift","secret","mechanism","enemy_shot","guardian","boss_attack","complete","checkpoint"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	view.camera_x=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
@@ -479,19 +711,22 @@ func _process(dt: float) -> void:
 
 func update_hud() -> void:
 	if not is_instance_valid(hud):return
+	hud_panel.refresh()
 	hud.text="%05d" % world.score+("\n" if portrait or options.text_scale>1. else "  ·  ")+t("lives")+" %d/%d" % [world.hp,world.max_hp]+"  ·  "+t("grenade")+" %d" % world.grenades
 	var region: String=world.section
 	if CampaignContent.SCENES.has(region):region=str(CampaignContent.SCENES[region][clampi(int(world.player.x/world.length()*3.),0,2)])
 	subtitle.text=t("mission")+" · "+t(region)
-	if world.weapon!="pistol":subtitle.text+="\n"+t(world.weapon)+" %d" % world.ammunition
-	elif world.shield>0:subtitle.text+=" · "+t("shield")+" %d" % world.shield
-	if world.notice_time>0. and world.notice!="":subtitle.text+="\n"+t(world.notice)
+	if world.weapon!="pistol" and world.ammunition<=5:subtitle.text+=" · "+t("low_ammo")
+	if world.notice_time>0. and world.notice!="" and (save_ok or world.notice!="arc_checkpoint"):subtitle.text+="\n"+t(world.notice)
 	if not save_ok:subtitle.text+="\n"+t("save_failed")
-	if bool(world.mount.ridden):subtitle.text+=" · "+t(CampaignVehicles.kind(world))+" %d/4" % int(world.mount.hp)
-	var active_controls: bool=menu_kind=="" and fade<0. and world.state=="playing"
+	var active_controls: bool=menu_kind=="" and fade<0. and world.state=="playing" and presentation_stage==""
 	pause_button.visible=active_controls
-	boss_health.visible=world.section=="arena" and bool(world.boss.active) and menu_kind==""
+	hud_panel.visible=menu_kind=="" and presentation_stage==""
+	subtitle.visible=hud_panel.visible
+	boss_health.position.y=hud_panel.strip_height+6.
+	boss_health.visible=world.section=="arena" and bool(world.boss.active) and menu_kind=="" and presentation_stage==""
 	boss_health.value=world.boss.hp
+	if boss_health.visible:subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+( " · "+t("boss_warning") if float(world.boss.windup)>0. or float(world.boss.get("beam_warning",0.))>0. else "")
 	subtitle.position.y=boss_health.position.y+(20. if boss_health.visible else 0.)
 	ride_button.visible=active_controls and bool(world.mount.available) and int(world.mount.hp)>0 and (bool(world.mount.ridden) or absf(world.player.x-float(world.mount.x))<110.)
 	ride_button.text=t("exit_vehicle") if bool(world.mount.ridden) else t("board")
@@ -500,13 +735,14 @@ func update_hud() -> void:
 		var item: AionCampaignTouch=actions[key];item.visible=active_controls;item.pressed=not Dictionary(held.get(key,{})).is_empty()
 		if key=="attack":
 			var near:=not world.close_enemy().is_empty() and not bool(world.mount.ridden)
-			var captive:=not CampaignRescue.nearest(world).is_empty() and not near
+			var captive:=absf(world.aim_direction.y)<.25 and not CampaignRescue.nearest(world).is_empty() and not near
 			item.action="cut" if captive else ("melee" if near else "shoot");item.caption=t("cut") if captive else (t("melee") if near else old("control_shoot"));item.cooldown=world.fire_time/.32
 		if key=="grenade":item.disabled=world.grenades<=0;item.cooldown=world.grenade_time/.55
 		if key=="jump":
 			var diving: bool=bool(world.mount.ridden) and CampaignVehicles.kind(world)=="shell"
 			item.caption=t("dive") if diving else old("control_jump");item.action="dive" if diving else "jump"
 		item.queue_redraw()
+	if is_instance_valid(control_hint):control_hint.text=pad_help() if active_input=="gamepad" else t("keys")
 
 func update_ambient() -> void:
 	if not audio_enabled:
@@ -534,7 +770,7 @@ func sound(event: String) -> void:
 			var voice:=AudioStreamPlayer.new();voice.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(voice);voices.append(voice)
 	if not sound_cache.has(event):
 		var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else 1400
-		var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.}[event]
+		var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.}.get(event,660.)
 		for i in count:
 			var phase: float=float(i)/22050.;var envelope: float=pow(1.-float(i)/count,2.)
 			var sample:=sin(phase*pitch*TAU*(1.-float(i)/count*.4))*envelope*.22
@@ -567,12 +803,13 @@ func metadata() -> void:
 	data.raw=[get_viewport_rect().size.x,get_viewport_rect().size.y]
 	data.velocity=[world.velocity.x,world.velocity.y]
 	data.npcs=[]
-	for n in world.npcs:data.npcs.append({"id":n.id,"x":n.x,"y":n.y,"freed":n.freed,"age":n.free_age,"gift":n.gift,"secret":n.secret})
+	for n in world.npcs:data.npcs.append({"id":n.id,"x":n.x,"y":n.y,"freed":n.freed,"age":n.free_age,"gift":n.gift,"secret":n.secret,"phase":n.get("phase","bound"),"facing":n.get("facing",-1),"thank_age":n.get("thank_age",0.)})
 	data.boss_warning=world.boss.get("beam_warning",0.);data.boss_beam_x=world.boss.get("beam_x",-999.);data.boss_x=world.boss.x;data.boss_phase=world.boss.phase;data.mount_type=CampaignVehicles.kind(world);data.music_starts=ambient_starts;data.native_memory=Performance.get_monitor(Performance.MEMORY_STATIC);data.node_count=Performance.get_monitor(Performance.OBJECT_NODE_COUNT);data.rescue_candidate=CampaignRescue.nearest(world).get("id","");data.rescue_time=world.rescue_time;data.weapon=world.weapon;data.ammunition=world.ammunition;data.objects=world.objects;data.rooms=world.rooms
 	data.bullets=[]
 	for bullet in world.bullets:
 		if bullet.owner=="enemy":data.bullets.append([bullet.p.x,bullet.p.y,bullet.v.x,bullet.v.y])
-	data.grounded=world.grounded();data.invulnerable=world.invulnerable
+	data.grounded=world.grounded();data.invulnerable=world.invulnerable;data.aim=[world.aim_direction.x,world.aim_direction.y]
+	data.presentation=presentation_stage;data.presentation_time=presentation_time;data.help_step=help_step;data.hud_summary=hud_panel.summary;data.report_lines=report_lines();data.input_kind=active_input;data.mount_transition=world.mount_transition;data.mount_transition_time=world.mount_transition_time
 	JavaScriptBridge.eval("document.getElementById('canvas')?.setAttribute('data-campaign',"+JSON.stringify(JSON.stringify(data))+");")
 
 func accessible_action(args: Array) -> void:
@@ -587,7 +824,10 @@ func accessible_update() -> void:
 	var entries:=[]
 	for item in ui.find_children("*","Button",true,false):
 		if item.is_visible_in_tree():entries.append({"id":str(item.get_instance_id()),"label":item.tooltip_text if item.text=="II" else item.text,"disabled":item.disabled,"toggle":false,"pressed":false})
-	var payload:=JSON.stringify({"items":entries,"language":language,"page":menu_kind,"summary":t(menu_kind) if menu_kind!="" else t(world.section)+" · "+old("score")+" "+str(world.score)})
+	var summary: String=menu_title() if menu_kind!="" else hud_panel.summary
+	if menu_kind=="" and world.section=="arena" and bool(world.boss.active):summary+=" · "+t("arena")+" %d/%d"%[world.boss.hp,world.boss.max_hp]+" · "+t("phase")+" "+str(world.boss.phase)
+	if presentation_stage!="":summary=t("won")+" · "+t("lights_restored") if presentation_stage=="victory" else t("mission")+" · "+t("title")+" · "+t("intro_objective")
+	var payload:=JSON.stringify({"items":entries,"language":language,"page":menu_kind,"summary":summary})
 	if payload==accessibility_stamp:return
 	accessibility_stamp=payload
 	var api=JavaScriptBridge.get_interface("AionAccessibility")

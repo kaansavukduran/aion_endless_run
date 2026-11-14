@@ -1,0 +1,32 @@
+{
+  "run_id": 43652130082,
+  "job_id": 132623484533,
+  "sha": "48dc3979e82ae25e098cfe9c385c4c7537fd773f",
+  "scope": "API30 emulator, actual ADB touches and display resize; disposable native test APK. Not physical hardware, signed release publication or upgrade verification.",
+  "input_checks": 15,
+  "input_status": "PASS",
+  "checks": [
+    "PASS Native system-font menu and heading/roster stay separated: tr",
+    "PASS Native system-font menu and heading/roster stay separated: cs",
+    "PASS Native system-font menu and heading/roster stay separated: en",
+    "PASS Real native Jump hold reaches an airborne owl glide",
+    "PASS Real native Jump repress consumes airborne flap 1",
+    "PASS Real native Jump repress consumes airborne flap 2",
+    "PASS Real native Jump repress consumes airborne flap 3",
+    "PASS Real native Fire touch emits a normal-run bullet",
+    "PASS Real native held Fire continues beyond five bullets without reload in the training arena",
+    "PASS Real native Roll touch reaches the actual roll state",
+    "PASS Native Eren independently charges while grounded",
+    "PASS Native Eren releases his own charged leap",
+    "PASS Native Emre holds on the ground and accumulates charge",
+    "PASS Native Emre releases a real charged leap",
+    "PASS Native landscape resize preserves the paused character, score and level"
+  ],
+  "job_conclusion": "failure",
+  "failed_gate": "Full-scene image validator received intentional dark opening screenshot labelled first-launch",
+  "diagnostics": [
+    "2026-11-14T23:19:56.7428842Z Android process remained alive; no Java or GDScript startup exception.",
+    "2026-11-14T23:19:56.9419072Z Blank or incomplete Android render: build/android-first-launch.png, 148 colors"
+  ],
+  "fix_scope": "Capture first-launch only after real SkipOpening/menu-ready precondition; thresholds unchanged."
+}

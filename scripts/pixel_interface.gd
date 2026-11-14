@@ -1,12 +1,16 @@
 class_name RunnerPixelInterface
 extends RefCounted
 var host
+var roster_page := 0
+
+func paged_roster() -> bool:
+	return host.page=="main" and host.portrait and host.interface_options.text_scale>1.0
 
 func split_main() -> bool:
 	return host.page=="main" and not host.portrait and host.interface_options.text_scale>1.0
 
 func roster_width() -> float:
-	return host.view_w*.6-42 if split_main() else host.view_w-56
+	return host.view_w*.5-42 if split_main() else host.view_w-56
 
 func stage_y() -> float:
 	if host.portrait:
@@ -14,7 +18,7 @@ func stage_y() -> float:
 		if host.page=="main":
 			# Preserve the actual translated roster and heading. A tall system
 			# font needs more room than the old fixed preview/sky allocation.
-			preview=minf(preview,roster_y()-chooser_height()-6-8-350-26)
+			preview=minf(preview,roster_y()-chooser_height()-6-8-(520 if host.interface_options.text_scale>1.0 else 350)-26)
 		return maxf(140.0,preview)
 	var baseline: float=host.view_h-(170.0 if host.touch_mode else 210.0)
 	return minf(baseline,roster_y()-12) if host.page=="main" and not split_main() else baseline
@@ -153,7 +157,7 @@ func hud() -> void:
 func card(width: float) -> VBoxContainer:
 	var h=host
 	width=minf(width,h.view_w-40)
-	if h.page=="main" and h.interface_options.text_scale>1:width=host.view_w*.4-42 if split_main() else minf(640,h.view_w-56)
+	if h.page=="main" and h.interface_options.text_scale>1:width=host.view_w*.5-42 if split_main() else minf(640,h.view_w-56)
 	var enlarged: bool=h.interface_options.text_scale>1.0
 	if enlarged and h.page!="main":width=h.view_w-40
 	var height: float=minf(h.view_h-120,410 if h.page!="main" else 340)
@@ -186,7 +190,7 @@ func card(width: float) -> VBoxContainer:
 func roster_geometry(width: float,separate: bool=false) -> Dictionary:
 	var h=host
 	var enlarged: bool=h.interface_options.text_scale>1.0
-	var columns: int=2 if h.portrait or separate or split_main() else h.FRIENDS.size()
+	var columns: int=3 if split_main() and not separate else (2 if h.portrait or separate else h.FRIENDS.size())
 	var stacked: bool=true
 	var tile_w: float=(width-float(columns-1)*10)/columns
 	var tile_h:=104.0 if h.portrait else 94.0
@@ -204,12 +208,13 @@ func roster_geometry(width: float,separate: bool=false) -> Dictionary:
 			probe.get_line_count()
 			tile_h=maxf(tile_h,ceilf(probe.get_minimum_size().y)+22+(48 if stacked else 0))
 	probe.free()
-	var rows:=ceili(float(h.FRIENDS.size())/columns)
-	return {"columns":columns,"width":tile_w,"height":tile_h,"total_height":tile_h*rows+float(rows-1)*10}
+	var rows:=1 if paged_roster() and not separate else ceili(float(h.FRIENDS.size())/columns)
+	return {"columns":columns,"width":tile_w,"height":tile_h,"total_height":tile_h*rows+float(rows-1)*10+(ceilf(h.ui_size(30)*1.6)+28 if paged_roster() and not separate else 0)}
 
 func roster_y() -> float:
 	var height: float=roster_geometry(roster_width()).total_height
-	return maxf(72,(host.view_h-height)*.5) if split_main() else host.view_h-height-20
+	var header: float=ceilf(host.ui_size(24)*1.6)+28 if split_main() else 72.
+	return maxf(header,(host.view_h-height)*.5) if split_main() else host.view_h-height-20
 
 func chooser_height() -> float:
 	if host.interface_options.text_scale>1:return 0.0
@@ -234,7 +239,8 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 	parent.add_child(grid)
 	grid.position=at
 	var tile_w: float=geometry.width
-	for id in h.FRIENDS:
+	var shown: Array=h.FRIENDS.slice(roster_page*2,roster_page*2+2) if paged_roster() and not separate else h.FRIENDS
+	for id in shown:
 		var tile: Button=h.button("",func():h.select_character(id),id==h.character)
 		tile.name=("Select_" if separate else "StartSelect_")+id
 		tile.accessibility_name=h.character_name(id)+(" · "+h.text("setting_on") if id==h.character else "")
@@ -262,6 +268,11 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 		title.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 		if stacked:title.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		row.add_child(title)
+	if paged_roster() and not separate:
+		var navigation:=HBoxContainer.new();navigation.position=at+Vector2(0,float(geometry.height)+10);parent.add_child(navigation)
+		var before: Button=h.button("‹",func():roster_page=maxi(0,roster_page-1);h.rebuild());before.name="RosterPrevious";before.disabled=roster_page==0
+		var after: Button=h.button("›",func():roster_page=mini(2,roster_page+1);h.rebuild());after.name="RosterNext";after.disabled=roster_page==2
+		for b in [before,after]:b.custom_minimum_size=Vector2((width-12)*.5,62);navigation.add_child(b)
 
 func main(column: VBoxContainer) -> Button:
 	var h=host
@@ -292,12 +303,28 @@ func main(column: VBoxContainer) -> Button:
 	var secondary: BoxContainer=VBoxContainer.new() if split_main() else HBoxContainer.new()
 	secondary.add_theme_constant_override("separation",8)
 	column.add_child(secondary)
-	for entry in ["boss_training","settings"]:
-		var action: Button=h.button(h.text(entry),func():h.show_page("bosses") if entry=="boss_training" else h.open_subpage("settings"))
+	for entry in ["characters","front_how"]:
+		var action: Button=h.button(h.text(entry) if entry=="characters" else RunnerFrontText.word(h.language,"how"),func():h.open_subpage("characters") if entry=="characters" else h.open_subpage("help"))
+		action.name="ChooseHero" if entry=="characters" else "HowToPlay"
 		action.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		action.custom_minimum_size=Vector2(0,maxf(60,h.ui_size(34)))
 		action.add_theme_font_size_override("font_size",h.ui_size(17))
 		secondary.add_child(action)
+	var utilities:=HBoxContainer.new()
+	utilities.add_theme_constant_override("separation",8)
+	column.add_child(utilities)
+	for entry in ["settings"]:
+		var action: Button=h.button(h.text(entry),func():h.open_subpage("settings"))
+		action.name="BossTraining" if entry=="boss_training" else "OpenSettings"
+		action.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		action.custom_minimum_size=Vector2(0,maxf(48,h.ui_size(28)))
+		action.add_theme_font_size_override("font_size",h.ui_size(17))
+		utilities.add_child(action)
+	if h.has_campaign_checkpoint():
+		var resume: Button=h.button(AionCampaignText.word(h.language,"continue"),func():h.campaign_resume_requested=true;h.start_campaign())
+		resume.name="ContinueCampaign"
+		resume.custom_minimum_size.y=maxf(48,h.ui_size(28))
+		column.add_child(resume)
 	var choose: Label=h.wrap_label("",18,"ffe1b9")
 	choose.name="StartChooser"
 	h.menu_layer.add_child(choose)
@@ -307,7 +334,7 @@ func main(column: VBoxContainer) -> Button:
 	var roster_at: float=roster_y()
 	choose.position=Vector2(28,roster_at-chooser_height()-6)
 	choose.size.y=chooser_height()
-	roster(h.menu_layer,Vector2(h.view_w*.4+14 if split_main() else 28,roster_at),roster_width())
+	roster(h.menu_layer,Vector2(h.view_w*.5+14 if split_main() else 28,roster_at),roster_width())
 	fit_main.call_deferred(column,h.layout_generation)
 	return first
 
@@ -327,12 +354,22 @@ func characters() -> void:
 	var column: VBoxContainer=card(760)
 	column.add_child(h.wrap_label(h.text("choose"),26))
 	for id in h.FRIENDS:
-		var choice: Button=h.button(h.character_name(id),func():h.select_character(id),id==h.character)
+		var tile: BoxContainer=HBoxContainer.new() if not h.portrait and h.interface_options.text_scale>1.0 else VBoxContainer.new()
+		tile.name="HeroCard_"+id
+		column.add_child(tile)
+		var preview:=RunnerHeroPreview.new()
+		preview.hero=id;preview.animate=h.decorative_motion()
+		preview.custom_minimum_size=Vector2(160,124)
+		tile.add_child(preview)
+		var info: BoxContainer=VBoxContainer.new()
+		info.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		tile.add_child(info)
+		var choice: Button=h.button(("✓ " if id==h.character else "")+h.character_name(id),func():h.select_character(id),id==h.character)
 		choice.name="Select_"+id
-		choice.icon=h.frames.pose("runner-"+id,0,0).texture
-		choice.expand_icon=true
-		choice.add_theme_constant_override("icon_max_width",50)
-		column.add_child(choice)
+		info.add_child(choice)
+		info.add_child(h.wrap_label(h.front_ability(id),17))
+	var confirm: Button=h.button(RunnerFrontText.word(h.language,"confirm"),func():h.show_page("main"),true)
+	confirm.name="ConfirmHero";confirm.set_meta("menu_pin",true);column.add_child(confirm)
 	h.menu_pages.prepare(column,Vector2(float(column.get_meta("page_width")),float(column.get_meta("page_height"))))
 
 func tutorial() -> void:

@@ -101,6 +101,11 @@ func run() -> void:
 	game.set_physics_process(false)
 	game.main_menu()
 	await settle()
+	# The title's first input only skips; this regression targets Endless menus.
+	if game.front.intro_active:
+		await pad(JOY_BUTTON_START)
+		await settle()
+	game.ui.find_child("StartRun",true,false).grab_focus()
 	await pad(JOY_BUTTON_A)
 	check(game.world.state=="running" and game.page=="","Real mapped A/Cross starts the focused main-menu action")
 	await pad(JOY_BUTTON_START)

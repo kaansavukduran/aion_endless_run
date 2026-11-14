@@ -46,7 +46,7 @@ func run() -> void:
 			for y in image.get_height():clean=clean and image.get_pixel(0,y).a==0. and image.get_pixel(image.get_width()-1,y).a==0.
 			check(clean,"Independent attack texture has transparent sampling gutters")
 		check(first_height>approved_height*.9 and first_height<approved_height*1.1,"First attack body size agrees with actual connected approved neutral: "+hero)
-		check(bank.pose("gun-run",bank.hero_row(hero),0).source_key=="pixel-"+hero,"Ground/fire artwork identity agrees with selected hero")
+		check(bank.pose("gun-run",bank.hero_row(hero),0).source_key==("forge-mouth-carry" if hero=="wolf" else "pixel-"+hero),"Ground/fire artwork identity agrees with selected hero")
 	for row in 8:
 		for frame in 6:
 			var pose:=art.pose(row,frame)

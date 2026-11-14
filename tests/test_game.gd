@@ -294,6 +294,8 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_physics_process(false)
+	# This suite starts at the menu; opening consumption is covered separately.
+	if game.front.intro_active:key(game,KEY_ENTER)
 	check(game.page == "main", "Normal entry opens main menu")
 	key(game, KEY_SPACE)
 	check(game.world.state == "running" and game.page == "", "Space starts at real entry")

@@ -56,6 +56,9 @@ with sync_playwright() as pw:
         for name,b in d['buttons'].items():check(b[0]>=0 and b[1]>=0 and b[0]+b[2]<=d['view'][0]+1 and b[1]+b[3]<=d['view'][1]+1,'Visible reachable menu action: '+name)
     fit();page.screenshot(path=str(a.evidence/'briefing.png'));button('CampaignBegin');fit()
     while data()['menu']=='help':button('CampaignGo')
+    # The authored Mission Start is a real, non-damaging presentation. Allow
+    # it to finish naturally rather than treating its story state as a failure.
+    page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && !(d.presentation || d.presentation_stage)}',timeout=15000)
     canvas.focus();page.wait_for_timeout(200)
     check(data()['state']=='playing','Main menu → Arcade → mission → play through normal buttons')
     p0=data()['player'][0];page.keyboard.down('d');page.wait_for_function('(x)=>JSON.parse(document.querySelector("canvas").dataset.campaign).player[0]>x+80',arg=p0,timeout=10000);page.keyboard.up('d');page.wait_for_timeout(200);p1=data()['player'][0]
@@ -82,18 +85,39 @@ with sync_playwright() as pw:
         r=d['actions']['jump'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2));page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-10',timeout=10000);check(True,'Firefox actual touch reaches the same jump action; CDP multitouch is Chromium-only')
     page.set_viewport_size({'width':1280,'height':720});page.wait_for_timeout(700);page.screenshot(path=str(a.evidence/'landscape-playing.png'));canvas.focus()
     if a.play_through or a.rescue_only:
-        held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None
+        held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None;board_attempts=set();vehicle_inputs=[]
         def keys(wanted):
             global held
             for k in held-set(wanted):page.keyboard.up(k)
             for k in set(wanted)-held:page.keyboard.down(k)
             held=set(wanted)
+        def contact_and_claim(captive):
+            # Freed NPCs no longer pay out remotely. Reach the moving NPC using
+            # real movement and let the actual contact/thanks animation finish.
+            deadline=time.monotonic()+12
+            while time.monotonic()<deadline:
+                current=data();npc=next(n for n in current['npcs'] if n['id']==captive['id'])
+                if current['awarded'].get(captive['id']+':gift') or npc.get('phase') in ['thanks','departed']:
+                    keys([]);break
+                assert current['state']=='playing',('Rescue approach interrupted',current['state'],current['menu'])
+                keys(['d'] if npc['x']>current['player'][0] else ['a'])
+                page.wait_for_timeout(40)
+            keys([])
+            page.wait_for_function('id=>JSON.parse(document.querySelector("canvas").dataset.campaign).awarded[id+":gift"]===true',arg=captive['id'],timeout=15000)
+            current=data();check(captive['id'] in current['rescued'],'Actual rescue remains freed through the contact handover')
+            saved=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
+            check(saved['awarded'].get(captive['id']+':gift') and captive['id'] in saved['rescued'],'Actual rescue and contact handover reach persistent browser storage')
+            return current
         while time.monotonic()-started<1000:
             d=data();now=time.monotonic();state=d['state'];section=d['section']
             if d['menu'] and not d.get('ui_ready',True):keys([]);page.wait_for_timeout(50);continue
             if section not in stages:stages.append(section);page.screenshot(path=str(a.evidence/(section+'.png')));print('STAGE',section,'HP',d['hp'],'score',d['score'],flush=True)
             if state=='complete':
-                keys([]);completed=True
+                keys([])
+                # The boss death and new short celebration must finish before
+                # the ordinary outro/report actions are reachable.
+                page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return !(d.presentation || d.presentation_stage) && ["outro","complete"].includes(d.menu)}',timeout=15000)
+                completed=True
                 while data()['menu']=='outro':button(text='Devam')
                 page.screenshot(path=str(a.evidence/'mission-complete.png'));break
             if d['menu']:
@@ -117,6 +141,14 @@ with sync_playwright() as pw:
                     continue
             x,y=d['player'];onfloor=d.get('grounded',y==0);targets=[e for e in d['enemies'] if abs(e['x']-x)<680]
             target=min(targets,key=lambda e:abs(e['x']-x)) if targets else None
+            if d['mounted'] and not d.get('mount_transition'):
+                # The authored vehicle is twice the actor's height; its high
+                # cannon passes over a short nearby ground enemy. Aim downward
+                # from range, then use the real Exit control for close combat.
+                if section not in ['quay','water'] or (target and abs(target['x']-x)<100 and target['y']>=y-45):
+                    keys([]);page.keyboard.press('e');page.wait_for_timeout(650)
+                    vehicle_inputs.append({'action':'exit','section':section,'x':x,'reason':'close ground target' if target else 'raised route'})
+                    continue
             direction='d';wanted=['f']
             closed=any(g['closed'] and 0<=g['x']-x<180 for g in d['gates'])
             if target and (closed or abs(target['x']-x)<320):
@@ -130,6 +162,8 @@ with sync_playwright() as pw:
                 if d.get('boss_warning',0)>0 and abs(x-d.get('boss_beam_x',-999))<95:direction='a'
             if target and target['y']<-65 and abs((y-46)-(target['y']-30))>34:wanted=[]
             if direction:wanted.append(direction)
+            if d['mounted'] and target and target['y']>=y-75 and 100<=abs(target['x']-x)<250:
+                wanted=['f','s','d' if target['x']>x else 'a']
             keys(wanted)
             flyer=target and target['y']<-65 and abs(target['x']-x)<450
             gap=any(0<p[0]-x<150 for p in d['pits'])
@@ -142,6 +176,13 @@ with sync_playwright() as pw:
             if d['grenades']>0 and now-last_bomb>3 and (len([e for e in targets if 100<e['x']-x<440])>=3 or (target and target['hp']>1 and abs(target['x']-x)<400) or (section=='arena' and abs(float(d.get('boss_x',1400))-x)<430)):
                 page.keyboard.press('g');last_bomb=now
             if a.expanded_rescue:
+                unclaimed=next((n for n in d.get('npcs',[]) if n['freed'] and not n['secret'] and not d['awarded'].get(n['id']+':gift') and abs(n['x']-x)<180 and abs(n['y']-y)<20 and not d['mounted']),None)
+                if unclaimed and onfloor and not any(abs(e['x']-x)<170 for e in targets):
+                    keys([]);done=contact_and_claim(unclaimed)
+                    page.screenshot(path=str(a.evidence/('rescue-'+str(len(rescues_tested))+'-thanks.png')))
+                    rescues_tested.append({'id':unclaimed['id'],'gift':unclaimed['gift'],'method':'projectile-or-prior-freed-contact','weapon_after':done['weapon'],'ammo_after':done['ammunition']})
+                    if a.rescue_only:break
+                    continue
                 # Fresh touch Fire near a captive, never a state setter or save injection.
                 captive=next((n for n in d.get('npcs',[]) if not n['freed'] and not n['secret'] and 15<(n['x']-x)*d['facing']<95 and abs(n['y']-y)<20 and d.get('rescue_candidate',n['id'])==n['id']),None)
                 if captive and onfloor and not any(abs(e['x']-x)<170 for e in targets):
@@ -154,12 +195,11 @@ with sync_playwright() as pw:
                     check(mid['shots']==shot_count,'Contextual touch Fire cuts ropes without firing a shot')
                     check(abs(mid['player'][0]-anchor[0])<1,'Actual cut keeps the physical actor in place')
                     page.screenshot(path=str(a.evidence/('rescue-'+str(len(rescues_tested))+'-cut.png')))
-                    page.wait_for_function('id=>JSON.parse(document.querySelector("canvas").dataset.campaign).awarded[id+":gift"]===true',arg=captive['id'],timeout=15000)
-                    done=data();check(captive['id'] in done['rescued'],'Knife contact actually frees that captive')
-                    saved=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
-                    check(saved['awarded'].get(captive['id']+':gift') and captive['id'] in saved['rescued'],'Actual rescue and handover reach persistent browser storage')
+                    page.wait_for_function('id=>JSON.parse(document.querySelector("canvas").dataset.campaign).rescued.includes(id)',arg=captive['id'],timeout=15000)
+                    check(True,'Knife contact actually frees that captive')
+                    done=contact_and_claim(captive)
                     page.screenshot(path=str(a.evidence/('rescue-'+str(len(rescues_tested))+'-thanks.png')))
-                    rescues_tested.append({'id':captive['id'],'gift':captive['gift'],'weapon_after':done['weapon'],'ammo_after':done['ammunition']})
+                    rescues_tested.append({'id':captive['id'],'gift':captive['gift'],'method':'knife-then-contact','weapon_after':done['weapon'],'ammo_after':done['ammunition']})
                     if a.profile and not (a.evidence/'performance.json').exists():
                         timings=page.evaluate("""async()=>{
                             const times=[];let previous=performance.now(),start=previous;
@@ -172,7 +212,9 @@ with sync_playwright() as pw:
                     if a.rescue_only:break
                     continue
             # Visible contextual button, never a hidden teleport or mount setter.
-            if section in ['quay','water'] and not d['mounted'] and 280<x<420:page.keyboard.press('e');page.wait_for_timeout(80)
+            if section in ['quay','water'] and not d['mounted'] and 280<x<420 and section not in board_attempts:
+                board_attempts.add(section);keys([]);page.keyboard.press('e');page.wait_for_timeout(650)
+                vehicle_inputs.append({'action':'board attempt','section':section,'x':x,'mounted_after':data()['mounted']})
             if now-last_report>15:
                 (a.evidence/'latest-state.json').write_text(json.dumps(d,indent=2)+'\n')
                 if a.browser=='chromium':
@@ -181,7 +223,7 @@ with sync_playwright() as pw:
                 print('PLAY',section,round(x),'y',round(y),'HP',d['hp'],'boss',d['boss_hp'],'retry',retries,flush=True);last_report=now
             page.wait_for_timeout(65)
         keys([])
-        (a.evidence/'playthrough.json').write_text(json.dumps({'completed':completed,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'final':data()},indent=2)+'\n')
+        (a.evidence/'playthrough.json').write_text(json.dumps({'completed':completed,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'vehicle_inputs':vehicle_inputs,'final':data()},indent=2)+'\n')
         if a.rescue_only:check(bool(rescues_tested),'An actual captive was reached, cut free and rewarded through ordinary controls')
         else:
             check(completed,'Mission 1 is completable with actual keyboard/mouse-equivalent gameplay')

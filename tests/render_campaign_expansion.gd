@@ -32,8 +32,13 @@ func run() -> void:
 			game.world.step(.05);game.world.step(.05)
 		sheet.save_png(output+"/"+hero+"-knife.png")
 		check(bool(n.freed),"Drawn cut actually frees captive: "+hero)
-		game.world.step(.05);game.world.step(.05);game.world.step(.05);game.world.step(.05);await capture(hero+"-thanks")
-		for i in 36:game.world.step(.01)
+		# Rope release now starts roaming; the thanks/gift fixture must approach
+		# through normal movement before naming a capture after that real phase.
+		for i in 150:
+			if str(n.get("phase",""))=="thanks":break
+			game.world.move_axis=Vector2(signf(float(n.x)-game.world.player.x),0.);game.world.step(.01)
+		game.world.move_axis=Vector2.ZERO;await capture(hero+"-thanks")
+		for i in 100:game.world.step(.01)
 		await capture(hero+"-gift")
 	for leaf in ["water","terrace","roots"]:
 		for section in 3:stage(leaf,game.world.STAGES[leaf].length*(.15+section*.33));await capture(leaf+"-"+str(section))

@@ -1,5 +1,15 @@
 # Aion Endless Run · Sanat ve animasyon kuralları
 
+## 0.25.0 · Oyun içinde bağlanan yeni pozlar
+
+`FORGE-HEROES-PROVENANCE.json` dört yeni kaynak PNG'de 124 bağımsız çizimi kaydeder: ağızda silahlı Ömer/Melun için 24, altı kahramanın araç kapağına tırmanması için 36, normal ve ağızda yönlü nişan için 64 poz. On çizilmiş animasyon dizisi vardır; ters oynatılan altı inme dizisi ve 64 tutulmuş yön pozu yeni çizilmiş ek döngüler diye sayılmaz. [Kaynak ve oynatma kuralları](FORGE-HERO-ART.md).
+
+`forge-items.png` 20 ayrı silah/destek nesnesi içerir; bunlar statik çizimlerdir. Mevcut meyve sanatı korunur. Eski 76 PNG'nin baytları değiştirilmedi. Yeni kaynaklar kullanıcı isteğiyle AI destekli üretildi; bu üretim kanon veya nihai görsel onayı iddiası değildir.
+
+Araçlar mevcut 84 çizimi kullanır. `FORGE-VEHICLES-PROVENANCE.json` görünür gövdeyi, zemin temasını, gövde işaretini ve gerçek namlu ucunu ayrı kaydeder. Araç ve kurtarılabilir kızların ayakta referans yüksekliği, elde tabancalı nötr Aion gövdesinin (73,243 dünya pikseli) iki katıdır. Animasyon karelerine göre büyütüp küçültme yapılmaz; ayak/araç desteği zemine oturur. Gövde ölçeği efekt sınırlarından türetilmez. [Araç kayıt ölçümleri](FORGE-VEHICLE-ART.md).
+
+Binmede araç zeminde sabit kalır; karakterin .45 saniyelik tırmanışı kapağın ön gövdesiyle maskelenir. Ana karakter içeride tamamen gizlenir. Sola/sağa inme sırasında iki gövde katmanı aynı yöne bakar. Koyun takipçilerinin görünür kargo desteği korunur. Animasyon kapatıldığında ağız pozunun statik karesi ile namlu fiziği aynı kareyi kullanır. Fizik aktörünü kare hizasını örtmek için oynatma veya farklı kaynakları her kare ayrı ölçekleme yoktur.
+
 ## Kimlik ve kaynak
 
 0.20.0 temel sanat katmanı: Aion, Ömer, Melun, Kutsanmış, Emre ve Eren için altı yeni `pixel-*.png` paftası. Kullanıcının kedi referansı; malzeme gölgeleri, seçici koyu kontur, renk kümeleri ve okunaklı siluet için kalite yönüdür; kostüm veya tür kopyası değildir. Özgün model referanslarının renk, tür ve ayırt edici kıyafetleri korunur. Bu çizimler, kullanıcının istediği oyun içi render yenilemesidir; pafta dosya adları yeni kanon onayı anlamına gelmez. Eski bütün kahraman PNG'leri byte düzeyinde korunur. 0.22.0 güncel katman: Aion ve iki ayaklı Kutsanmış için `polish-aion/sheep`; bu ikisinin alçak omuz taklası için `polish-rolls`; Ömer süzülme/kanat çırpma ve Eren şarj/sıçrama için `polish-abilities`; karga/cüce için `polish-enemies`; sekiz meyve ve on güç nesnesi için `polish-pickups`. Diğer dört kahramanın çalışan çizimleri korunur. Yeni kaynakların kesim/kare/ölçek/ankrajı `POLISH-PROVENANCE.json` içindedir. Güncel temel kaynak: `PIXEL-HEROES-PROVENANCE.json`; eski kayıtlar tarihsel/geri dönüş kaynağıdır.
