@@ -167,7 +167,7 @@ const STRINGS := {
 		"saved_error": "Kayıt yazılamadı. Disk alanını kontrol et.",
 		"pause": "Duraklat",
 		"new_best": "YENİ REKOR!",
-		"version": "0.22.0",
+		"version": "0.23.0",
 		"portrait": "Daha geniş bir manzara için cihazını çevirebilirsin.",
 		"return": "Koşuya dön",
 		"controls": "Kontroller",
@@ -412,7 +412,7 @@ const STRINGS := {
 		"saved_error": "Could not save. Check free disk space.",
 		"pause": "Pause",
 		"new_best": "NEW PERSONAL BEST!",
-		"version": "0.22.0",
+		"version": "0.23.0",
 		"portrait": "Turn your device for a wider view.",
 		"return": "Return to run",
 		"controls": "Controls",
@@ -657,7 +657,7 @@ const STRINGS := {
 		"saved_error": "Uložení se nezdařilo. Zkontroluj volné místo.",
 		"pause": "Pozastavit",
 		"new_best": "NOVÝ OSOBNÍ REKORD!",
-		"version": "0.22.0",
+		"version": "0.23.0",
 		"portrait": "Pro širší výhled otoč zařízení.",
 		"return": "Zpět do běhu",
 		"controls": "Ovládání",
@@ -756,5 +756,6 @@ static func language_for_locale(locale: String) -> String:
 	return primary if primary in LANGUAGES else "en"
 
 static func get_text(language: String, key: String) -> String:
+	if key=="version":return str(ProjectSettings.get_setting("application/config/version"))
 	var table: Dictionary = EXTRA[language].data if EXTRA.has(language) else STRINGS.get(language, STRINGS.en)
 	return table.get(key, STRINGS.en.get(key, key))

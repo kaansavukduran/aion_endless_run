@@ -62,6 +62,15 @@ func descriptor(key: String,row: int) -> Dictionary:
 		return {"key":alias.atlas,"row":int(alias.row),"data":MOTION.data.atlases[alias.atlas]}
 	return {"key":key,"row":row,"data":META.data.atlases[key]}
 
+func hero_row(hero: String) -> int:
+	# UI roster order is not atlas row order. Resolve identity from the
+	# authoritative alias instead of letting a sheep become an owl on landing.
+	var aliases: Array=PIXEL.data.aliases["gun-run"]
+	for row in aliases.size():
+		if str(aliases[row].atlas)=="pixel-"+hero:return row
+	push_error("Unknown hero atlas: "+hero)
+	return 0
+
 func count(key: String,row: int = 0) -> int:
 	var spec := descriptor(key,row)
 	return spec.data.frames[int(spec.row)].size()

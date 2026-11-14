@@ -274,11 +274,21 @@ func main(column: VBoxContainer) -> Button:
 	logo.add_theme_font_override("font",h.FONT)
 	logo.add_theme_font_size_override("font_size",h.ui_size(20))
 	column.add_child(logo)
-	var first: Button=h.button(h.text("play"),h.start_run,true)
+	var modes:=HBoxContainer.new()
+	modes.add_theme_constant_override("separation",8)
+	column.add_child(modes)
+	var arcade: Button=h.button(AionCampaignText.word(h.language,"arcade"),h.start_campaign,true)
+	arcade.name="StartCampaign"
+	arcade.custom_minimum_size.y=maxf(64,h.ui_size(38))
+	arcade.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	arcade.add_theme_font_size_override("font_size",h.ui_size(20))
+	modes.add_child(arcade)
+	var first: Button=h.button(AionCampaignText.word(h.language,"endless"),h.start_run)
 	first.name="StartRun"
 	first.custom_minimum_size.y=maxf(64,h.ui_size(38))
-	first.add_theme_font_size_override("font_size",h.ui_size(24))
-	column.add_child(first)
+	first.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	first.add_theme_font_size_override("font_size",h.ui_size(20))
+	modes.add_child(first)
 	var secondary: BoxContainer=VBoxContainer.new() if split_main() else HBoxContainer.new()
 	secondary.add_theme_constant_override("separation",8)
 	column.add_child(secondary)

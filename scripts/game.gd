@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.22.0"
+const GAME_VERSION = "0.23.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -725,6 +725,16 @@ func start_run() -> void:
 	notice_time = 0.0
 	show_page("")
 	tone(440.0, 0.09)
+
+func start_campaign() -> void:
+	clear_held_controls()
+	save_settings()
+	var campaign = preload("res://scripts/campaign_game.gd").new()
+	campaign.selected_hero=character
+	campaign.language=language
+	get_tree().root.add_child(campaign)
+	get_tree().current_scene=campaign
+	queue_free()
 
 func pause_run() -> void:
 	if world.state == "running":
