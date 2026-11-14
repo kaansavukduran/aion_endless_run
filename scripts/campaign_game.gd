@@ -424,7 +424,7 @@ func interact_binding() -> int:
 	return JOY_BUTTON_Y
 
 func pad_help() -> String:
-	return t("move")+" ← → · "+pad.binding_name("jump")+" "+old("control_jump")+" · "+pad.binding_name("shoot")+" "+old("control_shoot")+" · "+pad.binding_name("duck")+" "+t("grenade")+" · "+str(pad.NAMES[interact_binding()])+" "+t("ride")
+	return t("move")+" ↖ ↑ ↗ ← → ↙ ↓ ↘ · "+pad.binding_name("jump")+" "+old("control_jump")+" · "+pad.binding_name("shoot")+" "+old("control_shoot")+" · "+pad.binding_name("duck")+" "+t("grenade")+" · "+str(pad.NAMES[interact_binding()])+" "+t("ride")
 
 func poll_pad() -> void:
 	pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
@@ -529,7 +529,7 @@ func update_hud() -> void:
 		var item: AionCampaignTouch=actions[key];item.visible=active_controls;item.pressed=not Dictionary(held.get(key,{})).is_empty()
 		if key=="attack":
 			var near:=not world.close_enemy().is_empty() and not bool(world.mount.ridden)
-			var captive:=not CampaignRescue.nearest(world).is_empty() and not near
+			var captive:=absf(world.aim_direction.y)<.25 and not CampaignRescue.nearest(world).is_empty() and not near
 			item.action="cut" if captive else ("melee" if near else "shoot");item.caption=t("cut") if captive else (t("melee") if near else old("control_shoot"));item.cooldown=world.fire_time/.32
 		if key=="grenade":item.disabled=world.grenades<=0;item.cooldown=world.grenade_time/.55
 		if key=="jump":
@@ -601,7 +601,7 @@ func metadata() -> void:
 	data.bullets=[]
 	for bullet in world.bullets:
 		if bullet.owner=="enemy":data.bullets.append([bullet.p.x,bullet.p.y,bullet.v.x,bullet.v.y])
-	data.grounded=world.grounded();data.invulnerable=world.invulnerable
+	data.grounded=world.grounded();data.invulnerable=world.invulnerable;data.aim=[world.aim_direction.x,world.aim_direction.y]
 	JavaScriptBridge.eval("document.getElementById('canvas')?.setAttribute('data-campaign',"+JSON.stringify(JSON.stringify(data))+");")
 
 func accessible_action(args: Array) -> void:
