@@ -48,22 +48,24 @@ for code in ['tr','cs','en']:
  capture('main-'+code)
 menu_button(name='StartSelect_owl');latest('AION_UI ',lambda s:s['character']=='owl' and s['page']=='main')
 menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-# Keep the real finger down until the ENGINE reports the flight phase.
-# Software-rendered emulators do not advance game time at wall-clock speed.
-# Android's motion-event command leaves this contact held until the paired UP.
-def jump_contact(down):
- layout=latest('AION_UI ',lambda s:'jump' in s['actions']);x,y=layout['actions']['jump']
- adb('shell','input','touchscreen','motionevent','DOWN' if down else 'UP',x,y)
-jump_contact(True)
-try:
- latest('AION_STATE ',lambda s:s['gliding'] and s['airborne']);capture('owl-glide');check(True,'Real native Jump hold reaches an airborne owl glide')
-finally:jump_contact(False)
+# Send the flight gesture as ONE real device-side sequence. Per-action host
+# logcat/screenshot round trips can outlast an entire airborne window. Observe
+# every emitted state afterwards so a valid brief flap is not missed by looking
+# only at the newest packet after it has already advanced to the next charge.
+layout=latest('AION_UI ',lambda s:'jump' in s['actions']);x,y=layout['actions']['jump']
+before_flight=len(packets('AION_STATE '))
+def motion(action):return 'input touchscreen motionevent '+action+' '+str(x)+' '+str(y)
+sequence=[motion('DOWN'),'sleep 0.85']
+for _ in range(3):sequence.extend([motion('UP'),'sleep 0.06',motion('DOWN'),'sleep 0.25'])
+sequence.extend(['screencap -p /data/local/tmp/aion-owl-flight.png',motion('UP')])
+gesture=subprocess.Popen(['adb','shell','; '.join(sequence)],stdout=subprocess.DEVNULL)
+gesture.wait(timeout=12)
+flight=packets('AION_STATE ')[before_flight:]
+check(any(s['airborne'] and s['gliding'] for s in flight),'Real native Jump hold reaches an airborne owl glide')
 for flap in range(1,4):
- jump_contact(True)
- try:
-  latest('AION_STATE ',lambda s:s['airborne'] and s['owl_flaps_used']==flap)
-  check(True,'Real native Jump repress consumes airborne flap '+str(flap))
- finally:jump_contact(False)
+ check(any(s['airborne'] and s['owl_flaps_used']==flap for s in flight),'Real native Jump repress consumes airborne flap '+str(flap))
+(a.output/'android-owl-glide.png').write_bytes(adb('exec-out','cat','/data/local/tmp/aion-owl-flight.png'))
+(a.output/'android-owl-flight-states.json').write_text(json.dumps(flight,indent=2)+'\n')
 pause();capture('paused');main()
 menu_button(name='StartSelect_aion');latest('AION_UI ',lambda s:s['character']=='aion' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 gesture=hold('shoot',700)
