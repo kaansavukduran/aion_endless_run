@@ -1,4 +1,4 @@
-# Kontroller · 0.19.0
+# Kontroller · 0.22.0
 
 Tabanca her zaman elde; sınırsız mermi, 0,32 saniyelik atış aralığı. Doldurma veya yumruk yoktur. Eski kayıtlı Attack/X/J/R bağları silinmez, aynı ateş eyleminin alternatif girişidir. Bağımsız basılı girişler ortak bekleme süresini paylaşır; aynı anda iki tetik çift atış üretmez.
 
@@ -12,8 +12,8 @@ Tabanca her zaman elde; sınırsız mermi, 0,32 saniyelik atış aralığı. Dol
 
 Kullanıcının seçtiği bölünmüş düzen: solda Zıpla (Melun için Depar da), sağda Ateş et ve Takla. Sağ küme ayarlarda alternatif kalır. Joystick eklenmedi. Simetrik piksel düğmelerinin maskesi ve gerçek dokunma alanı ortaktır; basılı görünüm ve bekleme çizgisi vardır. Düğmeler alttaki alana ikinci eylem göndermez. İptal/odak/yön değişimi girişleri bırakır.
 
-Aion çift sıçrar. Ömer zıplama basılıyken süzülür. Melun dört ayak üstünde hızlanır. Kutsanmış'ın küçük takipçileri gecikmeli yolu izler. Emre yerde zıplamayı tutup bırakınca şarjlı tek sıçrama yapar;1,2 saniyede tam güç. Eren ayrı bir kahramandır; zıplama basıldığında anında tek sıçrar. İptal edilmiş Emre şarjı sıçrama üretmez.
+Aion çift sıçrar. Ömer zıplama basılıyken süzülür; havada bırakıp yeniden basınca üç kez kanat çırparak yükselebilir. İlk yerden sıçrama bu üç hakkı tüketmez; yere inince haklar yenilenir. Melun dört ayak üstünde hızlanır. Kutsanmış'ın küçük takipçileri gecikmeli yolu izler. Emre yerde zıplamayı tutup bırakınca şarjlı tek sıçrama yapar;1,2 saniyede tam güç. Eren ayrı bir kahramandır ve kendi çizimleriyle aynı tut/bırak şarjlı sıçrama yeteneğini kullanır. İki tavşanın da iptal edilmiş şarjı sıçrama üretmez.
 
-Takla bir kez eğilme/elleri yere koyma/omuz üzerinden ileri dönüş yapar; tutulursa alçakta bekler ve bırakınca doğrulur. Karakter küreye dönüşmez; çizim dikey sıkıştırılmaz. Takipçiler kendi gecikmeli takla kayıtlarını izler.
+Takla eğilme/elleri yere koyma/omuz üzerinden ileri dönüş karelerini kullanır; basılı tutulduğunda döngü devam eder, bırakınca toparlanır. Karakter küreye dönüşmez; çizim dikey sıkıştırılmaz. Takipçiler kendi gecikmeli takla kayıtlarını izler.
 
 Menüde A/× veya X/□ seçer, B/○ geri gider. Ana ekranlar fare tekerleği istemez; uzun ayarlarda Önceki/Sonraki sayfa düğmeleri kullanılır. Kayıtlı dil, tema, yazı boyutu, kontroller ve rekorlar korunur.11 dilde gerçek kontrol yardım metinleri günceldir. Fiziksel Xbox/PS testi ile sanal Gamepad API testi birbirinin yerine sayılmaz.
