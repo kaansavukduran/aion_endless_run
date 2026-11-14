@@ -1,6 +1,6 @@
 # 0.22.0 doğrulaması
 
-[Kaynak, gerçek giriş ve teslim kanıtı](evidence-v0220/README.md). Son yerel21 Godot grubunda12.127 kontrol PASS; diğer test/CI/yayın sonuçları sürümlü teslim kaydında ayrı tutulur. Bağımsız RGB ölçümü36 gerçek render karesinde yüz kaymasını0–1 ekran pikseli aralığında sınar. Normal oyuna dünya/sağlık/RNG setter eklenmedi.
+[Kaynak, gerçek giriş ve teslim kanıtı](evidence-v0220/README.md). Son yerel21 Godot grubunda12.127, nihai temiz CI ortamında12.178 kontrol PASS. Windows/Linux/macOS gerçek paket açılışları ve Android API30 emülatöründe15 native giriş kontrolü de geçti. Diğer tarayıcı/yayın sonuçları sürümlü teslim kaydında ayrı tutulur. Bağımsız RGB ölçümü36 gerçek render karesinde yüz kaymasını0–1 ekran pikseli aralığında sınar. Normal oyuna dünya/sağlık/RNG setter eklenmedi.
 
 Aion'un modeli korunur; Kutsanmış koşuda iki ayaklıdır. Ömer üç ek havada kanat çırpışını her yeni Jump basışında kullanır; tutma süzülmeyi sürdürür, iniş yeniler. Emre ve Eren tut/bırak şarjını aynı ortak girişlerden kullanır. Silahlar gerçek el/namlu kayıtlarına bağlıdır. Eski56 PNG değişmez;6 yeni sheet eklenir. Fiziksel cihazlar ve sanatın kullanıcı tarafından nihai onayı otomatik test PASS'iyle eşit sayılmaz.
 

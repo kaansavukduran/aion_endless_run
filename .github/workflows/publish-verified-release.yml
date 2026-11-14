@@ -7,7 +7,7 @@ on:
       source_run:
         description: Successful main Test and package run
         required: true
-        default: '43576807904'
+        default: '43578174636'
         type: string
       tag:
         description: Existing release tag with unchanged runtime sources
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       GH_TOKEN: ${{ github.token }}
-      SOURCE_RUN: ${{ inputs.source_run || github.event.client_payload.source_run || '43576807904' }}
+      SOURCE_RUN: ${{ inputs.source_run || github.event.client_payload.source_run || '43578174636' }}
       AION_TAG: ${{ inputs.tag || github.event.client_payload.tag || 'v0.22.0' }}
     steps:
       - name: Validate dispatch values
@@ -70,7 +70,7 @@ jobs:
             # Runtime equality and all platform gates above run BEFORE any tag.
             assert os.environ['GITHUB_EVENT_NAME']=='push'
             assert os.environ['GITHUB_REF']=='refs/heads/release-publication/v0.22.0'
-            assert version=='0.22.0' and os.environ['SOURCE_RUN']=='43576807904'
+            assert version=='0.22.0' and os.environ['SOURCE_RUN']=='43578174636'
             target=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
             ref='repos/'+os.environ['GITHUB_REPOSITORY']+'/git/ref/tags/'+os.environ['AION_TAG']
             existing=subprocess.run(['gh','api',ref],text=True,capture_output=True)
@@ -79,7 +79,7 @@ jobs:
               subprocess.run(['gh','api','--method','POST','repos/'+os.environ['GITHUB_REPOSITORY']+'/git/refs','-f','ref=refs/tags/'+os.environ['AION_TAG'],'-f','sha='+target],check=True)
             else:assert json.loads(existing.stdout)['object']['sha']==target,'Existing tags must never be moved'
             notes=Path('build/release-notes.md')
-            notes.write_text('Boss encounters every five levels, three localized boss stories, six faithful surprise animations and a red pistol with twice boss damage. Grounded hero feet, repeating held low rolls and a thinner HUD.\n\nVerified source and platform jobs: '+run['html_url']+'\nEvidence: docs/evidence-v0210/README.md. Physical phones/controllers were not tested. macOS ad-hoc; native iOS requires owner signing.\n')
+            notes.write_text(Path('docs/evidence-v0220/RELEASE_NOTES.md').read_text()+'\n\nVerified source and platform jobs: '+run['html_url']+'\n')
             subprocess.run(['gh','release','create',os.environ['AION_TAG'],'--verify-tag','--draft','--prerelease','--title','Aion Endless Run '+version,'--notes-file',str(notes)],check=True)
             release=next(r for r in json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/releases?per_page=100'],text=True)) if r['tag_name']==os.environ['AION_TAG'])
           assert release['draft'],'Published releases must not be overwritten'

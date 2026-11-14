@@ -305,10 +305,10 @@
     "passed": true,
     "script_error": false,
     "assertion_error": false,
-    "checks": 107,
+    "checks": 144,
     "results": [
       [
-        "107",
+        "144",
         "polish/ability checks",
         "0"
       ]
