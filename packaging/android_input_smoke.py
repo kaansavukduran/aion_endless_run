@@ -53,8 +53,10 @@ menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 # This input-only driver calls the SAME standard Android input command; it has
 # no access to game internals. Preserve the actual state history for review.
 sdk=Path(os.environ.get('ANDROID_HOME') or os.environ['ANDROID_SDK_ROOT'])
-android_jar=max(sdk.glob('platforms/android-*/android.jar'),key=lambda p:int(p.parent.name.split('-')[1]))
-d8=max(sdk.glob('build-tools/*/d8'),key=lambda p:tuple(int(n) for n in re.findall(r'\d+',p.parent.name)))
+android_jar=sdk/'platforms/android-35/android.jar'
+if not android_jar.is_file():android_jar=max(sdk.glob('platforms/android-*/android.jar'),key=lambda p:tuple(int(n) for n in re.findall(r'\d+',p.parent.name)))
+d8=sdk/'build-tools/35.0.0/d8'
+if not d8.is_file():d8=max(sdk.glob('build-tools/*/d8'),key=lambda p:tuple(int(n) for n in re.findall(r'\d+',p.parent.name)))
 classes=a.output/'adb-flight';classes.mkdir(exist_ok=True)
 source=Path(__file__).resolve().parents[1]/'tests/native/AionTouchFlight.java'
 subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-source','8','-target','8','-bootclasspath',str(android_jar),'-d',str(classes),str(source)],check=True)
