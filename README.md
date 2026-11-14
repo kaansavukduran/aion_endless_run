@@ -1,5 +1,7 @@
 # Aion Endless Run
 
+**Yerel 0.24.0 çalışma:** Mission 1 kurtarma ve içerik genişlemesi `feat/keeper-rescue` dalındadır; henüz yayımlanmadı. Altı kahramanın bıçakla bağ kesmesi, gerçek NPC hediyeleri ve yeni rota içeriği için [tasarım ve kapsam](docs/CAMPAIGN-EXPANSION.md), [yerel test kanıtları](docs/evidence-campaign-expansion/README.md). Aşağıdaki 0.23 canlı adresleri bu çalışmanın yayını değildir.
+
 ## 0.23.0 · İlk arcade görev: Sönen Fenerler
 
 [Vercel'de oyna](https://aionendlessrun.vercel.app/) · [GitHub Pages'te oyna](https://kaansavukduran.github.io/aion_endless_run/) · [Gerçek testler ve yayın kaydı](docs/evidence-arcade-m1/README.md)

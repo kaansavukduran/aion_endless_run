@@ -1,0 +1,2382 @@
+{
+  "kind": "tested working tree, not a byte-identical copy of the old base commit",
+  "base_commit": "90055c5abf7e339c4cf30ad698f8c9f6383b59ae",
+  "branch": "feat/keeper-rescue",
+  "utc": "2026-11-14T19:58:53.209300+00:00",
+  "istanbul": "2026-11-14T22:58:53.209300+03:00",
+  "timezone": "Europe/Istanbul",
+  "fingerprint": "61b86d90f655495a2ad9e9f50ba8aafc33f8c28cd6d1dd6bbeddfb47d13b2343",
+  "scope": "Project/code/assets/tests/packaging/workflows/licenses; docs/README/FORGE excluded to allow evidence bookkeeping. No git history, local cache, credentials or private attachments.",
+  "files": [
+    {
+      "path": ".github/workflows/build.yml",
+      "bytes": 16423,
+      "sha256": "94e1a8c8f11c5b72d8c379f09718829ebd7e023d1558bbfd44442028bf80a35a"
+    },
+    {
+      "path": ".github/workflows/publish-pages.yml",
+      "bytes": 2012,
+      "sha256": "f322d143a6633c0b6ed560b7f489ed9b8be535dadb94bea25e130bbfc0c2bd4b"
+    },
+    {
+      "path": ".github/workflows/publish-verified-release.yml",
+      "bytes": 9203,
+      "sha256": "a2b0e3cc659605ba07d1131e9d6bade273a4e14337f5dc78ed69c8cbc8adcd80"
+    },
+    {
+      "path": ".github/workflows/publish-verified.yml",
+      "bytes": 4769,
+      "sha256": "e7701967324f9c3b888f1be6bec6959576511dfc8105f3353b8c376c70a2a9d0"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 120,
+      "sha256": "f488e1d242854e794de8dac745b1b3a215081872f3c9aa5ecb83216389b480a5"
+    },
+    {
+      "path": "AIONIA_STANDARD.md",
+      "bytes": 1543,
+      "sha256": "8e1320985006a869dc708fce856ecaab6a1639b2db9f991cc285169cd8991f3e"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 16726,
+      "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "bytes": 18248,
+      "sha256": "25669aaa18f600d3b4faf77c4b6806c21f9935fc3252f94a0435c28c758e95f9"
+    },
+    {
+      "path": "assets/ACTION-PROVENANCE.json",
+      "bytes": 826,
+      "sha256": "1f15fdf70e0712cdedcd1b0d401d07e97c905aae33a6cc51ef8a89201232ba18"
+    },
+    {
+      "path": "assets/ADVENTURE-PROVENANCE.json",
+      "bytes": 3648,
+      "sha256": "4c796a40c55d7b4ddbbeb9e4224aeb8771510facaa7abc6be3205025f333919b"
+    },
+    {
+      "path": "assets/AGILITY-PROVENANCE.json",
+      "bytes": 164251,
+      "sha256": "f22e0d7c3dfa68ef4ce99b0fb48d14ce887ba1080f48013e15a39437cc1496fb"
+    },
+    {
+      "path": "assets/ARCADE-MACHINES-PROVENANCE.json",
+      "bytes": 146312,
+      "sha256": "009728a723a0d3e6d32a1c9eac26771345058de3bb134de1aef22dab780cddc1"
+    },
+    {
+      "path": "assets/CAMPAIGN-EXPANSION-PROVENANCE.json",
+      "bytes": 1512629,
+      "sha256": "ef9d03fcaef54f4b4ea73c6ac57c83d6e657db7f5e6117d00aff1dd279d469e5"
+    },
+    {
+      "path": "assets/CAMPAIGN-MELEE-PROVENANCE.json",
+      "bytes": 136948,
+      "sha256": "88b363887583dddd40e58e6ecf0e7f7e765e5491019eb3358f478ca503f8d0b6"
+    },
+    {
+      "path": "assets/CANONICAL-PROVENANCE.json",
+      "bytes": 787595,
+      "sha256": "4cd957ff9e3fa2bc30a4b78a3a6176cbb107f30141461482d15b7ecc2f38cc19"
+    },
+    {
+      "path": "assets/CHARACTERS-PROVENANCE.json",
+      "bytes": 4923,
+      "sha256": "d1b93200a1b4670b22ecb96f338f1f38d16ed7113d8f1694670638f27bde06db"
+    },
+    {
+      "path": "assets/COMPANION-RUNNER-PROVENANCE.json",
+      "bytes": 3761,
+      "sha256": "4bd821a4faea72f72bb27d71f1afcc5aa501eb43294aad315345852ffc9bec08"
+    },
+    {
+      "path": "assets/CREATURES-PROVENANCE.json",
+      "bytes": 77238,
+      "sha256": "3d7edff26b7e1f5c1dc401fbacb58b3262666568475300d27089018d719efe71"
+    },
+    {
+      "path": "assets/EMRE-PROVENANCE.json",
+      "bytes": 242520,
+      "sha256": "b56f2fd9bd1fcee74987267debcd6bb230ef928d7432e8a050c5479156432315"
+    },
+    {
+      "path": "assets/ENCOUNTERS-PROVENANCE.json",
+      "bytes": 422339,
+      "sha256": "45d5785e841b6d0be2fd6e0215ecff77c6a5e05e59aef8f9e8e8759db1343041"
+    },
+    {
+      "path": "assets/EREN-PROVENANCE.json",
+      "bytes": 140654,
+      "sha256": "59546116ae61dde693f9593db547fffac27a83a80416742950decb1f21a3751d"
+    },
+    {
+      "path": "assets/EVOLUTION-PROVENANCE.json",
+      "bytes": 20349,
+      "sha256": "b6f3adf3df96767fd13add7162ddf043f36d4e06a6253994a1dcc1207a433fe0"
+    },
+    {
+      "path": "assets/FLORA-PROVENANCE.json",
+      "bytes": 117277,
+      "sha256": "62318c36efd5635edcdab0643d1a6dae50b83e7e3a097735f5d905f14484c6b9"
+    },
+    {
+      "path": "assets/FRAGARIA-PROVENANCE.json",
+      "bytes": 534,
+      "sha256": "3454f2cc2d17ffe2625ecd3d77d9369d61032d5fc4979d25539aae62c066e180"
+    },
+    {
+      "path": "assets/FRONTIER-PROVENANCE.json",
+      "bytes": 895086,
+      "sha256": "66c06d9a630762581e4da9c99794474feb59333b545249d2184ed14a966c8798"
+    },
+    {
+      "path": "assets/FULL-RUNNER-PROVENANCE.json",
+      "bytes": 4154,
+      "sha256": "7b658f4787742dec09047c3a569995a985c9517bff9b86b3b8f8eb4b59fdc344"
+    },
+    {
+      "path": "assets/GODOT-COPYRIGHT.txt",
+      "bytes": 99790,
+      "sha256": "b3330849267d56ddd3d62a513817506606c2195034411fe05859f0140bff9d8a"
+    },
+    {
+      "path": "assets/GODOT-LICENSE.txt",
+      "bytes": 1149,
+      "sha256": "b0435e3b3e4e55238f05f4b306f30524a1b2e20147810d436eaa554fa6855c80"
+    },
+    {
+      "path": "assets/HEAD-REGISTRATION.json",
+      "bytes": 51588,
+      "sha256": "67df7493367f04cd9a76c367b753ff449f63e65374114e44fd4b68bd96bdd1f1"
+    },
+    {
+      "path": "assets/LANDSCAPE-PROVENANCE.json",
+      "bytes": 852,
+      "sha256": "cf5a7536cd0d1235454fa94e11efcbe73d89b84fbcbd25ad1060eea0379b08f5"
+    },
+    {
+      "path": "assets/LEXEND-OFL.txt",
+      "bytes": 4436,
+      "sha256": "5da8505887d0fa7fe963445fd58852707fda34adfeb65af25c99d152bab285bd"
+    },
+    {
+      "path": "assets/LOW-ROLLS-PROVENANCE.json",
+      "bytes": 101317,
+      "sha256": "637fd6cea33f8a2c6684c076b9de695082963901fdfbd64c27ba7716ac162634"
+    },
+    {
+      "path": "assets/Lexend.ttf",
+      "bytes": 175756,
+      "sha256": "3add53e641fbc81da64da4bb254285e2831b52b029527bc0714e2b9610832ee6"
+    },
+    {
+      "path": "assets/Lexend.ttf.import",
+      "bytes": 750,
+      "sha256": "ad876e8f7fa1c08968302f81be7697fcc932e92194c277b74ffd62dc991fc491"
+    },
+    {
+      "path": "assets/MOTION-PROVENANCE.json",
+      "bytes": 1458294,
+      "sha256": "911839fac156c8dc3ba40eed79b88ff1e214bdb1572214545e447365b0757254"
+    },
+    {
+      "path": "assets/ORCHARD-PROVENANCE.json",
+      "bytes": 46263,
+      "sha256": "0bcb78a53c9463043718c2c06025dedb839c7c3ebf369b2c0503cc5b81c21bd9"
+    },
+    {
+      "path": "assets/PIXEL-HEROES-PROVENANCE.json",
+      "bytes": 748369,
+      "sha256": "5f3554bc6911a6ab285ba9561802f0e4b8471990fd3b39581e69350175985be8"
+    },
+    {
+      "path": "assets/PIXELIFY-OFL.txt",
+      "bytes": 4488,
+      "sha256": "b66ba46f511a851ab09998b5a5a9fdbb102545a3864cb993095e1745996873a7"
+    },
+    {
+      "path": "assets/POLISH-PROVENANCE.json",
+      "bytes": 292528,
+      "sha256": "77fb0c104fec21fc60e2a66ddb18f1eaa79dd8c2091f026a3c8eef7ba96621da"
+    },
+    {
+      "path": "assets/PixelifySans.ttf",
+      "bytes": 79160,
+      "sha256": "9ba86cd010a4de309d263ceff8e8044092c9db7efda869620cb9ff1c4389e8a5"
+    },
+    {
+      "path": "assets/PixelifySans.ttf.import",
+      "bytes": 768,
+      "sha256": "92172961e240898eec8e7c055b2f9978caab3f8052abd39742a99e590ef53957"
+    },
+    {
+      "path": "assets/RUNNER-PROVENANCE.json",
+      "bytes": 947,
+      "sha256": "c41a3fd9b114528d7c9e01c7206cc1ec84b10a3c50792beb9ebfe349ead37625"
+    },
+    {
+      "path": "assets/SHOULDER-POSES-PROVENANCE.json",
+      "bytes": 94147,
+      "sha256": "a0723b0f6e2f664e19335d463df266dc5360a90f458e90ffa41f448bb8c78882"
+    },
+    {
+      "path": "assets/SPRITE-REGISTRATION.json",
+      "bytes": 19715,
+      "sha256": "f06bf7572ff1a22a04b1a8d3ae23112fc8e74fd2ce0125174b0ced219eba8dfd"
+    },
+    {
+      "path": "assets/STORY-PROVENANCE.json",
+      "bytes": 107452,
+      "sha256": "4c93227a8fca115d41902643ea8039290d1b8d189ce65993ccefc21ef8dad120"
+    },
+    {
+      "path": "assets/adventure-combat.png",
+      "bytes": 2662534,
+      "sha256": "fc7705e037201c0caeb44224030b2779a5225884d604606e944958645989b29c"
+    },
+    {
+      "path": "assets/adventure-combat.png.import",
+      "bytes": 959,
+      "sha256": "bf3be956528900884c1ecadb1d96123427222528ef1630d157978411b244f391"
+    },
+    {
+      "path": "assets/adventure-enemies.png",
+      "bytes": 1470343,
+      "sha256": "0a368b2330b60aaadade0944e77980b1a8c734ff8dff25109709de122010379f"
+    },
+    {
+      "path": "assets/adventure-enemies.png.import",
+      "bytes": 962,
+      "sha256": "2f4ad1aae8c095151263f311883f785b5a0dd632633c791a2f1f3e149ccde543"
+    },
+    {
+      "path": "assets/adventure-items.png",
+      "bytes": 1907448,
+      "sha256": "2fb54115f29923aea2209fd978238b8d57dfe86bd9e09ae292bd782da8431b12"
+    },
+    {
+      "path": "assets/adventure-items.png.import",
+      "bytes": 956,
+      "sha256": "78544a5bee71f8fadbea675db6075c2091c37aa602672920e8bb9b62f4aa8039"
+    },
+    {
+      "path": "assets/agility-owl.png",
+      "bytes": 1805820,
+      "sha256": "2930ec1c574613398bd741962aaf8feba9b83d434a5ceec9df94abd6d1720dfc"
+    },
+    {
+      "path": "assets/agility-owl.png.import",
+      "bytes": 943,
+      "sha256": "2491bc38943411d131b2478f8664d63999dafac2a20e61575aabff64a2f7e468"
+    },
+    {
+      "path": "assets/agility-wolf.png",
+      "bytes": 2155921,
+      "sha256": "411ccdf8e8a09371367b412cc061b95b08ebb2d7b637bccc5b5f88b7e05f096d"
+    },
+    {
+      "path": "assets/agility-wolf.png.import",
+      "bytes": 946,
+      "sha256": "dc63001bade6b7f5160af85cf1c597eb718b5bec2250c52e09ca48d4028b265c"
+    },
+    {
+      "path": "assets/aion-runner.png",
+      "bytes": 2026952,
+      "sha256": "215d90e9074dab317ad9ca947224c14cc02b06c2e7cef1626236cd1d4c2ba586"
+    },
+    {
+      "path": "assets/aion-runner.png.import",
+      "bytes": 944,
+      "sha256": "07d1a068f3ef9498f7208e76014159c5d02c5a1c11fa854e43a6ef7570ac4f7c"
+    },
+    {
+      "path": "assets/aionverse-flora.png",
+      "bytes": 2594589,
+      "sha256": "5a3a4fee4692315db756469b05462ac708e04c6accd1524fdbacffd25eee61a1"
+    },
+    {
+      "path": "assets/aionverse-flora.png.import",
+      "bytes": 956,
+      "sha256": "452f73f6a998a410335ba57cf3abcd8babd65c7cd6201794aefa83115c61de29"
+    },
+    {
+      "path": "assets/aionverse-landscapes.png",
+      "bytes": 2544395,
+      "sha256": "60891fd7e40d31100063e4bc458ec302117907a7d42cb23f420ee263b0fdcc38"
+    },
+    {
+      "path": "assets/aionverse-landscapes.png.import",
+      "bytes": 971,
+      "sha256": "b7ef7c72985206ce339231993d243261e256636852e588f785faa78768929472"
+    },
+    {
+      "path": "assets/arcade-machines.png",
+      "bytes": 2785129,
+      "sha256": "cd692d09f47da411741d8481f2172f8b27cc78de2ff6fec6773f4933e7698946"
+    },
+    {
+      "path": "assets/arcade-machines.png.import",
+      "bytes": 956,
+      "sha256": "039e2c9abb36830b3e2f5139149e15bbfdfb03aee03341528a7bcf43163ba802"
+    },
+    {
+      "path": "assets/audio/CAMPAIGN-AUDIO.json",
+      "bytes": 1189,
+      "sha256": "eec5bb03654f594765ab76075f60bc95af85473ac68e176a4e63fa8adfedb2bd"
+    },
+    {
+      "path": "assets/audio/campaign-boss.wav",
+      "bytes": 1058444,
+      "sha256": "12dd3eebe7b679d955418314cf37d035ec9ddf01bde4f4a1da2fe6951164a613"
+    },
+    {
+      "path": "assets/audio/campaign-boss.wav.import",
+      "bytes": 510,
+      "sha256": "a5defd9eca8927f83fb7567d4258a65b4f3d766a893184922fafd16090fe1b6c"
+    },
+    {
+      "path": "assets/audio/campaign-garden.wav",
+      "bytes": 1058444,
+      "sha256": "1ddd479af3b497d1f07eb498ee23d75048c01cd796fb191b8553654956318421"
+    },
+    {
+      "path": "assets/audio/campaign-garden.wav.import",
+      "bytes": 516,
+      "sha256": "67460ff9e6917fec96c77bcbea9da106036945b296a9acf386b70bc9d81b9778"
+    },
+    {
+      "path": "assets/audio/campaign-roots.wav",
+      "bytes": 1058444,
+      "sha256": "e2b01feaad1b55e8fc8bc17584899588c93fdf09f94cc01a9d749e03cc925812"
+    },
+    {
+      "path": "assets/audio/campaign-roots.wav.import",
+      "bytes": 511,
+      "sha256": "d37955b45a1c07fe413da5bbe7cb7b0194407ade4b371d5196d693c2610f9950"
+    },
+    {
+      "path": "assets/audio/campaign-shore.wav",
+      "bytes": 1058444,
+      "sha256": "073370d7493a6f90134509af24540147d94fd15ba406de6cdee597675647f272"
+    },
+    {
+      "path": "assets/audio/campaign-shore.wav.import",
+      "bytes": 512,
+      "sha256": "a3e010bc847ea946bc0a165c5a4b685d6433f56ba908f4a1dc6feac5a4762543"
+    },
+    {
+      "path": "assets/audio/campaign-water.wav",
+      "bytes": 1058444,
+      "sha256": "f680f545ba6221c7776aa45f8bc1dcaaef589b46c1117d3d28811469eeec48e7"
+    },
+    {
+      "path": "assets/audio/campaign-water.wav.import",
+      "bytes": 513,
+      "sha256": "ba849a982317235ae79f7ea7fe7655de1e4fe4bea9a6f102a79d53d0c6ce9f18"
+    },
+    {
+      "path": "assets/boss-story-reactions.png",
+      "bytes": 2074690,
+      "sha256": "043dbc0ed407285e1f12d47afc6944518df7e5f070aeed6919c1a6878a23f8b3"
+    },
+    {
+      "path": "assets/boss-story-reactions.png.import",
+      "bytes": 971,
+      "sha256": "33e08e471e24fb544cd246bac76e618137d65313fe920bb5cfa0f31f4b048391"
+    },
+    {
+      "path": "assets/campaign-environment.png",
+      "bytes": 2652646,
+      "sha256": "dc770f7bf3f50cd9ff86e0935c877257525a21fc2b1fdeb0ba273ce137df27fc"
+    },
+    {
+      "path": "assets/campaign-environment.png.import",
+      "bytes": 970,
+      "sha256": "e29aecdc9ffa442f4c1088f35861c6796b3e83d9634fe9958fb5d1521cb10c98"
+    },
+    {
+      "path": "assets/campaign-eren-melee.png",
+      "bytes": 1845120,
+      "sha256": "e628f632ac7832b73b8cd3138f35f1c8b5bd63cd26b79a756c7c701c140f24c8"
+    },
+    {
+      "path": "assets/campaign-eren-melee.png.import",
+      "bytes": 968,
+      "sha256": "a922f5edb2e3387ec787b1a5c90d712186ae66d61554b5a8fa4503fe624539fb"
+    },
+    {
+      "path": "assets/campaign-garden-enemies.png",
+      "bytes": 2270453,
+      "sha256": "d0013f085ee7387d042d3a746af5239e340f103dfc2140993461670648bc15da"
+    },
+    {
+      "path": "assets/campaign-garden-enemies.png.import",
+      "bytes": 980,
+      "sha256": "a5bf870da40485bb8496f80d4582c7c9c10c0fe4b1b6c0cb491cddc01faff722"
+    },
+    {
+      "path": "assets/campaign-heavy-machines.png",
+      "bytes": 3000708,
+      "sha256": "53f669ff1af7af7f700f5d59e532af32f456f364560feda5f27995d35309288f"
+    },
+    {
+      "path": "assets/campaign-heavy-machines.png.import",
+      "bytes": 980,
+      "sha256": "53414b291e4985eb30ef8cc534afa05ff06df9f5f95d5e337ac33a3ccb63fc5c"
+    },
+    {
+      "path": "assets/campaign-melee.png",
+      "bytes": 3407766,
+      "sha256": "b5bc84b59bb056324dfb95b85ef0d6d6b6cacfa33c3baa3c97784855f4d06b9b"
+    },
+    {
+      "path": "assets/campaign-melee.png.import",
+      "bytes": 953,
+      "sha256": "db299bed5bd6a0915241405c76431896ba6b18bb660101607fbb30ff9090fa18"
+    },
+    {
+      "path": "assets/campaign-mini-bosses.png",
+      "bytes": 2861018,
+      "sha256": "df3f61be172d8842337ea247d603667be1e268846476e71fc0356098c4c8a49a"
+    },
+    {
+      "path": "assets/campaign-mini-bosses.png.import",
+      "bytes": 971,
+      "sha256": "f0d19e1818b3d76ce856f689568d294252bf018ee0b5cdf8f283a5633e69e714"
+    },
+    {
+      "path": "assets/campaign-panorama.png",
+      "bytes": 3057571,
+      "sha256": "eb13a2ad6ef42ee620d48502b68c4333dc2c527ac815ff792abec1a741c9f698"
+    },
+    {
+      "path": "assets/campaign-panorama.png.import",
+      "bytes": 962,
+      "sha256": "f02bdaffd8dec99379d0f87f82fb582edc8cb92cd1ed15e683ac3d905c9fc066"
+    },
+    {
+      "path": "assets/campaign-rescue-heroes.png",
+      "bytes": 2802652,
+      "sha256": "229f1e9ad5d708aa918e033a14cef38c8061b6d02a997dd3f2d04d0277a55c09"
+    },
+    {
+      "path": "assets/campaign-rescue-heroes.png.import",
+      "bytes": 977,
+      "sha256": "d2e2a85fde4ad6611596d907422aa229d3ad67b08c2ca635688c7150c2ed79e9"
+    },
+    {
+      "path": "assets/campaign-rescue-npcs.png",
+      "bytes": 3048735,
+      "sha256": "20d3de3b08646d211ed76423e8d99a826666bc884da16ba184860ac21191f2aa"
+    },
+    {
+      "path": "assets/campaign-rescue-npcs.png.import",
+      "bytes": 971,
+      "sha256": "9b3dc5978ce45506641eb3a1e99bff3f92d7f67751cea4b1f4e29900975ba556"
+    },
+    {
+      "path": "assets/campaign-root-enemies.png",
+      "bytes": 2692701,
+      "sha256": "f5ed470ca60ff359ccdc00cdb2dbce5dfc43cc1ad7921b547af06d4b1357cfd8"
+    },
+    {
+      "path": "assets/campaign-root-enemies.png.import",
+      "bytes": 974,
+      "sha256": "b59baff67ba1ddd18ad7baf8bc518958a6ea4680120dbaa6644289c3e978619f"
+    },
+    {
+      "path": "assets/campaign-root-engine.png",
+      "bytes": 2835924,
+      "sha256": "8bf83048ae959dfb72cfc40b518e3fed283edfd0db2d50bbfb0d5df73bd41454"
+    },
+    {
+      "path": "assets/campaign-root-engine.png.import",
+      "bytes": 971,
+      "sha256": "57eeedae672a0abe70ad06c6164282a2afb82783230ee334d8b7eb919d5b618c"
+    },
+    {
+      "path": "assets/campaign-vehicles.png",
+      "bytes": 3246910,
+      "sha256": "413a65311a01350ecf7f001289363d9bd8c0a0e398a96a3be7a14db79ff13b8c"
+    },
+    {
+      "path": "assets/campaign-vehicles.png.import",
+      "bytes": 962,
+      "sha256": "1de809f9ccf9167d26bb7d5c59a66154e0e4213663fac23f0612b0e7583d837d"
+    },
+    {
+      "path": "assets/campaign-water-enemies.png",
+      "bytes": 2678530,
+      "sha256": "dc119787d89bdc7a11fa2e279486abbf87318693b98054641ddfa05d4bb60aa4"
+    },
+    {
+      "path": "assets/campaign-water-enemies.png.import",
+      "bytes": 977,
+      "sha256": "6efd1a63cbcbe4a47e3ecbdec2eb7a88aa4732fc69d4da487a15a1664372f617"
+    },
+    {
+      "path": "assets/canonical-aion.png",
+      "bytes": 2650092,
+      "sha256": "789fe4e54752e0f11da49eff5d43ab92e0c726ca919ca136c906991143844687"
+    },
+    {
+      "path": "assets/canonical-aion.png.import",
+      "bytes": 953,
+      "sha256": "7d3807194a1482ff8e2a76c5684a8ad6143c5c8a99729e874c2398e9cd44498c"
+    },
+    {
+      "path": "assets/canonical-owl.png",
+      "bytes": 2637221,
+      "sha256": "7969f14b2b15d92f3352350546e8cd55cd3d663ecef6f768fa4f1289d727c1bb"
+    },
+    {
+      "path": "assets/canonical-owl.png.import",
+      "bytes": 949,
+      "sha256": "700abd158097251f703a0d72257e69c887c526434fa78de0c17bd3d119a89376"
+    },
+    {
+      "path": "assets/canonical-rolls.png",
+      "bytes": 2115077,
+      "sha256": "01aebfe28ed30efb6faa1e3034fd4a2fed32dc6d7333e9cd9f76fa9d6c8731e3"
+    },
+    {
+      "path": "assets/canonical-rolls.png.import",
+      "bytes": 955,
+      "sha256": "8bf9cc245235d401764d02dc3cbe217c344b23e288b2b1456a6769fe1ac177e5"
+    },
+    {
+      "path": "assets/canonical-sheep.png",
+      "bytes": 3011991,
+      "sha256": "8b60d58e55798aeed7edde058342beb66647eb5d1a8735f867fbb586c2eb9083"
+    },
+    {
+      "path": "assets/canonical-sheep.png.import",
+      "bytes": 956,
+      "sha256": "7f0149a35ea496dbfd3bf94a1bdb5f9274e8cb7ea9e47fb13ce0910299cb8fcf"
+    },
+    {
+      "path": "assets/canonical-wolf.png",
+      "bytes": 2670658,
+      "sha256": "6f5eb1f33b92f4b0f77be626d9c50ab997bb79b37237d3f8857de723469e0ba3"
+    },
+    {
+      "path": "assets/canonical-wolf.png.import",
+      "bytes": 952,
+      "sha256": "00b141c53faaf77a9726c6e1bef2a8d788367778bbdf40cff952c84da37499c8"
+    },
+    {
+      "path": "assets/companion-actions.png",
+      "bytes": 1676890,
+      "sha256": "87d2205bde4fe6607039345dd37aa257d7ef410270d54c590d19173a40488c6e"
+    },
+    {
+      "path": "assets/companion-actions.png.import",
+      "bytes": 962,
+      "sha256": "951c274fdcc30b1e00c4ac3c7b5565be3d413fa74925a954e0201e73b0046d54"
+    },
+    {
+      "path": "assets/companions-runner.png",
+      "bytes": 2817925,
+      "sha256": "d308de70c13e77aa61f29040f300913b54d42f4ed4d885a9c0373b72174dba01"
+    },
+    {
+      "path": "assets/companions-runner.png.import",
+      "bytes": 962,
+      "sha256": "e3f22b0810d72e57ae89ec0ffca2eeca4aa9f2de4d8be88d4dd062a744632fff"
+    },
+    {
+      "path": "assets/emre-encounters.png",
+      "bytes": 2368930,
+      "sha256": "7338d82c80a0131f99b79123cf7c8f6de16460a9dfa3e0b444df4b0479b8849b"
+    },
+    {
+      "path": "assets/emre-encounters.png.import",
+      "bytes": 955,
+      "sha256": "f8b301af32dfbcb4b2e42eafe8ed7d1167ca63a9b568f00db13f4d82bf916862"
+    },
+    {
+      "path": "assets/emre-movement.png",
+      "bytes": 2384137,
+      "sha256": "569f3456ccdec29d50abbd23e4c77447ec994eb3ddbdb63b6d55d6c3781a2fdb"
+    },
+    {
+      "path": "assets/emre-movement.png.import",
+      "bytes": 950,
+      "sha256": "b69fdab4c56359586175d00842b1a0afcf74e048d4b4f22e5e4e13fc2a5582de"
+    },
+    {
+      "path": "assets/encounter-bosses.png",
+      "bytes": 2956608,
+      "sha256": "0d8415026e6e7c1c52575dc53d88bccdf59b4c1ad60762648c750e3f1a3052ec"
+    },
+    {
+      "path": "assets/encounter-bosses.png.import",
+      "bytes": 959,
+      "sha256": "dd7b195ebd2a4c52d0c12b5df958cbf47e9e934302a3b717ef597adba2eea759"
+    },
+    {
+      "path": "assets/encounter-defeats.png",
+      "bytes": 2622826,
+      "sha256": "0c2d26a24a2e28045ada5b47db1f1474dced7a237c62012d0ba46cc76991d842"
+    },
+    {
+      "path": "assets/encounter-defeats.png.import",
+      "bytes": 961,
+      "sha256": "e7bdbf5d9483030fa5bec01f73531d43546dc11a32eac00ebf0f360b1be43cd8"
+    },
+    {
+      "path": "assets/encounter-weapons.png",
+      "bytes": 2878442,
+      "sha256": "15d302826b2694d57333a350df0543f545e4c9566dc768ba4e6b56113e32d476"
+    },
+    {
+      "path": "assets/encounter-weapons.png.import",
+      "bytes": 962,
+      "sha256": "959ecc2e2cd9c2ba5216c7e6b169fdac747d29758054ee45b4a22a0a88802b3f"
+    },
+    {
+      "path": "assets/eren-animations.png",
+      "bytes": 2421548,
+      "sha256": "61823fc62c1451d1d549f023261bf86d9b9229e8f7a4f4480ed857685bf4cf31"
+    },
+    {
+      "path": "assets/eren-animations.png.import",
+      "bytes": 956,
+      "sha256": "b71764f7693bd981d8da7b6b080ef17e081a88091be34f65c56c91093a179a00"
+    },
+    {
+      "path": "assets/evolution-barriers.png",
+      "bytes": 2842048,
+      "sha256": "7f34a97888b24bf4032d7955113935081938b000c0ca705d6407c4aed45c1626"
+    },
+    {
+      "path": "assets/evolution-barriers.png.import",
+      "bytes": 965,
+      "sha256": "48866cb8fa0d514d6766053535a830e7c78f916ccf9fc415215d1ff7e3d4ccd7"
+    },
+    {
+      "path": "assets/evolution-celebrants.png",
+      "bytes": 2991737,
+      "sha256": "ed358621516469f0705de3c1745eccbe7fdc5635195cffe92cfd046122653600"
+    },
+    {
+      "path": "assets/evolution-celebrants.png.import",
+      "bytes": 971,
+      "sha256": "b2063be918f4842ee5a42d49a001a3bf777e9abe92bb23432be7cafeef36a806"
+    },
+    {
+      "path": "assets/evolution-rolls.png",
+      "bytes": 2966668,
+      "sha256": "e1271db4e607d01bfba55e8d6dfcdf678fe296b1eaca1296074b4c1f83de5a7f"
+    },
+    {
+      "path": "assets/evolution-rolls.png.import",
+      "bytes": 956,
+      "sha256": "855b1f44d0af8cdcc0eaebe24486f4d5838ed104a80b626d0d3ece99a0863545"
+    },
+    {
+      "path": "assets/evolution-strikes.png",
+      "bytes": 2573734,
+      "sha256": "17577985167eb750310c40b383e4a0a2fb89e8c579d371ea5620ae2312718f48"
+    },
+    {
+      "path": "assets/evolution-strikes.png.import",
+      "bytes": 961,
+      "sha256": "fb3e440bed971fbc71c009316bc2ca218effd128f38672e23938cf2e3a0f1d82"
+    },
+    {
+      "path": "assets/fonts/CAMPAIGN-FONT-PROVENANCE.json",
+      "bytes": 2803,
+      "sha256": "f176d8e4372541a2ef34e440e612f5b254d3be80a91675ba57f16cb1ae22c3e4"
+    },
+    {
+      "path": "assets/fonts/Campaign-CJK.otf",
+      "bytes": 79704,
+      "sha256": "a2cc39d02df0dbcf5ef6399faf4c7a7da761c03c76ceca387042dc2aefea34a8"
+    },
+    {
+      "path": "assets/fonts/Campaign-CJK.otf.import",
+      "bytes": 774,
+      "sha256": "431135981492898ff65b5b5eae4c6037d86257249681caa2d4990a86740513ef"
+    },
+    {
+      "path": "assets/fonts/NotoSans-Game.ttf",
+      "bytes": 64416,
+      "sha256": "1641c1090e4b45a808c11ee0f5d3ea62fd3504ba42e317b46468ffce04e82476"
+    },
+    {
+      "path": "assets/fonts/NotoSans-Game.ttf.import",
+      "bytes": 777,
+      "sha256": "cd5a8954d87fba494043cda32511d1ec4c085840d6df0005ed27b4e73fc74e7b"
+    },
+    {
+      "path": "assets/fonts/NotoSansCJK-Game.otf",
+      "bytes": 400364,
+      "sha256": "651462a5917a2828812d002e54449eef3898935a540b42bc857fa479a47ddcb9"
+    },
+    {
+      "path": "assets/fonts/NotoSansCJK-Game.otf.import",
+      "bytes": 786,
+      "sha256": "bd1d1ac50c27a79dbd7be4bb021eab22295c846de8c87cc2cdb5f9c13081f44c"
+    },
+    {
+      "path": "assets/fonts/OFL-NotoSans.txt",
+      "bytes": 4396,
+      "sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a"
+    },
+    {
+      "path": "assets/fonts/OFL-NotoSansCJK.txt",
+      "bytes": 4301,
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    {
+      "path": "assets/fonts/README.md",
+      "bytes": 955,
+      "sha256": "ad42988319971ff4551207fd4e4ff7a4e5e8b605892d24cd29a04c4ee62271a9"
+    },
+    {
+      "path": "assets/fragaria-strawberry.png",
+      "bytes": 704922,
+      "sha256": "b01ae5896be8ba724faabbd3cfd6e70b929e6491efec54ea066d82797ab9120d"
+    },
+    {
+      "path": "assets/fragaria-strawberry.png.import",
+      "bytes": 968,
+      "sha256": "8479c55d242b05d2f1657f4a4d9419f9d3c9c9c605d46dc2cbd3a15b78fd2e1d"
+    },
+    {
+      "path": "assets/frontier-boss.png",
+      "bytes": 2799597,
+      "sha256": "ecf0037858d5f6bae267f0814452c2f89f2a3272151698379f3e9b94e5d18458"
+    },
+    {
+      "path": "assets/frontier-boss.png.import",
+      "bytes": 950,
+      "sha256": "e2e66eadfb965f9891710309cf2fd196b576e6bd00d0a78952fbaec2ef2e1a91"
+    },
+    {
+      "path": "assets/frontier-heroes.png",
+      "bytes": 2336130,
+      "sha256": "773c61e8767d9daebec45905b2dec214b9ac907ae05690e73fc1c43edd735bbc"
+    },
+    {
+      "path": "assets/frontier-heroes.png.import",
+      "bytes": 955,
+      "sha256": "21f3f26c371767c52cb625c634787b33bca453e73910b51e8de96a9d1c3fd1e2"
+    },
+    {
+      "path": "assets/frontier-parkour.png",
+      "bytes": 2535674,
+      "sha256": "07bcf676cc7805916462c7c8af056b89b8411025813902a9c48514dc21417e6d"
+    },
+    {
+      "path": "assets/frontier-parkour.png.import",
+      "bytes": 959,
+      "sha256": "81cd83612712aec97c69efcef901a3b1a842f53db5f06807ade1e079e1976e53"
+    },
+    {
+      "path": "assets/icon.svg",
+      "bytes": 436,
+      "sha256": "6699a229adf7202620ccbd73698f41fe5cd9d3eeada74785f5f02d5fc10f14c3"
+    },
+    {
+      "path": "assets/icon.svg.import",
+      "bytes": 1020,
+      "sha256": "f477a93341af9c36738c2c107159560abf55cc446d2a1b8adf639a0d02f7d4e5"
+    },
+    {
+      "path": "assets/locales/az.json",
+      "bytes": 11858,
+      "sha256": "3041a6b493dea09b8457e87ccb7bd04d6881e99842ccc616fc43999c76d8302b"
+    },
+    {
+      "path": "assets/locales/campaign.json",
+      "bytes": 18262,
+      "sha256": "81b6679a9b3ad4ba6e2bc60d93b042060be2cf15190ffe9cf86461e8e1ab9eb0"
+    },
+    {
+      "path": "assets/locales/campaign_expansion.json",
+      "bytes": 16240,
+      "sha256": "fd14505e5d52c25d33b0886824b194156ceb451a74664bf3875a9f0e1b32c848"
+    },
+    {
+      "path": "assets/locales/de.json",
+      "bytes": 11563,
+      "sha256": "dab6bbdab19455642bcaefd152a98d27e58e9af4de1f9f48dffeaf1ace3aaffc"
+    },
+    {
+      "path": "assets/locales/es.json",
+      "bytes": 11709,
+      "sha256": "7af6fa010f980b397d2f8f7633cedbf020bcb969f6d544052d420831401a218e"
+    },
+    {
+      "path": "assets/locales/fr.json",
+      "bytes": 11825,
+      "sha256": "1442ca7452c2a2105c8a8d2498d3ea6c1631c401e5702a5c57b723d437920538"
+    },
+    {
+      "path": "assets/locales/it.json",
+      "bytes": 11567,
+      "sha256": "7f6fc0f27755ae1614c1969e5db28921ab42bf3bc27dd8a8b55f7067dd6ddf93"
+    },
+    {
+      "path": "assets/locales/ja.json",
+      "bytes": 12511,
+      "sha256": "1583a390c35491afa30a020a799a887b1006e78c34d795cfcf3d6068db12232e"
+    },
+    {
+      "path": "assets/locales/ko.json",
+      "bytes": 12158,
+      "sha256": "de0895a2f3877e91e5f7e24dc778584ca5ec40d475ef8162af0270b71f2caa29"
+    },
+    {
+      "path": "assets/locales/zh.json",
+      "bytes": 10640,
+      "sha256": "85fad618d5bece9c0be124fd4437f334e7bbe9d09ee9b853116795eee50b5954"
+    },
+    {
+      "path": "assets/low-somersaults.png",
+      "bytes": 2184282,
+      "sha256": "f175f1f6d1dfef558ac99978f4015e4897718be90c2f83f7f4aa758252734566"
+    },
+    {
+      "path": "assets/low-somersaults.png.import",
+      "bytes": 956,
+      "sha256": "55262ce822a064d4450cb36e659347b151d23d82b91c49577cf72eda7a10e9ef"
+    },
+    {
+      "path": "assets/motion-aion.png",
+      "bytes": 3058751,
+      "sha256": "9312191d6aebca0fd96db16ddae7391316890f627096d77d619d7588989876d2"
+    },
+    {
+      "path": "assets/motion-aion.png.import",
+      "bytes": 944,
+      "sha256": "f1c13d0ee8347e1afb3592e8773c5082a1d0d8727e6b2e491b9faa564ec8483e"
+    },
+    {
+      "path": "assets/motion-elements.png",
+      "bytes": 3104711,
+      "sha256": "7eaabea40b30f2d201c97cc681d7430d486dee1310d100bd3835fbdfae069041"
+    },
+    {
+      "path": "assets/motion-elements.png.import",
+      "bytes": 956,
+      "sha256": "0e5a1af743b4803cafa61d0e8208f68333f32de60615998f206e408a13f99678"
+    },
+    {
+      "path": "assets/motion-girls.png",
+      "bytes": 3348957,
+      "sha256": "c1b139969036d1d7f194c3ade3c1142aeaa648d08c95c150015f3d8b80d1baba"
+    },
+    {
+      "path": "assets/motion-girls.png.import",
+      "bytes": 947,
+      "sha256": "50d53a239bb068dbb71e09ad110a8e57c3c7c87aae8332cb889a0f10548f5736"
+    },
+    {
+      "path": "assets/motion-owl.png",
+      "bytes": 2785446,
+      "sha256": "145cb66faba9ca0b7bde64fc55da1fa2a8d414c8c7fbb3bb371323b03751064c"
+    },
+    {
+      "path": "assets/motion-owl.png.import",
+      "bytes": 941,
+      "sha256": "6ee7e0e8438b18676126239af63837899928e0ac8018de414326e2a732a20afe"
+    },
+    {
+      "path": "assets/motion-powers.png",
+      "bytes": 2446136,
+      "sha256": "e25eea678b633ca439ccade472bc4618614a31d57aee596aaaa76b6a81e8da10"
+    },
+    {
+      "path": "assets/motion-powers.png.import",
+      "bytes": 949,
+      "sha256": "1811c03ede8dce179faee21673111b78c698e663110d8b933e65e96bbe69850f"
+    },
+    {
+      "path": "assets/motion-rolls.png",
+      "bytes": 2717906,
+      "sha256": "153368d07a504a500969d8fcc02775c6ccfe320b734b38be85c3c901eaddef85"
+    },
+    {
+      "path": "assets/motion-rolls.png.import",
+      "bytes": 946,
+      "sha256": "9b73d7989b3951b43cf61a59bf1c7f0c46fb6d5311732e95ce26f926252bd697"
+    },
+    {
+      "path": "assets/motion-sheep.png",
+      "bytes": 2785832,
+      "sha256": "be50626466064f8cde5f75cfbb31ea1543caf0293971b5d456cd7bd7940a893e"
+    },
+    {
+      "path": "assets/motion-sheep.png.import",
+      "bytes": 947,
+      "sha256": "a148670dfccf77b40490be726cfb08e4d5e6195f0fd91a79b659077e930855b4"
+    },
+    {
+      "path": "assets/motion-terrain.png",
+      "bytes": 2489378,
+      "sha256": "cedfe855e5ca0cced5558e04c0dccb635c72fe6bfc36093f9a51456742836f20"
+    },
+    {
+      "path": "assets/motion-terrain.png.import",
+      "bytes": 953,
+      "sha256": "cc83fcaf2e6463fefb23e80304aaa0a08d0fdff81f4114392791d5e9e73d4868"
+    },
+    {
+      "path": "assets/motion-wolf.png",
+      "bytes": 2944863,
+      "sha256": "06db7e167e22815ccce2b15b78ccba41d6987eca465f5278a0592af85094b099"
+    },
+    {
+      "path": "assets/motion-wolf.png.import",
+      "bytes": 944,
+      "sha256": "985ad3167efcc6490e72e6074c1932626efd942deda40ac219267e845a3b34f8"
+    },
+    {
+      "path": "assets/motion-world.png",
+      "bytes": 2756433,
+      "sha256": "2b67050ab9d7bc815fb94b9d06ede3bc464b3060efae9178134783cd50ae6cea"
+    },
+    {
+      "path": "assets/motion-world.png.import",
+      "bytes": 946,
+      "sha256": "99cdfcaf063581e8259a069b90ef73a980b700ca67d45727884515c16d25b03e"
+    },
+    {
+      "path": "assets/orchard-fruits.png",
+      "bytes": 1000616,
+      "sha256": "249ccd657fdc79a1b7891fd6010e479e7e88a33ba8a39fd725741766b315f42a"
+    },
+    {
+      "path": "assets/orchard-fruits.png.import",
+      "bytes": 952,
+      "sha256": "9c7101dc51d6fdf95447f5fe8295f94addb1d13098d9f595c35f37483522cdbf"
+    },
+    {
+      "path": "assets/owl-runner.png",
+      "bytes": 2192684,
+      "sha256": "4b10872ff49b9995969f4540fab9c478c80267d27f5d5e3944a45b2aba9e89aa"
+    },
+    {
+      "path": "assets/owl-runner.png.import",
+      "bytes": 941,
+      "sha256": "5aa7ec595db49824a7c83ad0b45b70a297930698d5be264582e699e0a937126e"
+    },
+    {
+      "path": "assets/owl.png",
+      "bytes": 1215369,
+      "sha256": "52792c990f816ce3e387ae271fb91947d0c4610dd6c2ff67a5f4c98ba26787bf"
+    },
+    {
+      "path": "assets/owl.png.import",
+      "bytes": 920,
+      "sha256": "d08f4b53c30deb10cc7b7eb81330d458ee28c322163ef76c722b3ffa7569ffa9"
+    },
+    {
+      "path": "assets/pixel-aion.png",
+      "bytes": 2845064,
+      "sha256": "16d6e778a13844af1ebbec13ce57f9d2ebc9776e37d782c0804de8c9ea2e4976"
+    },
+    {
+      "path": "assets/pixel-aion.png.import",
+      "bytes": 940,
+      "sha256": "5aaa531de882a0ca3a8fae772990ef2a2749a62aed02e1370bc3fc97f7b88842"
+    },
+    {
+      "path": "assets/pixel-eren.png",
+      "bytes": 2125590,
+      "sha256": "64c2ccac36fef20a84efc3f59f86ed97c5262d8adc02b300acac0ff3598f53d2"
+    },
+    {
+      "path": "assets/pixel-eren.png.import",
+      "bytes": 941,
+      "sha256": "f67ae743d77517c216de56a526e5546425879c6d120c3f96800d633803e07e44"
+    },
+    {
+      "path": "assets/pixel-owl.png",
+      "bytes": 2237834,
+      "sha256": "312dd7e55c759c30cb73b3ee7e3c50996c5ac4ace860d0de1e89a04e79bb7c03"
+    },
+    {
+      "path": "assets/pixel-owl.png.import",
+      "bytes": 938,
+      "sha256": "88b91f86f40dadc6f8c2f1dff0e84975da5abcd2dc2374ec5121bd600a03a79f"
+    },
+    {
+      "path": "assets/pixel-rabbit.png",
+      "bytes": 2136591,
+      "sha256": "ac0cd244c05270604ea1e16ba7d0caa5ce558c2dfc0774c3f48cace7cd2eb4dd"
+    },
+    {
+      "path": "assets/pixel-rabbit.png.import",
+      "bytes": 946,
+      "sha256": "0c673f3b37e5f43002e2ff29d4e7a1d85a46631f6f5619a8683bd050d6dec1e9"
+    },
+    {
+      "path": "assets/pixel-sheep.png",
+      "bytes": 2435234,
+      "sha256": "72ad7db42c3ec3eeb063b1abe50690adde63252a562febf626c217f7bc56c5d4"
+    },
+    {
+      "path": "assets/pixel-sheep.png.import",
+      "bytes": 944,
+      "sha256": "0f66d182a9c9933b466444d8adc22e2f412d1ad6a50c80b614d70d3b6ec3070b"
+    },
+    {
+      "path": "assets/pixel-wolf.png",
+      "bytes": 2461279,
+      "sha256": "bd47bfcab46ea4a01cf963e6ec98b47ef5a657923dd4d730c1886ffeceae46ee"
+    },
+    {
+      "path": "assets/pixel-wolf.png.import",
+      "bytes": 941,
+      "sha256": "43828ac85b10463e7084d4dcd7b4d684d8a2aaa14128f740de24197f7087f1b8"
+    },
+    {
+      "path": "assets/polish-abilities.png",
+      "bytes": 2423587,
+      "sha256": "24f95ac73e76090191c354c8abb5706f0186a36c04d51ebc3294516c54c889ed"
+    },
+    {
+      "path": "assets/polish-abilities.png.import",
+      "bytes": 959,
+      "sha256": "61bc743e6b06dafcd34a2f8118c787d63725f58383bf2be86345c240f8893601"
+    },
+    {
+      "path": "assets/polish-aion.png",
+      "bytes": 2242884,
+      "sha256": "562b9d0623856fb4988b01ea9222dacc3b48c8e7fc839b8bdfec629323962616"
+    },
+    {
+      "path": "assets/polish-aion.png.import",
+      "bytes": 943,
+      "sha256": "52549875935a09ec7851cdcfc4dd224ff36cec189f4398a59e7159a9e19ef0f5"
+    },
+    {
+      "path": "assets/polish-enemies.png",
+      "bytes": 1946955,
+      "sha256": "942a37d01cbacb594575ba1239c71b01ac4037063abff1cdd229d6685c92c443"
+    },
+    {
+      "path": "assets/polish-enemies.png.import",
+      "bytes": 953,
+      "sha256": "38429a577c6d1d78151141277127d654fb557278d896c62b3de00cc367159880"
+    },
+    {
+      "path": "assets/polish-pickups.png",
+      "bytes": 1415879,
+      "sha256": "e66a638f1c984fe8a821fb40b21be96d29b226a0a0b9e314dcb4216b69506c2a"
+    },
+    {
+      "path": "assets/polish-pickups.png.import",
+      "bytes": 953,
+      "sha256": "bf3bc6ae02f1722699c4833a040219fdbd8316cff30b9fa3a2068fbb93b52326"
+    },
+    {
+      "path": "assets/polish-rolls.png",
+      "bytes": 1261197,
+      "sha256": "3709ec78899cf33506259c8656455f5bcfbf0fa70717d28637849526ca677438"
+    },
+    {
+      "path": "assets/polish-rolls.png.import",
+      "bytes": 947,
+      "sha256": "3a8f37386df2a44a9c52f0b9250f8af9f1508c70e055a1241920af777d427713"
+    },
+    {
+      "path": "assets/polish-sheep.png",
+      "bytes": 2202228,
+      "sha256": "942fe99b2dd7551842e155bc1e706f1b5027a486078ea2f4d9a09057104475cf"
+    },
+    {
+      "path": "assets/polish-sheep.png.import",
+      "bytes": 947,
+      "sha256": "752492da20069e73da40099c707218b21fef83c4b3e0bb5f36b62b6718acb175"
+    },
+    {
+      "path": "assets/sheep-runner.png",
+      "bytes": 2804457,
+      "sha256": "ea2df12ad8afc99a6dad937a03ec7b917b2be0784a80ee489c32d782aa45d96c"
+    },
+    {
+      "path": "assets/sheep-runner.png.import",
+      "bytes": 946,
+      "sha256": "8ec8e6473a8e04513f39fb36b3cd6d51350318e8149460ef4dbb0f1663a063b0"
+    },
+    {
+      "path": "assets/sheep.png",
+      "bytes": 1068676,
+      "sha256": "79d732d43f0d8adebeaac959e68ef3740635fe7b022fcf22e4d7395bebd0bc28"
+    },
+    {
+      "path": "assets/sheep.png.import",
+      "bytes": 926,
+      "sha256": "c80c6f77112f3ee0ccc2853a94caa10fed2db1a9b7779dfa0bb4c4f4f9d7c970"
+    },
+    {
+      "path": "assets/shoulder-somersaults.png",
+      "bytes": 1951176,
+      "sha256": "ce09f471a8fb873491fab11093a6b70a8d23de2f1d19125517bd99396a056e13"
+    },
+    {
+      "path": "assets/shoulder-somersaults.png.import",
+      "bytes": 971,
+      "sha256": "aa91f2640f8f02b97285b27b793b9d9f1f9faecf19b7ed903e7b10893740eae9"
+    },
+    {
+      "path": "assets/wolf-runner.png",
+      "bytes": 2848034,
+      "sha256": "749d7195cb155d9dd60f5ed5a95cd17d27bee6614f819e9075b79a4eb1acdf7b"
+    },
+    {
+      "path": "assets/wolf-runner.png.import",
+      "bytes": 944,
+      "sha256": "82f5a99bdffba35f9fe8db45f8af6e26ba2b8f0862cd4505f57cc3830c5b0527"
+    },
+    {
+      "path": "assets/wolf.png",
+      "bytes": 1227488,
+      "sha256": "cd5004045b7e083bd2ea7d560e128d32e75a1ac5b437ca1d9fd181ec6397d3fc"
+    },
+    {
+      "path": "assets/wolf.png.import",
+      "bytes": 922,
+      "sha256": "a45241243cfbccbcdadbc94e44fc8aeab4348dc4dcb69ca589e06cd9dc991cdd"
+    },
+    {
+      "path": "assets/woodland-creatures.png",
+      "bytes": 2042507,
+      "sha256": "c9da49791318f4d1bc766ec01287a736e2627b3403873b2397276682408920a9"
+    },
+    {
+      "path": "assets/woodland-creatures.png.import",
+      "bytes": 965,
+      "sha256": "874e1f69293722173a797e30884e92275d81ab789a4ff726a4072eb059d34190"
+    },
+    {
+      "path": "export_presets.cfg",
+      "bytes": 3707,
+      "sha256": "542d35c8607f18f411f11d607150af422902bc89e69be99a1b81b564d226dc54"
+    },
+    {
+      "path": "loading.tscn",
+      "bytes": 293,
+      "sha256": "3288d28d6498e9bbae79a236a86d4ab63742f641629f53ba4666ba927184edc5"
+    },
+    {
+      "path": "main.tscn",
+      "bytes": 169,
+      "sha256": "f343cb37acd5fcccc174b923db955e6ea96d77f3f6c108d312b2ff9e73129403"
+    },
+    {
+      "path": "packaging/android_config.py",
+      "bytes": 1016,
+      "sha256": "d4fce4c533335032e5b2c43a6738db07aae432557828c91cdbc2005595e0f57f"
+    },
+    {
+      "path": "packaging/android_input_smoke.py",
+      "bytes": 8242,
+      "sha256": "2a43255f2cbe6aa47033918ca9b7a9b9d320e5bc9fd0bfddd27b7b50456f0183"
+    },
+    {
+      "path": "packaging/android_packets.py",
+      "bytes": 1130,
+      "sha256": "eb1121db1681a87bfb0a535dc644d6fc2b9c4d807f88f8e91cd85da6ae8e172e"
+    },
+    {
+      "path": "packaging/archive_project.py",
+      "bytes": 2505,
+      "sha256": "c276c67219e5b3834d58ae57a863aa0e2a5f6139f610d338803ccc7bb6fb7558"
+    },
+    {
+      "path": "packaging/build_web.py",
+      "bytes": 4165,
+      "sha256": "315f74c53303a4ad3d7a28b94d69e14913663efbb03d07472f79bb6e251c7999"
+    },
+    {
+      "path": "packaging/campaign_registration.py",
+      "bytes": 678,
+      "sha256": "52a53781fabe15294c0156b1bc174ca993728ac8c462096372f531812b395e6e"
+    },
+    {
+      "path": "packaging/check_android_images.py",
+      "bytes": 416,
+      "sha256": "fa3cd21cc3af4ffc5e5fdc4e8db8b4f12b25de78e47c933a23056705f94ec99d"
+    },
+    {
+      "path": "packaging/check_android_log.py",
+      "bytes": 534,
+      "sha256": "a01f2c6b967b61d05c64e2e8b93b052415723294b26a07ce1f5de6eb13a366fb"
+    },
+    {
+      "path": "packaging/linux.sh",
+      "bytes": 2031,
+      "sha256": "c697332a76d4f929a874b11ead7b96934f67bff1ce7c10bf7c03c928ecd39b97"
+    },
+    {
+      "path": "packaging/macos_dmg.py",
+      "bytes": 1605,
+      "sha256": "a1ce0e3fd5fe5211eda7c37ecd9846609ff7d6504e98353542dc16fb7612f480"
+    },
+    {
+      "path": "packaging/prepare_campaign_audio.py",
+      "bytes": 1709,
+      "sha256": "75769c0589b5f9b75dae0547eadaaee6bd252aebfd5cf2873451076b1d081475"
+    },
+    {
+      "path": "packaging/prepare_campaign_font.py",
+      "bytes": 2189,
+      "sha256": "3970ffcb191fdc7f1b66f9685a9c1e8f597549f16523170a2b5164c258c7e6f8"
+    },
+    {
+      "path": "packaging/register_agility.py",
+      "bytes": 5957,
+      "sha256": "34f86252d2e39b7f8c74f09528b508dddbfff8f011d0af45805efc5dbd6eb1d4"
+    },
+    {
+      "path": "packaging/register_boss_story.py",
+      "bytes": 3546,
+      "sha256": "7170a8b88daf95f04509cb8a568655af20d3bb171195f6778ee7b88938f40e70"
+    },
+    {
+      "path": "packaging/register_campaign_art.py",
+      "bytes": 3331,
+      "sha256": "1e9ca065a74fdffa1c32963b31fa6b4ffbc9372eace9797fd87386ccbd8c8a25"
+    },
+    {
+      "path": "packaging/register_campaign_expansion.py",
+      "bytes": 6986,
+      "sha256": "6ba89d6f3bf677f559eee2fb58bc99b57dd181fa12d66d4769730f9eb4327004"
+    },
+    {
+      "path": "packaging/register_campaign_melee.py",
+      "bytes": 4310,
+      "sha256": "bbf9f41f6be0c7b4b182a5781d13ab569c169aab2fd1a03388e887ff912ffdf6"
+    },
+    {
+      "path": "packaging/register_canonical.py",
+      "bytes": 13461,
+      "sha256": "ba02769d06f320001c38902ef6b01fb5e41038824908b89adff25c903e4ba4f4"
+    },
+    {
+      "path": "packaging/register_creatures.py",
+      "bytes": 2703,
+      "sha256": "780d9a999a838476818bc95f36e1440dcde203525f839d23df8bfb2168dd5a75"
+    },
+    {
+      "path": "packaging/register_encounters.py",
+      "bytes": 4375,
+      "sha256": "4cc72da20fd61298765cc056ce47921ab1344d4742ce5e401bf682b88285af58"
+    },
+    {
+      "path": "packaging/register_flora.py",
+      "bytes": 1992,
+      "sha256": "f0b4727fa56cb058e6857c48fd938922885938133e6c3e39abb862c9a9bca658"
+    },
+    {
+      "path": "packaging/register_frontier.py",
+      "bytes": 3705,
+      "sha256": "a2db1e796db9f013856f617714090338b41e0abfd3b3952398cbad9655c128d1"
+    },
+    {
+      "path": "packaging/register_low_rolls.py",
+      "bytes": 2817,
+      "sha256": "63567f3fa5926cd6713efd839044c61ae3e49d8ebb27ba686e1940a3a0e894bd"
+    },
+    {
+      "path": "packaging/register_motion.py",
+      "bytes": 5421,
+      "sha256": "986693cc022b070fb4c2bc5b1cdedef6e9d40aad86f6aea77ee3e73f47923255"
+    },
+    {
+      "path": "packaging/register_orchard.py",
+      "bytes": 5133,
+      "sha256": "959c43e9d1d46f946f7d9a60618a5ca510d6a8dfa6e2ecb789ed66c66d3f3e30"
+    },
+    {
+      "path": "packaging/register_pixel_heroes.py",
+      "bytes": 12786,
+      "sha256": "6666b92ef814a8ecad8db13af28cf151410e8814e16ab2ad6f8074ea4fbcf72e"
+    },
+    {
+      "path": "packaging/register_polish.py",
+      "bytes": 6714,
+      "sha256": "02671fe253af100283dd5a9d115fac866709b0d4562decc898aaa966f0c5d078"
+    },
+    {
+      "path": "packaging/register_shoulder_poses.py",
+      "bytes": 3665,
+      "sha256": "1f20f0acf022885519739e1ada46cc16ac6d5abe94f4905646cbc4133906dbd3"
+    },
+    {
+      "path": "packaging/register_sprites.py",
+      "bytes": 2049,
+      "sha256": "86774dbf2c83b4a354acc489b9c690827a166089d8040b2e28b357c4728909cc"
+    },
+    {
+      "path": "packaging/register_stable_heads.py",
+      "bytes": 5574,
+      "sha256": "479762e0b97070cfda09c876884ff227ee7de8262d6fbe653ffde29ad3ed5211"
+    },
+    {
+      "path": "packaging/release_android.json",
+      "bytes": 592,
+      "sha256": "6d29b8017336ec88d3ba2c9af5fabe732356efdf8f55479f1a361781329737d4"
+    },
+    {
+      "path": "packaging/restore_staged_apk.py",
+      "bytes": 1382,
+      "sha256": "a179f0c6d0e97db5910e48df4fd16944c19c9bacf279cff0f6c85809e0b7f3f7"
+    },
+    {
+      "path": "packaging/run_source_tests.py",
+      "bytes": 2395,
+      "sha256": "bd1680af043fca2ea6bb76408aa541cca07898df951ccf689869c5117504a749"
+    },
+    {
+      "path": "packaging/setup_godot.py",
+      "bytes": 3778,
+      "sha256": "78146118931dadf3aacfb49caddd0a38eb4b042c70c6c2a7f8d76e1b4a285144"
+    },
+    {
+      "path": "packaging/web_accessibility.js",
+      "bytes": 2099,
+      "sha256": "911d57ce06cd103a628445d6415b1211bf738a3d9db4e928e09e8bfa321b2bfb"
+    },
+    {
+      "path": "packaging/web_boot.js",
+      "bytes": 8701,
+      "sha256": "131d520ca9a065c2379b67331e52bd0f80558bac79b70a954e0f5fb4477845a6"
+    },
+    {
+      "path": "packaging/web_splash.html",
+      "bytes": 4363,
+      "sha256": "c80cac009bd615c9c8d19db95ebcf416fe84410306015fc2f643181d1a388d8c"
+    },
+    {
+      "path": "packaging/web_storage.js",
+      "bytes": 676,
+      "sha256": "0f368bf008738795a2a905541ee35c4fda1f561a96ec455f76a2c98fcc318c5f"
+    },
+    {
+      "path": "packaging/web_update.js",
+      "bytes": 3390,
+      "sha256": "4709886043eec623369d5e763e63ce351de7531be0174f5bf449b47a80d18294"
+    },
+    {
+      "path": "packaging/web_updates.py",
+      "bytes": 4876,
+      "sha256": "1ea4e9e13b6126a9c5986e57693bef7efb7e1b3a3e011062d890dab1261b8c95"
+    },
+    {
+      "path": "packaging/web_worker.js",
+      "bytes": 4625,
+      "sha256": "7ee86b5c556a78f60296cbf974a9c0e4108191ffbf066ff0993ebfb47671f056"
+    },
+    {
+      "path": "packaging/windows.nsi",
+      "bytes": 1921,
+      "sha256": "c16476c42a6a282947249e803ae248e0602b2c894b941a7c4b22b2b9fc70175b"
+    },
+    {
+      "path": "packaging/write_release_receipt.py",
+      "bytes": 2421,
+      "sha256": "20621d14a3be36a81aaba32a4827314a74b43beb1b5dc392edf8b15939cd64de"
+    },
+    {
+      "path": "project.godot",
+      "bytes": 1030,
+      "sha256": "052918f16275cdcaf3fe4801625aca3ead5310f467c90bed26b86da03cccd311"
+    },
+    {
+      "path": "scripts/adventure.gd",
+      "bytes": 23605,
+      "sha256": "6d2f67bfd02ba84ec1137eae43d7f66e6322d13723e90de18f119a2d7ea5aa32"
+    },
+    {
+      "path": "scripts/adventure.gd.uid",
+      "bytes": 19,
+      "sha256": "ace624b5fa32de6cadc1c44fa48ddb7f8ba0d1ea1198bb9991ffb96cc737af66"
+    },
+    {
+      "path": "scripts/adventure_view.gd",
+      "bytes": 7506,
+      "sha256": "6e2200600ad2763ec49f20c9d4bc4d3e8b917774485aca9670252d739c34f3d6"
+    },
+    {
+      "path": "scripts/adventure_view.gd.uid",
+      "bytes": 19,
+      "sha256": "4b775c6a24645748fb44182abd7d767b7dc4e90cfc99dbd7c0852e1e41ee422b"
+    },
+    {
+      "path": "scripts/boss_story.gd",
+      "bytes": 2455,
+      "sha256": "b15bb160eb523a47b6accd7db2fbfaf8fe4ee59725946aab4bae598206d0c2e0"
+    },
+    {
+      "path": "scripts/boss_story.gd.uid",
+      "bytes": 20,
+      "sha256": "06de92b493731a1907323d1d657c6887774d1098d496a7d04b0ee8514ed07167"
+    },
+    {
+      "path": "scripts/brand_loading.gd",
+      "bytes": 4313,
+      "sha256": "87b93f1123f9757bc625ea09bce6836dff2c8aee5ae3cd0ccddab4636c586a6d"
+    },
+    {
+      "path": "scripts/brand_loading.gd.uid",
+      "bytes": 20,
+      "sha256": "e9e3965c65a7ea40a067fefb09e85aff47615ccab69fed55836a5c19abd8b63b"
+    },
+    {
+      "path": "scripts/browser_save.gd",
+      "bytes": 1509,
+      "sha256": "b4932d53cc9bc2e82279e2c23ea69b2b79c151b7c9a864c7e27fa851f950afb6"
+    },
+    {
+      "path": "scripts/browser_save.gd.uid",
+      "bytes": 19,
+      "sha256": "2ded9cf6d5c82950d2b6aacc189b5095ea76749c85a1d649e8307deb34cc1ccb"
+    },
+    {
+      "path": "scripts/campaign_art.gd",
+      "bytes": 2261,
+      "sha256": "c322fc7cc9650da6e445062b3893d775fde1c32d166021c3a453ee0bd4a62cf3"
+    },
+    {
+      "path": "scripts/campaign_art.gd.uid",
+      "bytes": 20,
+      "sha256": "19270d9fae65a157408b50bca4eceb6758dda2ccf8372b81bdca84047433c040"
+    },
+    {
+      "path": "scripts/campaign_catalog.gd",
+      "bytes": 1233,
+      "sha256": "e7923a63c1ed8319227129c5a89f3487146b7511bebf5451fcab5e0f604b6b5d"
+    },
+    {
+      "path": "scripts/campaign_catalog.gd.uid",
+      "bytes": 20,
+      "sha256": "486854382639c524e66fc1d0067aa8352fd347c138972fab244f07b554d415b3"
+    },
+    {
+      "path": "scripts/campaign_content.gd",
+      "bytes": 10130,
+      "sha256": "45e5b85168eabb8a691ae6676bae8f726327d0558ef41a58a8421c2b66c00b49"
+    },
+    {
+      "path": "scripts/campaign_content.gd.uid",
+      "bytes": 19,
+      "sha256": "248d4ab1964ff00b8d953e43a600be2a5c17c144fed73e145017c3ab8803ed03"
+    },
+    {
+      "path": "scripts/campaign_enemies.gd",
+      "bytes": 3947,
+      "sha256": "c1c6f5f360e162aab8b19f60f3a066bcb95036f47655be1e88ede27f61c01ad3"
+    },
+    {
+      "path": "scripts/campaign_enemies.gd.uid",
+      "bytes": 20,
+      "sha256": "584c22e6c7dc24e76ca66c1d6afb4fa292473104dab8c73c8812fcc72b358d9a"
+    },
+    {
+      "path": "scripts/campaign_environment_view.gd",
+      "bytes": 3096,
+      "sha256": "90d1ccc97f03f494958da3e7beb7562518a5b9eabc65df3742ae0631d2da2a4f"
+    },
+    {
+      "path": "scripts/campaign_environment_view.gd.uid",
+      "bytes": 20,
+      "sha256": "fa368cedeef00abcd8efc218c14644cc6166738e4cad161f6f5a8e73a0f92709"
+    },
+    {
+      "path": "scripts/campaign_game.gd",
+      "bytes": 34748,
+      "sha256": "3509ebd50b06d073ab531c9809850a46d98dfa4e7625dbba7f0420041cb90183"
+    },
+    {
+      "path": "scripts/campaign_game.gd.uid",
+      "bytes": 20,
+      "sha256": "d9ca68d95e2b16aff38078b59245c011aa0d2e238c2e31932d82bebbf1f37da3"
+    },
+    {
+      "path": "scripts/campaign_rescue.gd",
+      "bytes": 5094,
+      "sha256": "3e803013ac062504710bdadcfbef9e7fc33a49d94ad67d664d6e51e431d4170d"
+    },
+    {
+      "path": "scripts/campaign_rescue.gd.uid",
+      "bytes": 20,
+      "sha256": "5288edd8140ae78d2509231359788a834f449b765d7346847d3aeb0ce79ef5af"
+    },
+    {
+      "path": "scripts/campaign_stick.gd",
+      "bytes": 996,
+      "sha256": "bc9f39ecf4d306b6e9ef6792380500a91881b9dfb4e7277ed1f5b06cd6126407"
+    },
+    {
+      "path": "scripts/campaign_stick.gd.uid",
+      "bytes": 20,
+      "sha256": "428a76e48630f72fd558c9703c00042dce37accdfb76a13eb018a775b58d1e31"
+    },
+    {
+      "path": "scripts/campaign_text.gd",
+      "bytes": 11305,
+      "sha256": "d5e1e15deaee1cfcef46ea8723a510fe8abab15eefb76ba724a50908ce8f19f3"
+    },
+    {
+      "path": "scripts/campaign_text.gd.uid",
+      "bytes": 19,
+      "sha256": "6fddb484d62bacec5c5dbeb82fe9612c1189aa4cdc1afa66768c9871e8dcc92b"
+    },
+    {
+      "path": "scripts/campaign_touch.gd",
+      "bytes": 1184,
+      "sha256": "3144fe4d7cde932fdc59906bd90414022fd2958545ff49131f669ab47201b12b"
+    },
+    {
+      "path": "scripts/campaign_touch.gd.uid",
+      "bytes": 20,
+      "sha256": "315cdc323399c085214ed161af7badc017472dd18156004fd42b691e6c329c8e"
+    },
+    {
+      "path": "scripts/campaign_vehicles.gd",
+      "bytes": 1264,
+      "sha256": "e0e504c80b0f686577cffb9b6af065d67d1bb8f34619a941a1c9377d714f4851"
+    },
+    {
+      "path": "scripts/campaign_vehicles.gd.uid",
+      "bytes": 20,
+      "sha256": "8a976c98f673d37ce63eeb888d29249f837e5d27262f81774a4e250776fafcbc"
+    },
+    {
+      "path": "scripts/campaign_view.gd",
+      "bytes": 17657,
+      "sha256": "a7c2d337041206af17b421fa699475d6bc9e5106cc5ff40302fb5f4ad4ee3b59"
+    },
+    {
+      "path": "scripts/campaign_view.gd.uid",
+      "bytes": 20,
+      "sha256": "9fe5adde0f8b812c525066b5c3726032f5e96206e0ce91f373ce5586fe4e09e2"
+    },
+    {
+      "path": "scripts/campaign_weapons.gd",
+      "bytes": 4955,
+      "sha256": "bbd1cd6a71a22eef7abaa2a3333885821ca1279dc1796910b3f982640b683460"
+    },
+    {
+      "path": "scripts/campaign_weapons.gd.uid",
+      "bytes": 20,
+      "sha256": "57325536f67afa83f3b9513090444d77277cfcf1f9dad7337588dd5965ffa2bc"
+    },
+    {
+      "path": "scripts/campaign_world.gd",
+      "bytes": 31457,
+      "sha256": "bbf297c2176860bb542b31087228f02b10b243cc6e3d660b81c7c16fedf8bd44"
+    },
+    {
+      "path": "scripts/campaign_world.gd.uid",
+      "bytes": 20,
+      "sha256": "b56c759192549c707125a4abe28bda387a6a7fcbcf0a6cb64973d4508322760e"
+    },
+    {
+      "path": "scripts/companion_alpha.gdshader",
+      "bytes": 725,
+      "sha256": "e24ca7443221c721e777acfd8083862cb2f70728880ec44f3721c2965fc93846"
+    },
+    {
+      "path": "scripts/companion_alpha.gdshader.uid",
+      "bytes": 20,
+      "sha256": "9094521dd96bda76cd6d455eff641974c08cc226c1aba70fd5b359fbc2840d79"
+    },
+    {
+      "path": "scripts/encounter_art.gd",
+      "bytes": 910,
+      "sha256": "8de576d1a7da6ae25aa5e82340a28e60e01139b13b4f04208354135150192448"
+    },
+    {
+      "path": "scripts/encounter_art.gd.uid",
+      "bytes": 19,
+      "sha256": "2555afbbd132a19416452c05830cbf3646ed9d5cbb8f1b1531bf296716ab3934"
+    },
+    {
+      "path": "scripts/evolution_view.gd",
+      "bytes": 5375,
+      "sha256": "13d5a7e0c1725b838e146cea632e2b8965e4d5257e46903131d69c0aae0159bc"
+    },
+    {
+      "path": "scripts/evolution_view.gd.uid",
+      "bytes": 20,
+      "sha256": "bb3ede5e7b598b7e116b8143b85360dff6af8fc64d04264eb43b40e9a0269543"
+    },
+    {
+      "path": "scripts/frame_bank.gd",
+      "bytes": 8778,
+      "sha256": "40fa06c286071ed5b3c51b12a93b4b89b9047bae85304c034a30018b01e780ee"
+    },
+    {
+      "path": "scripts/frame_bank.gd.uid",
+      "bytes": 20,
+      "sha256": "aa3ccefd4eadd4eab63202b3c8475db2e921dc35b15b712545848788f74a516f"
+    },
+    {
+      "path": "scripts/frontier.gd",
+      "bytes": 13650,
+      "sha256": "8ec1dc91c6dedc16f03f3caf26e40cbc46c4819baee99492085d6de5b8a9082b"
+    },
+    {
+      "path": "scripts/frontier.gd.uid",
+      "bytes": 19,
+      "sha256": "8e48b5f36fb22d092c2c4630ff51655c7677cacc8b01687487f1cca1859debc1"
+    },
+    {
+      "path": "scripts/frontier_view.gd",
+      "bytes": 4621,
+      "sha256": "dc43de408eaba2a357698a6e13c51aa14051858b911ad44638dad2b5107613a6"
+    },
+    {
+      "path": "scripts/frontier_view.gd.uid",
+      "bytes": 20,
+      "sha256": "72fa96c88ab31a25811beafb4d6fb7da7deb6eedc59c570dd8177fae26f83184"
+    },
+    {
+      "path": "scripts/game.gd",
+      "bytes": 92703,
+      "sha256": "d830d1b1eaaff38355ce28093eb9c77763e4e89ed14f595cd28ca30591223589"
+    },
+    {
+      "path": "scripts/game.gd.uid",
+      "bytes": 20,
+      "sha256": "7a244c224c2c0cbadbcc7a97abefb0557941e8c1b334086fda90b5885efed8a2"
+    },
+    {
+      "path": "scripts/gamepad.gd",
+      "bytes": 8238,
+      "sha256": "fb82ba5b2a9308b55744e6bcf618f72192c4bb4aeaa26ae6e68d727597988513"
+    },
+    {
+      "path": "scripts/gamepad.gd.uid",
+      "bytes": 19,
+      "sha256": "79eb9a9bfaae8e5708266e0ae378c249093912a25316d3a05268f7627a603881"
+    },
+    {
+      "path": "scripts/interface_options.gd",
+      "bytes": 5627,
+      "sha256": "ba460d67ed6cd963ba8b8fcbe32a9544e32a96c60aad9606062253f603db9a35"
+    },
+    {
+      "path": "scripts/interface_options.gd.uid",
+      "bytes": 20,
+      "sha256": "4aff011c8ebfebe6a41acd64b1951b77cf7206f28fdc74f9c0e1a0b55ab688cd"
+    },
+    {
+      "path": "scripts/landscape_view.gd",
+      "bytes": 2250,
+      "sha256": "ff4a2ece79f42e4e7d0256393480ba64e42bcf3d0ac1c74b20fb29006d968f0f"
+    },
+    {
+      "path": "scripts/landscape_view.gd.uid",
+      "bytes": 19,
+      "sha256": "100b5d93f42d6104d6768cf3430343fb1961e6ba1bac183678439dff4c11e086"
+    },
+    {
+      "path": "scripts/language_chevron.gd",
+      "bytes": 143,
+      "sha256": "6267d66326f3ab0ca70e24c6658ccda4bf7da3bf4ef94f893099689a6f5664c8"
+    },
+    {
+      "path": "scripts/language_chevron.gd.uid",
+      "bytes": 19,
+      "sha256": "d28a67c4fc983110571627216f85e833552d862491aba6927f1a5ee8ffe84b14"
+    },
+    {
+      "path": "scripts/menu_pages.gd",
+      "bytes": 7357,
+      "sha256": "155f481e41f21c4582be817fee0734e2765c28ddc098217824f5c3499af61a32"
+    },
+    {
+      "path": "scripts/menu_pages.gd.uid",
+      "bytes": 19,
+      "sha256": "4d7fa5fca3a3478d58a28be333c9beb9ae5233fb5b335068e066b1e938b119bf"
+    },
+    {
+      "path": "scripts/native_diagnostics.gd",
+      "bytes": 2541,
+      "sha256": "ff4262a0aedbc14de77cbf86e58fc56a5a58d3b050b1c9d783da26ecb6935111"
+    },
+    {
+      "path": "scripts/native_diagnostics.gd.uid",
+      "bytes": 20,
+      "sha256": "9b3e0c73da8604e21c6d9d4238f554bacee4a81caf069a44796c7e55931041e5"
+    },
+    {
+      "path": "scripts/orchard.gd",
+      "bytes": 2166,
+      "sha256": "71af0bfcd4d768b5939f30814c668e6f549e957bd3bb5993f4eec307e2b628b9"
+    },
+    {
+      "path": "scripts/orchard.gd.uid",
+      "bytes": 20,
+      "sha256": "8144fd7e5a3f2bd67af519bbdad593ec1ca36d6b36d835d5920d008a485ed8dd"
+    },
+    {
+      "path": "scripts/pixel.gdshader",
+      "bytes": 354,
+      "sha256": "7fad9e00fdd8c41c48cee09908073d57fda65342acc4356a3ac8ed1c26795ba8"
+    },
+    {
+      "path": "scripts/pixel.gdshader.uid",
+      "bytes": 20,
+      "sha256": "430ce46f0baf926f4dc78bd6417d443ffec9142e64a76a062164a8206d5e71f1"
+    },
+    {
+      "path": "scripts/pixel_interface.gd",
+      "bytes": 17995,
+      "sha256": "17bfd271f17fe35a254bf0939f1f9ea23645949b993bcaac085c0ffefac17317"
+    },
+    {
+      "path": "scripts/pixel_interface.gd.uid",
+      "bytes": 20,
+      "sha256": "b1311aecf80b38effc936d799b39cb488fd126a4114576e5e030d94d80721615"
+    },
+    {
+      "path": "scripts/terrain_view.gd",
+      "bytes": 7629,
+      "sha256": "9bc4a85d5c63bca5b1f00d07b712a778fe21150311e3929e26221bc06948b76e"
+    },
+    {
+      "path": "scripts/terrain_view.gd.uid",
+      "bytes": 20,
+      "sha256": "f12acb24d9b3b8da8532b0a03fd4e25acb2e137572c7016cf9ead72aa320d2a8"
+    },
+    {
+      "path": "scripts/text.gd",
+      "bytes": 35822,
+      "sha256": "43142efd82bd96c1bf55fc358603461b1b863242c06db3e6a06fa6215db05c32"
+    },
+    {
+      "path": "scripts/text.gd.uid",
+      "bytes": 20,
+      "sha256": "e3adb3eb5ef8847a88b5b76d19f629c9a679a83f011a0b15790c0a55dfd22ad6"
+    },
+    {
+      "path": "scripts/touch_button.gd",
+      "bytes": 5681,
+      "sha256": "3838faef14be5c009b81527daceaac60ed6ad38df50655af4ccf97097ad21ea3"
+    },
+    {
+      "path": "scripts/touch_button.gd.uid",
+      "bytes": 20,
+      "sha256": "69e3faff0d366d9c8cfa8b345deda2ebfc3451811b51157bb51b912cca7d2404"
+    },
+    {
+      "path": "scripts/touch_controls.gd",
+      "bytes": 3833,
+      "sha256": "37339b4b37a9304558a3bf7583581ac38b0f3fb39682846bc19857a8179af433"
+    },
+    {
+      "path": "scripts/touch_controls.gd.uid",
+      "bytes": 20,
+      "sha256": "5db845b16592633b74044f3eb3962209521544174338ac17ab889dfad35608e7"
+    },
+    {
+      "path": "scripts/web_accessibility.gd",
+      "bytes": 2442,
+      "sha256": "6c3736d73c1a2fa70be789244af38e0382d97529e5ea8704365039af52bc4ad2"
+    },
+    {
+      "path": "scripts/web_accessibility.gd.uid",
+      "bytes": 20,
+      "sha256": "f4bfb341926d8ca74d331328a2918a062b0eac10eb2e40e9f82e2b4db5521517"
+    },
+    {
+      "path": "scripts/world.gd",
+      "bytes": 15073,
+      "sha256": "533bb4fac0cb3cf03bfc0714237bd7763fa280b90dbbb17164e154627ee84a36"
+    },
+    {
+      "path": "scripts/world.gd.uid",
+      "bytes": 19,
+      "sha256": "5c413b4afa5377d5d55000f1663a6aa4d48d1e15bd986e43cd8570b85e1d569d"
+    },
+    {
+      "path": "tests/browser_abilities.py",
+      "bytes": 4979,
+      "sha256": "0bae4c53c2ccf6777553ad329ac6f214f638f8b157bc818590ad3c5b63c16305"
+    },
+    {
+      "path": "tests/browser_adventure.py",
+      "bytes": 326,
+      "sha256": "ee03d257100ba1af64d983a2bcb5a16b0ae5a3e92f17d6a233a4e8257b6be4b6"
+    },
+    {
+      "path": "tests/browser_agility.py",
+      "bytes": 6572,
+      "sha256": "1b7e8cd440ed74ecd170a7f1059314a90b7f8c31774708c32d3fc1480835820a"
+    },
+    {
+      "path": "tests/browser_aionia.py",
+      "bytes": 7080,
+      "sha256": "0299127c5529db3de1c5624cf4ac5ff54d77fa189167ec72d06cf51555912ba2"
+    },
+    {
+      "path": "tests/browser_boss_hud.py",
+      "bytes": 2648,
+      "sha256": "af5f7f57c4ae3ff77516d0d08a7d86e30645e65ea69dbfcd36bd557890143d6f"
+    },
+    {
+      "path": "tests/browser_boss_story.py",
+      "bytes": 8216,
+      "sha256": "09928360d4b262360053ca1eb33fe20030980a5fa6d2258ee773dcaaf0e04726"
+    },
+    {
+      "path": "tests/browser_campaign.py",
+      "bytes": 22115,
+      "sha256": "8fe79891d04ec327ae43b76f3c3025963b4004af726265d4e402bc6a917f3b25"
+    },
+    {
+      "path": "tests/browser_campaign_audio.py",
+      "bytes": 3422,
+      "sha256": "af33ff499fa1dfad9e45c400a585ea5d2258c7df74a68d3ec9cf92990ac77610"
+    },
+    {
+      "path": "tests/browser_charge_roll.py",
+      "bytes": 10092,
+      "sha256": "46838ea166d79cc8287060893045cd2f5e92319e3866b186a950aaadef5d192d"
+    },
+    {
+      "path": "tests/browser_e2e.py",
+      "bytes": 4993,
+      "sha256": "8a9bd937e1b52df31bbbaedd8431561093bd4914273e21ced284d0f73c4f29ca"
+    },
+    {
+      "path": "tests/browser_encounters.py",
+      "bytes": 10126,
+      "sha256": "48836ce61dc1ff7ad73741182ac5a0ea0c188b21dcd0c36e1521a4f830869995"
+    },
+    {
+      "path": "tests/browser_evolution.py",
+      "bytes": 268,
+      "sha256": "9a4d22f00844c41551d7c0c44934c5330a6ab4af0c408e5e7ae2efd58c011015"
+    },
+    {
+      "path": "tests/browser_fidelity.py",
+      "bytes": 4768,
+      "sha256": "dadc0a55dc5cfe99568425c528db9d8bbac6e4c4b4380ba164fa764cf3f4d489"
+    },
+    {
+      "path": "tests/browser_firearm.py",
+      "bytes": 12923,
+      "sha256": "0534f9868271e1da71c7b5a8652f20f2817f8ad41ae50a012854134c8376cd7b"
+    },
+    {
+      "path": "tests/browser_frontier.py",
+      "bytes": 250,
+      "sha256": "64e16b19622ea390b9acaae779d8bbdb4bde67f14882b8d01ca6a6b49b7a103d"
+    },
+    {
+      "path": "tests/browser_live_quality.py",
+      "bytes": 6735,
+      "sha256": "f11bbdb6b5a82592b29397eaef80217fd8d96477cd5edaf984ca3fbec8caee18"
+    },
+    {
+      "path": "tests/browser_loader.py",
+      "bytes": 9030,
+      "sha256": "83be3f01f2f6f041285d5dad4f0f238791d7093088293737a19bf4fb12abe530"
+    },
+    {
+      "path": "tests/browser_localization.py",
+      "bytes": 7953,
+      "sha256": "8aefd9749b58ea05aa815e7be084e0c2ae63b51d1665eb5be26aeb169c75fb09"
+    },
+    {
+      "path": "tests/browser_motion.py",
+      "bytes": 13469,
+      "sha256": "02327838a73ed0d19d1bfa7e46e913114d48c0b37b38b8ceb81bd8eba183cd8c"
+    },
+    {
+      "path": "tests/browser_motion_details.py",
+      "bytes": 5744,
+      "sha256": "6d82a63975ecf79e6cf544b0a4e566a2f3c5531496534409998ea4f945a8990c"
+    },
+    {
+      "path": "tests/browser_orchard.py",
+      "bytes": 7176,
+      "sha256": "4aa34465ab8b317e892d7f4593050d5c3c2f89ead954bb639e2662dbdb0e004b"
+    },
+    {
+      "path": "tests/browser_panels.py",
+      "bytes": 4385,
+      "sha256": "3ca0ac4f1b641dfac425f7c0e6fea8b97cfdd37afdad52200018626f1f806d0e"
+    },
+    {
+      "path": "tests/browser_polish.py",
+      "bytes": 6919,
+      "sha256": "c33fdc1047ee50125a976153c3d6dc4e9388cea7a98f587764f2ad0ac4b5623f"
+    },
+    {
+      "path": "tests/browser_quality.py",
+      "bytes": 13581,
+      "sha256": "a9eae94947fbcd1daeaea978de3a9f262271494f337c7e05847512511b79b55f"
+    },
+    {
+      "path": "tests/browser_runner_ux.py",
+      "bytes": 10672,
+      "sha256": "98e86ba3bcb9f9aa1b4fc580caf62083642c100f1630fb2285bd6e46148b3a49"
+    },
+    {
+      "path": "tests/browser_swipe_quality.py",
+      "bytes": 3845,
+      "sha256": "e2f5ed9ea2627bde966953335eb349055405f12b5a707c051218c2b410bf53ff"
+    },
+    {
+      "path": "tests/browser_terrain.py",
+      "bytes": 6286,
+      "sha256": "130fc003c0986a94b60642c0fe866e72ee91f8047fa713361dacaac1ef1787b7"
+    },
+    {
+      "path": "tests/browser_touch_quality.py",
+      "bytes": 4897,
+      "sha256": "965ae081b47d18fe6142b5026176ff95c0f5732feb00ee6f946007e6431996c8"
+    },
+    {
+      "path": "tests/browser_trails.py",
+      "bytes": 6459,
+      "sha256": "6dca8b8459795359ff99a4a986bd6797ed567f77cb80d6cad4c2dc6406e1e93b"
+    },
+    {
+      "path": "tests/browser_upgrade.py",
+      "bytes": 9233,
+      "sha256": "c09b9ffcdde25d3e95d12599a6cff4db2ac88888cc6441eeeb8352e0b842975b"
+    },
+    {
+      "path": "tests/browser_variety.py",
+      "bytes": 5011,
+      "sha256": "055a84da3fede8015a9a148d0eaa13d1f57005794f2cb8c4b944cf7d736f37ed"
+    },
+    {
+      "path": "tests/browser_verified_tls.py",
+      "bytes": 4647,
+      "sha256": "faa119072c7ee3916d22ff9fb88c4c1d6f796fc8c6be1e62cda6c8c74dd4d55b"
+    },
+    {
+      "path": "tests/browser_weapon_poses.py",
+      "bytes": 3942,
+      "sha256": "99a1e59d56e8305421398203254b7be048191adcfb83620db62aec52725daa28"
+    },
+    {
+      "path": "tests/history/browser_adventure_v06.py",
+      "bytes": 12927,
+      "sha256": "6bdaf59d178eaf29dfdfb454a3e8e8c16ed6a6873dcc1c3ff3c857639702c0da"
+    },
+    {
+      "path": "tests/history/browser_evolution_v07.py",
+      "bytes": 11947,
+      "sha256": "7456190e14971905239bcda964ee044b96550d7bdc8940bad9fc6eff2f3dc2ff"
+    },
+    {
+      "path": "tests/history/browser_frontier_v08.py",
+      "bytes": 11411,
+      "sha256": "01aef27221b0e9174539148c791feaf3479935f089963e4d2e710d41ce1ef87e"
+    },
+    {
+      "path": "tests/history/browser_motion_v09.py",
+      "bytes": 13465,
+      "sha256": "3dc1ae4be4ee02ae0636a648da4ad252ebb1d264dba46d26f5d8132ed602d460"
+    },
+    {
+      "path": "tests/measure_rendered_faces.py",
+      "bytes": 2436,
+      "sha256": "d0cc4981bc2e2f0216c702505be9863645cf662083846f7e9bc237447244a030"
+    },
+    {
+      "path": "tests/native/AionTouchFlight.java",
+      "bytes": 1216,
+      "sha256": "b61a718f687d6404343b4b62bf04324971e232e20ef9285e13aa68258bf78629"
+    },
+    {
+      "path": "tests/play_campaign_expansion.gd",
+      "bytes": 6903,
+      "sha256": "727579dc35aea12132cfa3a1f2b212f46809042420697b2cbcc46cf709c67b3e"
+    },
+    {
+      "path": "tests/play_campaign_expansion.gd.uid",
+      "bytes": 19,
+      "sha256": "17050cd3124926942087ef96040d60fa3e0fe94323fa39be8e1a8a7afc8e13c7"
+    },
+    {
+      "path": "tests/render_boss_story.gd",
+      "bytes": 1656,
+      "sha256": "e0b7305b7c49b430c87461c643d3892b017df94586777c870dc32b99d5cefd4a"
+    },
+    {
+      "path": "tests/render_boss_story.gd.uid",
+      "bytes": 20,
+      "sha256": "3837381e8126f308099e904a146a3f21bb6b8e0d71a8e77b0eb340553ae39972"
+    },
+    {
+      "path": "tests/render_campaign_expansion.gd",
+      "bytes": 3494,
+      "sha256": "229744d05a1e7ecc0679012f19557fd87990174c0d5f6afb6460609b5bcc53c8"
+    },
+    {
+      "path": "tests/render_campaign_expansion.gd.uid",
+      "bytes": 20,
+      "sha256": "d58f3386b741402f49e6ff60ba286a1f83fe6cb04e5e91993c858b2b7cb46e01"
+    },
+    {
+      "path": "tests/render_campaign_review.gd",
+      "bytes": 4779,
+      "sha256": "10a47b560be02a5dade717612420c177b4da2d306a72c6087aaa83bc9708cb51"
+    },
+    {
+      "path": "tests/render_campaign_review.gd.uid",
+      "bytes": 20,
+      "sha256": "0c3db177e6dbc9c0f4371dfc8261000f23cd8d5910ec9f53e8b4a2482eba1d1f"
+    },
+    {
+      "path": "tests/render_pixel_states.gd",
+      "bytes": 1299,
+      "sha256": "1faa3081c76e18cfbafccf058737140a7939dbe544b083863235b578623ca807"
+    },
+    {
+      "path": "tests/render_pixel_states.gd.uid",
+      "bytes": 20,
+      "sha256": "2590ec6b4e9cda9fa544bae31dafc6bd437ca9bf157946d4e420ce3b14fd8a52"
+    },
+    {
+      "path": "tests/render_polish_review.gd",
+      "bytes": 3277,
+      "sha256": "7f49e145c3812c0506d25632e29a7edb1dfaff70131c3c9bcf02a5ddd0d111fb"
+    },
+    {
+      "path": "tests/render_polish_review.gd.uid",
+      "bytes": 20,
+      "sha256": "92ee42f4187dd85c6ded2aa9c5c2c94a3c52603983d8ae9cf2c316b5107f5549"
+    },
+    {
+      "path": "tests/render_terrain_review.gd",
+      "bytes": 4828,
+      "sha256": "8d397de7cce62473fd0c5ca7fa1bbece5b7eb27adf2bffdac934699f57508028"
+    },
+    {
+      "path": "tests/render_terrain_review.gd.uid",
+      "bytes": 20,
+      "sha256": "38657fb79ef1c5986684476eda3b02947a4ee46412c24d2526c8f5a71c32ae15"
+    },
+    {
+      "path": "tests/test_adventure.gd",
+      "bytes": 9479,
+      "sha256": "4b42808f654c81e1afe4f986e442ccf1bf887259327ed68d6db63388aed3cc37"
+    },
+    {
+      "path": "tests/test_adventure.gd.uid",
+      "bytes": 20,
+      "sha256": "70cac6515cabaea83f9f5b8cd1b340db032c2d3363274ff42d2b609ab89bf727"
+    },
+    {
+      "path": "tests/test_agility.gd",
+      "bytes": 5800,
+      "sha256": "af21ad38625ef6cd04326f182c3ee637d30be5fffd1b46247b4ccad19525acb0"
+    },
+    {
+      "path": "tests/test_agility.gd.uid",
+      "bytes": 19,
+      "sha256": "59ac31e2e53f47e9974f0eb92fec96429c4695f290c64f5e7b5f6c4ddaeb6144"
+    },
+    {
+      "path": "tests/test_aionia.gd",
+      "bytes": 10724,
+      "sha256": "b9ea29a01a3a93fc7d73885065e4d4f6803c0acda1cd8a5143fe666478cb2fb4"
+    },
+    {
+      "path": "tests/test_aionia.gd.uid",
+      "bytes": 19,
+      "sha256": "f3b465bdb2989d6acbda1e840568c9bbe5fa5987f49a89f7e9881b860691c36c"
+    },
+    {
+      "path": "tests/test_android_packets.py",
+      "bytes": 1483,
+      "sha256": "8d9f7f4fe1866ea8826ce2e45c1629d3d0d0b9ea4953d693867145cba590aecf"
+    },
+    {
+      "path": "tests/test_boss_hud.gd",
+      "bytes": 2634,
+      "sha256": "136f4e66ed2cdcc33e0b7b0085aff38928938bbdf893c015d6c6e5ffad67acc7"
+    },
+    {
+      "path": "tests/test_boss_hud.gd.uid",
+      "bytes": 20,
+      "sha256": "3b4866b6aeb6bc9a323f27a3fb6ff5cf168adc34fa7074fa745fd204f5660c5b"
+    },
+    {
+      "path": "tests/test_boss_story.gd",
+      "bytes": 6424,
+      "sha256": "ab33593367259136623c7c165b76e25d452a4c26a26b1368330e76bbbd4cb587"
+    },
+    {
+      "path": "tests/test_boss_story.gd.uid",
+      "bytes": 20,
+      "sha256": "481243f4354a7c467691d891c10cfeec214d28c82019f5ba28dee567a20eab90"
+    },
+    {
+      "path": "tests/test_campaign.gd",
+      "bytes": 11002,
+      "sha256": "d93888c451054d2df350e30519c45812bd1731c43a7651934aa1dbc6852a5ad6"
+    },
+    {
+      "path": "tests/test_campaign.gd.uid",
+      "bytes": 20,
+      "sha256": "0346fcda284562b734fb3176b498aef2400c9425990e71465e62c5a2429e4acb"
+    },
+    {
+      "path": "tests/test_campaign_art.gd",
+      "bytes": 3331,
+      "sha256": "e38452461ac17f4f520fc7df29586e72921ee748c961eacc61a0faf94e07ec80"
+    },
+    {
+      "path": "tests/test_campaign_art.gd.uid",
+      "bytes": 20,
+      "sha256": "2d92fe33f35913072c057248b595f7bd68d9e42452233da78eafedd971426e69"
+    },
+    {
+      "path": "tests/test_campaign_expansion.gd",
+      "bytes": 10742,
+      "sha256": "c852e371424494330d6523344ba5142efc3a44fb07eb294cd10b8b9b8ab0a1d5"
+    },
+    {
+      "path": "tests/test_campaign_expansion.gd.uid",
+      "bytes": 20,
+      "sha256": "da4e9fdb1739f2824113012fc78b848ee781d5825155ffab02d38f62009983d0"
+    },
+    {
+      "path": "tests/test_campaign_expansion_art.gd",
+      "bytes": 3431,
+      "sha256": "dcbc916ad851939e0833f92811da2131e5940db4ee5b29164b69f0c30ae6fa6c"
+    },
+    {
+      "path": "tests/test_campaign_expansion_art.gd.uid",
+      "bytes": 20,
+      "sha256": "e3b752388cf33cf2c8a96c859af567e1831f5ad3ee0524b16a7f32e4aad6e9c1"
+    },
+    {
+      "path": "tests/test_campaign_lifecycle.gd",
+      "bytes": 1345,
+      "sha256": "61b5aea0210590ea1caa467728c106844cdb3b2cf4e485baa027fc0b0e7048f3"
+    },
+    {
+      "path": "tests/test_campaign_lifecycle.gd.uid",
+      "bytes": 19,
+      "sha256": "6f94d4359fe6174f49db0026f23eb600bcf3cd5884fd417099c341305d6d6fb0"
+    },
+    {
+      "path": "tests/test_campaign_secret_routes.gd",
+      "bytes": 1902,
+      "sha256": "4b4deea68e3200726f28e4aa77f996b3f7d1c3c6d403a315812392e1e4b9f38e"
+    },
+    {
+      "path": "tests/test_campaign_secret_routes.gd.uid",
+      "bytes": 19,
+      "sha256": "1f420df005cc7655be160c7455f440bce14c5c221750946d552be539347edf3f"
+    },
+    {
+      "path": "tests/test_campaign_ui.gd",
+      "bytes": 8264,
+      "sha256": "3db308ec498261fb02bc1b903e994601bf40c033355c6e5a1d1db4c9ad4e8be2"
+    },
+    {
+      "path": "tests/test_campaign_ui.gd.uid",
+      "bytes": 20,
+      "sha256": "20d8ceedb17576d91231dcf46ddccb20e99e75331a3fbeabb5b923bfcc1b2f81"
+    },
+    {
+      "path": "tests/test_charge_roll_ui.gd",
+      "bytes": 8206,
+      "sha256": "919c16b39349bbc59b2c6060abe44a8c4434bec64a3dc334c61900511b77e166"
+    },
+    {
+      "path": "tests/test_charge_roll_ui.gd.uid",
+      "bytes": 20,
+      "sha256": "877b64b19f502b0a733be81ef655f0ce83a68833f141a5d84a1b22c895d882a6"
+    },
+    {
+      "path": "tests/test_encounters.gd",
+      "bytes": 7205,
+      "sha256": "8df3e0cca88bba413d80bfdd75abb1aa04bcf56a8a2f9341d606949902b5fe0b"
+    },
+    {
+      "path": "tests/test_encounters.gd.uid",
+      "bytes": 20,
+      "sha256": "3cd28837564bcc0f1dd2ca7c40076d87b7a12ef41cbeb3992feca843b37f790e"
+    },
+    {
+      "path": "tests/test_evolution.gd",
+      "bytes": 9207,
+      "sha256": "f154879dc357f1e8143b84ef9813be0e84726710e09022f7303e868d8a753eef"
+    },
+    {
+      "path": "tests/test_evolution.gd.uid",
+      "bytes": 19,
+      "sha256": "8095749c84aba16305c7d21d5660accb489616fb53100bcfe8d528987895da72"
+    },
+    {
+      "path": "tests/test_fidelity.gd",
+      "bytes": 3315,
+      "sha256": "709175e369da94bca584fa70c78eaf58cefa8883c8565668bd601149d884033d"
+    },
+    {
+      "path": "tests/test_fidelity.gd.uid",
+      "bytes": 20,
+      "sha256": "2b4cda8a753cfb24fc3241c7c0194061aad2daf3bb15d0029da55f4d3c70a0d8"
+    },
+    {
+      "path": "tests/test_firearm.gd",
+      "bytes": 5056,
+      "sha256": "f81177dd661c95c045815b7fe79a6ceff7aa763169ab4d22812b5b41e5fb0e1c"
+    },
+    {
+      "path": "tests/test_firearm.gd.uid",
+      "bytes": 20,
+      "sha256": "fb55b51efd1258a59e4f0d9085311d9f9d2b44997894e73cba5cc0ebf6a5cf5e"
+    },
+    {
+      "path": "tests/test_frontier.gd",
+      "bytes": 10235,
+      "sha256": "094510172f130ba178dd3d1e01d2240bd207f37521ec4ece12d278f6fcd29d48"
+    },
+    {
+      "path": "tests/test_frontier.gd.uid",
+      "bytes": 20,
+      "sha256": "3ab85b91836b32fcf6dee9767f7dd09c390a416a50329db3cf1be5cbacf02172"
+    },
+    {
+      "path": "tests/test_game.gd",
+      "bytes": 19491,
+      "sha256": "7b8378481588deb1a110c4ca6fe57845a6a544a4fb95548ae8a43d1de297aa31"
+    },
+    {
+      "path": "tests/test_game.gd.uid",
+      "bytes": 20,
+      "sha256": "0dc2984edabcd050f6cd1425554d656fee8c9533a82b5ba83e08694e24f96ed1"
+    },
+    {
+      "path": "tests/test_localization.gd",
+      "bytes": 4726,
+      "sha256": "237fc8b8e67eaf323532b9ada9c92ac51ac246f3e0fe6830c5194c4d5a7e647d"
+    },
+    {
+      "path": "tests/test_localization.gd.uid",
+      "bytes": 20,
+      "sha256": "b3bfdbc8526949ddee9c72ddf1401f590b3583a650f4c918634fc79a23c72439"
+    },
+    {
+      "path": "tests/test_macos_dmg.py",
+      "bytes": 1744,
+      "sha256": "0afa694166101557c2eadf655369c8492b1f836490096dc9d4b39b66e4c022d7"
+    },
+    {
+      "path": "tests/test_motion.gd",
+      "bytes": 7043,
+      "sha256": "1f44d1ba19640c5edb9c27bb80e50f604e7f885f8c79f0aa491b933dce974c87"
+    },
+    {
+      "path": "tests/test_motion.gd.uid",
+      "bytes": 20,
+      "sha256": "c5892893c2fa8b29d6e63f15f6905f4f1ee6492455f0c1ea8f4ca9b23a584a8e"
+    },
+    {
+      "path": "tests/test_orchard.gd",
+      "bytes": 5639,
+      "sha256": "99fb36b2965de1913f1a63f7ea22dc479cec9f3b41014e58aed509efbd925bb2"
+    },
+    {
+      "path": "tests/test_orchard.gd.uid",
+      "bytes": 20,
+      "sha256": "edc6d4d34bf48bd98a1c5813e4e871a95d57585dce347336626d2a96a27c32aa"
+    },
+    {
+      "path": "tests/test_pixel_heroes.gd",
+      "bytes": 4595,
+      "sha256": "bb3a15e767e9ac97c2d0c2427a3254e19afd90a38f23e8177750784f13c8864b"
+    },
+    {
+      "path": "tests/test_pixel_heroes.gd.uid",
+      "bytes": 20,
+      "sha256": "a87d1f8bb5ab8563d08657f34109f8e9d6b06e340f14ac746c877245fcfc0495"
+    },
+    {
+      "path": "tests/test_polish.gd",
+      "bytes": 6437,
+      "sha256": "b6da80257c09d511aa84fe462b94e0fd84337c5944d142fa4a4e7a4b980bc087"
+    },
+    {
+      "path": "tests/test_polish.gd.uid",
+      "bytes": 20,
+      "sha256": "6b2b911dc63d7a27f1fc47d052b7e6c78589743ea15c631e8ef15d6e2e1ac3f6"
+    },
+    {
+      "path": "tests/test_runner_ux.gd",
+      "bytes": 12506,
+      "sha256": "b2126d0d05a7eb7e0e6416452767fb697d0833b490e9f2e48b0ab27d8eac2d96"
+    },
+    {
+      "path": "tests/test_runner_ux.gd.uid",
+      "bytes": 20,
+      "sha256": "0fadd2c3e9c88b5cab36a2696165d7239e64b9fbbda19f2070cacfaf20c2f5c6"
+    },
+    {
+      "path": "tests/test_terrain.gd",
+      "bytes": 2399,
+      "sha256": "4fda4e2c2b34a8c667e0de03fdf1f785872859ade8bf99b12986b45734b564fd"
+    },
+    {
+      "path": "tests/test_terrain.gd.uid",
+      "bytes": 19,
+      "sha256": "a8bee18a72402e918a74f3bccf7bca3978daf858a158e25fcf3bed8e42106810"
+    },
+    {
+      "path": "tests/test_unslop_quality.gd",
+      "bytes": 6999,
+      "sha256": "0c47f0238eedb826cc4b782078a07a2f9c4c521804f76c681d7e07be0b1f7e69"
+    },
+    {
+      "path": "tests/test_unslop_quality.gd.uid",
+      "bytes": 20,
+      "sha256": "b8b3b959a4adf17496e32d1a42c31991081f47e3ae357e966bfd2243dfd2d298"
+    },
+    {
+      "path": "tests/test_variety.gd",
+      "bytes": 8432,
+      "sha256": "57b8463fcc7dc754903094e01e417eb9ad3a0c2d559b2309b381d34eade6d5bd"
+    },
+    {
+      "path": "tests/test_variety.gd.uid",
+      "bytes": 19,
+      "sha256": "526a3d83eb401a5ba23fffc7ba92c9a95f16567e7df2027684bbdbdfead30558"
+    },
+    {
+      "path": "tests/test_visual_polish.gd",
+      "bytes": 3220,
+      "sha256": "96342a0d6b7bf3ffe432436deaf8f30b47caf857b0a1a5d66c00c3ea259f6761"
+    },
+    {
+      "path": "tests/test_visual_polish.gd.uid",
+      "bytes": 20,
+      "sha256": "07281102783886eb1bfda868a5e5a6640ed525405473e8c13b5239ca82c4583c"
+    },
+    {
+      "path": "tests/test_web_packaging.py",
+      "bytes": 4771,
+      "sha256": "b16ff65a847c6b6aeb496fca0df19c714e7097ca4b710599e7fbb0cbf83566c7"
+    },
+    {
+      "path": "vercel.json",
+      "bytes": 477,
+      "sha256": "84384f73c63ac4ace7c262d1a81fcf115de3e7d76395d08c51ce28a806f38a07"
+    }
+  ]
+}

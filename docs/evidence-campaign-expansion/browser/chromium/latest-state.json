@@ -1,0 +1,480 @@
+{
+  "actions": {
+    "attack": [
+      977.0,
+      413.0,
+      100.0,
+      100.0
+    ],
+    "grenade": [
+      922.0,
+      523.0,
+      100.0,
+      100.0
+    ],
+    "jump": [
+      1032.0,
+      523.0,
+      100.0,
+      100.0
+    ]
+  },
+  "activated": {
+    "shore:lamp:0": true,
+    "shore:lamp:1": true,
+    "shore:object:0": true,
+    "shore:object:1": true,
+    "shore:object:2": true
+  },
+  "ammunition": 18,
+  "awarded": {
+    "shore:enemy:0": true,
+    "shore:enemy:1": true,
+    "shore:enemy:2": true,
+    "shore:enemy:3": true,
+    "shore:enemy:300": true,
+    "shore:enemy:301": true,
+    "shore:enemy:302": true,
+    "shore:enemy:303": true,
+    "shore:enemy:304": true,
+    "shore:enemy:310": true,
+    "shore:enemy:311": true,
+    "shore:enemy:4": true,
+    "shore:enemy:5": true,
+    "shore:enemy:6": true,
+    "shore:fruit:1": true,
+    "shore:fruit:10": true,
+    "shore:fruit:11": true,
+    "shore:fruit:12": true,
+    "shore:fruit:13": true,
+    "shore:fruit:14": true,
+    "shore:fruit:2": true,
+    "shore:fruit:3": true,
+    "shore:fruit:4": true,
+    "shore:fruit:5": true,
+    "shore:fruit:6": true,
+    "shore:fruit:7": true,
+    "shore:fruit:8": true,
+    "shore:fruit:9": true,
+    "shore:lamp:0:power": true,
+    "shore:lamp:1:power": true,
+    "shore:object:0:power": true,
+    "shore:object:1:power": true,
+    "shore:object:2:gift": true
+  },
+  "boss_beam_x": -999.0,
+  "boss_hp": 90,
+  "boss_phase": 1,
+  "boss_warning": 0.0,
+  "boss_x": 7380.0,
+  "bullets": [],
+  "buttons": {},
+  "camera": 2834.14446289063,
+  "character": "aion",
+  "checkpoint": "shore",
+  "checkpoint_ready": true,
+  "completed": false,
+  "discovered": {},
+  "enemies": [
+    {
+      "hp": 1,
+      "kind": "crow",
+      "windup": 0.600533333333333,
+      "x": 3643.88233333333,
+      "y": -109.328431889611
+    },
+    {
+      "hp": 1,
+      "kind": "crow",
+      "windup": 0.0,
+      "x": 3806.02486666667,
+      "y": -100.150322483434
+    },
+    {
+      "hp": 1,
+      "kind": "crow",
+      "windup": 0.0,
+      "x": 3967.74373333333,
+      "y": -113.541344348473
+    },
+    {
+      "hp": 1,
+      "kind": "gnome",
+      "windup": 0.0,
+      "x": 4800.0,
+      "y": 0.0
+    },
+    {
+      "hp": 1,
+      "kind": "seed",
+      "windup": 0.0,
+      "x": 4920.0,
+      "y": 0.0
+    },
+    {
+      "hp": 1,
+      "kind": "crow",
+      "windup": 0.0,
+      "x": 5040.0,
+      "y": -120.0
+    },
+    {
+      "hp": 1,
+      "kind": "seed",
+      "windup": 0.0,
+      "x": 5160.0,
+      "y": 0.0
+    },
+    {
+      "hp": 1,
+      "kind": "seed",
+      "windup": 0.0,
+      "x": 5280.0,
+      "y": 0.0
+    },
+    {
+      "hp": 1,
+      "kind": "gnome",
+      "windup": 0.0,
+      "x": 6100.0,
+      "y": 0.0
+    },
+    {
+      "hp": 1,
+      "kind": "seed",
+      "windup": 0.0,
+      "x": 6220.0,
+      "y": 0.0
+    },
+    {
+      "hp": 1,
+      "kind": "crow",
+      "windup": 0.0,
+      "x": 6340.0,
+      "y": -120.0
+    },
+    {
+      "hp": 1,
+      "kind": "beetle",
+      "windup": 0.0,
+      "x": 6460.0,
+      "y": 0.0
+    },
+    {
+      "hp": 1,
+      "kind": "beetle",
+      "windup": 0.0,
+      "x": 6580.0,
+      "y": 0.0
+    }
+  ],
+  "facing": 1,
+  "flock": 1,
+  "gates": [
+    {
+      "closed": false,
+      "x": 1080.0
+    },
+    {
+      "closed": false,
+      "x": 2080.0
+    },
+    {
+      "closed": false,
+      "x": 3080.0
+    },
+    {
+      "closed": false,
+      "x": 4080.0
+    },
+    {
+      "closed": false,
+      "x": 5080.0
+    },
+    {
+      "closed": false,
+      "x": 6080.0
+    },
+    {
+      "closed": false,
+      "x": 2920.0
+    },
+    {
+      "closed": true,
+      "x": 4220.0
+    },
+    {
+      "closed": true,
+      "x": 5520.0
+    },
+    {
+      "closed": true,
+      "x": 6820.0
+    }
+  ],
+  "grenades": 3,
+  "grounded": true,
+  "hp": 2,
+  "invulnerable": 0.0,
+  "kills": 14,
+  "melee": 0.0,
+  "menu": "",
+  "mount_type": "skimmer",
+  "mounted": false,
+  "music_starts": 1,
+  "native_memory": 0.0,
+  "node_count": 24.0,
+  "npcs": [
+    {
+      "age": 0.0,
+      "freed": false,
+      "gift": "heavy",
+      "id": "shore:keeper",
+      "secret": "",
+      "x": 4290.0,
+      "y": 0.0
+    },
+    {
+      "age": 0.0,
+      "freed": false,
+      "gift": "points",
+      "id": "shore:keeper:1",
+      "secret": "",
+      "x": 3725.0,
+      "y": 0.0
+    },
+    {
+      "age": 0.0,
+      "freed": false,
+      "gift": "arc",
+      "id": "shore:keeper:2",
+      "secret": "",
+      "x": 6900.0,
+      "y": 0.0
+    }
+  ],
+  "objects": [
+    {
+      "active": true,
+      "changed": 18.2604344877345,
+      "clock": 3.85613333333333,
+      "hp": 0,
+      "id": "shore:object:0",
+      "kind": "turret",
+      "secret": "",
+      "x": 450.0,
+      "y": 0.0
+    },
+    {
+      "active": true,
+      "changed": 8.98970158730158,
+      "hp": 0,
+      "id": "shore:object:1",
+      "kind": "panel",
+      "secret": "",
+      "x": 1800.0,
+      "y": 0.0
+    },
+    {
+      "active": true,
+      "changed": 2.6031,
+      "hp": 0,
+      "id": "shore:object:2",
+      "kind": "planks",
+      "secret": "",
+      "x": 3150.0,
+      "y": 0.0
+    },
+    {
+      "active": false,
+      "hp": 2,
+      "id": "shore:object:3",
+      "kind": "gate",
+      "secret": "",
+      "x": 4500.0,
+      "y": 0.0
+    },
+    {
+      "active": false,
+      "hp": 2,
+      "id": "shore:object:4",
+      "kind": "lamp",
+      "secret": "",
+      "x": 5850.0,
+      "y": 0.0
+    },
+    {
+      "active": false,
+      "hp": 2,
+      "id": "shore:object:5",
+      "kind": "relay",
+      "secret": "",
+      "x": 7200.0,
+      "y": 0.0
+    },
+    {
+      "active": true,
+      "changed": 13.4874365079365,
+      "hp": 0,
+      "id": "shore:lamp:0",
+      "kind": "lamp",
+      "secret": "",
+      "x": 720.0,
+      "y": 0.0
+    },
+    {
+      "active": true,
+      "changed": 10.4396698412699,
+      "hp": 0,
+      "id": "shore:lamp:1",
+      "kind": "lamp",
+      "secret": "",
+      "x": 1320.0,
+      "y": 0.0
+    }
+  ],
+  "pits": [],
+  "platforms": [
+    [
+      650.0,
+      -70.0,
+      170.0,
+      20.0
+    ],
+    [
+      1300.0,
+      -70.0,
+      170.0,
+      20.0
+    ],
+    [
+      1950.0,
+      -70.0,
+      170.0,
+      20.0
+    ],
+    [
+      2600.0,
+      -70.0,
+      170.0,
+      20.0
+    ],
+    [
+      3250.0,
+      -70.0,
+      170.0,
+      20.0
+    ],
+    [
+      3900.0,
+      -70.0,
+      170.0,
+      20.0
+    ],
+    [
+      4550.0,
+      -70.0,
+      170.0,
+      20.0
+    ],
+    [
+      5200.0,
+      -70.0,
+      170.0,
+      20.0
+    ],
+    [
+      5850.0,
+      -70.0,
+      170.0,
+      20.0
+    ],
+    [
+      6500.0,
+      -70.0,
+      170.0,
+      20.0
+    ],
+    [
+      7150.0,
+      -70.0,
+      170.0,
+      20.0
+    ]
+  ],
+  "player": [
+    3225.82446289062,
+    0.0
+  ],
+  "pose": {
+    "anchor": [
+      3214.19970703125,
+      0.0
+    ],
+    "facing": 1,
+    "floor": 0.0,
+    "frame": 1,
+    "row": 3,
+    "source": "pixel-aion"
+  },
+  "raw": [
+    1152.0,
+    648.0
+  ],
+  "rescue_candidate": "",
+  "rescue_time": 0.0,
+  "rescued": [],
+  "rooms": [],
+  "route": [],
+  "run_seed": 254494359,
+  "save_ok": true,
+  "schema": 2,
+  "score": 2250,
+  "section": "shore",
+  "shots": 55,
+  "state": "playing",
+  "stick": [
+    24.0,
+    471.0,
+    150.0,
+    150.0
+  ],
+  "taken": {
+    "shore:crate:1": true,
+    "shore:crate:2": true,
+    "shore:crate:3": true,
+    "shore:crate:4": true,
+    "shore:fruit:1": true,
+    "shore:fruit:10": true,
+    "shore:fruit:11": true,
+    "shore:fruit:12": true,
+    "shore:fruit:13": true,
+    "shore:fruit:14": true,
+    "shore:fruit:2": true,
+    "shore:fruit:3": true,
+    "shore:fruit:4": true,
+    "shore:fruit:5": true,
+    "shore:fruit:6": true,
+    "shore:fruit:7": true,
+    "shore:fruit:8": true,
+    "shore:fruit:9": true,
+    "shore:object:2:gift": true
+  },
+  "time": 22.1165678210679,
+  "transform": [
+    1.0,
+    0.0,
+    0.0
+  ],
+  "ui_generation": 9,
+  "ui_ready": true,
+  "velocity": [
+    235.0,
+    0.0
+  ],
+  "view": [
+    1152.0,
+    648.0
+  ],
+  "weapon": "beam"
+}

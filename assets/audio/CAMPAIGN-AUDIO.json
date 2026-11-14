@@ -1,0 +1,35 @@
+{
+  "authoring": "Original code-authored additive synthesis, pentatonic/modal steps; no external samples or SNK audio. Runtime existing procedural sound effects complement these ambient music loops.",
+  "files": [
+    {
+      "path": "assets/audio/campaign-shore.wav",
+      "seconds": 24,
+      "sample_rate": 22050,
+      "sha256": "073370d7493a6f90134509af24540147d94fd15ba406de6cdee597675647f272"
+    },
+    {
+      "path": "assets/audio/campaign-water.wav",
+      "seconds": 24,
+      "sample_rate": 22050,
+      "sha256": "f680f545ba6221c7776aa45f8bc1dcaaef589b46c1117d3d28811469eeec48e7"
+    },
+    {
+      "path": "assets/audio/campaign-garden.wav",
+      "seconds": 24,
+      "sample_rate": 22050,
+      "sha256": "1ddd479af3b497d1f07eb498ee23d75048c01cd796fb191b8553654956318421"
+    },
+    {
+      "path": "assets/audio/campaign-roots.wav",
+      "seconds": 24,
+      "sample_rate": 22050,
+      "sha256": "e2b01feaad1b55e8fc8bc17584899588c93fdf09f94cc01a9d749e03cc925812"
+    },
+    {
+      "path": "assets/audio/campaign-boss.wav",
+      "seconds": 24,
+      "sample_rate": 22050,
+      "sha256": "12dd3eebe7b679d955418314cf37d035ec9ddf01bde4f4a1da2fe6951164a613"
+    }
+  ]
+}

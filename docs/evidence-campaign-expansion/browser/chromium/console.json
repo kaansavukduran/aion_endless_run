@@ -1,0 +1,62 @@
+[
+  {
+    "time": 26717.013713063,
+    "type": "log",
+    "text": "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org"
+  },
+  {
+    "time": 26717.250848236,
+    "type": "log",
+    "text": "OpenGL API OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)) - Compatibility - Using Device: WebKit - WebKit WebGL"
+  },
+  {
+    "time": 26717.524907768,
+    "type": "log",
+    "text": "Build configuration: Emscripten 4.0.20, single-threaded, no GDExtension support."
+  },
+  {
+    "time": 26719.830307777,
+    "type": "log",
+    "text": "AION_READY 0.24.0"
+  },
+  {
+    "time": 26720.213174392,
+    "type": "warning",
+    "text": "[.WebGL-0x1c6402146600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+  },
+  {
+    "time": 26720.213278048,
+    "type": "warning",
+    "text": "[.WebGL-0x1c6402146600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+  },
+  {
+    "time": 26720.213364209,
+    "type": "warning",
+    "text": "[.WebGL-0x1c6402146600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+  },
+  {
+    "time": 26720.216220449,
+    "type": "warning",
+    "text": "[.WebGL-0x1c6402146600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+  },
+  {
+    "time": 26759.285849088,
+    "type": "log",
+    "text": "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org"
+  },
+  {
+    "time": 26759.409312968,
+    "type": "log",
+    "text": "OpenGL API OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)) - Compatibility - Using Device: WebKit - WebKit WebGL"
+  },
+  {
+    "time": 26759.624423601,
+    "type": "log",
+    "text": "Build configuration: Emscripten 4.0.20, single-threaded, no GDExtension support."
+  },
+  {
+    "time": 26761.627030558,
+    "type": "log",
+    "text": "AION_READY 0.24.0"
+  }
+]

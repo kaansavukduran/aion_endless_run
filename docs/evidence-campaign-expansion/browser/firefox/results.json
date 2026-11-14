@@ -1,0 +1,620 @@
+{
+  "checks": [
+    "Visible reachable menu action: @Button@97",
+    "Visible reachable menu action: CampaignBegin",
+    "Visible reachable menu action: @Button@110",
+    "Visible reachable menu action: CampaignGo",
+    "Main menu \u2192 Arcade \u2192 mission \u2192 play through normal buttons",
+    "D moves the player right; this is not automatic scrolling",
+    "A moves and faces left",
+    "Held fire produces real, spaced gunshots",
+    "G spends exactly one energy grenade",
+    "Actual right Fire touch reaches a gunshot or contextual close strike",
+    "Actual right Grenade touch spends one bomb without a second underlying command",
+    "Pause freezes the active mission",
+    "Visible reachable menu action: @Button@169",
+    "Visible reachable menu action: @Button@170",
+    "Visible reachable menu action: @Button@171",
+    "Portrait rotation preserves checkpoint and score",
+    "Approved fixed left stick and three right actions exist",
+    "Touch target is inside portrait viewport: attack",
+    "Touch target is inside portrait viewport: grenade",
+    "Touch target is inside portrait viewport: jump",
+    "Firefox actual touch reaches the same jump action; CDP multitouch is Chromium-only",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Contextual touch Fire cuts ropes without firing a shot",
+    "Actual cut keeps the physical actor in place",
+    "Knife contact actually frees that captive",
+    "Actual rescue and handover reach persistent browser storage",
+    "Mission 1 is completable with actual keyboard/mouse-equivalent gameplay",
+    "The chosen branch was actually recorded",
+    "Actual completed checkpoint and campaign best are persisted",
+    "Return to the original runner clears stale campaign observations",
+    "Returning to main preserves the completed campaign",
+    "Offline reload starts the real game and preserves its separate campaign checkpoint",
+    "No browser or Godot script errors during the actual flow: []"
+  ],
+  "errors": [],
+  "build": "3639f7fe926a22c1",
+  "final": {
+    "actions": {
+      "attack": [
+        977.0,
+        413.0,
+        100.0,
+        100.0
+      ],
+      "grenade": [
+        922.0,
+        523.0,
+        100.0,
+        100.0
+      ],
+      "jump": [
+        1032.0,
+        523.0,
+        100.0,
+        100.0
+      ]
+    },
+    "activated": {},
+    "ammunition": 0,
+    "awarded": {},
+    "boss_beam_x": -999.0,
+    "boss_hp": 90,
+    "boss_phase": 1,
+    "boss_warning": 0.0,
+    "boss_x": 7380.0,
+    "bullets": [],
+    "buttons": {
+      "@Button@97": [
+        172.0,
+        403.0,
+        808.0,
+        54.0,
+        "Ana men\u00fc"
+      ],
+      "CampaignBegin": [
+        172.0,
+        345.0,
+        808.0,
+        48.0,
+        "G\u00f6reve ba\u015fla"
+      ]
+    },
+    "camera": 0.0,
+    "character": "aion",
+    "checkpoint": "shore",
+    "checkpoint_ready": true,
+    "completed": false,
+    "discovered": {},
+    "enemies": [
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 500.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 697.393707275391,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 903.243362426758,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1046.08206176758,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1251.79208374023,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 1504.94549560547,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2200.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 2320.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 2440.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2560.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2680.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 3500.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 3620.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 3740.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 3860.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 3980.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 4800.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 4920.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 5040.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 5160.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 5280.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 6100.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 6220.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 6340.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 6460.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 6580.0,
+        "y": 0.0
+      }
+    ],
+    "facing": 1,
+    "flock": 1,
+    "gates": [
+      {
+        "closed": true,
+        "x": 1080.0
+      },
+      {
+        "closed": false,
+        "x": 2080.0
+      },
+      {
+        "closed": false,
+        "x": 3080.0
+      },
+      {
+        "closed": false,
+        "x": 4080.0
+      },
+      {
+        "closed": false,
+        "x": 5080.0
+      },
+      {
+        "closed": false,
+        "x": 6080.0
+      },
+      {
+        "closed": true,
+        "x": 2920.0
+      },
+      {
+        "closed": true,
+        "x": 4220.0
+      },
+      {
+        "closed": true,
+        "x": 5520.0
+      },
+      {
+        "closed": true,
+        "x": 6820.0
+      }
+    ],
+    "grenades": 5,
+    "grounded": true,
+    "hp": 3,
+    "invulnerable": 1.2,
+    "kills": 0,
+    "melee": 0.0,
+    "menu": "briefing",
+    "mount_type": "skimmer",
+    "mounted": false,
+    "music_starts": 1,
+    "native_memory": 0.0,
+    "node_count": 26.0,
+    "npcs": [
+      {
+        "age": 0.0,
+        "freed": false,
+        "gift": "heavy",
+        "id": "shore:keeper",
+        "secret": "",
+        "x": 4290.0,
+        "y": 0.0
+      },
+      {
+        "age": 0.0,
+        "freed": false,
+        "gift": "points",
+        "id": "shore:keeper:1",
+        "secret": "",
+        "x": 3725.0,
+        "y": 0.0
+      },
+      {
+        "age": 0.0,
+        "freed": false,
+        "gift": "arc",
+        "id": "shore:keeper:2",
+        "secret": "",
+        "x": 6900.0,
+        "y": 0.0
+      }
+    ],
+    "objects": [
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:0",
+        "kind": "turret",
+        "secret": "",
+        "x": 450.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:1",
+        "kind": "panel",
+        "secret": "",
+        "x": 1800.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:2",
+        "kind": "planks",
+        "secret": "",
+        "x": 3150.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:3",
+        "kind": "gate",
+        "secret": "",
+        "x": 4500.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:4",
+        "kind": "lamp",
+        "secret": "",
+        "x": 5850.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:5",
+        "kind": "relay",
+        "secret": "",
+        "x": 7200.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 1,
+        "id": "shore:lamp:0",
+        "kind": "lamp",
+        "secret": "",
+        "x": 720.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 1,
+        "id": "shore:lamp:1",
+        "kind": "lamp",
+        "secret": "",
+        "x": 1320.0,
+        "y": 0.0
+      }
+    ],
+    "pits": [],
+    "platforms": [
+      [
+        650.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1300.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1950.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        2600.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3250.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3900.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        4550.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        5200.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        5850.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        6500.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        7150.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3070.0,
+        -55.0,
+        160.0,
+        18.0
+      ]
+    ],
+    "player": [
+      140.0,
+      0.0
+    ],
+    "pose": {
+      "anchor": [
+        140.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "row": 3,
+      "source": "pixel-aion"
+    },
+    "raw": [
+      1152.0,
+      648.0
+    ],
+    "rescue_candidate": "",
+    "rescue_time": 0.0,
+    "rescued": [],
+    "rooms": [],
+    "route": [],
+    "run_seed": 1971789169,
+    "save_ok": true,
+    "schema": 2,
+    "score": 0,
+    "section": "shore",
+    "shots": 0,
+    "state": "briefing",
+    "stick": [
+      24.0,
+      471.0,
+      150.0,
+      150.0
+    ],
+    "taken": {},
+    "time": 0.0,
+    "transform": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "ui_generation": 1,
+    "ui_ready": true,
+    "velocity": [
+      0.0,
+      0.0
+    ],
+    "view": [
+      1152.0,
+      648.0
+    ],
+    "weapon": "pistol"
+  }
+}

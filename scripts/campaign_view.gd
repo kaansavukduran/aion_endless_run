@@ -5,6 +5,7 @@ var host
 var world: AionCampaignWorld
 var frames := RunnerFrameBank.new()
 var art := AionCampaignArt.new()
+var catalogue := CampaignCatalog.new()
 var landscape := RunnerLandscapeView.new()
 var terrain := RunnerTerrainView.new()
 var ground := 440.0
@@ -35,6 +36,8 @@ func hero_pose(hero: String, moving: bool, airborne: bool, clock: float) -> Dict
 		var death_row:=row*2+1
 		return frames.pose("deaths",death_row,frames.progress("deaths",death_row,world.death_time/.8) if motion else frames.count("deaths",death_row)-1)
 	if bool(world.mount.ridden):return frames.pose("gun-run",row,0)
+	if world.rescue_time>0.:
+		return catalogue.pose("rescue-heroes",row,clampi(int((.6-world.rescue_time)/.6*6.),0,5) if motion else 3)
 	if world.melee_time>0.:
 		return art.melee(hero,clampi(int((.28-world.melee_time)/.28*6.),0,5) if motion else 3)
 	var key := "gun-fire" if world.shot_flash>0. else "gun-run"
@@ -66,7 +69,7 @@ func held_gun(hero: String,p: Vector2,direction: int) -> void:
 
 func _draw() -> void:
 	if world==null: return
-	landscape.panorama(self,world.biome(),camera_x,.05)
+	if not CampaignEnvironmentView.background(self):landscape.panorama(self,world.biome(),camera_x,.05)
 	var base_ground:=ground
 	ground-=camera_y
 	draw_world()
@@ -80,12 +83,15 @@ func draw_world() -> void:
 		if world.floor_at(x)!=0.: continue
 		existing("flora",world.biome(),0 if host.options.reduced_motion or not host.motion_enabled else posmod(int(world.time/.7)+i,3),Vector2(x,0),1,.74)
 	terrain.draw(self,world.biome(),world.biome(),1.,camera_x,.05)
+	CampaignEnvironmentView.draw(self)
 	for pit in world.pits:
 		var rect := Rect2(pit.x-camera_x,ground,pit.y-pit.x,scene_h-ground)
 		draw_rect(rect,Color("131d26"))
 		for side in [pit.x-8.,pit.y]:
 			for y in range(0,120,12): draw_rect(Rect2(side-camera_x,ground+y,8,9),Color("536345"))
 	for platform in world.platforms:
+		if platform.end.x<camera_x-50. or platform.position.x>camera_x+scene_w+50.:continue
+		if world.disabled_platforms.has(platform.position.x):continue
 		var r := Rect2(at(platform.position),platform.size)
 		# Bracketed wooden walkways, with posts in the scenery layer behind
 		# the actors. Their caps exactly match the one-way collision surface.
@@ -100,26 +106,36 @@ func draw_world() -> void:
 		for dx in [7.,r.size.x-12.]:
 			draw_rect(Rect2(r.position+Vector2(dx,3),Vector2(5,15)),Color("686c62"));draw_rect(Rect2(r.position+Vector2(dx+1,5),Vector2(2,2)),Color("d2cba4"))
 	for gate in world.gates:
+		if float(gate.x)<camera_x-100. or float(gate.x)>camera_x+scene_w+100.:continue
 		if not world.gate_closed(gate): continue
 		var p := at(Vector2(float(gate.x),0))
 		draw_rect(Rect2(p-Vector2(6,155),Vector2(12,155)),Color("44445f"))
 		for y in range(8,151,18): draw_rect(Rect2(p-Vector2(3,y),Vector2(6,9)),Color("f2bf77"))
 		caption(host.t("arc_clear"),p+Vector2(-72,-168),16)
 	for npc in world.npcs:
-		existing("celebrants",int(npc.variant),posmod(int(world.time*5),frames.count("celebrants",int(npc.variant))),Vector2(float(npc.x),0),-1,.72)
-		if not bool(npc.freed):
-			var p := at(Vector2(float(npc.x),0))
-			for x in range(-32,37,16): draw_rect(Rect2(p+Vector2(x,-82),Vector2(3,82)),Color("a9ccb9"))
-			draw_rect(Rect2(p+Vector2(-36,-86),Vector2(76,5)),Color("e8bf7a"))
-			caption(host.t("arc_rescue"),p+Vector2(-65,-99),16)
+		if float(npc.x)<camera_x-150. or float(npc.x)>camera_x+scene_w+150.:continue
+		if str(npc.secret)!="" and not world.discovered.has(str(npc.secret)):continue
+		var age: float=npc.free_age
+		if bool(npc.freed) and age>4.5:continue
+		var frame: int=posmod(int(world.time*2.),2) if host.motion_enabled and not host.options.reduced_motion else 0
+		if bool(npc.freed):frame=2 if age<.2 else (3 if age<.45 else (4 if age<.9 else (5 if age<2.4 else 6+posmod(int(age*6.),2))))
+		draw_pose(catalogue.pose("rescue-npcs",int(npc.variant),frame),Vector2(float(npc.x),float(npc.y)))
+		var p := at(Vector2(float(npc.x),float(npc.y)))
+		if not bool(npc.freed):caption(host.t("cut"),p+Vector2(-35,-85),17)
+		elif age>.4 and age<2.4:
+			caption(host.t("thanks"),Vector2(clampf(p.x-48.,8.,scene_w-200.),p.y-99.),17)
+			if age>.9:caption(host.t(str(npc.gift)),Vector2(clampf(p.x-48.,8.,scene_w-200.),p.y-80.),16)
 	for crate in world.crates:
+		if float(crate.x)<camera_x-80. or float(crate.x)>camera_x+scene_w+80.:continue
 		if int(crate.hp)<=0: continue
 		var p := at(Vector2(float(crate.x),float(crate.y)))
 		draw_rect(Rect2(p-Vector2(22,42),Vector2(44,42)),Color("63493b"))
 		draw_rect(Rect2(p-Vector2(19,39),Vector2(38,36)),Color("b48d62"),false,3)
 		draw_line(p-Vector2(16,6),p+Vector2(16,-36),Color("725445"),4)
 	for item in world.pickups:
+		if float(item.x)<camera_x-80. or float(item.x)>camera_x+scene_w+80.:continue
 		if world.taken.has(str(item.id)): continue
+		if item.has("secret") and not world.discovered.has(str(item.secret)):continue
 		var p := Vector2(float(item.x),float(item.y))
 		if str(item.kind).begins_with("fruit_"):
 			var fruit: int=int(str(item.kind).trim_prefix("fruit_"))%8
@@ -141,15 +157,29 @@ func draw_world() -> void:
 				draw_line(point+Vector2(-7,-3),point+Vector2(-7,10),Color("fff2d4"),5.)
 				if item.kind=="arc":draw_line(point+Vector2(2,-10),point+Vector2(2,1),Color("7bd5ea"),3.)
 	for e in world.enemies:
-		if bool(e.defeated) and float(e.get("dead_age",0.))>.3: continue
+		if float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
+		if bool(e.defeated) and float(e.get("dead_age",0.))>.65: continue
 		var p := Vector2(float(e.x),float(e.y))
 		var tint := Color.WHITE
-		if bool(e.defeated): tint.a = maxf(0.,1.-float(e.get("dead_age",0.))/.3)
+		if bool(e.defeated): tint.a = maxf(0.,1.-maxf(0.,float(e.get("dead_age",0.))-.45)/.2)
 		var attack: bool = float(e.windup)>0. or float(e.get("flash",0.))>0. or float(e.get("dash",0.))>0. or float(e.get("dive",0.))>0.
 		var frame: int = posmod(int(float(e.age)*9.),6)
-		if float(e.windup)>0.:frame=clampi(int((1.-float(e.windup)/(.85 if bool(e.mini) else .65))*3.),0,2)
+		if bool(e.defeated):frame=clampi(int(float(e.get("dead_age",0.))/.65*6.),0,5)
+		elif float(e.windup)>0.:frame=clampi(int((1.-float(e.windup)/(.85 if bool(e.mini) else .65))*3.),0,2)
 		elif float(e.get("flash",0.))>0.:frame=clampi(3+int((.24-float(e.flash))/.24*3.),3,5)
-		if str(e.kind) in ["drone","seed","warden"]:
+		if CampaignContent.NEW_ENEMIES.has(str(e.kind)):
+			var spec: Dictionary=CampaignContent.NEW_ENEMIES[str(e.kind)]
+			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
+			if CampaignEnemies.hidden(e):phase=1
+			draw_pose(catalogue.pose(str(spec.atlas),int(spec.row)+phase,frame),p,-int(e.facing),1.,tint)
+		elif str(e.kind) in CampaignContent.HEAVIES and catalogue.DATA.data.atlases.has("heavy-machines"):
+			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
+			draw_pose(catalogue.pose("heavy-machines",CampaignContent.HEAVIES.find(str(e.kind))*4+phase,frame),p,-int(e.facing),1.,tint)
+		elif bool(e.mini) and catalogue.DATA.data.atlases.has("mini-bosses"):
+			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
+			var row: int=["current_guard","terrace_guard","drill_guard"].find(str(e.get("mini_role","current_guard")))*4+phase
+			draw_pose(catalogue.pose("mini-bosses",row,frame),p,-int(e.facing),1.,tint)
+		elif str(e.kind) in ["drone","seed","warden"]:
 			var row: int = {"drone":0,"seed":2,"warden":6}[str(e.kind)]+int(attack)
 			draw_pose(art.pose(row,frame),p,int(e.facing),1.,tint)
 		elif e.kind=="gnome": existing("enemies",4 if attack else 3,frame,p,int(e.facing),1.,tint)
@@ -160,18 +190,28 @@ func draw_world() -> void:
 		if attack:
 			var point := at(p+Vector2(0,-70))
 			draw_circle(point,5,Color("f7bb70")); caption("!",point+Vector2(-3,-10),20)
-		if bool(e.mini) and not bool(e.defeated): small_health(at(p+Vector2(-35,-130)),70,float(e.hp)/float(e.max_hp))
+		if (bool(e.mini) or bool(e.get("heavy",false))) and not bool(e.defeated):small_health(at(p+Vector2(-35,-130)),70,float(e.hp)/float(e.max_hp))
 	if bool(world.boss.active) or world.completed:
-		var row: int = 8 if world.completed else (7 if float(world.boss.windup)>0. else 6)
-		var frame: int=frames.progress("boss-designs",row,world.victory_time/1.2) if world.completed else posmod(int(float(world.boss.clock)*8),frames.count("boss-designs",row))
-		existing("boss-designs",row,frame,Vector2(float(world.boss.x),float(world.boss.y)),-1,1.7)
+		var phase: int=2 if world.completed else clampi(int(world.boss.phase)-1,0,2)
+		var row: int=phase*4+(3 if world.completed else (1 if float(world.boss.windup)>0. else (2 if float(world.boss.wait)>.8 else 0)))
+		var frame: int=clampi(int(world.victory_time/1.2*6),0,5) if world.completed else posmod(int(float(world.boss.clock)*8),6)
+		if not host.motion_enabled or host.options.reduced_motion:frame=3
+		draw_pose(catalogue.pose("root-engine",row,frame),Vector2(float(world.boss.x),float(world.boss.y)))
+		if not world.completed and not world.boss_vulnerable():
+			var core:=at(Vector2(float(world.boss.x),float(world.boss.y)-75.))
+			draw_arc(core,48.,0.,TAU,24,Color("efd58a"),3.);caption(host.t("shield"),core+Vector2(-28,-56),16)
 		if float(world.boss.windup)>0.: caption(host.t("arc_boss_warning"),at(Vector2(float(world.boss.x)-130.,-215.)),19)
-	if bool(world.mount.available) and int(world.mount.hp)>0:
+	if (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and world.floor_at(float(world.mount.x))==0.):
 		var p := Vector2(float(world.mount.x),-42.)
 		if bool(world.mount.ridden): p.y = world.player.y
 		var firing: bool=world.shot_flash>0. and bool(world.mount.ridden)
 		var frame: int=clampi(int((.18-world.shot_flash)/.18*6.),0,5) if firing else posmod(int(world.time*8),6)
-		draw_pose(art.pose(5 if firing else 4,frame),p,world.facing if bool(world.mount.ridden) else 1)
+		var type: String=CampaignVehicles.kind(world)
+		if type!="skimmer":
+			if int(world.mount.hp)<=0.:p.y=0.
+			var row: int=["shell","wind","drill"].find(type)*4+(3 if int(world.mount.hp)<=0 else (2 if float(world.mount.get("hurt",0.))>0. else (1 if firing else 0)))
+			draw_pose(catalogue.pose("vehicles",row,frame),p,world.facing if bool(world.mount.ridden) else 1)
+		else:draw_pose(art.pose(5 if firing else 4,frame),p,world.facing if bool(world.mount.ridden) else 1)
 		if bool(world.mount.ridden):
 			small_health(at(p+Vector2(-28,53)),56,float(world.mount.hp)/4.)
 			if world.character=="sheep" and world.flock>1:
@@ -183,7 +223,7 @@ func draw_world() -> void:
 	if world.invulnerable>0.: tint=Color("ffd9ca")
 	draw_pose(pose,world.player,world.facing,1.,tint)
 	hero_marker={"anchor":[world.player.x,world.player.y],"facing":world.facing,"source":pose.get("source_key","campaign-melee"),"row":pose.get("source_row",0),"frame":pose.get("source_frame",0),"floor":world.floor_at(world.player.x)}
-	if not bool(world.mount.ridden) and (not world.grounded() or world.charging or (world.character=="wolf" and world.boost_held)) and world.melee_time<=0.: held_gun(world.character,world.player,world.facing)
+	if not bool(world.mount.ridden) and (not world.grounded() or world.charging or (world.character=="wolf" and world.boost_held)) and world.melee_time<=0. and world.rescue_time<=0.: held_gun(world.character,world.player,world.facing)
 	if world.character=="sheep":
 		for i in world.flock-1:
 			if bool(world.mount.ridden):
@@ -197,10 +237,13 @@ func draw_world() -> void:
 	if world.charging: small_health(at(world.player+Vector2(-28,-112)),56,world.charge_ratio())
 	for b in world.bullets:
 		var p := at(b.p)
-		var color := Color("e1f5e7") if b.owner=="hero" else Color("eeb079")
+		var color := Color(str(b.get("colour","e1f5e7"))) if b.owner=="hero" else Color("eeb079")
 		if b.kind=="arc": color=Color("89dbec")
 		if b.kind=="wave": draw_rect(Rect2(p-Vector2(20,9),Vector2(40,18)),color)
-		else: draw_line(p,p-Vector2(b.v).normalized()*12.,color,4.)
+		elif b.kind=="beam":draw_line(p,p-Vector2(b.v).normalized()*140.,color,6.)
+		elif b.kind=="disc":draw_arc(p,9.,world.time*8.,world.time*8.+PI*1.8,10,color,3.)
+		elif b.kind=="trap":draw_rect(Rect2(p-Vector2(11,4),Vector2(22,8)),color);draw_circle(p-Vector2(0,6),3.,Color("ffe8b0"))
+		else: draw_line(p,p-Vector2(b.v).normalized()*(25. if b.kind=="harpoon" else 12.),color,4.)
 	for bomb in world.bombs:
 		var p := at(bomb.p); var color := Color(str(bomb.color))
 		draw_circle(p,9,Color("292331"));draw_circle(p,6,color);draw_rect(Rect2(p-Vector2(2,13),Vector2(4,7)),Color("f5e6bf"))

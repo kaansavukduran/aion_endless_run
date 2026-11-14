@@ -1,0 +1,638 @@
+{
+  "url": "http://127.0.0.1:8771/",
+  "instrumentation": "WebAudio start/createBuffer counters; wraps original methods without changing their result. Real menu/input.",
+  "samples": [
+    {
+      "wall": 4.105997504666448e-06,
+      "audio": {
+        "starts": 12,
+        "longStarts": 12,
+        "buffers": 13,
+        "longBuffers": 13
+      },
+      "heap": {
+        "usedSize": 10353704,
+        "totalSize": 15900672,
+        "embedderHeapUsedSize": 1192736,
+        "backingStorageSize": 208915749
+      },
+      "cgroup": 2904928256,
+      "menu": "paused",
+      "music_starts": null
+    },
+    {
+      "wall": 1.2025696169985167,
+      "audio": {
+        "starts": 12,
+        "longStarts": 12,
+        "buffers": 13,
+        "longBuffers": 13
+      },
+      "heap": {
+        "usedSize": 10760796,
+        "totalSize": 15900672,
+        "embedderHeapUsedSize": 1231296,
+        "backingStorageSize": 208921843
+      },
+      "cgroup": 2886676480,
+      "menu": "paused",
+      "music_starts": null
+    },
+    {
+      "wall": 2.3756543599993165,
+      "audio": {
+        "starts": 12,
+        "longStarts": 12,
+        "buffers": 13,
+        "longBuffers": 13
+      },
+      "heap": {
+        "usedSize": 11463224,
+        "totalSize": 15900672,
+        "embedderHeapUsedSize": 1326824,
+        "backingStorageSize": 208922950
+      },
+      "cgroup": 2894266368,
+      "menu": "paused",
+      "music_starts": null
+    },
+    {
+      "wall": 3.638282525997056,
+      "audio": {
+        "starts": 12,
+        "longStarts": 12,
+        "buffers": 13,
+        "longBuffers": 13
+      },
+      "heap": {
+        "usedSize": 11875708,
+        "totalSize": 15900672,
+        "embedderHeapUsedSize": 1468400,
+        "backingStorageSize": 208923223
+      },
+      "cgroup": 2900766720,
+      "menu": "paused",
+      "music_starts": null
+    },
+    {
+      "wall": 4.832946352998988,
+      "audio": {
+        "starts": 12,
+        "longStarts": 12,
+        "buffers": 13,
+        "longBuffers": 13
+      },
+      "heap": {
+        "usedSize": 12259732,
+        "totalSize": 16424960,
+        "embedderHeapUsedSize": 1580208,
+        "backingStorageSize": 208923223
+      },
+      "cgroup": 2907975680,
+      "menu": "paused",
+      "music_starts": null
+    },
+    {
+      "wall": 6.037634036998497,
+      "audio": {
+        "starts": 12,
+        "longStarts": 12,
+        "buffers": 13,
+        "longBuffers": 13
+      },
+      "heap": {
+        "usedSize": 12659944,
+        "totalSize": 16687104,
+        "embedderHeapUsedSize": 1862312,
+        "backingStorageSize": 208923223
+      },
+      "cgroup": 2914820096,
+      "menu": "paused",
+      "music_starts": null
+    },
+    {
+      "wall": 7.276627292998455,
+      "audio": {
+        "starts": 12,
+        "longStarts": 12,
+        "buffers": 13,
+        "longBuffers": 13
+      },
+      "heap": {
+        "usedSize": 13043380,
+        "totalSize": 17211392,
+        "embedderHeapUsedSize": 1896472,
+        "backingStorageSize": 208923223
+      },
+      "cgroup": 2925518848,
+      "menu": "paused",
+      "music_starts": null
+    },
+    {
+      "wall": 8.54366127299727,
+      "audio": {
+        "starts": 12,
+        "longStarts": 12,
+        "buffers": 13,
+        "longBuffers": 13
+      },
+      "heap": {
+        "usedSize": 10090392,
+        "totalSize": 11968512,
+        "embedderHeapUsedSize": 1910784,
+        "backingStorageSize": 208923223
+      },
+      "cgroup": 2934718464,
+      "menu": "paused",
+      "music_starts": null
+    },
+    {
+      "wall": 9.795704062998993,
+      "audio": {
+        "starts": 12,
+        "longStarts": 12,
+        "buffers": 13,
+        "longBuffers": 13
+      },
+      "heap": {
+        "usedSize": 10463476,
+        "totalSize": 11968512,
+        "embedderHeapUsedSize": 2176912,
+        "backingStorageSize": 208923223
+      },
+      "cgroup": 2942009344,
+      "menu": "paused",
+      "music_starts": null
+    },
+    {
+      "wall": 10.980206759999419,
+      "audio": {
+        "starts": 12,
+        "longStarts": 12,
+        "buffers": 13,
+        "longBuffers": 13
+      },
+      "heap": {
+        "usedSize": 10206932,
+        "totalSize": 12230656,
+        "embedderHeapUsedSize": 2202104,
+        "backingStorageSize": 208922959
+      },
+      "cgroup": 2874028032,
+      "menu": "paused",
+      "music_starts": null
+    },
+    {
+      "wall": 12.220846176998748,
+      "audio": {
+        "starts": 14,
+        "longStarts": 14,
+        "buffers": 15,
+        "longBuffers": 15
+      },
+      "heap": {
+        "usedSize": 10734176,
+        "totalSize": 13279232,
+        "embedderHeapUsedSize": 2071888,
+        "backingStorageSize": 234351831
+      },
+      "cgroup": 2940243968,
+      "menu": "",
+      "music_starts": null
+    },
+    {
+      "wall": 13.472757581999758,
+      "audio": {
+        "starts": 32,
+        "longStarts": 32,
+        "buffers": 33,
+        "longBuffers": 33
+      },
+      "heap": {
+        "usedSize": 9843204,
+        "totalSize": 11706368,
+        "embedderHeapUsedSize": 1008232,
+        "backingStorageSize": 234395691
+      },
+      "cgroup": 3096494080,
+      "menu": "",
+      "music_starts": null
+    },
+    {
+      "wall": 14.698266309998871,
+      "audio": {
+        "starts": 52,
+        "longStarts": 50,
+        "buffers": 54,
+        "longBuffers": 51
+      },
+      "heap": {
+        "usedSize": 9934468,
+        "totalSize": 12492800,
+        "embedderHeapUsedSize": 1019336,
+        "backingStorageSize": 268435351
+      },
+      "cgroup": 3302780928,
+      "menu": "",
+      "music_starts": null
+    },
+    {
+      "wall": 15.868674112996814,
+      "audio": {
+        "starts": 73,
+        "longStarts": 70,
+        "buffers": 76,
+        "longBuffers": 71
+      },
+      "heap": {
+        "usedSize": 9879668,
+        "totalSize": 11444224,
+        "embedderHeapUsedSize": 941688,
+        "backingStorageSize": 251564039
+      },
+      "cgroup": 3453616128,
+      "menu": "",
+      "music_starts": null
+    },
+    {
+      "wall": 17.038717404997442,
+      "audio": {
+        "starts": 91,
+        "longStarts": 88,
+        "buffers": 94,
+        "longBuffers": 89
+      },
+      "heap": {
+        "usedSize": 9908880,
+        "totalSize": 11968512,
+        "embedderHeapUsedSize": 1000824,
+        "backingStorageSize": 285506043
+      },
+      "cgroup": 3650375680,
+      "menu": "",
+      "music_starts": null
+    },
+    {
+      "wall": 18.246513690999564,
+      "audio": {
+        "starts": 111,
+        "longStarts": 107,
+        "buffers": 114,
+        "longBuffers": 108
+      },
+      "heap": {
+        "usedSize": 9852868,
+        "totalSize": 11182080,
+        "embedderHeapUsedSize": 937824,
+        "backingStorageSize": 234784345
+      },
+      "cgroup": 3838623744,
+      "menu": "",
+      "music_starts": null
+    },
+    {
+      "wall": 19.500150141997437,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 9929488,
+        "totalSize": 11706368,
+        "embedderHeapUsedSize": 992544,
+        "backingStorageSize": 319630980
+      },
+      "cgroup": 3798454272,
+      "menu": "",
+      "music_starts": null
+    },
+    {
+      "wall": 20.642082414997276,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10455976,
+        "totalSize": 12230656,
+        "embedderHeapUsedSize": 1441032,
+        "backingStorageSize": 319657659
+      },
+      "cgroup": 3425497088,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 21.771666921998985,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10913364,
+        "totalSize": 12492800,
+        "embedderHeapUsedSize": 1590880,
+        "backingStorageSize": 319661877
+      },
+      "cgroup": 3433750528,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 22.956190493998292,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10494808,
+        "totalSize": 12230656,
+        "embedderHeapUsedSize": 1730648,
+        "backingStorageSize": 184164277
+      },
+      "cgroup": 3438485504,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 24.176719328999752,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10270304,
+        "totalSize": 11706368,
+        "embedderHeapUsedSize": 1877104,
+        "backingStorageSize": 184164283
+      },
+      "cgroup": 3375112192,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 25.351705041997775,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10714200,
+        "totalSize": 12230656,
+        "embedderHeapUsedSize": 2034000,
+        "backingStorageSize": 184164283
+      },
+      "cgroup": 3384496128,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 26.542269354999007,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10338404,
+        "totalSize": 12754944,
+        "embedderHeapUsedSize": 2262008,
+        "backingStorageSize": 184164283
+      },
+      "cgroup": 3352637440,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 27.784472159997676,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10878504,
+        "totalSize": 13279232,
+        "embedderHeapUsedSize": 2457032,
+        "backingStorageSize": 184164283
+      },
+      "cgroup": 3361075200,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 28.938478936997853,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10507728,
+        "totalSize": 12492800,
+        "embedderHeapUsedSize": 2615160,
+        "backingStorageSize": 184164283
+      },
+      "cgroup": 3368120320,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 30.12620657199659,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 9941500,
+        "totalSize": 10657792,
+        "embedderHeapUsedSize": 1024472,
+        "backingStorageSize": 158669888
+      },
+      "cgroup": 3263000576,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 31.30037163799716,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10347688,
+        "totalSize": 10919936,
+        "embedderHeapUsedSize": 1190640,
+        "backingStorageSize": 158678061
+      },
+      "cgroup": 3211264000,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 32.473797575999924,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10770680,
+        "totalSize": 11444224,
+        "embedderHeapUsedSize": 1242648,
+        "backingStorageSize": 158678061
+      },
+      "cgroup": 3220140032,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 33.75449531799677,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10245288,
+        "totalSize": 10919936,
+        "embedderHeapUsedSize": 1379200,
+        "backingStorageSize": 158678061
+      },
+      "cgroup": 3228979200,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 34.92448615600006,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10649352,
+        "totalSize": 12230656,
+        "embedderHeapUsedSize": 1500728,
+        "backingStorageSize": 158678061
+      },
+      "cgroup": 3236843520,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 36.151565165997454,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10242308,
+        "totalSize": 11444224,
+        "embedderHeapUsedSize": 1171520,
+        "backingStorageSize": 158678061
+      },
+      "cgroup": 3244556288,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 37.337302374999126,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10656376,
+        "totalSize": 11706368,
+        "embedderHeapUsedSize": 1307296,
+        "backingStorageSize": 158678061
+      },
+      "cgroup": 3218776064,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 38.5116892349979,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10143504,
+        "totalSize": 11182080,
+        "embedderHeapUsedSize": 1454064,
+        "backingStorageSize": 158678061
+      },
+      "cgroup": 3228692480,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 39.717253785998764,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10760272,
+        "totalSize": 11968512,
+        "embedderHeapUsedSize": 1576728,
+        "backingStorageSize": 158678061
+      },
+      "cgroup": 3235188736,
+      "menu": "dead",
+      "music_starts": null
+    },
+    {
+      "wall": 40.89798644199982,
+      "audio": {
+        "starts": 125,
+        "longStarts": 118,
+        "buffers": 128,
+        "longBuffers": 119
+      },
+      "heap": {
+        "usedSize": 10418000,
+        "totalSize": 11444224,
+        "embedderHeapUsedSize": 1708784,
+        "backingStorageSize": 158678061
+      },
+      "cgroup": 3243810816,
+      "menu": "dead",
+      "music_starts": null
+    }
+  ],
+  "errors": [],
+  "build": "938cff2cba20fe93"
+}

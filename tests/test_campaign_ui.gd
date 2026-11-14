@@ -30,6 +30,13 @@ func run() -> void:
 								check(view.encloses(game.menu.get_global_rect()),"Every tutorial page fits the selected system font: "+language+" "+str(scale))
 								for button in game.buttons:check(view.encloses(button.get_global_rect()),"Next and Skip stay reachable on later tutorial pages")
 						check(game.menu_kind=="","Actual Next actions eventually enter gameplay without scrolling")
+	for viewport in [Vector2i(393,873),Vector2i(844,390)]:
+		root.size=viewport;await process_frame
+		for scale in [1.,2.]:
+			game.options.text_scale=scale
+			for language in GameText.LANGUAGES:
+				game.language=language;game.world.load_section("arena");game.menu_kind="";game.resize();game.update_hud();await process_frame
+				check(not game.subtitle.get_global_rect().intersects(game.boss_health.get_global_rect()),"Boss health and localized mission/inventory text never overlap in rotated layouts")
 	game.options.text_scale=1.;game.language="tr";game.menu_kind="briefing";game.build_ui();await process_frame;await process_frame
 	game._input(event(JOY_BUTTON_A));await process_frame
 	check(game.menu_kind=="help","Xbox A / PS Cross activates actual briefing button")
@@ -58,5 +65,28 @@ func run() -> void:
 	game.world.begin("eren");game.world.state="playing";touch.index=2;touch.pressed=true;touch.canceled=false;game._input(touch);game.world.step(.05)
 	check(game.world.charging,"Rabbit touch really starts a charge")
 	touch.pressed=false;touch.canceled=true;game._input(touch);check(not game.world.charging and game.world.velocity.y==0.,"Canceled rabbit touch discards charge without launching an unintended jump")
+	for hero in AionCampaignWorld.HEROES:
+		game.world.begin(hero);game.world.state="playing";game.world.enemies.clear();game.world.gates.clear();game.world.objects.clear();game.world.hazards.clear();game.world.pickups.clear();game.world.crates.clear()
+		var npc: Dictionary=game.world.npcs[0];game.world.player=Vector2(float(npc.x)-65.,float(npc.y));game.world.velocity=Vector2.ZERO;game.world.facing=1
+		game.close_menu();game.update_hud()
+		check(game.actions.attack.action=="cut","Contextual button visibly changes to Cut: "+hero)
+		var attack_rect: Rect2=game.actions.attack.get_global_rect();touch.index=6;touch.position=game.screen_transform*attack_rect.get_center();touch.pressed=true;touch.canceled=false;game._input(touch)
+		check(game.world.rescue_time>0. and game.world.shots==0,"Real touch fire starts the hero's knife action: "+hero)
+		touch.pressed=false;game._input(touch)
+		for frame in 36:game.world.step(.01)
+		check(npc.freed and game.world.rescued.has(str(npc.id)),"Touch release does not cancel the one valid knife cut: "+hero)
+		game.release_all();game.world.retry();game.world.enemies.clear();game.world.player=Vector2(float(game.world.npcs[1].x)-65.,0.);game.world.facing=1
+		game._input(event(game.pad.bindings.shoot));check(game.world.rescue_time>0.,"Saved gamepad fire mapping uses the same knife action: "+hero);game._input(event(game.pad.bindings.shoot,false))
+	game.audio_enabled=true;game.world.load_section("water");game.world.state="playing";game.menu_kind="";game.update_ambient()
+	check(game.ambient.playing and not game.ambient.stream_paused,"Actual regional music stream starts with audio enabled")
+	game.menu_kind="paused";game.update_ambient();check(game.ambient.stream_paused,"Pause suspends regional ambient playback")
+	var starts:=game.ambient_starts
+	for frame in 400:game.update_ambient()
+	check(game.ambient_starts==starts,"A paused long WAV is never restarted on each update")
+	check(game.ambient.playback_type==AudioServer.PLAYBACK_TYPE_STREAM,"Campaign loops use stream playback instead of allocating WebAudio samples repeatedly")
+	game.audio_enabled=false;game.update_ambient();check(not game.ambient.playing,"Existing mute preference really stops new music")
+	game.audio_enabled=true;game.menu_kind="";game.update_ambient();check(game.ambient_starts==starts+1,"Unmuting starts exactly one music stream")
+	for frame in 200:game.update_ambient()
+	check(game.ambient_starts==starts+1,"Ordinary music updates do not restart a running track")
 	game.queue_free();await process_frame
 	print("RESULT: %d campaign UI checks, %d failures" % [checks,failures]);quit(1 if failures else 0)

@@ -1,0 +1,15 @@
+{
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "viewport": [
+    1280,
+    720
+  ],
+  "dpr": 1,
+  "scope": "Actual active mission, standing after a rescue; motion enabled. Not a physical phone or peak-load certification.",
+  "samples": 80,
+  "mean_fps": 13.371218452281465,
+  "median_frame_ms": 50,
+  "p95_frame_ms": 216.6999999999971,
+  "frames_over_50ms": 35,
+  "build": "938cff2cba20fe93"
+}
