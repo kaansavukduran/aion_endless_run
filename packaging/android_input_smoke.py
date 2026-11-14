@@ -20,10 +20,31 @@ def check(ok,message):
  results.append(message);print('PASS',message,flush=True)
 def tap(point):adb('shell','input','tap',*point)
 def menu_button(name=None,text=None):
- state=latest('AION_UI ')
+ state=latest('AION_UI ',lambda s:any(b['name']==name or (text and re.search(text,b['text'])) for b in s['buttons']))
  matches=[b for b in state['buttons'] if b['name']==name or (text and re.search(text,b['text']))]
- assert matches,(name,text,state)
  tap(matches[0]['point'])
+def ready_main():
+ # Every real launch may show the skippable authored opening. Use its actual
+ # logged control, then await the interactive main layout rather than treating
+ # the opening's page='main' label as a ready menu.
+ state=latest('AION_UI ',lambda s:s['page']=='main' and any(b['name'] in ['SkipOpening','LanguageMenu'] for b in s['buttons']),timeout=25)
+ skip=next((b for b in state['buttons'] if b['name']=='SkipOpening'),None)
+ if skip is not None:tap(skip['point'])
+ return latest('AION_UI ',lambda s:s['page']=='main' and any(b['name']=='LanguageMenu' for b in s['buttons']) and all(key in s['regions'] for key in ['PagePanel','StartChooser']),timeout=25)
+def training():
+ # Training is still an actual feature, now under How to play to keep the
+ # primary menu compact. Follow the real UI and its pager; never set practice.
+ state=ready_main()
+ if not any(b['name']=='BossTraining' for b in state['buttons']):
+  menu_button(name='HowToPlay');state=latest('AION_UI ',lambda s:s['page']=='help')
+  for _ in range(16):
+   if any(b['name']=='BossTraining' for b in state['buttons']):break
+   before=[(b['name'],b['text']) for b in state['buttons']]
+   menu_button(name='NextPage')
+   state=latest('AION_UI ',lambda s:s['page']=='help' and [(b['name'],b['text']) for b in s['buttons']]!=before)
+  assert any(b['name']=='BossTraining' for b in state['buttons']),state
+ menu_button(name='BossTraining')
+ latest('AION_UI ',lambda s:s['page']=='bosses')
 def capture(name):
  (a.output/('android-'+name+'.png')).write_bytes(adb('exec-out','screencap','-p'))
 def hold(action,duration=1200):
@@ -36,8 +57,9 @@ def pause():
  # paused layout as well, otherwise main() can read the old Pause button.
  latest('AION_UI ',lambda s:s['page']=='paused')
 def main():
- menu_button(text=r'^(Main menu|Ana menü|Hlavní nabídka)$');latest('AION_UI ',lambda s:s['page']=='main')
+ menu_button(text=r'^(Main menu|Ana menü|Hlavní nabídka)$');ready_main()
 initial=latest('AION_UI ',lambda s:s['page']=='main',timeout=25);capture('first-launch')
+ready_main()
 for code in ['tr','cs','en']:
  menu_button(name='LanguageMenu')
  latest('AION_UI ',lambda s:any(b['name']=='Language_'+code for b in s['buttons']))
@@ -80,7 +102,7 @@ menu_button(name='StartSelect_aion');latest('AION_UI ',lambda s:s['character']==
 gesture=hold('shoot',700)
 try:latest('AION_STATE ',lambda s:s['shooting'] and s['shots']>0);capture('normal-fire');check(True,'Real native Fire touch emits a normal-run bullet')
 finally:gesture.wait(timeout=5)
-pause();main();menu_button(text=r'^Boss training$');latest('AION_UI ',lambda s:s['page']=='bosses');menu_button(name='PracticeBoss_0');latest('AION_STATE ',lambda s:s['practice'] and s['boss_phase']=='fight',timeout=25)
+pause();main();training();menu_button(name='PracticeBoss_0');latest('AION_STATE ',lambda s:s['practice'] and s['boss_phase']=='fight',timeout=25)
 # A slow software-rendered emulator advances less active game time per wall
 # second. Use the real training arena (3HP, no parkour) to observe a full hold;
 # normal-run input is checked above. Never remove the six-shot assertion.

@@ -1,0 +1,23 @@
+{
+  "sha": "c78ab3c15569d3efe9c432aac1c53bcd6f543c8e",
+  "run_id": 43650856407,
+  "job_id": 132619733421,
+  "job": "desktop (ubuntu-24.04)",
+  "failed_step": "Render arcade routes and all six hero animation cycles",
+  "source": "GitHub connector fetch_workflow_job_logs (decoded completed-job log)",
+  "errors": [
+    "2026-11-14T23:04:46.2700782Z \u001b[36;1massert 'RESULT: 40 rendered terrain checks, 0 failures' in text\u001b[0m",
+    "2026-11-14T23:04:46.2701212Z \u001b[36;1massert 'SCRIPT ERROR' not in text and 'FAIL:' not in text\u001b[0m",
+    "2026-11-14T23:04:50.3468575Z RESULT: 40 rendered terrain checks, 0 failures",
+    "2026-11-14T23:04:52.2028645Z \u001b[36;1massert 'RESULT: 108 campaign render checks, 0 failures' in text\u001b[0m",
+    "2026-11-14T23:04:52.2029052Z \u001b[36;1massert 'SCRIPT ERROR' not in text and 'FAIL:' not in text\u001b[0m",
+    "2026-11-14T23:04:59.4183789Z FAIL: Actual rendered source matches hero identity: wolf",
+    "2026-11-14T23:04:59.5511975Z FAIL: Actual rendered source matches hero identity: wolf",
+    "2026-11-14T23:04:59.6833117Z FAIL: Actual rendered source matches hero identity: wolf",
+    "2026-11-14T23:04:59.8158636Z FAIL: Actual rendered source matches hero identity: wolf",
+    "2026-11-14T23:04:59.9497973Z FAIL: Actual rendered source matches hero identity: wolf",
+    "2026-11-14T23:05:00.0819078Z FAIL: Actual rendered source matches hero identity: wolf",
+    "2026-11-14T23:05:07.6946328Z RESULT: 108 campaign render checks, 6 failures",
+    "2026-11-14T23:05:07.9065634Z ##[error]Process completed with exit code 1."
+  ]
+}

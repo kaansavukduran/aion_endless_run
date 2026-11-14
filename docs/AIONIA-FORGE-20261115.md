@@ -119,3 +119,7 @@ Bu kayıt ara export **0.25.0 / `1326c4c2d0227925`** içindir. Son kaynak/varlı
 Settings testindeki ilk iki deneme farklı nedenle başarısızdı: sürücü eski `Option_text_size_2.0` kimliğini arıyordu; Godot düğüm adını `Option_text_size_2_0` yapıyor. Gerçek sayfaların tamamı gezilmişti; bir sayfalama/girdi kusuru olduğu ileri sürülmez. Kimlik ve gerçek sayfa yanıtını bekleme koşulu düzeltildi; eski hata klasörleri korunur.
 
 Export **0.25.0 / `29cde1501f1a9acb`** üç rotada ve EN/%200 front akışında sınandı. Son küçük onarımlar için üretilecek yeni hash bu sonuçların yerine otomatik yazılmaz. Yeni paket doğrulaması tamamlanınca bu bölüm güncellenecek. Fiziksel Poco X7/iPhone/gerçek Xbox-PS, gerçek Edge/Safari bu koşuların yerine geçmez ve NOT TESTED kalır. Yayın READY tek başına oynanış doğrulaması değildir.
+
+## İlk yayın kapısı · c78ab3c
+
+Gerçek Vercel önizlemesi30048532c94c99a7,45kontrol/0hata ve19dosya bütünlüğü PASS. GitHub43650856407 kaynak40/33.780, Windows ve macOS PASS. Linux/Android'in iki eski test önkoşulu durdu: renderer eski kurt paftasını bekliyordu; emülatör sürücüsü açılışı atlamadan dil menüsü arıyordu. Bunlar geçilmiş sayılmadı. Renderer yeni satır kimlikleriyle108/0yerelde doğrulandı; Android sürücüsü ve yeni CI kontrolü son makbuzda ayrıca izlenecek. Runtime kaynakları/varlıkları bu test onarımında değişmiyor.

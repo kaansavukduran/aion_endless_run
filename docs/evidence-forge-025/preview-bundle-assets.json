@@ -1,0 +1,142 @@
+{
+  "url": "https://aionendless-q3843atha-vegan-axolotl.vercel.app/",
+  "recorded_utc": "2026-11-14T23:04:10.977700+00:00",
+  "version": "0.25.0",
+  "build": "30048532c94c99a7",
+  "files": {
+    "aion-30048532c94c99a7.pck": {
+      "status": 200,
+      "bytes": 157940412,
+      "sha256": "58cbbf89fc42b8bd2c87095d3a8dd4c08d63e7904f9498d3004c2ad72f370413",
+      "content_type": "application/octet-stream",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-30048532c94c99a7.js": {
+      "status": 200,
+      "bytes": 315759,
+      "sha256": "e3f56ee40e6f84371053db06692cfac15e2c8659547b11c6b2dfa1996dabd981",
+      "content_type": "application/javascript; charset=utf-8",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-30048532c94c99a7.wasm": {
+      "status": 200,
+      "bytes": 37700666,
+      "sha256": "26b61ce95247012ab3dca3ff51e96d1cdbff44ee91a8c20a83e150afca83f1b6",
+      "content_type": "application/wasm",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-30048532c94c99a7.audio.worklet.js": {
+      "status": 200,
+      "bytes": 7298,
+      "sha256": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+      "content_type": "application/javascript; charset=utf-8",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-30048532c94c99a7.audio.position.worklet.js": {
+      "status": 200,
+      "bytes": 2973,
+      "sha256": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+      "content_type": "application/javascript; charset=utf-8",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-30048532c94c99a7.png": {
+      "status": 200,
+      "bytes": 21443,
+      "sha256": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+      "content_type": "image/png",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-30048532c94c99a7.icon.png": {
+      "status": 200,
+      "bytes": 4923,
+      "sha256": "b90dbfa25f495297cb2dd5616e610591195a63734010120d4710508499832f6c",
+      "content_type": "image/png",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-30048532c94c99a7.apple-touch-icon.png": {
+      "status": 200,
+      "bytes": 4283,
+      "sha256": "3eac0892636b7e51cf74753f9656062ee6795f179443622d778d26ff8e453c00",
+      "content_type": "image/png",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-30048532c94c99a7.144x144.png": {
+      "status": 200,
+      "bytes": 3146,
+      "sha256": "fa5c7500b372756f6ec7eaf301d87826349b4a772e71649852b3b0b3eb29f51f",
+      "content_type": "image/png",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-30048532c94c99a7.180x180.png": {
+      "status": 200,
+      "bytes": 4283,
+      "sha256": "3eac0892636b7e51cf74753f9656062ee6795f179443622d778d26ff8e453c00",
+      "content_type": "image/png",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-30048532c94c99a7.512x512.png": {
+      "status": 200,
+      "bytes": 17069,
+      "sha256": "afff6fd69a6e00fbc7e03697f4fec8105290fca184b7308789cf3c507708db96",
+      "content_type": "image/png",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "fragaria-30048532c94c99a7.png": {
+      "status": 200,
+      "bytes": 704922,
+      "sha256": "b01ae5896be8ba724faabbd3cfd6e70b929e6491efec54ea066d82797ab9120d",
+      "content_type": "image/png",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "pixel-font-30048532c94c99a7.ttf": {
+      "status": 200,
+      "bytes": 79160,
+      "sha256": "9ba86cd010a4de309d263ceff8e8044092c9db7efda869620cb9ff1c4389e8a5",
+      "content_type": "font/ttf",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "index.html": {
+      "status": 200,
+      "bytes": 26563,
+      "sha256": "3eb53736e593e3f66be0a51a4e64b89ea645b441358323cee9801d001f1d42bf",
+      "content_type": "text/html; charset=utf-8",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "build.json": {
+      "status": 200,
+      "bytes": 1795,
+      "sha256": "ec15d5a21f2c4d1881d8850c61603130865789f43c98bf920191c45001aa7252",
+      "content_type": "application/json; charset=utf-8",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "aion-latest.json": {
+      "status": 200,
+      "bytes": 1795,
+      "sha256": "ec15d5a21f2c4d1881d8850c61603130865789f43c98bf920191c45001aa7252",
+      "content_type": "application/json; charset=utf-8",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "index.manifest.json": {
+      "status": 200,
+      "bytes": 379,
+      "sha256": "19acbaba7e435fdb77a5ebabdcd31d4ff6116765ce9b7a5f5055a15feb2744e4",
+      "content_type": "application/json; charset=utf-8",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "index.offline.html": {
+      "status": 200,
+      "bytes": 971,
+      "sha256": "b0a5d443e78f58717adac780bac91c1431bfa3b801c41f4707d507fb5ad2e47f",
+      "content_type": "text/html; charset=utf-8",
+      "cache_control": "public, max-age=0, must-revalidate"
+    },
+    "index.service.worker.js": {
+      "status": 200,
+      "bytes": 7452,
+      "sha256": "e25ef2733effa7b8c09d5e6582824927b34e27b62346abf51d731144af93ab86",
+      "content_type": "application/javascript; charset=utf-8",
+      "cache_control": "public, max-age=0, must-revalidate"
+    }
+  },
+  "scope": "Actual HTTPS responses verified with system TLS trust, all thirteen manifest asset hashes; no certificate bypass."
+}

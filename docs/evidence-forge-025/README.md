@@ -22,3 +22,13 @@ Son `3649…` derlemesi, `29cde…` üzerindeki üç tam rotadan sonra dar kapsa
 Tarayıcı kontrolleri gerçek girişleri kullanır; tam görev yürüyüşlerinde teleport, dokunulmazlık veya düşman silme kullanılmaz. Sanal kol fiziksel Xbox/PS testi değildir. Yazılımsal llvmpipe sonuçları telefon performansı veya 60 FPS garantisi değildir. Fiziksel Poco/iPhone, gerçek kol ve gerçek Safari/Edge sınanmadı. Yeni native Release yayımlanmadı.
 
 İlk hatalı denemeler yerel çalışma alanında korundu: eski test düğüm kimliği, sunum biterken eski koordinata dokunma, ayakta ateş denemesinde gerçek ölüm ve demo dönüşünde henüz yerleşmemiş menüye dokunma. Ürün hataları ile sürücü hataları teslim kaydında ayrıdır. Özel standart belgeleri, kullanıcı eki, erişim çerezleri ve geçici preview bağlantıları bu kamu dizinine alınmadı.
+
+## İlk CI ve gerçek Vercel önizlemesi
+
+`c78ab3c` için GitHub run43650856407: kaynak işi **40 süit /33.780 kontrol PASS**, Windows ve macOS PASS. Bu taze CI sayısı yerel birleştirilmiş33.651sayısından ayrı kayıttır; ortam/yazı metriğine göre UI matrisindeki gerçek dallar değişir. Linux eski renderer yalnız `pixel-wolf` beklediği için altı kurt kimlik kontrolünde durdu; Android eski sürücü yeni açılışı atlamadan LanguageMenu aradı. İki başarısızlık ham JSON'da korunur.
+
+Renderer yeni kurdun gerçek `forge-mouth-carry` satır2 kimliğini ve diğer beş kahramanın kendi piksel paftası satır3 kimliğini doğrular. Donmuş fixture'da önceki kahramanın elle atanmış .12s atış parlaması sonraki koşuya taşınmaması için temizlendi. Güncel renderer **108 kontrol,0hata**. Ürün kodu değişmedi.
+
+Vercel protected preview dpl_CbG5NyhMq9rH4563u31yzvC5Zzng, aynı c78commit, gerçek sunucu derlemesi **30048532c94c99a7**: **45 gerçek giriş kontrolü PASS**,0hata; 19dosya,13manifest varlığının SHA-256özeti ve WASM MIME PASS. Canlı tarayıcı bu ortamın sistem TLS güven zinciri üzerinden çalıştı; sertifika denetimi kapatılmadı. Bu tanı sürücüsünde servis worker kapalıdır; canlı offline testi diye sunulmaz. PWA/offline kanıtı ayrı ship-upgrade ve tam rota sonuçlarıdır. Geçici görüntüleme yetkisi/çerezi bu dizine alınmadı, Vercel koruması değiştirilmedi.
+
+Android sürücüsü artık her gerçek başlangıçta yalnız görünen SkipOpening'e dokunur, gerçek ana menüyü bekler ve antrenmana Yardım→sayfalama→BossTraining yoluyla girer. Önceki15emülatör iddiası korunmuştur; dört paket-dekodlama mock kontrolü ve Python derleme denetimi PASS. Bu yerel sözleşme testi, yeni APK'nın emülatörde geçtiği anlamına gelmez; sonraki CI sonucu ayrı gereklidir.
