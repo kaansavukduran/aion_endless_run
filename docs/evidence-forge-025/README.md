@@ -32,3 +32,11 @@ Renderer yeni kurdun gerçek `forge-mouth-carry` satır2 kimliğini ve diğer be
 Vercel protected preview dpl_CbG5NyhMq9rH4563u31yzvC5Zzng, aynı c78commit, gerçek sunucu derlemesi **30048532c94c99a7**: **45 gerçek giriş kontrolü PASS**,0hata; 19dosya,13manifest varlığının SHA-256özeti ve WASM MIME PASS. Canlı tarayıcı bu ortamın sistem TLS güven zinciri üzerinden çalıştı; sertifika denetimi kapatılmadı. Bu tanı sürücüsünde servis worker kapalıdır; canlı offline testi diye sunulmaz. PWA/offline kanıtı ayrı ship-upgrade ve tam rota sonuçlarıdır. Geçici görüntüleme yetkisi/çerezi bu dizine alınmadı, Vercel koruması değiştirilmedi.
 
 Android sürücüsü artık her gerçek başlangıçta yalnız görünen SkipOpening'e dokunur, gerçek ana menüyü bekler ve antrenmana Yardım→sayfalama→BossTraining yoluyla girer. Önceki15emülatör iddiası korunmuştur; dört paket-dekodlama mock kontrolü ve Python derleme denetimi PASS. Bu yerel sözleşme testi, yeni APK'nın emülatörde geçtiği anlamına gelmez; sonraki CI sonucu ayrı gereklidir.
+
+## Son hazır menü sözleşmesi ve Android görüntüsü
+
+Son48dcönizlemesinde isteğe bağlı Firefox/%200tam akış,23başarılı kontrolden sonra demo dönüşünün ilk StartRun dokunmasında durdu; bu28PASSsayılmaz. Odaklı gerçek-giriş probunda üç döngünün birinde eski(28,72)hedefi kaçtı, yerleşmiş(251,151)hedefi çalıştı. `demo-return-probe/targeted-results.json` bu başarısız ilk dokunmayı ve sonraki ölçümü açıkça ayırır. İki tarayıcı rAF'sinin iki Godot yerleşim karesi olduğu varsayımı yanlıştı.
+
+Menü gizliden görünür hale geçince UI-hazır bayrağı artık geçersiz kılınır; var olan iki gerçek Godot process-frame bariyerinden sonra güncel hedefler yayımlanır. Fizik, karakter pivotu, çizimler veya kontrol şeması değişmez. Yeni dört regresyon kontrolü dahil1968front kontrolü PASS. Yeni web paketi ve yayın kontrolleri bu son düzeltmeyi ayrıca sınayacak.
+
+48dcAndroid emülatöründe15gerçek giriş iddiası geçti; son görüntü denetimi,148renkli kasıtlı açılışı tam sahne sanıp durdu. Son sürücü ilk tam-sahne görüntüsünü gerçekSkipOpening/ana menü hazır olduktan sonra alır.200renklik kalite eşiği düşürülmez.4Android paket mock kontrolü ve Python derleme denetimi PASS; yeni emülatör görsel sonucu ayrıca gereklidir.

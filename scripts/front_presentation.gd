@@ -41,6 +41,7 @@ func input(event: InputEvent) -> bool:
 func refresh() -> void:
 	if is_instance_valid(modal):modal.queue_free()
 	if not is_instance_valid(host.ui):return
+	var menu_was_visible: bool=host.menu_layer.visible
 	modal=Control.new();modal.name="TitlePresentation";modal.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(modal)
 	if get_parent()==host.ui:host.ui.move_child(self,host.ui.get_child_count()-1)
 	if host.page=="main" and (intro_active or demo_world!=null):
@@ -50,6 +51,12 @@ func refresh() -> void:
 		skip.size=Vector2(host.view_w-40,maxf(64.,skip.custom_minimum_size.y))
 		modal.add_child(skip)
 	host.menu_layer.visible=host.page!="main" or (not intro_active and demo_world==null)
+	if host.menu_layer.visible and not menu_was_visible:
+		# A demo can hide a just-built menu before its containers ever sort.
+		# Report readiness only after the same Godot-frame barrier as rebuild().
+		host.ui_layout_ready=false
+		host.web_stamp=""
+		host.refresh_interface_metadata.call_deferred(host.layout_generation)
 	if is_instance_valid(host.language_button):host.language_button.visible=host.page!="main" or (not intro_active and demo_world==null)
 	queue_redraw()
 func start_demo(index: int=0) -> void:

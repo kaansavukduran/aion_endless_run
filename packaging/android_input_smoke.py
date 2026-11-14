@@ -58,8 +58,11 @@ def pause():
  latest('AION_UI ',lambda s:s['page']=='paused')
 def main():
  menu_button(text=r'^(Main menu|Ana menü|Hlavní nabídka)$');ready_main()
-initial=latest('AION_UI ',lambda s:s['page']=='main',timeout=25);capture('first-launch')
+initial=latest('AION_UI ',lambda s:s['page']=='main',timeout=25)
 ready_main()
+# The full-scene image validator expects the interactive game, not the
+# intentionally sparse dark opening. Keep its existing thresholds unchanged.
+capture('first-launch')
 for code in ['tr','cs','en']:
  menu_button(name='LanguageMenu')
  latest('AION_UI ',lambda s:any(b['name']=='Language_'+code for b in s['buttons']))

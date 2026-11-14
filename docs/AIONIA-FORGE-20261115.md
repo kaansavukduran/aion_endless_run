@@ -123,3 +123,7 @@ Export **0.25.0 / `29cde1501f1a9acb`** üç rotada ve EN/%200 front akışında 
 ## İlk yayın kapısı · c78ab3c
 
 Gerçek Vercel önizlemesi30048532c94c99a7,45kontrol/0hata ve19dosya bütünlüğü PASS. GitHub43650856407 kaynak40/33.780, Windows ve macOS PASS. Linux/Android'in iki eski test önkoşulu durdu: renderer eski kurt paftasını bekliyordu; emülatör sürücüsü açılışı atlamadan dil menüsü arıyordu. Bunlar geçilmiş sayılmadı. Renderer yeni satır kimlikleriyle108/0yerelde doğrulandı; Android sürücüsü ve yeni CI kontrolü son makbuzda ayrıca izlenecek. Runtime kaynakları/varlıkları bu test onarımında değişmiyor.
+
+## Son dar kapsamlı regresyon onarımı
+
+48dcCI'deAndroid'in15gerçek giriş kontrolü geçti, fakat açılış ekranının tam-sahne görüntüsü diye değerlendirilmesi görüntü kalite kapısını durdurdu. Çekim anı düzeltildi; eşik değişmedi. Firefoxönizlemesinde demo dönüşü hedef koordinatının yerleşimden önce yayımlandığı gerçek probla kanıtlandı:(28,72)yerine(251,151). Menü gizliden görünür olurken var olan Godot-frame hazır sözleşmesi uygulanır;1968front kontrolü PASS. Yeni paket/CI/yayın sonucu önceki paketlerin yerine sessizce yazılmaz.
