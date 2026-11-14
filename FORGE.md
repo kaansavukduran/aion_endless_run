@@ -1,5 +1,7 @@
 # 0.22.0 · Model-faithful visual and ability revision
 
+Published0.22.0: final source CI2a782f5/run43578174636 passes all five gates;21 suites/12178 checks,265 browser assertions and15 native Android inputs. Tag87cb29e and publication43579686335 attempt2 preserve the verified runtime. All11 public assets match hashes; downloaded stable APK v2/v3 signer/code26, Mac universal ZIP and19-file offline archive verified. First publication attempt failed on a list response missing the newly created draft, before uploads. Main now reads the create response directly. Evidence: docs/evidence-v0220/verification.json. Physical devices remain NOT TESTED.
+
 Six new original AI-assisted sheets preserve model identity: upright biped sheep, original Aion gills/coat/DNA-tail, low shoulder rotations, steady owl glide/flaps, Eren charge/leap, crow/gnome material detail and18 distinct collectibles.56 prior PNGs remain byte-identical. New sources are isolated by actual alpha spans with anatomical anchors and one calibrated scale per source; physical actors are not shifted to mask frame errors.
 
 Owl gets three upward airborne flaps on fresh Jump presses, held glide remains and landing refills. Eren now shares hold/release charge with Emre, without changing their distinct art. Branded loader fills/percent/ellipsis are uniformly strawberry red. Flora uses opaque connected roots and the actual support plane. Existing weapons, bosses/story, saves, gamepad and split-touch layout remain.

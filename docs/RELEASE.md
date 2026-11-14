@@ -4,7 +4,7 @@
 
 Aion ve Kutsanmış'ın paftaya sadık yeni çizimleri, iki ayaklı koyun koşusu, altı karakterin sabit yüz/gerçek ayak kaydı, üç havada kanat çırpışı ve Eren'in tut/bırak şarjı. Yeni karga/cüce ve18 meyve/güç simgesi. Kökler gerçek zemin çizgisinde; yükleyici tüm dolanlar/yüzde/noktalarda çilek kırmızısı. Eren'in el-silah bağlantısı ve koyunun gerçek mavi namlusu ayrıca düzeltildi. Sonsuz tabanca,15s seviyeler,5 seviyede bir boss/ara sahne ve onaylı split touch korunur.
 
-Dokuz paket hedefi: Windows Setup/portable; Linux AppImage/DEB/portable; macOS universal DMG/ZIP; Android ARM64/x64 APK; offline web arşivi. Paket/yayın doğrulaması tamamlanmadan başarı varsayılmaz; gerçek durum sürümlü teslim JSON'undadır. Android versionCode26, aynı uygulama kimliği ve kalıcı imza. Son uygulama kaynağı7f499f9; sonraki teslim commit'leri belgeler/test/yayın akışını kaydeder.
+Yayımlanmış dokuz paket: Windows Setup/portable; Linux AppImage/DEB/portable; macOS universal DMG/ZIP; Android ARM64/x64 APK; offline web arşivi. 9 paket ve2 makbuzun kamu boyut/özetleri doğrulandı; gerçek APK imzası, Mac ZIP mimarileri ve offline arşiv ayrıca indirip denetlendi. CI21 grup/12.178, tarayıcı265 ve Android emülatöründe15 giriş kontrolü PASS. Ayrıntılı kapsam sürümlü teslim JSON'undadır. Android versionCode26, aynı uygulama kimliği ve kalıcı imza. Son uygulama kaynağı7f499f9; sonraki teslim commit'leri belgeler/test/yayın akışını kaydeder.
 
 Native iOS sahibinin Apple imzasını gerektirir. Mac ad-hoc; Developer ID/noter, Windows Authenticode, fiziksel Poco/iPhone/kol veya gerçek telefon performansı doğrulanmış değildir. Browser Gamepad API, CDP dokunma ve Android API30 emülatörü fiziksel cihaz sayılmaz. Rekorlar iki web origin'inde ayrı saklanır.
 

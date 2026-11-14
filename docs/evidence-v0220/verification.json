@@ -1,10 +1,10 @@
 {
   "version": "0.22.0",
-  "recorded_at": "2026-11-14T09:15:07.428046+00:00",
+  "recorded_at": "2026-11-14T09:20:00.932208+00:00",
   "application_source_commit": "7f499f95f95f7d740aa476c29f16e5c6c808d9d0",
   "source_commit": "2a782f533bb9b7a15ad21010107a0eca32ab9bf8",
   "ci_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43578174636",
-  "status": "ALL_TESTS_PASS_PUBLICATION_PENDING",
+  "status": "PUBLISHED_VERIFIED",
   "source_groups": 21,
   "local_source_checks": 12127,
   "browser_scope": "265 distinct recorded browser assertions:139 six-hero normal-input;32 new abilities/standard Gamepad API/red-loader;13 DPR3 touch/cancel/rotation;4 real swipes;19 headed Firefox loader/retry/cache/offline/record;11 natural level5 boss story/victory/return;44 final public checks on both origins in Firefox and Chromium;3 actual final-CI service-worker/offline/earned-record checks. No world/save/RNG/health setters.122 explicit native visual fixtures are separate. Physical phones/controllers NOT TESTED.",
@@ -37,5 +37,25 @@
   "pages_status": "PASS: current buildf7f0ba8e5e813f2e;11 checks each in headed Firefox and Chromium.",
   "offline_status": "PASS: actual final CI output buildf7f0ba8e5e813f2e, installed ServiceWorker, saved earned record, offline reload and real Fire.",
   "android_test_driver_scope": "Standard Android input command delegated by one device-side VM; four actual DOWN/UP pairs,961/676/700/655ms,4.0276s total. Observed airborne owl flap counts0,1,2,3. This is input, not a game-state setter.",
-  "ci_failure_history": "Earlier Android host log/screenshot trips missed airborne windows; fixed-duration waits were unreliable under emulator load. The final driver preserves all three flap assertions and uses real device-side Android DOWN/UP events. SDK37.2.0 preview detection required choosing the actual project SDK35. A macOS Resource busy failure is narrowly retried at most3 times, verified by3 failure-contract tests. No failed run is reported as an overall PASS."
+  "ci_failure_history": "Earlier Android host log/screenshot trips missed airborne windows; fixed-duration waits were unreliable under emulator load. The final driver preserves all three flap assertions and uses real device-side Android DOWN/UP events. SDK37.2.0 preview detection required choosing the actual project SDK35. A macOS Resource busy failure is narrowly retried at most3 times, verified by3 failure-contract tests. No failed run is reported as an overall PASS.",
+  "release_url": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.22.0",
+  "release_tag_commit": "87cb29ed2a1f87f4c2e074a54b2a9fbb31ab8836",
+  "publication_run": "https://github.com/kaansavukduran/aion_endless_run/actions/runs/43579686335",
+  "publication_attempt": 2,
+  "all11_public_assets_digest_verified": true,
+  "public_package_count": 9,
+  "public_receipt_count": 2,
+  "public_apk": {
+    "bytes": 164619541,
+    "sha256": "98ab648dd4d8ed8e2a27ddeea5cb77415f3da841ce9c04c61dfd1c95d0f93e69",
+    "version": "0.22.0",
+    "version_code": 26,
+    "v2_v3_signatures_verified": true,
+    "stable_signer_preserved": true
+  },
+  "public_offline_archive_files": 19,
+  "public_mac_crc_and_two_architectures_verified": true,
+  "downloaded_package_scope": "Actual public APK, macOS universal ZIP and offline web archive were downloaded and checked. Other six public packages use exact successful platform CI artifacts with all server size/SHA256 digests verified; not all nine downloads were reinstalled locally.",
+  "publication_first_attempt": "Runtime/platform gate passed and tag87cb29e/draft445170297 were created. The immediately following releases-list response did not include the new draft, causing StopIteration before package upload/publication. Second attempt reused the unchanged tag/draft and succeeded. Main now uses the release-creation API response instead of reading the list immediately after creation; no tag was moved.",
+  "artifact_runtime_scope": "Application source7f499f9, complete-platform CI source2a782f5, documentation/publication tag87cb29e are separate. Runtime equality was enforced before publishing. Final main only adds delivery evidence and fixes release bootstrap read-after-create. Same tested packages are published without another runtime rebuild."
 }

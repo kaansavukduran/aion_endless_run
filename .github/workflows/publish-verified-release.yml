@@ -80,8 +80,11 @@ jobs:
             else:assert json.loads(existing.stdout)['object']['sha']==target,'Existing tags must never be moved'
             notes=Path('build/release-notes.md')
             notes.write_text(Path('docs/evidence-v0220/RELEASE_NOTES.md').read_text()+'\n\nVerified source and platform jobs: '+run['html_url']+'\n')
-            subprocess.run(['gh','release','create',os.environ['AION_TAG'],'--verify-tag','--draft','--prerelease','--title','Aion Endless Run '+version,'--notes-file',str(notes)],check=True)
-            release=next(r for r in json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/releases?per_page=100'],text=True)) if r['tag_name']==os.environ['AION_TAG'])
+            # Use the creation response: the releases list can omit a just-created draft.
+            payload=Path('build/release-create.json')
+            payload.write_text(json.dumps({'tag_name':os.environ['AION_TAG'],'name':'Aion Endless Run '+version,'draft':True,'prerelease':True,'body':notes.read_text()}))
+            release=json.loads(subprocess.check_output(['gh','api','--method','POST','repos/'+os.environ['GITHUB_REPOSITORY']+'/releases','--input',str(payload)],text=True))
+            assert release['tag_name']==os.environ['AION_TAG'] and release['draft']
           assert release['draft'],'Published releases must not be overwritten'
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('version='+version+'\nrelease_id='+str(release['id'])+'\nsource_sha='+run['head_sha']+'\n')
           PY

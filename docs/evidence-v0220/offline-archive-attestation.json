@@ -1,0 +1,86 @@
+{
+  "release": "https://github.com/kaansavukduran/aion_endless_run/releases/tag/v0.22.0",
+  "archive_sha256": "6bf9d9da9f72b8bb5176b435dfed52d5b38c97f65d52ac22f2984d8aec4d6f75",
+  "archive_files_match_actual_CI_web_artifact": true,
+  "build": "f7f0ba8e5e813f2e",
+  "verified_file_count": 19,
+  "files": [
+    {
+      "path": "aion-f7f0ba8e5e813f2e.pck",
+      "sha256": "8322319715c85199da2faba3d909bbda2b1d0084ce86ac7a019d800ce638d3ea"
+    },
+    {
+      "path": "aion-f7f0ba8e5e813f2e.180x180.png",
+      "sha256": "3eac0892636b7e51cf74753f9656062ee6795f179443622d778d26ff8e453c00"
+    },
+    {
+      "path": "aion-latest.json",
+      "sha256": "1fc167b26cbd5e6a91d0d7caca96126e7b44cc2c9fe2f4a9782023f7823b18da"
+    },
+    {
+      "path": "aion-f7f0ba8e5e813f2e.js",
+      "sha256": "e3f56ee40e6f84371053db06692cfac15e2c8659547b11c6b2dfa1996dabd981"
+    },
+    {
+      "path": "aion-f7f0ba8e5e813f2e.icon.png",
+      "sha256": "b90dbfa25f495297cb2dd5616e610591195a63734010120d4710508499832f6c"
+    },
+    {
+      "path": "aion-f7f0ba8e5e813f2e.512x512.png",
+      "sha256": "afff6fd69a6e00fbc7e03697f4fec8105290fca184b7308789cf3c507708db96"
+    },
+    {
+      "path": "index.manifest.json",
+      "sha256": "db3038f7b57b248f0783da791805eb7689c944e0f334371e9437545becfd281f"
+    },
+    {
+      "path": "build.json",
+      "sha256": "1fc167b26cbd5e6a91d0d7caca96126e7b44cc2c9fe2f4a9782023f7823b18da"
+    },
+    {
+      "path": "index.html",
+      "sha256": "0436a4f805a59d96caaf1a51ab211f4f727d4c50f953bb3560b76b89b856d254"
+    },
+    {
+      "path": "aion-f7f0ba8e5e813f2e.png",
+      "sha256": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e"
+    },
+    {
+      "path": "aion-f7f0ba8e5e813f2e.wasm",
+      "sha256": "26b61ce95247012ab3dca3ff51e96d1cdbff44ee91a8c20a83e150afca83f1b6"
+    },
+    {
+      "path": "aion-f7f0ba8e5e813f2e.apple-touch-icon.png",
+      "sha256": "3eac0892636b7e51cf74753f9656062ee6795f179443622d778d26ff8e453c00"
+    },
+    {
+      "path": "index.offline.html",
+      "sha256": "b0a5d443e78f58717adac780bac91c1431bfa3b801c41f4707d507fb5ad2e47f"
+    },
+    {
+      "path": "fragaria-f7f0ba8e5e813f2e.png",
+      "sha256": "b01ae5896be8ba724faabbd3cfd6e70b929e6491efec54ea066d82797ab9120d"
+    },
+    {
+      "path": "aion-f7f0ba8e5e813f2e.audio.worklet.js",
+      "sha256": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3"
+    },
+    {
+      "path": "aion-f7f0ba8e5e813f2e.audio.position.worklet.js",
+      "sha256": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8"
+    },
+    {
+      "path": "index.service.worker.js",
+      "sha256": "570ad7d8094d4542631a5257713637506636a3fac865251af63b2e63d9792d8f"
+    },
+    {
+      "path": "pixel-font-f7f0ba8e5e813f2e.ttf",
+      "sha256": "9ba86cd010a4de309d263ceff8e8044092c9db7efda869620cb9ff1c4389e8a5"
+    },
+    {
+      "path": "aion-f7f0ba8e5e813f2e.144x144.png",
+      "sha256": "fa5c7500b372756f6ec7eaf301d87826349b4a772e71649852b3b0b3eb29f51f"
+    }
+  ],
+  "worker_test": "Three normal-input local-subpath service-worker/offline/earned-record checks use these exact web files; public CA-forwarded smoke tests separately disable SW."
+}
