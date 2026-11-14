@@ -1,3 +1,7 @@
+# Ground material update · scope and handoff
+
+Baseline clean main f2142f9. Live AIONIA1.7/regression1.1 read. Replace game.gd flat road/regular dashes with cached authored pixel-material strips in terrain_view.gd; six biome palettes, fixed real ground, preserved pits/props/characters/input/saves.146 terrain coverage/alpha/grid/RNG tests;1136 focused source checks PASS;40 real-render fixture checks PASS including50% blend/pit/rotation.88 normal browser assertions pass on candidateac5c460bbdcc83eb; final change only corrects double-compositing the biome fill. Source runtime and release assets otherwise preserved. Production verification is recorded in docs/evidence-terrain. Existing0.22.0 packages are not overwritten.
+
 # 0.22.0 · Model-faithful visual and ability revision
 
 Published0.22.0: final source CI2a782f5/run43578174636 passes all five gates;21 suites/12178 checks,265 browser assertions and15 native Android inputs. Tag87cb29e and publication43579686335 attempt2 preserve the verified runtime. All11 public assets match hashes; downloaded stable APK v2/v3 signer/code26, Mac universal ZIP and19-file offline archive verified. First publication attempt failed on a list response missing the newly created draft, before uploads. Main now reads the create response directly. Evidence: docs/evidence-v0220/verification.json. Physical devices remain NOT TESTED.

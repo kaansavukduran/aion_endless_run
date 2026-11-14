@@ -8,6 +8,10 @@ Sevimli, çevrimdışı bir pixel-art koşu oyunu. **Space ile zıpla, Esc ile m
 
 0.21.0: Boss’lar5 seviyede bir gelir. Üç boss için farklı konuşmalar, altı kahramanın şaşırma çizimleri ve kırmızı tabanca teslimi eklendi. Ara sahnede koşu donar; Devam/Atla klavye, dokunma ve kolla çalışır. Kırmızı tabanca koşu boyunca boss’a iki kat hasar verir. Yerdeki altı kahramanın ayak hizası düzeltildi; basılı takla döngülüdür ve skor bandı inceltildi. Sınırsız0,32s ateş,15s seviyeler,11 dil, yetenekler ve kayıtlar korunur. [Bu sürümün kanıtı](docs/evidence-v0210/README.md).
 
+## Web zemini güncellemesi
+
+Altı biyoma uygun pixel-art yol: kumtaşı, kar/buz kenarı, yosunlu toprak, aşınmış şehir taşları, orman kökleri ve bazalt. Düz renk/çizgi dolgusu yerine katmanlı malzeme, gömülü taşlar ve sakin bir alt doku kullanılır. Karakterlerin bastığı zemin ve çarpışma kuralları değişmez. [Gerçek ekranlar ve doğrulama](docs/evidence-terrain/README.md). Bu web güncellemesi önceki0.22.0 indirme paketlerinin üzerine yazmaz.
+
 ## 0.22.0 · Paftaya sadık görsel yenileme
 
 Aion'un pembe derisi, mavi uçlu pembe solungaçları, bilim önlüğü ve DNA kuyruğu korunur. Kutsanmış artık özgün modelindeki gibi **iki ayaklı** koşar; küçük takipçiler aynı kaynağı kullanır. Yeni karga/cüce, sekiz meyve ve on güç simgesi ortak pixel-art malzeme/ışık dili kullanır.56 eski PNG değişmez; altı yeni pafta eklenir.

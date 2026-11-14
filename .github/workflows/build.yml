@@ -80,6 +80,27 @@ jobs:
           sudo apt-get install -y ./build/AionEndlessRun-0.22.0-linux-x64.deb
           timeout 15 /usr/games/AionEndlessRun --headless -- --aion-smoke-test
           APPIMAGE_EXTRACT_AND_RUN=1 timeout 20 build/AionEndlessRun-0.22.0-linux-x64.AppImage --headless -- --aion-smoke-test
+      - name: Render biome ground, pits and rotated mobile views
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get install -y xvfb
+          set -o pipefail
+          AION_TERRAIN_REVIEW=build/terrain-review timeout 120 xvfb-run -a --server-args='-screen 0 1280x1024x24' godot --audio-driver Dummy --script tests/render_terrain_review.gd 2>&1 | tee build/terrain-render.log
+          python3 - <<'PY'
+          from pathlib import Path
+          text=Path('build/terrain-render.log').read_text()
+          assert 'RESULT: 40 rendered terrain checks, 0 failures' in text
+          assert 'SCRIPT ERROR' not in text and 'FAIL:' not in text
+          PY
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux' && always()
+        with:
+          name: terrain-render-evidence
+          path: |
+            build/terrain-review/*.png
+            build/terrain-render.log
+          if-no-files-found: warn
       - name: Windows installer and portable
         if: runner.os == 'Windows'
         shell: pwsh

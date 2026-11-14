@@ -1,0 +1,77 @@
+[
+  {
+    "suite": "terrain",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 146,
+    "results": [
+      [
+        "146",
+        "terrain checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "game",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 127,
+    "results": [
+      [
+        "127",
+        "checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "frontier",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 320,
+    "results": [
+      [
+        "320",
+        "frontier checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "motion",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 399,
+    "results": [
+      [
+        "399",
+        "motion checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "polish",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 144,
+    "results": [
+      [
+        "144",
+        "polish/ability checks",
+        "0"
+      ]
+    ]
+  }
+]

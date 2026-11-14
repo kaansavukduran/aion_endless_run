@@ -33,6 +33,7 @@ var scene_h := 648.0
 var scene_zoom := 1.0
 var touch_mode := false
 var landscape := preload("res://scripts/landscape_view.gd").new()
+var terrain := preload("res://scripts/terrain_view.gd").new()
 var frames := preload("res://scripts/frame_bank.gd").new()
 var world := World.new()
 var language := "en"
@@ -1765,19 +1766,11 @@ func draw_scenery() -> void:
 	weights[posmod(biome-1,World.BIOME_NAMES.size())] += 1.0-blend
 	var days := [Color("e5a58b"),Color("7396b0"),Color("6b9476"),Color("9183ad"),Color("94ab79"),Color("bd7975")]
 	var nights := [Color("3b3655"),Color("253f59"),Color("193c3a"),Color("272d4d"),Color("203842"),Color("492a40")]
-	var floors := [Color("553e50"),Color("233b51"),Color("193e39"),Color("2d3445"),Color("303d38"),Color("432d39")]
-	var edges := [Color("c48d91"),Color("c4e7f0"),Color("a5bd7c"),Color("a7b7c8"),Color("b4c88b"),Color("e59670")]
 	var top := Color("9d667e") if world.state=="ready" else Color("355c80").lerp(Color("0c142a"),night)
 	var bottom := Color(0,0,0,1)
-	var floor_color := Color(0,0,0,1)
-	var edge_color := Color(0,0,0,1)
 	for n in World.BIOME_NAMES.size():
 		bottom += days[n].lerp(nights[n],night)*float(weights[n])
-		floor_color += floors[n]*float(weights[n])
-		edge_color += edges[n]*float(weights[n])
 	bottom.a = 1.0
-	floor_color.a = 1.0
-	edge_color.a = 1.0
 	for i in 48:
 		var fraction := float(i)/48.0
 		draw_rect(Rect2(0,fraction*ground,scene_w,ground/48.0+1),top.lerp(bottom,fraction))
@@ -1786,12 +1779,7 @@ func draw_scenery() -> void:
 	landscape.panorama(self,biome,scroll,night,blend)
 	evolution_view.draw_scene(self,true)
 	landscape.foreground(self,scroll,night)
-	draw_rect(Rect2(0,ground,scene_w,scene_h-ground),floor_color)
-	draw_rect(Rect2(0,ground,scene_w,4),edge_color)
-	draw_rect(Rect2(0,ground+4,scene_w,10),floor_color.lightened(0.22))
-	for i in range(-1,int(scene_w/43)+2):
-		var x := float(i)*43-fposmod(scroll,43)
-		draw_rect(Rect2(x,ground+27+(i%3)*7,9,3),edge_color.darkened(0.25))
+	terrain.draw(self, biome, previous, blend, scroll, night)
 	if weights[1]>0.4:
 		for i in 28:
 			var x := fposmod(float(i*109)-scroll*0.15,scene_w)

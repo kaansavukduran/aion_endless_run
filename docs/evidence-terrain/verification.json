@@ -1,0 +1,28 @@
+{
+  "recorded_at": "2026-11-14T12:35:54.220819+03:00",
+  "baseline_commit": "f2142f96d06e6d793547a7fd75fb30f2cf00d660",
+  "status": "LOCAL_PASS_DEPLOY_PENDING",
+  "engine": "Godot4.6.3",
+  "observed_standard": "AIONIA1.7, regression record1.1; live documents reread for relevant art/ground-contact scope. Private text not redistributed.",
+  "scope": "Ground drawing only: six biome materials. Existing character assets, physics/collisions, timing, saves, preferences and approved touch scheme unchanged.",
+  "source_checks": 1136,
+  "source_suites": [
+    "terrain",
+    "game",
+    "frontier",
+    "motion",
+    "polish"
+  ],
+  "new_terrain_checks": 146,
+  "native_rendered_checks": 40,
+  "browser_checks": 88,
+  "browser_build_before_final_compositing_fix": "ac5c460bbdcc83eb",
+  "browser_scope": "Normal local browser UI/keys/touch/standard API gamepad. Aion/owl/sheep run/fire/roll, wolf sprint and actual menu/theme/text/viewport combinations. Final draw-only compositing change is covered separately by the40 actual render checks; production output will be smoke-tested after deploy.",
+  "rendered_fixtures": "Six deliberately selected biomes, one real pit overlay, a50% biome transition and portrait/landscape resize; explicit visual fixtures, not naturally reached levels.1280x720 desktop,393x873 portrait,873x393 landscape.",
+  "render_test_correction": "First pixel test used the Node2D transform alone, omitting the window stretch transform. Correcting the test to root.get_final_transform()*get_global_transform_with_canvas() produced correct actual support coordinates; no gameplay actor was moved.",
+  "blend_fix": "A translucent material must be composited once. The deep fill starts below the opaque tile region; the50% transition is checked against the actual rendered rim.",
+  "pixel_contract": "One source pixel =2 world pixels. Six cached1024x96 RGBA materials,2048-world-pixel period. Ground never receives height offsets; no RNG is consumed.",
+  "baseline_screenshot_scope": "Old native fixture has inherited CS/200% UI; final fixtures explicitly use TR/100%. Comparison concerns the same ground renderer/support level, not a controlled UI typography comparison.",
+  "native_download_release": "Existing v0.22.0 release packages are preserved; they are not overwritten by this web visual update.",
+  "physical_phone_gamepad": "NOT TESTED"
+}

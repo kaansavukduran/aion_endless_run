@@ -2,7 +2,7 @@
 from pathlib import Path
 import argparse,json,os,re,subprocess,tempfile
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=Path('build/test-results'));p.add_argument('--suites',nargs='*');a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
-suites=a.suites or ['game','adventure','localization','evolution','frontier','motion','encounters','fidelity','agility','runner_ux','boss_hud','aionia','variety','visual_polish','orchard','firearm','charge_roll_ui','unslop_quality','pixel_heroes','boss_story','polish']
+suites=a.suites or ['game','adventure','localization','evolution','frontier','motion','encounters','fidelity','agility','runner_ux','boss_hud','aionia','variety','visual_polish','orchard','firearm','charge_roll_ui','unslop_quality','pixel_heroes','boss_story','polish','terrain']
 results=[]
 for name in suites:
  env=dict(os.environ);env['XDG_DATA_HOME']=tempfile.mkdtemp(prefix='aion-test-'+name+'-')
