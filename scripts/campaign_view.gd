@@ -16,6 +16,7 @@ var camera_y := 0.0
 var font: Font
 var gun_parts: Dictionary = {}
 var hero_marker: Dictionary = {}
+var npc_growth_cache: Dictionary = {}
 
 func at(p: Vector2) -> Vector2: return Vector2(p.x-camera_x,p.y+ground).round()
 
@@ -25,6 +26,17 @@ func draw_pose(pose: Dictionary, p: Vector2, direction: int=1, growth: float=1.,
 	draw_set_transform(at(p),0,Vector2(direction*growth,growth))
 	draw_texture_rect(pose.texture,Rect2((Vector2(pose.offset)*factor).round(),dimensions),false,tint)
 	draw_set_transform(Vector2.ZERO,0,Vector2.ONE)
+
+func npc_growth(row: int) -> float:
+	# Based on actual rendered atlas crop height, not a blind 2x texture scale.
+	# Cache one standing reference per NPC so its size cannot pulse by frame.
+	if not npc_growth_cache.has(row):
+		var reference: Dictionary=frames.pose("gun-run",frames.hero_row("aion"),0)
+		var npc_reference: Dictionary=catalogue.pose("rescue-npcs",row,0)
+		var hero_height: float=maxf(1.,float(reference.size.y)-4.*float(reference.get("scale",1.)))
+		var npc_height: float=maxf(1.,float(npc_reference.size.y)-4.*float(npc_reference.get("scale",1.)))
+		npc_growth_cache[row]=2.*hero_height/npc_height
+	return float(npc_growth_cache[row])
 
 func existing(key: String,row: int,frame: int,p: Vector2,direction: int=1,growth: float=1.,tint: Color=Color.WHITE) -> void:
 	draw_pose(frames.pose(key,row,clampi(frame,0,frames.count(key,row)-1)),p,direction,growth,tint)
@@ -119,12 +131,15 @@ func draw_world() -> void:
 		if bool(npc.freed) and age>4.5:continue
 		var frame: int=posmod(int(world.time*2.),2) if host.motion_enabled and not host.options.reduced_motion else 0
 		if bool(npc.freed):frame=2 if age<.2 else (3 if age<.45 else (4 if age<.9 else (5 if age<2.4 else 6+posmod(int(age*6.),2))))
-		draw_pose(catalogue.pose("rescue-npcs",int(npc.variant),frame),Vector2(float(npc.x),float(npc.y)))
+		var npc_pose: Dictionary=catalogue.pose("rescue-npcs",int(npc.variant),frame)
+		var growth: float=npc_growth(int(npc.variant))
+		draw_pose(npc_pose,Vector2(float(npc.x),float(npc.y)),1,growth)
 		var p := at(Vector2(float(npc.x),float(npc.y)))
-		if not bool(npc.freed):caption(host.t("cut"),p+Vector2(-35,-85),17)
+		var label_top: float=maxf(46.,p.y+minf(-90.,float(npc_pose.offset.y)*growth-12.))
+		if not bool(npc.freed):caption(host.t("cut"),Vector2(clampf(p.x-35.,8.,scene_w-200.),label_top),17)
 		elif age>.4 and age<2.4:
-			caption(host.t("thanks"),Vector2(clampf(p.x-48.,8.,scene_w-200.),p.y-99.),17)
-			if age>.9:caption(host.t(str(npc.gift)),Vector2(clampf(p.x-48.,8.,scene_w-200.),p.y-80.),16)
+			caption(host.t("thanks"),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top),17)
+			if age>.9:caption(host.t(str(npc.gift)),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top+20.),16)
 	for crate in world.crates:
 		if float(crate.x)<camera_x-80. or float(crate.x)>camera_x+scene_w+80.:continue
 		if int(crate.hp)<=0: continue
@@ -222,6 +237,12 @@ func draw_world() -> void:
 	var tint := Color.WHITE
 	if world.invulnerable>0.: tint=Color("ffd9ca")
 	draw_pose(pose,world.player,world.facing,1.,tint)
+	# A small muzzle flash communicates actual vertical/diagonal bullet direction;
+	# existing hero anatomy and authored horizontal frames remain untouched.
+	if world.shot_flash>0. and absf(world.aim_direction.y)>.15:
+		var aim: Vector2=world.aim_direction
+		var flash:=at(world.player+Vector2(aim.x*38.,-55.+aim.y*20.))
+		draw_line(flash-aim*10.,flash+aim*17.,Color("fff2d4"),3.)
 	hero_marker={"anchor":[world.player.x,world.player.y],"facing":world.facing,"source":pose.get("source_key","campaign-melee"),"row":pose.get("source_row",0),"frame":pose.get("source_frame",0),"floor":world.floor_at(world.player.x)}
 	if not bool(world.mount.ridden) and (not world.grounded() or world.charging or (world.character=="wolf" and world.boost_held)) and world.melee_time<=0. and world.rescue_time<=0.: held_gun(world.character,world.player,world.facing)
 	if world.character=="sheep":
