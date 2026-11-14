@@ -523,6 +523,7 @@ func step_bullets(dt: float) -> void:
 			if int(crate.hp)>0 and Vector2(b.p).distance_to(Vector2(float(crate.x),float(crate.y)-24.))<30.: open_crate(crate); b.age = 99.;break
 		if float(b.age)>3.:continue
 		if CampaignContent.hit_object(self,b.p,int(b.damage),previous):b.age=99.
+		if float(b.p.y)>=floor_at(float(b.p.x)) and float(b.v.y)>0.:b.age=99. # Downward shots collide with solid ground.
 	bullets = bullets.filter(func(b):return float(b.age)<float(b.get("life",3.)) and float(b.p.x)>-80. and float(b.p.x)<length()+100.)
 
 func boss_vulnerable() -> bool:
