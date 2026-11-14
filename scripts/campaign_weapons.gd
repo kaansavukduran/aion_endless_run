@@ -31,7 +31,7 @@ static func fire(w) -> void:
 	if aim.length_squared()<.01:aim=Vector2(w.facing,0.)
 	aim=aim.normalized()
 	var offset: Vector2=w.muzzle_offset()
-	var origin: Vector2=w.player+Vector2(w.facing*offset.x,offset.y)
+	var origin: Vector2=w.player+Vector2((1. if aim.x>=0. else -1.)*absf(offset.x),offset.y)
 	# For vertical fire, position the muzzle above the collision floor and
 	# along the actual angled barrel. Straight down works from the air and ground.
 	if absf(aim.y)>.15:origin=w.player+Vector2(aim.x*minf(absf(offset.x),40.),-55.+aim.y*20.)
