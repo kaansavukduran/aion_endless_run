@@ -15,10 +15,12 @@ var font_mode := "system"
 var text_scale := 1.0
 var reduced_motion := false
 var dark := true
+var attract_enabled := true
 var colors: Dictionary = DARK
 var body_font: Font
 
 func load_from(cfg: ConfigFile) -> void:
+ attract_enabled=bool(cfg.get_value("prefs","attract_enabled",true))
  touch_layout=str(cfg.get_value("prefs","touch_layout","split"))
  if touch_layout not in ["split","right"]:touch_layout="split"
  theme_mode=str(cfg.get_value("prefs","theme_mode","dark"))
@@ -32,7 +34,7 @@ func load_from(cfg: ConfigFile) -> void:
  resolve_theme()
 
 func save_to(cfg: ConfigFile) -> void:
- for key in ["theme_mode","font_mode","text_scale","reduced_motion","touch_layout"]:cfg.set_value("prefs",key,get(key))
+ for key in ["theme_mode","font_mode","text_scale","reduced_motion","touch_layout","attract_enabled"]:cfg.set_value("prefs",key,get(key))
 
 func system_is_dark() -> bool:
  if OS.has_feature("web"):return bool(JavaScriptBridge.eval("matchMedia('(prefers-color-scheme: dark)').matches"))

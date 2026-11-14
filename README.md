@@ -1,5 +1,11 @@
 # Aion Endless Run
 
+## 0.25.0 · Fener Ormanı arcade sunumu
+
+Atlanabilir AIONIA açılışı, kayıt yazmayan gerçek Attract Mode, altı animasyonlu kahraman kartı, görsel yardım, kompakt görev HUD'ı ve ayrıntılı gerçek görev raporu. Ömer havada, Melun koşarken silahını ağzında taşır; iki tavşan kısa basışta Aion'un 1,75 katına, tam şarjda yaklaşık 4 katına sıçrar. Ömer'in üç hava kanat hakkı vardır. NPC'lerin bağı bıçak veya mermiyle çözülür; dolaşan NPC ile temas teşekkür ve tek seferlik ödülü başlatır. Araçlara girme/çıkma animasyonu ve namluyla eşleşen sekiz yönlü atış korunur.
+
+[Kapsam ve doğrulama](docs/AIONIA-FORGE-20261115.md) · [Yeni kahraman çizimleri](docs/FORGE-HERO-ART.md) · [Araç gövde/namlu kaydı](docs/FORGE-VEHICLE-ART.md) · [Web oyun adresi](https://aionendlessrun.vercel.app/). Yeni çizimler oyun içi üretimdir; resmî kanon/logo onayı iddiası değildir. Eski kaynaklar ve indirmeler korunur.
+
 **0.24.0 · Mission 1 kurtarma ve içerik genişlemesi:** Altı kahramanın bıçakla bağ kesmesi, gerçek NPC hediyeleri ve yeni rota içeriği için [tasarım ve kapsam](docs/CAMPAIGN-EXPANSION.md), [test kanıtları](docs/evidence-campaign-expansion/README.md). [Vercel'de oyna](https://aionendlessrun.vercel.app/). Aşağıdaki sürüm kayıtları önceki teslimlerin kapsamını anlatır.
 
 ## 0.23.0 · İlk arcade görev: Sönen Fenerler

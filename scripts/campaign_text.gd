@@ -2,6 +2,7 @@ class_name AionCampaignText
 extends RefCounted
 const SUPPLEMENT=preload("res://assets/locales/campaign.json")
 const EXPANSION=preload("res://assets/locales/campaign_expansion.json")
+const UI=preload("res://assets/locales/campaign_ui.json")
 
 const EN := {
 "arcade":"Arcade", "endless":"Endless", "title":"Beaconfall", "start":"Begin mission", "continue":"Continue checkpoint", "brief":"The coast's lanterns have gone dark. Free the keepers, follow the broken relay and stop the Root Engine.",
@@ -31,9 +32,10 @@ const LOCAL := {
 "it":{"arcade":"Arcade","endless":"Corsa infinita","title":"Lanterne spente","start":"Inizia missione","continue":"Riprendi dal checkpoint","grenade":"Granata","melee":"Colpo","ride":"Sali / scendi","fork":"Scegli il percorso","shore":"Costa delle lanterne","quay":"Molo spezzato","canopy":"Chiome degli alberi","water":"Canale allagato","terrace":"Terrazze del giardino","roots":"Passaggio delle radici","relay":"Relè di rame","arena":"Motore delle radici","won":"Missione completata","retry":"Riprova checkpoint","mission":"Missione 1","back":"Menu principale","next":"Continua"}}
 
 static func word(locale: String,key: String) -> String:
+	if UI.data.has(locale) and UI.data[locale].has(key):return str(UI.data[locale][key])
 	if EXPANSION.data.has(locale) and EXPANSION.data[locale].has(key):return str(EXPANSION.data[locale][key])
-	if key=="keys":return word(locale,"move")+" A/D ←/→ · "+GameText.get_text(locale,"control_jump")+" Space · "+GameText.get_text(locale,"control_shoot")+" F / click · "+word(locale,"grenade")+" G · "+word(locale,"ride")+" E · Esc"
-	if key=="pad":return word(locale,"move")+" ←/→ · A/× "+GameText.get_text(locale,"control_jump")+" · RB/R1 "+GameText.get_text(locale,"control_shoot")+" · B/○ "+word(locale,"grenade")+" · Y/△ "+word(locale,"ride")
+	if key=="keys":return word(locale,"move")+" A/D ←/→ · "+word(locale,"aim")+" W/S ↑/↓ · "+GameText.get_text(locale,"control_jump")+" Space · "+GameText.get_text(locale,"control_shoot")+" F/J · "+word(locale,"grenade")+" G · "+word(locale,"ride")+" E · Esc"
+	if key=="pad":return word(locale,"move")+" ←/→ · "+word(locale,"aim")+" ↖↑↗←→↙↓↘ · A/× "+GameText.get_text(locale,"control_jump")+" · RB/R1 "+GameText.get_text(locale,"control_shoot")+" · B/○ "+word(locale,"grenade")+" · Y/△ "+word(locale,"ride")
 	if locale=="tr" and TR.has(key): return str(TR[key])
 	if LOCAL.has(locale) and LOCAL[locale].has(key): return str(LOCAL[locale][key])
 	if SUPPLEMENT.data.has(locale) and SUPPLEMENT.data[locale].has(key):return str(SUPPLEMENT.data[locale][key])

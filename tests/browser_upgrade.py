@@ -29,6 +29,7 @@ version = current_meta['version']
 def check(value, message):
     assert value, message
     results.append(message)
+    print('PASS', message, flush=True)
 
 with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
     tmp = Path(tmp)
@@ -53,7 +54,16 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         page = context.new_page()
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
-        def ready(): page.wait_for_selector('canvas[data-state="ready"]', timeout=90000)
+        def ready():
+            page.wait_for_selector('canvas[data-state="ready"]', timeout=90000)
+            # New exports have an authored opening before their interactive
+            # main menu. Skip it through the real supported input, only when
+            # telemetry says it is active; older releases have no such field.
+            intro=page.locator('canvas').get_attribute('data-front')
+            if intro and json.loads(intro).get('intro'):
+                page.locator('canvas').focus()
+                page.keyboard.press('Enter')
+            page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]', timeout=90000)
         page.goto(url)
         ready()
         page.evaluate('navigator.serviceWorker.ready.then(() => true)')
@@ -71,7 +81,9 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         page.wait_for_selector('canvas[data-language-picker="true"]')
         ui_click(name='Language_en')
         page.wait_for_selector('canvas[lang="en"]')
-        page.keyboard.press('Space')
+        # Arcade is now the primary main-menu focus. Select the actual Endless
+        # action explicitly instead of assuming Space activates that mode.
+        ui_click(name='StartRun')
         page.wait_for_selector('canvas[data-state="running"]')
         page.wait_for_timeout(1000)
         page.keyboard.press('Escape')
@@ -84,6 +96,7 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         check(page.locator('canvas').get_attribute('data-character') == 'owl', 'Legacy PWA really opens offline with its saved owl')
         legacy_version = page.locator('canvas').get_attribute('data-version')
         legacy_build = page.evaluate('window.AION_BUILD?.build')
+        observed_builds={'legacy':{'version':legacy_version,'build':legacy_build},'target':{'version':version,'build':current_meta['build']},'scope':'Actual previous export and real service worker/IndexedDB migration; subsequent test-next-build is a synthetic shell update, not a published release.'}
         check(legacy_version != version or legacy_build != current_meta['build'], 'Reproduced the previous export before migration')
         page.screenshot(path=str(args.evidence/'legacy-offline.png'))
         context.set_offline(False)
@@ -97,11 +110,13 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         # Web-only fixes keep the game version; wait for the new shell identity.
         page.wait_for_function('(build) => window.AION_BUILD?.build === build', arg=current_meta['build'], timeout=90000)
         page.wait_for_selector(f'canvas[data-version="{version}"][data-state="ready"]', timeout=90000)
+        ready()
         check('build=' in page.url, 'Old cached shell migrates to the current build automatically')
         canvas = page.locator('canvas')
+        observed_builds['migrated']={'version':canvas.get_attribute('data-version'),'build':page.evaluate('window.AION_BUILD?.build')}
         check(canvas.get_attribute('data-character') == 'owl' and canvas.get_attribute('lang') == 'en', 'Migration preserves character and language in IndexedDB')
         check(int(canvas.get_attribute('data-best')) >= saved_score > 0, 'Migration preserves the earned best score')
-        page.keyboard.press('Space')
+        ui_click(name='StartRun')
         page.wait_for_selector('canvas[data-sprite-row="1"]')
         check(canvas.get_attribute('data-character') == 'owl', 'Migrated owl uses the actual running sprite row')
         page.keyboard.down('Space')
@@ -134,7 +149,7 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
             text = re.sub(r'const INFO = \{.*?\};','const INFO = '+json.dumps(info)+';',text)
             worker.write_text(text)
         server_root[0] = future
-        page.keyboard.press('Space')
+        ui_click(name='StartRun')
         page.wait_for_selector('canvas[data-state="running"]')
         current_url = page.url
         page.evaluate('navigator.serviceWorker.getRegistration().then(r => r.update())')
@@ -147,6 +162,7 @@ with tempfile.TemporaryDirectory(prefix='aion-upgrade-') as tmp:
         print('UPDATE_READBACK',{'paused_observed':page.evaluate("sessionStorage.getItem('aion-test-paused')"),'url':page.url,'character':canvas.get_attribute('data-character'),'build':page.evaluate('window.AION_BUILD')},flush=True)
         check(page.evaluate("sessionStorage.getItem('aion-test-paused')")=='yes' and 'test-next-build' in page.url and canvas.get_attribute('data-character') == 'owl', 'Update button saves, pauses and opens the new shell with preferences intact')
         check(not errors, 'No uncaught browser errors during legacy migration or offline updates')
+        (args.evidence/'upgrade-builds.json').write_text(json.dumps(observed_builds,indent=2)+'\n')
         browser.close()
     server.shutdown()
 (args.evidence/'upgrade-results.json').write_text(json.dumps(results, indent=2)+'\n')

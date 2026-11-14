@@ -18,6 +18,7 @@ const SPECS := {
 const SPECIAL := ["heavy","scatter","arc","beam","disc","harpoon","seeker","spore","trap","nova"]
 
 static func fire(w) -> void:
+	if not bool(w.mount.ridden) and not w.weapons_used.has(w.weapon):w.weapons_used.append(w.weapon)
 	w.shot_flash=.18 # Use the actual firing-pose muzzle, including the first shot.
 	var spec: Dictionary=SPECS.get(w.weapon,SPECS.pistol)
 	var riding: bool=bool(w.mount.ridden)
@@ -30,11 +31,13 @@ static func fire(w) -> void:
 	var aim: Vector2=Vector2(w.aim_direction)
 	if aim.length_squared()<.01:aim=Vector2(w.facing,0.)
 	aim=aim.normalized()
-	var offset: Vector2=w.muzzle_offset()
-	var origin: Vector2=w.player+Vector2((1. if aim.x>=0. else -1.)*absf(offset.x),offset.y)
-	# For vertical fire, position the muzzle above the collision floor and
-	# along the actual angled barrel. Straight down works from the air and ground.
-	if absf(aim.y)>.15:origin=w.player+Vector2(aim.x*minf(absf(offset.x),40.),-55.+aim.y*20.)
+	var offset: Vector2=w.armed_muzzle()
+	var origin: Vector2=w.player+offset
+	# Authored downward keyposes already place their muzzle above the floor.
+	# Only a genuinely buried muzzle is clamped, never an arbitrary aim guess.
+	var floor: float=w.floor_at(origin.x)
+	if origin.y>=floor:origin.y=floor-.5
+
 	var index:=0
 	for angle in angles:
 		var target: String=""
@@ -42,8 +45,8 @@ static func fire(w) -> void:
 		eligible.sort_custom(func(a,b):return absf(float(a.x)-w.player.x)<absf(float(b.x)-w.player.x))
 		if w.weapon=="seeker" and not eligible.is_empty():target=str(eligible[mini(index,eligible.size()-1)].id)
 		var b: Dictionary={"p":origin,"v":aim.rotated(angle)*float(spec.speed),"owner":"hero","age":0.,"kind":"vehicle" if riding else w.weapon,"damage":int(spec.damage)+int(riding)+int(float(w.buffs.get("power",0.))>0.),"pierce":int(spec.pierce),"hit":[],"life":float(spec.life),"colour":str(spec.colour),"target":target,"bounces":0}
-		b.start=w.player+Vector2(0,-50. if absf(aim.y)>.15 else offset.y)
-		if w.weapon=="trap":b.gravity=550.;b.p=w.player+Vector2(w.facing*35.,-15.)
+		b.start=origin-aim*(maxf(32.,absf(offset.x)) if absf(aim.y)<.15 else 32.)
+		if w.weapon=="trap":b.gravity=550.
 		b.aim=aim
 		w.bullets.append(b);index+=1
 	w.shots+=1;w.fire_time=float(spec.interval);w.shot_flash=.18;w.pending_events.append("shot")

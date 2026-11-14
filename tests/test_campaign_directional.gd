@@ -47,11 +47,9 @@ func run() -> void:
 	# Validate actual pixel-atlas reference sizing. Animations keep the idle
 	# reference multiplier rather than changing height on each frame.
 	var view:=AionCampaignView.new()
-	var ref: Dictionary=view.frames.pose("gun-run",view.frames.hero_row("aion"),0)
-	var aion_height: float=maxf(1.,float(ref.size.y)-4.*float(ref.get("scale",1.)))
+	var aion_height: float=view.hero_reference_height()
 	for row in 8:
-		var pose: Dictionary=view.catalogue.pose("rescue-npcs",row,0)
-		var npc_height: float=maxf(1.,float(pose.size.y)-4.*float(pose.get("scale",1.)))
+		var npc_height: float=view.npc_reference_height(row)
 		check(is_equal_approx(npc_height*view.npc_growth(row),2.*aion_height),"Rescue girl standing pixel height is twice Aion: "+str(row))
 		check(is_equal_approx(view.npc_growth(row),view.npc_growth(row)),"Growth is stable for every animation frame: "+str(row))
 	view.free()

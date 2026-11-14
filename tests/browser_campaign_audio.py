@@ -23,21 +23,31 @@ with sync_playwright() as p:
  page.get_by_role('button',name='Begin mission',exact=True).press('Enter')
  def data():return json.loads(page.locator('canvas').get_attribute('data-campaign'))
  while data()['menu']=='help':page.get_by_role('button',name=data()['buttons']['CampaignGo'][4],exact=True).press('Enter');page.wait_for_timeout(160)
- page.locator('canvas').focus();page.keyboard.press('Escape');cd=c.new_cdp_session(page);samples=[];start=time.monotonic()
+ # Mission Start now consumes Escape as Skip. Finish that real presentation
+ # before exercising paused → playing → paused audio. Two seconds of actual
+ # play keeps this focused probe away from an unattended combat/death flow.
+ page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && !(d.presentation || d.presentation_stage)}',timeout=15000)
+ page.locator('canvas').focus();page.keyboard.press('Escape')
+ page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"',timeout=10000)
+ cd=c.new_cdp_session(page);samples=[];start=time.monotonic();states=['paused']
  for i in range(args.seconds):
-  if i==10:page.keyboard.press('Escape')
-  if i==20:page.keyboard.press('Escape')
+  if i in [10,12]:
+   page.keyboard.press('Escape')
+   expected='' if i==10 else 'paused'
+   page.wait_for_function('menu=>JSON.parse(document.querySelector("canvas").dataset.campaign).menu===menu',arg=expected,timeout=10000)
+   states.append('playing' if i==10 else 'paused')
   sample={'wall':time.monotonic()-start,'audio':page.evaluate('window.audioProbe'),'heap':cd.send('Runtime.getHeapUsage'),'cgroup':cgroup_memory_bytes(),'menu':data()['menu'],'music_starts':data().get('music_starts')};samples.append(sample);print(json.dumps(sample),flush=True)
   if sample['cgroup'] is not None and sample['cgroup']>12*1024**3:break
   page.wait_for_timeout(1000)
- (out/'audio-probe.json').write_text(json.dumps({'url':url,'instrumentation':'WebAudio start/createBuffer counters; wraps original methods without changing their result. Real menu/input.','samples':samples,'errors':errors,'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(v=>v.build)")},indent=2)+'\n');c.close();b.close()
+ (out/'audio-probe.json').write_text(json.dumps({'url':url,'instrumentation':'WebAudio start/createBuffer counters; wraps original methods without changing their result. Real menu/input.','states':states,'samples':samples,'errors':errors,'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(v=>v.build)")},indent=2)+'\n');c.close();b.close()
 
 last=samples[-1];observed=last['audio']['longStarts']
 if args.expect_restart_bug:
  assert observed>1,'Baseline did not reproduce repeated 24-second sample allocation'
  print('EXPECTED REGRESSION REPRODUCED:',observed,'long sample starts')
 else:
+ assert states==['paused','playing','paused'] and len(samples)==args.seconds,('Pause/resume scenario was not fully exercised',states,len(samples))
  assert not errors,errors
  assert observed<=1,('Repeated long sample starts',last)
  assert last['music_starts']==1,('Coast music restarted across pause/death updates',last)
- print('RESULT: 3 real WebAudio lifecycle checks, 0 failures')
+ print('RESULT: 3 real WebAudio checks and actual paused/playing/paused transitions, 0 failures')

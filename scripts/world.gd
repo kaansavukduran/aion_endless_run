@@ -6,8 +6,11 @@ const GRAVITY := 1700.0
 const JUMP_SPEED := -650.0
 const CHARGE_SECONDS := 1.2
 const CHARGE_HEROES := ["rabbit","eren"]
+const RABBIT_TAP_HEIGHT_RATIO := 1.75
+const RABBIT_FULL_HEIGHT_RATIO := 4.0
 const OWL_FLAPS := 3
-const OWL_FLAP_SPEED := -280.0
+const OWL_FLAP_HEIGHT_RATIO := 1.5
+const OWL_FLAP_SPEED := JUMP_SPEED * sqrt(OWL_FLAP_HEIGHT_RATIO)
 const OWL_FLAP_DURATION := 0.30
 var owl_flaps_used := 0
 var owl_flap_time := 0.0
@@ -26,6 +29,7 @@ var frontier = preload("res://scripts/frontier.gd").new()
 var adventure = preload("res://scripts/adventure.gd").new()
 var pending_events: Array[String] = []
 var character := "aion"
+var pose_motion_enabled := true # Ephemeral rendering contract; never saved.
 var jumps_used := 0
 var jump_held := false
 var boost_held := false
@@ -147,6 +151,8 @@ func jump() -> void:
 			owl_flaps_used+=1
 			owl_flap_time=OWL_FLAP_DURATION
 			velocity=minf(velocity,OWL_FLAP_SPEED)
+			# Keep held glide intent; powered ascent uses normal gravity until
+			# its apex so wingbeat height stays tied to the jump-height ratio.
 			gliding=true
 			air_time=0.0
 			jump_buffer=0.0
@@ -173,7 +179,9 @@ func release_charged_jump() -> void:
 	var power:=charge_ratio()
 	cancel_charge()
 	if character not in CHARGE_HEROES or state!="running" or y<0 or adventure.hugging():return
-	charged_jump_multiplier=lerpf(0.65,1.35,power)
+	# Height is proportional to velocity squared, so interpolate height rather
+	# than velocity. Even a zero-duration tap has the full 1.75x baseline.
+	charged_jump_multiplier=sqrt(lerpf(RABBIT_TAP_HEIGHT_RATIO,RABBIT_FULL_HEIGHT_RATIO,power))
 	jump_buffer=0.12
 
 func event(value: String) -> void:
@@ -303,19 +311,21 @@ func step(dt: float) -> void:
 	var was_air := y < 0.0
 	var was_riding := riding_gust
 	gliding = character == "owl" and jump_held and y < 0.0 and (velocity >= 0.0 or gliding)
-	riding_gust = gliding and gust_strength() > 0.0
+	# The wind ceiling bounds environmental lift, not the three deliberate
+	# wingbeats. A powered jump may pass above it and descend naturally.
+	riding_gust = gliding and gust_strength() > 0.0 and y >= WIND_CEILING and (velocity >= 0.0 or was_riding)
 	if riding_gust:
 		velocity = move_toward(velocity, WIND_RISE_SPEED * wind_components().y, 850.0 * gust_strength() * dt)
 		if not was_riding: event("updraft")
 	elif owl_flap_time>0:
-		velocity += GRAVITY * 0.65 * dt
-	elif gliding:
+		velocity += GRAVITY * dt
+	elif gliding and velocity >= 0.0:
 		velocity = minf(GLIDE_FALL_SPEED, velocity + GRAVITY * 0.18 * dt)
 	else:
 		velocity += GRAVITY * dt
 	owl_flap_time=maxf(0.0,owl_flap_time-dt)
 	y = minf(0.0, y + velocity * dt)
-	if character == "owl" and y < WIND_CEILING:
+	if character == "owl" and riding_gust and y < WIND_CEILING:
 		y = WIND_CEILING
 		velocity = maxf(0.0, velocity)
 	if y < 0.0: air_time += dt

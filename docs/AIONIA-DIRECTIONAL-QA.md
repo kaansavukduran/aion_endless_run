@@ -1,5 +1,7 @@
 # Arcade sekiz yönlü ateş ve kurtarma karakteri ölçeği
 
+> Tarihsel başlangıç kaydı: PR #3'ün `328fd0d42131f9fc857fe50f2a32488023461ce5` durumu. Aşağıdaki açık başlıklar bu ilk incelemeye aittir. Sonraki 0.25.0 uygulaması, gerçek sanat/namlu kayıtları ve test kapsamı [güncel Forge raporunda](AIONIA-FORGE-20261115.md) izlenir.
+
 Durum: geliştirme dalında kodlandı; CI ve tarayıcı testi olmadan production'a hazır sayılmayacak.
 
 ## Kapsam

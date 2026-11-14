@@ -37,12 +37,16 @@ func run() -> void:
 			for language in GameText.LANGUAGES:
 				game.language=language;game.world.load_section("arena");game.menu_kind="";game.resize();game.update_hud();await process_frame
 				check(not game.subtitle.get_global_rect().intersects(game.boss_health.get_global_rect()),"Boss health and localized mission/inventory text never overlap in rotated layouts")
+	# Reproduce a first-time player after the layout matrix has intentionally
+	# completed the tutorial. Repeat-run tutorial suppression has its own test.
+	game.tutorial_seen=false
 	game.options.text_scale=1.;game.language="tr";game.menu_kind="briefing";game.build_ui();await process_frame;await process_frame
 	game._input(event(JOY_BUTTON_A));await process_frame
 	check(game.menu_kind=="help","Xbox A / PS Cross activates actual briefing button")
 	game._input(event(JOY_BUTTON_X));await process_frame
 	check(game.help_step==1,"Xbox X / PS Square activates actual tutorial next button")
-	game.close_menu();game._input(event(JOY_BUTTON_START));await process_frame
+	game.close_menu();game.skip_presentation() # Dedicated presentation suite verifies the new skippable intro.
+	game._input(event(JOY_BUTTON_START));await process_frame
 	check(game.menu_kind=="paused" and game.world.state=="paused","Controller Start pauses actual mission")
 	game._input(event(JOY_BUTTON_A));await process_frame
 	check(game.menu_kind=="" and game.world.state=="playing","Controller confirm really resumes actual mission")

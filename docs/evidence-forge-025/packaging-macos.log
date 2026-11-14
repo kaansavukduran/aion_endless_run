@@ -1,0 +1,14 @@
+DMG source allocated KiB: 1024 capacity KiB: 393216
+hdiutil: create failed - Resource busy
+done
+.DMG source allocated KiB: 1024 capacity KiB: 393216
+Resource busy
+Resource busy
+Resource busy
+.DMG source allocated KiB: 1024 capacity KiB: 393216
+No space left on device
+.
+----------------------------------------------------------------------
+Ran 3 tests in 0.039s
+
+OK

@@ -31,6 +31,7 @@ static func draw(v) -> void:
 		if bool(o.active):frame=clampi(int(float(o.get("changed",9.))/.18),1,3) if v.host.motion_enabled and not v.host.options.reduced_motion else 3
 		elif o.kind in ["current","updraft"]:frame=3
 		elif o.kind=="turret" and fmod(float(o.get("clock",0.)),3.)>2.2:frame=1
+		if w.completed and o.kind=="lamp":frame=3
 		v.draw_pose(v.catalogue.pose("environment",row,frame),Vector2(float(o.x),float(o.y)))
 	for z in w.zones:
 		if absf(float(z.x)-w.player.x)>v.scene_w+float(z.width):continue

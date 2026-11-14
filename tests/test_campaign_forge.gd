@@ -1,0 +1,110 @@
+extends SceneTree
+
+## Isolated real-physics fixtures: no frontend input or physical device claim.
+var checks := 0
+var failures := 0
+
+func check(ok: bool, message: String) -> void:
+	checks += 1
+	if not ok: failures += 1; printerr("FAIL: " + message)
+
+func fresh(hero: String="aion") -> AionCampaignWorld:
+	var w := AionCampaignWorld.new()
+	w.begin(hero); w.state="playing"
+	w.enemies.clear();w.gates.clear();w.objects.clear();w.hazards.clear();w.pickups.clear();w.crates.clear();w.zones.clear();w.platforms.clear();w.pits.clear();w.npcs.clear()
+	return w
+
+func tick(w: AionCampaignWorld, seconds: float, hz: int=120) -> void:
+	for i in ceili(seconds*hz): w.step(1./hz)
+
+func apex(w: AionCampaignWorld, hz: int) -> float:
+	var start := w.player.y
+	var peak := start
+	for i in hz*3:
+		w.step(1./hz);peak=minf(peak,w.player.y)
+		if w.velocity.y>=0.:break
+	return start-peak
+
+func _initialize() -> void: call_deferred("run")
+
+func run() -> void:
+	for hz in [60,120,240]:
+		var a := fresh();a.jump_press();a.jump_release()
+		var reference := apex(a,hz)
+		for hero in ["rabbit","eren"]:
+			var low := fresh(hero);low.jump_press();low.jump_release()
+			var tap := apex(low,hz)
+			check(absf(tap/reference-1.75)<.04,"Actual tap apex is1.75 Aion: %s/%d" % [hero,hz])
+			var high := fresh(hero);high.jump_press();tick(high,1.2,hz);high.jump_release()
+			var charged := apex(high,hz)
+			check(absf(charged/reference-4.)<.12 and charged>tap*2.,"Actual full-charge apex is4 Aion: %s/%d" % [hero,hz])
+		var owl := fresh("owl");owl.player.y=-100.;owl.jumps=1
+		for index in 3:
+			owl.jump_release();owl.jump_press()
+			check(owl.flap_count==index+1,"Fresh airborne press spends exactly one flap")
+			owl.jump_press();check(owl.flap_count==index+1,"Held/repeated press cannot synthesize extra flaps")
+			var rise := apex(owl,hz)
+			check(absf(rise/reference-1.5)<.04,"Actual flap rise is1.50 Aion: %d/%d" % [index,hz])
+		owl.jump_release();owl.jump_press();check(owl.flap_count==3,"Fourth fresh press cannot flap")
+		tick(owl,.3,hz);check(owl.gliding and owl.velocity.y<=85.,"Held glide resumes after powered ascent")
+		owl.jump_release();tick(owl,4.,hz);check(owl.grounded() and owl.flap_count==0,"Landing safely refills all three wingbeats")
+	var dirs: Array[Vector2]=[Vector2.RIGHT,Vector2(1,-1).normalized(),Vector2.UP,Vector2(-1,-1).normalized(),Vector2.LEFT,Vector2(-1,1).normalized(),Vector2.DOWN,Vector2(1,1).normalized()]
+	for hero in AionCampaignWorld.HEROES:
+		for direction in dirs:
+			var w := fresh(hero);w.aim_direction=direction;w.attack_press()
+			check(w.bullets.size()==1,"Each hero actually fires in eight directions")
+			var b: Dictionary=w.bullets[0]
+			check(Vector2(b.v).normalized().distance_to(direction)<.001 and absf(Vector2(b.v).length()-760.)<.001,"Direction normalized without diagonal speed bonus")
+			check(float(b.p.y)<0.,"Every initial muzzle remains above the floor")
+	for weapon in CampaignWeapons.SPECIAL:
+		for direction in dirs:
+			var w := fresh();w.collect({"id":"special","kind":weapon});w.aim_direction=direction;w.attack_press()
+			var spec: Dictionary=CampaignWeapons.SPECS[weapon]
+			for b in w.bullets:
+				check(absf(Vector2(b.v).length()-float(spec.speed))<.01,"Special projectile retains its authored speed: "+weapon)
+				check(Vector2(b.v).normalized().dot(direction)>.55,"All actual spread/projectile vectors rotate with aim: "+weapon)
+			check(w.ammunition==int(spec.ammo)-1,"One directional burst spends one ammo: "+weapon)
+	for direction in dirs:
+		var w := fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":4,"type":"wind"};w.interact()
+		check(w.mount_transition=="enter" and not w.throw_grenade(),"Boarding blocks combat until the hatch transition finishes")
+		w.attack_press();check(w.bullets.is_empty(),"Boarding cannot fire a hidden extra shot")
+		tick(w,.46);w.aim_direction=direction;w.attack_press()
+		check(w.mount.ridden and w.bullets.size()==3,"Mounted wind craft uses real directional fan")
+		check(w.vehicles_used==["wind"],"Vehicle report records one completed board")
+		for b in w.bullets:check(Vector2(b.v).normalized().dot(direction)>.95,"Vehicle barrel follows aim rather than character facing")
+		w.attack_release();check(w.interact(),"Vehicle exit accepted")
+		tick(w,.46);check(not w.mount.ridden and w.grounded() and w.mount_transition=="","Exit finishes on supported ground")
+	var w := fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":4,"type":"drill"};w.interact();var frozen:=w.time
+	w.invulnerable=0.;w.damage_player();check(w.hp==3 and w.mount.hp==4,"Boarding is protected from damage")
+	tick(w,.4);check(w.time==frozen,"World simulation clock pauses during boarding");tick(w,.06)
+	w.invulnerable=0.;w.mount.hp=1;w.damage_player();check(not w.mount.ridden and w.mount_transition=="" and w.velocity.y<0.,"Vehicle destruction cancels transition and ejects safely")
+	# Bullet rescue occurs at distance; walking into the freed person, not
+	# elapsed time, authorizes the gratitude/gift state.
+	w=fresh();CampaignRescue.populate(w);var npc: Dictionary=w.npcs[0]
+	w.player=Vector2(float(npc.x)-300.,0.);w.attack_press();tick(w,.5);w.attack_release()
+	check(npc.freed and w.rescued.has(str(npc.id)),"Actual ordinary bullet cuts a distant NPC rope")
+	check(str(npc.phase)=="free" and not w.awarded.has(str(npc.id)+":gift"),"Freeing remotely does not trigger a thank-you/gift")
+	var released_x: float=npc.x;tick(w,2.)
+	check(absf(float(npc.x)-released_x)>1. and absf(float(npc.x)-float(npc.home_x))<=90.,"Freed NPC really roams within supported bounds")
+	check(not w.awarded.has(str(npc.id)+":gift"),"Elapsed time alone cannot claim a remote gift")
+	var pending := w.snapshot();var restored := AionCampaignWorld.new();check(restored.restore(pending),"Unclaimed freed NPC survives save/reload")
+	restored.state="playing";tick(restored,1.);check(not restored.awarded.has(str(npc.id)+":gift"),"Reload does not auto-claim a never-contacted freed NPC")
+	w.player=Vector2(float(npc.x),float(npc.y));tick(w,.1)
+	check(str(npc.phase)=="thanks" and w.greeted.has(str(npc.id)),"Actual body contact triggers gratitude")
+	var greeting := w.snapshot();var resumed := AionCampaignWorld.new();check(resumed.restore(greeting),"Pending actual-contact handover is saved")
+	resumed.state="playing";tick(resumed,1.)
+	check(resumed.awarded.has(str(npc.id)+":gift") and resumed.weapon=="heavy","A genuine pending handover resumes exactly once")
+	var earned := resumed.score;resumed.retry();tick(resumed,1.5)
+	check(resumed.score==earned and resumed.weapon=="pistol","Checkpoint retry cannot pay an already-claimed NPC twice")
+	check(resumed.rescue_roles.has(str(npc.id)),"Actual rescued role survives checkpoint reports")
+	# A flying/angled beam still intersects ropes across a large timestep.
+	w=fresh();CampaignRescue.populate(w);npc=w.npcs[0];w.player=Vector2(float(npc.x)-500.,0.)
+	w.bullets=[{"p":Vector2(float(npc.x)-100.,-60.),"v":Vector2(1900.,0.),"owner":"hero","age":0.,"kind":"beam","damage":2,"pierce":20,"hit":[],"life":.5}]
+	w.step(.05);w.step(.05);check(npc.freed,"Fast beam uses segment-vs-rope collision")
+	# Structured role/weapon/loss statistics are observations, not UI inventions.
+	w=fresh();w.invulnerable=0.;w.damage_player();check(w.losses==1,"Actual HP loss updates report once")
+	w.invulnerable=0.;w.shield=1;w.damage_player();check(w.losses==1,"Shield absorption does not invent a life lost")
+	w.attack_press();check(w.weapons_used==["pistol"],"Actual first pistol shot is recorded")
+	w.collect({"id":"gun","kind":"arc"});check(w.weapons_used.has("arc"),"Real weapon collection updates report")
+	var saved := w.snapshot();var copy := AionCampaignWorld.new();check(copy.restore(saved) and copy.losses==1 and copy.weapons_used==w.weapons_used,"Statistics persist without changing old checkpoint semantics")
+	print("RESULT: %d campaign forge mechanics checks, %d failures" % [checks,failures]);quit(1 if failures else 0)

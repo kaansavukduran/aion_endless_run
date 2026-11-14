@@ -1,0 +1,657 @@
+{
+  "checks": [
+    "Visible reachable menu action: @Button@99",
+    "Visible reachable menu action: CampaignBegin",
+    "Visible reachable menu action: @Button@119",
+    "Visible reachable menu action: CampaignGo",
+    "Main menu \u2192 Arcade \u2192 mission \u2192 play through normal buttons",
+    "D moves the player right; this is not automatic scrolling",
+    "A moves and faces left",
+    "Held fire produces real, spaced gunshots",
+    "G spends exactly one energy grenade",
+    "Actual right Fire touch reaches a gunshot or contextual close strike",
+    "Actual right Grenade touch spends one bomb without a second underlying command",
+    "Pause freezes the active mission",
+    "Visible reachable menu action: @Button@217",
+    "Visible reachable menu action: @Button@218",
+    "Visible reachable menu action: @Button@219",
+    "Visible reachable menu action: @Button@220",
+    "Visible reachable menu action: @Button@221",
+    "Portrait rotation preserves checkpoint and score",
+    "Approved fixed left stick and three right actions exist",
+    "Touch target is inside portrait viewport: attack",
+    "Touch target is inside portrait viewport: grenade",
+    "Touch target is inside portrait viewport: jump",
+    "Real multitouch moves and jumps simultaneously",
+    "Touch cancellation releases the joystick without a stuck direction",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Actual rescue remains freed through the contact handover",
+    "Actual rescue and contact handover reach persistent browser storage",
+    "Mission 1 is completable with actual keyboard/mouse-equivalent gameplay",
+    "The chosen branch was actually recorded",
+    "Actual completed checkpoint and campaign best are persisted",
+    "Return to the original runner clears stale campaign observations",
+    "Returning to main preserves the completed campaign",
+    "Offline reload starts the real game and preserves its separate campaign checkpoint",
+    "No browser or Godot script errors during the actual flow: []"
+  ],
+  "errors": [],
+  "build": "29cde1501f1a9acb",
+  "final": {
+    "actions": {
+      "attack": [
+        977.0,
+        413.0,
+        100.0,
+        100.0
+      ],
+      "grenade": [
+        922.0,
+        523.0,
+        100.0,
+        100.0
+      ],
+      "jump": [
+        1032.0,
+        523.0,
+        100.0,
+        100.0
+      ]
+    },
+    "activated": {},
+    "aim": [
+      1.0,
+      0.0
+    ],
+    "ammunition": 0,
+    "awarded": {},
+    "boss_beam_x": -999.0,
+    "boss_hp": 90,
+    "boss_phase": 1,
+    "boss_warning": 0.0,
+    "boss_x": 7380.0,
+    "bullets": [],
+    "buttons": {
+      "@Button@100": [
+        172.0,
+        435.0,
+        808.0,
+        54.0,
+        "Ana men\u00fc"
+      ],
+      "CampaignBegin": [
+        172.0,
+        313.0,
+        808.0,
+        48.0,
+        "G\u00f6reve ba\u015fla"
+      ],
+      "CampaignLastReport": [
+        172.0,
+        371.0,
+        808.0,
+        54.0,
+        "G\u00f6rev raporu"
+      ]
+    },
+    "camera": 0.0,
+    "character": "aion",
+    "checkpoint": "shore",
+    "checkpoint_ready": true,
+    "completed": false,
+    "discovered": {},
+    "enemies": [
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 500.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 698.512329101562,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 848.79377746582,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1084.16456604004,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 1228.94300842285,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1367.50527954102,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1538.97415161133,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2200.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 2320.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 2440.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2560.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2680.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 3500.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 3620.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 3740.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 3860.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 3980.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 4800.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 4920.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 5040.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 5160.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 5280.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 6100.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 6220.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 6340.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 6460.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 6580.0,
+        "y": 0.0
+      }
+    ],
+    "facing": 1,
+    "flock": 1,
+    "gates": [
+      {
+        "closed": true,
+        "x": 1080.0
+      },
+      {
+        "closed": false,
+        "x": 2080.0
+      },
+      {
+        "closed": false,
+        "x": 3080.0
+      },
+      {
+        "closed": false,
+        "x": 4080.0
+      },
+      {
+        "closed": false,
+        "x": 5080.0
+      },
+      {
+        "closed": false,
+        "x": 6080.0
+      },
+      {
+        "closed": true,
+        "x": 2920.0
+      },
+      {
+        "closed": true,
+        "x": 4220.0
+      },
+      {
+        "closed": true,
+        "x": 5520.0
+      },
+      {
+        "closed": true,
+        "x": 6820.0
+      }
+    ],
+    "greeted": {},
+    "grenades": 5,
+    "grounded": true,
+    "help_step": 0,
+    "hp": 3,
+    "hud_summary": "Aion \u00b7 SKOR 00000 \u00b7 Can 3/3 \u00b7 Bomba 5 \u00b7 Silah: Tabanca \u221e \u00b7 Bek\u00e7iler 0",
+    "input_kind": "keyboard",
+    "invulnerable": 1.2,
+    "kills": 0,
+    "losses": 0,
+    "melee": 0.0,
+    "menu": "briefing",
+    "mount_transition": "",
+    "mount_transition_time": 0.0,
+    "mount_type": "skimmer",
+    "mounted": false,
+    "music_starts": 1,
+    "native_memory": 0.0,
+    "node_count": 33.0,
+    "npcs": [
+      {
+        "age": 0.0,
+        "facing": -1,
+        "freed": false,
+        "gift": "heavy",
+        "id": "shore:keeper",
+        "phase": "bound",
+        "secret": "",
+        "thank_age": 0.0,
+        "x": 4290.0,
+        "y": 0.0
+      },
+      {
+        "age": 0.0,
+        "facing": -1,
+        "freed": false,
+        "gift": "points",
+        "id": "shore:keeper:1",
+        "phase": "bound",
+        "secret": "",
+        "thank_age": 0.0,
+        "x": 3725.0,
+        "y": 0.0
+      },
+      {
+        "age": 0.0,
+        "facing": -1,
+        "freed": false,
+        "gift": "arc",
+        "id": "shore:keeper:2",
+        "phase": "bound",
+        "secret": "",
+        "thank_age": 0.0,
+        "x": 6900.0,
+        "y": 0.0
+      }
+    ],
+    "objects": [
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:0",
+        "kind": "turret",
+        "secret": "",
+        "x": 450.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:1",
+        "kind": "panel",
+        "secret": "",
+        "x": 1800.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:2",
+        "kind": "planks",
+        "secret": "",
+        "x": 3150.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:3",
+        "kind": "gate",
+        "secret": "",
+        "x": 4500.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:4",
+        "kind": "lamp",
+        "secret": "",
+        "x": 5850.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:5",
+        "kind": "relay",
+        "secret": "",
+        "x": 7200.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 1,
+        "id": "shore:lamp:0",
+        "kind": "lamp",
+        "secret": "",
+        "x": 720.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 1,
+        "id": "shore:lamp:1",
+        "kind": "lamp",
+        "secret": "",
+        "x": 1320.0,
+        "y": 0.0
+      }
+    ],
+    "pits": [],
+    "platforms": [
+      [
+        650.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1300.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1950.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        2600.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3250.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3900.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        4550.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        5200.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        5850.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        6500.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        7150.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3070.0,
+        -55.0,
+        160.0,
+        18.0
+      ]
+    ],
+    "player": [
+      140.0,
+      0.0
+    ],
+    "pose": {
+      "anchor": [
+        140.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "muzzle": [
+        205.747573852539,
+        -32.6407775878906
+      ],
+      "row": 3,
+      "source": "pixel-aion"
+    },
+    "presentation": "",
+    "presentation_time": 0.0,
+    "raw": [
+      1152.0,
+      648.0
+    ],
+    "report_lines": [
+      "Rota: ",
+      "S\u00fcre: 00:00 \u00b7 Yenilen d\u00fc\u015fmanlar: 0",
+      "Kaybedilen can: 0 \u00b7 Bulunan s\u0131rlar: 0",
+      "Bek\u00e7iler: 0 \u00b7 K\u00f6k Motoru: G\u00f6rev tamamland\u0131",
+      "REKOR: 41050",
+      "En h\u0131zl\u0131 tamamlama: 05:40 \u00b7 En \u00e7ok kurtarma: 21.0",
+      "Kullan\u0131lan silahlar: \u2014",
+      "Kullan\u0131lan ara\u00e7lar: \u2014",
+      "Kurtar\u0131lan bek\u00e7iler: \u2014"
+    ],
+    "rescue_candidate": "",
+    "rescue_roles": {},
+    "rescue_time": 0.0,
+    "rescued": [],
+    "rooms": [],
+    "route": [],
+    "run_seed": 578858989,
+    "save_ok": true,
+    "schema": 3,
+    "score": 0,
+    "section": "shore",
+    "shots": 0,
+    "state": "briefing",
+    "stick": [
+      24.0,
+      471.0,
+      150.0,
+      150.0
+    ],
+    "taken": {},
+    "time": 0.0,
+    "transform": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "ui_generation": 1,
+    "ui_ready": true,
+    "vehicles_used": [],
+    "velocity": [
+      0.0,
+      0.0
+    ],
+    "view": [
+      1152.0,
+      648.0
+    ],
+    "weapon": "pistol",
+    "weapons_used": []
+  }
+}

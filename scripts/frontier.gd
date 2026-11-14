@@ -384,6 +384,19 @@ func step_plants(world,dt: float,movement: float) -> void:
 	update_projectiles(world,dt)
 
 func weapon_muzzle(world) -> Vector2:
+	if (world.character=="owl" and world.y<0.) or (world.character=="wolf" and world.state in ["running","paused"]):
+		var metadata: Dictionary=ForgeHeroArt.DATA.data.atlases["mouth-carry"]
+		var row: int
+		var column: int
+		if world.character=="owl":
+			row=1 if world.owl_flap_time>0. else 0
+			column=clampi(int((1.-world.owl_flap_time/world.OWL_FLAP_DURATION)*6.),0,5) if world.owl_flap_time>0. else posmod(int(world.time*6.),6)
+		else:
+			row=3 if shot_flash>0. else 2
+			column=gun_frame(6) if shot_flash>0. else posmod(int(world.travel_distance()/174.*6.),6)
+		if not world.pose_motion_enabled:column=0
+		var pose: Dictionary=metadata.frames[row][column]
+		return (Vector2(float(pose.muzzle[0]),float(pose.muzzle[1]))-Vector2(float(pose.origin[0]),float(pose.origin[1])))*float(metadata.scales[row])
 	if world.character=="eren" and (world.charging or world.y<0):
 		var atlas: Dictionary=POLISHED.data.atlases["polish-abilities"]
 		var row: int=2 if world.charging else 3

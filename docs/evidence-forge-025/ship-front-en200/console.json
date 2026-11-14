@@ -1,0 +1,22 @@
+[
+  {
+    "type": "warning",
+    "text": "[JavaScript Warning: \"The WebAssembly exception handling 'try' instruction is deprecated and should no longer be used. Please recompile to use the 'try_table' instruction instead.\"]"
+  },
+  {
+    "type": "log",
+    "text": "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org"
+  },
+  {
+    "type": "log",
+    "text": "OpenGL API OpenGL ES 3.0 (WebGL 2.0) - Compatibility - Using Device: Mozilla - llvmpipe, or similar"
+  },
+  {
+    "type": "log",
+    "text": "Build configuration: Emscripten 4.0.20, single-threaded, no GDExtension support."
+  },
+  {
+    "type": "log",
+    "text": "AION_READY 0.25.0"
+  }
+]

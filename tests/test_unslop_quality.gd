@@ -43,7 +43,7 @@ func run():
  check(w.adventure.ducking(w) and w.adventure.roll_frame()==3,"Held shoulder-roll repeats the low authored poses without rotating a bitmap")
  check(w.adventure.roll_pose(1.0,.14,false)==5,"Release uses the authored recovery poses")
  sprite.free()
- var g=load("res://main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.touch_tutorial_done=true
+ var g=load("res://main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.touch_tutorial_done=true;g.front.skip_intro()
  for dims in [Vector2i(1152,648),Vector2i(393,873),Vector2i(873,393)]:
   root.size=dims;await process_frame;g.touch_mode=true
   for scale_value in [1.0,2.0]:
@@ -53,9 +53,18 @@ func run():
    var inset: Vector2=panel.get_theme_stylebox("panel").get_minimum_size()
    var measured: float=g.menu_pages.measure(content,panel.size.x-inset.x)
    check(panel.size.y<=measured+inset.y+2,"Main background fits real content without a blank slab "+str(dims)+str(scale_value)+" actual="+str(panel.size.y)+" content="+str(measured)+" minimum="+str(content.get_combined_minimum_size()))
-   check(g.menu_layer.find_children("StartSelect_*","Button",true,false).size()==6,"Eren and Emre have separate visible cards")
-   for choice in g.menu_layer.find_children("StartSelect_*","Button",true,false):
-    check(not g.language_button.get_global_rect().intersects(choice.get_global_rect()),"Compact language control never covers a character card at enlarged text")
+   var previous=g.menu_layer.find_child("RosterPrevious",true,false)
+   while previous!=null and not previous.disabled:
+    previous.pressed.emit();await process_frame;await process_frame;await process_frame
+    previous=g.menu_layer.find_child("RosterPrevious",true,false)
+   var shown:={}
+   for roster_page in (3 if g.pixel_ui.paged_roster() else 1):
+    for choice in g.menu_layer.find_children("StartSelect_*","Button",true,false):
+     shown[str(choice.name)]=true
+     check(choice.is_visible_in_tree() and not g.language_button.get_global_rect().intersects(choice.get_global_rect()),"Compact language control never covers a visible character card at enlarged text "+str(dims)+str(scale_value)+" language="+str(g.language_button.get_global_rect())+" card="+str(choice.get_global_rect()))
+    var next=g.menu_layer.find_child("RosterNext",true,false)
+    if next!=null and not next.disabled:next.pressed.emit();await process_frame;await process_frame;await process_frame
+   check(shown.size()==6 and shown.has("StartSelect_rabbit") and shown.has("StartSelect_eren"),"Eren and Emre have separate reachable cards on actual roster pages")
    g.select_character("eren");check(g.character_name("eren")=="Eren" and g.character=="eren","Eren selection follows the real menu action")
    g.start_run();g.world.obstacle_wait=999;g.world.frontier.plant_wait=999;g.world.adventure.item_wait=999;g.world.adventure.ambient_gnome_wait=999;g.update_friend();g.update_hud()
    check(not g.action_buttons.has("attack") and not g.ammo_label.visible,"No Reload button or magazine HUD exists")

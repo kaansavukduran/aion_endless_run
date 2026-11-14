@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.24.0"
+const GAME_VERSION = "0.25.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -126,6 +126,10 @@ var visual_size := 1.0
 var friend_combat := -1
 var ui_layout_ready := false
 var layout_generation := 0
+var front := preload("res://scripts/front_presentation.gd").new()
+var help_step := 0
+var camera_rise := 0.0
+var campaign_resume_requested := false
 
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("0a1222"))
@@ -188,6 +192,11 @@ func _ready() -> void:
 	get_tree().auto_accept_quit = false
 	apply_fullscreen()
 	rebuild()
+	front.host=self
+	ui.add_child(front)
+	front.intro_active=not get_tree().has_meta("aion_intro_seen")
+	get_tree().set_meta("aion_intro_seen",true)
+	front.refresh()
 	print("AION_READY "+GAME_VERSION)
 	if "--aion-smoke-test" in OS.get_cmdline_user_args():get_tree().quit.call_deferred()
 
@@ -206,6 +215,7 @@ func make_companion_sprite() -> Sprite2D:
 	return item
 
 func text(key: String) -> String:
+	if key=="attract_enabled":return RunnerFrontText.word(language,"attract")
 	return Words.get_text(language, key)
 
 func character_name(id: String) -> String:
@@ -254,6 +264,9 @@ func save_settings() -> void:
 		best = maxi(best, world.score)
 		best_level = maxi(best_level, world.adventure.level)
 	var cfg := ConfigFile.new()
+	# Preserve campaign tutorial/other module preferences written on the same device.
+	cfg.load("user://save.cfg")
+	preload("res://scripts/browser_save.gd").restore(cfg)
 	cfg.set_value("prefs", "language", language)
 	cfg.set_value("prefs", "language_override", language_override)
 	cfg.set_value("prefs","language_mode_revision",2)
@@ -342,6 +355,8 @@ func button(value: String, callback: Callable, primary: bool = false) -> Button:
 	item.add_theme_font_size_override("font_size",ui_size(30 if touch_mode else 22))
 	item.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	item.pressed.connect(callback)
+	item.focus_entered.connect(func():tone(620.,.025))
+	item.pressed.connect(func():tone(880.,.035))
 	if primary:
 		item.add_theme_stylebox_override("normal", box("ad536e", "f2b1a6", 12))
 		item.add_theme_color_override("font_color", interface_options.color("on_primary"))
@@ -399,6 +414,7 @@ func rebuild() -> void:
 	world.field_width = scene_w
 	settings_inputs.clear()
 	for child in ui.get_children():
+		if child==front:continue
 		# Keep the pressed control in the tree until Godot finishes GUI dispatch.
 		child.hide()
 		child.name = "RetiredUI_" + str(child.get_instance_id())
@@ -419,12 +435,14 @@ func rebuild() -> void:
 	if touch_mode and page=="" and not touch_tutorial_done: pixel_ui.tutorial()
 	update_hud()
 	queue_redraw()
+	if is_instance_valid(front) and is_instance_valid(front.host):front.refresh()
 
 func refresh_interface_metadata(generation: int) -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if generation != layout_generation: return
 	ui_layout_ready = true
+	if is_instance_valid(front) and front.intro_active:ui_layout_ready=false
 	native_diagnostics.layout()
 	web_stamp = ""
 	publish_web_status()
@@ -455,6 +473,9 @@ func build_page() -> void:
 	if page == "characters":
 		build_characters()
 		return
+	if page=="help":
+		build_front_help()
+		return
 	var column := card(440.0 if page == "main" else 560.0)
 	var first: Button
 	if page == "main":
@@ -462,9 +483,21 @@ func build_page() -> void:
 	elif page == "paused":
 		column.add_child(wrap_label(text("paused"), 28))
 		column.add_child(wrap_label(text("pause_note")))
+		# Essential pause actions stay visible while optional detail is paged.
+		var pause_actions:=HBoxContainer.new()
+		pause_actions.name="PausePrimaryActions"
+		pause_actions.set_meta("menu_pin",true)
+		column.add_child(pause_actions)
 		first = button(text("resume"), resume_run, true)
-		column.add_child(first)
-		column.add_child(button(text("menu"), main_menu))
+		first.name="PauseResume"
+		first.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		pause_actions.add_child(first)
+		var pause_menu:=button(text("menu"), main_menu)
+		pause_menu.name="PauseMainMenu"
+		pause_menu.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		pause_actions.add_child(pause_menu)
+		first.focus_neighbor_bottom=first.get_path_to(pause_menu)
+		pause_menu.focus_neighbor_top=pause_menu.get_path_to(first)
 		if not OS.has_feature("web") and not OS.has_feature("mobile"):
 			column.add_child(button(text("quit"), quit_game))
 		column.add_child(button(text("settings"), func(): open_subpage("settings")))
@@ -498,7 +531,7 @@ func build_page() -> void:
 	elif page == "settings":
 		column.add_child(wrap_label(text("settings"), 28))
 		column.add_child(wrap_label(text("language"), 13, "d4b6b2"))
-		var choose_language:=button(Words.LANGUAGE_NAMES[language]+"  ▾",toggle_language_picker)
+		var choose_language:=button(Words.LANGUAGE_NAMES[language]+"  ▼",toggle_language_picker)
 		choose_language.name="SettingsLanguage"
 		column.add_child(choose_language)
 		first=choose_language
@@ -508,6 +541,7 @@ func build_page() -> void:
 		add_choice(column,"ui_font",[["system","font_system"],["pixel","font_pixel"]],interface_options.font_mode,func(v):apply_interface_option("font_mode",v))
 		add_choice(column,"text_size",[[1.0,"size_100"],[1.25,"size_125"],[1.5,"size_150"],[2.0,"size_200"]],interface_options.text_scale,func(v):apply_interface_option("text_scale",v))
 		add_toggle(column,"reduced_motion",interface_options.reduced_motion,func(v):apply_interface_option("reduced_motion",v))
+		add_toggle(column,"attract_enabled",interface_options.attract_enabled,func(v):apply_interface_option("attract_enabled",v))
 		add_choice(column,"touch_layout",[["split","layout_split"],["right","layout_right"]],interface_options.touch_layout,func(v):apply_interface_option("touch_layout",v))
 		gamepad.build_settings(column)
 		add_toggle(column, "motion", motion, func(value): motion = value; save_settings())
@@ -712,6 +746,7 @@ func open_subpage(value: String) -> void:
 	show_page(value)
 
 func start_run() -> void:
+	front.skip_intro();front.stop_demo()
 	visual_size = 1.0
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("try { screen.orientation?.unlock?.(); } catch (_) {}")
@@ -727,11 +762,13 @@ func start_run() -> void:
 	tone(440.0, 0.09)
 
 func start_campaign() -> void:
+	front.skip_intro();front.stop_demo()
 	clear_held_controls()
 	save_settings()
 	var campaign = preload("res://scripts/campaign_game.gd").new()
 	campaign.selected_hero=character
 	campaign.language=language
+	campaign.resume_on_ready=campaign_resume_requested
 	get_tree().root.add_child(campaign)
 	get_tree().current_scene=campaign
 	queue_free()
@@ -762,6 +799,9 @@ func quit_game() -> void:
 	get_tree().quit()
 
 func _notification(what: int) -> void:
+	if is_instance_valid(front):
+		if what in [NOTIFICATION_APPLICATION_FOCUS_OUT,NOTIFICATION_APPLICATION_PAUSED]:front.frozen=true
+		elif what in [NOTIFICATION_APPLICATION_FOCUS_IN,NOTIFICATION_APPLICATION_RESUMED]:front.frozen=false
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		quit_game()
 	if what in [NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_WM_GO_BACK_REQUEST]:
@@ -771,6 +811,7 @@ func _notification(what: int) -> void:
 func select_character(id: String) -> void:
 	if id not in FRIENDS or world.state != "ready" or page not in ["main", "characters"]: return
 	character = id
+	pixel_ui.roster_page=FRIENDS.find(id)/2
 	world.character = id
 	clear_held_controls()
 	save_settings()
@@ -900,12 +941,17 @@ func apply_scene_transform() -> void:
 		if is_instance_valid(world_tint): world_tint.color = Color.WHITE.lerp(Color.from_hsv(fposmod(clock * 0.045, 1.0), 0.30, 1.0), 0.60*prism_intensity)
 	elif is_instance_valid(world_tint): world_tint.color = Color.WHITE
 	var base := Transform2D(0,Vector2.ONE*scene_zoom,0,Vector2(92.0-World.PLAYER_X*scene_zoom,0) if portrait else Vector2.ZERO)
+	# Follow the new high rabbit/owl leaps without moving the physical actor.
+	camera_rise=maxf(0.,-(ground+world.y-110.)) if page=="" else 0.
+	base.origin.y+=camera_rise*scene_zoom
 	transform = screen_transform * base * camera
 
 func on_wolf(point: Vector2) -> bool:
 	return character == "wolf" and Rect2(World.PLAYER_X - 65, ground + world.y - 115, 130, 130).has_point(point)
 
 func _input(event: InputEvent) -> void:
+	if is_instance_valid(front) and is_instance_valid(front.host) and front.input(event):
+		get_viewport().set_input_as_handled();return
 	if event is InputEventScreenTouch and event.pressed: active_input="touch"
 	elif event is InputEventKey and event.pressed and not event.echo: active_input="keyboard"
 	elif event is InputEventMouseButton and event.pressed and event.device!=-1: active_input="keyboard"
@@ -965,7 +1011,7 @@ func _input(event: InputEvent) -> void:
 				return
 			if page == "": pause_run()
 			elif page == "paused": resume_run()
-			elif page in ["characters", "settings"]: show_page(return_page)
+			elif page in ["characters", "settings","help"]: show_page(return_page)
 			elif page == "finished": main_menu()
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_SPACE and page == "":
@@ -985,7 +1031,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.keycode in [KEY_SPACE, KEY_ENTER] and page == "main" and not language_picker_open:
 			var focused := get_viewport().gui_get_focus_owner()
-			if focused == null or not (str(focused.name).begins_with("StartSelect_") or str(focused.name) == "LanguageMenu"):
+			if focused == null or str(focused.name)=="StartRun":
 				start_run()
 				get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F11:
@@ -1010,6 +1056,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _physics_process(dt: float) -> void:
+	if is_instance_valid(front) and is_instance_valid(front.host):front.step(dt)
 	theme_check+=dt
 	if theme_check>1.0:
 		theme_check=0.0
@@ -1275,6 +1322,7 @@ func publish_web_status() -> void:
 	stamp += ":" + str(language_picker_open)+":"+interface_options.theme_mode+":"+str(interface_options.dark)+":"+interface_options.font_mode+":"+str(interface_options.text_scale)+":"+str(interface_options.reduced_motion)+":"+active_input
 	stamp += ":"+str(world.owl_flaps_used)+":"+str(world.owl_flap_time)
 	stamp += ":"+interface_options.touch_layout
+	stamp += ":"+str(front.intro_active)+":"+str(front.demo_world!=null)+":"+str(int(front.intro_time*10))+":"+str(int(front.idle_time))+":"+str(int(front.demo_time*10))+":"+str(help_step)
 	if world.frontier.storytelling():stamp+=":"+str(world.frontier.story_index)+":"+str(world.frontier.story_time)
 	stamp += ":" + str(effects_enabled) + ":" + str(motion) + ":" + str(audio_enabled) + ":" + str(world.adventure.celebrations_enabled)
 	stamp += ":%.2f:%s:%d:%d:%s" % [world.y, world.riding_gust, friend_row, friend_frame, friend_action]
@@ -1291,6 +1339,7 @@ func publish_web_status() -> void:
 	if canvas == null: return
 	web_accessibility.update()
 	canvas.setAttribute("data-ui-ready", str(ui_layout_ready))
+	canvas.setAttribute("data-front",JSON.stringify({"intro":front.intro_active,"intro_time":front.intro_time,"idle":front.idle_time,"demo":front.demo_world!=null,"demo_index":front.demo_index,"demo_time":front.demo_time,"help_step":help_step,"selected":character,"demo_player":[front.demo_world.player.x,front.demo_world.player.y] if front.demo_world!=null else [],"demo_shots":front.demo_world.shots if front.demo_world!=null else 0,"demo_section":front.demo_world.section if front.demo_world!=null else ""}))
 	canvas.setAttribute("data-level-elapsed",str(world.adventure.level_elapsed))
 	canvas.setAttribute("data-level-distance",str(world.adventure.level_distance(world)))
 	canvas.setAttribute("data-celebration-x",str(world.adventure.celebration_x(world,motion)))
@@ -1498,6 +1547,7 @@ func runner_region(id: String, row: int, frame: int) -> Rect2:
 	return Rect2(frame * 181, ys[row], 181, ys[row + 1] - ys[row])
 
 func update_friend() -> void:
+	world.pose_motion_enabled=motion
 	var a = world.adventure
 	if world.state != "paused" or friend_character != character:
 		friend_combat = -1
@@ -1572,7 +1622,15 @@ func update_friend() -> void:
 		if not motion: shooting = 3 if firing else 0
 		frames.place(friend_sprite,key,row,shooting,Vector2(World.PLAYER_X,ground+world.y))
 	if character=="owl" and world.owl_flap_time>0 and world.state in ["running","paused"] and not a.ducking(world):
-		frames.place(friend_sprite,"owl-flap",0,frames.progress("owl-flap",0,1-world.owl_flap_time/World.OWL_FLAP_DURATION) if motion else 2,Vector2(World.PLAYER_X,ground+world.y))
+		frames.place(friend_sprite,"owl-flap",0,frames.progress("owl-flap",0,1-world.owl_flap_time/World.OWL_FLAP_DURATION) if motion else 0,Vector2(World.PLAYER_X,ground+world.y))
+	# Mouth-carry rendering and projectile metadata share the same actual frame.
+	if world.state in ["running","paused"] and not a.ducking(world) and not a.hugging():
+		if character=="owl" and world.y<0 and world.owl_flap_time<=0.:
+			frames.place(friend_sprite,"runner-owl",6,posmod(int(world.time*6.),6) if motion else 0,Vector2(World.PLAYER_X,ground+world.y))
+		elif character=="wolf" and world.y>=0.:
+			var carry_key: String="gun-fire" if world.frontier.shot_flash>0. else "gun-run"
+			var carry_frame: int=world.frontier.gun_frame(6) if world.frontier.shot_flash>0. else posmod(int(world.travel_distance()/174.*6.),6)
+			frames.place(friend_sprite,carry_key,COMBAT_ROWS[character],carry_frame if motion else 0,Vector2(World.PLAYER_X,ground+world.y))
 	if world.state in ["running","paused"] and not a.ducking(world) and not a.hugging() and (world.y<0 or world.boosting() or (world.state=="paused" and character=="wolf" and friend_row==6)):
 		place_held_gun()
 	if world.charging:
@@ -1608,6 +1666,9 @@ func update_friend() -> void:
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
 
 func place_held_gun() -> void:
+	if bool(friend_sprite.get_meta("gun_embedded",false)):
+		gun_echo.visible=false
+		return
 	# Keep the established jump/glide/four-legged sprint art and add only its
 	# own isolated pistol/paw pixels. Never resize or sway the hero to aim.
 	var f=world.frontier
@@ -1617,7 +1678,7 @@ func place_held_gun() -> void:
 	var cache_key:=character+":"+key+":"+str(frame)
 	var muzzle: Array=frames.PIXEL.data.atlases["pixel-"+character].frames[4 if f.shot_flash>0 else 3][frame].muzzle
 	if not gun_parts.has(cache_key):
-		var pose: Dictionary=frames.pose(key,row,frame)
+		var pose: Dictionary=frames.pose(key,row,frame,true)
 		var factor: float=pose.scale
 		var point:=Vector2(muzzle[0],muzzle[1])
 		# Only barrel/grip pixels, never a second cheek/eye from the atlas.
@@ -1771,6 +1832,7 @@ func draw_scenery() -> void:
 	var night := 0.12 if world.state=="ready" else (cos(time*TAU/72.0)+1.0)/2.0
 	var weights := [0.0,0.0,0.0,0.0,0.0,0.0]
 	var biome: int = world.biome()
+	if world.state=="ready":biome=4
 	var blend := 1.0 if world.distance < World.BIOME_DISTANCE else smoothstep(0.0,0.08,fmod(world.distance/World.BIOME_DISTANCE,1.0))
 	weights[biome] = blend
 	weights[posmod(biome-1,World.BIOME_NAMES.size())] += 1.0-blend
@@ -1783,12 +1845,13 @@ func draw_scenery() -> void:
 	bottom.a = 1.0
 	for i in 48:
 		var fraction := float(i)/48.0
-		draw_rect(Rect2(0,fraction*ground,scene_w,ground/48.0+1),top.lerp(bottom,fraction))
+		var sky_height: float=ground+camera_rise
+		draw_rect(Rect2(0,-camera_rise+fraction*sky_height,scene_w,sky_height/48.0+1),top.lerp(bottom,fraction))
 	var previous: int=posmod(biome-1,World.BIOME_NAMES.size())
 	if blend<1.0:landscape.panorama(self,previous,scroll,night)
 	landscape.panorama(self,biome,scroll,night,blend)
 	evolution_view.draw_scene(self,true)
-	landscape.foreground(self,scroll,night)
+	landscape.foreground(self,scroll,night,4 if world.state=="ready" else -1)
 	terrain.draw(self, biome, previous, blend, scroll, night)
 	if weights[1]>0.4:
 		for i in 28:
@@ -1825,3 +1888,38 @@ func update_weapon_visual() -> void:
 	var hi: Vector2=(Vector2(m[0]+13,m[1]+8)/pose.scale-pose.offset)/pose.texture.get_size()
 	mat.set_shader_parameter("weapon_uv",Vector4(lo.x,lo.y,hi.x,hi.y))
 	mat.set_shader_parameter("weapon_red",true)
+
+func has_campaign_checkpoint() -> bool:
+	var content: String=FileAccess.get_file_as_string("user://campaign.json") if FileAccess.file_exists("user://campaign.json") else ""
+	if OS.has_feature("web"):
+		var mirror=JavaScriptBridge.eval("(()=>{try{return localStorage.getItem('aion.campaign.v1')||''}catch(_){return ''}})()")
+		if mirror is String and not mirror.is_empty():content=mirror
+	if content.is_empty():return false
+	var parsed=JSON.parse_string(content)
+	if not parsed is Dictionary or bool(parsed.get("completed",false)):return false
+	var probe:=AionCampaignWorld.new()
+	return probe.restore(parsed)
+
+func front_ability(hero: String) -> String:
+	return RunnerFrontText.ability(language,hero)
+
+func build_front_help() -> void:
+	var keys: Array=["move","jump","shoot","grenade","vehicle","rescue","secret","route","ability"]
+	help_step=clampi(help_step,0,keys.size()-1)
+	var column: VBoxContainer=card(800)
+	column.add_child(wrap_label(RunnerFrontText.word(language,"how")+" · "+str(help_step+1)+"/"+str(keys.size()),23))
+	column.add_child(wrap_label(RunnerFrontText.word(language,keys[help_step]),22))
+	var preview:=RunnerHeroPreview.new();preview.hero=character;preview.action=keys[help_step];preview.animate=decorative_motion();preview.custom_minimum_size=Vector2(200,140);column.add_child(preview)
+	var keyboard: Array=["A / D · ← / → · W / S", "Space", "F / J · "+text("control_shoot"), "G", "E", "F / J · "+text("control_shoot"), "A / D · Space", "A / × · Enter", front_ability(character)]
+	var pads: Array=["L / D-pad · R",gamepad.binding_name("jump"),gamepad.binding_name("shoot")+" / "+gamepad.binding_name("attack"),gamepad.binding_name("duck"),"Y / △",gamepad.binding_name("shoot"),"L · "+gamepad.binding_name("jump"),"A / ×",front_ability(character)]
+	var touch: Array=["↔ ↕",text("control_jump"),text("control_shoot"),AionCampaignText.word(language,"grenade"),AionCampaignText.word(language,"mount"),text("control_shoot"),"↔ · "+text("control_jump"),"✓",front_ability(character)]
+	column.add_child(wrap_label(str((pads if active_input=="gamepad" else (touch if touch_mode else keyboard))[help_step]),20))
+	var navigation:=HBoxContainer.new();column.add_child(navigation)
+	var previous:=button(RunnerFrontText.word(language,"previous"),func():help_step=maxi(0,help_step-1);rebuild());previous.name="FrontHelpPrevious";previous.disabled=help_step==0;previous.size_flags_horizontal=Control.SIZE_EXPAND_FILL;navigation.add_child(previous)
+	var next:=button(RunnerFrontText.word(language,"next"),func():help_step=mini(keys.size()-1,help_step+1);rebuild());next.name="FrontHelpNext";next.disabled=help_step==keys.size()-1;next.size_flags_horizontal=Control.SIZE_EXPAND_FILL;navigation.add_child(next)
+	var demo:=button(RunnerFrontText.word(language,"demo"),func():show_page("main");front.start_demo());demo.name="StartAttract";column.add_child(demo)
+	var training:=button(text("boss_training"),func():show_page("bosses"));training.name="BossTraining";column.add_child(training)
+	var replay:=button(RunnerFrontText.word(language,"intro"),func():show_page("main");front.begin_intro());replay.name="ReplayOpening";column.add_child(replay)
+	var back:=button(text("back"),func():show_page(return_page));back.name="FrontHelpBack";back.set_meta("menu_pin",true);column.add_child(back)
+	menu_pages.prepare(column,Vector2(float(column.get_meta("page_width")),float(column.get_meta("page_height"))))
+	focus_later.call_deferred(next)

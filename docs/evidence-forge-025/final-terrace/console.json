@@ -1,0 +1,67 @@
+[
+  {
+    "time": 36126.607807375,
+    "type": "log",
+    "text": "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org"
+  },
+  {
+    "time": 36126.936422944,
+    "type": "log",
+    "text": "OpenGL API OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)) - Compatibility - Using Device: WebKit - WebKit WebGL"
+  },
+  {
+    "time": 36127.309129813,
+    "type": "log",
+    "text": "Build configuration: Emscripten 4.0.20, single-threaded, no GDExtension support."
+  },
+  {
+    "time": 36131.551332921,
+    "type": "log",
+    "text": "AION_READY 0.25.0"
+  },
+  {
+    "time": 36132.26147744,
+    "type": "warning",
+    "text": "[.WebGL-0x1f401c4b200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+  },
+  {
+    "time": 36132.261604311,
+    "type": "warning",
+    "text": "[.WebGL-0x1f401c4b200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+  },
+  {
+    "time": 36132.261665264,
+    "type": "warning",
+    "text": "[.WebGL-0x1f401c4b200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+  },
+  {
+    "time": 36132.261713677,
+    "type": "warning",
+    "text": "[.WebGL-0x1f401c4b200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+  },
+  {
+    "time": 36769.955382099,
+    "type": "log",
+    "text": "AION_READY 0.25.0"
+  },
+  {
+    "time": 36776.244848856,
+    "type": "log",
+    "text": "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org"
+  },
+  {
+    "time": 36776.66919361,
+    "type": "log",
+    "text": "OpenGL API OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)) - Compatibility - Using Device: WebKit - WebKit WebGL"
+  },
+  {
+    "time": 36777.014269275,
+    "type": "log",
+    "text": "Build configuration: Emscripten 4.0.20, single-threaded, no GDExtension support."
+  },
+  {
+    "time": 36779.851446281,
+    "type": "log",
+    "text": "AION_READY 0.25.0"
+  }
+]

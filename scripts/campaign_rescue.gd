@@ -28,7 +28,7 @@ static func populate(w) -> void:
 		var roles: Array=REGIONAL_ROLES.get(w.section,ROLES)
 		var role: String=str(roles[posmod(i,roles.size())])
 		if secret!="":role={"water":"observer","terrace":"gardener","roots":"archivist"}[w.section]
-		w.npcs.append({"id":id,"x":x,"home_x":x,"y":y,"freed":freed,"variant":posmod(index,8),"role":role,"gift":GIFTS[posmod(index,GIFTS.size())] if i>0 else "heavy","free_age":99. if freed and w.awarded.has(id+":gift") else 0.,"secret":secret})
+		w.npcs.append({"id":id,"x":x,"home_x":x,"y":y,"freed":freed,"variant":posmod(index,8),"role":role,"gift":GIFTS[posmod(index,GIFTS.size())] if i>0 else "heavy","free_age":99. if freed and w.awarded.has(id+":gift") else 0.,"phase":("departed" if w.awarded.has(id+":gift") else ("thanks" if w.greeted.has(id) else "free")) if freed else "bound","thank_age":99. if w.awarded.has(id+":gift") else 0.,"facing":-1,"roam_clock":0.,"secret":secret})
 	# A cage protects an actual captive, rather than being an unrelated prop.
 	for o in w.objects:
 		if o.kind!="cage" or w.npcs.is_empty():continue
@@ -57,6 +57,46 @@ static func begin(w) -> bool:
 	w.pending_events.append("cut")
 	return true
 
+## A shot may free the rope even when the player is too far away to use a
+## knife. The contact test uses the whole travelled segment, including beams.
+static func hit_rope(w,from: Vector2,to: Vector2) -> bool:
+	for n in w.npcs:
+		if bool(n.freed) or (str(n.secret)!="" and not w.discovered.has(str(n.secret))):continue
+		if w.objects.any(func(o):return str(o.id)==str(n.get("cage","")) and not bool(o.active)):continue
+		var rope:=Rect2(float(n.x)-25.,float(n.y)-120.,50.,100.)
+		if crosses_rect(from,to,rope):
+			w.rescue(n)
+			return true
+	return false
+
+static func crosses_rect(from: Vector2,to: Vector2,rect: Rect2) -> bool:
+	if maxf(from.x,to.x)<rect.position.x or minf(from.x,to.x)>rect.end.x or maxf(from.y,to.y)<rect.position.y or minf(from.y,to.y)>rect.end.y:return false
+	if rect.has_point(from) or rect.has_point(to):return true
+	var corners: Array[Vector2]=[rect.position,Vector2(rect.end.x,rect.position.y),rect.end,Vector2(rect.position.x,rect.end.y)]
+	for i in 4:
+		if Geometry2D.segment_intersects_segment(from,to,corners[i],corners[(i+1)%4])!=null:return true
+	return false
+
+static func has_support(w,n: Dictionary,x: float) -> bool:
+	if absf(float(n.y))<.1:return w.floor_at(x)==0.
+	for platform in w.platforms:
+		if w.disabled_platforms.has(platform.position.x):continue
+		if absf(platform.position.y-float(n.y))<.1 and x>=platform.position.x+4. and x<=platform.end.x-4.:return true
+	return false
+
+static func handover(w,n: Dictionary) -> void:
+	var id: String=str(n.id)
+	if w.awarded.has(id+":gift"):return
+	# Persist the claim with the real effect. The freed NPC cannot pay out
+	# just because time passed remotely, and retry never duplicates a gift.
+	w.award(id+":gift",500 if n.gift=="points" else 0)
+	if n.gift!="points":w.collect({"id":id+":supply","kind":str(n.gift),"x":n.x,"y":n.y})
+	w.notice="arc_maintenance" if n.role=="archivist" else "arc_thanks";w.notice_time=2.;w.pending_events.append("rescue_gift")
+	if n.role=="technician":
+		w.mount.hp=mini(4,int(w.mount.hp)+1)
+		for o in w.objects:
+			if o.kind=="gate" and absf(float(o.x)-float(n.x))<400.:o.active=true;w.activated[str(o.id)]=true
+
 static func step(w,dt: float) -> void:
 	if w.rescue_time>0.:
 		w.rescue_time=maxf(0.,w.rescue_time-dt)
@@ -67,21 +107,25 @@ static func step(w,dt: float) -> void:
 	for n in w.npcs:
 		if not bool(n.freed):continue
 		n.free_age=float(n.free_age)+dt
-		if float(n.free_age)>=.9 and not w.awarded.has(str(n.id)+":gift"):
-			# Persist the claim together with the effect, never a replayable toast.
-			w.award(str(n.id)+":gift",500 if n.gift=="points" else 0)
-			if n.gift!="points":w.collect({"id":str(n.id)+":supply","kind":str(n.gift),"x":n.x,"y":n.y})
-			w.notice="arc_maintenance" if n.role=="archivist" else "arc_thanks";w.notice_time=2.;w.pending_events.append("rescue_gift")
-			if n.role=="technician":
-				w.mount.hp=mini(4,int(w.mount.hp)+1)
-				for o in w.objects:
-					if o.kind=="gate" and absf(float(o.x)-float(n.x))<400.:o.active=true;w.activated[str(o.id)]=true
-		if n.role=="courier" and float(n.free_age)>1.3 and float(n.free_age)<4.2:
-			if w.floor_at(float(n.x))==0.:n.x=move_toward(float(n.x),w.player.x-70.,90.*dt)
-			if int(float(n.free_age)*2.)!=int((float(n.free_age)-dt)*2.):
-				w.bullets.append({"p":Vector2(float(n.x),float(n.y)-40.),"v":Vector2(w.facing*600.,0.),"owner":"hero","age":0.,"kind":"helper","damage":1,"pierce":0,"hit":[]})
-		if float(n.free_age)>2.4:
-			var next: float=float(n.x)-60.*dt
-			if float(n.y)<-.1:
-				n.x=maxf(float(n.home_x)-75.,next)
-			elif w.floor_at(next)==0.:n.x=next
+		var phase: String=str(n.get("phase","free"))
+		if phase=="free":
+			n.roam_clock=float(n.get("roam_clock",0.))+dt
+			var facing: int=int(n.get("facing",-1))
+			var next: float=float(n.x)+float(facing)*45.*dt
+			var limit: bool=absf(next-float(n.get("home_x",n.x)))>90. or next<35. or next>w.length()-90.
+			if limit or not has_support(w,n,next) or float(n.roam_clock)>1.5+float(int(n.variant)%3)*.25:
+				n.facing=-facing;n.roam_clock=0.
+			else:n.x=next
+			if float(n.free_age)>.2 and absf(w.player.x-float(n.x))<48. and absf(w.player.y-float(n.y))<30. and not bool(w.mount.ridden):
+				n.phase="thanks";n.thank_age=0.;n.facing=1 if w.player.x>float(n.x) else -1
+				w.greeted[str(n.id)]=true;w.pending_events.append("npc_contact")
+		elif phase in ["thanks","departed"]:
+			n.thank_age=float(n.get("thank_age",0.))+dt
+			if phase=="thanks" and float(n.thank_age)>=.9:handover(w,n)
+			if phase=="thanks" and float(n.thank_age)>1.7:n.phase="departed"
+			if str(n.phase)=="departed" and float(n.thank_age)<4.8:
+				var next: float=float(n.x)-60.*dt
+				if has_support(w,n,next):n.x=next;n.facing=-1
+			if n.role=="courier" and w.awarded.has(str(n.id)+":gift") and float(n.thank_age)>1.3 and float(n.thank_age)<4.2:
+				if int(float(n.thank_age)*2.)!=int((float(n.thank_age)-dt)*2.):
+					w.bullets.append({"p":Vector2(float(n.x),float(n.y)-40.),"v":Vector2(w.facing*600.,0.),"owner":"hero","age":0.,"kind":"helper","damage":1,"pierce":0,"hit":[]})

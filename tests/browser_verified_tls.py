@@ -6,9 +6,25 @@ rejects a base64 body above100 MiB. Reassembled bytes still pass the actual
 loader SHA-256 checks. Service workers are blocked only in this diagnostic driver, so this run tests
 live controls, not service-worker installation/caching.
 """
-import runpy,sys,urllib.request,urllib.error,os
+import runpy,sys,urllib.request,urllib.error,urllib.parse,os,re,json,http.cookiejar
 base=os.environ.get("AION_LIVE_BASE","https://kaansavukduran.github.io/aion_endless_run/")
-assert base in ["https://kaansavukduran.github.io/aion_endless_run/","https://aionendlessrun.vercel.app/"]
+preview=bool(re.fullmatch(r'https://aionendless-[a-z0-9]+-vegan-axolotl\.vercel\.app/',base))
+assert preview or base in ["https://kaansavukduran.github.io/aion_endless_run/","https://aionendlessrun.vercel.app/"]
+opener=urllib.request.build_opener()
+if os.environ.get('AION_PREVIEW_ACCESS_FILE'):
+ assert preview, 'Temporary preview access is restricted to this project preview'
+ # A short-lived connector-created viewing capability stays outside the repo
+ # and logs. Cookies remain only in this opener; protection settings are intact.
+ with open(os.environ['AION_PREVIEW_ACCESS_FILE']) as access_file:
+  access_url=json.load(access_file)['url']
+ assert access_url.startswith(base) and '_vercel_share=' in urllib.parse.urlsplit(access_url).query
+ class SameOriginRedirect(urllib.request.HTTPRedirectHandler):
+  def redirect_request(self,req,fp,code,msg,headers,newurl):
+   if not newurl.startswith(base):raise RuntimeError('Preview authentication redirected outside its origin')
+   return super().redirect_request(req,fp,code,msg,headers,newurl)
+ opener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()),SameOriginRedirect())
+ with opener.open(access_url,timeout=60) as access_response:
+  assert access_response.status==200, 'Preview viewing access failed'
 from playwright.sync_api import Browser
 from playwright.sync_api import Page
 original_on=Page.on
@@ -77,7 +93,7 @@ def create(self,*args,**kwargs):
   if url not in cache:
    request=urllib.request.Request(url,headers={'Accept-Encoding':'identity','User-Agent':'Aion-live-verification'})
    try:
-    response=urllib.request.urlopen(request,timeout=90)
+    response=opener.open(request,timeout=90)
    except urllib.error.HTTPError as response_error:
     response=response_error
     print('LIVE HTTP',response.code,url,flush=True)

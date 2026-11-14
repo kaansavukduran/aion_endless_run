@@ -1,0 +1,15 @@
+{
+  "legacy": {
+    "version": "0.24.0",
+    "build": "f21be96bbf646fb9"
+  },
+  "target": {
+    "version": "0.25.0",
+    "build": "3649b43ccdca3bbb"
+  },
+  "scope": "Actual previous export and real service worker/IndexedDB migration; subsequent test-next-build is a synthetic shell update, not a published release.",
+  "migrated": {
+    "version": "0.25.0",
+    "build": "3649b43ccdca3bbb"
+  }
+}

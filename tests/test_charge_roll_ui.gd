@@ -40,7 +40,7 @@ func run():
  for tick in range(20,200):check(w.adventure.roll_pose(tick*.02,0,true)==posmod(int(tick*.02/.62*6),6),"Held low roll repeats all six authored frames on a continuous 0.62s cycle")
  check(w.adventure.roll_pose(.8,.14,false)==5 and w.adventure.roll_pose(.92,.02,false)==0,"Release shows authored recovery poses")
  var save_path:="user://save.cfg";var original:=FileAccess.get_file_as_bytes(save_path) if FileAccess.file_exists(save_path) else PackedByteArray()
- var g=load("res://main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.touch_tutorial_done=true
+ var g=load("res://main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.touch_tutorial_done=true;g.front.skip_intro()
  for dims in [Vector2i(873,393),Vector2i(393,873),Vector2i(1152,648)]:
   root.size=dims;await process_frame;g.touch_mode=true
   for scale_value in [1.0,2.0]:
@@ -56,7 +56,7 @@ func run():
       if target!="main":g.menu_pages.select(n,false)
       await process_frame;await process_frame
       for control in g.menu_layer.find_children("*","Control",true,false):
-       if control.is_visible_in_tree() and control is BaseButton:check(screen.grow(1).encloses(control.get_global_rect()),"Visible page action fits: "+target+str(n)+str(control.name)+str(dims)+str(scale_value))
+       if control.is_visible_in_tree() and control is BaseButton:check(screen.grow(1).encloses(control.get_global_rect()),"Visible page action fits: "+target+str(n)+str(control.name)+str(dims)+str(scale_value)+" rect="+str(control.get_global_rect())+" view="+str(screen)+" panel="+str(g.menu_layer.get_node("PagePanel").get_global_rect()))
      if target=="settings":check(g.menu_pages.pages.size()>1,"Long settings use explicit pages")
      if target=="finished":
       for pin in g.menu_layer.find_children("*","Control",true,false):
@@ -74,13 +74,25 @@ func run():
    for lang in ["tr","en"]:
     g.language=lang;g.page="main";g.language_picker_open=false;g.rebuild();await process_frame;await process_frame;await process_frame
     var screen:=Rect2(0,0,g.view_w,g.view_h)
-    var tiles: Array=g.menu_layer.find_children("StartSelect_*","Button",true,false)
-    var panel: Control=g.menu_layer.get_node("PagePanel")
-    check(tiles.size()==6,"All six heroes remain visible with the actual wider system font")
-    for tile in tiles:
-     check(screen.grow(1).encloses(tile.get_global_rect()),"200% hero card fits "+family+lang+str(dims)+str(tile.name))
-     check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"200% hero title/image fits its actual card")
-     check(not panel.get_global_rect().intersects(tile.get_global_rect()),"Large-text main actions never overlap hero cards")
+    # Large portrait uses explicit two-card pages; visit them through the real controls.
+    var previous=g.menu_layer.find_child("RosterPrevious",true,false)
+    while previous!=null and not previous.disabled:
+     previous.pressed.emit();await process_frame;await process_frame;await process_frame
+     previous=g.menu_layer.find_child("RosterPrevious",true,false)
+    var seen:={}
+    for roster_page in (3 if g.pixel_ui.paged_roster() else 1):
+     var tiles: Array=g.menu_layer.find_children("StartSelect_*","Button",true,false)
+     var panel: Control=g.menu_layer.get_node("PagePanel")
+     for tile in tiles:
+      seen[str(tile.name)]=true
+      check(screen.grow(1).encloses(tile.get_global_rect()),"200% hero card fits "+family+lang+str(dims)+str(tile.name))
+      check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"200% hero title/image fits its actual card "+family+lang+str(dims)+str(tile.name)+" tile="+str(tile.get_global_rect())+" body="+str(tile.get_child(0).get_global_rect()))
+      check(not panel.get_global_rect().intersects(tile.get_global_rect()),"Large-text main actions never overlap hero cards")
+     var following=g.menu_layer.find_child("RosterNext",true,false)
+     if following!=null:
+      check(screen.grow(1).encloses(following.get_global_rect()),"Actual roster next action is inside viewport")
+      if not following.disabled:following.pressed.emit();await process_frame;await process_frame;await process_frame
+    check(seen.size()==6 and seen.has("StartSelect_rabbit") and seen.has("StartSelect_eren"),"All six heroes remain separately reachable with the actual wider system font")
     g.toggle_language_picker();await process_frame;await process_frame
     var languages: Array=g.language_picker.find_children("*","Button",true,false)
     check(languages.size()==12,"System plus eleven languages remain individually reachable")

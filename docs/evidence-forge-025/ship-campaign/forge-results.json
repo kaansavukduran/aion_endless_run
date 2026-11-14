@@ -1,0 +1,664 @@
+{
+  "checks": [
+    "Campaign briefing: all current actions fit and have positive hit areas",
+    "Actual Arcade briefing/help/start presentation reaches playable Mission 1",
+    "Normal D input moves the Arcade hero",
+    "Actual touch Bomb spends one grenade",
+    "Actual touch Jump reaches the same physics action",
+    "Virtual Gamepad API Start pauses the actual world",
+    "Campaign portrait pause: all current actions fit and have positive hit areas",
+    "Paused rotation preserves campaign progress",
+    "Virtual Gamepad API confirm activates the selected Resume action",
+    "Actual keyboard aim and gun action: [1, 0]",
+    "Actual keyboard aim and gun action: [1, -1]",
+    "Actual keyboard aim and gun action: [0, -1]",
+    "Actual keyboard aim and gun action: [-1, -1]",
+    "Actual keyboard aim and gun action: [-1, 0]",
+    "Actual keyboard aim and gun action: [-1, 1]",
+    "Actual keyboard aim and gun action: [0, 1]",
+    "Actual keyboard aim and gun action: [1, 1]",
+    "A held gunshot frees a real captive without starting the knife clip",
+    "Freed NPC grants no gift before hero contact",
+    "The freed NPC actually walks before the hero approaches",
+    "Actual hero contact completes the thanks/gift and persists it once",
+    "No uncaught browser or Godot script errors in the tested ordinary-input flow"
+  ],
+  "errors": [],
+  "browser": "chromium",
+  "locale": "tr-TR",
+  "scenario": "campaign",
+  "large_text": false,
+  "scope": "Real exported game with ordinary user input; emulated viewports/touch and synthetic Gamepad API, not physical hardware.",
+  "build": "3649b43ccdca3bbb",
+  "observations": {
+    "keyboard_aim": [
+      {
+        "keys": [
+          "d"
+        ],
+        "aim": [
+          1.0,
+          0.0
+        ],
+        "shots": 1
+      },
+      {
+        "keys": [
+          "d",
+          "w"
+        ],
+        "aim": [
+          0.70710676908493,
+          -0.70710676908493
+        ],
+        "shots": 2
+      },
+      {
+        "keys": [
+          "w"
+        ],
+        "aim": [
+          0.0,
+          -1.0
+        ],
+        "shots": 3
+      },
+      {
+        "keys": [
+          "a",
+          "w"
+        ],
+        "aim": [
+          -0.70710676908493,
+          -0.70710676908493
+        ],
+        "shots": 4
+      },
+      {
+        "keys": [
+          "a"
+        ],
+        "aim": [
+          -1.0,
+          0.0
+        ],
+        "shots": 5
+      },
+      {
+        "keys": [
+          "a",
+          "s"
+        ],
+        "aim": [
+          -0.70710676908493,
+          0.70710676908493
+        ],
+        "shots": 6
+      },
+      {
+        "keys": [
+          "s"
+        ],
+        "aim": [
+          0.0,
+          1.0
+        ],
+        "shots": 7
+      },
+      {
+        "keys": [
+          "d",
+          "s"
+        ],
+        "aim": [
+          0.70710676908493,
+          0.70710676908493
+        ],
+        "shots": 8
+      }
+    ],
+    "rescued_npc": "shore:keeper:1",
+    "rescue_checkpoint_retries": 1,
+    "campaign_final": {
+      "actions": {
+        "attack": [
+          977.0,
+          413.0,
+          100.0,
+          100.0
+        ],
+        "grenade": [
+          922.0,
+          523.0,
+          100.0,
+          100.0
+        ],
+        "jump": [
+          1032.0,
+          523.0,
+          100.0,
+          100.0
+        ]
+      },
+      "activated": {
+        "shore:lamp:0": true,
+        "shore:lamp:1": true,
+        "shore:object:0": true,
+        "shore:object:1": true,
+        "shore:object:2": true
+      },
+      "aim": [
+        1.0,
+        0.0
+      ],
+      "ammunition": 18,
+      "awarded": {
+        "shore:enemy:0": true,
+        "shore:enemy:1": true,
+        "shore:enemy:2": true,
+        "shore:enemy:3": true,
+        "shore:enemy:300": true,
+        "shore:enemy:301": true,
+        "shore:enemy:302": true,
+        "shore:enemy:303": true,
+        "shore:enemy:304": true,
+        "shore:enemy:310": true,
+        "shore:enemy:311": true,
+        "shore:enemy:4": true,
+        "shore:enemy:5": true,
+        "shore:fruit:1": true,
+        "shore:fruit:10": true,
+        "shore:fruit:11": true,
+        "shore:fruit:12": true,
+        "shore:fruit:13": true,
+        "shore:fruit:14": true,
+        "shore:fruit:15": true,
+        "shore:fruit:16": true,
+        "shore:fruit:2": true,
+        "shore:fruit:3": true,
+        "shore:fruit:4": true,
+        "shore:fruit:5": true,
+        "shore:fruit:6": true,
+        "shore:fruit:7": true,
+        "shore:fruit:8": true,
+        "shore:fruit:9": true,
+        "shore:keeper:1": true,
+        "shore:keeper:1:gift": true,
+        "shore:lamp:0:power": true,
+        "shore:lamp:1:power": true,
+        "shore:object:0:power": true,
+        "shore:object:1:power": true,
+        "shore:object:2:gift": true
+      },
+      "boss_beam_x": -999.0,
+      "boss_hp": 90,
+      "boss_phase": 1,
+      "boss_warning": 0.0,
+      "boss_x": 7380.0,
+      "bullets": [],
+      "buttons": {},
+      "camera": 3280.17693359375,
+      "character": "aion",
+      "checkpoint": "shore",
+      "checkpoint_ready": true,
+      "completed": false,
+      "discovered": {},
+      "enemies": [
+        {
+          "hp": 1,
+          "kind": "crow",
+          "windup": 0.0,
+          "x": 3662.5712890625,
+          "y": -38.5714302062988
+        },
+        {
+          "hp": 1,
+          "kind": "crow",
+          "windup": 0.3,
+          "x": 3424.75622738715,
+          "y": -138.81582930503
+        },
+        {
+          "hp": 1,
+          "kind": "crow",
+          "windup": 0.0,
+          "x": 3606.85693359375,
+          "y": -102.244523562435
+        },
+        {
+          "hp": 1,
+          "kind": "gnome",
+          "windup": 0.0,
+          "x": 4800.0,
+          "y": 0.0
+        },
+        {
+          "hp": 1,
+          "kind": "seed",
+          "windup": 0.0,
+          "x": 4920.0,
+          "y": 0.0
+        },
+        {
+          "hp": 1,
+          "kind": "crow",
+          "windup": 0.0,
+          "x": 5040.0,
+          "y": -120.0
+        },
+        {
+          "hp": 1,
+          "kind": "seed",
+          "windup": 0.0,
+          "x": 5160.0,
+          "y": 0.0
+        },
+        {
+          "hp": 1,
+          "kind": "seed",
+          "windup": 0.0,
+          "x": 5280.0,
+          "y": 0.0
+        },
+        {
+          "hp": 1,
+          "kind": "gnome",
+          "windup": 0.0,
+          "x": 6100.0,
+          "y": 0.0
+        },
+        {
+          "hp": 1,
+          "kind": "seed",
+          "windup": 0.0,
+          "x": 6220.0,
+          "y": 0.0
+        },
+        {
+          "hp": 1,
+          "kind": "crow",
+          "windup": 0.0,
+          "x": 6340.0,
+          "y": -120.0
+        },
+        {
+          "hp": 1,
+          "kind": "beetle",
+          "windup": 0.0,
+          "x": 6460.0,
+          "y": 0.0
+        },
+        {
+          "hp": 1,
+          "kind": "beetle",
+          "windup": 0.0,
+          "x": 6580.0,
+          "y": 0.0
+        }
+      ],
+      "facing": 1,
+      "flock": 1,
+      "gates": [
+        {
+          "closed": false,
+          "x": 1080.0
+        },
+        {
+          "closed": false,
+          "x": 2080.0
+        },
+        {
+          "closed": false,
+          "x": 3080.0
+        },
+        {
+          "closed": false,
+          "x": 4080.0
+        },
+        {
+          "closed": false,
+          "x": 5080.0
+        },
+        {
+          "closed": false,
+          "x": 6080.0
+        },
+        {
+          "closed": false,
+          "x": 2920.0
+        },
+        {
+          "closed": true,
+          "x": 4220.0
+        },
+        {
+          "closed": true,
+          "x": 5520.0
+        },
+        {
+          "closed": true,
+          "x": 6820.0
+        }
+      ],
+      "greeted": {
+        "shore:keeper:1": true
+      },
+      "grenades": 5,
+      "grounded": true,
+      "help_step": 5,
+      "hp": 2,
+      "hud_summary": "Aion · SKOR 03000 · Can 2/3 · Bomba 5 · Silah: Fener Huzmesi: 18 · Bekçiler 1",
+      "input_kind": "keyboard",
+      "invulnerable": 0.391377777777777,
+      "kills": 13,
+      "losses": 4,
+      "melee": 0.0,
+      "menu": "",
+      "mount_transition": "",
+      "mount_transition_time": 0.0,
+      "mount_type": "skimmer",
+      "mounted": false,
+      "music_starts": 1,
+      "native_memory": 0.0,
+      "node_count": 24.0,
+      "npcs": [
+        {
+          "age": 0.0,
+          "facing": -1,
+          "freed": false,
+          "gift": "heavy",
+          "id": "shore:keeper",
+          "phase": "bound",
+          "secret": "",
+          "thank_age": 0.0,
+          "x": 4290.0,
+          "y": 0.0
+        },
+        {
+          "age": 5.86375555555555,
+          "facing": -1,
+          "freed": true,
+          "gift": "points",
+          "id": "shore:keeper:1",
+          "phase": "thanks",
+          "secret": "",
+          "thank_age": 1.40862222222222,
+          "x": 3684.383,
+          "y": 0.0
+        },
+        {
+          "age": 0.0,
+          "facing": -1,
+          "freed": false,
+          "gift": "arc",
+          "id": "shore:keeper:2",
+          "phase": "bound",
+          "secret": "",
+          "thank_age": 0.0,
+          "x": 6900.0,
+          "y": 0.0
+        }
+      ],
+      "objects": [
+        {
+          "active": true,
+          "changed": 20.3038666666668,
+          "clock": 0.8927,
+          "hp": 0,
+          "id": "shore:object:0",
+          "kind": "turret",
+          "secret": "",
+          "x": 450.0,
+          "y": 0.0
+        },
+        {
+          "active": true,
+          "changed": 16.7920666666668,
+          "hp": 0,
+          "id": "shore:object:1",
+          "kind": "panel",
+          "secret": "",
+          "x": 1800.0,
+          "y": 0.0
+        },
+        {
+          "active": true,
+          "changed": 7.07362222222221,
+          "hp": 0,
+          "id": "shore:object:2",
+          "kind": "planks",
+          "secret": "",
+          "x": 3150.0,
+          "y": 0.0
+        },
+        {
+          "active": false,
+          "hp": 2,
+          "id": "shore:object:3",
+          "kind": "gate",
+          "secret": "",
+          "x": 4500.0,
+          "y": 0.0
+        },
+        {
+          "active": false,
+          "hp": 2,
+          "id": "shore:object:4",
+          "kind": "lamp",
+          "secret": "",
+          "x": 5850.0,
+          "y": 0.0
+        },
+        {
+          "active": false,
+          "hp": 2,
+          "id": "shore:object:5",
+          "kind": "relay",
+          "secret": "",
+          "x": 7200.0,
+          "y": 0.0
+        },
+        {
+          "active": true,
+          "changed": 19.4281333333335,
+          "hp": 0,
+          "id": "shore:lamp:0",
+          "kind": "lamp",
+          "secret": "",
+          "x": 720.0,
+          "y": 0.0
+        },
+        {
+          "active": true,
+          "changed": 17.9420666666668,
+          "hp": 0,
+          "id": "shore:lamp:1",
+          "kind": "lamp",
+          "secret": "",
+          "x": 1320.0,
+          "y": 0.0
+        }
+      ],
+      "pits": [],
+      "platforms": [
+        [
+          650.0,
+          -70.0,
+          170.0,
+          20.0
+        ],
+        [
+          1300.0,
+          -70.0,
+          170.0,
+          20.0
+        ],
+        [
+          1950.0,
+          -70.0,
+          170.0,
+          20.0
+        ],
+        [
+          2600.0,
+          -70.0,
+          170.0,
+          20.0
+        ],
+        [
+          3250.0,
+          -70.0,
+          170.0,
+          20.0
+        ],
+        [
+          3900.0,
+          -70.0,
+          170.0,
+          20.0
+        ],
+        [
+          4550.0,
+          -70.0,
+          170.0,
+          20.0
+        ],
+        [
+          5200.0,
+          -70.0,
+          170.0,
+          20.0
+        ],
+        [
+          5850.0,
+          -70.0,
+          170.0,
+          20.0
+        ],
+        [
+          6500.0,
+          -70.0,
+          170.0,
+          20.0
+        ],
+        [
+          7150.0,
+          -70.0,
+          170.0,
+          20.0
+        ]
+      ],
+      "player": [
+        3671.85693359375,
+        0.0
+      ],
+      "pose": {
+        "anchor": [
+          3671.85693359375,
+          0.0
+        ],
+        "facing": 1,
+        "floor": 0.0,
+        "frame": 0,
+        "muzzle": [
+          3737.60450744629,
+          -32.6407775878906
+        ],
+        "row": 3,
+        "source": "pixel-aion"
+      },
+      "presentation": "",
+      "presentation_time": 0.0,
+      "raw": [
+        1152.0,
+        648.0
+      ],
+      "report_lines": [
+        "Rota: ",
+        "Süre: 00:31 · Yenilen düşmanlar: 13",
+        "Kaybedilen can: 4 · Bulunan sırlar: 0",
+        "Bekçiler: 1 · Kök Motoru: Görev tamamlandı",
+        "REKOR: 00000",
+        "En hızlı tamamlama: 00:31 · En çok kurtarma: 1",
+        "Kullanılan silahlar: Tabanca ∞",
+        "Kullanılan silahlar: Işık Yağmuru",
+        "Kullanılan silahlar: Saçma",
+        "Kullanılan silahlar: Ark",
+        "Kullanılan silahlar: Fener Huzmesi",
+        "Kullanılan araçlar: —",
+        "Kurtarılan bekçiler: Bakım teknisyeni ×1"
+      ],
+      "rescue_candidate": "",
+      "rescue_roles": {
+        "shore:keeper:1": "technician"
+      },
+      "rescue_time": 0.0,
+      "rescued": [
+        "shore:keeper:1"
+      ],
+      "rooms": [],
+      "route": [],
+      "run_seed": 671932856,
+      "save_ok": true,
+      "schema": 3,
+      "score": 3000,
+      "section": "shore",
+      "shots": 99,
+      "state": "playing",
+      "stick": [
+        24.0,
+        471.0,
+        150.0,
+        150.0
+      ],
+      "taken": {
+        "shore:crate:1": true,
+        "shore:crate:2": true,
+        "shore:crate:3": true,
+        "shore:crate:4": true,
+        "shore:fruit:1": true,
+        "shore:fruit:10": true,
+        "shore:fruit:11": true,
+        "shore:fruit:12": true,
+        "shore:fruit:13": true,
+        "shore:fruit:14": true,
+        "shore:fruit:15": true,
+        "shore:fruit:16": true,
+        "shore:fruit:2": true,
+        "shore:fruit:3": true,
+        "shore:fruit:4": true,
+        "shore:fruit:5": true,
+        "shore:fruit:6": true,
+        "shore:fruit:7": true,
+        "shore:fruit:8": true,
+        "shore:fruit:9": true,
+        "shore:object:2:gift": true
+      },
+      "time": 31.2276539682542,
+      "transform": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "ui_generation": 15,
+      "ui_ready": true,
+      "vehicles_used": [],
+      "velocity": [
+        0.0,
+        0.0
+      ],
+      "view": [
+        1152.0,
+        648.0
+      ],
+      "weapon": "beam",
+      "weapons_used": [
+        "pistol",
+        "heavy",
+        "scatter",
+        "arc",
+        "beam"
+      ]
+    }
+  }
+}

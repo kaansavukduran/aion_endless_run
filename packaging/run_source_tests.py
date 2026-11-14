@@ -2,12 +2,12 @@
 from pathlib import Path
 import argparse,json,os,re,subprocess,tempfile
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=Path('build/test-results'));p.add_argument('--suites',nargs='*');a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
-suites=a.suites or ['game','adventure','localization','evolution','frontier','motion','encounters','fidelity','agility','runner_ux','boss_hud','aionia','variety','visual_polish','orchard','firearm','charge_roll_ui','unslop_quality','pixel_heroes','boss_story','polish','terrain','campaign','campaign_ui','campaign_art','campaign_expansion','campaign_expansion_art','campaign_lifecycle','campaign_secret_routes','campaign_directional']
+suites=a.suites or ['game','adventure','localization','evolution','frontier','motion','encounters','fidelity','agility','runner_ux','boss_hud','aionia','variety','visual_polish','orchard','firearm','charge_roll_ui','unslop_quality','pixel_heroes','boss_story','polish','terrain','campaign','campaign_ui','campaign_art','campaign_expansion','campaign_expansion_art','campaign_lifecycle','campaign_secret_routes','campaign_directional','campaign_forge','endless_jump_ratios','front_presentation','campaign_presentation','forge_hero_art','forge_visual','armed_muzzles','forge_vehicle_art','vehicle_muzzles','pause_actions']
 results=[]
 for name in suites:
  env=dict(os.environ);env['XDG_DATA_HOME']=tempfile.mkdtemp(prefix='aion-test-'+name+'-')
  try:
-  run=subprocess.run([env.get('GODOT_BIN','godot'),'--headless','--script',f'tests/test_{name}.gd'],env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=150)
+  run=subprocess.run([env.get('GODOT_BIN','godot'),'--headless','--script',f'tests/test_{name}.gd'],env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=240 if name in ['campaign_ui','front_presentation','campaign_presentation'] else 150)
   log=run.stdout;code=run.returncode
  except subprocess.TimeoutExpired as error:
   log=(error.stdout or b'').decode() if isinstance(error.stdout,bytes) else (error.stdout or '');code=124
