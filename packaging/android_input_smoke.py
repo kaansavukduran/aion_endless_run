@@ -48,18 +48,22 @@ for code in ['tr','cs','en']:
  capture('main-'+code)
 menu_button(name='StartSelect_owl');latest('AION_UI ',lambda s:s['character']=='owl' and s['page']=='main')
 menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-# Observe glide, then release while still airborne. Waiting2.2s can land
-# before the first repress, which tests a second takeoff rather than a flap.
-gesture=hold('jump',700)
+# Keep the real finger down until the ENGINE reports the flight phase.
+# Software-rendered emulators do not advance game time at wall-clock speed.
+# Android's motion-event command leaves this contact held until the paired UP.
+def jump_contact(down):
+ layout=latest('AION_UI ',lambda s:'jump' in s['actions']);x,y=layout['actions']['jump']
+ adb('shell','input','touchscreen','motionevent','DOWN' if down else 'UP',x,y)
+jump_contact(True)
 try:
  latest('AION_STATE ',lambda s:s['gliding'] and s['airborne']);capture('owl-glide');check(True,'Real native Jump hold reaches an airborne owl glide')
-finally:gesture.wait(timeout=5)
+finally:jump_contact(False)
 for flap in range(1,4):
- gesture=hold('jump',350)
+ jump_contact(True)
  try:
   latest('AION_STATE ',lambda s:s['airborne'] and s['owl_flaps_used']==flap)
   check(True,'Real native Jump repress consumes airborne flap '+str(flap))
- finally:gesture.wait(timeout=5)
+ finally:jump_contact(False)
 pause();capture('paused');main()
 menu_button(name='StartSelect_aion');latest('AION_UI ',lambda s:s['character']=='aion' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 gesture=hold('shoot',700)
