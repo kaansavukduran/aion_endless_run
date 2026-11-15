@@ -15,6 +15,12 @@ func run():
    check(is_equal_approx(pose.size.x/image.get_width(),scale),'Fixed source scale through collapse '+kind)
    check(pose.source_row==row and pose.source_frame==frame,'Each enemy uses its own real registered death row')
   check(hashes.size()==6,'Six distinct death drawings, not duplicate/faded poses '+kind)
+ var originals:=AionCampaignArt.new()
+ for pair in [['drone',0],['seed',2],['warden',6]]:
+  var original: Dictionary=originals.pose(int(pair[1]),0);var pixels: Image=original.texture.get_image();var used: Rect2i=pixels.get_used_rect();var factor: float=original.size.y/pixels.get_height()
+  var reference: Dictionary=bank.DATA.data.references[str(pair[0])]
+  check(absf(float(reference.height)-used.size.y*factor)<.001,'Death registration uses actual rendered robot height, not source pixels '+str(pair[0]))
+  check(absf(float(reference.foot)-(float(original.offset.y)+used.end.y*factor))<.001,'Robot reference uses world offset and scaled source feet '+str(pair[0]))
  for frame in 4:
   var f:=bank.flag(frame);check(f.texture.get_image().get_pixel(0,0).a==0.,'Flag has transparent gutter')
   check(f.texture.get_image().get_used_rect().size.y>60,'Flag contains full pole, cloth and base')

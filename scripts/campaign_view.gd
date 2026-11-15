@@ -226,7 +226,7 @@ func draw_world() -> void:
 			draw_pose(catalogue.pose("mini-bosses",row,frame),p,direction,1.,tint)
 		elif str(e.kind) in ["drone","seed","warden"]:
 			var row: int = {"drone":0,"seed":2,"warden":6}[str(e.kind)]+int(attack)
-			draw_pose(art.pose(row,frame),p-Vector2(0.,float(CampaignEffectsArt.DATA.data.references["seed"].foot) if str(e.kind)=="seed" else 0.),direction,1.,tint)
+			draw_pose(art.pose(row,frame),p,direction,1.,tint)
 		elif e.kind=="gnome": existing("enemies",4 if attack else 3,frame,p,direction,1.,tint)
 		elif e.kind=="crow": existing("enemies",1 if attack else 0,frame,p,direction,1.,tint)
 		else:

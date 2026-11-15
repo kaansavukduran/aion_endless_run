@@ -1,0 +1,32 @@
+[
+  {
+    "suite": "campaign_effects_art",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 209,
+    "results": [
+      [
+        "209",
+        "campaign effects art checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_rewards_sweep",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 55,
+    "results": [
+      [
+        "55",
+        "reward and aim sweep checks",
+        "0"
+      ]
+    ]
+  }
+]

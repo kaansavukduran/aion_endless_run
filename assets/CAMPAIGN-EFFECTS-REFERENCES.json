@@ -11,8 +11,8 @@
   },
   "drone": {
     "facing": 1,
-    "foot": 48.0,
-    "height": 83.0
+    "foot": 19.5,
+    "height": 55.5
   },
   "gnome": {
     "facing": -1,
@@ -26,8 +26,8 @@
   },
   "seed": {
     "facing": 1,
-    "foot": 49.0,
-    "height": 125.0
+    "foot": 0.0,
+    "height": 76.96000000000001
   },
   "slime": {
     "facing": -1,
@@ -36,8 +36,8 @@
   },
   "warden": {
     "facing": 1,
-    "foot": -23.5,
-    "height": 123.0
+    "foot": 0.0,
+    "height": 146.70000000000002
   },
   "wisp": {
     "facing": -1,

@@ -1,0 +1,17 @@
+[
+  {
+    "suite": "campaign_effects_art",
+    "exit_code": 1,
+    "passed": false,
+    "script_error": false,
+    "assertion_error": true,
+    "checks": 209,
+    "results": [
+      [
+        "209",
+        "campaign effects art checks",
+        "6"
+      ]
+    ]
+  }
+]
