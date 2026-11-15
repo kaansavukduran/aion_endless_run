@@ -147,19 +147,7 @@ func draw_world() -> void:
 	for platform in world.platforms:
 		if platform.end.x<camera_x-50. or platform.position.x>camera_x+scene_w+50.:continue
 		if world.disabled_platforms.has(platform.position.x):continue
-		var r := Rect2(at(platform.position),platform.size)
-		# Bracketed wooden walkways, with posts in the scenery layer behind
-		# the actors. Their caps exactly match the one-way collision surface.
-		for dx in [14.,r.size.x-22.]:
-			var post_height: float=ground-r.position.y+(CampaignRoutes.floor_height(platform.position.x+dx) if CampaignRoutes.is_fork(world.section) else 0.)
-			draw_rect(Rect2(r.position+Vector2(dx,9),Vector2(7,post_height-9)),Color("635744"))
-			draw_rect(Rect2(r.position+Vector2(dx+1,10),Vector2(2,post_height-10)),Color("aa9263"))
-		draw_rect(r,Color("493f38")); draw_rect(Rect2(r.position,Vector2(r.size.x,3)),Color("d1bc86"))
-		for x in range(0,int(r.size.x),18):
-			draw_rect(Rect2(r.position+Vector2(x+1,3),Vector2(minf(16,r.size.x-x-1),9)),Color("9b835a") if x%36==0 else Color("8b7953"))
-			draw_rect(Rect2(r.position+Vector2(x+3,4),Vector2(minf(9,r.size.x-x-3),1)),Color("c5a46c"))
-		for dx in [7.,r.size.x-12.]:
-			draw_rect(Rect2(r.position+Vector2(dx,3),Vector2(5,15)),Color("686c62"));draw_rect(Rect2(r.position+Vector2(dx+1,5),Vector2(2,2)),Color("d2cba4"))
+		CampaignTimberArt.walkway(self,platform)
 	CampaignRoutes.draw_landmarks(self)
 	for gate in world.gates:
 		if float(gate.x)<camera_x-100. or float(gate.x)>camera_x+scene_w+100.:continue
@@ -172,10 +160,7 @@ func draw_world() -> void:
 	for crate in world.crates:
 		if float(crate.x)<camera_x-80. or float(crate.x)>camera_x+scene_w+80.:continue
 		if int(crate.hp)<=0: continue
-		var p := at(Vector2(float(crate.x),float(crate.y)))
-		draw_rect(Rect2(p-Vector2(22,42),Vector2(44,42)),Color("63493b"))
-		draw_rect(Rect2(p-Vector2(19,39),Vector2(38,36)),Color("b48d62"),false,3)
-		draw_line(p-Vector2(16,6),p+Vector2(16,-36),Color("725445"),4)
+		CampaignTimberArt.crate(self,Vector2(float(crate.x),float(crate.y)))
 	for item in world.pickups:
 		if float(item.x)<camera_x-80. or float(item.x)>camera_x+scene_w+80.:continue
 		if world.taken.has(str(item.id)): continue

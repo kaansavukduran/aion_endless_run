@@ -1,3 +1,9 @@
+# 0.27.1 · Kutu ve platform görsel düzeltmesi
+
+Başlangıç temiz main `2a20d2f1206bd4e7b1021c463cda0a55fb540e1d`. İstek yalnız ekrandaki ikmal kutusu ve çıkılabilir ahşap platformun kalitesini artırmak. `campaign_view.gd` içindeki düz renk şekillerin yerine yerel olarak özgün çizilmiş `campaign-timber.png` ve ortak `CampaignTimberArt` çizicisi eklendi. Kaynak pikseli oyun birimidir; doku/çivi esnetilmez. Platform üst yüzeyi aynı Y'dedir; ayaklar gerçek zemin yüksekliğini kullanır, çukur dibine dekoratif ayak çizilmez. Dünya fiziği, karakter paftaları, kontroller, kayıtlar ve eşya kuralları değiştirilmedi.
+
+İlgili dört mevcut kaynak paketi 793 kontrolle başarılı. Görsel karşılaştırmalar açıkça kurulmuş gerçek oyun motoru fixture'larıdır; normal girişle oynanmış gibi sunulmaz. Web giriş kontrolü, son commit CI/yayın kimliği teslimde ayrıca doğrulanır. [Kanıt ve kapsam](docs/evidence-timber/README.md).
+
 #0.27.0 · Son istek ve doğrulama devri
 
 Yetkili kaynak main, başlangıç697cfcd/0.26.2. Araçla NPCteşekkür/çanta ve eşya teması; ara açılara gerçek atış; tüm karakterlerdeShift ve sağtıkbomba; Xbox/PS mevcut eşlemeler veLBdepar;4yeni bayrak karesi,54eski düşman ölüm çizimi, var olan ölüm satırlarında global fade kaldırma, piksel mermi ailesi. Hero paftaları, eski kaynakPNG, kayıtlar korunur. [Kapsam/kanıt](docs/evidence-0270/README.md).55yerel kaynak paketi38.221kontrol/0hata;34normal tarayıcı kontrolü/0hata;4açıkça kurulmuş native render fixture. Sentetik gamepad fiziksel cihaz diye yazılmaz. İlk çoklu kaynak kontrolünde RMB bırakılmadan B basılması ortak giriş nedeniyle yeni bomba üretmiyordu; test fiziksel kaynakları doğru sırayla bırakacak şekilde düzenlendi, oyun buna uydurulmadı. SonCI/yayın kimliği ayrıca doğrulanır. Eski kayıtlar aşağıda kalır.

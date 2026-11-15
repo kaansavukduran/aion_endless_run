@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.27.1 · Ahşap platformlar ve ikmal kutuları
+
+Kutu ve çıkılabilir platformlar, yerel olarak çizilmiş perçinli ahşap pixel-art parçaları kullanır. Kapak/çerçeve, ahşap damarları, metal köşeler, çift yönlü payanda ve yere oturan ayaklar vardır. Uzun kirişler dokuyu esnetmeden döşenir. Rota, platform çarpışmaları, kutu içeriği ve kayıtlar korunur. [Görsel ve doğrulama kaydı](docs/evidence-timber/README.md).
+
 ## 0.27.0 · Araçla ikmal, akıcı nişan ve ölüm animasyonları
 
 Araçla NPC teması ve gerçek eşya toplama, sekiz hedef yönü arasında ara açılara ateş, Shift depar/sağ tık bomba, yeni dalgalanan bayrak ve türe özel opak ölüm kareleri. [Değişiklikler ve gerçek doğrulama](docs/evidence-0270/README.md).

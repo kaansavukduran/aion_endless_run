@@ -1,0 +1,62 @@
+[
+  {
+    "suite": "campaign",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 522,
+    "results": [
+      [
+        "522",
+        "campaign checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_routes",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 138,
+    "results": [
+      [
+        "138",
+        "physical route checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_rewards_sweep",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 55,
+    "results": [
+      [
+        "55",
+        "reward and aim sweep checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_combat_patch",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 78,
+    "results": [
+      [
+        "78",
+        "combat patch checks",
+        "0"
+      ]
+    ]
+  }
+]

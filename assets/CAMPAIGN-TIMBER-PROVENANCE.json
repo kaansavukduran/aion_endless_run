@@ -1,0 +1,24 @@
+{
+  "authoring": "Original pixel art drawn locally by the project-owned Python authoring script; no external image/model inputs",
+  "source": "packaging/draw_campaign_timber.py",
+  "license": "Project LICENSE",
+  "atlas_pixels": [
+    192,
+    96
+  ],
+  "world_pixel_ratio": 1,
+  "crate_pixels": [
+    44,
+    42
+  ],
+  "walkway_tile_pixels": [
+    32,
+    24
+  ],
+  "registration": {
+    "crate": "Bottom of final source row meets existing crate Y; unchanged44x42 visual envelope",
+    "walkway": "First cap row at unchanged one-way platform Y; supports end at actual world floor",
+    "tiling": "Partial last tile is cropped, never stretched"
+  },
+  "sha256": "cbc71ef4a889d812f9bcab08d64369ff8256eec79bc93dd8b1272e6477c2238b"
+}
