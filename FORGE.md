@@ -1,5 +1,7 @@
 # 0.26.0 · Mission 1 bütünleştirme devri
 
+[Son teslim/test makbuzu](docs/M1-DELIVERY.md). Oyun kodu main/b7f6d269 üzerindedir; CI43706073148 tüm gerekli platform kapılarından geçti. Bu son belge kaydı çalışma kodunu değiştirmez.
+
 Başlangıç: temiz main `4864b09ce7efea0d2c1b4eaead8703b9cb465b0e`; çalışma dalı `feat/mission1-flow`. Godot4.6.3 korunur. Kullanıcının son kararı oynanabilir kadroyu Aion/Kutsanmış/Ayça/Eren, dilleri TR/EN yapar; eski6satırlık atlaslar ve11dillik arşiv metinleri silinmez. AIONIA1.7, referans indeksi rev3 ve AER1.1 incelendi; özel belgeler depoya kopyalanmadı.
 
 Güncel fiziksel rotalar, no-confirm bölüm geçişleri ve kapsamlı kanıt ayrımı: [M1 akış denetimi](docs/M1-FLOW-VALIDATION.md). Yeni beş eylem gövde bankası: [karakter üretimi](docs/M1-HERO-ART.md). Ortak kaynak pikselinden bağımsız ölçülen kabza/namlu ve hareket sürekliliği test edilir; özel silah ikonlarındaki örnek mermi/duman elde tutulan kopyadan ayrılır, kaynak PNG korunur. Araç namlusu gövdeden ayrıştırılır, özgün eğik kare ekseni gerçek nişan açısına dönüştürülür.
