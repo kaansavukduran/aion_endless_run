@@ -8,7 +8,7 @@ Oyun kodu `b7f6d2693c9e47de148a4336bf7dcc0cdaa5ef7a` üzerinden main dalındadı
 - Üst köprü/alt kanal üzerinden fiziksel yol ayrımları; metinden rota seçme yoktur. Aşağı/S veya joystick aşağı ile eğilerek ilerle ve ateş et. Mevcut bomba, zıplama, yakın saldırı ve kol eşlemeleri korunur.
 - Ortak gövde, el ve zemin kayıtları; ateş ederken yürüyüş sürer. Hareket, duruş, hava ve eğilme kareleri ortak ölçekte kullanılır. Portreler ve iki moddaki koyun takipçileri güncel paftayı kullanır.
 - Araçlarda üç can ve kaynak çizimden ayrılan, kesintisiz dönen gerçek namlu; zemine uygun binme/inme. Örümcek mayın hedefe yürür ve beş saniyede patlar. NPC'ler yüzlerinin yönüne yürür; çantadan çıkan gerçek ikmal temasla alınır.
--81 eski PNG byte-byte aynıdır. Dokuz yeni PNG:120 etkin gövde karesi,24 Ayça hasar/ölüm karesi,12 örümcek karesi ve6 statik eşya.48 eski taslak eğilme karesi runtime'a ek kare gibi sayılmaz. Yeni bıçak/yumruk paftası iddiası yoktur; bu eylemler kayıtlı elin üzerinde prosedürel bıçak/vuruş katmanı kullanır.
+- 81 eski PNG byte-byte aynıdır. Dokuz yeni PNG:120 etkin gövde karesi,24 Ayça hasar/ölüm karesi,12 örümcek karesi ve6 statik eşya.48 eski taslak eğilme karesi runtime'a ek kare gibi sayılmaz. Yeni bıçak/yumruk paftası iddiası yoktur; bu eylemler kayıtlı elin üzerinde prosedürel bıçak/vuruş katmanı kullanır.
 
 ## Gerçek testler
 
@@ -39,3 +39,11 @@ Gerçek düzeltmeler: eski silah ikonlarında ters yön/hatalı fiziksel namlu, 
 Üç istenen skill okundu. Proje içi `.agents/skills/unslop` ve `.agents/skills/fragaria-unslop` paketleri gerçek hata sınıflarıyla güncellendi;16 Markdown dosyası/16 bağlantı doğrulandı. Bulut skill API'si salt okunur olduğundan buluttaki kurulu kopyaların değiştiği iddia edilmez. Kurallar gelecekte hiç hata olmayacağı garantisi vermez.
 
 Fiziksel Poco/iPhone, gerçek Xbox/PlayStation kolu, Edge/Safari ve en ağır mobil sahneler yerelde test edilmedi. Yeni imzalı indirme paketi veya Drive eşitlemesi yayımlanmadı. Mission2–5 tamamlanmış sayılmaz; bu teslim Mission1'i geliştirir.
+
+## Canlı adres doğrulaması ve son QA hazırlık düzeltmesi
+
+Gerçek public Vercel adresinde0.26.0/build`41ada338818156b3`: Chromium/TR51, Firefox/EN51 kontrol geçti; script/tarayıcı hatası0. [Public makbuz](evidence-m1-flow/public-live-verification.json), [Türkçe canlı menü](evidence-m1-flow/live-main-tr.png), [English live menu](evidence-m1-flow/live-main-en.png). Bunlar uzak çevrimdışı kurulum kanıtı değildir; yerel Firefox ve kök rota offline testleri ayrı kayıttır.
+
+9bf75f7'nin ana dal CI turu18 Android giriş kontrolünü geçirdi; ilk PNG162 renkli, tasarlanmış intro/Skip sahnesi olduğundan menü görüntüsü kalite kapısı reddetti. Eski hazır olma koşulu Skip'in yokluğunu ve GPU sunumunu zorunlu tutmuyordu. Eski tap/capture zamanlaması kaydedilmediği için hangi olasılığın tek neden olduğu ileri sürülmez. Yeni cold-launch koruması açılışın gerçekten gözlendiğini, yalnız geçerli Skip'e dokunulduğunu, Skip'in kapandığını ve tam menünün çizildiğini doğrular;8s/12 deneme sınırı, bütün ham PNG'ler ve zamanlama kayıtları korunur.200 renk sınırı düşürülmedi.17 Python regresyon testi geçer; gerçek emülatör yeniden koşusu ayrıca gereklidir.
+
+Public EN turunda yardım ekranına geçiş yapan gerçek ilk dokunma başarılıydı; test eski briefing verisini okuyup yardım döngüsünü atlamıştı. Test yardım→oyun geçişini gerçek UI generation/ready onayıyla bekler; aynı51 public EN kontrol bu korumayla geçti. Bu son değişiklikler yalnız QA betikleri, proje içi skill kuralları ve teslim belgeleridir; oyun/varlık/yükleyici dosyaları değişmez. Son ana dal CI ve Pages kayıtları son commit'e göre kontrol edilir.

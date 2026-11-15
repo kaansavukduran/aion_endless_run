@@ -1,6 +1,7 @@
 """Use real ADB gestures and passive Godot layout/state logs; no state injection."""
 import argparse,json,re,subprocess,time,os
 from android_packets import decode_packets
+from android_readiness import capture_main_frame, layout_matches_display, wait_for_main
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=Path('build'));a=p.parse_args();a.output.mkdir(exist_ok=True,parents=True)
 results=[]
@@ -20,34 +21,30 @@ def check(ok,message):
  results.append(message);print('PASS',message,flush=True)
 def tap(point):adb('shell','input','tap',*point)
 tap_targets=[]
+def record_target(record):
+ tap_targets.append(record)
+ (a.output/'android-tap-targets.json').write_text(json.dumps(tap_targets,indent=2)+'\n')
+ print('ADB_TAP '+json.dumps(record),flush=True)
 def display_bounds():
  values=re.findall(r'(Physical|Override) size:\s*(\d+)x(\d+)',adb('shell','wm','size',text=True))
  assert values,'ADB did not expose display size'
  chosen=next((item for item in reversed(values) if item[0]=='Override'),values[-1])
  return [int(chosen[1]),int(chosen[2])]
-def layout_matches_display(state,bounds):
- expected='portrait' if bounds[0]<bounds[1] else 'landscape'
- return state.get('orientation')==expected and all(0<=b['point'][0]<bounds[0] and 0<=b['point'][1]<bounds[1] for b in state['buttons'])
 def menu_button(name=None,text=None):
  bounds=display_bounds()
  history=packets('AION_UI ')
  if history and not layout_matches_display(history[-1],bounds):
-  tap_targets.append({'event':'rejected_stale_layout','wanted':name or text,'display':bounds,'layout':history[-1]})
+  record_target({'event':'rejected_stale_layout','wanted':name or text,'display':bounds,'layout':history[-1]})
  state=latest('AION_UI ',lambda s:layout_matches_display(s,bounds) and any(b['name']==name or (text and re.search(text,b['text'])) for b in s['buttons']))
  chosen=next(b for b in state['buttons'] if b['name']==name or (text and re.search(text,b['text'])))
  record={'event':'tap','name':chosen['name'],'text':chosen['text'],'point':chosen['point'],'orientation':state['orientation'],'page':state['page'],'display':bounds}
- tap_targets.append(record)
- (a.output/'android-tap-targets.json').write_text(json.dumps(tap_targets,indent=2)+'\n')
- print('ADB_TAP '+json.dumps(record),flush=True)
+ record_target(record)
  tap(chosen['point'])
-def ready_main():
- # Every real launch may show the skippable authored opening. Use its actual
- # logged control, then await the interactive main layout rather than treating
- # the opening's page='main' label as a ready menu.
- state=latest('AION_UI ',lambda s:s['page']=='main' and any(b['name'] in ['SkipOpening','LanguageMenu'] for b in s['buttons']),timeout=25)
- skip=next((b for b in state['buttons'] if b['name']=='SkipOpening'),None)
- if skip is not None:tap(skip['point'])
- return latest('AION_UI ',lambda s:s['page']=='main' and any(b['name']=='LanguageMenu' for b in s['buttons']) and all(key in s['regions'] for key in ['PagePanel','StartChooser']),timeout=25)
+def ready_main(cold=False):
+ def skip_opening(button,state,bounds):
+  record_target({'event':'tap','name':button['name'],'text':button['text'],'point':button['point'],'orientation':state['orientation'],'page':state['page'],'display':bounds})
+  tap(button['point'])
+ return wait_for_main(lambda:packets('AION_UI '),display_bounds,skip_opening,record_target,cold=cold)
 def training():
  # Training is still an actual feature, now under How to play to keep the
  # primary menu compact. Follow the real UI and its pager; never set practice.
@@ -64,6 +61,13 @@ def training():
  latest('AION_UI ',lambda s:s['page']=='bosses')
 def capture(name):
  (a.output/('android-'+name+'.png')).write_bytes(adb('exec-out','screencap','-p'))
+def capture_main():
+ # Layout metadata can precede the GPU-presented frame on software Android.
+ # Keep every raw attempt, including the first, and bound this render barrier.
+ # Never relabel an intro/blank frame as a passing full-menu screenshot.
+ capture_main_frame(lambda:packets('AION_UI '),display_bounds,
+  lambda:adb('exec-out','screencap','-p'),
+  lambda name,png:(a.output/name).write_bytes(png),record_target)
 def hold(action,duration=1200):
  layout=latest('AION_UI ',lambda s:action in s['actions']);x,y=layout['actions'][action]
  return subprocess.Popen(['adb','shell','input','swipe',str(x),str(y),str(x),str(y),str(duration)],stdout=subprocess.DEVNULL)
@@ -76,10 +80,10 @@ def pause():
 def main():
  menu_button(text=r'^(Main menu|Ana menü|Hlavní nabídka)$');ready_main()
 initial=latest('AION_UI ',lambda s:s['page']=='main',timeout=25)
-ready_main()
+ready_main(cold=True)
 # The full-scene image validator expects the interactive game, not the
 # intentionally sparse dark opening. Keep its existing thresholds unchanged.
-capture('first-launch')
+capture_main()
 for code in ['tr','en']:
  menu_button(name='LanguageMenu')
  latest('AION_UI ',lambda s:any(b['name']=='Language_'+code for b in s['buttons']))

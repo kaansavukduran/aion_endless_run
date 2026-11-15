@@ -66,7 +66,7 @@ with sync_playwright() as pw:
                 (a.evidence/'button-failure.json').write_text(json.dumps({'wanted':name,'state':data(),'errors':errors},indent=2)+'\n');page.screenshot(path=str(a.evidence/'button-failure.png'));raise
         if expect_menu and data()['menu']!=expect_menu:return False
         d=data();generation=d.get('ui_generation',0);key=next(k for k,v in d['buttons'].items() if (k==name if name else v[4]==text));v=d['buttons'][key];page.touchscreen.tap(*xy(v[0]+v[2]/2,v[1]+v[3]/2))
-        page.wait_for_function('(old)=>{const s=document.querySelector("canvas").dataset.campaign;return !s || JSON.parse(s).ui_generation!==old}',arg=generation,timeout=10000)
+        page.wait_for_function('(old)=>{const s=document.querySelector("canvas").dataset.campaign;if(!s)return true;const d=JSON.parse(s);return d.ui_generation!==old && d.ui_ready}',arg=generation,timeout=10000)
         page.wait_for_timeout(120)
     def fit():
         d=data()

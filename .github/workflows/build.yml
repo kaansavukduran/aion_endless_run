@@ -22,7 +22,7 @@ jobs:
       - name: Web loader packaging contracts
         run: |
           python3 tests/test_web_packaging.py
-          python3 -m unittest discover -s tests -p test_android_packets.py
+          python3 -m unittest discover -s tests -p 'test_android_*.py'
           python3 -m unittest discover -s tests -p test_macos_dmg.py
       - name: Install Godot
         run: |

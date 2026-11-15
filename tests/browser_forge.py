@@ -150,7 +150,10 @@ with sync_playwright() as playwright:
                     break
         assert button, ('Visible action not found', name, text, [button['name'] for button in buttons])
         before_page = int(raw().get('menuPage', 0)) if not in_campaign else None
+        before_campaign_generation = campaign().get('ui_generation', 0) if in_campaign else None
         page.touchscreen.tap(*coords(button['x']+button['w']/2, button['y']+button['h']/2, in_campaign))
+        if in_campaign:
+            page.wait_for_function("old=>{const value=document.querySelector('canvas')?.dataset.campaign;if(!value)return false;const d=JSON.parse(value);return d.ui_generation!==old && d.ui_ready}", arg=before_campaign_generation, timeout=15000)
         if not in_campaign:
             destination = {'OpenSettings': 'settings', 'ChooseHero': 'characters', 'HowToPlay': 'help', 'ConfirmHero': 'main', 'FrontHelpBack': 'main', 'PageBack': 'main'}.get(name)
             if destination:
