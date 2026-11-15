@@ -386,27 +386,41 @@ with sync_playwright() as playwright:
             aim_samples = []
             directions = [(['d'], [1, 0]), (['d', 'w'], [1, -1]), (['w'], [0, -1]), (['a', 'w'], [-1, -1]), (['a'], [-1, 0]), (['a', 's'], [-1, 1]), (['s'], [0, 1]), (['d', 's'], [1, 1])]
             for index, (inputs, target) in enumerate(directions):
-                # Down while grounded now means crouch. Exercise downward aim
-                # during real airborne movement instead of accepting a changed
-                # horizontal crouch shot as the old downward-aim assertion.
-                if index in [0, 3, 6] or (target[1] > 0 and campaign().get('grounded')):
+                # Grounded Down is intentionally a horizontal crouch shot.
+                # Every downward test must use its own real jump, rather than
+                # the descending tail of the preceding case's flight.
+                keys([])
+                downward = target[1] > 0
+                ground_packet = None
+                if downward:
+                    handle = page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.grounded ? d : false}", timeout=10000)
+                    ground_packet = handle.json_value()
+                    handle.dispose()
                     page.keyboard.press('Space')
-                    if target[1] > 0:
-                        page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).player[1]<-10", timeout=5000)
-                shots = campaign()['shots']
+                elif index in [0, 3]:
+                    page.keyboard.press('Space')
                 keys(inputs)
-                page.wait_for_timeout(100)
-                page.keyboard.down('f')
-                page.wait_for_function("shots=>JSON.parse(document.querySelector('canvas').dataset.campaign).shots>shots", arg=shots, timeout=5000)
-                data = campaign()
                 length = math.hypot(*target)
                 expected = [target[0]/length, target[1]/length]
-                check(math.dist(data['aim'], expected) < .03, 'Actual keyboard aim and gun action: '+str(target))
-                aim_samples.append({'keys': inputs, 'aim': data['aim'], 'shots': data['shots']})
+                handle = page.wait_for_function("([aim,air])=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && Math.hypot(d.aim[0]-aim[0],d.aim[1]-aim[1])<.03 && (!air || (!d.grounded && d.player[1]<-20 && d.velocity[1]<0)) ? d : false}", arg=[expected, downward], timeout=10000)
+                prepared = handle.json_value()
+                handle.dispose()
+                shots = prepared['shots']
+                page.keyboard.down('f')
+                # Return the actual packet that first observes this shot. Do
+                # not re-read after landing and label its grounded aim as the
+                # direction of an earlier airborne shot.
+                handle = page.wait_for_function("shots=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.shots>shots ? d : false}", arg=shots, timeout=5000)
+                data = handle.json_value()
+                handle.dispose()
+                packet = {'case': index, 'keys': inputs, 'expected': expected, 'downward_air_required': downward, 'ground_before_jump': ground_packet, 'prepared': prepared, 'shots_before_fire': shots, 'observed_shot': data}
+                aim_samples.append(packet)
+                observations['keyboard_aim'] = aim_samples
+                (args.evidence/'keyboard-aim-packets.json').write_text(json.dumps(aim_samples, ensure_ascii=False, indent=2)+'\n')
+                check(data['shots'] > shots and math.dist(data['aim'], expected) < .03 and (not downward or not data['grounded']), 'Actual keyboard aim and gun action: '+str(target))
                 page.keyboard.up('f')
                 keys([])
                 page.wait_for_timeout(360)
-            observations['keyboard_aim'] = aim_samples
 
             keys([])
             # Eight real combat aim checks leave the actor exposed to enemies.
@@ -524,14 +538,22 @@ with sync_playwright() as playwright:
         }
         (args.evidence/'forge-results.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
     except Exception as error:
+        # Preserve the checked packet and live state before releasing keys.
+        # Cleanup may change grounded/aim state and is recorded separately.
+        try:
+            failure = {'error': str(error), 'phase': 'before-input-cleanup', 'front': front(), 'campaign': campaign(), 'canvas': raw(), 'errors': errors, 'passed_checks': checks, 'observations': observations}
+            (args.evidence/'failure.json').write_text(json.dumps(failure, ensure_ascii=False, indent=2)+'\n')
+            page.screenshot(path=str(args.evidence/'failure.png'))
+        except Exception:
+            pass
         keys([])
         try:
-            page.screenshot(path=str(args.evidence/'failure.png'))
-            (args.evidence/'failure.json').write_text(json.dumps({'error': str(error), 'front': front(), 'campaign': campaign(), 'canvas': raw(), 'errors': errors, 'passed_checks': checks}, ensure_ascii=False, indent=2)+'\n')
+            (args.evidence/'failure-after-cleanup.json').write_text(json.dumps({'phase': 'after-input-cleanup', 'campaign': campaign(), 'canvas': raw()}, ensure_ascii=False, indent=2)+'\n')
         except Exception:
             pass
         raise
     finally:
+        keys([])
         (args.evidence/'console.json').write_text(json.dumps(console, ensure_ascii=False, indent=2)+'\n')
         context.close()
         browser.close()
