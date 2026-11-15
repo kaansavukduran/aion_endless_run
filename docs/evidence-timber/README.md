@@ -15,6 +15,7 @@ Oyun dünyası, fizik, kutu hasarı/ödülü, rota, kontroller, karakter paftala
 ## Yerel doğrulama
 
 - Mevcut `campaign`, `campaign_routes`, `campaign_rewards_sweep`, `campaign_combat_patch` paketleri: **793 kontrol, sıfır hata**. [Makbuz](focused-source-results.json). Çizimi taklit eden yeni birim testi eklenmedi; mevcut kutu açma, fiziksel rota ve giriş regresyonları kullanıldı.
+- Yükleyici/paketleme için 7, Android paket sözleşmeleri için 27, macOS DMG için 3 mevcut Python kontrolü başarılı. İlk uzak paket kontrolü menüdeki ikinci sürüm sabitinin 0.27.0 kaldığını yakaladı; `scripts/game.gd` sabiti 0.27.1 olarak eşitlendi ve aynı sözleşme kontrolü yeniden geçti.
 - Atlas yeniden üretildiğinde aynı SHA-256 verdi; dış görsel/model girdisi yoktur.
 - [Önce](before.png) ve [sonra](after.png) aynı kamera ve geometriyle gerçek oyun motorunda render edildi. [Uzun köprü](long-bridge.png), [dikey](portrait.png), [yatay](landscape.png) de incelendi. Bunlar **açıkça kurulmuş renderer fixture'larıdır**, normal kullanıcı girdileriyle bu noktalara ulaşıldığı iddiası değildir.
 - İlk yerel screenshot yardımcısı hedef dizin yokken PNG yazamadı; çıktı dizini ve yazma sonucu denetimi eklendi. Bu, oyun hatası veya başarılı görsel kanıt diye kaydedilmedi. Buradaki son dört görüntü gerçek yazma sonucu OK denetimiyle alındı.
