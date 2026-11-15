@@ -61,6 +61,15 @@ func run():
 				var item: Sprite2D=game.friend_sprite
 				var probe: Vector2=item.get_meta("head_probe_world")
 				if col==0:first_x=probe.x
-				check(item.get_meta("source_key")=="pixel-"+hero and item.get_meta("source_row")== (7 if state=="ice" else 8) and is_equal_approx(probe.x,first_x) and is_equal_approx(item.position.x,World.PLAYER_X),"Actual scene selects a fixed elemental face at a fixed actor origin: "+hero+"/"+state+"/"+str(col))
+				var correct_source: bool=item.get_meta("source_key")=="pixel-"+hero and item.get_meta("source_row")== (7 if state=="ice" else 8)
+				var face_registered: bool=is_equal_approx(probe.x,first_x)
+				if hero=="rabbit":
+					correct_source=item.get_meta("source_key")=="m1-damage-ayca" and item.get_meta("source_row")== (0 if state=="ice" else 1)
+					face_registered=not bool(item.get_meta("face_visible")) or face_registered
+				check(correct_source and face_registered and is_equal_approx(item.position.x,World.PLAYER_X),"Actual scene selects an identity-faithful fixed elemental face at a fixed actor origin: "+hero+"/"+state+"/"+str(col))
+	game.character="rabbit";game.world.character="rabbit";game.world.state="bonk";game.world.hit_time=1.3
+	for cause in ["enemy","bonk"]:
+		game.world.death_cause=cause;game.update_friend()
+		check(game.friend_sprite.get_meta("source_key")=="m1-damage-ayca" and game.friend_sprite.get_meta("source_row")== (3 if cause=="enemy" else 2) and not game.gun_echo.visible,"Ayça retains her own skirt/bow in distinct cause-specific defeat clips: "+cause)
 	game.queue_free();await process_frame
 	print("RESULT: %d pixel hero checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

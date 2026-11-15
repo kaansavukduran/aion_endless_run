@@ -34,20 +34,25 @@ func run() -> void:
 		root.size=viewport;await process_frame
 		for text_scale in [1.,1.5,2.]:
 			game.options.text_scale=text_scale
-			for locale in ["tr","en","ja","de","fr"]:
+			for locale in GameText.LANGUAGES:
 				game.language=locale;game.resize();game.world.state="paused"
 				for kind in ["paused","settings","complete","result_details","help"]:
 					game.menu_kind=kind;game.build_ui();await process_frame;await process_frame
 					var area:=Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h))
 					check(area.encloses(game.menu.get_global_rect()),"Complete menu fits: "+str(viewport)+" "+str(text_scale)+" "+locale+" "+kind)
 					for button in game.buttons:check(area.encloses(button.get_global_rect()),"Actual action fits: "+button.text)
+	# Junctions share the real HUD rather than presenting a choice dialog.
+	for section in CampaignRoutes.FORKS:
+		game.world.load_section(section);game.menu_kind="";game.presentation_stage="";game.build_ui();await process_frame;await process_frame
+		check(game.menu==null and game.world.state=="playing","Physical junction has no blocking presentation: "+section)
+		check(game.ui.find_children("Route_*","Button",true,false).is_empty(),"Route labels cannot become gameplay choice buttons")
 	# A long real inventory must remain readable as separate report facts.
 	game.world.weapons_used.assign(CampaignWeapons.SPECIAL);game.world.vehicles_used.assign(["wind","shell","drill"])
-	game.options.text_scale=2.;game.language="fr";root.size=Vector2i(873,393);await process_frame;game.resize();game.menu_kind="result_details"
+	game.options.text_scale=2.;game.language="en";root.size=Vector2i(873,393);await process_frame;game.resize();game.menu_kind="result_details"
 	var pages: int=game.report_lines().size()
 	for index in pages:
 		game.detail_page=index;game.build_ui();await process_frame;await process_frame
-		check(Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h)).encloses(game.menu.get_global_rect()),"Full weapon inventory page fits large French text: "+str(index))
+		check(Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h)).encloses(game.menu.get_global_rect()),"Full weapon inventory page fits large English text: "+str(index))
 	game.options.text_scale=1.;game.language="en";game.menu_kind="";game.presentation_stage="";game.world.completed=true;game.world.boss.active=false;game.world.state="victory";game.world.victory_time=1.19
 	game._process(.05)
 	check(game.presentation_stage=="victory" and game.world.state=="complete","Victory presentation begins only after the real boss death interval")

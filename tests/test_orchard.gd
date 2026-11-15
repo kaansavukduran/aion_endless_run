@@ -39,8 +39,10 @@ func run() -> void:
 	check(w.orchard.wait_distance==wait_distance and w.pickups.is_empty(),"Boss arenas do not spawn normal fruit ribbons")
 	w=arena();w.character="rabbit";w.jump()
 	for i in 120:w.step(.01)
-	w.release_charged_jump();w.step(.016);var emre_speed: float=w.velocity;w.jump();w.step(.016)
-	check(w.jumps_used==1 and emre_speed<World.JUMP_SPEED,"Emre releases one charged leap and cannot double-jump")
+	w.release_charged_jump();w.step(.016);var ayca_speed: float=w.velocity;w.jump();w.step(.016)
+	check(w.jumps_used==1 and ayca_speed<World.JUMP_SPEED,"Ayça releases one charged leap and cannot double-jump")
+	# Historical Emre sheets remain isolated archive art; current Ayça is
+	# checked through the actual menu, body layer and weapon below.
 	var bank=Bank.new();var scale_values:={}
 	for key in ["emre-movement","emre-encounters"]:
 		for row in 6:
@@ -48,25 +50,25 @@ func run() -> void:
 			var gaze: Array[float]=[]
 			for col in 12:
 				var pose: Dictionary=bank.pose(key,row,col);scale_values[pose.scale]=true
-				check(pose.texture.get_image().get_pixel(0,0).a==0,"Emre frames have independent transparent padding")
+				check(pose.texture.get_image().get_pixel(0,0).a==0,"Archived Emre frames have independent transparent padding")
 				if row<2:gaze.append((pose.offset.x+pose.eye_local.x)*pose.scale)
-			if row<2:check(gaze.max()-gaze.min()<.001,"Emre's complete idle/run/weapon cycle has stable horizontal gaze")
-	check(scale_values.size()==1,"One Emre scale is shared by all144 movement, combat and defeat poses")
+			if row<2:check(gaze.max()-gaze.min()<.001,"Archived Emre's complete idle/run/weapon cycle has stable horizontal gaze")
+	check(scale_values.size()==1,"One archived Emre scale is shared by all144 movement, combat and defeat poses")
 	for row in 2:
 		for col in 4:
 			var pose: Dictionary=bank.pose("fruits",row,col)
 			check(pose.texture.get_width()>20 and pose.texture.get_image().get_pixel(0,0).a==0,"Detailed fruit art has isolated transparent margins")
 	for lang in Words.LANGUAGES:
-		check(Words.get_text(lang,"name_rabbit")!="name_rabbit" and Words.get_text(lang,"pad_ability_rabbit").count("%s")==1,"Emre's name and input help are localized: "+lang)
+		check(Words.get_text(lang,"name_rabbit")!="name_rabbit" and Words.get_text(lang,"pad_ability_rabbit").count("%s")==1,"Ayça's current name and input help are localized: "+lang)
 		for kind in w.orchard.KINDS:check(Words.get_text(lang,"fruit_"+kind)!="fruit_"+kind,"Fruit translated: "+lang+"/"+kind)
 	var game=load("res://main.tscn").instantiate();root.add_child(game);await process_frame;game.set_physics_process(false);game.set_process(false)
-	game.main_menu();game.select_character("rabbit");check(game.character=="rabbit" and game.character_name("rabbit")==Words.get_text(game.language,"name_rabbit"),"Fifth hero can be selected through the real existing menu action")
-	game.start_run();game.touch_tutorial_done=true;game.begin_playing();game.press_shoot("key");game.update_friend();check(game.friend_sprite.get_meta("source_key")=="pixel-rabbit" and game.friend_sprite.get_meta("source_row")==4,"Actual Emre uses his own pistol frames")
-	game.release_shoot("key");game.press_attack("key");check(game.world.frontier.shoot_held and game.world.adventure.attack_time==0,"Emre alternate Fire uses the shared cadence without melee")
+	game.main_menu();game.select_character("rabbit");check(game.character=="rabbit" and game.character_name("rabbit")==Words.get_text(game.language,"name_rabbit"),"Ayça can be selected through the real existing menu action")
+	game.start_run();game.touch_tutorial_done=true;game.begin_playing();game.press_shoot("key");game.update_friend();check(game.friend_sprite.get_meta("source_key")=="m1-body-rabbit" and game.friend_sprite.get_meta("pose_key")=="m1-body" and game.gun_echo.visible,"Actual Ayça uses her own body with a visible modular pistol")
+	game.release_shoot("key");game.press_attack("key");check(game.world.frontier.shoot_held and game.world.adventure.attack_time==0,"Ayça alternate Fire uses the shared cadence without melee")
 	game.start_boss_practice(0)
 	for n in 120:game.world.step(1.0/60)
 	game.world.frontier.fire(game.world)
 	for n in 8:game.world.step(1.0/60)
-	game.update_friend();check(game.world.frontier.shots_fired>0 and game.friend_sprite.get_meta("source_key")=="pixel-rabbit","Emre's real boss pistol uses measured muzzle and dedicated weapon frames")
+	game.update_friend();check(game.world.frontier.shots_fired>0 and game.friend_sprite.get_meta("source_key")=="m1-body-rabbit","Ayça's real boss pistol shares the measured modular muzzle and her own body")
 	game.queue_free();await process_frame
-	print("RESULT: %d orchard/Emre checks, %d failures"%[checks,failures]);quit(1 if failures else 0)
+	print("RESULT: %d orchard/Ayça checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

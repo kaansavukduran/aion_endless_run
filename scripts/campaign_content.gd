@@ -48,7 +48,7 @@ static func populate(w) -> void:
 			for j in 3:w.pickups.append({"id":id+":loot:"+str(j),"x":x-65.+j*65.,"y":-178.,"kind":["magnet","reveal","points"][j],"secret":id})
 		var heavy: String={"water":"sweeper","terrace":"glider","roots":"borer"}[w.section]
 		w.spawn_enemy(heavy,w.length()*.62,-90. if heavy=="glider" else 0.,700)
-		w.mount={"available":true,"ridden":false,"x":600.,"hp":4,"type":{"water":"shell","terrace":"wind","roots":"drill"}[w.section],"hurt":0.,"wreck_age":0.}
+		w.mount={"available":true,"ridden":false,"x":600.,"hp":3,"type":{"water":"shell","terrace":"wind","roots":"drill"}[w.section],"hurt":0.,"wreck_age":0.}
 		w.zones.append({"id":w.section+":flow","kind":"current" if w.section=="water" else ("updraft" if w.section=="terrace" else "dark"),"x":w.length()*.4,"width":900.})
 		for i in 2:w.hazards.append({"id":w.section+":hazard:"+str(i),"kind":("electric" if i==0 else "sluice") if w.section=="water" else (("vines" if i==0 else "gust") if w.section=="terrace" else ("claw" if i==0 else "crystal")),"x":w.length()*(.43+i*.29),"clock":float(i),"phase":0.,"warn":false})
 	if w.section=="relay":w.spawn_enemy("patrol",w.length()*.65,0.,700)
@@ -62,7 +62,11 @@ static func populate(w) -> void:
 		# The first coast lamps establish a visible change, not a tutorial modal.
 		if w.section=="shore":
 			for i in 2:w.objects.append({"id":"shore:lamp:"+str(i),"kind":"lamp","x":720.+i*600.,"y":0.,"hp":1,"active":w.activated.has("shore:lamp:"+str(i)),"secret":""})
-	for i in w.crates.size():w.crates[i].kind=(CampaignWeapons.SPECIAL+["heal","shield","grenade","repair","haste","power","reveal","magnet"])[i%18]
+	if w.section=="shore":
+		w.pickups.append({"id":"shore:owl_feather","kind":"owl_feather","x":1200.,"y":-35.})
+	elif w.section=="quay":
+		w.pickups.append({"id":"quay:wolf_charm","kind":"wolf_charm","x":1650.,"y":-35.})
+	for i in w.crates.size():w.crates[i].kind=(CampaignWeapons.SPECIAL+["heal","shield","grenade","repair","haste","power","reveal","magnet","owl_feather","wolf_charm"])[i%20]
 	for e in w.enemies:
 		if bool(e.mini):
 			e.mini_role={"water":"current_guard","terrace":"terrace_guard","roots":"drill_guard"}.get(w.section,"current_guard")

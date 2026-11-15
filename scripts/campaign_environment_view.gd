@@ -3,7 +3,7 @@ extends RefCounted
 const PANORAMA=preload("res://assets/campaign-panorama.png")
 
 static func background(v) -> bool:
-	var row: int=["water","terrace","roots"].find(v.world.section)
+	var row: int=["water","terrace","roots"].find("terrace" if v.world.section=="fork_two" else v.world.section)
 	if row<0:return false
 	var source_h: float=PANORAMA.get_height()/3.
 	var scale: float=maxf(v.scene_w/PANORAMA.get_width(),v.ground/source_h)*1.1

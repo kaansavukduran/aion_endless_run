@@ -29,15 +29,32 @@ with sync_playwright() as pw:
     xx,yy=main_button['x']+main_button['w']/2,main_button['y']+main_button['h']/2
     page.touchscreen.tap(rect['x']+(tr[0]*xx+tr[2]*yy+tr[4])/float(initial['rawWidth'])*rect['width'],rect['y']+(tr[1]*xx+tr[3]*yy+tr[5])/float(initial['rawHeight'])*rect['height'])
     page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")',timeout=45000)
-    def data():return json.loads(canvas.get_attribute('data-campaign'))
+    last_observation={}
+    def data():
+        current=json.loads(canvas.get_attribute('data-campaign'))
+        last_observation.clear();last_observation.update(current)
+        return current
     import sys
     default_hook=sys.excepthook
-    def failure_hook(kind,value,tb):
-        try:
-            (a.evidence/'failure.json').write_text(json.dumps({'error':str(value),'state':data(),'console_errors':errors},indent=2)+'\n');page.screenshot(path=str(a.evidence/'failure.png'))
+    def capture_failure(error):
+        destination=a.evidence/'failure.json'
+        if destination.exists():return
+        try:current=data();source='live-before-context-close'
+        except Exception:current=last_observation.copy();source='last-successful-read'
+        destination.write_text(json.dumps({'error':str(error),'state':current,'state_source':source,'console_errors':errors},indent=2)+'\n')
+        try:page.screenshot(path=str(a.evidence/'failure.png'))
         except Exception:pass
+    def failure_hook(kind,value,tb):
+        capture_failure(value)
         default_hook(kind,value,tb)
     sys.excepthook=failure_hook
+    original_wait=page.wait_for_function
+    def observed_wait(*arguments,**keywords):
+        try:return original_wait(*arguments,**keywords)
+        except Exception as error:
+            capture_failure(error)
+            raise
+    page.wait_for_function=observed_wait
     def xy(x,y):
         d=data();r=canvas.bounding_box();tr=d['transform'];raw=d.get('raw',[d['view'][0]*tr[0],d['view'][1]*tr[0]])
         return r['x']+(x*tr[0]+tr[1])/raw[0]*r['width'],r['y']+(y*tr[0]+tr[2])/raw[1]*r['height']
@@ -85,31 +102,91 @@ with sync_playwright() as pw:
         r=d['actions']['jump'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2));page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-10',timeout=10000);check(True,'Firefox actual touch reaches the same jump action; CDP multitouch is Chromium-only')
     page.set_viewport_size({'width':1280,'height':720});page.wait_for_timeout(700);page.screenshot(path=str(a.evidence/'landscape-playing.png'));canvas.focus()
     if a.play_through or a.rescue_only:
-        held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None;board_attempts=set();vehicle_inputs=[]
+        held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None;board_attempts=set();vehicle_inputs=[];fork_inputs=[];rescue_presentations=[]
         def keys(wanted):
             global held
             for k in held-set(wanted):page.keyboard.up(k)
             for k in set(wanted)-held:page.keyboard.down(k)
             held=set(wanted)
+        def rescue_presentation(current):
+            if not current.get('ui_ready',True):
+                keys([]);page.wait_for_timeout(50);return True
+            if current['menu']!='boss':return False
+            keys([])
+            if current.get('ui_ready',True):
+                rescue_presentations.append({'section':current['section'],'state':current['state'],'menu':current['menu'],'ui_generation':current.get('ui_generation')})
+                (a.evidence/'rescue-story-inputs.json').write_text(json.dumps(rescue_presentations,indent=2)+'\n')
+                page.keyboard.press('Enter')
+            page.wait_for_timeout(180)
+            return True
+        def wait_rescue(predicate,timeout,label,wanted=()):
+            deadline=time.monotonic()+timeout
+            while time.monotonic()<deadline:
+                current=data()
+                if predicate(current):return current
+                if rescue_presentation(current):continue
+                assert current['state']=='playing',(label,'Interrupted',current['state'],current['menu'])
+                keys(wanted)
+                page.wait_for_timeout(50)
+            capture_failure(label)
+            raise AssertionError((label,last_observation))
+        def record_profile():
+            if a.profile and not (a.evidence/'performance.json').exists():
+                timings=page.evaluate("""async()=>{
+                    const times=[];let previous=performance.now(),start=previous;
+                    const initial=JSON.parse(document.querySelector('canvas').dataset.campaign);
+                    await new Promise(resolve=>{function frame(t){times.push(t-previous);previous=t;if(t-start<6000)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
+                    const gl=document.querySelector('canvas').getContext('webgl2'),debug=gl&&gl.getExtension('WEBGL_debug_renderer_info');
+                    const final=JSON.parse(document.querySelector('canvas').dataset.campaign);
+                    const duration=(performance.now()-start)/1000;
+                    return {interval_ms:times.slice(2),duration_seconds:duration,engine_process_frames:final.engine_process_frames-initial.engine_process_frames,engine_physics_frames:final.engine_physics_frames-initial.engine_physics_frames,renderer:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):'unavailable',viewport:[innerWidth,innerHeight],dpr:devicePixelRatio};
+                }""")
+                samples=sorted(timings.pop('interval_ms'));timings.update({'scope':'Active mission, standing after a rescue; motion enabled. Engine rates use passive Godot frame-counter deltas published at10Hz; browser rAF intervals are recorded separately. Not a physical phone or peak-load certification.','samples':len(samples),'browser_raf_hz':1000/(sum(samples)/len(samples)),'engine_process_hz':timings['engine_process_frames']/timings['duration_seconds'],'engine_physics_hz':timings['engine_physics_frames']/timings['duration_seconds'],'median_frame_ms':samples[len(samples)//2],'p95_frame_ms':samples[int(len(samples)*.95)],'frames_over_50ms':sum(v>50 for v in samples),'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(v=>v.build)")})
+                (a.evidence/'performance.json').write_text(json.dumps(timings,indent=2)+'\n')
+
         def contact_and_claim(captive):
-            # Freed NPCs no longer pay out remotely. Reach the moving NPC using
-            # real movement and let the actual contact/thanks animation finish.
+            # Reach the moving NPC, observe the bag's real dropped item, then
+            # collect it through movement. The thank-you timer itself pays nothing.
             deadline=time.monotonic()+12
             while time.monotonic()<deadline:
                 current=data();npc=next(n for n in current['npcs'] if n['id']==captive['id'])
                 if current['awarded'].get(captive['id']+':gift') or npc.get('phase') in ['thanks','departed']:
                     keys([]);break
+                if rescue_presentation(current):continue
                 assert current['state']=='playing',('Rescue approach interrupted',current['state'],current['menu'])
                 keys(['d'] if npc['x']>current['player'][0] else ['a'])
                 page.wait_for_timeout(40)
+            current=data();npc=next(n for n in current['npcs'] if n['id']==captive['id'])
+            cross='d' if int(npc['facing'])<0 else 'a'
+            keys([cross])
+            side=1 if cross=='d' else -1
+            wait_rescue(lambda current:(current['player'][0]-next(n for n in current['npcs'] if n['id']==captive['id'])['x'])*side>75,12,'Cross the real NPC before its bag handoff',[cross])
             keys([])
-            page.wait_for_function('id=>JSON.parse(document.querySelector("canvas").dataset.campaign).awarded[id+":gift"]===true',arg=captive['id'],timeout=15000)
+            wait_rescue(lambda current:any(item.get('rescue_id')==captive['id'] and item.get('from_bag') for item in current['pickups']),20,'Actual NPC bag item appears after any authored boss presentation')
+            check(not data()['awarded'].get(captive['id']+':gift'),'Thank-you/bag animation creates a world item without awarding it remotely')
+            page.screenshot(path=str(a.evidence/('rescue-'+str(len(rescues_tested))+'-bag-item.png')))
+            deadline=time.monotonic()+15
+            while time.monotonic()<deadline:
+                current=data()
+                if current['awarded'].get(captive['id']+':gift'):break
+                if rescue_presentation(current):continue
+                assert current['state']=='playing',('Dropped item approach interrupted',current['state'],current['menu'])
+                item=next(item for item in current['pickups'] if item.get('rescue_id')==captive['id'])
+                keys(['d'] if item['x']>current['player'][0] else ['a'])
+                page.wait_for_timeout(40)
+            keys([])
+            page.wait_for_function('id=>JSON.parse(document.querySelector("canvas").dataset.campaign).awarded[id+":gift"]===true',arg=captive['id'],timeout=5000)
             current=data();check(captive['id'] in current['rescued'],'Actual rescue remains freed through the contact handover')
             saved=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
-            check(saved['awarded'].get(captive['id']+':gift') and captive['id'] in saved['rescued'],'Actual rescue and contact handover reach persistent browser storage')
+            check(saved['awarded'].get(captive['id']+':gift') and saved['taken'].get(captive['id']+':supply') and captive['id'] in saved['rescued'],'Actual dropped-item contact and rescue reach persistent browser storage once')
+            record_profile()
             return current
         while time.monotonic()-started<1000:
             d=data();now=time.monotonic();state=d['state'];section=d['section']
+            # The real fade suppresses input through its second half, even
+            # after the destination world is playing. Release held keys before
+            # polling so a swallowed keydown is not cached as still applied.
+            if d.get('travel_active'):keys([]);page.wait_for_timeout(65);continue
             if d['menu'] and not d.get('ui_ready',True):keys([]);page.wait_for_timeout(50);continue
             if section not in stages:stages.append(section);page.screenshot(path=str(a.evidence/(section+'.png')));print('STAGE',section,'HP',d['hp'],'score',d['score'],flush=True)
             if state=='complete':
@@ -123,14 +200,30 @@ with sync_playwright() as pw:
             if d['menu']:
                 keys([])
                 if d['menu']=='dead':retries+=1;button('CampaignRetry',expect_menu='dead')
-                elif d['menu']=='fork_one':button('Route_water' if a.route=='water' else 'Route_canopy')
-                elif d['menu']=='fork_two':button('Route_'+a.route)
+                elif d['menu'] in ['fork_one','fork_two']:
+                    raise AssertionError(('Gameplay must not open a text route-choice menu',d))
                 elif d['menu']=='boss':
                     (a.evidence/'boss-entry-state.json').write_text(json.dumps(d,indent=2)+'\n')
                     canvas.focus();page.keyboard.press('Enter');page.wait_for_timeout(350)
                 elif d['menu']=='paused':button(text='Devam et')
                 page.wait_for_timeout(120);canvas.focus();continue
             if state!='playing':keys([]);page.wait_for_timeout(80);continue
+            if section in ['fork_one','fork_two']:
+                # These are real traversal sections. Upper uses reachable
+                # stepping platforms; lower walks into the channel. No route
+                # setters, hidden buttons or debug advancement are used.
+                upper=(section=='fork_one' and a.route!='water') or (section=='fork_two' and a.route=='terrace')
+                assert not any(name.startswith('Route_') for name in d['buttons']),('Route menu leaked into physical fork',d)
+                if not any(record['section']==section for record in fork_inputs):
+                    fork_inputs.append({'section':section,'path':'upper' if upper else 'lower','entry':d['player']})
+                keys(['d','f'])
+                if upper and d.get('grounded') and d['player'][0]<1000 and now-last_jump>.25:
+                    page.keyboard.press('Space');last_jump=now
+                elif not upper and d['player'][0]>1000 and d.get('grounded') and now-last_jump>.85 and any(math.hypot(b[0]-d['player'][0],b[1]-(d['player'][1]-37))<100 for b in d.get('bullets',[])):
+                    page.keyboard.press('Space');last_jump=now
+                fork_inputs[-1]['latest_position']=d['player']
+                page.wait_for_timeout(50)
+                continue
             if a.steering_file and a.steering_file.exists():
                 command=json.loads(a.steering_file.read_text())
                 if command.get('id')!=steering_id:
@@ -200,15 +293,6 @@ with sync_playwright() as pw:
                     done=contact_and_claim(captive)
                     page.screenshot(path=str(a.evidence/('rescue-'+str(len(rescues_tested))+'-thanks.png')))
                     rescues_tested.append({'id':captive['id'],'gift':captive['gift'],'method':'knife-then-contact','weapon_after':done['weapon'],'ammo_after':done['ammunition']})
-                    if a.profile and not (a.evidence/'performance.json').exists():
-                        timings=page.evaluate("""async()=>{
-                            const times=[];let previous=performance.now(),start=previous;
-                            await new Promise(resolve=>{function frame(t){times.push(t-previous);previous=t;if(t-start<6000)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
-                            const gl=document.querySelector('canvas').getContext('webgl2'),debug=gl&&gl.getExtension('WEBGL_debug_renderer_info');
-                            return {interval_ms:times.slice(2),renderer:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):'unavailable',viewport:[innerWidth,innerHeight],dpr:devicePixelRatio};
-                        }""")
-                        samples=sorted(timings.pop('interval_ms'));timings.update({'scope':'Actual active mission, standing after a rescue; motion enabled. Not a physical phone or peak-load certification.','samples':len(samples),'mean_fps':1000/(sum(samples)/len(samples)),'median_frame_ms':samples[len(samples)//2],'p95_frame_ms':samples[int(len(samples)*.95)],'frames_over_50ms':sum(v>50 for v in samples),'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(v=>v.build)")})
-                        (a.evidence/'performance.json').write_text(json.dumps(timings,indent=2)+'\n')
                     if a.rescue_only:break
                     continue
             # Visible contextual button, never a hidden teleport or mount setter.
@@ -223,11 +307,12 @@ with sync_playwright() as pw:
                 print('PLAY',section,round(x),'y',round(y),'HP',d['hp'],'boss',d['boss_hp'],'retry',retries,flush=True);last_report=now
             page.wait_for_timeout(65)
         keys([])
-        (a.evidence/'playthrough.json').write_text(json.dumps({'completed':completed,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'vehicle_inputs':vehicle_inputs,'final':data()},indent=2)+'\n')
+        (a.evidence/'playthrough.json').write_text(json.dumps({'completed':completed,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'vehicle_inputs':vehicle_inputs,'physical_forks':fork_inputs,'rescue_story_inputs':rescue_presentations,'final':data()},indent=2)+'\n')
         if a.rescue_only:check(bool(rescues_tested),'An actual captive was reached, cut free and rewarded through ordinary controls')
         else:
             check(completed,'Mission 1 is completable with actual keyboard/mouse-equivalent gameplay')
             check(a.route in data()['route'],'The chosen branch was actually recorded')
+            check(len(fork_inputs)==(1 if a.route=='water' else 2),'Every required route fork was traversed through ordinary movement')
         if not a.rescue_only:
             saved=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
             check(saved['completed'] and saved['best_score']>=data()['score'],'Actual completed checkpoint and campaign best are persisted')

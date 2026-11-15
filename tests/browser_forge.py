@@ -23,7 +23,7 @@ parser.add_argument('--locale', choices=['tr-TR', 'en-US'], default='tr-TR')
 parser.add_argument('--scenario', choices=['front', 'campaign', 'all'], default='all')
 parser.add_argument('--rescue', action='store_true', help='Reach a real captive using ordinary play; fire ropes, then approach for gift.')
 parser.add_argument('--idle-attract', action='store_true', help='Also wait for the actual 30-second inactivity trigger.')
-parser.add_argument('--large-text', action='store_true', help='Use the actual settings control for 200% text during the presentation flow.')
+parser.add_argument('--large-text', action='store_true', help='Use the actual settings control for 200%% text during the presentation flow.')
 args = parser.parse_args()
 args.evidence.mkdir(parents=True, exist_ok=True)
 checks = []
@@ -123,10 +123,10 @@ with sync_playwright() as playwright:
                        for key, value in campaign()['buttons'].items()]
         else:
             page.wait_for_selector('canvas[data-ui-ready="true"]', timeout=30000)
-            # A title/demo overlay can unhide an existing menu without rebuilding
-            # it. Give Godot's containers two real render frames to finish their
-            # queued sort before measuring a pointer target (no state writes).
+            # Browser rAF is not Godot's container-sort acknowledgment. Let the
+            # event reach the engine, then require its actual readiness again.
             page.evaluate('() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))')
+            page.wait_for_selector('canvas[data-ui-ready="true"]', timeout=30000)
             buttons = front_buttons()
         button = next((button for button in buttons if button['name'] == name), None) if name else next((button for button in buttons if button['text'] == text), None)
         if not button and not in_campaign and name not in ['NextPage', 'PreviousPage', 'RosterNext', 'RosterPrevious']:
@@ -235,13 +235,14 @@ with sync_playwright() as playwright:
                 check(raw()['textScale'] == '2.0', 'Actual settings apply 200% text without changing the selected font')
                 fit('Desktop 200% main')
             page.screenshot(path=str(args.evidence/'main.png'))
-            for hero in ['aion', 'sheep', 'wolf', 'owl', 'rabbit', 'eren']:
+            for hero in ['aion', 'sheep', 'rabbit', 'eren']:
                 tap('ChooseHero')
                 for _ in range(12):
                     if any(button['name'] == 'Select_'+hero for button in front_buttons()):
                         break
                     tap('NextPage')
                 tap('Select_'+hero)
+                check(not any(button['name'] in ['Select_owl', 'Select_wolf'] for button in front_buttons()), 'Retired owl/wolf are not offered as playable choices')
                 # Selection may rebuild and repaginate the current card.
                 for _ in range(12):
                     if any(button['name'] == 'ConfirmHero' for button in front_buttons()):
@@ -382,8 +383,13 @@ with sync_playwright() as playwright:
             aim_samples = []
             directions = [(['d'], [1, 0]), (['d', 'w'], [1, -1]), (['w'], [0, -1]), (['a', 'w'], [-1, -1]), (['a'], [-1, 0]), (['a', 's'], [-1, 1]), (['s'], [0, 1]), (['d', 's'], [1, 1])]
             for index, (inputs, target) in enumerate(directions):
-                if index in [0, 3, 6]:
+                # Down while grounded now means crouch. Exercise downward aim
+                # during real airborne movement instead of accepting a changed
+                # horizontal crouch shot as the old downward-aim assertion.
+                if index in [0, 3, 6] or (target[1] > 0 and campaign().get('grounded')):
                     page.keyboard.press('Space')
+                    if target[1] > 0:
+                        page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).player[1]<-10", timeout=5000)
                 shots = campaign()['shots']
                 keys(inputs)
                 page.wait_for_timeout(100)
@@ -398,6 +404,35 @@ with sync_playwright() as playwright:
                 keys([])
                 page.wait_for_timeout(360)
             observations['keyboard_aim'] = aim_samples
+
+            keys([])
+            # Eight real combat aim checks leave the actor exposed to enemies.
+            # A dead actor cannot satisfy an independent posture test. Retain
+            # that state, then use the actual checkpoint action, without a
+            # world setter, immunity or a hidden debug restart.
+            precondition = campaign()
+            observations['before_crouch_checkpoint'] = precondition
+            if precondition['state'] == 'dying':
+                page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'", timeout=10000)
+            if campaign().get('menu') == 'dead':
+                tap('CampaignRetry', in_campaign=True)
+            else:
+                canvas.focus()
+                page.keyboard.press('Escape')
+                page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'", timeout=10000)
+                tap(text='Kontrol noktasından dene' if args.locale.startswith('tr') else 'Retry checkpoint', in_campaign=True)
+            presentation_done()
+            page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.grounded && d.ui_ready}", timeout=15000)
+            canvas.focus()
+            check(True, 'Actual checkpoint UI supplies a living, actionable actor before the independent crouch test')
+            before = campaign()
+            keys(['s', 'd', 'f'])
+            page.wait_for_function("before=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.crouching && d.player[0]>before.x+12 && d.shots>before.shots}", arg={'x': before['player'][0], 'shots': before['shots']}, timeout=10000)
+            check(True, 'Down + movement + Fire reaches real crouch locomotion and a shot together')
+            page.screenshot(path=str(args.evidence/'crouch-moving-fire.png'))
+            keys([])
+            page.wait_for_function("!JSON.parse(document.querySelector('canvas').dataset.campaign).crouching", timeout=5000)
+            check(True, 'Releasing Down exits crouch without a stuck posture')
 
             if args.rescue:
                 # Keep Fire held while approaching: no new contextual knife press
@@ -448,10 +483,29 @@ with sync_playwright() as playwright:
                     if data.get('grounded') and any(0 < pit[0]-data['player'][0] < 160 for pit in data['pits']):
                         page.keyboard.press('Space')
                     page.wait_for_timeout(40)
+                # The NPC now takes an item from her bag. Crossing to her other
+                # side keeps the hero away from the thrown item's side, so this
+                # explicitly proves that the thank-you timer itself pays nothing.
+                npc = next(npc for npc in campaign()['npcs'] if npc['id'] == target['id'])
+                cross = 'd' if int(npc['facing']) < 0 else 'a'
+                keys([cross])
+                page.wait_for_function("([id,side])=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign),n=d.npcs.find(n=>n.id===id);return (d.player[0]-n.x)*side>75}", arg=[target['id'], 1 if cross == 'd' else -1], timeout=8000)
                 keys([])
-                page.wait_for_function("id=>JSON.parse(document.querySelector('canvas').dataset.campaign).awarded[id+':gift']===true", arg=target['id'], timeout=15000)
+                page.wait_for_function("id=>JSON.parse(document.querySelector('canvas').dataset.campaign).pickups.some(p=>p.rescue_id===id && p.from_bag)", arg=target['id'], timeout=15000)
+                check(not campaign()['awarded'].get(target['id']+':gift'), 'The bag produces a visible world item without remotely granting its power-up')
+                page.screenshot(path=str(args.evidence/'bag-item-before-contact.png'))
+                deadline = time.monotonic()+15
+                while time.monotonic() < deadline:
+                    data = campaign()
+                    if data['awarded'].get(target['id']+':gift'):
+                        break
+                    item = next(item for item in data['pickups'] if item.get('rescue_id') == target['id'])
+                    keys(['d'] if item['x'] > data['player'][0] else ['a'])
+                    page.wait_for_timeout(40)
+                keys([])
+                page.wait_for_function("id=>JSON.parse(document.querySelector('canvas').dataset.campaign).awarded[id+':gift']===true", arg=target['id'], timeout=5000)
                 saved = page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
-                check(saved['awarded'].get(target['id']+':gift'), 'Actual hero contact completes the thanks/gift and persists it once')
+                check(saved['awarded'].get(target['id']+':gift') and saved['taken'].get(target['id']+':supply'), 'Actual dropped-item contact applies the power-up and persists it once')
                 observations['rescued_npc'] = target['id']
                 observations['rescue_checkpoint_retries'] = retries
                 page.screenshot(path=str(args.evidence/'contact-thanks-gift.png'))

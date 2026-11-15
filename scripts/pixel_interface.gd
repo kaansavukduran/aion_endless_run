@@ -4,10 +4,15 @@ var host
 var roster_page := 0
 
 func paged_roster() -> bool:
-	return host.page=="main" and host.portrait and host.interface_options.text_scale>1.0
+	if host.page!="main" or host.interface_options.text_scale<=1.:return false
+	if host.portrait:return true
+	# Measure the actual font before choosing pages; a wide system face may
+	# need more height than two rows can occupy in a short landscape window.
+	return float(roster_geometry(roster_width(),false,false).total_height)>host.view_h-80.
+
 
 func split_main() -> bool:
-	return host.page=="main" and not host.portrait and host.interface_options.text_scale>1.0
+	return host.page=="main" and not host.portrait
 
 func roster_width() -> float:
 	return host.view_w*.5-42 if split_main() else host.view_w-56
@@ -157,7 +162,7 @@ func hud() -> void:
 func card(width: float) -> VBoxContainer:
 	var h=host
 	width=minf(width,h.view_w-40)
-	if h.page=="main" and h.interface_options.text_scale>1:width=host.view_w*.5-42 if split_main() else minf(640,h.view_w-56)
+	if h.page=="main":width=host.view_w*.5-42 if split_main() else minf(640,h.view_w-56)
 	var enlarged: bool=h.interface_options.text_scale>1.0
 	if enlarged and h.page!="main":width=h.view_w-40
 	var height: float=minf(h.view_h-120,410 if h.page!="main" else 340)
@@ -168,6 +173,8 @@ func card(width: float) -> VBoxContainer:
 	if split_main():height=h.view_h-144
 	var panel:=PanelContainer.new()
 	panel.name="PagePanel"
+	if h.page=="main":
+		panel.set_script(preload("res://scripts/arcade_menu_frame.gd"));panel.palette=h.interface_options.colors
 	h.menu_layer.add_child(panel)
 	var pos:=Vector2((h.view_w-width)*.5,maxf(82,(h.view_h-height)*.5))
 	if h.page=="main":pos=Vector2(28 if not h.portrait else (h.view_w-width)*.5,(24 if enlarged else (56 if h.touch_mode or h.view_h<700 else 94)) if not h.portrait else stage_y()+26)
@@ -187,13 +194,13 @@ func card(width: float) -> VBoxContainer:
 	else:panel.add_child(column)
 	return column
 
-func roster_geometry(width: float,separate: bool=false) -> Dictionary:
+func roster_geometry(width: float,separate: bool=false,allow_paging: bool=true) -> Dictionary:
 	var h=host
 	var enlarged: bool=h.interface_options.text_scale>1.0
-	var columns: int=3 if split_main() and not separate else (2 if h.portrait or separate else h.FRIENDS.size())
+	var columns: int=2 if split_main() or h.portrait or separate else h.FRIENDS.size()
 	var stacked: bool=true
 	var tile_w: float=(width-float(columns-1)*10)/columns
-	var tile_h:=104.0 if h.portrait else 94.0
+	var tile_h:=132.0 if h.portrait else 152.0
 	var probe: Label=h.wrap_label("",20)
 	probe.add_theme_font_size_override("font_size",h.ui_size(20))
 	probe.theme=h.ui.theme
@@ -206,14 +213,15 @@ func roster_geometry(width: float,separate: bool=false) -> Dictionary:
 		for prefix in [""]:
 			probe.text=prefix+h.character_name(id)
 			probe.get_line_count()
-			tile_h=maxf(tile_h,ceilf(probe.get_minimum_size().y)+22+(48 if stacked else 0))
+			tile_h=maxf(tile_h,ceilf(probe.get_minimum_size().y)+22+(96 if stacked else 0))
 	probe.free()
-	var rows:=1 if paged_roster() and not separate else ceili(float(h.FRIENDS.size())/columns)
-	return {"columns":columns,"width":tile_w,"height":tile_h,"total_height":tile_h*rows+float(rows-1)*10+(ceilf(h.ui_size(30)*1.6)+28 if paged_roster() and not separate else 0)}
+	var paged: bool=allow_paging and not separate and paged_roster()
+	var rows:=1 if paged else ceili(float(h.FRIENDS.size())/columns)
+	return {"columns":columns,"width":tile_w,"height":tile_h,"total_height":tile_h*rows+float(rows-1)*10+(ceilf(h.ui_size(30)*1.6)+28 if paged else 0)}
 
 func roster_y() -> float:
 	var height: float=roster_geometry(roster_width()).total_height
-	var header: float=ceilf(host.ui_size(24)*1.6)+28 if split_main() else 72.
+	var header: float=72. if host.interface_options.text_scale>1. else 72.+chooser_height()+6.
 	return maxf(header,(host.view_h-height)*.5) if split_main() else host.view_h-height-20
 
 func chooser_height() -> float:
@@ -221,7 +229,7 @@ func chooser_height() -> float:
 	var probe: Label=host.wrap_label("",18)
 	probe.theme=host.ui.theme
 	host.ui.add_child(probe)
-	probe.size.x=host.view_w-56
+	probe.size.x=roster_width()
 	probe.text=host.text("characters")
 	var height: float=maxf(36,ceilf(probe.get_minimum_size().y))
 	probe.free()
@@ -257,8 +265,9 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 		row.position=Vector2(8,8)
 		row.size=Vector2(tile_w-16,tile.custom_minimum_size.y-16)
 		row.add_theme_constant_override("separation",6)
-		var image: TextureRect=h.character_portrait(id)
-		image.custom_minimum_size=Vector2(54,48)
+		var image:=RunnerHeroPreview.new()
+		image.hero=id;image.body_art=h.menu_hero_art;image.weapon_art=h.menu_weapon_art;image.action="armed_walk";image.animate=h.decorative_motion()
+		image.custom_minimum_size=Vector2(80,96)
 		row.add_child(image)
 		var title: Label=h.wrap_label(h.character_name(id),20,"fff1d5")
 		title.add_theme_font_size_override("font_size",h.ui_size(20))
@@ -271,72 +280,51 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 	if paged_roster() and not separate:
 		var navigation:=HBoxContainer.new();navigation.position=at+Vector2(0,float(geometry.height)+10);parent.add_child(navigation)
 		var before: Button=h.button("‹",func():roster_page=maxi(0,roster_page-1);h.rebuild());before.name="RosterPrevious";before.disabled=roster_page==0
-		var after: Button=h.button("›",func():roster_page=mini(2,roster_page+1);h.rebuild());after.name="RosterNext";after.disabled=roster_page==2
+		var after: Button=h.button("›",func():roster_page=mini(ceili(float(h.FRIENDS.size())/2.)-1,roster_page+1);h.rebuild());after.name="RosterNext";after.disabled=roster_page>=ceili(float(h.FRIENDS.size())/2.)-1
 		for b in [before,after]:b.custom_minimum_size=Vector2((width-12)*.5,62);navigation.add_child(b)
 
 func main(column: VBoxContainer) -> Button:
 	var h=host
-	var record: Label=h.label(h.text("best")+"  %05d" % h.best,18,"f2d5a6")
-	h.menu_layer.add_child(record)
-	record.position=Vector2(28,12)
-	record.visible=h.interface_options.text_scale<=1.0
-	var logo: Label=h.label("AION · ENDLESS RUN",24,"f8d9b1")
-	logo.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	logo.add_theme_font_override("font",h.FONT)
-	logo.add_theme_font_size_override("font_size",h.ui_size(20))
-	column.add_child(logo)
-	var modes:=HBoxContainer.new()
-	modes.add_theme_constant_override("separation",8)
-	column.add_child(modes)
+	var enlarged: bool=h.interface_options.text_scale>1.
+	var title: Label=h.label("AION",32,"f8d9b1")
+	title.name="ArcadeTitle";title.add_theme_font_override("font",h.FONT)
+	title.add_theme_font_size_override("font_size",h.ui_size(24 if enlarged else 40))
+	column.add_child(title)
+	var mission: Label=h.wrap_label(AionCampaignText.word(h.language,"title"),17,"f2d5a6")
+	mission.name="MissionTitle"
+	if not enlarged:column.add_child(mission)
+	else:mission.free()
+	var modes:=HBoxContainer.new();modes.add_theme_constant_override("separation",8);column.add_child(modes)
 	var arcade: Button=h.button(AionCampaignText.word(h.language,"arcade"),h.start_campaign,true)
-	arcade.name="StartCampaign"
-	arcade.custom_minimum_size.y=maxf(64,h.ui_size(38))
-	arcade.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	arcade.add_theme_font_size_override("font_size",h.ui_size(20))
-	modes.add_child(arcade)
-	var first: Button=h.button(AionCampaignText.word(h.language,"endless"),h.start_run)
-	first.name="StartRun"
-	first.custom_minimum_size.y=maxf(64,h.ui_size(38))
-	first.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	first.add_theme_font_size_override("font_size",h.ui_size(20))
-	modes.add_child(first)
-	var secondary: BoxContainer=VBoxContainer.new() if split_main() else HBoxContainer.new()
-	secondary.add_theme_constant_override("separation",8)
-	column.add_child(secondary)
-	for entry in ["characters","front_how"]:
-		var action: Button=h.button(h.text(entry) if entry=="characters" else RunnerFrontText.word(h.language,"how"),func():h.open_subpage("characters") if entry=="characters" else h.open_subpage("help"))
-		action.name="ChooseHero" if entry=="characters" else "HowToPlay"
-		action.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		action.custom_minimum_size=Vector2(0,maxf(60,h.ui_size(34)))
-		action.add_theme_font_size_override("font_size",h.ui_size(17))
-		secondary.add_child(action)
-	var utilities:=HBoxContainer.new()
-	utilities.add_theme_constant_override("separation",8)
-	column.add_child(utilities)
-	for entry in ["settings"]:
-		var action: Button=h.button(h.text(entry),func():h.open_subpage("settings"))
-		action.name="BossTraining" if entry=="boss_training" else "OpenSettings"
-		action.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		action.custom_minimum_size=Vector2(0,maxf(48,h.ui_size(28)))
-		action.add_theme_font_size_override("font_size",h.ui_size(17))
-		utilities.add_child(action)
+	arcade.name="StartCampaign";arcade.custom_minimum_size.y=maxf(64,h.ui_size(38));arcade.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	arcade.add_theme_font_size_override("font_size",h.ui_size(20));modes.add_child(arcade)
 	if h.has_campaign_checkpoint():
-		var resume: Button=h.button(AionCampaignText.word(h.language,"continue"),func():h.campaign_resume_requested=true;h.start_campaign())
-		resume.name="ContinueCampaign"
-		resume.custom_minimum_size.y=maxf(48,h.ui_size(28))
-		column.add_child(resume)
-	var choose: Label=h.wrap_label("",18,"ffe1b9")
+		var resume: Button=h.button(AionCampaignText.word(h.language,"continue_short"),func():h.campaign_resume_requested=true;h.start_campaign())
+		resume.name="ContinueCampaign";resume.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		resume.add_theme_font_size_override("font_size",h.ui_size(17));modes.add_child(resume)
+	var secondary:=HBoxContainer.new();secondary.add_theme_constant_override("separation",8);column.add_child(secondary)
+	var endless: Button=h.button(AionCampaignText.word(h.language,"endless"),h.start_run)
+	endless.name="StartRun";endless.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	endless.custom_minimum_size.y=maxf(60,h.ui_size(34));endless.add_theme_font_size_override("font_size",h.ui_size(17));secondary.add_child(endless)
+	var help: Button=h.button(RunnerFrontText.word(h.language,"how"),func():h.open_subpage("help"))
+	help.name="HowToPlay";help.size_flags_horizontal=Control.SIZE_EXPAND_FILL;help.add_theme_font_size_override("font_size",h.ui_size(17));secondary.add_child(help)
+	var utilities:=HBoxContainer.new();utilities.add_theme_constant_override("separation",8);column.add_child(utilities)
+	for entry in ["characters","settings"]:
+		var action: Button=h.button(h.text(entry),func():h.open_subpage(entry))
+		action.name="ChooseHero" if entry=="characters" else "OpenSettings"
+		action.size_flags_horizontal=Control.SIZE_EXPAND_FILL;action.custom_minimum_size.y=maxf(48,h.ui_size(28))
+		action.add_theme_font_size_override("font_size",h.ui_size(17));utilities.add_child(action)
+	var choose: Label=h.wrap_label(h.text("characters"),18,"ffe1b9")
 	choose.name="StartChooser"
+	# Width must exist before entering the tree; shaping at width zero caches
+	# a many-line minimum which otherwise leaves an oversized invisible label.
+	choose.size=Vector2(roster_width(),chooser_height());choose.visible=not enlarged
 	h.menu_layer.add_child(choose)
-	choose.size.x=h.view_w-56
-	choose.text=h.text("characters")
-	choose.visible=h.interface_options.text_scale<=1.0
 	var roster_at: float=roster_y()
-	choose.position=Vector2(28,roster_at-chooser_height()-6)
-	choose.size.y=chooser_height()
+	choose.position=Vector2(h.view_w*.5+14 if split_main() else 28,roster_at-chooser_height()-6);choose.size.y=chooser_height()
 	roster(h.menu_layer,Vector2(h.view_w*.5+14 if split_main() else 28,roster_at),roster_width())
 	fit_main.call_deferred(column,h.layout_generation)
-	return first
+	return arcade
 
 func fit_main(column: VBoxContainer,generation: int) -> void:
 	if not is_instance_valid(host) or not host.is_inside_tree() or generation!=host.layout_generation or not is_instance_valid(column):return
@@ -358,7 +346,7 @@ func characters() -> void:
 		tile.name="HeroCard_"+id
 		column.add_child(tile)
 		var preview:=RunnerHeroPreview.new()
-		preview.hero=id;preview.animate=h.decorative_motion()
+		preview.hero=id;preview.body_art=h.menu_hero_art;preview.weapon_art=h.menu_weapon_art;preview.animate=h.decorative_motion()
 		preview.custom_minimum_size=Vector2(160,124)
 		tile.add_child(preview)
 		var info: BoxContainer=VBoxContainer.new()

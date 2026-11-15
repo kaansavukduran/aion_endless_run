@@ -13,6 +13,9 @@ var damage_flash := 0.0
 var last_clock := 0.0
 var items: ForgeItemBank
 
+func avatar_pose() -> Dictionary:
+	return host.view.m1_heroes.pose(host.world.character,"idle_fire",0)
+
 func refresh() -> void:
 	items=host.hud_items
 	font=host.view.font
@@ -29,7 +32,9 @@ func refresh() -> void:
 		host.t("weapon")+": "+active_weapon,
 		host.t("keepers")+" %d"%w.rescued.size()]
 	if w.shield>0:fields.append(host.t("shield")+" %d"%w.shield)
-	if bool(w.mount.ridden):fields.append(host.t(CampaignVehicles.kind(w))+" %d/4"%int(w.mount.hp))
+	if bool(w.mount.ridden):fields.append(host.t(CampaignVehicles.kind(w))+" %d/3"%int(w.mount.hp))
+	for assist in w.assists:
+		if int(assist.remaining)>0:fields.append(host.t("owl_feather" if assist.kind=="owl" else "wolf_charm")+" ×"+str(assist.remaining))
 	for key in w.buffs:
 		if float(w.buffs[key])>0.:fields.append(host.t(str(key))+" %ds"%ceili(float(w.buffs[key])))
 	rows.clear();rows.append([])
@@ -66,7 +71,7 @@ func _draw() -> void:
 			draw_string(font,Vector2(x,y),value,HORIZONTAL_ALIGNMENT_LEFT,-1,point_size,Color(colors.text))
 			x+=font.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,point_size).x+26.
 		y+=font.get_height(point_size)+5.
-	var pose: Dictionary=host.view.frames.pose("gun-run",host.view.frames.hero_row(host.world.character),0)
+	var pose: Dictionary=avatar_pose()
 	var dimensions: Vector2=pose.get("size",pose.texture.get_size()*float(pose.get("scale",1.)))
 	var factor:=minf(36./dimensions.x,36./dimensions.y)
 	draw_texture_rect(pose.texture,Rect2(Vector2(5,5)+(Vector2(36,36)-dimensions*factor)*.5,dimensions*factor),false)

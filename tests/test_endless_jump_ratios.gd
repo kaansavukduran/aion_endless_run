@@ -19,6 +19,9 @@ func arena(hero: String) -> RunnerWorld:
 	w.character = hero
 	w.adventure.enabled = false
 	w.reset()
+	# Owl is retired from selection. Explicitly exercise its archived physics
+	# after reset migrates inaccessible selected IDs to Aion.
+	w.character = hero
 	w.obstacle_wait = 999.
 	w.frontier.plant_wait = 999.
 	w.gust_wait = 999999.

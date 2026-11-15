@@ -384,6 +384,7 @@ func step_plants(world,dt: float,movement: float) -> void:
 	update_projectiles(world,dt)
 
 func weapon_muzzle(world) -> Vector2:
+	if M1HeroArt.has(world.character):return Vector2(M1CombatArt.runner_attachment(world).muzzle)*float(world.pose_visual_scale)
 	if (world.character=="owl" and world.y<0.) or (world.character=="wolf" and world.state in ["running","paused"]):
 		var metadata: Dictionary=ForgeHeroArt.DATA.data.atlases["mouth-carry"]
 		var row: int

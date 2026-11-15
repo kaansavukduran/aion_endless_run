@@ -36,9 +36,9 @@ func run() -> void:
      check(float(f.body_bounds[2]-f.body_bounds[0])*pose.scale>neutral_width*1.2 and float(f.body_bounds[3]-f.body_bounds[1])*pose.scale<neutral_height,"Four-legged stride is wider and lower than the approved upright neutral, without counting the gun as a head anchor")
     if hero=="owl" and row==0:check(float(f.body_bounds[2]-f.body_bounds[0])>float(bank.PIXEL.data.atlases["pixel-owl"].frames[0][0].body_bounds[2]-bank.PIXEL.data.atlases["pixel-owl"].frames[0][0].body_bounds[0])*1.15*bank.PIXEL.data.atlases["pixel-owl"].scale[0]/expected_scale,"Every flight pose spreads its actual wings beyond the folded neutral silhouette")
     if hero=="owl" and row==3:check(float(f.body_bounds[2]-f.body_bounds[0])/float(f.body_bounds[3]-f.body_bounds[1])>1.3,"Legacy aerial beak strike keeps spread airborne wings")
- game.character="wolf"
- game.world.character="wolf"
+ # Legacy companion source/physics actor; not a selectable roster entry.
  game.world.reset()
+ game.character="wolf"
  game.world.character="wolf"
  game.world.boost_held=true
  check(game.world.adventure.attack(game.world),"Boosting wolf can start a contact attack")

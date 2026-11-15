@@ -80,7 +80,7 @@ func run():
      previous.pressed.emit();await process_frame;await process_frame;await process_frame
      previous=g.menu_layer.find_child("RosterPrevious",true,false)
     var seen:={}
-    for roster_page in (3 if g.pixel_ui.paged_roster() else 1):
+    for roster_page in (ceili(float(g.FRIENDS.size())/2.) if g.pixel_ui.paged_roster() else 1):
      var tiles: Array=g.menu_layer.find_children("StartSelect_*","Button",true,false)
      var panel: Control=g.menu_layer.get_node("PagePanel")
      for tile in tiles:
@@ -92,10 +92,10 @@ func run():
      if following!=null:
       check(screen.grow(1).encloses(following.get_global_rect()),"Actual roster next action is inside viewport")
       if not following.disabled:following.pressed.emit();await process_frame;await process_frame;await process_frame
-    check(seen.size()==6 and seen.has("StartSelect_rabbit") and seen.has("StartSelect_eren"),"All six heroes remain separately reachable with the actual wider system font")
+    check(seen.size()==4 and seen.has("StartSelect_aion") and seen.has("StartSelect_sheep") and seen.has("StartSelect_rabbit") and seen.has("StartSelect_eren"),"All four current heroes remain separately reachable with the actual wider system font")
     g.toggle_language_picker();await process_frame;await process_frame
     var languages: Array=g.language_picker.find_children("*","Button",true,false)
-    check(languages.size()==12,"System plus eleven languages remain individually reachable")
+    check(languages.size()==3,"System, Turkish and English remain individually reachable")
     for option in languages:check(screen.grow(1).encloses(option.get_global_rect()),"200% language fits "+family+lang+str(dims)+str(option.name))
     g.language_picker_open=false
  g.build_theme();g.ui.theme=g.ui_theme

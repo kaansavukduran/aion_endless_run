@@ -1,0 +1,17 @@
+{
+  "baseline": "4864b09ce7efea0d2c1b4eaead8703b9cb465b0e",
+  "existing_png_count": 81,
+  "changed_existing_pngs": [],
+  "new_pngs": [
+    "assets/m1-sheep-crouch.png",
+    "assets/m1-aion-crouch.png",
+    "assets/m1-body-aion.png",
+    "assets/m1-body-ayca.png",
+    "assets/m1-support.png",
+    "assets/m1-damage-ayca.png",
+    "assets/m1-body-sheep.png",
+    "assets/m1-body-eren.png",
+    "assets/m1-rabbit-crouch.png"
+  ],
+  "scope": "Byte comparison of original tracked PNGs; new sources are separate files."
+}

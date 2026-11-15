@@ -64,7 +64,7 @@ func run():
      check(choice.is_visible_in_tree() and not g.language_button.get_global_rect().intersects(choice.get_global_rect()),"Compact language control never covers a visible character card at enlarged text "+str(dims)+str(scale_value)+" language="+str(g.language_button.get_global_rect())+" card="+str(choice.get_global_rect()))
     var next=g.menu_layer.find_child("RosterNext",true,false)
     if next!=null and not next.disabled:next.pressed.emit();await process_frame;await process_frame;await process_frame
-   check(shown.size()==6 and shown.has("StartSelect_rabbit") and shown.has("StartSelect_eren"),"Eren and Emre have separate reachable cards on actual roster pages")
+   check(shown.size()==4 and shown.has("StartSelect_rabbit") and shown.has("StartSelect_eren"),"Eren and Ayça have separate reachable cards on actual roster pages")
    g.select_character("eren");check(g.character_name("eren")=="Eren" and g.character=="eren","Eren selection follows the real menu action")
    g.start_run();g.world.obstacle_wait=999;g.world.frontier.plant_wait=999;g.world.adventure.item_wait=999;g.world.adventure.ambient_gnome_wait=999;g.update_friend();g.update_hud()
    check(not g.action_buttons.has("attack") and not g.ammo_label.visible,"No Reload button or magazine HUD exists")
@@ -72,7 +72,7 @@ func run():
    for tick in 220:g.world.step(.01)
    check(g.world.frontier.shots_fired>=6,"Normal firearm input continues after five bullets")
    g.release_shoot("key");g.press_jump("key");g.world.step(.01);check(g.world.charging and g.world.y==0,"Eren holds on the ground before release");g.release_jump("key");g.world.step(.01);g.update_friend()
-   check(g.world.y<0 and not g.world.charging and g.friend_sprite.get_meta("source_key")=="polish-abilities","Eren jumps using his own art, independently of Emre")
+   check(g.world.y<0 and not g.world.charging and g.friend_sprite.get_meta("source_key")=="m1-body-eren" and g.friend_sprite.get_meta("pose_action")=="air_fire","Eren jumps using his own body art, independently of Ayça")
    g.release_jump("key");g.main_menu()
  root.size=Vector2i(393,873);await process_frame;g.touch_mode=true;g.interface_options.text_scale=1.0;g.active_input="touch"
  for lang in g.Words.LANGUAGES:
@@ -84,7 +84,10 @@ func run():
     if g.ability_label.visible and g.action_buttons[id].visible:check(not g.ability_label.get_global_rect().intersects(g.action_buttons[id].get_global_rect()),"Ability text does not enter a touch target: "+lang+"/"+hero+"/"+id)
   for status in ["glide","sprint","charge"]:
    var hero: String={"glide":"owl","sprint":"wolf","charge":"rabbit"}[status]
-   g.main_menu();g.select_character(hero);g.start_run();await process_frame
+   # Private legacy actors still exercise shaped old status text, without
+   # reintroducing retired heroes into selection or saved preferences.
+   g.main_menu();g.select_character("aion" if hero in ["owl","wolf"] else hero);g.start_run();await process_frame
+   if hero in ["owl","wolf"]:g.character=hero;g.world.character=hero
    if status=="glide":g.world.y=-100;g.world.gliding=true
    elif status=="sprint":g.world.boost_held=true
    else:g.world.charging=true;g.world.charge_time=.6

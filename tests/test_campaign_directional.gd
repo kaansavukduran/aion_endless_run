@@ -29,6 +29,9 @@ func run() -> void:
 		for direction in [Vector2.UP,Vector2(1.,-1.).normalized(),Vector2.DOWN]:
 			var w:=fresh()
 			w.collect({"id":"special","kind":name})
+			# A low grounded actor cannot point a long barrel through the floor.
+			# Measure true downward vectors in the valid airborne context instead.
+			if direction.y>.1:w.player.y=-150.;w.air_time=.2
 			w.aim_direction=direction;w.attack_press()
 			check(not w.bullets.is_empty(),"Special weapon fires in aim direction: "+name)
 			if not w.bullets.is_empty():
@@ -44,6 +47,27 @@ func run() -> void:
 		w.spawn_enemy("gnome",w.player.x+55.,0.,99)
 		w.attack_press()
 		check(w.shots==1 and w.melee_time==0.,"Up-aim overrides nearby automatic melee for "+hero)
+	# The same real fire action must work in every current body state. Body
+	# identity/scale is supplied by M1HeroArt, not the retired eight-way redraw.
+	for hero in AionCampaignWorld.HEROES:
+		for posture in ["idle","walk","crouch","air"]:
+			var w:=fresh(hero)
+			if posture=="walk":w.move_axis=Vector2.LEFT;w.velocity.x=-235.
+			elif posture=="crouch":w.move_axis=Vector2(1,1);w.velocity.x=98.7
+			elif posture=="air":w.player.y=-150.;w.air_time=.2
+			w.aim_direction=Vector2.RIGHT
+			var body_before: Dictionary=M1CombatArt.body_spec(w)
+			check(str(body_before.hero)==hero and str(body_before.key)=="m1-body","Current authored body remains selected: "+hero+"/"+posture)
+			check(int(body_before.mirror)==1,"Body yaw follows independent aim while movement may face left")
+			w.attack_press()
+			check(w.bullets.size()==1 and Vector2(w.bullets[0].v).normalized().is_equal_approx(Vector2.RIGHT),"Idle/walk/crouch/air fire produces a real forward shot: "+hero+"/"+posture)
+			var shot: Vector2=w.bullets[0].p
+			check(shot.distance_to(w.player+w.armed_muzzle())<.01,"Actual shot starts at the currently held weapon muzzle: "+hero+"/"+posture)
+			var root_before:=w.player
+			w.step(.02)
+			if posture in ["walk","crouch"]:check(absf(w.player.x-root_before.x)>0.,"Firing does not freeze locomotion: "+hero+"/"+posture)
+			elif posture=="idle":check(w.player.is_equal_approx(root_before),"Idle fire does not invent body root motion")
+			else:check(w.player.y<0.,"Air fire remains airborne rather than snapping to the floor")
 	# Validate actual pixel-atlas reference sizing. Animations keep the idle
 	# reference multiplier rather than changing height on each frame.
 	var view:=AionCampaignView.new()
@@ -51,7 +75,9 @@ func run() -> void:
 	for row in 8:
 		var npc_height: float=view.npc_reference_height(row)
 		check(is_equal_approx(npc_height*view.npc_growth(row),2.*aion_height),"Rescue girl standing pixel height is twice Aion: "+str(row))
-		check(is_equal_approx(view.npc_growth(row),view.npc_growth(row)),"Growth is stable for every animation frame: "+str(row))
+		for frame in 8:
+			var pose: Dictionary=view.catalogue.pose("rescue-npcs",row,frame)
+			check(is_equal_approx(view.npc_growth(row),2.*aion_height/npc_height) and pose.texture!=null,"Every real NPC frame shares its standing reference scale: "+str(row)+"/"+str(frame))
 	view.free()
 	print("RESULT: %d directional and NPC-size checks, %d failures" % [checks,failures])
 	quit(1 if failures else 0)

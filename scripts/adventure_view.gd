@@ -8,6 +8,38 @@ const EVOLUTION = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const FRAGARIA = preload("res://assets/fragaria-strawberry.png")
 const PixelArt = preload("res://scripts/encounter_art.gd")
 var host
+var support_art: RefCounted
+
+func support_pose(kind: String) -> Dictionary:
+	if support_art==null and ResourceLoader.exists("res://scripts/m1_support_art.gd"):
+		support_art=load("res://scripts/m1_support_art.gd").new()
+	if support_art!=null:return support_art.pose(kind)
+	return {}
+
+func draw_assist_pose(pose: Dictionary,point: Vector2,growth: float=1.,facing: int=1) -> void:
+	var factor: float=float(pose.get("scale",1.))*growth
+	var texture: Texture2D=pose.texture
+	draw_set_transform(point.round(),0.,Vector2(facing,1.))
+	draw_texture_rect(texture,Rect2(Vector2(pose.offset)*factor,Vector2(pose.get("size",texture.get_size()*float(pose.get("scale",1.))))*growth),false)
+	draw_set_transform(Vector2.ZERO)
+
+func draw_assists(world,ground: float,clock: float) -> void:
+	if world.frontier.active():return
+	for a in world.adventure.assists:
+		var owl: bool=str(a.kind)=="owl_feather"
+		var key: String="runner-owl" if owl else "runner-wolf"
+		var row: int=6
+		if not owl and str(a.state)=="bite":key="strikes";row=6
+		var frame: int=host.frames.cycle(key,row,clock,.55) if host.motion else 0
+		draw_assist_pose(host.frames.pose(key,row,frame,true),Vector2(float(a.x),ground+float(a.y)),.75,int(a.facing))
+		if bool(a.stone):
+			var p:=Vector2(float(a.stone_x),ground+float(a.stone_y))
+			var rock:=support_pose("owl_stone")
+			if not rock.is_empty():draw_assist_pose(rock,p,.8)
+			else:draw_colored_polygon(PackedVector2Array([p+Vector2(-11,-7),p+Vector2(-4,-13),p+Vector2(9,-10),p+Vector2(14,1),p+Vector2(7,11),p+Vector2(-8,9)]),Color("988575"))
+		if float(a.impact_time)>0. and host.decorative_motion():
+			var phase: float=1.-float(a.impact_time)/.28
+			draw_arc(Vector2(float(a.stone_x),ground+float(a.impact_y)),135.*phase,0.,TAU,20,Color(.88,.77,.58,1.-phase),3.)
 
 func atlas(name: String, row: int, frame: int, anchor: Vector2, width: float, centered: bool = false) -> void:
 	var f: Dictionary = host.frames.pose(name,row,frame)
@@ -68,6 +100,14 @@ func _draw() -> void:
 		var point := Vector2(item.x, ground + item.y + bob)
 		if item.kind=="fragaria":
 			draw_texture_rect(FRAGARIA,Rect2(point-Vector2(22,42),Vector2(44,62)),false)
+		elif item.kind in ["owl_feather","wolf_charm"]:
+			var icon: Dictionary=support_pose(str(item.kind))
+			if not icon.is_empty():draw_assist_pose(icon,point,.8)
+			else:
+				var pose: Dictionary=host.frames.pose("runner-owl" if item.kind=="owl_feather" else "runner-wolf",0,0,true)
+				var texture: Texture2D=pose.texture
+				var factor: float=48./maxf(texture.get_width(),texture.get_height())
+				draw_texture_rect(texture,Rect2(point-texture.get_size()*factor*.5,texture.get_size()*factor),false)
 		else:
 			var icon: Dictionary=host.frames.pickup_pose(item.kind)
 			var texture: Texture2D=icon.texture
@@ -95,6 +135,7 @@ func _draw() -> void:
 			draw_rect(Rect2(enemy.x - 15, ground + enemy.y - 39, 30.0 * enemy.hp / enemy.max_hp, 4), Color("ffc576"))
 		if enemy.kind == "crow" and enemy.diving and enemy.hp > 0 and enemy.x > world.PLAYER_X + 135:
 			draw_string(host.FONT, Vector2(enemy.x - 4, ground + enemy.y - 43), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 19, Color("ffd57a"))
+	draw_assists(world,ground,clock)
 	if a.lightning_time > 0.0:
 		var source: Vector2 = a.lightning_origin+Vector2(0,ground)
 		var end: Vector2 = a.lightning_end+Vector2(0,ground)

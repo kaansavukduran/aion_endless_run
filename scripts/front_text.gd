@@ -3,8 +3,8 @@ extends RefCounted
 # New front-of-house copy lives here; existing game/campaign translations remain authoritative.
 const KEYS := ["skip","demo","how","attract","intro","hero","confirm","move","jump","shoot","grenade","vehicle","rescue","secret","route","ability","previous","next"]
 const WORDS := {
-	"tr":["Atla","TANITIM · Herhangi bir tuşla dön","Nasıl oynanır?","Boştayken oynanış tanıtımı","Açılışı tekrar izle","Kahramanın","Seçimi onayla","Yürü ve nişan al","Zıpla","Ateş ve yakın etkileşim","Enerji bombası","Araca bin / araçtan in","Fener bekçilerini kurtar","Gizli alanları keşfet","Kendi rotanı seç","Kahramanın yeteneği","Önceki","Sonraki"],
-	"en":["Skip","DEMO · Any input returns","How to play","Idle gameplay demonstration","Replay opening","Your hero","Confirm selection","Move and aim","Jump","Fire and close interaction","Energy grenade","Enter / leave vehicle","Rescue lantern keepers","Discover hidden areas","Choose your route","Your hero's ability","Previous","Next"],
+	"tr":["Atla","TANITIM · Herhangi bir tuşla dön","Nasıl oynanır?","Boştayken oynanış tanıtımı","Açılışı tekrar izle","Kahramanın","Seçimi onayla","Yürü ve nişan al","Zıpla","Ateş ve yakın etkileşim","Enerji bombası","Araca bin / araçtan in","Fener bekçilerini kurtar","Gizli alanları keşfet","Üst ve alt yolları keşfet","Kahramanın yeteneği","Önceki","Sonraki"],
+	"en":["Skip","DEMO · Any input returns","How to play","Idle gameplay demonstration","Replay opening","Your hero","Confirm selection","Move and aim","Jump","Fire and close interaction","Energy grenade","Enter / leave vehicle","Rescue lantern keepers","Discover hidden areas","Explore upper and lower paths","Your hero's ability","Previous","Next"],
 	"cs":["Přeskočit","UKÁZKA · Návrat libovolným vstupem","Jak hrát","Ukázka při nečinnosti","Přehrát úvod","Tvůj hrdina","Potvrdit výběr","Pohyb a míření","Skok","Střelba a blízká interakce","Energetický granát","Nastoupit / vystoupit","Zachraň strážce luceren","Objev skryté oblasti","Vyber si cestu","Schopnost hrdiny","Předchozí","Další"],
 	"az":["Keç","TƏQDİMAT · Qayıtmaq üçün toxun","Necə oynanılır?","Boş vaxtda oyun təqdimatı","Açılışı yenidən göstər","Qəhrəmanın","Seçimi təsdiqlə","Hərəkət və nişan","Tullan","Atəş və yaxın əlaqə","Enerji bombası","Nəqliyyata min / en","Fənər gözətçilərini xilas et","Gizli yerləri kəşf et","Yolunu seç","Qəhrəmanın bacarığı","Əvvəlki","Sonrakı"],
 	"de":["Überspringen","DEMO · Beliebige Eingabe zurück","Spielanleitung","Spielvorführung bei Inaktivität","Intro wiederholen","Dein Held","Auswahl bestätigen","Bewegen und zielen","Springen","Feuern und Nahinteraktion","Energiegranate","Einsteigen / aussteigen","Laternenwächter retten","Geheime Orte entdecken","Route wählen","Heldenfähigkeit","Zurück","Weiter"],
@@ -16,6 +16,7 @@ const WORDS := {
 	"it":["Salta","DEMO · Qualsiasi comando per tornare","Come giocare","Dimostrazione durante l'inattività","Rivedi introduzione","Il tuo eroe","Conferma scelta","Muoversi e mirare","Saltare","Fuoco e interazione vicina","Granata d'energia","Salire / scendere","Salvare le guardiane","Scoprire zone segrete","Scegliere il percorso","Abilità dell'eroe","Precedente","Avanti"]
 }
 static func word(language: String,key: String) -> String:
+	language=GameText.language_for_locale(language)
 	var index:=KEYS.find(key)
 	return str(WORDS.get(language,WORDS.en)[index]) if index>=0 else key
 
@@ -33,5 +34,6 @@ const ABILITIES := {
 	"it":["Premi due volte: doppio salto","Un gregge di tre","Tieni: corsa a quattro zampe","Tieni: plana · Tre battiti d'ali","Tocco: 1,75× · Tieni: 4×","Tocco: 1,75× · Tieni: 4×"]
 }
 static func ability(language: String,hero: String) -> String:
+	language=GameText.language_for_locale(language)
 	var index: int=["aion","sheep","wolf","owl","rabbit","eren"].find(hero)
 	return str(ABILITIES.get(language,ABILITIES.en)[maxi(0,index)])

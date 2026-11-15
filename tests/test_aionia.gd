@@ -33,7 +33,7 @@ func run() -> void:
 	var game=load("res://main.tscn").instantiate();root.add_child(game);await process_frame;game.set_physics_process(false)
 	print("AIONIA_BODY_FONT ",game.interface_options.body_font.get_font_name())
 	check(game.GAME_VERSION==ProjectSettings.get_setting("application/config/version"),"Displayed and exported application versions agree")
-	for code in ["tr","en","cs"]:
+	for code in ["tr","en"]:
 		game.language=code;check(game.text("version").contains(game.GAME_VERSION),"Localized version agrees with the running application "+code)
 	game.touch_mode=true;game.touch_tutorial_done=true;game.interface_options.text_scale=1.0;game.interface_options.font_mode="system"
 	game.interface_options.theme_mode="dark";game.interface_options.resolve_theme();game.build_theme();game.ui.theme=game.ui_theme
@@ -62,7 +62,7 @@ func run() -> void:
 	check(not game.decorative_motion() and game.motion,"Reduced motion suppresses decoration without freezing hero animation")
 	for dimensions in [Vector2i(393,873),Vector2i(873,393),Vector2i(1440,2560),Vector2i(768,1024)]:
 		root.size=dimensions;await process_frame
-		for lang in ["tr","en","cs"]:
+		for lang in ["tr","en"]:
 			game.language=lang
 			for key in ["theme","theme_dark","theme_light","theme_system","ui_font","text_size","reduced_motion","controller","pad_capture","pad_remap_help","pad_reset"]:check(game.text(key)!=key,"Localized AIONIA option "+lang+"/"+key)
 			for scale_value in [1.0,2.0]:
@@ -75,7 +75,7 @@ func run() -> void:
 					if target=="main" and scale_value==1.0:
 						var choose: Label=game.menu_layer.get_node("StartChooser")
 						check(not panel.get_global_rect().intersects(choose.get_global_rect()),"Character heading does not overlap main actions "+lang+str(dimensions))
-						check(choose.size.x>=floorf(game.view_w-56) and choose.get_minimum_size().y<=choose.size.y,"Character heading has real readable width "+lang)
+						check(choose.size.x>=floorf(game.pixel_ui.roster_width()) and choose.get_minimum_size().y<=choose.size.y,"Character heading has real readable width "+lang)
 						check(choose.size.y<100 and choose.get_global_rect().end.y<=game.pixel_ui.roster_y(),"Character heading never covers its roster "+lang+str(dimensions))
 						for tile in game.menu_layer.find_children("StartSelect_*","Button",true,false):
 							check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Actual portrait/name content stays inside its character card "+lang+str(tile.name))
@@ -87,7 +87,7 @@ func run() -> void:
 						check(game.menu_pages.previous.is_visible_in_tree() and screen.encloses(game.menu_pages.previous.get_global_rect()),"Last content page is reachable without a wheel "+lang+target)
 
 	root.size=Vector2i(1200,540);await process_frame
-	game.interface_options.text_scale=1;game.language="cs";game.page="main"
+	game.interface_options.text_scale=1;game.language="tr";game.page="main"
 	for family in ["DejaVu Sans","Liberation Sans"]:
 		var alternate:=SystemFont.new();alternate.font_names=PackedStringArray([family]);alternate.fallbacks=[ThemeDB.fallback_font]
 		game.interface_options.body_font=alternate;game.ui_theme.default_font=alternate
@@ -96,7 +96,7 @@ func run() -> void:
 			root.size=dimensions;await process_frame;game.rebuild();await process_frame;await process_frame
 			print("AIONIA_ALTERNATE_FONT ",alternate.get_font_name()," ",dimensions)
 			for tile in game.menu_layer.find_children("StartSelect_*","Button",true,false):
-				check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Czech names fit measured alternate font "+family+str(dimensions)+str(tile.name))
+				check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Turkish names fit measured alternate font "+family+str(dimensions)+str(tile.name))
 			var heading: Control=game.menu_layer.get_node("StartChooser")
 			check(not game.menu_layer.get_node("PagePanel").get_global_rect().intersects(heading.get_global_rect()),"Measured alternate-font roster does not overlap main actions "+family+str(dimensions))
 			check(heading.size.y<100 and heading.get_global_rect().end.y<=game.pixel_ui.roster_y(),"Translated heading uses its actual wrapped height "+family+str(dimensions))

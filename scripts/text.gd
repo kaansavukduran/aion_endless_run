@@ -1,8 +1,8 @@
 class_name GameText
 extends RefCounted
 
-const LANGUAGES := ["tr", "en", "cs", "az", "de", "fr", "ja", "ko", "zh", "es", "it"]
-const LANGUAGE_NAMES := {"tr":"Türkçe", "en":"English", "cs":"Čeština", "az":"Azərbaycanca", "de":"Deutsch", "fr":"Français", "ja":"日本語", "ko":"한국어", "zh":"中文", "es":"Español", "it":"Italiano"}
+const LANGUAGES := ["tr", "en"]
+const LANGUAGE_NAMES := {"tr":"Türkçe", "en":"English"}
 const STRINGS := {
 	"tr": {
 		"story_next": "Devam",
@@ -33,7 +33,7 @@ const STRINGS := {
 		"controller": "Oyun kolu",
 		"pad_haptics": "Titreşim (isteğe bağlı)",
 		"pad_deadzone": "Sol çubuk ölü bölgesi (20–80%)",
-		"pad_remap_help": "Sol/sağ tık veya F: ateş · Space: zıpla · ↓: takla · Esc: duraklat · 15 aktif saniye = 1 seviye. Emre ve Eren: zıplamayı tut, güç biriktir; bırakınca sıçra. Ömer: tutarak süzül, yeniden basarak üç kez kanat çırp.",
+		"pad_remap_help": "Sol/sağ tık veya F: ateş · Space: zıpla · ↓: takla · Esc: duraklat · 15 aktif saniye = 1 seviye. Ayça ve Eren: zıplamayı tut, güç biriktir; bırakınca sıçra. Ömer: tutarak süzül, yeniden basarak üç kez kanat çırp.",
 		"pad_capture": "%s: koldaki yeni tuşa bas. İptal: Start / Esc.",
 		"pad_reset": "Kol ayarlarını sıfırla",
 		"pad_ability_aion": "İki kez %s: çift zıpla",
@@ -71,7 +71,7 @@ const STRINGS := {
 		"gate_boost": "HIZ ŞERİDİ · İLERİ!",
 		"gate_rush": "Hız şeridi %ds",
 		"carrier_down": "KARGA YÜKÜ DAĞILDI +35",
-		"motion_help": "Sol/sağ tık veya F: ateş · Space: zıpla · ↓: takla · Esc: duraklat · 15 aktif saniye = 1 seviye. Emre ve Eren: zıplamayı tut, güç biriktir; bırakınca sıçra. Ömer: tutarak süzül, yeniden basarak üç kez kanat çırp.",
+		"motion_help": "Sol/sağ tık veya F: ateş · Space: zıpla · ↓: takla · Esc: duraklat · 15 aktif saniye = 1 seviye. Ayça ve Eren: zıplamayı tut, güç biriktir; bırakınca sıçra. Ömer: tutarak süzül, yeniden basarak üç kez kanat çırp.",
 		"swamp": "SİSLİ BATAKLIK",
 		"city": "BAKIR ŞEHİR",
 		"control_shoot": "Ateş et",
@@ -158,7 +158,7 @@ const STRINGS := {
 		"off": "Kapalı",
 		"volume": "Ses düzeyi",
 		"appearance": "Görünüm ve erişilebilirlik",
-		"help": "Sol/sağ tık veya F: ateş · Space: zıpla · ↓: takla · Esc: duraklat · 15 aktif saniye = 1 seviye. Emre ve Eren: zıplamayı tut, güç biriktir; bırakınca sıçra. Ömer: tutarak süzül, yeniden basarak üç kez kanat çırp.",
+		"help": "Sol/sağ tık veya F: ateş · Space: zıpla · ↓: takla · Esc: duraklat · 15 aktif saniye = 1 seviye. Ayça ve Eren: zıplamayı tut, güç biriktir; bırakınca sıçra. Ömer: tutarak süzül, yeniden basarak üç kez kanat çırp.",
 		"how": "Nasıl oynanır?",
 		"next": "SONRAKİ BİYOM",
 		"clear": "TEMİZ ATLAMA  +10",
@@ -222,7 +222,7 @@ const STRINGS := {
 		"desc_spring": "9 saniye boyunca %16 daha yükseğe zıpla. Karakter boyutu değişmez.",
 		"desc_fortune": "Meyveler 12 saniye boyunca iki kat puan verir.",
 		"desc_frost": "8 saniye boyunca 430 adım içindeki yaklaşan düşmanları yavaşlat. Engellerin hızı değişmez.",
-		"name_rabbit": "Emre",
+		"name_rabbit": "Ayça",
 		"ability_rabbit": "Zıplamayı basılı tut: güç biriktir · bırak: sıçra",
 		"touch_ability_rabbit": "↑ Tut · bırak",
 		"pad_ability_rabbit": "%s basılı tut, sonra bırak: güçlü sıçrama",
@@ -247,7 +247,7 @@ const STRINGS := {
 		"touch_ability_eren": "↑ Tut · bırak",
 		"pad_ability_eren": "%s basılı tut, sonra bırak: güçlü sıçrama",
 		"owl_flaps": "KANAT %d/3",
-		"charge_glide_help": "Emre ve Eren: zıplamayı tut, güç biriktir; bırakınca sıçra. Ömer: tutarak süzül, yeniden basarak üç kez kanat çırp.",
+		"charge_glide_help": "Ayça ve Eren: zıplamayı tut, güç biriktir; bırakınca sıçra. Ömer: tutarak süzül, yeniden basarak üç kez kanat çırp.",
 	},
 	"en": {
 		"story_next": "Continue",
@@ -278,7 +278,7 @@ const STRINGS := {
 		"controller": "Controller",
 		"pad_haptics": "Vibration (optional)",
 		"pad_deadzone": "Left stick deadzone (20–80%)",
-		"pad_remap_help": "Left/right click or F: fire · Space: jump · ↓: roll · Esc: pause · 15 active seconds = 1 level. Emre and Eren: hold Jump to charge; release to leap. Ömer: hold to glide; press again for up to three flaps.",
+		"pad_remap_help": "Left/right click or F: fire · Space: jump · ↓: roll · Esc: pause · 15 active seconds = 1 level. Ayça and Eren: hold Jump to charge; release to leap. Ömer: hold to glide; press again for up to three flaps.",
 		"pad_capture": "%s: press the new controller button. Cancel: Start / Esc.",
 		"pad_reset": "Reset controller settings",
 		"pad_ability_aion": "%s twice: double jump",
@@ -316,7 +316,7 @@ const STRINGS := {
 		"gate_boost": "SPEED PAD · GO!",
 		"gate_rush": "Speed pad %ds",
 		"carrier_down": "CROW CARGO BROKEN +35",
-		"motion_help": "Left/right click or F: fire · Space: jump · ↓: roll · Esc: pause · 15 active seconds = 1 level. Emre and Eren: hold Jump to charge; release to leap. Ömer: hold to glide; press again for up to three flaps.",
+		"motion_help": "Left/right click or F: fire · Space: jump · ↓: roll · Esc: pause · 15 active seconds = 1 level. Ayça and Eren: hold Jump to charge; release to leap. Ömer: hold to glide; press again for up to three flaps.",
 		"swamp": "MISTY MARSH",
 		"city": "COPPER CITY",
 		"control_shoot": "Fire",
@@ -403,7 +403,7 @@ const STRINGS := {
 		"off": "Off",
 		"volume": "Volume",
 		"appearance": "Appearance & accessibility",
-		"help": "Left/right click or F: fire · Space: jump · ↓: roll · Esc: pause · 15 active seconds = 1 level. Emre and Eren: hold Jump to charge; release to leap. Ömer: hold to glide; press again for up to three flaps.",
+		"help": "Left/right click or F: fire · Space: jump · ↓: roll · Esc: pause · 15 active seconds = 1 level. Ayça and Eren: hold Jump to charge; release to leap. Ömer: hold to glide; press again for up to three flaps.",
 		"how": "How to play",
 		"next": "NEXT BIOME",
 		"clear": "CLEAN JUMP  +10",
@@ -467,7 +467,7 @@ const STRINGS := {
 		"desc_spring": "Jump 16% higher for 9 seconds. Character size stays the same.",
 		"desc_fortune": "Fruit awards double points for 12 seconds.",
 		"desc_frost": "Slow approaching enemies within 430 steps for 8 seconds. Obstacles keep their speed.",
-		"name_rabbit": "Emre",
+		"name_rabbit": "Ayça",
 		"ability_rabbit": "Hold Jump to charge · release to leap",
 		"touch_ability_rabbit": "↑ Hold/release",
 		"pad_ability_rabbit": "Hold %s, then release: charged leap",
@@ -492,7 +492,7 @@ const STRINGS := {
 		"touch_ability_eren": "↑ Hold/release",
 		"pad_ability_eren": "Hold %s, then release: charged leap",
 		"owl_flaps": "FLAPS %d/3",
-		"charge_glide_help": "Emre and Eren: hold Jump to charge; release to leap. Ömer: hold to glide; press again for up to three flaps.",
+		"charge_glide_help": "Ayça and Eren: hold Jump to charge; release to leap. Ömer: hold to glide; press again for up to three flaps.",
 	},
 	"cs": {
 		"story_next": "Pokračovat",
@@ -523,7 +523,7 @@ const STRINGS := {
 		"controller": "Ovladač",
 		"pad_haptics": "Vibrace (volitelné)",
 		"pad_deadzone": "Mrtvá zóna levé páčky (20–80 %)",
-		"pad_remap_help": "Levý/pravý klik nebo F: střelba · Space: skok · ↓: kotoul · Esc: pauza · 15 aktivních sekund = 1 úroveň. Emre a Eren: drž skok pro nabití, pusť pro výskok. Ömer: drž pro plachtění, stiskni znovu pro až tři mávnutí.",
+		"pad_remap_help": "Levý/pravý klik nebo F: střelba · Space: skok · ↓: kotoul · Esc: pauza · 15 aktivních sekund = 1 úroveň. Ayça a Eren: drž skok pro nabití, pusť pro výskok. Ömer: drž pro plachtění, stiskni znovu pro až tři mávnutí.",
 		"pad_capture": "%s: stiskněte nové tlačítko. Zrušit: Start / Esc.",
 		"pad_reset": "Obnovit nastavení ovladače",
 		"pad_ability_aion": "Dvakrát %s: dvojitý skok",
@@ -561,7 +561,7 @@ const STRINGS := {
 		"gate_boost": "RYCHLOSTNÍ PÁS · VPŘED!",
 		"gate_rush": "Rychlostní pás %ds",
 		"carrier_down": "NÁKLAD VRAN ROZBIT +35",
-		"motion_help": "Levý/pravý klik nebo F: střelba · Space: skok · ↓: kotoul · Esc: pauza · 15 aktivních sekund = 1 úroveň. Emre a Eren: drž skok pro nabití, pusť pro výskok. Ömer: drž pro plachtění, stiskni znovu pro až tři mávnutí.",
+		"motion_help": "Levý/pravý klik nebo F: střelba · Space: skok · ↓: kotoul · Esc: pauza · 15 aktivních sekund = 1 úroveň. Ayça a Eren: drž skok pro nabití, pusť pro výskok. Ömer: drž pro plachtění, stiskni znovu pro až tři mávnutí.",
 		"swamp": "MLŽNÝ MOČÁL",
 		"city": "MĚDĚNÉ MĚSTO",
 		"control_shoot": "Střílet",
@@ -648,7 +648,7 @@ const STRINGS := {
 		"off": "Vypnuto",
 		"volume": "Hlasitost",
 		"appearance": "Vzhled a přístupnost",
-		"help": "Levý/pravý klik nebo F: střelba · Space: skok · ↓: kotoul · Esc: pauza · 15 aktivních sekund = 1 úroveň. Emre a Eren: drž skok pro nabití, pusť pro výskok. Ömer: drž pro plachtění, stiskni znovu pro až tři mávnutí.",
+		"help": "Levý/pravý klik nebo F: střelba · Space: skok · ↓: kotoul · Esc: pauza · 15 aktivních sekund = 1 úroveň. Ayça a Eren: drž skok pro nabití, pusť pro výskok. Ömer: drž pro plachtění, stiskni znovu pro až tři mávnutí.",
 		"how": "Jak hrát",
 		"next": "DALŠÍ BIOM",
 		"clear": "ČISTÝ SKOK +10",
@@ -712,7 +712,7 @@ const STRINGS := {
 		"desc_spring": "Na 9 sekund skáčeš o 16 % výš. Velikost postavy se nemění.",
 		"desc_fortune": "Ovoce dává 12 sekund dvojnásobek bodů.",
 		"desc_frost": "Na 8 sekund zpomalí blížící se nepřátele do vzdálenosti 430 kroků. Překážky nezpomalí.",
-		"name_rabbit": "Emre",
+		"name_rabbit": "Ayça",
 		"ability_rabbit": "Drž skok: nabíjej · pusť: vyskoč",
 		"touch_ability_rabbit": "↑ Drž/pusť",
 		"pad_ability_rabbit": "Drž %s a pusť: nabitý skok",
@@ -737,7 +737,7 @@ const STRINGS := {
 		"touch_ability_eren": "↑ Drž/pusť",
 		"pad_ability_eren": "Drž %s a pusť: nabitý skok",
 		"owl_flaps": "MÁVNUTÍ %d/3",
-		"charge_glide_help": "Emre a Eren: drž skok pro nabití, pusť pro výskok. Ömer: drž pro plachtění, stiskni znovu pro až tři mávnutí.",
+		"charge_glide_help": "Ayça a Eren: drž skok pro nabití, pusť pro výskok. Ömer: drž pro plachtění, stiskni znovu pro až tři mávnutí.",
 	}
 }
 const EXTRA := {
@@ -755,7 +755,16 @@ static func language_for_locale(locale: String) -> String:
 	var primary := locale.to_lower().replace("_", "-").split("-")[0]
 	return primary if primary in LANGUAGES else "en"
 
+# Current playable roster copy; archived translations are not selectable.
+const CURRENT := {
+ "tr":{"power_owl_feather":"Ömer’in Tüyü","power_wolf_charm":"Melun’un Tılsımı","desc_owl_feather":"Ömer gökten iki kez kaya atar; patlama yakındaki düşmanlara etkilidir.","desc_wolf_charm":"Melun en fazla iki düşmana koşup ısırır.","discoveries":"KEŞFEDİLEN GÜÇLER %d","characters":"Kahramanlar","name_rabbit":"Ayça","pad_remap_help":"Aion: çift sıçrama. Ayça ve Eren: zıplamayı tut, bırakınca yüksel. Ömer'in tüyü ve Melun'un mührü yardımcı güçlerdir.","motion_help":"Sol/sağ tık veya F: ateş · Space: zıpla · ↓: takla · Esc: duraklat · 15 aktif saniye = 1 seviye. Ayça ve Eren: tut, bırak ve sıçra.","charge_glide_help":"Ayça ve Eren: zıplamayı tutarak güç biriktir, bırakınca yüksel. Ömer ve Melun artık toplanabilir yardımcı güçlerdir."},
+ "en":{"power_owl_feather":"Omar’s Feather","power_wolf_charm":"Melun’s Charm","desc_owl_feather":"Omar drops two stones from above, damaging nearby enemies.","desc_wolf_charm":"Melun runs toward and bites up to two enemies.","discoveries":"POWERS DISCOVERED %d","characters":"Heroes","name_rabbit":"Ayça","pad_remap_help":"Aion: double jump. Ayça and Eren: hold jump, then release to leap. Omar's feather and Melun's seal are companion powers.","motion_help":"Left/right click or F: fire · Space: jump · ↓: roll · Esc: pause · 15 active seconds = 1 level. Ayça and Eren: hold, release and leap.","charge_glide_help":"Ayça and Eren: hold jump to build power, release to leap. Omar and Melun are collectible companion powers."}
+}
+
 static func get_text(language: String, key: String) -> String:
+	language=language_for_locale(language)
+	if key=="help":return str(CURRENT[language].motion_help)
+	if CURRENT[language].has(key):return str(CURRENT[language][key])
 	if key=="version":return str(ProjectSettings.get_setting("application/config/version"))
 	var table: Dictionary = EXTRA[language].data if EXTRA.has(language) else STRINGS.get(language, STRINGS.en)
 	return table.get(key, STRINGS.en.get(key, key))

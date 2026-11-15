@@ -12,7 +12,7 @@ func run() -> void:
  var samples: Array=[]
  for cycle in 4:
   var scene:=AionCampaignGame.new();root.add_child(scene);await process_frame;scene.set_process(false);scene.audio_enabled=false
-  for stage in ["water","terrace","roots","arena"]:
+  for stage in ["fork_one","water","fork_two","terrace","roots","arena"]:
    scene.world.load_section(stage);scene.resize();await process_frame;await process_frame
   scene.queue_free();await process_frame;await process_frame
   var nodes: int=int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT));samples.append(nodes)

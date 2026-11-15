@@ -78,6 +78,7 @@ func run() -> void:
 		w.step(0.01)
 		check(w.state == "running","A tucked roll clears the actual load: "+kind)
 	w = arena()
+	# Retained legacy flight/attack actor, assigned only after arena reset.
 	w.character = "owl"
 	w.y = -70
 	w.adventure.attack(w)
@@ -87,6 +88,7 @@ func run() -> void:
 	w.step(0.01)
 	check(w.adventure.kills == 1 and w.obstacles.is_empty(),"The forward beak can really break the crow-carried load")
 	w = arena()
+	# Retained legacy flight/attack actor, assigned only after arena reset.
 	w.character = "owl"
 	w.adventure.attack(w)
 	check(not w.adventure.attack_airborne,"A grounded owl keeps alternating wing strikes")

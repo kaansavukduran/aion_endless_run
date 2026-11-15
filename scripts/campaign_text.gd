@@ -32,6 +32,16 @@ const LOCAL := {
 "it":{"arcade":"Arcade","endless":"Corsa infinita","title":"Lanterne spente","start":"Inizia missione","continue":"Riprendi dal checkpoint","grenade":"Granata","melee":"Colpo","ride":"Sali / scendi","fork":"Scegli il percorso","shore":"Costa delle lanterne","quay":"Molo spezzato","canopy":"Chiome degli alberi","water":"Canale allagato","terrace":"Terrazze del giardino","roots":"Passaggio delle radici","relay":"Relè di rame","arena":"Motore delle radici","won":"Missione completata","retry":"Riprova checkpoint","mission":"Missione 1","back":"Menu principale","next":"Continua"}}
 
 static func word(locale: String,key: String) -> String:
+	locale=GameText.language_for_locale(locale)
+	if key=="fork_one":return "Fener Kavşağı" if locale=="tr" else "Lantern Junction"
+	if key=="fork_two":return "Asma Geçit" if locale=="tr" else "Hanging Passage"
+	if key=="continue_short":return "Sürdür" if locale=="tr" else "Continue"
+	if key in ["owl_feather","arc_owl_feather"]:return "Ömer’in Tüyü · İki kaya saldırısı" if locale=="tr" else "Omar’s Feather · Two stone strikes"
+	if key in ["wolf_charm","arc_wolf_charm"]:return "Melun’un Tılsımı · İki ısırık" if locale=="tr" else "Melun’s Charm · Two bites"
+	if key=="help_route":return "Yüksek yola zıpla veya alttaki kanala ilerle. Tek yönlü platformdan inmek için aşağı ve zıplamayı birlikte kullan. Yolunu hareketin belirler." if locale=="tr" else "Jump onto the upper path or walk into the lower channel. Hold down and jump to drop through a one-way platform. Your movement chooses the route."
+	if key=="keys":return "A/D yürü · S/↓ eğil · W/↑ yukarı nişan · Space zıpla · F ateş · G bomba · E bin/in · Esc" if locale=="tr" else "A/D move · S/↓ crouch · W/↑ aim up · Space jump · F fire · G grenade · E ride/exit · Esc"
+	if key=="crouch":return "Eğil" if locale=="tr" else "Crouch"
+	if key=="touch":return "Sol joystick: yürü; aşağı tutarak eğil · Sağda zıpla, ateş ve bomba · Yakında Bin" if locale=="tr" else "Left stick: move; hold down to crouch · Right: jump, fire and grenade · Ride when near"
 	if UI.data.has(locale) and UI.data[locale].has(key):return str(UI.data[locale][key])
 	if EXPANSION.data.has(locale) and EXPANSION.data[locale].has(key):return str(EXPANSION.data[locale][key])
 	if key=="keys":return word(locale,"move")+" A/D ←/→ · "+word(locale,"aim")+" W/S ↑/↓ · "+GameText.get_text(locale,"control_jump")+" Space · "+GameText.get_text(locale,"control_shoot")+" F/J · "+word(locale,"grenade")+" G · "+word(locale,"ride")+" E · Esc"
