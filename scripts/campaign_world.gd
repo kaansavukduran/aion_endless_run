@@ -588,16 +588,16 @@ func step_bullets(dt: float) -> void:
 				if b.kind=="nova":CampaignWeapons.blast(self,b.p,170.,int(b.damage),str(b.colour));b.age=99.;break
 				damage_enemy(e,int(b.damage)); b.hit.append(str(e.id)); b.pierce = int(b.pierce)-1
 				if int(b.pierce)<0: b.age = 99.; break
-		if float(b.age)>3.:continue
+		if float(b.age)>=float(b.get("life",3.)):continue
 		if bool(boss.active) and Geometry2D.get_closest_point_to_segment(Vector2(float(boss.x),float(boss.y)-75.),previous,b.p).distance_to(Vector2(float(boss.x),float(boss.y)-75.))<105. and not "boss" in b.hit:
 			if boss_vulnerable():damage_boss(int(b.damage))
 			b.hit.append("boss"); b.age = 99.
-		if float(b.age)>3.:continue
+		if float(b.age)>=float(b.get("life",3.)):continue
 		for crate in crates:
 			if int(crate.hp)>0 and Geometry2D.get_closest_point_to_segment(Vector2(float(crate.x),float(crate.y)-24.),previous,b.p).distance_to(Vector2(float(crate.x),float(crate.y)-24.))<30.: open_crate(crate); b.age = 99.;break
-		if float(b.age)>3.:continue
+		if float(b.age)>=float(b.get("life",3.)):continue
 		if CampaignContent.hit_object(self,b.p,int(b.damage),previous):b.age=99.
-		if float(b.age)<3. and CampaignRescue.hit_rope(self,previous,b.p):b.age=99.
+		if float(b.age)<float(b.get("life",3.)) and CampaignRescue.hit_rope(self,previous,b.p):b.age=99.
 		if float(b.p.y)>=floor_at(float(b.p.x)) and float(b.v.y)>0.:b.age=99. # Downward shots collide with solid ground.
 	bullets = bullets.filter(func(b):return float(b.age)<float(b.get("life",3.)) and float(b.p.x)>-80. and float(b.p.x)<length()+100.)
 

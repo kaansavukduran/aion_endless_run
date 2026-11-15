@@ -34,6 +34,9 @@ func run() -> void:
   check(float(b.life)*Vector2(b.v).length()>700.,'Special has useful travel range '+gun)
   if gun=='seeker':
    w.spawn_enemy('gnome',1000.,0.,0);b.target=w.enemies[0].id;CampaignWeapons.step(w,b,.5);check(Vector2(b.v).length()>700.,'Homing does not revert to old slow speed')
+ w=fresh();w.npcs=[{'id':'late-rope','x':620.,'y':0.,'freed':false,'secret':'','role':'keeper'}]
+ w.bullets=[{'p':Vector2(600,-60),'v':Vector2(760,0),'owner':'hero','age':3.1,'kind':'seeker','damage':1,'pierce':0,'hit':[],'life':3.3,'target':''}]
+ w.step_bullets(.02);check(w.npcs[0].freed,'Longer-lived projectile still cuts ropes after the former three-second cutoff')
  var bank:=CampaignCatalog.new();var scale: float=-1.
  for frame in range(6,12):
   var pose:=bank.pose('rescue-npcs',7,frame)
