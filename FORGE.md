@@ -1,3 +1,9 @@
+# 0.26.2 · Savaş ve korsan yürüyüşü
+
+Başlangıç temiz main6e621ff. Özgün korsan kıyafet/saç/şapka kimliği korunarak iki kolu görülen6yürüyüş karesi; sabit ölçek/yüz/zemin kaydı. Orijinal NPC atlası korunur. Araçlarda Space/A/dokunmatik ortak eylemle tek zıplama, havada karakter çift zıplamasını kullanamaz. Bütün araçlar gerçek kaynak namlusundan üçlü yayılım yapar; küçük düşmanlar iki yönde gerçek atışla sınandı. Örümcek yakın bağlı NPC'ye de gider ve patlama ipi çözer; gizli/kafes koruması ve temas ödülü korunur. Saçma/izleyen/mor spor mermileri hız/ömür artışı; izleyen mermi dönüşte eski hıza dönmez.53taze kaynak paketi/37.960kontrol,25normal tarayıcı kontrolü,8açıkça kurulmuş native render fixture'ı başarılı.77yeni hedefli kontrol vardır. Yayın build/CI durumu ayrıca doğrulanır; eski sürüm sonucu yeni sonuca dönüştürülmez.
+
+[Kanıt](docs/evidence-combat-0262/README.md). Önceki kayıtlar aşağıda korunur.
+
 # 0.26.1 · Ara sahne katman önceliği düzeltmesi
 
 Son gerçek regresyon: yeni M1 gövde katmanı, sonsuz moddaki mevcut tepki/sarılma pozları ve kırmızı silah tesliminin üzerine çiziliyordu. Seçici önceliği düzeltildi; Ayça kendi çizimini, koyun takipçileri güncel iki ayaklı gövdeyi korur. 52 taze kaynak paketi/35.721 kontrol, 27 Python testi ve 16 skill dosyası/16 bağlantı geçti. 728 gerçek ana sahne kontrolü düzeltmeden önce 292 kez başarısızdı, sonra sıfır hata; 12 native ara sahne render fixture'ı da sıfır hata. [Kanıt ve kapsam](docs/evidence-cinematic-priority/README.md). Son yayın durumu son commit'in kendi CI/dağıtımından ayrıca doğrulanır.

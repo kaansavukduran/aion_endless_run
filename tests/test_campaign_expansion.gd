@@ -102,9 +102,9 @@ func run() -> void:
 	w=fresh();w.collect({"id":"power","kind":"power"});w.attack_press();check(w.bullets[0].damage==2,"Power buff changes real projectile damage")
 	for type in ["shell","wind","drill"]:
 		w=fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":3,"type":type};check(w.interact(),"Vehicle begins boarding: "+type);tick(w,.46)
-		w.attack_press();check(w.bullets.size()==(3 if type=="wind" else 1),"Vehicle has its own attack: "+type)
+		w.attack_press();check(w.bullets.size()==3,"Vehicle has its own attack: "+type)
 		w.jump_press()
-		if type=="shell":check(float(w.mount.dive)>0.,"Shell jump action actually dives")
+		check(w.velocity.y<0.,"Every mounted vehicle performs a grounded jump")
 		w.section="water";w.load_section("relay");check(w.mount.ridden and CampaignVehicles.kind(w)==type,"A surviving route vehicle reaches the common relay")
 		w.load_section("arena");check(w.mount.ridden and CampaignVehicles.kind(w)==type,"A surviving route vehicle can reach the boss")
 		w.invulnerable=0.;w.mount.hp=1;w.damage_player();check(not w.mount.ridden and w.player.y<0. and w.floor_at(w.player.x)==0.,"Destroyed craft safely ejects to supported ground")

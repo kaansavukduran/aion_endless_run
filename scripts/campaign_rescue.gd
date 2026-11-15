@@ -76,6 +76,14 @@ static func hit_rope(w,from: Vector2,to: Vector2) -> bool:
 			return true
 	return false
 
+## Area attacks use the same secrecy/cage protection as travelling bullets.
+static func blast_ropes(w,centre: Vector2,radius: float) -> void:
+	for n in w.npcs:
+		if bool(n.freed) or (str(n.secret)!="" and not w.discovered.has(str(n.secret))):continue
+		if w.objects.any(func(o):return str(o.id)==str(n.get("cage","")) and not bool(o.active)):continue
+		var nearest:=Vector2(clampf(centre.x,float(n.x)-25.,float(n.x)+25.),clampf(centre.y,float(n.y)-120.,float(n.y)-20.))
+		if centre.distance_to(nearest)<=radius:w.rescue(n)
+
 static func crosses_rect(from: Vector2,to: Vector2,rect: Rect2) -> bool:
 	if maxf(from.x,to.x)<rect.position.x or minf(from.x,to.x)>rect.end.x or maxf(from.y,to.y)<rect.position.y or minf(from.y,to.y)>rect.end.y:return false
 	if rect.has_point(from) or rect.has_point(to):return true

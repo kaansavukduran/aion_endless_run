@@ -1,6 +1,8 @@
 # Aion Endless Run
 
-## 0.26.1 · Hareketle seçilen yollar, dört kahraman
+## 0.26.2 · Araç zıplaması ve savaş düzeltmeleri
+
+Korsan bekçinin iki kolu görülen altı yeni yürüyüş karesi, araçlarda gerçek zıplama ve üçlü yayılım, ipleri patlamasıyla çözen örümcek ve daha hızlı/uzun menzilli özel mermiler. [Test ve görsel kanıt](docs/evidence-combat-0262/README.md).
 
 **Arcade / Sönen Fenerler**: Aion, iki ayaklı Kutsanmış, Ayça ve Eren ile Mission 1. İki yol ayrımında üst köprülere zıpla veya alt kanaldan ilerle; oyun rotayı fiziksel konumundan seçer. Yol seçme metin menüsü yoktur. Bölüm geçişleri otomatik kısa solmayla gerçekleşir.
 

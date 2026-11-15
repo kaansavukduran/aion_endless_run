@@ -81,8 +81,9 @@ static func step_transition(w,dt: float) -> void:
 
 static func jump(w) -> bool:
 	if not bool(w.mount.ridden):return false
-	if kind(w)=="shell":w.mount.dive=1.;w.velocity.y=0.;return true
-	return false
+	if w.grounded():
+		w.mount.dive=0.;w.velocity.y=-650.;w.jumps=1;w.air_time=0.
+	return true # Consume airborne presses too: mounted heroes cannot double-jump.
 
 static func step(w,dt: float) -> void:
 	w.mount.dive=maxf(0.,float(w.mount.get("dive",0.))-dt)

@@ -170,7 +170,7 @@ func draw_world() -> void:
 		if phase=="departed" and age>4.8:continue
 		var animated: bool=host.motion_enabled and not host.options.reduced_motion
 		var frame: int=posmod(int(world.time*2.),2) if animated else 0
-		if phase in ["free","departed"]:frame=6+posmod(int(world.time*6.),2) if animated else 6
+		if phase in ["free","departed"]:frame=6+posmod(int(world.time*6.),6 if int(npc.variant)==7 else 2) if animated else 6
 		elif phase=="thanks":frame=2 if age<.45 else 3
 		var npc_pose: Dictionary=catalogue.pose("rescue-npcs",int(npc.variant),frame)
 		var growth: float=npc_growth(int(npc.variant))
@@ -293,6 +293,9 @@ func draw_world() -> void:
 		if b.kind=="wave": draw_rect(Rect2(p-Vector2(20,9),Vector2(40,18)),color)
 		elif b.kind=="beam":draw_line(p,p-Vector2(b.v).normalized()*140.,color,6.)
 		elif b.kind=="disc":draw_arc(p,9.,world.time*8.,world.time*8.+PI*1.8,10,color,3.)
+		elif b.kind=="vehicle":
+			# Pixel core/outline makes the wider collision envelope readable.
+			draw_rect(Rect2(p-Vector2(7,7),Vector2(14,14)),Color("443652"));draw_rect(Rect2(p-Vector2(5,5),Vector2(10,10)),color);draw_rect(Rect2(p-Vector2(2,2),Vector2(4,4)),Color("fff2d4"))
 		elif b.kind=="trap":draw_pose(support_art.pose("spider-walk",int(world.time*12.)%6),Vector2(b.p)+Vector2(0,8),int(b.get("facing",-1 if float(b.v.x)<0. else 1)))
 		else: draw_line(p,p-Vector2(b.v).normalized()*(25. if b.kind=="harpoon" else 12.),color,4.)
 	for bomb in world.bombs:

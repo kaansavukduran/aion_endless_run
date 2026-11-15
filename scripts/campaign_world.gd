@@ -581,7 +581,7 @@ func step_bullets(dt: float) -> void:
 			if CampaignEnemies.hidden(e):continue
 			var radius: float = 58. if bool(e.mini) or bool(e.get("heavy",false)) else float(CampaignContent.NEW_ENEMIES.get(str(e.kind),{}).get("radius",34.))
 			var target:=Vector2(float(e.x),float(e.y)-30.)
-			if Geometry2D.get_closest_point_to_segment(target,previous,b.p).distance_to(target)<radius:
+			if Geometry2D.get_closest_point_to_segment(target,previous,b.p).distance_to(target)<radius+float(b.get("hit_radius",0.)):
 				if bool(e.mini) and float(e.windup)<=.3 and float(e.get("flash",0.))<=0. and int(e.hp)>5:b.age=99.;break
 				if str(e.kind)=="mirror" and float(e.windup)>0.:
 					b.owner="enemy";b.v=-Vector2(b.v);b.age=0.;break
