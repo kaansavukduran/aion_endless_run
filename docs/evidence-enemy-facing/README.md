@@ -1,0 +1,9 @@
+# Enemy facing correction
+
+Baseline: e468eb0, Godot4.6.3 / web0.25.0. Live AIONIA1.7 and AER1.1 read on2026-11-15. The reported crow/gnome reversal is reproduced in the Arcade renderer. World `facing=-1` correctly targets the player to the left, but the registered original polish-enemies art already faces left. Applying `-1` as a raw texture mirror made it face right. Woodland creatures have the same source orientation. Original drone/seed machine rows face right and retain their previous mapping; the warden faces left. Existing regional enemies, heavies and guardians retain their already correct left-source mapping.
+
+The renderer now converts world facing relative to authored source facing for every enemy branch. Hero/NPC/vehicle transforms, physics, artwork, attack timing, controls and saved data are unchanged. Endless already draws these sources leftward without a mirror and is unchanged.
+
+`before.png` and `after.png` are authored in-engine fixtures, not normal-input or physical-device claims: Aion between two crows and two gnomes. The earlier raw legacy flip is reproduced for the before image; after uses corrected production rendering. Six actual animation frames were captured per state under X11 llvmpipe1152x648/TR/system font. Source contact sheets were visually inspected separately.
+
+PASS:190 enemy-facing checks, including actual world AI on either side, approach movement, defeat-facing preservation and registered clip identity. Burrow starts in its visible phase; expecting movement while hidden was an initial test-fixture error, corrected without changing the enemy. Existing campaign1662 and campaign-art204 checks PASS. New suite is registered in the standard source runner. Export/remote publication results are recorded in the linked PR when available. Physical devices are NOT TESTED.

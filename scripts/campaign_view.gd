@@ -21,6 +21,12 @@ var item_bank := ForgeItemBank.new()
 var vehicle_art := ForgeVehicleArt.new()
 var forge_art := ForgeHeroArt.new()
 
+# World facing (-1 = left) must be relative to each source drawing.
+# Original drone/seed machine rows face right; other enemy sheets face left.
+static func enemy_draw_direction(kind: String, facing: int) -> int:
+	var source_facing: int=1 if kind in ["drone","seed"] else -1
+	return source_facing*(-1 if facing<0 else 1)
+
 func hero_reference_height() -> float:
 	# Actual alpha silhouette, without texture padding, muzzle/particles or UI.
 	return float(frames.pose("gun-run",frames.hero_row("aion"),0).height)
@@ -188,6 +194,7 @@ func draw_world() -> void:
 		if float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
 		if bool(e.defeated) and float(e.get("dead_age",0.))>.65: continue
 		var p := Vector2(float(e.x),float(e.y))
+		var direction: int=enemy_draw_direction(str(e.kind),int(e.facing))
 		var tint := Color.WHITE
 		if bool(e.defeated): tint.a = maxf(0.,1.-maxf(0.,float(e.get("dead_age",0.))-.45)/.2)
 		var attack: bool = float(e.windup)>0. or float(e.get("flash",0.))>0. or float(e.get("dash",0.))>0. or float(e.get("dive",0.))>0.
@@ -199,22 +206,22 @@ func draw_world() -> void:
 			var spec: Dictionary=CampaignContent.NEW_ENEMIES[str(e.kind)]
 			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
 			if CampaignEnemies.hidden(e):phase=1
-			draw_pose(catalogue.pose(str(spec.atlas),int(spec.row)+phase,frame),p,-int(e.facing),1.,tint)
+			draw_pose(catalogue.pose(str(spec.atlas),int(spec.row)+phase,frame),p,direction,1.,tint)
 		elif str(e.kind) in CampaignContent.HEAVIES and catalogue.DATA.data.atlases.has("heavy-machines"):
 			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
-			draw_pose(catalogue.pose("heavy-machines",CampaignContent.HEAVIES.find(str(e.kind))*4+phase,frame),p,-int(e.facing),1.,tint)
+			draw_pose(catalogue.pose("heavy-machines",CampaignContent.HEAVIES.find(str(e.kind))*4+phase,frame),p,direction,1.,tint)
 		elif bool(e.mini) and catalogue.DATA.data.atlases.has("mini-bosses"):
 			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
 			var row: int=["current_guard","terrace_guard","drill_guard"].find(str(e.get("mini_role","current_guard")))*4+phase
-			draw_pose(catalogue.pose("mini-bosses",row,frame),p,-int(e.facing),1.,tint)
+			draw_pose(catalogue.pose("mini-bosses",row,frame),p,direction,1.,tint)
 		elif str(e.kind) in ["drone","seed","warden"]:
 			var row: int = {"drone":0,"seed":2,"warden":6}[str(e.kind)]+int(attack)
-			draw_pose(art.pose(row,frame),p,int(e.facing),1.,tint)
-		elif e.kind=="gnome": existing("enemies",4 if attack else 3,frame,p,int(e.facing),1.,tint)
-		elif e.kind=="crow": existing("enemies",1 if attack else 0,frame,p,int(e.facing),1.,tint)
+			draw_pose(art.pose(row,frame),p,direction,1.,tint)
+		elif e.kind=="gnome": existing("enemies",4 if attack else 3,frame,p,direction,1.,tint)
+		elif e.kind=="crow": existing("enemies",1 if attack else 0,frame,p,direction,1.,tint)
 		else:
 			var row: int = {"moth":0,"slime":1,"beetle":2,"wisp":3}.get(str(e.kind),0)
-			existing("creatures",row,frame,p,int(e.facing),1.,tint)
+			existing("creatures",row,frame,p,direction,1.,tint)
 		if attack:
 			var point := at(p+Vector2(0,-70))
 			draw_circle(point,5,Color("f7bb70")); caption("!",point+Vector2(-3,-10),20)
