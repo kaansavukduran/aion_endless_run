@@ -1,0 +1,782 @@
+[
+  {
+    "suite": "game",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 121,
+    "results": [
+      [
+        "121",
+        "checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "adventure",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 58,
+    "results": [
+      [
+        "58",
+        "adventure checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "localization",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 35,
+    "results": [
+      [
+        "35",
+        "localization/registration checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "evolution",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 105,
+    "results": [
+      [
+        "105",
+        "evolution checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "frontier",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 224,
+    "results": [
+      [
+        "224",
+        "frontier checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "motion",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 399,
+    "results": [
+      [
+        "399",
+        "motion checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "encounters",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 96,
+    "results": [
+      [
+        "96",
+        "encounter/gamepad checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "fidelity",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 685,
+    "results": [
+      [
+        "685",
+        "fidelity checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "agility",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 186,
+    "results": [
+      [
+        "186",
+        "agility checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "runner_ux",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 189,
+    "results": [
+      [
+        "189",
+        "runner UX checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "boss_hud",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 30,
+    "results": [
+      [
+        "30",
+        "boss HUD checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "aionia",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 476,
+    "results": [
+      [
+        "476",
+        "AIONIA checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "variety",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 498,
+    "results": [
+      [
+        "498",
+        "variety/transition/locale checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "visual_polish",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 152,
+    "results": [
+      [
+        "152",
+        "visual polish checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "orchard",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 1752,
+    "results": [
+      [
+        "1752",
+        "orchard/Ay\u00e7a checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "firearm",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 174,
+    "results": [
+      [
+        "174",
+        "firearm/menu checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "charge_roll_ui",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 2519,
+    "results": [
+      [
+        "2519",
+        "charge/roll/paged UI checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "unslop_quality",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 768,
+    "results": [
+      [
+        "768",
+        "Unslop quality checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "pixel_heroes",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 1670,
+    "results": [
+      [
+        "1670",
+        "pixel hero checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "boss_story",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 224,
+    "results": [
+      [
+        "224",
+        "boss story checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "polish",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 252,
+    "results": [
+      [
+        "252",
+        "polish/ability checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "terrain",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 146,
+    "results": [
+      [
+        "146",
+        "terrain checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 520,
+    "results": [
+      [
+        "520",
+        "campaign checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_ui",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 967,
+    "results": [
+      [
+        "967",
+        "campaign UI checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_art",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 204,
+    "results": [
+      [
+        "204",
+        "campaign art checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_expansion",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 394,
+    "results": [
+      [
+        "394",
+        "campaign expansion checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_expansion_art",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 742,
+    "results": [
+      [
+        "742",
+        "campaign expansion art checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_lifecycle",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 8,
+    "results": [
+      [
+        "8",
+        "campaign lifecycle checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_secret_routes",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 24,
+    "results": [
+      [
+        "24",
+        "secret approach checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_directional",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 408,
+    "results": [
+      [
+        "408",
+        "directional and NPC-size checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_forge",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 605,
+    "results": [
+      [
+        "605",
+        "campaign forge mechanics checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "endless_jump_ratios",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 120,
+    "results": [
+      [
+        "120",
+        "Endless jump ratio checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "front_presentation",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 1322,
+    "results": [
+      [
+        "1322",
+        "front presentation checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_presentation",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 504,
+    "results": [
+      [
+        "504",
+        "campaign presentation checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "forge_hero_art",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 475,
+    "results": [
+      [
+        "475",
+        "forge hero art checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "forge_visual",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 288,
+    "results": [
+      [
+        "288",
+        "forge scale/art checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "armed_muzzles",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 3206,
+    "results": [
+      [
+        "3206",
+        "actual pose/muzzle checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "forge_vehicle_art",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 1189,
+    "results": [
+      [
+        "1189",
+        "forge vehicle art checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "vehicle_muzzles",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 7346,
+    "results": [
+      [
+        "7346",
+        "vehicle pose/muzzle checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "pause_actions",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 70,
+    "results": [
+      [
+        "70",
+        "pinned pause checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "enemy_facing",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 331,
+    "results": [
+      [
+        "331",
+        "enemy facing checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "endless_companions",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 21,
+    "results": [
+      [
+        "21",
+        "endless companion checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_m1_mechanics",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 66,
+    "results": [
+      [
+        "66",
+        "Mission1 mechanics checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_routes",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 138,
+    "results": [
+      [
+        "138",
+        "physical route checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "arcade_roster_ui",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 589,
+    "results": [
+      [
+        "589",
+        "arcade roster/UI checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "m1_hero_art",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 990,
+    "results": [
+      [
+        "990",
+        "M1 hero art checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "vehicle_turrets",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 2752,
+    "results": [
+      [
+        "2752",
+        "original turret checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_assists",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 57,
+    "results": [
+      [
+        "57",
+        "campaign assist checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "held_weapon_art",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 80,
+    "results": [
+      [
+        "80",
+        "held weapon art checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "m1_flock",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 564,
+    "results": [
+      [
+        "564",
+        "M1 follower checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "m1_damage_art",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 254,
+    "results": [
+      [
+        "254",
+        "Ay\u00e7a damage art checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "cinematic_heroes",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 728,
+    "results": [
+      [
+        "728",
+        "cinematic hero scene checks",
+        "0"
+      ]
+    ]
+  }
+]

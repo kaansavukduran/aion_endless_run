@@ -1,0 +1,296 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+AION_READY 0.26.0
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: aion
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: aion
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: aion
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: aion/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: aion
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: aion
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: aion
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: aion
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: aion
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: sheep/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: sheep
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: sheep
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Both sheep followers retain current bipedal standing idle during cinematics
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 0
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 0
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 0
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 0
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 1
+FAIL: Ayça cinematic uses her one registered source scale
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 1
+FAIL: Ayça cinematic uses her one registered source scale
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 1
+FAIL: Ayça cinematic uses her one registered source scale
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 1
+FAIL: Ayça cinematic uses her one registered source scale
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 2
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: rabbit
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 2
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: rabbit
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 2
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: rabbit
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 2
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: rabbit
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: rabbit
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: rabbit
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: rabbit
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 0
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 0
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 0
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 0
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 1
+FAIL: Ayça cinematic uses her one registered source scale
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 1
+FAIL: Ayça cinematic uses her one registered source scale
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 1
+FAIL: Ayça cinematic uses her one registered source scale
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 1
+FAIL: Ayça cinematic uses her one registered source scale
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 2
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: rabbit
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 2
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: rabbit
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 2
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: rabbit
+FAIL: Ayça keeps her own bow/skirt alert or idle instead of the old male rabbit: 2
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: rabbit
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: rabbit
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: rabbit
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: rabbit
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: eren
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: eren
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: eren
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/0
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/1
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: eren
+FAIL: The actual scene retains the authored story reaction, not a walk/fire overwrite: eren/2
+FAIL: Original cinematic body scale stays fixed across its authored cels: eren
+FAIL: The existing red-gun handoff remains visibly drawn at its own cinematic beat: eren
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: eren
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: eren
+FAIL: Actual hug selects its stationary identity-faithful idle instead of M1 walk: eren
+RESULT: 728 cinematic hero scene checks, 292 failures

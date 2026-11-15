@@ -1,4 +1,12 @@
-# Mission1 · 0.26.0 teslim ve doğrulama
+# Mission1 · 0.26.1 teslim ve doğrulama
+
+## 0.26.1 · Gerçek ara sahne regresyonu
+
+Son görsel katman incelemesi yeni M1 gövde seçicisinin sonsuz moddaki mevcut tepki/sarılma pozlarını ve kırmızı silah teslimini örttüğünü kanıtladı. Hareket katmanı bu sahnelerde mevcut animasyona öncelik verir; Ayça eski erkek tavşan yerine kendi tokalı/etekli çizimini kullanır. İki koyun takipçisi güncel iki ayaklı çizimle görünür kalır. Arcade fizik/rota, kayıt şeması veya eski kaynak PNG'ler bu yamada değişmez.
+
+Gerçek `main.tscn` seçici testi önce 728 kontrolde 292 hata verdi; aynı test düzeltmeden sonra 728/0. 52 taze kaynak paketi toplam 35.721 kontrol ve 17 Python testi geçti. 12 native görüntü, açıkça kurulmuş tepki/silah teslimi/sarılma sahneleridir; normal girişle oynanmış rota testi diye sunulmaz. [Kalıcı test, ham makbuz ve görüntüler](evidence-cinematic-priority/README.md). Aşağıdaki 0.26.0 rota/public kanıtları kendi build kimliklerine aittir; son 0.26.1 yayını ayrıca doğrulanmalıdır.
+
+## 0.26.0 · Mission 1 teslimi
 
 Oyun kodu `b7f6d2693c9e47de148a4336bf7dcc0cdaa5ef7a` üzerinden main dalındadır. Bu ağacın oyun dosyaları test edilen`a961e6e5be3d382de971f1d0aeab5c0769905f28` ile aynıdır. Bu belge ve README/FORGE bağlantıları oyun kodunu değiştirmez. Son yayın commit/build kimliği Vercel ve GitHub Actions kayıtlarından ayrıca doğrulanır; önceki build sonucu yeni yayının sonucu sayılmaz.
 

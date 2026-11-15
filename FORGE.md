@@ -1,3 +1,7 @@
+# 0.26.1 · Ara sahne katman önceliği düzeltmesi
+
+Son gerçek regresyon: yeni M1 gövde katmanı, sonsuz moddaki mevcut tepki/sarılma pozları ve kırmızı silah tesliminin üzerine çiziliyordu. Seçici önceliği düzeltildi; Ayça kendi çizimini, koyun takipçileri güncel iki ayaklı gövdeyi korur. 52 taze kaynak paketi/35.721 kontrol, 17 Python testi ve 16 skill dosyası/16 bağlantı geçti. 728 gerçek ana sahne kontrolü düzeltmeden önce 292 kez başarısızdı, sonra sıfır hata; 12 native ara sahne render fixture'ı da sıfır hata. [Kanıt ve kapsam](docs/evidence-cinematic-priority/README.md). Son yayın durumu son commit'in kendi CI/dağıtımından ayrıca doğrulanır.
+
 # 0.26.0 · Mission 1 bütünleştirme devri
 
 [Son teslim/test makbuzu](docs/M1-DELIVERY.md). Oyun kodu main/b7f6d269 üzerindedir; CI43706073148 tüm gerekli platform kapılarından geçti. Bu son belge kaydı çalışma kodunu değiştirmez.

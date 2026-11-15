@@ -60,3 +60,5 @@ These gates apply only to the changed game surface and its approved rules. They 
 - After an in-game menu tap, wait for a new engine UI generation and its readiness acknowledgment before branching on the destination menu or issuing the next action. A fixed wall-clock delay can leave stale briefing metadata and skip a required help screen, even when the real first tap worked.
 
 - Action preconditions must hold at the observed event, not only earlier in a timed sequence. For an airborne shot, establish a fresh ordinary jump and actual rising/aim acknowledgment, then retain the same immutable packet that observes the new shot. Save checked evidence before releasing inputs; label any post-cleanup observation separately because landing or released keys can change it.
+
+- Test the actual final scene selector across reaction, hug and weapon-handoff beats after replacing a body renderer. A passing frame-bank test cannot prove layer priority; verify the offered weapon remains visible after the final body helper, and that every playable identity and follower retains its own cinematic pose.

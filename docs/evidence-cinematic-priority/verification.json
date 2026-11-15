@@ -1,0 +1,44 @@
+{
+  "version": "0.26.1",
+  "working_base_commit": "1ea8dfd35092489f48fbc19a5b4815d584083896",
+  "scope": "Endless Game scene cinematic selector priority; not a new Arcade playthrough",
+  "before": {
+    "checks": 728,
+    "failures": 292
+  },
+  "after": {
+    "checks": 728,
+    "failures": 0
+  },
+  "source_suites": 52,
+  "source_checks": 35721,
+  "native_fixture_scenes": 12,
+  "native_fixture_failures": 0,
+  "native_capture_version_note": "Captured after selector repair and before patch-version bump; the native log correctly displays 0.26.0. No claim that it is a published 0.26.1 binary.",
+  "files": {
+    "sheep-hug.png": {
+      "bytes": 536520,
+      "sha256": "ef78b220ce0a732960a96cecf572d5b1db79591347d607e0a4567f44b01a5197"
+    },
+    "native-scenes.log": {
+      "bytes": 4383,
+      "sha256": "01efe087f2008a08fd7b43ccb006d0234cab8e3ee570e99c355e3266f36ab33c"
+    },
+    "aion-shock.png": {
+      "bytes": 438644,
+      "sha256": "2e1959483b2efd41139492ee999e6e9e4d5fa6fce036b209ae9af31ebcd44b62"
+    },
+    "selector-before.log": {
+      "bytes": 25059,
+      "sha256": "f8ba870c38dc0bc372e2e6a675ce15931a7771361aa070462b71035fd0ee9f6a"
+    },
+    "source-results.json": {
+      "bytes": 13196,
+      "sha256": "9443b0c7e25fc4f641e0fa33fc4c5a7368769b224fa8acd3daa87c9b584b40de"
+    },
+    "rabbit-gift.png": {
+      "bytes": 454480,
+      "sha256": "ca69eb2ece4351d60932cf96f9fd66f271bcc8852206fb96e82320c671aa2cf0"
+    }
+  }
+}

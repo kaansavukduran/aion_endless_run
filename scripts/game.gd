@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.26.0"
+const GAME_VERSION = "0.26.1"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -1685,13 +1685,23 @@ func update_m1_friend() -> void:
 	var anchor_x: float=((view_w*.5-92)/scene_zoom+World.PLAYER_X) if portrait else view_w*.73
 	var anchor:=Vector2(anchor_x if preview else World.PLAYER_X,ground+world.y)
 	var growth: float=1.65 if preview else visual_size
-	place_m1_body(friend_sprite,character,str(spec.action),int(spec.frame),anchor,growth)
-	gun_echo.visible=world.state in ["running","paused"] and not world.adventure.hugging() and not world.frontier.storytelling()
-	if gun_echo.visible:
-		var attachment: Dictionary=M1CombatArt.runner_attachment(world)
-		var weapon: Dictionary=attachment.weapon
-		gun_echo.texture=M1CombatArt.weapon_texture(menu_weapon_art,"pistol");gun_echo.region_enabled=false;gun_echo.rotation=0.;gun_echo.offset=Vector2(weapon.offset)/float(weapon.factor);gun_echo.scale=Vector2.ONE*float(weapon.factor)*visual_size;gun_echo.position=anchor+Vector2(attachment.grip)*visual_size
-		gun_echo.modulate=Color("ffaaaa") if world.frontier.red_weapon else Color.WHITE
+	var cinematic: bool=world.frontier.storytelling() or world.adventure.hugging()
+	if cinematic:
+		# update_friend already placed the authored original reactions/hug and
+		# the offered red gun. A locomotion layer must not overwrite either.
+		# Ayça cannot borrow the previous male rabbit's costume or reaction.
+		if character=="rabbit":
+			if world.frontier.storytelling() and world.frontier.story_index==1:place_m1_damage("freeze",0)
+			else:place_m1_body(friend_sprite,character,"idle_fire",0,anchor,growth)
+		if world.adventure.hugging():gun_echo.hide()
+	else:
+		place_m1_body(friend_sprite,character,str(spec.action),int(spec.frame),anchor,growth)
+		gun_echo.visible=world.state in ["running","paused"]
+		if gun_echo.visible:
+			var attachment: Dictionary=M1CombatArt.runner_attachment(world)
+			var weapon: Dictionary=attachment.weapon
+			gun_echo.texture=M1CombatArt.weapon_texture(menu_weapon_art,"pistol");gun_echo.region_enabled=false;gun_echo.rotation=0.;gun_echo.offset=Vector2(weapon.offset)/float(weapon.factor);gun_echo.scale=Vector2.ONE*float(weapon.factor)*visual_size;gun_echo.position=anchor+Vector2(attachment.grip)*visual_size
+			gun_echo.modulate=Color("ffaaaa") if world.frontier.red_weapon else Color.WHITE
 	if character!="sheep":return
 	for i in followers.size():
 		var follower: Sprite2D=followers[i]
@@ -1700,7 +1710,7 @@ func update_m1_friend() -> void:
 		var delayed: Dictionary=world.flock_pose(i)
 		var action: String="walk"
 		var frame: int=posmod(int((world.travel_distance()-World.FLOCK_GAP*(i+1))/174.*6.),6)
-		if world.state=="ready":action="idle_fire";frame=0
+		if cinematic or world.state=="ready":action="idle_fire";frame=0
 		elif float(delayed.get("duck",0.))>.5:
 			action="crouch_walk"
 			frame=world.adventure.roll_pose(float(delayed.get("roll_phase",0.)),float(delayed.get("roll_remaining",0.)),bool(delayed.get("roll_held",false)),6)
@@ -1710,7 +1720,7 @@ func update_m1_friend() -> void:
 		if not world.pose_motion_enabled:frame=0
 		# Followers have no independent weapon/fire action. Their original .72
 		# scale and actual spatially delayed movement are shared with this art.
-		place_m1_body(follower,"sheep",action,frame,Vector2(World.PLAYER_X-World.FLOCK_GAP*(i+1),ground+float(delayed.y)),FOLLOWER_RATIO)
+		place_m1_body(follower,"sheep",action,frame,Vector2(World.PLAYER_X-World.FLOCK_GAP*(i+1),ground+(0. if cinematic else float(delayed.y))),FOLLOWER_RATIO)
 
 func place_m1_body(item: Sprite2D,hero: String,action: String,frame: int,anchor: Vector2,growth: float) -> void:
 	# Reuse the preloaded body bank; no per-frame bank/image construction.
@@ -1726,11 +1736,11 @@ func place_m1_body(item: Sprite2D,hero: String,action: String,frame: int,anchor:
 	item.set_meta("foot_world",anchor)
 	item.set_meta("face_visible",true)
 
-func place_m1_damage() -> void:
+func place_m1_damage(action_override: String="",frame_override: int=-1) -> void:
 	if not has_meta("m1_damage_bank"):set_meta("m1_damage_bank",M1DamageArt.new())
-	var action: String="freeze" if world.state=="ice" else ("fire" if world.state=="fire" else ("faceplant" if world.death_cause=="enemy" else "impact"))
+	var action: String=action_override if not action_override.is_empty() else ("freeze" if world.state=="ice" else ("fire" if world.state=="fire" else ("faceplant" if world.death_cause=="enemy" else "impact")))
 	var duration: float=.7 if world.state in ["ice","fire"] else 1.25
-	var frame: int=clampi(int(world.hit_time/duration*6.),0,5) if motion and not interface_options.reduced_motion else 5
+	var frame: int=frame_override if frame_override>=0 else (clampi(int(world.hit_time/duration*6.),0,5) if motion and not interface_options.reduced_motion else 5)
 	var pose: Dictionary=get_meta("m1_damage_bank").pose(character,action,frame)
 	var factor: float=float(pose.size.x)/float(pose.texture.get_width())
 	var anchor:=Vector2(World.PLAYER_X,ground+world.y)

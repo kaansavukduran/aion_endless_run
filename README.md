@@ -1,6 +1,6 @@
 # Aion Endless Run
 
-## 0.26.0 · Hareketle seçilen yollar, dört kahraman
+## 0.26.1 · Hareketle seçilen yollar, dört kahraman
 
 **Arcade / Sönen Fenerler**: Aion, iki ayaklı Kutsanmış, Ayça ve Eren ile Mission 1. İki yol ayrımında üst köprülere zıpla veya alt kanaldan ilerle; oyun rotayı fiziksel konumundan seçer. Yol seçme metin menüsü yoktur. Bölüm geçişleri otomatik kısa solmayla gerçekleşir.
 
@@ -13,6 +13,8 @@ Yürüyen örümcek mayınları hedefe gider; beş saniye içinde patlar. Kurtar
 [Oyunu oyna](https://aionendlessrun.vercel.app/) · [Teslim ve gerçek testler](docs/M1-DELIVERY.md) · [Fiziksel rotalar](docs/M1-FLOW-VALIDATION.md) · [Karakter paftaları](docs/M1-HERO-ART.md) · [Yerel Unslop kuralları ve QA](docs/M1-SKILL-QA-INVENTORY.md)
 
 Bu sürüm Mission 1'i geliştirir; Mission 2–5'in tamamlandığı iddia edilmez. Önceki yayımlanmış indirme paketleri yeni web sürümünden ayrıdır. Aşağıdaki bölüm önceki teslimlerin tarihsel kaydıdır; eski karakter/dil listeleri güncel kadroyu tarif etmez.
+
+0.26.1, yeni hareket katmanının sonsuz moddaki mevcut tepki/sarılma pozlarını ve kırmızı silah teslimini örtmesini düzeltir. Dört karakterin gerçek ana sahne seçicisi 728 kontrolle sınanır; Arcade rotaları ve kayıt biçimi değişmez. [Ara sahne regresyon kanıtı](docs/evidence-cinematic-priority/README.md).
 
 # Önceki sürümlerin kayıtları
 
