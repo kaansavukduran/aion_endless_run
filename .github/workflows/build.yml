@@ -275,6 +275,7 @@ jobs:
             build/android-two-touch-driver.txt
             build/android-arcade-input-states.json
             build/android-arcade-final-ui.json
+            build/android-tap-targets.json
           if-no-files-found: warn
   android:
     if: github.event_name != 'pull_request' && vars.AION_ANDROID_SIGNING_READY == 'true'

@@ -23,7 +23,7 @@ parser.add_argument('--locale', choices=['tr-TR', 'en-US'], default='tr-TR')
 parser.add_argument('--scenario', choices=['front', 'campaign', 'all'], default='all')
 parser.add_argument('--rescue', action='store_true', help='Reach a real captive using ordinary play; fire ropes, then approach for gift.')
 parser.add_argument('--idle-attract', action='store_true', help='Also wait for the actual 30-second inactivity trigger.')
-parser.add_argument('--large-text', action='store_true', help='Use the actual settings control for 200% text during the presentation flow.')
+parser.add_argument('--large-text', action='store_true', help='Use the actual settings control for 200%% text during the presentation flow.')
 args = parser.parse_args()
 args.evidence.mkdir(parents=True, exist_ok=True)
 checks = []
@@ -406,7 +406,25 @@ with sync_playwright() as playwright:
             observations['keyboard_aim'] = aim_samples
 
             keys([])
-            page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).grounded", timeout=10000)
+            # Eight real combat aim checks leave the actor exposed to enemies.
+            # A dead actor cannot satisfy an independent posture test. Retain
+            # that state, then use the actual checkpoint action, without a
+            # world setter, immunity or a hidden debug restart.
+            precondition = campaign()
+            observations['before_crouch_checkpoint'] = precondition
+            if precondition['state'] == 'dying':
+                page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'", timeout=10000)
+            if campaign().get('menu') == 'dead':
+                tap('CampaignRetry', in_campaign=True)
+            else:
+                canvas.focus()
+                page.keyboard.press('Escape')
+                page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'", timeout=10000)
+                tap(text='Kontrol noktasından dene' if args.locale.startswith('tr') else 'Retry checkpoint', in_campaign=True)
+            presentation_done()
+            page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.grounded && d.ui_ready}", timeout=15000)
+            canvas.focus()
+            check(True, 'Actual checkpoint UI supplies a living, actionable actor before the independent crouch test')
             before = campaign()
             keys(['s', 'd', 'f'])
             page.wait_for_function("before=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.crouching && d.player[0]>before.x+12 && d.shots>before.shots}", arg={'x': before['player'][0], 'shots': before['shots']}, timeout=10000)

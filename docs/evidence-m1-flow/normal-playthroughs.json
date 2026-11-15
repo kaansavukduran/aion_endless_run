@@ -1,0 +1,565 @@
+[
+  {
+    "route": "water",
+    "build": "1cb17f4b134c91d0",
+    "mode": "ordinary keyboard/touch/browser controls; no world setters",
+    "checks": 85,
+    "completed": true,
+    "stages": [
+      "shore",
+      "quay",
+      "fork_one",
+      "water",
+      "relay",
+      "arena"
+    ],
+    "retries": 0,
+    "elapsed_seconds": 552.7296947549985,
+    "rescues_tested": [
+      {
+        "id": "shore:keeper:1",
+        "gift": "points",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "beam",
+        "ammo_after": 16
+      },
+      {
+        "id": "shore:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "shore:keeper:2",
+        "gift": "arc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "arc",
+        "ammo_after": 36
+      },
+      {
+        "id": "quay:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "quay:keeper:1",
+        "gift": "trap",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "trap",
+        "ammo_after": 12
+      },
+      {
+        "id": "water:keeper:1",
+        "gift": "shield",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "disc",
+        "ammo_after": 24
+      },
+      {
+        "id": "water:keeper:3",
+        "gift": "points",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "pistol",
+        "ammo_after": 0
+      },
+      {
+        "id": "water:keeper:4",
+        "gift": "arc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "arc",
+        "ammo_after": 36
+      },
+      {
+        "id": "water:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "water:keeper:5",
+        "gift": "grenade",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "arc",
+        "ammo_after": 34
+      },
+      {
+        "id": "water:keeper:6",
+        "gift": "seeker",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "seeker",
+        "ammo_after": 18
+      },
+      {
+        "id": "relay:keeper:1",
+        "gift": "disc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "disc",
+        "ammo_after": 24
+      },
+      {
+        "id": "relay:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "relay:keeper:2",
+        "gift": "harpoon",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "harpoon",
+        "ammo_after": 20
+      },
+      {
+        "id": "relay:keeper:3",
+        "gift": "spore",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "spore",
+        "ammo_after": 24
+      },
+      {
+        "id": "arena:keeper:1",
+        "gift": "disc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "disc",
+        "ammo_after": 24
+      },
+      {
+        "id": "arena:keeper:2",
+        "gift": "harpoon",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "harpoon",
+        "ammo_after": 20
+      },
+      {
+        "id": "arena:keeper:3",
+        "gift": "spore",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "spore",
+        "ammo_after": 24
+      }
+    ],
+    "physical_forks": [
+      {
+        "section": "fork_one",
+        "path": "lower",
+        "entry": [
+          140.0,
+          0.0
+        ],
+        "latest_position": [
+          1477.94116210938,
+          90.0
+        ]
+      }
+    ],
+    "final": {
+      "state": "complete",
+      "section": "arena",
+      "hp": 1,
+      "score": 37925,
+      "boss_hp": 0,
+      "boss_phase": 3
+    },
+    "errors": [],
+    "offline_reload_tested": false
+  },
+  {
+    "route": "terrace",
+    "build": "1cb17f4b134c91d0",
+    "mode": "ordinary keyboard/touch/browser controls; no world setters",
+    "checks": 88,
+    "completed": true,
+    "stages": [
+      "shore",
+      "quay",
+      "fork_one",
+      "canopy",
+      "fork_two",
+      "terrace",
+      "relay",
+      "arena"
+    ],
+    "retries": 0,
+    "elapsed_seconds": 558.5227004469998,
+    "rescues_tested": [
+      {
+        "id": "shore:keeper:1",
+        "gift": "points",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "beam",
+        "ammo_after": 16
+      },
+      {
+        "id": "shore:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "shore:keeper:2",
+        "gift": "arc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "arc",
+        "ammo_after": 36
+      },
+      {
+        "id": "quay:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "quay:keeper:1",
+        "gift": "trap",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "trap",
+        "ammo_after": 12
+      },
+      {
+        "id": "terrace:keeper:1",
+        "gift": "arc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "arc",
+        "ammo_after": 36
+      },
+      {
+        "id": "terrace:keeper:2",
+        "gift": "grenade",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "spore",
+        "ammo_after": 24
+      },
+      {
+        "id": "terrace:keeper:3",
+        "gift": "seeker",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "seeker",
+        "ammo_after": 18
+      },
+      {
+        "id": "terrace:keeper:4",
+        "gift": "haste",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "seeker",
+        "ammo_after": 1
+      },
+      {
+        "id": "terrace:keeper:5",
+        "gift": "power",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "terrace:keeper:6",
+        "gift": "reveal",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "arc",
+        "ammo_after": 35
+      },
+      {
+        "id": "terrace:keeper:7",
+        "gift": "magnet",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "seeker",
+        "ammo_after": 18
+      },
+      {
+        "id": "relay:keeper:1",
+        "gift": "disc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "disc",
+        "ammo_after": 24
+      },
+      {
+        "id": "relay:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "relay:keeper:2",
+        "gift": "harpoon",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "harpoon",
+        "ammo_after": 20
+      },
+      {
+        "id": "relay:keeper:3",
+        "gift": "spore",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "spore",
+        "ammo_after": 24
+      },
+      {
+        "id": "arena:keeper:1",
+        "gift": "disc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "disc",
+        "ammo_after": 24
+      },
+      {
+        "id": "arena:keeper:2",
+        "gift": "harpoon",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "harpoon",
+        "ammo_after": 20
+      },
+      {
+        "id": "arena:keeper:3",
+        "gift": "spore",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "spore",
+        "ammo_after": 24
+      }
+    ],
+    "physical_forks": [
+      {
+        "section": "fork_one",
+        "path": "upper",
+        "entry": [
+          140.0,
+          0.0
+        ],
+        "latest_position": [
+          1467.75,
+          -195.0
+        ]
+      },
+      {
+        "section": "fork_two",
+        "path": "upper",
+        "entry": [
+          140.0,
+          0.0
+        ],
+        "latest_position": [
+          1475.39538574219,
+          -195.0
+        ]
+      }
+    ],
+    "final": {
+      "state": "complete",
+      "section": "arena",
+      "hp": 3,
+      "score": 42350,
+      "boss_hp": 0,
+      "boss_phase": 3
+    },
+    "errors": [],
+    "offline_reload_tested": false
+  },
+  {
+    "route": "roots",
+    "build": "1cb17f4b134c91d0",
+    "mode": "ordinary keyboard/touch/browser controls; no world setters",
+    "checks": 95,
+    "completed": true,
+    "stages": [
+      "shore",
+      "quay",
+      "fork_one",
+      "canopy",
+      "fork_two",
+      "roots",
+      "relay",
+      "arena"
+    ],
+    "retries": 0,
+    "elapsed_seconds": 440.5824268840006,
+    "rescues_tested": [
+      {
+        "id": "shore:keeper:1",
+        "gift": "points",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "beam",
+        "ammo_after": 16
+      },
+      {
+        "id": "shore:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "shore:keeper:2",
+        "gift": "arc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "arc",
+        "ammo_after": 36
+      },
+      {
+        "id": "quay:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "quay:keeper:1",
+        "gift": "trap",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "trap",
+        "ammo_after": 12
+      },
+      {
+        "id": "roots:keeper:1",
+        "gift": "disc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "disc",
+        "ammo_after": 24
+      },
+      {
+        "id": "roots:keeper:2",
+        "gift": "harpoon",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "harpoon",
+        "ammo_after": 20
+      },
+      {
+        "id": "roots:keeper:3",
+        "gift": "spore",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "spore",
+        "ammo_after": 24
+      },
+      {
+        "id": "roots:keeper:4",
+        "gift": "trap",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "trap",
+        "ammo_after": 12
+      },
+      {
+        "id": "roots:keeper:5",
+        "gift": "nova",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "nova",
+        "ammo_after": 12
+      },
+      {
+        "id": "roots:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "roots:keeper:6",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "roots:keeper:7",
+        "gift": "repair",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "disc",
+        "ammo_after": 23
+      },
+      {
+        "id": "roots:keeper:8",
+        "gift": "beam",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "beam",
+        "ammo_after": 18
+      },
+      {
+        "id": "relay:keeper:1",
+        "gift": "disc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "disc",
+        "ammo_after": 24
+      },
+      {
+        "id": "relay:keeper",
+        "gift": "heavy",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "heavy",
+        "ammo_after": 90
+      },
+      {
+        "id": "relay:keeper:2",
+        "gift": "harpoon",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "harpoon",
+        "ammo_after": 20
+      },
+      {
+        "id": "relay:keeper:3",
+        "gift": "spore",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "spore",
+        "ammo_after": 24
+      },
+      {
+        "id": "arena:keeper:1",
+        "gift": "disc",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "disc",
+        "ammo_after": 24
+      },
+      {
+        "id": "arena:keeper:2",
+        "gift": "harpoon",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "harpoon",
+        "ammo_after": 20
+      },
+      {
+        "id": "arena:keeper:3",
+        "gift": "spore",
+        "method": "projectile-or-prior-freed-contact",
+        "weapon_after": "spore",
+        "ammo_after": 24
+      }
+    ],
+    "physical_forks": [
+      {
+        "section": "fork_one",
+        "path": "upper",
+        "entry": [
+          140.0,
+          0.0
+        ],
+        "latest_position": [
+          1477.20483398438,
+          -195.0
+        ]
+      },
+      {
+        "section": "fork_two",
+        "path": "lower",
+        "entry": [
+          140.0,
+          0.0
+        ],
+        "latest_position": [
+          1465.97961425781,
+          90.0
+        ]
+      }
+    ],
+    "final": {
+      "state": "complete",
+      "section": "arena",
+      "hp": 3,
+      "score": 43775,
+      "boss_hp": 0,
+      "boss_phase": 3
+    },
+    "errors": [],
+    "offline_reload_tested": true
+  }
+]

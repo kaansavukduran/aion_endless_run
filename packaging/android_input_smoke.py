@@ -19,10 +19,27 @@ def check(ok,message):
  assert ok,message
  results.append(message);print('PASS',message,flush=True)
 def tap(point):adb('shell','input','tap',*point)
+tap_targets=[]
+def display_bounds():
+ values=re.findall(r'(Physical|Override) size:\s*(\d+)x(\d+)',adb('shell','wm','size',text=True))
+ assert values,'ADB did not expose display size'
+ chosen=next((item for item in reversed(values) if item[0]=='Override'),values[-1])
+ return [int(chosen[1]),int(chosen[2])]
+def layout_matches_display(state,bounds):
+ expected='portrait' if bounds[0]<bounds[1] else 'landscape'
+ return state.get('orientation')==expected and all(0<=b['point'][0]<bounds[0] and 0<=b['point'][1]<bounds[1] for b in state['buttons'])
 def menu_button(name=None,text=None):
- state=latest('AION_UI ',lambda s:any(b['name']==name or (text and re.search(text,b['text'])) for b in s['buttons']))
- matches=[b for b in state['buttons'] if b['name']==name or (text and re.search(text,b['text']))]
- tap(matches[0]['point'])
+ bounds=display_bounds()
+ history=packets('AION_UI ')
+ if history and not layout_matches_display(history[-1],bounds):
+  tap_targets.append({'event':'rejected_stale_layout','wanted':name or text,'display':bounds,'layout':history[-1]})
+ state=latest('AION_UI ',lambda s:layout_matches_display(s,bounds) and any(b['name']==name or (text and re.search(text,b['text'])) for b in s['buttons']))
+ chosen=next(b for b in state['buttons'] if b['name']==name or (text and re.search(text,b['text'])))
+ record={'event':'tap','name':chosen['name'],'text':chosen['text'],'point':chosen['point'],'orientation':state['orientation'],'page':state['page'],'display':bounds}
+ tap_targets.append(record)
+ (a.output/'android-tap-targets.json').write_text(json.dumps(tap_targets,indent=2)+'\n')
+ print('ADB_TAP '+json.dumps(record),flush=True)
+ tap(chosen['point'])
 def ready_main():
  # Every real launch may show the skippable authored opening. Use its actual
  # logged control, then await the interactive main layout rather than treating
@@ -114,7 +131,14 @@ pause();old=latest('AION_UI ',lambda s:s['page']=='paused');adb('shell','wm','si
 try:
  rotated=latest('AION_UI ',lambda s:s['page']=='paused' and s['orientation']=='landscape');capture('landscape-paused')
  check(rotated['character']==old['character'] and rotated['score']==old['score'] and rotated['level']==old['level'],'Native landscape resize preserves the paused character, score and level')
-finally:adb('shell','wm','size','reset')
+finally:
+ adb('shell','wm','size','reset')
+ # Window-manager completion is not Godot layout completion. The last record
+ # was explicitly landscape; require the restored engine layout and bounded
+ # physical targets before the first tap back into the portrait menu.
+ restored_bounds=display_bounds()
+ restored=latest('AION_UI ',lambda state:state['page']=='paused' and state['orientation']==old['orientation'] and layout_matches_display(state,restored_bounds),timeout=25)
+ check(restored['character']==old['character'] and restored['score']==old['score'] and restored['level']==old['level'],'Native restored portrait layout is acknowledged before another menu tap')
 # The changed crouch/movement mechanic belongs to Arcade, whose passive native
 # records are separate from the retained Endless runner observations above.
 main();menu_button(name='StartSelect_aion');ready_main();menu_button(name='StartCampaign')
