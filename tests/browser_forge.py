@@ -383,44 +383,66 @@ with sync_playwright() as playwright:
             page.wait_for_timeout(500)
             canvas.focus()
 
+            class AimActorDied(Exception):
+                pass
+            aim_retries = 0
+            observations['aim_deaths'] = []
+            def alive_aim_wait(expression, arg=None, timeout=10000):
+                script = "args=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);if(d.hp<=0 || ['dying','dead'].includes(d.state))return {actor_dead:d};return ("+expression+");}"
+                handle=page.wait_for_function(script,arg=arg,timeout=timeout)
+                packet=handle.json_value();handle.dispose()
+                if 'actor_dead' in packet:raise AimActorDied(packet['actor_dead'])
+                return packet
             aim_samples = []
             directions = [(['d'], [1, 0]), (['d', 'w'], [1, -1]), (['w'], [0, -1]), (['a', 'w'], [-1, -1]), (['a'], [-1, 0]), (['a', 's'], [-1, 1]), (['s'], [0, 1]), (['d', 's'], [1, 1])]
             for index, (inputs, target) in enumerate(directions):
-                # Grounded Down is intentionally a horizontal crouch shot.
-                # Every downward test must use its own real jump, rather than
-                # the descending tail of the preceding case's flight.
-                keys([])
-                downward = target[1] > 0
-                ground_packet = None
-                if downward:
-                    handle = page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.grounded ? d : false}", timeout=10000)
-                    ground_packet = handle.json_value()
-                    handle.dispose()
-                    page.keyboard.press('Space')
-                elif index in [0, 3]:
-                    page.keyboard.press('Space')
-                keys(inputs)
-                length = math.hypot(*target)
-                expected = [target[0]/length, target[1]/length]
-                handle = page.wait_for_function("([aim,air])=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && Math.hypot(d.aim[0]-aim[0],d.aim[1]-aim[1])<.03 && (!air || (!d.grounded && d.player[1]<-20 && d.velocity[1]<0)) ? d : false}", arg=[expected, downward], timeout=10000)
-                prepared = handle.json_value()
-                handle.dispose()
-                shots = prepared['shots']
-                page.keyboard.down('f')
-                # Return the actual packet that first observes this shot. Do
-                # not re-read after landing and label its grounded aim as the
-                # direction of an earlier airborne shot.
-                handle = page.wait_for_function("shots=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.shots>shots ? d : false}", arg=shots, timeout=5000)
-                data = handle.json_value()
-                handle.dispose()
-                packet = {'case': index, 'keys': inputs, 'expected': expected, 'downward_air_required': downward, 'ground_before_jump': ground_packet, 'prepared': prepared, 'shots_before_fire': shots, 'observed_shot': data}
-                aim_samples.append(packet)
-                observations['keyboard_aim'] = aim_samples
-                (args.evidence/'keyboard-aim-packets.json').write_text(json.dumps(aim_samples, ensure_ascii=False, indent=2)+'\n')
-                check(data['shots'] > shots and math.dist(data['aim'], expected) < .03 and (not downward or not data['grounded']), 'Actual keyboard aim and gun action: '+str(target))
-                page.keyboard.up('f')
-                keys([])
-                page.wait_for_timeout(360)
+                while True:
+                    try:
+                        current=campaign()
+                        if current['hp']<=0 or current['state'] in ['dying','dead']:raise AimActorDied(current)
+                        # Grounded Down is intentionally a horizontal crouch shot.
+                        # Every downward test must use its own real jump, rather than
+                        # the descending tail of the preceding case's flight.
+                        keys([])
+                        downward = target[1] > 0
+                        ground_packet = None
+                        if downward:
+                            ground_packet = alive_aim_wait("d.state==='playing' && d.hp>0 && d.grounded ? d : false")
+                            page.keyboard.press('Space')
+                        elif index in [0, 3]:
+                            page.keyboard.press('Space')
+                        keys(inputs)
+                        length = math.hypot(*target)
+                        expected = [target[0]/length, target[1]/length]
+                        prepared = alive_aim_wait("d.state==='playing' && d.hp>0 && Math.hypot(d.aim[0]-args[0][0],d.aim[1]-args[0][1])<.03 && (!args[1] || (!d.grounded && d.player[1]<-20 && d.velocity[1]<0)) ? d : false", [expected, downward])
+                        shots = prepared['shots']
+                        page.keyboard.down('f')
+                        # Return the actual packet that first observes this shot. Do
+                        # not re-read after landing and label its grounded aim as the
+                        # direction of an earlier airborne shot.
+                        data = alive_aim_wait("d.shots>args ? d : false", shots, timeout=5000)
+                        packet = {'case': index, 'keys': inputs, 'expected': expected, 'downward_air_required': downward, 'ground_before_jump': ground_packet, 'prepared': prepared, 'shots_before_fire': shots, 'observed_shot': data}
+                        aim_samples.append(packet)
+                        observations['keyboard_aim'] = aim_samples
+                        (args.evidence/'keyboard-aim-packets.json').write_text(json.dumps(aim_samples, ensure_ascii=False, indent=2)+'\n')
+                        check(data['shots'] > shots and math.dist(data['aim'], expected) < .03 and (not downward or not data['grounded']), 'Actual keyboard aim and gun action: '+str(target))
+                        page.keyboard.up('f')
+                        keys([])
+                        page.wait_for_timeout(360)
+
+                        break
+                    except AimActorDied as death:
+                        dead=death.args[0]
+                        observations['aim_deaths'].append({'case':index,'state':dead})
+                        (args.evidence/('aim-case-%d-death-%d.json'%(index,aim_retries))).write_text(json.dumps(dead,indent=2)+'\n')
+                        page.screenshot(path=str(args.evidence/('aim-case-%d-death-%d.png'%(index,aim_retries))))
+                        keys([]);page.keyboard.up('f')
+                        assert aim_retries<3, ('Aim cases exceeded ordinary checkpoint retries',dead)
+                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.menu==='dead' && d.ui_ready}",timeout=10000)
+                        tap('CampaignRetry',in_campaign=True);aim_retries+=1
+                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.ui_ready}",timeout=10000)
+                        canvas.focus()
+            observations['aim_checkpoint_retries']=aim_retries
 
             keys([])
             # Eight real combat aim checks leave the actor exposed to enemies.

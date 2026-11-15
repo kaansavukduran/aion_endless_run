@@ -815,10 +815,10 @@
     "passed": true,
     "script_error": false,
     "assertion_error": false,
-    "checks": 203,
+    "checks": 209,
     "results": [
       [
-        "203",
+        "209",
         "campaign effects art checks",
         "0"
       ]
