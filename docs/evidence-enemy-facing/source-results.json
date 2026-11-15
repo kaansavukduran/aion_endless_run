@@ -1,0 +1,17 @@
+[
+  {
+    "suite": "enemy_facing",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 190,
+    "results": [
+      [
+        "190",
+        "enemy facing checks",
+        "0"
+      ]
+    ]
+  }
+]
