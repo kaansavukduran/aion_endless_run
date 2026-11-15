@@ -6,7 +6,7 @@ import argparse,json,math,time,os,shutil
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-p=argparse.ArgumentParser();p.add_argument('--url',required=True);p.add_argument('--evidence',type=Path,required=True);p.add_argument('--route',choices=['water','terrace','roots'],default='water');p.add_argument('--play-through',action='store_true');p.add_argument('--browser',choices=['chromium','firefox'],default='chromium');p.add_argument('--offline',action='store_true');p.add_argument('--expanded-rescue',action='store_true');p.add_argument('--rescue-only',action='store_true');p.add_argument('--record-video',action='store_true');p.add_argument('--profile',action='store_true');p.add_argument('--debug-port',type=int);p.add_argument('--headed',action='store_true');p.add_argument('--angle-gl',action='store_true');p.add_argument('--steering-file',type=Path);a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--url',required=True);p.add_argument('--evidence',type=Path,required=True);p.add_argument('--route',choices=['water','terrace','roots'],default='water');p.add_argument('--play-through',action='store_true');p.add_argument('--browser',choices=['chromium','firefox'],default='chromium');p.add_argument('--offline',action='store_true');p.add_argument('--expanded-rescue',action='store_true');p.add_argument('--rescue-only',action='store_true');p.add_argument('--record-video',action='store_true');p.add_argument('--profile',action='store_true');p.add_argument('--debug-port',type=int);p.add_argument('--headed',action='store_true');p.add_argument('--angle-gl',action='store_true');p.add_argument('--steering-file',type=Path);p.add_argument('--combat-controls',action='store_true');a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];console=[]
 def check(condition,message):
     assert condition,message
@@ -18,6 +18,23 @@ with sync_playwright() as pw:
     else:
         browser=pw.chromium.launch(executable_path=shutil.which('chromium'),headless=not a.headed,args=['--no-sandbox','--enable-unsafe-swiftshader']+(['--remote-debugging-port='+str(a.debug_port)] if a.debug_port else [])+(['--use-angle=gl'] if a.angle_gl else []))
     context=browser.new_context(viewport={'width':1280,'height':720},locale='tr-TR',has_touch=True,**({'record_video_dir':str(a.evidence/'video'),'record_video_size':{'width':1280,'height':720}} if a.record_video else {}))
+    context.add_init_script("""(() => {
+      const pad={id:'Xbox Controller (QA virtual input)',index:0,connected:false,
+        mapping:'standard',timestamp:0,axes:[0,0,0,0],
+        buttons:Array.from({length:17},()=>({pressed:false,touched:false,value:0}))};
+      Object.defineProperty(navigator,'getGamepads',{value:()=>pad.connected?[pad]:[]});
+      window.qaPad=pad;
+      window.qaPadConnect=value=>{
+        pad.connected=value;
+        const event=new Event(value?'gamepadconnected':'gamepaddisconnected');
+        Object.defineProperty(event,'gamepad',{value:pad});
+        window.dispatchEvent(event);
+      };
+      window.qaPadButton=(i,value)=>{
+        pad.buttons[i]={pressed:value,touched:value,value:value?1:0};
+        pad.timestamp=performance.now();
+      };
+    })();""")
     page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
     def message(m):
         console.append({'time':time.monotonic(),'type':m.type,'text':m.text})
@@ -101,6 +118,44 @@ with sync_playwright() as pw:
     else:
         r=d['actions']['jump'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2));page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-10',timeout=10000);check(True,'Firefox actual touch reaches the same jump action; CDP multitouch is Chromium-only')
     page.set_viewport_size({'width':1280,'height':720});page.wait_for_timeout(700);page.screenshot(path=str(a.evidence/'landscape-playing.png'));canvas.focus()
+    if a.combat_controls:
+        canvas.focus();page.keyboard.down('d')
+        page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>200')
+        normal=data()['velocity'][0];page.keyboard.down('Shift')
+        page.wait_for_function('v=>JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>v*1.5',arg=normal)
+        check(True,'Actual Shift key increases current hero running speed')
+        page.keyboard.up('Shift');page.keyboard.up('d')
+        page.wait_for_function('Math.abs(JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0])<1')
+        before=data()['grenades'];page.mouse.click(850,260,button='right')
+        page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===n-1',arg=before)
+        check(True,'Actual right mouse click throws one grenade')
+        page.keyboard.down('w');page.keyboard.down('d');page.keyboard.down('f');page.wait_for_timeout(100)
+        page.keyboard.press('Space');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-25')
+        page.evaluate("""window.sweepPackets=[];window.sweepTimer=setInterval(()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);sweepPackets.push({aim:d.aim,shots:d.shots,projectiles:d.hero_projectiles,grounded:d.grounded})},8)""")
+        page.keyboard.up('w');page.keyboard.down('s');page.wait_for_timeout(230)
+        page.keyboard.up('s');page.keyboard.up('d');page.keyboard.up('f')
+        packets=page.evaluate('clearInterval(sweepTimer);sweepPackets');(a.evidence/'sweep-packets.json').write_text(json.dumps(packets,indent=2)+'\n')
+        mid=[b for q in packets for b in q['projectiles'] if b['age']<.14 and abs(b['v'][1])>30 and abs(abs(b['v'][0])-abs(b['v'][1]))>30]
+        check(bool(mid),'Held fire emits an actual projectile between the eight primary angles')
+        page.evaluate('qaPadConnect(true)');page.wait_for_timeout(150)
+        page.evaluate('qaPad.axes[0]=1;qaPadButton(4,true)')
+        page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>350')
+        check(True,'Virtual Xbox left stick plus LB routes to sprint')
+        page.evaluate('qaPad.axes[0]=0;qaPadButton(4,false)');page.wait_for_timeout(150)
+        page.evaluate('qaPadButton(9,true)');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"');page.evaluate('qaPadButton(9,false)')
+        frozen=data()['time'];page.wait_for_timeout(180);check(data()['time']==frozen,'Virtual Xbox Start pauses the actual world')
+        page.evaluate('qaPadButton(0,true)');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu===""');page.evaluate('qaPadButton(0,false)')
+        check(data()['state']=='playing','Virtual Xbox A activates the real Resume button')
+        page.evaluate('qaPadButton(5,true)');before_shots=data()['shots']
+        page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).shots>n',arg=before_shots)
+        page.evaluate('qaPadButton(5,false)');check(True,'Virtual Xbox RB fires through the real game input path')
+        page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).grounded')
+        page.evaluate('qaPadButton(0,true)');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-15');page.evaluate('qaPadButton(0,false)')
+        check(True,'Virtual Xbox A jumps during normal gameplay')
+        page.wait_for_timeout(650);before_bombs=data()['grenades'];page.evaluate('qaPadButton(1,true)')
+        page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===n-1',arg=before_bombs);page.evaluate('qaPadButton(1,false)')
+        check(True,'Virtual Xbox B throws a grenade during normal gameplay')
+        page.evaluate('qaPadConnect(false)');canvas.focus()
     if a.play_through or a.rescue_only:
         held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None;board_attempts=set();vehicle_inputs=[];fork_inputs=[];rescue_presentations=[]
         def keys(wanted):

@@ -21,6 +21,8 @@ var item_bank := ForgeItemBank.new()
 var vehicle_art := ForgeVehicleArt.new()
 var forge_art := ForgeHeroArt.new()
 var support_art := M1SupportArt.new()
+var projectile_art := CampaignProjectileArt.new()
+var effects_art := CampaignEffectsArt.new()
 var m1_heroes := M1HeroArt.new()
 
 # World facing (-1 = left) must be relative to each source drawing.
@@ -33,6 +35,10 @@ static func npc_draw_direction(facing: int) -> int:
 	# Freed walk/departure sources face left. World velocity never changes
 	# to compensate for a sprite flip.
 	return -1 if facing>0 else 1
+
+func draw_flag(position: Vector2,growth: float=1.) -> void:
+	var frame: int=posmod(int(world.time*5.),4) if host.motion_enabled and not host.options.reduced_motion else 0
+	draw_pose(effects_art.flag(frame),position,1,growth)
 
 func hero_reference_height() -> float:
 	# Actual alpha silhouette, without texture padding, muzzle/particles or UI.
@@ -162,31 +168,7 @@ func draw_world() -> void:
 		draw_rect(Rect2(p-Vector2(6,155),Vector2(12,155)),Color("44445f"))
 		for y in range(8,151,18): draw_rect(Rect2(p-Vector2(3,y),Vector2(6,9)),Color("f2bf77"))
 		caption(host.t("arc_clear"),p+Vector2(-72,-168),16)
-	for npc in world.npcs:
-		if float(npc.x)<camera_x-150. or float(npc.x)>camera_x+scene_w+150.:continue
-		if str(npc.secret)!="" and not world.discovered.has(str(npc.secret)):continue
-		var phase: String=str(npc.get("phase","free" if bool(npc.freed) else "bound"))
-		var age: float=float(npc.get("thank_age",0.))
-		if phase=="departed" and age>4.8:continue
-		var animated: bool=host.motion_enabled and not host.options.reduced_motion
-		var frame: int=posmod(int(world.time*2.),2) if animated else 0
-		if phase in ["free","departed"]:frame=6+posmod(int(world.time*6.),6 if int(npc.variant)==7 else 2) if animated else 6
-		elif phase=="thanks":frame=2 if age<.45 else 3
-		var npc_pose: Dictionary=catalogue.pose("rescue-npcs",int(npc.variant),frame)
-		var growth: float=npc_growth(int(npc.variant))
-		var npc_direction: int=npc_draw_direction(int(npc.get("facing",-1))) if phase!="bound" else 1
-		draw_pose(npc_pose,Vector2(float(npc.x),float(npc.y)),npc_direction,growth)
-		if phase=="thanks":
-			var bag_at:=Vector2(float(npc.x)+float(npc.facing)*22.,float(npc.y)-52.)
-			draw_pose(support_art.pose("satchel"),bag_at)
-			if age>=.45 and age<.9:
-				draw_pose(item_bank.pose(str(npc.gift)),bag_at+Vector2(float(npc.facing)*10.,-(age-.45)*80.),1,.6)
-		var p := at(Vector2(float(npc.x),float(npc.y)))
-		var label_top: float=maxf(46.,p.y+minf(-90.,float(npc_pose.offset.y)*growth-12.))
-		if phase=="bound":caption(host.t("cut"),Vector2(clampf(p.x-35.,8.,scene_w-200.),label_top),17)
-		elif phase=="thanks" and age<2.4:
-			caption(host.t("thanks"),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top),17)
-			if age>.9:caption(host.t(str(npc.gift)),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top+20.),16)
+	draw_npcs(false)
 	for crate in world.crates:
 		if float(crate.x)<camera_x-80. or float(crate.x)>camera_x+scene_w+80.:continue
 		if int(crate.hp)<=0: continue
@@ -210,11 +192,21 @@ func draw_world() -> void:
 			draw_pose(item_bank.pose(str(item.kind)),p)
 	for e in world.enemies:
 		if float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
-		if bool(e.defeated) and float(e.get("dead_age",0.))>.65: continue
+		if bool(e.defeated) and float(e.get("dead_age",0.))>1.: continue
 		var p := Vector2(float(e.x),float(e.y))
 		var direction: int=enemy_draw_direction(str(e.kind),int(e.facing))
+		if bool(e.defeated) and not bool(e.mini) and str(e.kind) in CampaignEffectsArt.LEGACY:
+			var f: int=clampi(int(float(e.get("dead_age",0.))/.65*6.),0,5)
+			if not host.motion_enabled or host.options.reduced_motion:f=5
+			if CampaignContent.flying(str(e.kind)):
+				var support: float=world.floor_at(p.x)
+				if support<180.:p.y=minf(support,p.y+float(CampaignEffectsArt.DATA.data.references[str(e.kind)].foot)+float(e.get("dead_age",0.))*float(e.get("dead_age",0.))*700.)
+			else:
+				p.y+=minf(0.,float(CampaignEffectsArt.DATA.data.references[str(e.kind)].foot)+float(e.get("dead_age",0.))*float(e.get("dead_age",0.))*700.)
+			var source_facing: int=CampaignEffectsArt.DATA.data.references[str(e.kind)].facing
+			draw_pose(effects_art.death(str(e.kind),f),p,source_facing*(-1 if int(e.facing)<0 else 1))
+			continue
 		var tint := Color.WHITE
-		if bool(e.defeated): tint.a = maxf(0.,1.-maxf(0.,float(e.get("dead_age",0.))-.45)/.2)
 		var attack: bool = float(e.windup)>0. or float(e.get("flash",0.))>0. or float(e.get("dash",0.))>0. or float(e.get("dive",0.))>0.
 		var frame: int = posmod(int(float(e.age)*9.),6)
 		if bool(e.defeated):frame=clampi(int(float(e.get("dead_age",0.))/.65*6.),0,5)
@@ -234,13 +226,13 @@ func draw_world() -> void:
 			draw_pose(catalogue.pose("mini-bosses",row,frame),p,direction,1.,tint)
 		elif str(e.kind) in ["drone","seed","warden"]:
 			var row: int = {"drone":0,"seed":2,"warden":6}[str(e.kind)]+int(attack)
-			draw_pose(art.pose(row,frame),p,direction,1.,tint)
+			draw_pose(art.pose(row,frame),p-Vector2(0.,float(CampaignEffectsArt.DATA.data.references["seed"].foot) if str(e.kind)=="seed" else 0.),direction,1.,tint)
 		elif e.kind=="gnome": existing("enemies",4 if attack else 3,frame,p,direction,1.,tint)
 		elif e.kind=="crow": existing("enemies",1 if attack else 0,frame,p,direction,1.,tint)
 		else:
 			var row: int = {"moth":0,"slime":1,"beetle":2,"wisp":3}.get(str(e.kind),0)
 			existing("creatures",row,frame,p,direction,1.,tint)
-		if attack:
+		if attack and not bool(e.defeated):
 			var point := at(p+Vector2(0,-70))
 			draw_circle(point,5,Color("f7bb70")); caption("!",point+Vector2(-3,-10),20)
 		if (bool(e.mini) or bool(e.get("heavy",false))) and not bool(e.defeated):small_health(at(p+Vector2(-35,-130)),70,float(e.hp)/float(e.max_hp))
@@ -286,18 +278,29 @@ func draw_world() -> void:
 			var follower: Dictionary=follower_render_spec(i)
 			draw_pose(follower.pose,follower.p,int(follower.facing),float(follower.growth))
 	if world.charging: small_health(at(world.player+Vector2(-28,-112)),56,world.charge_ratio())
+	draw_npcs(true) # Keep the thank-you and bag visible in front of a contacted hull.
 	for b in world.bullets:
 		var p := at(b.p)
 		var color := Color(str(b.get("colour","e1f5e7"))) if b.owner=="hero" else Color("eeb079")
 		if b.kind=="arc": color=Color("89dbec")
-		if b.kind=="wave": draw_rect(Rect2(p-Vector2(20,9),Vector2(40,18)),color)
-		elif b.kind=="beam":draw_line(p,p-Vector2(b.v).normalized()*140.,color,6.)
-		elif b.kind=="disc":draw_arc(p,9.,world.time*8.,world.time*8.+PI*1.8,10,color,3.)
-		elif b.kind=="vehicle":
-			# Pixel core/outline makes the wider collision envelope readable.
-			draw_rect(Rect2(p-Vector2(7,7),Vector2(14,14)),Color("443652"));draw_rect(Rect2(p-Vector2(5,5),Vector2(10,10)),color);draw_rect(Rect2(p-Vector2(2,2),Vector2(4,4)),Color("fff2d4"))
+		if b.kind=="wave":
+			var crests: Array=[2,4,7,10,8,5,3,2]
+			for i in crests.size():
+				var h: float=crests[i]
+				var at_x: float=p.x+(i-4)*5.*signf(float(b.v.x))
+				draw_rect(Rect2(at_x,p.y-h,5.,h*2.),Color("352d49"))
+				draw_rect(Rect2(at_x+1.,p.y-h+2.,3.,maxf(1.,h*2.-4.)),color)
+				if h>4:draw_rect(Rect2(at_x+1.,p.y-h+2.,2.,2.),Color("fff1d6"))
+		elif b.kind=="beam":
+			var tail: Vector2=p-Vector2(b.v).normalized()*140.
+			draw_line(p,tail,Color("352d49"),8.);draw_line(p,tail,color,5.);draw_line(p,tail,Color("fff6d9"),2.)
 		elif b.kind=="trap":draw_pose(support_art.pose("spider-walk",int(world.time*12.)%6),Vector2(b.p)+Vector2(0,8),int(b.get("facing",-1 if float(b.v.x)<0. else 1)))
-		else: draw_line(p,p-Vector2(b.v).normalized()*(25. if b.kind=="harpoon" else 12.),color,4.)
+		else:
+			var phase: int=posmod(int(float(b.age)*18.),2) if host.motion_enabled and not host.options.reduced_motion else 0
+			var shot: Dictionary=projectile_art.pose(str(b.kind),str(b.get("colour","e1f5e7")),phase)
+			draw_set_transform(p,Vector2(b.v).angle(),Vector2.ONE)
+			draw_texture(shot.texture,shot.offset)
+			draw_set_transform(Vector2.ZERO,0.,Vector2.ONE)
 	for bomb in world.bombs:
 		var p := at(bomb.p); var color := Color(str(bomb.color))
 		draw_circle(p,9,Color("292331"));draw_circle(p,6,color);draw_rect(Rect2(p-Vector2(2,13),Vector2(4,7)),Color("f5e6bf"))
@@ -311,8 +314,7 @@ func draw_world() -> void:
 	draw_assists()
 	if world.section!="arena" and not CampaignRoutes.is_fork(world.section):
 		var p := at(Vector2(world.length()-140.,0))
-		draw_rect(Rect2(p-Vector2(3,100),Vector2(6,100)),Color("cabb99"))
-		draw_polygon(PackedVector2Array([p+Vector2(3,-100),p+Vector2(52,-80),p+Vector2(3,-60)]),PackedColorArray([Color("eaad7d")]))
+		draw_flag(Vector2(world.length()-140.,0))
 
 func draw_hero_weapon() -> void:
 	var transform: Dictionary=M1CombatArt.placement(world)
@@ -401,3 +403,31 @@ func caption(value: String,p: Vector2,size: int) -> void:
 func small_health(p: Vector2,width: float,ratio: float) -> void:
 	draw_rect(Rect2(p,Vector2(width,7)),Color("332638"))
 	draw_rect(Rect2(p+Vector2(1,1),Vector2((width-2.)*clampf(ratio,0,1),5)),Color("e9ba7e"))
+
+func draw_npcs(mounted_front: bool) -> void:
+	for npc in world.npcs:
+		if float(npc.x)<camera_x-150. or float(npc.x)>camera_x+scene_w+150.:continue
+		if str(npc.secret)!="" and not world.discovered.has(str(npc.secret)):continue
+		var phase: String=str(npc.get("phase","free" if bool(npc.freed) else "bound"))
+		if (bool(world.mount.ridden) and phase=="thanks")!=mounted_front:continue
+		var age: float=float(npc.get("thank_age",0.))
+		if phase=="departed" and age>4.8:continue
+		var animated: bool=host.motion_enabled and not host.options.reduced_motion
+		var frame: int=posmod(int(world.time*2.),2) if animated else 0
+		if phase in ["free","departed"]:frame=6+posmod(int(world.time*6.),6 if int(npc.variant)==7 else 2) if animated else 6
+		elif phase=="thanks":frame=2 if age<.45 else 3
+		var npc_pose: Dictionary=catalogue.pose("rescue-npcs",int(npc.variant),frame)
+		var growth: float=npc_growth(int(npc.variant))
+		var npc_direction: int=npc_draw_direction(int(npc.get("facing",-1))) if phase!="bound" else 1
+		draw_pose(npc_pose,Vector2(float(npc.x),float(npc.y)),npc_direction,growth)
+		if phase=="thanks":
+			var bag_at:=Vector2(float(npc.x)+float(npc.facing)*22.,float(npc.y)-52.)
+			draw_pose(support_art.pose("satchel"),bag_at)
+			if age>=.45 and age<.9:
+				draw_pose(item_bank.pose(str(npc.gift)),bag_at+Vector2(float(npc.facing)*10.,-(age-.45)*80.),1,.6)
+		var p := at(Vector2(float(npc.x),float(npc.y)))
+		var label_top: float=maxf(46.,p.y+minf(-90.,float(npc_pose.offset.y)*growth-12.))
+		if phase=="bound":caption(host.t("cut"),Vector2(clampf(p.x-35.,8.,scene_w-200.),label_top),17)
+		elif phase=="thanks" and age<2.4:
+			caption(host.t("thanks"),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top),17)
+			if age>.9:caption(host.t(str(npc.gift)),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top+20.),16)

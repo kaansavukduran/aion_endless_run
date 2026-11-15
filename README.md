@@ -1,6 +1,8 @@
 # Aion Endless Run
 
-## 0.26.2 · Araç zıplaması ve savaş düzeltmeleri
+## 0.27.0 · Araçla ikmal, akıcı nişan ve ölüm animasyonları
+
+Araçla NPC teması ve gerçek eşya toplama, sekiz hedef yönü arasında ara açılara ateş, Shift depar/sağ tık bomba, yeni dalgalanan bayrak ve türe özel opak ölüm kareleri. [Değişiklikler ve gerçek doğrulama](docs/evidence-0270/README.md).
 
 Korsan bekçinin iki kolu görülen altı yeni yürüyüş karesi, araçlarda gerçek zıplama ve üçlü yayılım, ipleri patlamasıyla çözen örümcek ve daha hızlı/uzun menzilli özel mermiler. [Test ve görsel kanıt](docs/evidence-combat-0262/README.md).
 

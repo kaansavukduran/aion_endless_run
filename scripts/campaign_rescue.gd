@@ -143,7 +143,7 @@ static func step(w,dt: float) -> void:
 			if limit or not has_support(w,n,next) or float(n.roam_clock)>1.5+float(int(n.variant)%3)*.25:
 				n.facing=-facing;n.roam_clock=0.
 			else:n.x=next
-			if float(n.free_age)>.2 and absf(w.player.x-float(n.x))<48. and absf(w.player.y-float(n.y))<30. and not bool(w.mount.ridden):
+			if float(n.free_age)>.2 and w.touches_npc(n):
 				n.phase="thanks";n.thank_age=0.;n.facing=1 if w.player.x>float(n.x) else -1
 				w.greeted[str(n.id)]=true;w.pending_events.append("npc_contact")
 		elif phase in ["thanks","departed"]:

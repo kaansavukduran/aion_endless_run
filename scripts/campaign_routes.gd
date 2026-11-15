@@ -94,9 +94,7 @@ static func draw_landmarks(v) -> void:
 	for p in [Vector2(550.,-130.),Vector2(1060.,UPPER_FLOOR),Vector2(1530.,UPPER_FLOOR),Vector2(1530.,LOWER_FLOOR)]:
 		v.draw_pose(v.catalogue.pose("environment",2,3),p)
 	for floor_y in [UPPER_FLOOR,LOWER_FLOOR]:
-		var exit_point: Vector2=v.at(Vector2(EXIT_X,floor_y))
-		v.draw_rect(Rect2(exit_point-Vector2(3,84),Vector2(6,84)),Color("cabb99"))
-		v.draw_polygon(PackedVector2Array([exit_point+Vector2(3,-84),exit_point+Vector2(38,-68),exit_point+Vector2(3,-52)]),PackedColorArray([Color("b8d6a0") if floor_y==UPPER_FLOOR else Color("84bfb8")]))
+		v.draw_flag(Vector2(EXIT_X,floor_y),.84)
 	for position in [Vector2(220.,-56.),Vector2(880.,LOWER_FLOOR-56.)]:
 		var p: Vector2=v.at(position)
 		var upper: bool=position.x<300.

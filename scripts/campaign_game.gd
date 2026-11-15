@@ -214,7 +214,7 @@ func build_touch() -> void:
 		item.font=options.font_for(FONT);item.palette=options.colors.duplicate();item.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		if key=="grenade":item.palette.accent=AionCampaignWorld.COLORS[world.character]
 		ui.add_child(item);item.position=points[key];item.size=Vector2(100,100);actions[key]=item
-	var hint:=label(t("boost") if world.character=="wolf" else t("move"),14);ui.add_child(hint);hint.position=Vector2(24,view_h-206)
+	var hint:=label(t("boost"),14);ui.add_child(hint);hint.position=Vector2(24,view_h-206)
 
 func build_menu() -> void:
 	release_all()
@@ -555,6 +555,8 @@ func _input(event: InputEvent) -> void:
 		if event.index==stick_touch:stick.axis=stick.value(screen_transform.affine_inverse()*event.position);stick.queue_redraw();get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION:
 		var p: Vector2=screen_transform.affine_inverse()*event.position
+		if event.button_index==MOUSE_BUTTON_RIGHT:
+			set_action("grenade","mouse-right",event.pressed);get_viewport().set_input_as_handled();return
 		if event.button_index==MOUSE_BUTTON_LEFT:
 			if not event.pressed:
 				for key in actions:set_action(key,"mouse-touch",false)
@@ -602,7 +604,7 @@ func interact_binding() -> int:
 	return JOY_BUTTON_Y
 
 func pad_help() -> String:
-	return t("move")+" ↖ ↑ ↗ ← → ↙ ↓ ↘ · "+pad.binding_name("jump")+" "+old("control_jump")+" · "+pad.binding_name("shoot")+" "+old("control_shoot")+" · "+pad.binding_name("duck")+" "+t("grenade")+" · "+str(pad.NAMES[interact_binding()])+" "+t("ride")
+	return t("move")+" ↖ ↑ ↗ ← → ↙ ↓ ↘ · "+pad.binding_name("jump")+" "+old("control_jump")+" · "+pad.binding_name("shoot")+" "+old("control_shoot")+" · "+pad.binding_name("duck")+" "+t("grenade")+" · "+pad.binding_name("boost")+" "+old("control_boost")+" · "+str(pad.NAMES[interact_binding()])+" "+t("ride")
 
 func poll_pad() -> void:
 	pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
@@ -644,7 +646,7 @@ func advance_travel(dt: float) -> void:
 	if fade>=duration:
 		release_all();fade=-1.;fade_panel.color.a=0.
 
-func update_arcade_aim() -> void:
+func update_arcade_aim(dt: float=0.) -> void:
 	# Left stick controls movement in X and 8-way aiming in XY. Right stick,
 	# when active, overrides aiming without changing movement (twin-stick).
 	var axis: float=float(right_down)-float(left_down)
@@ -662,7 +664,7 @@ func update_arcade_aim() -> void:
 	if raw.length_squared()<.04:raw=Vector2(world.facing,0.)
 	var snapped:=Vector2(signf(raw.x) if absf(raw.x)>.25 else 0.,signf(raw.y) if absf(raw.y)>.25 else 0.)
 	if snapped.length_squared()<.5:snapped=Vector2(world.facing,0.)
-	world.aim_direction=raw.normalized() if bool(world.mount.ridden) else snapped.normalized()
+	world.steer_aim(raw.normalized() if bool(world.mount.ridden) else snapped.normalized(),dt)
 	world.move_axis=Vector2(axis,vertical)
 
 func _process(dt: float) -> void:
@@ -676,8 +678,8 @@ func _process(dt: float) -> void:
 	pad_menu_wait=maxf(0.,pad_menu_wait-dt)
 	poll_pad()
 	if world.state=="playing" and menu_kind=="" and fade<0.:
-		update_arcade_aim()
-		if world.character=="wolf" and (stick_touch>=0 or mouse_stick):world.boost_held=absf(world.move_axis.x)>.85 or not Dictionary(held.get("boost",{})).is_empty()
+		update_arcade_aim(clampf(dt,0.,.05))
+		if (stick_touch>=0 or mouse_stick):world.boost_held=absf(world.move_axis.x)>.85 or not Dictionary(held.get("boost",{})).is_empty()
 		world.step(dt)
 	if world.state=="travel" and fade<0.:start_travel()
 	if world.state in ["victory","dying"]:world.step(dt)
@@ -821,6 +823,9 @@ func metadata() -> void:
 	data.pickups=[]
 	for item in world.pickups:
 		if not world.taken.has(str(item.id)):data.pickups.append(item.duplicate(true))
+	data.hero_projectiles=[]
+	for bullet in world.bullets:
+		if bullet.owner=="hero":data.hero_projectiles.append({"p":[bullet.p.x,bullet.p.y],"v":[bullet.v.x,bullet.v.y],"kind":bullet.kind,"age":bullet.age})
 	data.spiders=[]
 	for bullet in world.bullets:
 		if str(bullet.kind)=="trap":data.spiders.append({"p":[bullet.p.x,bullet.p.y],"age":bullet.age,"target":bullet.get("target","")})

@@ -45,7 +45,8 @@ var section := "shore"
 var player := Vector2(140, 0)
 var velocity := Vector2.ZERO
 var facing := 1
-var aim_direction := Vector2.RIGHT # Eight-direction Arcade fire; not the Endless runner
+var aim_direction := Vector2.RIGHT # Rendered/firing direction, including the sweep between eight target directions.
+var aim_sweep_gate := 0.
 var move_axis := Vector2.ZERO
 var time := 0.0
 var run_seed := 7719
@@ -154,6 +155,33 @@ func crouching() -> bool:
 func player_hit_center() -> Vector2:
 	return player+Vector2(0.,-20. if crouching() else -37.)
 
+## Mounted logical player is a saddle42px above the vehicle foot, not a
+## standing hero. Use the same physical hull envelope for NPCs and supplies.
+func mounted_contact_rect() -> Rect2:
+	var foot: float=player.y+42.-(24. if float(mount.get("dive",0.))>0. else 0.)
+	return Rect2(player.x-82.,foot-132.,164.,132.)
+
+func touches_npc(n: Dictionary) -> bool:
+	if bool(mount.ridden):return mounted_contact_rect().intersects(Rect2(float(n.x)-18.,float(n.y)-75.,36.,75.))
+	return absf(player.x-float(n.x))<48. and absf(player.y-float(n.y))<30.
+
+func touches_pickup(item: Dictionary) -> bool:
+	var point:=Vector2(float(item.x),float(item.y))
+	if bool(mount.ridden):return mounted_contact_rect().grow(10.).has_point(point)
+	return player_hit_center().distance_to(point)<48. if item.has("rescue_id") else player.distance_to(point)<63.
+
+## Eight input targets, a bounded shortest-arc turn, and one controlled early
+## shot window per180ms while sweeping. Actual gun and projectile share aim.
+func steer_aim(target: Vector2,dt: float) -> void:
+	if target.length_squared()<.01:return
+	if dt<=0. or bool(mount.ridden):aim_direction=target.normalized();return
+	aim_sweep_gate=maxf(0.,aim_sweep_gate-dt)
+	var delta: float=wrapf(target.angle()-aim_direction.angle(),-PI,PI)
+	if fire_held and absf(delta)>.20 and aim_sweep_gate<=0. and weapon not in ["trap","nova","disc"]:
+		fire_time=minf(fire_time,.07);aim_sweep_gate=.18
+	var step: float=9.*minf(dt,.05)
+	aim_direction=target.normalized() if absf(delta)<=step else Vector2.from_angle(aim_direction.angle()+signf(delta)*step)
+
 func player_hit_radius() -> float:
 	return 17. if crouching() else 30.
 
@@ -171,7 +199,7 @@ func begin(hero: String) -> void:
 	state = "briefing"
 
 func stop_inputs() -> void:
-	move_axis = Vector2.ZERO; aim_direction = Vector2(facing,0.); fire_held = false; jump_held = false
+	move_axis = Vector2.ZERO; aim_direction = Vector2(facing,0.); aim_sweep_gate=0.; fire_held = false; jump_held = false
 	charging = false; charge_time = 0.; boost_held = false; gliding = false
 	melee_latched = false
 	rescue_latched=false
@@ -639,7 +667,7 @@ func step(dt: float) -> void:
 				if str(enemy.id)==melee_target and absf(float(enemy.x)-player.x)<125. and absf(float(enemy.y)-player.y)<85.:damage_enemy(enemy,2)
 	var on_floor := grounded()
 	if charging: charge_time = minf(1.2,charge_time+dt)
-	var speed: float = 235.*(1.55 if character == "wolf" and boost_held else 1.)*(1.35 if bool(mount.ridden) else 1.)*(1.25 if float(buffs.get("haste",0.))>0. else 1.)*(.65 if float(buffs.get("slow",0.))>0. else 1.)
+	var speed: float = 235.*(1.55 if boost_held else 1.)*(1.35 if bool(mount.ridden) else 1.)*(1.25 if float(buffs.get("haste",0.))>0. else 1.)*(.65 if float(buffs.get("slow",0.))>0. else 1.)
 	velocity.x = move_axis.x*speed*(.3 if charging else (.42 if crouching() else 1.))
 	if rescue_time>0.:velocity.x=0.
 	if absf(move_axis.x)>.1 and rescue_time<=0.: facing = 1 if move_axis.x>0. else -1
@@ -685,8 +713,8 @@ func step(dt: float) -> void:
 		item.age=float(item.get("age",0.))+dt
 		if item.has("secret") and not discovered.has(str(item.secret)):continue
 		if item.has("rescue_id"):
-			if float(item.age)>=.25 and not taken.has(str(item.id)) and player_hit_center().distance_to(Vector2(float(item.x),float(item.y)))<48.:collect(item)
-		elif not taken.has(str(item.id)) and player.distance_to(Vector2(float(item.x),float(item.y)))<63.: collect(item)
+			if float(item.age)>=.25 and not taken.has(str(item.id)) and touches_pickup(item):collect(item)
+		elif not taken.has(str(item.id)) and touches_pickup(item): collect(item)
 	trail.append({"p":player,"time":time,"facing":facing,"grounded":grounded(),"crouched":crouching(),"walk_distance":walk_distance,"moving":absf(velocity.x)>1.,"velocity_y":velocity.y,"air_time":air_time})
 	while trail.size()>1 and time-float(trail[0].time)>4.: trail.pop_front()
 	if CampaignRoutes.is_fork(section):

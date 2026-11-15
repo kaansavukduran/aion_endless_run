@@ -1,0 +1,47 @@
+{
+  "beetle": {
+    "facing": -1,
+    "foot": -24.0,
+    "height": 26.88
+  },
+  "crow": {
+    "facing": -1,
+    "foot": -1.89473552795118,
+    "height": 42.5454545454545
+  },
+  "drone": {
+    "facing": 1,
+    "foot": 48.0,
+    "height": 83.0
+  },
+  "gnome": {
+    "facing": -1,
+    "foot": -10.0765550239234,
+    "height": 49.2631578947368
+  },
+  "moth": {
+    "facing": -1,
+    "foot": -12.1143157958984,
+    "height": 35.52
+  },
+  "seed": {
+    "facing": 1,
+    "foot": 49.0,
+    "height": 125.0
+  },
+  "slime": {
+    "facing": -1,
+    "foot": -17.98,
+    "height": 26.68
+  },
+  "warden": {
+    "facing": 1,
+    "foot": -23.5,
+    "height": 123.0
+  },
+  "wisp": {
+    "facing": -1,
+    "foot": -1.16681228637695,
+    "height": 40.46
+  }
+}
