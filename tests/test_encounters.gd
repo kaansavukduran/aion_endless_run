@@ -149,10 +149,10 @@ func run() -> void:
 	check(game.best==old_best,"Practice never changes the saved normal-run record")
 	game.world.frontier.shot_flash = 0.19
 	game.update_friend()
-	check(game.friend_sprite.get_meta("pose_key")=="gun-fire" and game.friend_sprite.get_meta("source_row")==4,"The actual sheep uses its own two-hoof firing row")
+	check(game.friend_sprite.get_meta("source_key")=="m1-body-sheep" and game.gun_echo.visible and not game.friend_sprite.get_meta("gun_embedded"),"The biped sheep preserves its own body while firing its separate hand-bound gun")
 	game.world.frontier.shot_flash = 0
 	game.update_friend()
-	check(game.friend_sprite.get_meta("pose_key")=="gun-run","Aiming resumes the complete gun-running cycle")
+	check(game.friend_sprite.get_meta("pose_key")=="m1-body" and game.friend_sprite.get_meta("pose_action")=="walk","Aiming resumes the complete body-running cycle")
 	game.world.state = "bonk"
 	game.world.death_cause = "enemy"
 	game.world.hit_time = 1.3

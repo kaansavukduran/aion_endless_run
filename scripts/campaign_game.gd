@@ -3,7 +3,10 @@ extends Node2D
 
 const Words = preload("res://scripts/campaign_text.gd")
 const FONT = preload("res://assets/PixelifySans.ttf")
+const TRAVEL_DURATION := .36
+const REDUCED_TRAVEL_DURATION := .1
 var world := AionCampaignWorld.new()
+var native_diagnostics := preload("res://scripts/campaign_native_diagnostics.gd").new()
 var options := RunnerInterfaceOptions.new()
 var pad := RunnerGamepad.new()
 var selected_hero := "aion"
@@ -86,9 +89,9 @@ var control_hint: Label
 var checkpoint_invalid := false
 var tutorial_seen := false
 var settings_ok := true
-var route_icons: Dictionary = {}
 
 func _ready() -> void:
+	native_diagnostics.host=self
 	var cfg := ConfigFile.new(); cfg.load("user://save.cfg")
 	RunnerBrowserSave.restore(cfg)
 	options.load_from(cfg); pad.load_from(cfg)
@@ -121,7 +124,7 @@ func t(key: String) -> String:
 func old(key: String) -> String: return GameText.get_text(language,key)
 func font_size(size: int) -> int: return roundi(size*options.text_scale)
 func menu_title() -> String:
-	return t({"briefing":"title","help":"controls","paused":"pause","fork_one":"fork","fork_two":"fork","boss":"arena","dead":"dead","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
+	return t({"briefing":"title","help":"controls","paused":"pause","boss":"arena","dead":"dead","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
 
 func safe_rect(raw: Vector2) -> Rect2:
 	if OS.has_feature("web"):
@@ -262,15 +265,6 @@ func build_menu() -> void:
 			action(t("controls"),func():help_return="paused";menu_kind="help";help_step=0;build_ui())
 			action(t("settings"),func():menu_previous="paused";menu_kind="settings";settings_page=0;build_ui())
 			action(t("back"),return_main)
-		"fork_one","fork_two":
-			if options.text_scale<1.5:column.add_child(paragraph(t(menu_kind),17))
-			var choices: Array = ["canopy","water"] if menu_kind=="fork_one" else ["terrace","roots"]
-			for choice in choices:
-				var route_button:=action(t(choice),func():world.choose_route(choice);menu_kind="";start_travel();build_ui(),choice==choices[0]);route_button.name="Route_"+choice
-				route_button.tooltip_text=t("route_"+choice)
-				if options.text_scale<=1.2:route_button.icon=route_icon(choice)
-				if options.text_scale<=1. and not portrait:column.add_child(paragraph(t("route_"+choice),16))
-			action(t("back"),return_main)
 		"boss":
 			column.add_child(paragraph(t("boss_intro")))
 			action(t("next"),close_menu,true).name="CampaignBossGo"
@@ -312,25 +306,6 @@ func fit_menu(target: PanelContainer) -> void:
 
 func elapsed_time(seconds: float) -> String:
 	return "%02d:%02d"%[int(seconds)/60,int(seconds)%60]
-
-func route_icon(choice: String) -> Texture2D:
-	if route_icons.has(choice):return route_icons[choice]
-	var source: Texture2D=CampaignEnvironmentView.PANORAMA
-	var row: int=["water","terrace","roots"].find(choice)
-	var region: Rect2i
-	if row>=0:
-		var h:=source.get_height()/3
-		region=Rect2i((source.get_width()-h*2)/2,row*h,h*2,h)
-	else:
-		source=RunnerLandscapeView.SOURCE
-		var source_region: Array=RunnerLandscapeView.META.data.panels[4]
-		var h:=int(source_region[3])
-		region=Rect2i(int(source_region[0])+(int(source_region[2])-h*2)/2,int(source_region[1]),h*2,h)
-	var image:=source.get_image()
-	if image.is_compressed():image.decompress()
-	var thumbnail:=image.get_region(region);thumbnail.resize(96,48,Image.INTERPOLATE_NEAREST)
-	route_icons[choice]=ImageTexture.create_from_image(thumbnail)
-	return route_icons[choice]
 
 func report_lines() -> Array[String]:
 	var gun_names: Array=[]
@@ -507,6 +482,9 @@ func release_all() -> void:
 	if is_instance_valid(stick):stick.axis=Vector2.ZERO;stick.active=false;stick.queue_redraw()
 
 func set_action(key: String,source: String,down: bool,canceled: bool=false) -> void:
+	# A press during the section fade must not remain latched when the next
+	# section opens. Releases remain safe even for an already hidden control.
+	if down and (fade>=0. or world.state=="travel"):return
 	var sources: Dictionary=held.get(key,{})
 	var before:=not sources.is_empty()
 	if down:sources[source]=true
@@ -538,6 +516,8 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:active_input="touch"
 	elif event is InputEventJoypadButton or event is InputEventJoypadMotion:active_input="gamepad"
 	elif event is InputEventKey or (event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION):active_input="keyboard"
+	if fade>=0. or world.state=="travel":
+		release_all();get_viewport().set_input_as_handled();return
 	if presentation_stage!="":
 		if (event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ENTER,KEY_SPACE,KEY_ESCAPE]) or (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_A,JOY_BUTTON_X,JOY_BUTTON_B,JOY_BUTTON_START]) or (event is InputEventScreenTouch and event.pressed and not event.canceled):
 			skip_presentation();get_viewport().set_input_as_handled()
@@ -589,6 +569,8 @@ func _input(event: InputEvent) -> void:
 		mouse_axis=stick.value(screen_transform.affine_inverse()*event.position);stick.axis=mouse_axis;stick.queue_redraw();get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if fade>=0. or world.state=="travel":
+		release_all();get_viewport().set_input_as_handled();return
 	if event is InputEventKey:
 		if event.echo:return
 		if event.keycode==KEY_ESCAPE and event.pressed:toggle_pause();get_viewport().set_input_as_handled();return
@@ -624,6 +606,7 @@ func pad_help() -> String:
 
 func poll_pad() -> void:
 	pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
+	if fade>=0. or world.state=="travel":return
 	var pads:=Input.get_connected_joypads()
 	if pads.is_empty():return
 	var id: int=pads[0]
@@ -647,6 +630,20 @@ func poll_pad() -> void:
 func start_travel() -> void:
 	release_all();fade=0.;fade_loaded=false
 
+func travel_duration() -> float:
+	return REDUCED_TRAVEL_DURATION if options.reduced_motion else TRAVEL_DURATION
+
+func advance_travel(dt: float) -> void:
+	if fade<0. or not application_active:return
+	var duration:=travel_duration();var midpoint:=duration*.5
+	fade+=clampf(dt,0.,.05)
+	if fade>=midpoint and not fade_loaded:
+		world.finish_travel();release_all();view.camera_x=0.;view.camera_y=0.
+		fade_loaded=true;boss_announced=false;save_checkpoint()
+	fade_panel.color.a=clampf(fade/midpoint if not fade_loaded else (duration-fade)/midpoint,0.,1.)
+	if fade>=duration:
+		release_all();fade=-1.;fade_panel.color.a=0.
+
 func update_arcade_aim() -> void:
 	# Left stick controls movement in X and 8-way aiming in XY. Right stick,
 	# when active, overrides aiming without changing movement (twin-stick).
@@ -659,14 +656,17 @@ func update_arcade_aim() -> void:
 	if stick_touch>=0 and is_instance_valid(stick):
 		axis=stick.axis.x;vertical=stick.axis.y
 	var raw:=Vector2(axis,vertical)
+	# A grounded Down press is a low firing stance, not accidental floor aim.
+	if vertical>.55 and world.grounded() and not bool(world.mount.ridden):raw.y=0.
 	if pad_look.length_squared()>.25:raw=pad_look
 	if raw.length_squared()<.04:raw=Vector2(world.facing,0.)
 	var snapped:=Vector2(signf(raw.x) if absf(raw.x)>.25 else 0.,signf(raw.y) if absf(raw.y)>.25 else 0.)
 	if snapped.length_squared()<.5:snapped=Vector2(world.facing,0.)
-	world.aim_direction=snapped.normalized()
-	world.move_axis=Vector2(axis,0.)
+	world.aim_direction=raw.normalized() if bool(world.mount.ridden) else snapped.normalized()
+	world.move_axis=Vector2(axis,vertical)
 
 func _process(dt: float) -> void:
+	native_diagnostics.step(dt)
 	world.pose_motion_enabled=motion_enabled and not options.reduced_motion
 	if not is_instance_valid(view):return
 	if presentation_stage!="" and application_active:
@@ -681,15 +681,10 @@ func _process(dt: float) -> void:
 		world.step(dt)
 	if world.state=="travel" and fade<0.:start_travel()
 	if world.state in ["victory","dying"]:world.step(dt)
-	if fade>=0.:
-		fade+=minf(dt,.05)
-		if fade>=.18 and not fade_loaded:
-			world.finish_travel();view.camera_x=0.;view.camera_y=0.;fade_loaded=true;boss_announced=false;save_checkpoint()
-		fade_panel.color.a=clampf(fade/.18 if not fade_loaded else (0.36-fade)/.18,0.,1.)
-		if fade>=.36:fade=-1.;fade_panel.color.a=0.
+	advance_travel(dt)
 	if fade<0. and world.section=="arena" and not boss_announced and world.state=="playing" and absf(world.player.x-float(world.boss.x))<view.scene_w*.40:
 		boss_announced=true;world.stop_inputs();world.state="story";menu_kind="boss";build_ui()
-	if menu_kind=="" and presentation_stage=="" and world.state in ["fork_one","fork_two","dead","complete"]:
+	if menu_kind=="" and presentation_stage=="" and world.state in ["dead","complete"]:
 		menu_kind=world.state;release_all()
 		if world.state=="complete" and not complete_presented:
 			complete_presented=true;save_checkpoint();start_presentation("victory")
@@ -703,6 +698,7 @@ func _process(dt: float) -> void:
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	view.camera_x=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
 	var desired_y:=minf(0.,world.player.y+225.)
+	desired_y=CampaignRoutes.camera_y(world,desired_y)
 	view.camera_y=desired_y if options.reduced_motion else lerpf(view.camera_y,desired_y,1.-exp(-minf(dt,.05)*9.))
 	view.queue_redraw();update_hud()
 	telemetry_clock+=dt
@@ -728,7 +724,7 @@ func update_hud() -> void:
 	boss_health.value=world.boss.hp
 	if boss_health.visible:subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+( " · "+t("boss_warning") if float(world.boss.windup)>0. or float(world.boss.get("beam_warning",0.))>0. else "")
 	subtitle.position.y=boss_health.position.y+(20. if boss_health.visible else 0.)
-	ride_button.visible=active_controls and bool(world.mount.available) and int(world.mount.hp)>0 and (bool(world.mount.ridden) or absf(world.player.x-float(world.mount.x))<110.)
+	ride_button.visible=active_controls and (bool(world.mount.ridden) or CampaignVehicles.can_board(world))
 	ride_button.text=t("exit_vehicle") if bool(world.mount.ridden) else t("board")
 	if is_instance_valid(stick):stick.visible=active_controls
 	for key in actions:
@@ -808,8 +804,26 @@ func metadata() -> void:
 	data.bullets=[]
 	for bullet in world.bullets:
 		if bullet.owner=="enemy":data.bullets.append([bullet.p.x,bullet.p.y,bullet.v.x,bullet.v.y])
+	data.camera_y=view.camera_y;data.ground=view.ground
+	data.travel_active=fade>=0. or world.state=="travel";data.travel_target=world.travel_target
 	data.grounded=world.grounded();data.invulnerable=world.invulnerable;data.aim=[world.aim_direction.x,world.aim_direction.y]
 	data.presentation=presentation_stage;data.presentation_time=presentation_time;data.help_step=help_step;data.hud_summary=hud_panel.summary;data.report_lines=report_lines();data.input_kind=active_input;data.mount_transition=world.mount_transition;data.mount_transition_time=world.mount_transition_time
+	# Passive acceptance observations: these mirror real state, never mutate it.
+	data.engine_process_frames=Engine.get_process_frames();data.engine_physics_frames=Engine.get_physics_frames()
+	data.crouching=world.crouching()
+	var hit: Vector2=world.player_hit_center()
+	data.player_hit_center=[hit.x,hit.y];data.player_hit_radius=world.player_hit_radius()
+	data.assist_attacks=world.assist_attacks;data.assists=[]
+	for assist in world.assists:
+		var stones:=[]
+		for stone in assist.stones:stones.append({"x":stone.x,"y":stone.y,"age":stone.age})
+		data.assists.append({"kind":assist.kind,"remaining":assist.remaining,"age":assist.age,"phase":assist.phase,"x":assist.x,"y":assist.y,"stones":stones})
+	data.pickups=[]
+	for item in world.pickups:
+		if not world.taken.has(str(item.id)):data.pickups.append(item.duplicate(true))
+	data.spiders=[]
+	for bullet in world.bullets:
+		if str(bullet.kind)=="trap":data.spiders.append({"p":[bullet.p.x,bullet.p.y],"age":bullet.age,"target":bullet.get("target","")})
 	JavaScriptBridge.eval("document.getElementById('canvas')?.setAttribute('data-campaign',"+JSON.stringify(JSON.stringify(data))+");")
 
 func accessible_action(args: Array) -> void:

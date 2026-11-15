@@ -20,7 +20,7 @@ var font: Font
 var modal: Control
 var frozen:=false
 var last_jump:=0.
-const DEMOS := [["aion","shore"],["aion","water"],["owl","terrace"],["eren","arena"]]
+const DEMOS := [["aion","shore"],["sheep","water"],["rabbit","terrace"],["eren","arena"]]
 func t(key: String) -> String:return AionCampaignText.word(host.language,key)
 func copy(key: String) -> String:return RunnerFrontText.word(host.language,key)
 func begin_intro() -> void:
@@ -126,9 +126,9 @@ func _draw() -> void:
 				var hero: String=host.FRIENDS[i]
 				var key: String="runner-"+hero
 				var row:=2 if hero=="aion" else (6 if hero in ["owl","wolf","rabbit","eren"] else 1)
-				var pose: Dictionary=host.frames.pose(key,row,host.frames.cycle(key,row,intro_time,.85) if host.decorative_motion() else 0)
+				var pose: Dictionary=host.menu_hero_art.pose(hero,"walk",posmod(int(intro_time*7.),6) if host.decorative_motion() else 0) if host.menu_hero_art.has(hero) else host.frames.pose(key,row,host.frames.cycle(key,row,intro_time,.85) if host.decorative_motion() else 0)
 				var factor: float=float(pose.get("scale",1.))
-				var anchor:=Vector2(width*(float(i)+.5)/6.,height*.65)
+				var anchor:=Vector2(width*(float(i)+.5)/float(host.FRIENDS.size()),height*.65)
 				draw_texture_rect(pose.texture,Rect2((anchor+Vector2(pose.offset)*factor).round(),pose.get("size",pose.texture.get_size()*factor)),false)
 	elif demo_world!=null:
 		var text: String=copy("demo")

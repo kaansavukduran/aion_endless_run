@@ -10,9 +10,10 @@ func check(value: bool, message: String) -> void:
 func _initialize() -> void:
 	call_deferred("run")
 func run() -> void:
-	for pair in [["tr-TR","tr"],["en-GB","en"],["cs-CZ","cs"],["CS_cz","cs"],["de-DE","de"],["fr","fr"],["ja-JP","ja"],["ko_KR","ko"],["zh-Hant-TW","zh"],["az-AZ","az"],["es-ES","es"],["it-IT","it"],["cz","en"],["","en"]]:
-		check(Words.language_for_locale(pair[0]) == pair[1], "Locale selection: " + pair[0])
-	var names := {"tr":["Aion","Ömer","Melun","Kutsanmış"],"en":["Aion","Ömer","Melun","Kutsanmış"],"cs":["Aion","Ömer","Melun","Kutsanmış"]}
+	for pair in [["tr-TR","tr"],["TR_tr","tr"],["en-GB","en"],["cs-CZ","en"],["CS_cz","en"],["de-DE","en"],["fr","en"],["ja-JP","en"],["ko_KR","en"],["zh-Hant-TW","en"],["az-AZ","en"],["es-ES","en"],["it-IT","en"],["cz","en"],["","en"]]:
+		check(Words.language_for_locale(pair[0]) == pair[1], "Current TR/EN locale selection: " + pair[0])
+	check(Words.LANGUAGES==["tr","en"],"Only the explicitly requested Turkish and English are selectable")
+	var names := {"tr":["Aion","Kutsanmış","Ayça","Eren"],"en":["Aion","Kutsanmış","Ayça","Eren"]}
 	for lang in Words.LANGUAGES:
 		var table: Dictionary = Words.EXTRA[lang].data if Words.EXTRA.has(lang) else Words.STRINGS[lang]
 		var complete: bool = table.size() == Words.STRINGS.en.size()
@@ -20,7 +21,7 @@ func run() -> void:
 			complete = complete and table.has(key) and not Words.get_text(lang,key).is_empty() and Words.get_text(lang,key).count("%d") == Words.get_text("en",key).count("%d")
 		check(complete, "Complete localized UI with matching numeric placeholders: " + lang)
 		var actual: Array[String] = []
-		for id in ["aion","owl","wolf","sheep"]: actual.append(Words.get_text(lang,"name_"+id))
+		for id in ["aion","sheep","rabbit","eren"]: actual.append(Words.get_text(lang,"name_"+id))
 		check(actual == names[lang] if names.has(lang) else actual.size()==4 and actual[0]=="Aion", "Exact character names: " + lang)
 	check(Words.get_text("xx","play") == "Start running", "Unsupported lookup falls back to English")
 	var game = load("res://main.tscn").instantiate()
@@ -28,25 +29,27 @@ func run() -> void:
 	await process_frame
 	game.set_physics_process(false)
 	game.set_process(false)
-	check(game.ui.find_children("StartSelect_*", "Button", true, false).size() == 6, "All six selectable character tiles exist before play")
-	game.select_character("wolf")
-	game.set_language("cs")
-	check(game.character_name("owl") == "Ömer" and game.language_override, "Manual Czech selection localizes names and overrides the default")
+	check(game.ui.find_children("StartSelect_*", "Button", true, false).size() == 4, "All four current playable tiles exist before play")
+	game.select_character("eren")
+	game.set_language("tr")
+	check(game.character_name("rabbit") == "Ayça" and game.language_override, "Manual Turkish selection localizes the current roster and overrides the default")
 	game.start_run()
 	game.select_character("owl")
-	check(game.character == "wolf", "Changing character during a run is rejected")
+	check(game.character == "eren", "Changing character during a run is rejected")
 	game.pause_run()
 	game.open_subpage("characters")
 	game.show_page("characters")
 	game.select_character("sheep")
-	check(game.page == "paused" and game.character == "wolf", "Pause cannot expose or bypass character selection")
+	check(game.page == "paused" and game.character == "eren", "Pause cannot expose or bypass character selection")
 	game.world.state = "bonk"
 	game.show_page("finished")
 	game.select_character("aion")
-	check(game.character == "wolf", "Result screen requires returning to the starting screen to choose")
+	check(game.character == "eren", "Result screen requires returning to the starting screen to choose")
 	game.main_menu()
 	game.select_character("sheep")
 	check(game.character == "sheep", "A new pre-run selection is allowed")
+	# Archived six-row sources remain anatomically valid even when two heroes
+	# are no longer playable. Current M1 bodies have separate live-state tests.
 	# Head/ear span remains anatomically constant when poses lean or extend.
 	# Whole-pose height intentionally varies with bent knees and outstretched wings.
 	for id in ["owl","wolf","sheep"]:
@@ -65,17 +68,20 @@ func run() -> void:
 	game.world.sheep_count = 3
 	game.world.y = 0.0
 	game.update_friend()
-	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),64.109091),"Leader sheep keeps its normal anatomical size")
+	var leader_pose: Dictionary=M1HeroArt.metrics("sheep","walk",int(game.friend_sprite.get_meta("source_frame")))
+	var leader_atlas: Dictionary=M1HeroArt.DATA.data.atlases[str(leader_pose.source_key).trim_prefix("m1-body-")]
+	var expected_head: float=float(leader_atlas.calibration.sheep.face_patch[2])*float(leader_pose.source_scale)
+	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),expected_head) and str(game.friend_sprite.get_meta("source_key")).begins_with("m1-body-"),"Leader sheep uses the current calibrated M1 anatomical size")
 	for item in game.followers:
-		check(is_equal_approx(float(item.get_meta("head_size")),64.109091*0.72),"Each following sheep is 72 percent of normal anatomical size")
+		check(is_equal_approx(float(item.get_meta("head_size")),expected_head*0.72),"Each following sheep is 72 percent of normal anatomical size")
 	game.place_companion(game.friend_sprite,"owl",6,2,Vector2.ZERO,0.62*1.65,true)
 	check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),57.434599*1.65),"Explicit mushroom growth remains independent of pose")
-	game.set_language("cs")
+	game.set_language("tr")
 	game.save_settings()
 	var restored = load("res://main.tscn").instantiate()
 	root.add_child(restored)
 	await process_frame
-	check(restored.language == "cs" and restored.language_override and restored.character == "sheep", "Czech override and pre-run character survive a new instance")
+	check(restored.language == "tr" and restored.language_override and restored.character == "sheep", "Turkish override and pre-run character survive a new instance")
 	game.queue_free()
 	restored.queue_free()
 	await process_frame

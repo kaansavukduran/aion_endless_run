@@ -12,7 +12,9 @@ func advance(w,seconds):
  for i in ceili(seconds/.01):w.step(.01)
 func _initialize():call_deferred("run")
 func run():
- for id in ["aion","owl","wolf","sheep","rabbit","eren"]:
+ # Current heroes plus explicitly retained private legacy actor fixtures.
+ # Owl/wolf are NOT advertised as selectable heroes by this cadence check.
+ for id in World.PLAYABLE_HEROES+["owl","wolf"]:
   var w=arena();w.character=id;w.frontier.shoot_held=true
   var times:=[]
   for i in 250:
@@ -26,7 +28,7 @@ func run():
  w.state="running";w.adventure.hug_time=.5;w.step(.02);check(w.frontier.shots_fired==shots,"Hug pauses the weapon without introducing a reload")
  w=arena();var e=w.adventure.spawn_enemy(w,"slime",World.PLAYER_X+230);w.frontier.fire(w);advance(w,.22)
  check(e.hp==0 and w.adventure.run_xp==10,"A real normal-run bullet defeats the ground enemy and earns XP")
- var names={"aion":"Aion","sheep":"Kutsanmış","wolf":"Melun","owl":"Ömer","rabbit":"Emre","eren":"Eren"}
+ var names={"aion":"Aion","sheep":"Kutsanmış","wolf":"Melun","owl":"Ömer","rabbit":"Ayça","eren":"Eren"}
  for lang in Words.LANGUAGES:
   for id in names:check(Words.get_text(lang,"name_"+id)==names[id],"Proper name stays exact: "+lang+"/"+id)
  var save_path:="user://save.cfg";var original:=FileAccess.get_file_as_bytes(save_path) if FileAccess.file_exists(save_path) else PackedByteArray()
@@ -38,7 +40,7 @@ func run():
  for lang in Words.LANGUAGES:
   check(Words.get_text(lang,"gamepad_help").contains("X/□ "+Words.get_text(lang,"control_attack")),"Gamepad help describes the retained alternate Fire binding: "+lang)
  var g=load("res://main.tscn").instantiate();root.add_child(g);await process_frame;g.set_process(false);g.set_physics_process(false);g.touch_tutorial_done=true;g.select_character("aion");g.start_run();g.press_shoot("key");g.world.step(.02);g.update_friend();g.update_hud()
- check(g.world.frontier.shot_flash>0 and g.world.adventure.attack_time==0 and g.friend_sprite.get_meta("pose_key")=="gun-fire","Normal input and actual sprite use pistol, never punch")
+ check(g.world.frontier.shot_flash>0 and g.world.adventure.attack_time==0 and g.friend_sprite.get_meta("pose_key")=="m1-body" and g.friend_sprite.get_meta("source_key")=="m1-body-aion" and g.gun_echo.visible and not bool(g.friend_sprite.get_meta("gun_embedded")),"Normal input uses the current body and attached pistol, never punch")
  g.release_shoot("key");g.press_attack("key");check(g.world.frontier.shoot_held and g.world.adventure.attack_time==0,"Saved alternate binding also fires, with no melee or reload")
  check(not g.level_progress.visible and not g.xp_progress.visible,"Long level and XP bars are removed from the rendered HUD")
  g.main_menu()

@@ -26,7 +26,9 @@ func largest_body(image: Image) -> Rect2i:
 func _initialize() -> void:call_deferred("run")
 func run() -> void:
 	var art:=AionCampaignArt.new();var bank:=RunnerFrameBank.new()
-	for hero in AionCampaignWorld.HEROES:
+	# Retain original six-identity source validation as archive compatibility.
+	# Current four-player M1 bodies/weapon attachments are tested separately.
+	for hero in ["aion","wolf","sheep","owl","rabbit","eren"]:
 		var neutral: Dictionary=bank.pose("runner-"+hero,0,0)
 		# The sheep's detached halo is not part of its anatomical body height.
 		var approved_body:=largest_body(neutral.texture.get_image())
@@ -46,7 +48,7 @@ func run() -> void:
 			for y in image.get_height():clean=clean and image.get_pixel(0,y).a==0. and image.get_pixel(image.get_width()-1,y).a==0.
 			check(clean,"Independent attack texture has transparent sampling gutters")
 		check(first_height>approved_height*.9 and first_height<approved_height*1.1,"First attack body size agrees with actual connected approved neutral: "+hero)
-		check(bank.pose("gun-run",bank.hero_row(hero),0).source_key==("forge-mouth-carry" if hero=="wolf" else "pixel-"+hero),"Ground/fire artwork identity agrees with selected hero")
+		check(bank.pose("gun-run",bank.hero_row(hero),0).source_key==("forge-mouth-carry" if hero=="wolf" else "pixel-"+hero),"Archived ground/fire artwork retains its original identity")
 	for row in 8:
 		for frame in 6:
 			var pose:=art.pose(row,frame)

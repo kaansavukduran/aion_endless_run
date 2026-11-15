@@ -81,11 +81,11 @@ jobs:
           chmod +x /tmp/appimagetool
           sudo cp /tmp/appimagetool /usr/local/bin/appimagetool
           bash packaging/linux.sh
-          tar -czf build/AionEndlessRun-0.25.0-web-offline.tar.gz -C build/web .
+          tar -czf build/AionEndlessRun-0.26.0-web-offline.tar.gz -C build/web .
           timeout 15 build/linux/AionEndlessRun.x86_64 --headless -- --aion-smoke-test
-          sudo apt-get install -y ./build/AionEndlessRun-0.25.0-linux-x64.deb
+          sudo apt-get install -y ./build/AionEndlessRun-0.26.0-linux-x64.deb
           timeout 15 /usr/games/AionEndlessRun --headless -- --aion-smoke-test
-          APPIMAGE_EXTRACT_AND_RUN=1 timeout 20 build/AionEndlessRun-0.25.0-linux-x64.AppImage --headless -- --aion-smoke-test
+          APPIMAGE_EXTRACT_AND_RUN=1 timeout 20 build/AionEndlessRun-0.26.0-linux-x64.AppImage --headless -- --aion-smoke-test
       - name: Render biome ground, pits and rotated mobile views
         if: runner.os == 'Linux'
         shell: bash
@@ -107,7 +107,7 @@ jobs:
             build/terrain-review/*.png
             build/terrain-render.log
           if-no-files-found: warn
-      - name: Render arcade routes and all six hero animation cycles
+      - name: Render physical routes and four hero animation cycles
         if: runner.os == 'Linux'
         shell: bash
         run: |
@@ -116,7 +116,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           text=Path('build/campaign-render.log').read_text()
-          assert 'RESULT: 108 campaign render checks, 0 failures' in text
+          assert 'RESULT: 654 campaign render checks, 0 failures' in text
           assert 'SCRIPT ERROR' not in text and 'FAIL:' not in text
           PY
       - uses: actions/upload-artifact@v4
@@ -137,7 +137,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           log=Path('build/campaign-expansion-render.log').read_text()
-          assert 'RESULT: 48 expansion render checks, 0 failures' in log
+          assert 'RESULT: 226 expansion render checks, 0 failures' in log
           assert 'SCRIPT ERROR' not in log and 'FAIL:' not in log
           PY
       - uses: actions/upload-artifact@v4
@@ -177,13 +177,13 @@ jobs:
           $exportProcess = Start-Process -FilePath (Get-Command godot).Source -ArgumentList '--headless','--export-release','Windows' -Wait -PassThru -NoNewWindow
           if ($exportProcess.ExitCode -ne 0) { exit $exportProcess.ExitCode }
           Copy-Item LICENSE,THIRD_PARTY_NOTICES.md,README.md build/windows/
-          Compress-Archive -Path build/windows/* -DestinationPath build/AionEndlessRun-0.25.0-windows-x64-portable.zip
+          Compress-Archive -Path build/windows/* -DestinationPath build/AionEndlessRun-0.26.0-windows-x64-portable.zip
           if (!(Test-Path 'C:\Program Files (x86)\NSIS\makensis.exe')) { choco install nsis -y --no-progress }
           & 'C:\Program Files (x86)\NSIS\makensis.exe' packaging/windows.nsi
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $gameProcess = Start-Process -FilePath build/windows/AionEndlessRun.exe -ArgumentList '--headless','--','--aion-smoke-test' -Wait -PassThru
           if ($gameProcess.ExitCode -ne 0) { exit $gameProcess.ExitCode }
-          $installProcess = Start-Process -FilePath build/AionEndlessRun-0.25.0-windows-x64-Setup.exe -ArgumentList '/S' -Wait -PassThru
+          $installProcess = Start-Process -FilePath build/AionEndlessRun-0.26.0-windows-x64-Setup.exe -ArgumentList '/S' -Wait -PassThru
           if ($installProcess.ExitCode -ne 0) { exit $installProcess.ExitCode }
           $installedGame = Join-Path $env:LOCALAPPDATA 'Programs/Aion Endless Run/AionEndlessRun.exe'
           if (!(Test-Path $installedGame)) { throw 'Installer did not create game executable' }
@@ -194,11 +194,11 @@ jobs:
         run: |
           mkdir -p build/macos
           godot --headless --export-release macOS
-          mv build/macos/AionEndlessRun.zip build/AionEndlessRun-0.25.0-macos-universal-portable.zip
-          ditto -xk build/AionEndlessRun-0.25.0-macos-universal-portable.zip build/dmg
+          mv build/macos/AionEndlessRun.zip build/AionEndlessRun-0.26.0-macos-universal-portable.zip
+          ditto -xk build/AionEndlessRun-0.26.0-macos-universal-portable.zip build/dmg
           cp LICENSE THIRD_PARTY_NOTICES.md build/dmg/
           ln -s /Applications build/dmg/Applications
-          python3 packaging/macos_dmg.py build/dmg build/AionEndlessRun-0.25.0-macos-universal.dmg
+          python3 packaging/macos_dmg.py build/dmg build/AionEndlessRun-0.26.0-macos-universal.dmg
           find build/dmg -path '*/Contents/MacOS/*' -type f -exec chmod +x {} \;
           find build/dmg -path '*/Contents/MacOS/*' -type f -exec {} --headless -- --aion-smoke-test \;
       - uses: actions/upload-artifact@v4
@@ -262,7 +262,7 @@ jobs:
             adb shell pidof com.kaansavukduran.aionendlessrun
             adb logcat -d > build/android-logcat.txt
             python3 packaging/check_android_log.py build/android-logcat.txt
-            python3 packaging/check_android_images.py build/android-first-launch.png build/android-paused.png build/android-owl-glide.png build/android-held-fire.png build/android-eren.png build/android-duck.png build/android-rabbit-charge.png build/android-rabbit-leap.png
+            python3 packaging/check_android_images.py build/android-first-launch.png build/android-paused.png build/android-aion-jump.png build/android-held-fire.png build/android-eren.png build/android-duck.png build/android-rabbit-charge.png build/android-rabbit-leap.png build/android-crouch-fire.png
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -271,8 +271,10 @@ jobs:
             build/android-*.png
             build/android-logcat.txt
             build/android-input-results.json
-            build/android-owl-flight-states.json
-            build/android-touch-driver.txt
+            build/android-aion-jump-states.json
+            build/android-two-touch-driver.txt
+            build/android-arcade-input-states.json
+            build/android-arcade-final-ui.json
           if-no-files-found: warn
   android:
     if: github.event_name != 'pull_request' && vars.AION_ANDROID_SIGNING_READY == 'true'
@@ -304,7 +306,7 @@ jobs:
           mkdir -p build/android
           godot --headless --export-release Android
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose build/android/AionEndlessRun.apk
-          mv build/android/AionEndlessRun.apk build/AionEndlessRun-0.25.0-android-arm64-x64.apk
+          mv build/android/AionEndlessRun.apk build/AionEndlessRun-0.26.0-android-arm64-x64.apk
       - uses: actions/upload-artifact@v4
         with:
           name: android

@@ -1,5 +1,22 @@
 # Aion Endless Run
 
+## 0.26.0 · Hareketle seçilen yollar, dört kahraman
+
+**Arcade / Sönen Fenerler**: Aion, iki ayaklı Kutsanmış, Ayça ve Eren ile Mission 1. İki yol ayrımında üst köprülere zıpla veya alt kanaldan ilerle; oyun rotayı fiziksel konumundan seçer. Yol seçme metin menüsü yoktur. Bölüm geçişleri otomatik kısa solmayla gerçekleşir.
+
+Ömer ve Melun artık oynanabilir karakter değil, toplanan yardımcı güçlerdir: tüy iki alan etkili taş saldırısı, kurt simgesi iki ayrı hedefe koşup ısırma sağlar. Aynı beş hareket/ateş eylemi için ortak gövde, el ve zemin kaydı kullanılır. Ateş etmek koşu karelerini durdurmaz. Ayça, eski Emre yuvasında kendine ait etekli/tokalı çizimini kullanır; Eren ayrı kalır. Eski kaynak paftaları değiştirilmez.
+
+**Arcade kontrolleri:** A/D veya oklarla yürü; S/Aşağı basılı tutarak eğil ve ilerle; Space zıpla; F/sol tık ateş et; G bomba; E bin/in. Aşağı+Zıpla ile tek yönlü platformdan in. Telefonda solda sabit joystick, sağda Zıpla/Ateş/Bomba; joystick'i aşağı çekerek eğil. Kolda sol çubuk/yön tuşları, A/× zıpla, RB/R1 veya X/□ ateş, B/○ bomba, Y/△ bin/in, Start/Options duraklat; kayıtlı eşlemeler korunur. Araçta sağ çubuk veya fareyle kesintisiz nişan al. Araçlar üç can taşır.
+
+Yürüyen örümcek mayınları hedefe gider; beş saniye içinde patlar. Kurtarılan fener bekçileri çantadan fiziksel ikmal bırakır; eşyaya temas edince alınır. Menü ve oyun yalnız **Türkçe/English** sunar. Dikey/yatay telefon, klavye/fare ve gamepad desteği korunur. Eski sonsuz mod ayrı kaydıyla erişilebilirdir.
+
+[Oyunu oyna](https://aionendlessrun.vercel.app/) · [Fiziksel rotalar ve doğrulama kapsamı](docs/M1-FLOW-VALIDATION.md) · [Karakter paftaları](docs/M1-HERO-ART.md) · [Yerel Unslop kuralları ve QA](docs/M1-SKILL-QA-INVENTORY.md)
+
+Bu sürüm Mission 1'i geliştirir; Mission 2–5'in tamamlandığı iddia edilmez. Önceki yayımlanmış indirme paketleri yeni web sürümünden ayrıdır. Aşağıdaki bölüm önceki teslimlerin tarihsel kaydıdır; eski karakter/dil listeleri güncel kadroyu tarif etmez.
+
+# Önceki sürümlerin kayıtları
+
+
 ## 0.25.0 · Fener Ormanı arcade sunumu
 
 Atlanabilir AIONIA açılışı, kayıt yazmayan gerçek Attract Mode, altı animasyonlu kahraman kartı, görsel yardım, kompakt görev HUD'ı ve ayrıntılı gerçek görev raporu. Ömer havada, Melun koşarken silahını ağzında taşır; iki tavşan kısa basışta Aion'un 1,75 katına, tam şarjda yaklaşık 4 katına sıçrar. Ömer'in üç hava kanat hakkı vardır. NPC'lerin bağı bıçak veya mermiyle çözülür; dolaşan NPC ile temas teşekkür ve tek seferlik ödülü başlatır. Araçlara girme/çıkma animasyonu ve namluyla eşleşen sekiz yönlü atış korunur.

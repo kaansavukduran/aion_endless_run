@@ -63,7 +63,7 @@ ready_main()
 # The full-scene image validator expects the interactive game, not the
 # intentionally sparse dark opening. Keep its existing thresholds unchanged.
 capture('first-launch')
-for code in ['tr','cs','en']:
+for code in ['tr','en']:
  menu_button(name='LanguageMenu')
  latest('AION_UI ',lambda s:any(b['name']=='Language_'+code for b in s['buttons']))
  menu_button(name='Language_'+code)
@@ -71,35 +71,18 @@ for code in ['tr','cs','en']:
  panel=layout['regions']['PagePanel'];chooser=layout['regions']['StartChooser']
  check(panel[1]+panel[3]<=chooser[1] and chooser[3]<100, 'Native system-font menu and heading/roster stay separated: '+code)
  capture('main-'+code)
-menu_button(name='StartSelect_owl');latest('AION_UI ',lambda s:s['character']=='owl' and s['page']=='main')
+layout=ready_main()
+visible={button['name'] for button in layout['buttons']}
+check(not ({'StartSelect_owl','StartSelect_wolf'} & visible),'Retired owl and wolf are not playable native menu choices')
+check({'StartSelect_aion','StartSelect_sheep','StartSelect_rabbit','StartSelect_eren'} <= visible,'All four current playable characters are reachable on the native menu')
+menu_button(name='StartSelect_aion');latest('AION_UI ',lambda s:s['character']=='aion' and s['page']=='main')
 menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-# Complete touch pairs share one Android input VM. Starting a new VM for
-# every contact adds device-dependent gaps and may land between real presses.
-# This input-only driver calls the SAME standard Android input command; it has
-# no access to game internals. Preserve the actual state history for review.
-sdk=Path(os.environ.get('ANDROID_HOME') or os.environ['ANDROID_SDK_ROOT'])
-android_jar=sdk/'platforms/android-35/android.jar'
-if not android_jar.is_file():android_jar=max(sdk.glob('platforms/android-*/android.jar'),key=lambda p:tuple(int(n) for n in re.findall(r'\d+',p.parent.name)))
-d8=sdk/'build-tools/35.0.0/d8'
-if not d8.is_file():d8=max(sdk.glob('build-tools/*/d8'),key=lambda p:tuple(int(n) for n in re.findall(r'\d+',p.parent.name)))
-classes=a.output/'adb-flight';classes.mkdir(exist_ok=True)
-source=Path(__file__).resolve().parents[1]/'tests/native/AionTouchFlight.java'
-subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-source','8','-target','8','-bootclasspath',str(android_jar),'-d',str(classes),str(source)],check=True)
-subprocess.run([str(d8),'--min-api','26','--lib',str(android_jar),'--output',str(classes/'driver.zip'),str(classes/'AionTouchFlight.class')],check=True)
-adb('push',classes/'driver.zip','/data/local/tmp/aion-touch-driver.zip')
-layout=latest('AION_UI ',lambda s:'jump' in s['actions']);x,y=layout['actions']['jump']
-before_flight=len(packets('AION_STATE '))
-started=time.monotonic()
-output=adb('shell','CLASSPATH=/data/local/tmp/aion-touch-driver.zip:/system/framework/input.jar','app_process','/system/bin','AionTouchFlight',x,y,text=True)
-(a.output/'android-touch-driver.txt').write_text(output+'\nwall_seconds='+str(time.monotonic()-started)+'\n')
-print(output,flush=True)
-adb('shell','screencap','-p','/data/local/tmp/aion-owl-flight.png')
-flight=packets('AION_STATE ')[before_flight:]
-(a.output/'android-owl-glide.png').write_bytes(adb('exec-out','cat','/data/local/tmp/aion-owl-flight.png'))
-(a.output/'android-owl-flight-states.json').write_text(json.dumps(flight,indent=2)+'\n')
-check(any(s['airborne'] and s['gliding'] for s in flight),'Real native Jump hold reaches an airborne owl glide')
-for flap in range(1,4):
- check(any(s['airborne'] and s['owl_flaps_used']==flap for s in flight),'Real native Jump repress consumes airborne flap '+str(flap))
+before_jump=len(packets('AION_STATE '));gesture=hold('jump',350)
+gesture.wait(timeout=5)
+flight=packets('AION_STATE ')[before_jump:]
+(a.output/'android-aion-jump-states.json').write_text(json.dumps(flight,indent=2)+'\n')
+check(any(state['airborne'] for state in flight),'Real native Aion Jump touch produces an airborne state')
+capture('aion-jump')
 pause();capture('paused');main()
 menu_button(name='StartSelect_aion');latest('AION_UI ',lambda s:s['character']=='aion' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 gesture=hold('shoot',700)
@@ -124,12 +107,59 @@ latest('AION_STATE ',lambda s:s['airborne'] and not s['charging']);capture('eren
 pause();main();menu_button(name='StartSelect_rabbit');latest('AION_UI ',lambda s:s['character']=='rabbit' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 gesture=hold('jump',1000)
 try:
- latest('AION_STATE ',lambda s:s['charging'] and not s['airborne'] and s['charge_ratio']>.1);capture('rabbit-charge');check(True,'Native Emre holds on the ground and accumulates charge')
+ latest('AION_STATE ',lambda s:s['charging'] and not s['airborne'] and s['charge_ratio']>.1);capture('rabbit-charge');check(True,'Native Ayça holds on the ground and accumulates charge')
 finally:gesture.wait(timeout=5)
-latest('AION_STATE ',lambda s:s['airborne'] and not s['charging']);capture('rabbit-leap');check(True,'Native Emre releases a real charged leap')
+latest('AION_STATE ',lambda s:s['airborne'] and not s['charging']);capture('rabbit-leap');check(True,'Native Ayça releases a real charged leap')
 pause();old=latest('AION_UI ',lambda s:s['page']=='paused');adb('shell','wm','size','2560x1440')
 try:
  rotated=latest('AION_UI ',lambda s:s['page']=='paused' and s['orientation']=='landscape');capture('landscape-paused')
  check(rotated['character']==old['character'] and rotated['score']==old['score'] and rotated['level']==old['level'],'Native landscape resize preserves the paused character, score and level')
 finally:adb('shell','wm','size','reset')
+# The changed crouch/movement mechanic belongs to Arcade, whose passive native
+# records are separate from the retained Endless runner observations above.
+main();menu_button(name='StartSelect_aion');ready_main();menu_button(name='StartCampaign')
+def arcade_ui(predicate=lambda value:True,timeout=25):
+ return latest('AION_ARCADE_UI ',lambda value:value.get('ui_ready') and predicate(value),timeout=timeout)
+def arcade_state(predicate=lambda value:True,timeout=25):
+ return latest('AION_ARCADE_STATE ',predicate,timeout=timeout)
+def arcade_button(name):
+ layout=arcade_ui(lambda value:any(button['name']==name for button in value['buttons']))
+ chosen=next(button for button in layout['buttons'] if button['name']==name)
+ generation=layout['ui_generation'];tap(chosen['point'])
+ return arcade_ui(lambda value:value['ui_generation']!=generation)
+arcade_button('CampaignBegin')
+for _ in range(15):
+ if arcade_ui()['menu']!='help':break
+ arcade_button('CampaignGo')
+arcade_state(lambda state:state['state']=='playing')
+check(True,'Actual native Arcade entry reaches Mission1 through briefing and help')
+# Inject two ordinary touchscreen pointers. No game handlers/state are invoked.
+sdk=Path(os.environ.get('ANDROID_HOME') or os.environ['ANDROID_SDK_ROOT'])
+android_jar=sdk/'platforms/android-35/android.jar'
+if not android_jar.is_file():android_jar=max(sdk.glob('platforms/android-*/android.jar'),key=lambda path:tuple(int(number) for number in re.findall(r'\d+',path.parent.name)))
+d8=sdk/'build-tools/35.0.0/d8'
+if not d8.is_file():d8=max(sdk.glob('build-tools/*/d8'),key=lambda path:tuple(int(number) for number in re.findall(r'\d+',path.parent.name)))
+classes=a.output/'adb-two-touch';classes.mkdir(exist_ok=True)
+source=Path(__file__).resolve().parents[1]/'tests/native/AionTouchPair.java'
+subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-source','8','-target','8','-bootclasspath',str(android_jar),'-d',str(classes),str(source)],check=True)
+subprocess.run([str(d8),'--min-api','26','--lib',str(android_jar),'--output',str(classes/'driver.zip'),str(classes/'AionTouchPair.class')],check=True)
+adb('push',classes/'driver.zip','/data/local/tmp/aion-two-touch-driver.zip')
+layout=arcade_ui(lambda state:'stick' in state and 'attack' in state['actions'])
+stick=layout['stick'];attack=layout['actions']['attack'];before=arcade_state()
+x=round(stick[0]+stick[2]*.76);y=round(stick[1]+stick[3]*.76)
+command=['adb','shell','CLASSPATH=/data/local/tmp/aion-two-touch-driver.zip:/system/framework/input.jar','app_process','/system/bin','AionTouchPair',str(x),str(y),str(attack[0]),str(attack[1]),'3500']
+pair=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
+try:
+ active=arcade_state(lambda state:state['crouching'] and state['velocity'][0]>1 and state['player'][0]>before['player'][0]+8 and state['shots']>before['shots'],timeout=15)
+ check(pair.poll() is None,'Native two-finger gesture remains held during crouch/fire observation')
+ capture('crouch-fire')
+ check(True,'Real native joystick Down+Right and second-finger Fire crawl and shoot together')
+finally:
+ output,_=pair.communicate(timeout=10)
+ (a.output/'android-two-touch-driver.txt').write_text(output+'\n')
+released=arcade_state(lambda state:not state['crouching'] and abs(state['velocity'][0])<1)
+check(True,'Releasing both native fingers clears crouch and movement')
+(a.output/'android-arcade-input-states.json').write_text(json.dumps(packets('AION_ARCADE_STATE '),indent=2)+'\n')
+(a.output/'android-arcade-final-ui.json').write_text(json.dumps(arcade_ui(),indent=2)+'\n')
+
 (a.output/'android-input-results.json').write_text(json.dumps({'checks':results,'scope':'API30 emulator, real ADB touches, offline and display resize; no physical phone/gamepad claim.'},indent=2)+'\n')

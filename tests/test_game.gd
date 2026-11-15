@@ -42,8 +42,9 @@ func touch(game: Node, index: int, point: Vector2, pressed: bool) -> void:
 
 func ability_tests() -> void:
 	var owl := classic_world()
-	owl.character = "owl"
 	owl.reset()
+	# Legacy actor fixture; Ömer is now an assist, not a selectable hero.
+	owl.character = "owl"
 	owl.obstacle_wait = 999.0
 	owl.jump_held = true
 	owl.jump()
@@ -59,6 +60,7 @@ func ability_tests() -> void:
 	var flights := []
 	for held in [false, true]:
 		owl.reset()
+		owl.character = "owl" # Retained diagnostic actor after playable reset.
 		owl.obstacle_wait = 999.0
 		owl.jump_held = held
 		owl.jump()
@@ -85,8 +87,9 @@ func ability_tests() -> void:
 	aion.jump()
 	check(aion.jumps_used == 2, "Aion can double jump again after landing")
 	var wolf := classic_world()
-	wolf.character = "wolf"
 	wolf.reset()
+	# Legacy actor fixture; Melun is now an assist, not a selectable hero.
+	wolf.character = "wolf"
 	var normal_speed: float = wolf.speed()
 	wolf.boost_held = true
 	check(is_equal_approx(wolf.speed(), normal_speed * World.BOOST_MULTIPLIER), "Wolf hold boosts real world speed")
@@ -178,8 +181,9 @@ func flock_and_wind_tests() -> void:
 		while float(flock.flock_pose(0).y) >= 0.0: flock.step(1.0 / 240)
 		check(absf(flock.distance - base_distance - World.FLOCK_GAP) < 5.0, "Spatial follower timing stays correct at speed " + str(flock.speed()))
 	var owl := classic_world()
-	owl.character = "owl"
 	owl.reset()
+	# Legacy actor fixture; Ömer is now an assist, not a selectable hero.
+	owl.character = "owl"
 	owl.obstacle_wait = 999.0
 	owl.y = -90.0
 	owl.velocity = 40.0
@@ -201,6 +205,7 @@ func flock_and_wind_tests() -> void:
 	for i in 500: owl.step(1.0 / 120)
 	check(owl.y == 0.0 and not owl.riding_gust and owl.jumps_used == 0, "A finite passing gust still lets the owl land and reset its jump")
 	owl.reset()
+	owl.character="owl" # Legacy diagnostic actor after current-roster reset.
 	owl.obstacle_wait = 999.0
 	owl.jump_held = true
 	owl.gusts = [{"x":World.PLAYER_X, "width":50000.0}]
@@ -338,7 +343,7 @@ func run() -> void:
 	root.add_child(second)
 	await process_frame
 	second.set_physics_process(false)
-	check(second.best == 4321 and second.character == "owl", "Best and character survive new instance")
+	check(second.best == 4321 and second.character == "aion", "Old removed-owl preference safely falls back while earned best survives")
 	check(second.language == "en" and not second.motion and not second.audio_enabled and is_equal_approx(second.volume, 0.35), "Settings persist independently")
 	second.start_run()
 	key(second, KEY_SPACE)
@@ -347,8 +352,10 @@ func run() -> void:
 	second.main_menu()
 	check(second.world.state == "ready" and second.world.y == 0.0 and second.world.score == 0 and second.world.obstacles.is_empty(), "Main menu resets airborne pose and previous hazards while preserving the best")
 	second.main_menu()
-	second.select_character("wolf")
+	second.select_character("aion")
 	second.start_run()
+	# Private legacy actor fixture; never select this removed hero through UI.
+	second.character="wolf";second.world.character="wolf"
 	touch(second, 0, Vector2(World.PLAYER_X, second.ground - 35), true)
 	check(second.world.boosting(), "Mobile hold on the wolf activates boost")
 	touch(second, 1, Vector2(World.PLAYER_X + 230, second.ground - 35), true)
@@ -366,8 +373,10 @@ func run() -> void:
 	second.resume_run()
 	check(not second.world.boosting(), "Resume cannot latch an old boost press")
 	second.main_menu()
-	second.select_character("owl")
+	second.select_character("aion")
 	second.start_run()
+	# Private legacy flight actor for retained source/physics regression.
+	second.character="owl";second.world.character="owl"
 	second.world.y = -100.0
 	second.world.velocity = 110.0
 	second.world.jumps_used = 1
@@ -378,10 +387,15 @@ func run() -> void:
 	second.world.step(0.02)
 	check(not second.world.gliding, "Keyboard release ends owl glide")
 	second.motion = true
+	# This fixture explicitly exercises animation. A retained accessibility
+	# preference must not turn it into a false expectation of moving frames.
+	second.interface_options.reduced_motion = false
 	for id in ["wolf", "sheep", "owl"]:
 		second.main_menu()
-		second.select_character(id)
+		second.select_character("aion" if id in ["wolf","owl"] else id)
 		second.start_run()
+		# Source-animation diagnostics retain legacy companion actors.
+		second.character=id;second.world.character=id
 		second.world.state = "running"
 		second.world.y = 0.0
 		second.world.time = 0.0
@@ -409,8 +423,10 @@ func run() -> void:
 	second.update_friend()
 	check(second.friend_row == 6, "Owl glide uses its dedicated extended-wing artwork")
 	second.main_menu()
-	second.select_character("wolf")
+	second.select_character("aion")
 	second.start_run()
+	# Private legacy actor fixture; never select this removed hero through UI.
+	second.character="wolf";second.world.character="wolf"
 	second.world.y = 0.0
 	second.world.boost_held = true
 	second.update_friend()
@@ -434,10 +450,12 @@ func run() -> void:
 	second.world.step(0.02)
 	second.update_friend()
 	check(second.friend_sprite.position.y < second.followers[0].position.y and second.followers[0].position.y == second.followers[1].position.y, "Real follower sprites stay grounded while the leading sheep takes off")
-	check(second.friend_sprite.get_meta("pose_key") == "actions" and second.followers[0].get_meta("pose_key") == "runner-sheep", "Sheep jump uses new squash/flight frames while its follower still runs")
+	check(second.friend_sprite.get_meta("pose_key") == "m1-body" and second.friend_sprite.get_meta("pose_action") == "air_fire" and second.followers[0].get_meta("pose_key") == "m1-body" and second.followers[0].get_meta("pose_action") == "walk", "Sheep leader jumps while its delayed follower runs using the same current anatomical body bank")
 	second.main_menu()
-	second.select_character("wolf")
+	second.select_character("aion")
 	second.start_run()
+	# Private legacy actor fixture; never select this removed hero through UI.
+	second.character="wolf";second.world.character="wolf"
 	second.world.time = 0.5
 	var ribbon_a: Array = second.wolf_wind_ribbons()
 	second.world.time = 0.6

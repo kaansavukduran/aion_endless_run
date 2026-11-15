@@ -1,3 +1,13 @@
+# 0.26.0 · Mission 1 bütünleştirme devri
+
+Başlangıç: temiz main `4864b09ce7efea0d2c1b4eaead8703b9cb465b0e`; çalışma dalı `feat/mission1-flow`. Godot4.6.3 korunur. Kullanıcının son kararı oynanabilir kadroyu Aion/Kutsanmış/Ayça/Eren, dilleri TR/EN yapar; eski6satırlık atlaslar ve11dillik arşiv metinleri silinmez. AIONIA1.7, referans indeksi rev3 ve AER1.1 incelendi; özel belgeler depoya kopyalanmadı.
+
+Güncel fiziksel rotalar, no-confirm bölüm geçişleri ve kapsamlı kanıt ayrımı: [M1 akış denetimi](docs/M1-FLOW-VALIDATION.md). Yeni beş eylem gövde bankası: [karakter üretimi](docs/M1-HERO-ART.md). Ortak kaynak pikselinden bağımsız ölçülen kabza/namlu ve hareket sürekliliği test edilir; özel silah ikonlarındaki örnek mermi/duman elde tutulan kopyadan ayrılır, kaynak PNG korunur. Araç namlusu gövdeden ayrıştırılır, özgün eğik kare ekseni gerçek nişan açısına dönüştürülür.
+
+Üç istenen skill okundu. Bulut skill kaynakları salt okunur; projedeki `.agents/skills/unslop` ve `.agents/skills/fragaria-unslop` kopyaları açık QA kurallarıyla geliştirilmiştir. Bulut paketlerinin güncellendiği iddia edilmez. [Skill ve test envanteri](docs/M1-SKILL-QA-INVENTORY.md).
+
+Eski sonuçlar aşağıda tarihsel olarak korunur. Güncel son export/CI/yayın durumu ayrı teslim raporunda kaydedilmelidir; eski0.25sonuçlarını0.26sonucu saymayın. Native dağıtım/release veya Drive eşitlemesi bu görevin örtük çıktısı değildir.
+
 # 0.25.0 · AIONIA arcade presentation and movement handoff
 
 Active source `/workspace/aion_endless_run`, branch `feat/aionia-eightway-npc-ui-20261115`, continuing the owner's existing PR #3 / `328fd0d42131f9fc857fe50f2a32488023461ce5`; baseline production/main `101a8a882f42421314900e2549efba4a59d33561` is preserved. Live AIONIA1.7, reference index revision3 and AER1.1 read; the standard revision was rechecked before publication work. Scope is the adopted29-section UI brief plus the latest mouth-gun,2×vehicles,rabbit/owl physics and projectile/contact-rescue request. Existing approved joystick/fire/jump/grenade controls and all11locales retained.

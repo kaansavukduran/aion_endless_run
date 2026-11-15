@@ -20,12 +20,19 @@ var npc_growth_cache: Dictionary = {}
 var item_bank := ForgeItemBank.new()
 var vehicle_art := ForgeVehicleArt.new()
 var forge_art := ForgeHeroArt.new()
+var support_art := M1SupportArt.new()
+var m1_heroes := M1HeroArt.new()
 
 # World facing (-1 = left) must be relative to each source drawing.
 # Original drone/seed machine rows face right; other enemy sheets face left.
 static func enemy_draw_direction(kind: String, facing: int) -> int:
 	var source_facing: int=1 if kind in ["drone","seed"] else -1
 	return source_facing*(-1 if facing<0 else 1)
+
+static func npc_draw_direction(facing: int) -> int:
+	# Freed walk/departure sources face left. World velocity never changes
+	# to compensate for a sprite flip.
+	return -1 if facing>0 else 1
 
 func hero_reference_height() -> float:
 	# Actual alpha silhouette, without texture padding, muzzle/particles or UI.
@@ -58,7 +65,7 @@ func vehicle_pose(type: String,phase: int,frame: int) -> Dictionary:
 func vehicle_draw_position() -> Vector2:
 	# The rider climbs into a stationary hull. Its saddle root is meaningful
 	# only after entry has finished; applying it early sinks the whole hull.
-	return Vector2(float(world.mount.x),world.player.y+42. if bool(world.mount.ridden) and world.mount_transition!="enter" else 0.)
+	return Vector2(float(world.mount.x),world.player.y+42. if bool(world.mount.ridden) and world.mount_transition!="enter" else float(world.mount.get("floor_y",world.floor_at(float(world.mount.x)))))
 
 func vehicle_draw_facing() -> int:
 	return world.facing if bool(world.mount.ridden) or not world.mount_transition.is_empty() else int(world.mount.get("facing",1))
@@ -67,29 +74,31 @@ func existing(key: String,row: int,frame: int,p: Vector2,direction: int=1,growth
 	draw_pose(frames.pose(key,row,clampi(frame,0,frames.count(key,row)-1)),p,direction,growth,tint)
 
 func hero_pose(hero: String, moving: bool, airborne: bool, clock: float) -> Dictionary:
-	var row: int = frames.hero_row(hero)
-	var motion: bool=host.motion_enabled and not host.options.reduced_motion
-	if world.state in ["dying","dead"] and world.death_cause!="pit":
-		var death_row:=row*2+1
-		return frames.pose("deaths",death_row,frames.progress("deaths",death_row,world.death_time/.8) if motion else frames.count("deaths",death_row)-1)
-	if bool(world.mount.ridden):return frames.pose("gun-run",row,0)
-	if world.rescue_time>0.:
-		return catalogue.pose("rescue-heroes",row,clampi(int((.6-world.rescue_time)/.6*6.),0,5) if motion else 3)
-	if world.melee_time>0.:
-		return art.melee(hero,clampi(int((.28-world.melee_time)/.28*6.),0,5) if motion else 3)
-	var armed: Dictionary=world.armed_art_spec()
-	if not armed.is_empty():
-		return forge_art.pose(str(armed.key),int(armed.row),int(armed.frame) if motion or str(armed.key)!="mouth-carry" else 0)
-	var key := "gun-fire" if world.shot_flash>0. else "gun-run"
-	var frame: int = int((.18-world.shot_flash)/.18*frames.count(key,row)) if world.shot_flash>0. else (frames.cycle(key,row,clock,180.) if moving and motion else 0)
-	if airborne or world.charging or (hero=="wolf" and world.boost_held and moving):
-		key = "runner-"+hero; row = 2
-		if world.charging or (hero=="wolf" and world.boost_held) or (hero=="owl" and world.gliding): row = 6
-		if hero=="owl" and world.flap_time>0.: key = "owl-flap"; row = 0
-		frame = (frames.cycle(key,row,world.time,.6) if row==6 or key=="owl-flap" else RunnerWorld.flight_frame_for(world.velocity.y,world.air_time,frames.count(key,row))) if motion else 0
-		if world.charging:frame=frames.progress(key,row,world.charge_ratio()) if motion else 0
-		elif key=="owl-flap":frame=frames.progress(key,row,1.-world.flap_time/.3) if motion else 0
-	return frames.pose(key,row,clampi(frame,0,frames.count(key,row)-1))
+	if M1HeroArt.has(hero):
+		var s: Dictionary=M1CombatArt.body_spec(world)
+		return m1_heroes.pose(hero,str(s.action),int(s.frame))
+	return frames.pose("gun-run",frames.hero_row(hero),0)
+
+func follower_render_spec(index: int) -> Dictionary:
+	# Feet on an elevated walkway are grounded too. Sample the actual recorded
+	# support/crouch/stride instead of treating every negative Y as a jump.
+	if bool(world.mount.ridden):
+		return {"pose":m1_heroes.pose("sheep","idle_fire",0),"p":vehicle_draw_position()+Vector2(-vehicle_draw_facing()*(28.+index*24.),-30.),"facing":vehicle_draw_facing(),"growth":.55,"action":"idle_fire","frame":0}
+	var sample: Dictionary={"p":world.player-Vector2((index+1)*52,0),"facing":world.facing,"grounded":world.grounded(),"crouched":world.crouching(),"walk_distance":world.walk_distance,"moving":absf(world.velocity.x)>1.,"velocity_y":world.velocity.y,"air_time":world.air_time}
+	for old in world.trail:
+		if float(old.time)<=world.time-float(index+1)*.27:sample=old
+	var action: String="idle_fire"
+	var frame:=0
+	var travel: float=float(sample.get("walk_distance",world.walk_distance))
+	if not bool(sample.get("grounded",true)):
+		action="air_fire";frame=RunnerWorld.flight_frame_for(float(sample.get("velocity_y",0.)),float(sample.get("air_time",0.)),6)
+	elif bool(sample.get("crouched",false)):
+		action="crouch_walk" if bool(sample.get("moving",false)) else "crouch_fire"
+		if action=="crouch_walk":frame=posmod(int(travel/110.*6.),6)
+	elif bool(sample.get("moving",false)):
+		action="walk";frame=posmod(int(travel/174.*6.),6)
+	if not host.motion_enabled or host.options.reduced_motion:frame=0
+	return {"pose":m1_heroes.pose("sheep",action,frame),"p":Vector2(sample.p),"facing":int(sample.facing),"growth":.67,"action":action,"frame":frame}
 
 func held_gun(hero: String,p: Vector2,direction: int) -> void:
 	var row: int = frames.hero_row(hero)
@@ -122,7 +131,7 @@ func draw_world() -> void:
 		var x: float = i*390.+160.
 		if world.floor_at(x)!=0.: continue
 		existing("flora",world.biome(),0 if host.options.reduced_motion or not host.motion_enabled else posmod(int(world.time/.7)+i,3),Vector2(x,0),1,.74)
-	terrain.draw(self,world.biome(),world.biome(),1.,camera_x,.05)
+	if not CampaignRoutes.draw_floor(self):terrain.draw(self,world.biome(),world.biome(),1.,camera_x,.05)
 	CampaignEnvironmentView.draw(self)
 	for pit in world.pits:
 		var rect := Rect2(pit.x-camera_x,ground,pit.y-pit.x,scene_h-ground)
@@ -136,7 +145,7 @@ func draw_world() -> void:
 		# Bracketed wooden walkways, with posts in the scenery layer behind
 		# the actors. Their caps exactly match the one-way collision surface.
 		for dx in [14.,r.size.x-22.]:
-			var post_height: float=ground-r.position.y
+			var post_height: float=ground-r.position.y+(CampaignRoutes.floor_height(platform.position.x+dx) if CampaignRoutes.is_fork(world.section) else 0.)
 			draw_rect(Rect2(r.position+Vector2(dx,9),Vector2(7,post_height-9)),Color("635744"))
 			draw_rect(Rect2(r.position+Vector2(dx+1,10),Vector2(2,post_height-10)),Color("aa9263"))
 		draw_rect(r,Color("493f38")); draw_rect(Rect2(r.position,Vector2(r.size.x,3)),Color("d1bc86"))
@@ -145,6 +154,7 @@ func draw_world() -> void:
 			draw_rect(Rect2(r.position+Vector2(x+3,4),Vector2(minf(9,r.size.x-x-3),1)),Color("c5a46c"))
 		for dx in [7.,r.size.x-12.]:
 			draw_rect(Rect2(r.position+Vector2(dx,3),Vector2(5,15)),Color("686c62"));draw_rect(Rect2(r.position+Vector2(dx+1,5),Vector2(2,2)),Color("d2cba4"))
+	CampaignRoutes.draw_landmarks(self)
 	for gate in world.gates:
 		if float(gate.x)<camera_x-100. or float(gate.x)>camera_x+scene_w+100.:continue
 		if not world.gate_closed(gate): continue
@@ -161,10 +171,16 @@ func draw_world() -> void:
 		var animated: bool=host.motion_enabled and not host.options.reduced_motion
 		var frame: int=posmod(int(world.time*2.),2) if animated else 0
 		if phase in ["free","departed"]:frame=6+posmod(int(world.time*6.),2) if animated else 6
-		elif phase=="thanks":frame=2 if age<.2 else (3 if age<.45 else (4 if age<.9 else (5 if age<2.4 else 6+posmod(int(age*6.),2))))
+		elif phase=="thanks":frame=2 if age<.45 else 3
 		var npc_pose: Dictionary=catalogue.pose("rescue-npcs",int(npc.variant),frame)
 		var growth: float=npc_growth(int(npc.variant))
-		draw_pose(npc_pose,Vector2(float(npc.x),float(npc.y)),int(npc.get("facing",1)) if phase in ["free","departed"] else 1,growth)
+		var npc_direction: int=npc_draw_direction(int(npc.get("facing",-1))) if phase!="bound" else 1
+		draw_pose(npc_pose,Vector2(float(npc.x),float(npc.y)),npc_direction,growth)
+		if phase=="thanks":
+			var bag_at:=Vector2(float(npc.x)+float(npc.facing)*22.,float(npc.y)-52.)
+			draw_pose(support_art.pose("satchel"),bag_at)
+			if age>=.45 and age<.9:
+				draw_pose(item_bank.pose(str(npc.gift)),bag_at+Vector2(float(npc.facing)*10.,-(age-.45)*80.),1,.6)
 		var p := at(Vector2(float(npc.x),float(npc.y)))
 		var label_top: float=maxf(46.,p.y+minf(-90.,float(npc_pose.offset.y)*growth-12.))
 		if phase=="bound":caption(host.t("cut"),Vector2(clampf(p.x-35.,8.,scene_w-200.),label_top),17)
@@ -186,6 +202,8 @@ func draw_world() -> void:
 		if str(item.kind).begins_with("fruit_"):
 			var fruit: int=int(str(item.kind).trim_prefix("fruit_"))%8
 			existing("pickups",int(fruit/6),fruit%6,p)
+		elif str(item.kind) in ["owl_feather","wolf_charm"]:
+			draw_pose(support_art.pose(str(item.kind)),p)
 		else:
 			# Every actual special weapon/support has its own original silhouette.
 			# This is a registered static drawing, not a fabricated animation count.
@@ -236,16 +254,16 @@ func draw_world() -> void:
 			var core:=at(Vector2(float(world.boss.x),float(world.boss.y)-75.))
 			draw_arc(core,48.,0.,TAU,24,Color("efd58a"),3.);caption(host.t("shield"),core+Vector2(-28,-56),16)
 		if float(world.boss.windup)>0.: caption(host.t("arc_boss_warning"),at(Vector2(float(world.boss.x)-130.,-215.)),19)
-	if (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and world.floor_at(float(world.mount.x))==0.):
+	if (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and float(world.mount.get("floor_y",world.floor_at(float(world.mount.x))))<180.):
 		var p: Vector2=vehicle_draw_position()
 		var firing: bool=world.shot_flash>0. and bool(world.mount.ridden)
 		var spec: Dictionary=world.vehicle_art_spec()
 		var frame: int=int(spec.frame)
 		var type: String=CampaignVehicles.kind(world)
 		var phase: int=3 if int(world.mount.hp)<=0 else int(spec.phase)
-		var machine: Dictionary=vehicle_pose(type,phase,frame)
+		var machine: Dictionary=vehicle_art.hull_pose(type,phase,frame,hero_reference_height()*2.) if bool(world.mount.ridden) else vehicle_pose(type,phase,frame)
 		draw_pose(machine,p,vehicle_draw_facing(),float(machine.vehicle_growth))
-		if bool(world.mount.ridden) and (absf(world.aim_direction.y)>.15 or world.aim_direction.x*world.facing<0.):draw_vehicle_barrel(machine,p)
+		if bool(world.mount.ridden):draw_vehicle_barrel(machine,p)
 		if bool(world.mount.ridden) and world.character=="sheep" and world.flock>1:
 			draw_set_transform(at(p),0.,Vector2(vehicle_draw_facing(),1.))
 			draw_rect(Rect2(-66,-30,59,5),Color("b89461"));draw_rect(Rect2(-66,-25,59,3),Color("634b3a"))
@@ -255,23 +273,18 @@ func draw_world() -> void:
 	var tint := Color.WHITE
 	if world.invulnerable>0.: tint=Color("ffd9ca")
 	if not bool(world.mount.ridden) and world.mount_transition.is_empty():
-		draw_pose(pose,world.player,int(world.armed_art_spec().get("mirror",world.facing)),1.,tint)
+		draw_pose(pose,world.player,M1CombatArt.body_facing(world),1.,tint)
 	if not world.mount_transition.is_empty():
 		draw_embark()
-	elif not bool(world.mount.ridden) and world.state=="playing" and world.rescue_time<=0. and world.melee_time<=0. and world.weapon!="pistol":
-		draw_special_weapon()
+	elif not bool(world.mount.ridden) and world.state in ["playing","briefing"]:
+		draw_hero_weapon()
+
 	hero_marker={"anchor":[world.player.x,world.player.y],"facing":world.facing,"source":pose.get("source_key","campaign-melee"),"row":pose.get("source_row",0),"frame":pose.get("source_frame",0),"floor":world.floor_at(world.player.x),"muzzle":[world.player.x+world.muzzle_offset().x,world.player.y+world.muzzle_offset().y]}
-	if not bool(world.mount.ridden) and not bool(pose.get("gun_embedded",false)) and world.mount_transition.is_empty() and (not world.grounded() or world.charging or (world.character=="wolf" and world.boost_held)) and world.melee_time<=0. and world.rescue_time<=0.: held_gun(world.character,world.player,world.facing)
+
 	if world.character=="sheep":
 		for i in world.flock-1:
-			if bool(world.mount.ridden):
-				existing("runner-sheep",0,0,vehicle_draw_position()+Vector2(-vehicle_draw_facing()*(28.+i*24.),-30.),vehicle_draw_facing(),.55)
-				continue
-			var sample: Dictionary = {"p":world.player-Vector2((i+1)*52,0),"facing":world.facing}
-			for old in world.trail:
-				if float(old.time)<=world.time-float(i+1)*.27: sample=old
-			var p: Vector2=sample.p
-			existing("runner-sheep",2 if p.y<-.1 else 1,posmod(int(world.walk_distance/24.),frames.count("runner-sheep",1)),p,int(sample.facing),.67)
+			var follower: Dictionary=follower_render_spec(i)
+			draw_pose(follower.pose,follower.p,int(follower.facing),float(follower.growth))
 	if world.charging: small_health(at(world.player+Vector2(-28,-112)),56,world.charge_ratio())
 	for b in world.bullets:
 		var p := at(b.p)
@@ -280,7 +293,7 @@ func draw_world() -> void:
 		if b.kind=="wave": draw_rect(Rect2(p-Vector2(20,9),Vector2(40,18)),color)
 		elif b.kind=="beam":draw_line(p,p-Vector2(b.v).normalized()*140.,color,6.)
 		elif b.kind=="disc":draw_arc(p,9.,world.time*8.,world.time*8.+PI*1.8,10,color,3.)
-		elif b.kind=="trap":draw_rect(Rect2(p-Vector2(11,4),Vector2(22,8)),color);draw_circle(p-Vector2(0,6),3.,Color("ffe8b0"))
+		elif b.kind=="trap":draw_pose(support_art.pose("spider-walk",int(world.time*12.)%6),Vector2(b.p)+Vector2(0,8),int(b.get("facing",-1 if float(b.v.x)<0. else 1)))
 		else: draw_line(p,p-Vector2(b.v).normalized()*(25. if b.kind=="harpoon" else 12.),color,4.)
 	for bomb in world.bombs:
 		var p := at(bomb.p); var color := Color(str(bomb.color))
@@ -288,24 +301,56 @@ func draw_world() -> void:
 		for a in 4: draw_circle(p+Vector2.from_angle(world.time*5.+a*PI*.5)*12.,2,color)
 	for blast in world.blasts:
 		var phase: float=float(blast.age)/.5
+		if str(blast.get("kind",""))=="spider":draw_pose(support_art.pose("spider-burst",clampi(int(phase*6.),0,5)),Vector2(blast.p))
 		var color := Color(str(blast.color));color.a=(1.-phase)*.8
 		draw_arc(at(blast.p),float(blast.radius)*phase,0,TAU,24,color,6.)
 		for i in 8: draw_rect(Rect2(at(blast.p)+Vector2.from_angle(i*TAU/8.)*float(blast.radius)*phase-Vector2(3,3),Vector2(6,6)),color)
-	if world.section!="arena":
+	draw_assists()
+	if world.section!="arena" and not CampaignRoutes.is_fork(world.section):
 		var p := at(Vector2(world.length()-140.,0))
 		draw_rect(Rect2(p-Vector2(3,100),Vector2(6,100)),Color("cabb99"))
 		draw_polygon(PackedVector2Array([p+Vector2(3,-100),p+Vector2(52,-80),p+Vector2(3,-60)]),PackedColorArray([Color("eaad7d")]))
 
-func draw_vehicle_barrel(machine: Dictionary,p: Vector2) -> void:
-	# A real rotating attachment, with its tip shared by projectile physics.
-	# The fixed hull nozzle stays a neutral intake, never a false forward flash.
-	var gun: Dictionary=item_bank.pose("pistol")
-	var width: float=machine.barrel_length
-	var dimensions: Vector2=gun.size*(width/maxf(1.,float(gun.size.x)))
-	var pivot: Vector2=p+Vector2(float(machine.pivot_local.x)*world.facing,float(machine.pivot_local.y))
-	draw_set_transform(at(pivot),world.aim_direction.angle(),Vector2.ONE)
-	draw_texture_rect(gun.texture,Rect2(Vector2(0.,-dimensions.y*.5),dimensions),false)
+func draw_hero_weapon() -> void:
+	var transform: Dictionary=M1CombatArt.placement(world)
+	var point: Vector2=world.player+Vector2(transform.grip)
+	draw_set_transform(at(point),float(transform.angle),Vector2(1,int(transform.mirror_y)))
+	if world.rescue_time>0.:
+		draw_rect(Rect2(-3,-2,6,5),Color("87583f"))
+		draw_polygon(PackedVector2Array([Vector2(1,-2),Vector2(20,-2),Vector2(24,0),Vector2(1,2)]),PackedColorArray([Color("d7e9e8")]))
+	elif world.melee_time>0.:
+		draw_rect(Rect2(0,-4,9,8),Color("f5d0bd"));draw_rect(Rect2(6,-3,4,6),Color("d99791"))
+	else:
+		var weapon: Dictionary=transform.weapon
+		draw_texture_rect(M1CombatArt.weapon_texture(item_bank,str(weapon.kind)),Rect2(Vector2(weapon.offset),Vector2(weapon.size)),false)
 	draw_set_transform(Vector2.ZERO)
+	if world.shot_flash>.09 and world.melee_time<=0. and world.rescue_time<=0.:
+		var end: Vector2=at(world.player+Vector2(transform.muzzle))
+		draw_rect(Rect2(end-Vector2(2,2),Vector2(4,4)),Color("fff0bf"))
+
+func draw_assists() -> void:
+	for a in world.assists:
+		var p:=Vector2(float(a.x),float(a.y))
+		var frame: int=posmod(int(float(a.age)*10.),6)
+		if a.kind=='owl':draw_pose(frames.pose('runner-owl',6,frame,true),p,int(a.facing),.8)
+		elif a.phase=='bite':draw_pose(art.melee('wolf',clampi(int(float(a.phase_age)/.24*6.),0,5)),p,int(a.facing),.8)
+		else:draw_pose(frames.pose('runner-wolf',6,frame,true),p,int(a.facing),.8)
+		for rock in a.stones:draw_pose(support_art.pose('owl_stone'),Vector2(float(rock.x),float(rock.y)))
+
+
+func draw_vehicle_barrel(machine: Dictionary,p: Vector2) -> void:
+	var spec: Dictionary=world.vehicle_art_spec()
+	var type: String=CampaignVehicles.kind(world)
+	var metrics: Dictionary=ForgeVehicleArt.aim_anchors(type,int(spec.phase),int(spec.frame),hero_reference_height()*2.)
+	var turret: Dictionary=vehicle_art.turret_pose(type,int(spec.phase),int(spec.frame),hero_reference_height()*2.)
+	if turret.is_empty():return
+	var pivot: Vector2=p+Vector2(float(metrics.pivot_local.x)*world.facing,float(metrics.pivot_local.y))
+	draw_set_transform(at(pivot),world.aim_direction.angle()+float(turret.get("rotation",0.)),Vector2.ONE)
+	draw_texture_rect(turret.texture,Rect2(Vector2(turret.offset),Vector2(turret.size)),false)
+	draw_set_transform(Vector2.ZERO)
+	if world.shot_flash>.1:
+		var muzzle: Vector2=at(world.player+world.armed_muzzle())
+		draw_circle(muzzle,3.,Color("fff0bf"))
 
 func draw_special_weapon() -> void:
 	# A modular weapon attachment uses the same measured muzzle as hit physics.
@@ -323,8 +368,8 @@ func draw_embark() -> void:
 	var progress: float=clampf(world.mount_transition_time/.45,0.,1.)
 	if world.mount_transition=="exit":progress=1.-progress
 	var frame: int=clampi(int(progress*6.),0,5)
-	var pose: Dictionary=forge_art.embark(world.character,frame)
-	var foot:=Vector2(float(world.mount.x),0.)
+	var pose: Dictionary=m1_heroes.pose(world.character,"air_fire" if progress<.5 else "crouch_fire",frame)
+	var foot:=vehicle_draw_position()
 	# A deliberate climb into the roof hatch, not a physics offset to mask drift.
 	var visual: Vector2=world.player+Vector2(0.,-sin(progress*PI)*hero_reference_height()*.75)
 	if progress<.5:

@@ -16,7 +16,7 @@ func run() -> void:
 			game.options.text_scale=scale;game.ui.theme=game.options.theme(game.FONT)
 			for language in GameText.LANGUAGES:
 				game.language=language;game.resize()
-				for kind in ["briefing","help","paused","fork_one","fork_two","boss","dead","outro","complete"]:
+				for kind in ["briefing","help","paused","boss","dead","outro","complete"]:
 					if kind=="help":game.help_step=0
 					game.menu_kind=kind;game.build_ui();await process_frame;await process_frame
 					var view:=Rect2(0,0,game.view_w,game.view_h)
@@ -39,6 +39,7 @@ func run() -> void:
 				check(not game.subtitle.get_global_rect().intersects(game.boss_health.get_global_rect()),"Boss health and localized mission/inventory text never overlap in rotated layouts")
 	# Reproduce a first-time player after the layout matrix has intentionally
 	# completed the tutorial. Repeat-run tutorial suppression has its own test.
+	game.saved.clear() # A previous test run's Continue action is not a first visit.
 	game.tutorial_seen=false
 	game.options.text_scale=1.;game.language="tr";game.menu_kind="briefing";game.build_ui();await process_frame;await process_frame
 	game._input(event(JOY_BUTTON_A));await process_frame
@@ -53,9 +54,17 @@ func run() -> void:
 	game.menu_kind="outro";game.outro_step=0;game.world.state="complete";game.build_ui();await process_frame;await process_frame
 	game._input(event(JOY_BUTTON_A));await process_frame;check(game.outro_step==1,"Victory continuation activates its actual first button")
 	game.close_menu()
-	for pair in [["fork_one","canopy",0],["fork_one","water",1],["fork_two","terrace",0],["fork_two","roots",1]]:
-		game.world.state=pair[0];game.menu_kind=pair[0];game.build_ui();await process_frame;await process_frame
-		game.buttons[int(pair[2])].pressed.emit();check(game.world.travel_target==pair[1],"Actual route button chooses its own branch, not the last captured loop variable: "+str(pair[1]))
+	# The old Route_* buttons intentionally no longer exist. Entering a real
+	# junction keeps simulation active, and only physical exit contact selects.
+	game.presentation_stage="";game.fade=-1.
+	for pair in [["fork_one","canopy",-195.],["fork_one","water",90.],["fork_two","terrace",-195.],["fork_two","roots",90.]]:
+		game.world.load_section(str(pair[0]));game.world.enemies.clear();game.menu_kind="";game.build_ui();await process_frame;await process_frame
+		var clock: float=game.world.time;game._process(.016)
+		check(game.world.time>clock and game.menu_kind=="","Actual fork remains live gameplay instead of opening a modal")
+		check(game.ui.find_children("Route_*","Button",true,false).is_empty(),"No text-choice controls exist at a physical route fork")
+		game.world.player=Vector2(1490.,float(pair[2]));game.world.velocity=Vector2.ZERO;game.world.step(.016)
+		check(game.world.travel_target==str(pair[1]),"Actual feet at the branch exit choose "+str(pair[1]))
+		game.fade=-1.
 	game.fade=-1.;game.world.load_section("shore");game.close_menu()
 	game.world.load_section("shore");game.world.enemies.clear();game.world.gates.clear();game.world.player.x=140.;game.world.move_axis=Vector2.ZERO
 	game._input(event(game.pad.bindings.shoot));game.world.step(.05)

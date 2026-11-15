@@ -168,6 +168,7 @@ func run() -> void:
 	w.step(0.01)
 	check(w.adventure.enemies.any(func(e): return e.kind == "gnome") and not w.adventure.giant(),"Later levels can spawn an occasional gnome without a mushroom")
 	w = arena()
+	# Retained legacy flight/attack actor, assigned only after arena reset.
 	w.character = "owl"
 	w.y = -100
 	w.jump_held = true
@@ -178,6 +179,7 @@ func run() -> void:
 	advance(w,0.12)
 	check(w.riding_gust and w.wind_push > 0 and w.speed() > base_speed,"A real forward gust increases actual forward travel")
 	w = arena()
+	# Retained legacy flight/attack actor, assigned only after arena reset.
 	w.character = "owl"
 	w.y = -100
 	w.jump_held = true

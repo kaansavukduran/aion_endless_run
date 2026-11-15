@@ -1,7 +1,7 @@
 class_name RunnerAdventure
 extends RefCounted
 
-const POWER_NAMES := ["mushroom", "lightning", "slow", "haste", "shield", "magnet", "leaf", "spring", "fortune", "frost"]
+const POWER_NAMES := ["mushroom", "lightning", "slow", "haste", "shield", "magnet", "leaf", "spring", "fortune", "frost", "owl_feather", "wolf_charm"]
 const ATTACK_DURATION := 0.40
 const ATTACK_COOLDOWN := 0.46
 const LEVEL_DISTANCE := 12000.0
@@ -90,6 +90,9 @@ var last_spawn_distance := -10000.0
 var last_encounter := ""
 var item_id := 0
 var enemy_id := 0
+var assists: Array[Dictionary] = []
+const ASSIST_LIFETIME := 12.0
+const CROW_DIVE_SPEED_FACTOR := 0.9
 
 func reset() -> void:
 	heart_time = 0.0
@@ -123,6 +126,7 @@ func reset() -> void:
 	roll_time = 0.0
 	roll_elapsed = 0.0
 	enemies.clear()
+	assists.clear()
 	items.clear()
 	for key in powers: powers[key] = 0.0
 	attack_held = false
@@ -225,7 +229,7 @@ func choose_power(world) -> String:
 	if eligible and mushroom_chance > 0.0 and world.rng.randf() < mushroom_chance:
 		last_mushroom_at = world.time
 		return "mushroom"
-	return shuffled_pick(world, power_bag, ["lightning", "slow", "haste", "shield", "magnet", "leaf", "spring", "fortune", "frost"])
+	return shuffled_pick(world, power_bag, ["lightning", "slow", "haste", "shield", "magnet", "leaf", "spring", "fortune", "frost", "owl_feather", "wolf_charm"])
 
 func choose_girl(world) -> void:
 	if girl_bag.is_empty():
@@ -473,7 +477,55 @@ func collect(world, kind: String) -> void:
 		"leaf":
 			if world.character == "sheep" and world.sheep_count < 3: world.sheep_count += 1
 			else: powers.shield = maxf(float(powers.shield), 8.0)
+		"owl_feather", "wolf_charm":summon_assist(world,kind)
 	world.event("power_" + kind)
+
+func summon_assist(world,kind: String) -> void:
+	# Recollecting the same charm replaces it, never stacks invisible charges.
+	assists=assists.filter(func(a):return str(a.kind)!=kind)
+	assists.append({"kind":kind,"charges":2,"age":0.,"wait":.15,"state":"find","x":world.PLAYER_X-100.,"y":-190. if kind=="owl_feather" else 0.,"target":-1,"stone":false,"stone_x":0.,"stone_y":0.,"impact_y":-20.,"impact_time":0.,"facing":1})
+
+func assist_target(world,kind: String) -> Dictionary:
+	var best: Dictionary={};var distance:=INF
+	for e in enemies:
+		if int(e.hp)<=0 or float(e.x)<world.PLAYER_X-45. or float(e.x)>world.field_width-35.:continue
+		if kind=="wolf_charm" and flying(str(e.kind)):continue
+		var delta: float=absf(float(e.x)-world.PLAYER_X)
+		if delta<distance:best=e;distance=delta
+	return best
+
+func step_assists(world,dt: float,movement: float) -> void:
+	# Existing boss scenes own the playfield and freeze ordinary powers.
+	if world.frontier.active():return
+	for a in assists:
+		a.age=float(a.age)+dt;a.wait=maxf(0.,float(a.wait)-dt);a.impact_time=maxf(0.,float(a.impact_time)-dt)
+		if float(a.age)>=ASSIST_LIFETIME:continue
+		if str(a.kind)=="owl_feather":
+			a.x=move_toward(float(a.x),world.PLAYER_X+115.,dt*500.)
+			if bool(a.stone):
+				a.stone_x=float(a.stone_x)-movement;a.stone_y=float(a.stone_y)+dt*950.
+				if float(a.stone_y)>=float(a.impact_y):
+					a.stone=false;a.wait=.5;a.impact_time=.28
+					for e in enemies:
+						if int(e.hp)>0 and Vector2(float(e.x),float(e.y)).distance_to(Vector2(float(a.stone_x),float(a.impact_y)))<135.:hit_enemy(world,e,1,false)
+					world.event("assist_rock")
+			elif int(a.charges)>0 and float(a.wait)<=0.:
+				var target:=assist_target(world,str(a.kind))
+				if not target.is_empty():
+					a.charges=int(a.charges)-1;a.stone=true;a.stone_x=float(target.x);a.stone_y=minf(-315.,float(target.y)-180.);a.impact_y=float(target.y);a.target=int(target.id)
+		else:
+			a.x=float(a.x)-movement
+			if str(a.state)=="bite":
+				if float(a.wait)<=0.:a.state="find"
+			elif int(a.charges)>0:
+				var target:=assist_target(world,str(a.kind))
+				if not target.is_empty():
+					a.facing=1 if float(target.x)>=float(a.x) else -1
+					a.x=move_toward(float(a.x),float(target.x)-25.,dt*1200.)
+					if absf(float(a.x)-float(target.x))<43.:
+						hit_enemy(world,target,1,false);a.charges=int(a.charges)-1;a.state="bite";a.wait=.3;world.event("assist_bite")
+			elif float(a.wait)<=0.:a.x=float(a.x)+dt*650.
+	assists=assists.filter(func(a):return float(a.age)<ASSIST_LIFETIME and (int(a.charges)>0 or bool(a.stone) or float(a.wait)>0. or float(a.impact_time)>0.))
 
 func end_wave(world) -> void:
 	for enemy in enemies:
@@ -592,7 +644,8 @@ func after_step(world, dt: float, movement: float, previous_y: float) -> void:
 				crystal.y = move_toward(crystal.y, world.y - 35.0, dt * 480)
 	for enemy in enemies:
 		enemy.age += dt
-		enemy.x -= movement * (1.13 if flying(enemy.kind) else (1.16 if enemy.kind == "beetle" else 1.04)) * (0.55 if powers.frost > 0 and enemy.x > world.PLAYER_X and enemy.x-world.PLAYER_X < 430 else 1.0) * (0.1 if enemy.hurt > 0.0 and enemy.hp > 0 else 1.0)
+		var diving_crow: bool=enemy.kind=="crow" and enemy.base_y> -100 and enemy.x<world.PLAYER_X+380
+		enemy.x -= movement * (CROW_DIVE_SPEED_FACTOR if diving_crow else 1.) * (1.13 if flying(enemy.kind) else (1.16 if enemy.kind == "beetle" else 1.04)) * (0.55 if powers.frost > 0 and enemy.x > world.PLAYER_X and enemy.x-world.PLAYER_X < 430 else 1.0) * (0.1 if enemy.hurt > 0.0 and enemy.hp > 0 else 1.0)
 		enemy.hurt = maxf(0.0, enemy.hurt - dt)
 		if enemy.hp <= 0:
 			enemy.defeat += dt
@@ -624,6 +677,7 @@ func after_step(world, dt: float, movement: float, previous_y: float) -> void:
 		if body.intersects(rect) and world.invulnerable <= 0.0 and enemy.hurt <= 0.0:
 			world.take_hit("bonk","enemy")
 			if world.state != "running": break
+	step_assists(world,dt,movement)
 	enemies = enemies.filter(func(e): return e.x > -120 and (e.hp > 0 or e.defeat < 0.65))
 	update_goal(world)
 

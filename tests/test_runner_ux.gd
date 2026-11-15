@@ -128,7 +128,7 @@ func scene_tests() -> void:
 	for i in 18:game.world.step(.01)
 	check(enemy.hp==0 and game.world.adventure.kills==1,"A normal touch shot reaches actual crow damage, not only its animation")
 	touch(game,0,button_center(game,"shoot"),false)
-	for lang in ["tr","en","cs"]:
+	for lang in GameText.LANGUAGES:
 		game.language=lang;game.main_menu()
 		for key in ["touch_hint","touch_skip","touch_ability_aion","touch_ability_owl","touch_ability_wolf","touch_ability_sheep","fragaria_found","fragaria_note"]:check(game.text(key)!=key,"New player-facing copy is translated: "+lang+"/"+key)
 		for target in ["main","paused","finished","settings","characters","bosses"]:

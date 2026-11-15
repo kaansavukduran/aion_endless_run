@@ -9,7 +9,10 @@ func check(ok: bool,message: String) -> void:
  if not ok:failures+=1;printerr("FAIL: "+message)
 func _initialize():call_deferred("run")
 func arena(hero: String):
- var w=World.new();w.character=hero;w.reset();w.obstacle_wait=999;w.frontier.plant_wait=999;w.adventure.item_wait=999;w.adventure.ambient_gnome_wait=999;w.gust_wait=999999;w.invulnerable=999;return w
+ var w=World.new();w.character=hero;w.reset()
+ # Owl is an archived ability fixture, not a selectable current hero. Reset
+ # correctly migrates removed selections; explicitly restore this test actor.
+ w.character=hero;w.obstacle_wait=999;w.frontier.plant_wait=999;w.adventure.item_wait=999;w.adventure.ambient_gnome_wait=999;w.gust_wait=999999;w.invulnerable=999;return w
 func advance(w,seconds: float):
  for i in ceili(seconds/.01):w.step(.01)
 func run():
@@ -58,26 +61,41 @@ func run():
   g.main_menu();g.select_character(hero);g.start_run();g.press_jump("touch:1");advance(g.world,.45);g.press_jump("touch:2");g.release_jump("touch:2",false)
   check(g.world.charging,"Unrelated finger cannot cancel owned charge "+hero)
   g.release_jump("touch:1",false);g.world.step(.01);check(g.world.y==0 and not g.world.charging,"Touch cancellation does not launch "+hero)
- g.main_menu();g.select_character("owl");g.start_run();g.press_jump("key");advance(g.world,.42)
+ g.main_menu();g.select_character("aion");g.start_run();g.character="owl";g.world.character="owl";g.press_jump("key");advance(g.world,.42)
  for n in 3:
   g.release_jump("key");g.press_jump("key");g.world.step(.01);g.update_friend()
   check(g.world.owl_flaps_used==n+1 and g.friend_sprite.get_meta("pose_key")=="owl-flap","Shared input selects real airborne flap drawing")
   g.press_jump("key");check(g.world.owl_flaps_used==n+1,"Duplicate held source is ignored")
   advance(g.world,.31)
  # Explicit weapon/grip fixtures, separate from ordinary browser input proof.
- g.main_menu();g.select_character("eren");g.start_run()
- for charge in [true,false]:
-  for n in 6:
-   g.world.charging=charge;g.world.charge_time=n/5.*g.world.CHARGE_SECONDS;g.world.y=0 if charge else -90;g.world.air_time=0 if n==0 else .2;g.world.velocity=-650+n*260.;g.world.frontier.shot_flash=.12;g.update_friend()
-   var column: int=g.frames.progress("runner-eren",6,g.world.charge_ratio()) if charge else g.flight_frame(g.world.velocity,g.world.air_time,6)
-   var atlas: Dictionary=g.frames.POLISH.data.atlases["polish-abilities"];var row: int=2 if charge else 3;var f: Dictionary=atlas.frames[row][column]
-   var hand: Vector2=(Vector2(f.weapon_grip[0],f.weapon_grip[1])-Vector2(f.origin[0],f.origin[1]))*float(atlas.scale[row])
-   var muzzle: Vector2=g.world.frontier.weapon_muzzle(g.world)
-   check(muzzle.distance_to(hand+Vector2(23,-5))<.001,"Air/charge pistol attaches to the reviewed skin-colored hand landmark")
-   var gun_frame: int=g.world.frontier.gun_frame(6);var original: Array=g.frames.PIXEL.data.atlases["pixel-eren"].frames[4][gun_frame].muzzle
-   var drawn: Vector2=g.gun_echo.position+Vector2(original[0],original[1])
-   check(drawn.distance_to(Vector2(g.world.PLAYER_X,g.ground+g.world.y)+muzzle)<.51,"Rendered barrel and emitted projectile share the actual hand-bound muzzle")
-   g.world.frontier.emit_hero_shot(g.world);var shot: Dictionary=g.world.frontier.projectiles[-1]
-   check(Vector2(shot.x-g.world.PLAYER_X,shot.y-g.world.y).distance_to(muzzle)<.001,"Bullet starts at the same registered barrel, never the previous sheet position")
+ # Derive the expected barrel from raw reviewed source coordinates plus the
+ # actual rendered weapon transform; do not call runner_attachment as an oracle.
+ g.motion=true;g.interface_options.reduced_motion=false
+ var registration: Dictionary=M1HeldWeaponBank.DATA.data.weapons.pistol
+ var grip_pixel:=Vector2(registration.grip_pixel[0],registration.grip_pixel[1])
+ var muzzle_pixel:=Vector2(registration.muzzle_pixel[0],registration.muzzle_pixel[1])
+ var canvas_width: float=registration.canvas_size[0]
+ if int(registration.source_facing)<0:
+  grip_pixel.x=canvas_width-1.-grip_pixel.x;muzzle_pixel.x=canvas_width-1.-muzzle_pixel.x
+ for hero in M1HeroArt.HEROES:
+  g.main_menu();g.select_character(hero);g.start_run()
+  for charge in ([true,false] if hero in ["rabbit","eren"] else [false]):
+   for n in 6:
+    g.world.charging=charge;g.world.charge_time=n/5.*g.world.CHARGE_SECONDS;g.world.y=0 if charge else -90;g.world.air_time=0 if n==0 else .2;g.world.velocity=-650+n*260.;g.world.frontier.shot_flash=.12;g.update_friend()
+    var action: String="crouch_fire" if charge else "air_fire"
+    var column: int=clampi(int(g.world.charge_ratio()*6.),0,5) if charge else g.world.frontier.gun_frame(6)
+    var source: Array=M1HeroArt.DATA.data.runtime_rows[hero][action]
+    var f: Dictionary=M1HeroArt.DATA.data.atlases[source[0]].frames[int(source[1])][column]
+    var hand: Vector2=(Vector2(f.grip[0],f.grip[1])-Vector2(f.origin[0],f.origin[1]))*float(f.scale)*g.visual_size
+    var muzzle: Vector2=g.world.frontier.weapon_muzzle(g.world)
+    check(muzzle.distance_to(hand+(muzzle_pixel-grip_pixel)*(28./canvas_width)*g.visual_size)<.001,"Current air/charge barrel stays attached to its actual reviewed body hand: "+hero)
+    var anchor:=Vector2(g.world.PLAYER_X,g.ground+g.world.y)
+    var drawn_grip: Vector2=g.gun_echo.position+(g.gun_echo.offset+grip_pixel)*g.gun_echo.scale
+    var drawn_muzzle: Vector2=g.gun_echo.position+(g.gun_echo.offset+muzzle_pixel)*g.gun_echo.scale
+    var pixels: Image=g.gun_echo.texture.get_image()
+    check(pixels.get_pixelv(Vector2i(muzzle_pixel)).a>.5 and pixels.get_pixelv(Vector2i(grip_pixel)).a>.5,"Expected barrel/handle lie on opaque pixels of the actual drawn held pistol: "+hero)
+    check(drawn_grip.distance_to(anchor+hand)<.001 and drawn_muzzle.distance_to(anchor+muzzle)<.001,"Rendered hand socket/barrel and physical muzzle share the same actual transform: "+hero)
+    g.world.frontier.emit_hero_shot(g.world);var shot: Dictionary=g.world.frontier.projectiles[-1]
+    check(Vector2(shot.x-g.world.PLAYER_X,shot.y-g.world.y).distance_to(muzzle)<.001,"Bullet starts at the actual registered barrel, never an archived sheet position: "+hero)
  g.queue_free();await process_frame
  print("RESULT: %d polish/ability checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

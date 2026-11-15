@@ -38,7 +38,9 @@ func run() -> void:
 			var high := fresh(hero);high.jump_press();tick(high,1.2,hz);high.jump_release()
 			var charged := apex(high,hz)
 			check(absf(charged/reference-4.)<.12 and charged>tap*2.,"Actual full-charge apex is4 Aion: %s/%d" % [hero,hz])
-		var owl := fresh("owl");owl.player.y=-100.;owl.jumps=1
+		# Archived physics is retained for old source/ability consumers; owl is
+		# deliberately not selectable, so assign only after begin's migration.
+		var owl := fresh();owl.character="owl";owl.player.y=-100.;owl.jumps=1
 		for index in 3:
 			owl.jump_release();owl.jump_press()
 			check(owl.flap_count==index+1,"Fresh airborne press spends exactly one flap")
@@ -58,14 +60,16 @@ func run() -> void:
 			check(float(b.p.y)<0.,"Every initial muzzle remains above the floor")
 	for weapon in CampaignWeapons.SPECIAL:
 		for direction in dirs:
-			var w := fresh();w.collect({"id":"special","kind":weapon});w.aim_direction=direction;w.attack_press()
+			var w := fresh();w.collect({"id":"special","kind":weapon})
+			if direction.y>.1:w.player.y=-150.;w.air_time=.2
+			w.aim_direction=direction;w.attack_press()
 			var spec: Dictionary=CampaignWeapons.SPECS[weapon]
 			for b in w.bullets:
 				check(absf(Vector2(b.v).length()-float(spec.speed))<.01,"Special projectile retains its authored speed: "+weapon)
 				check(Vector2(b.v).normalized().dot(direction)>.55,"All actual spread/projectile vectors rotate with aim: "+weapon)
 			check(w.ammunition==int(spec.ammo)-1,"One directional burst spends one ammo: "+weapon)
 	for direction in dirs:
-		var w := fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":4,"type":"wind"};w.interact()
+		var w := fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":3,"type":"wind"};w.interact()
 		check(w.mount_transition=="enter" and not w.throw_grenade(),"Boarding blocks combat until the hatch transition finishes")
 		w.attack_press();check(w.bullets.is_empty(),"Boarding cannot fire a hidden extra shot")
 		tick(w,.46);w.aim_direction=direction;w.attack_press()
@@ -74,8 +78,8 @@ func run() -> void:
 		for b in w.bullets:check(Vector2(b.v).normalized().dot(direction)>.95,"Vehicle barrel follows aim rather than character facing")
 		w.attack_release();check(w.interact(),"Vehicle exit accepted")
 		tick(w,.46);check(not w.mount.ridden and w.grounded() and w.mount_transition=="","Exit finishes on supported ground")
-	var w := fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":4,"type":"drill"};w.interact();var frozen:=w.time
-	w.invulnerable=0.;w.damage_player();check(w.hp==3 and w.mount.hp==4,"Boarding is protected from damage")
+	var w := fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":3,"type":"drill"};w.interact();var frozen:=w.time
+	w.invulnerable=0.;w.damage_player();check(w.hp==3 and w.mount.hp==3,"Boarding is protected from damage")
 	tick(w,.4);check(w.time==frozen,"World simulation clock pauses during boarding");tick(w,.06)
 	w.invulnerable=0.;w.mount.hp=1;w.damage_player();check(not w.mount.ridden and w.mount_transition=="" and w.velocity.y<0.,"Vehicle destruction cancels transition and ejects safely")
 	# Bullet rescue occurs at distance; walking into the freed person, not
@@ -92,8 +96,12 @@ func run() -> void:
 	w.player=Vector2(float(npc.x),float(npc.y));tick(w,.1)
 	check(str(npc.phase)=="thanks" and w.greeted.has(str(npc.id)),"Actual body contact triggers gratitude")
 	var greeting := w.snapshot();var resumed := AionCampaignWorld.new();check(resumed.restore(greeting),"Pending actual-contact handover is saved")
-	resumed.state="playing";tick(resumed,1.)
-	check(resumed.awarded.has(str(npc.id)+":gift") and resumed.weapon=="heavy","A genuine pending handover resumes exactly once")
+	resumed.state="playing";tick(resumed,1.2)
+	var supplies: Array=resumed.pickups.filter(func(item):return str(item.id)==str(npc.id)+":supply")
+	check(supplies.size()==1 and resumed.weapon=="pistol" and not resumed.awarded.has(str(npc.id)+":gift"),"A genuine pending handover resumes as one unclaimed physical bag item")
+	if not supplies.is_empty():
+		resumed.player=Vector2(float(supplies[0].x),float(supplies[0].y)+25.);resumed.velocity=Vector2.ZERO;tick(resumed,.3)
+	check(resumed.awarded.has(str(npc.id)+":gift") and resumed.weapon=="heavy","Only actual dropped-item contact claims the resumed handover")
 	var earned := resumed.score;resumed.retry();tick(resumed,1.5)
 	check(resumed.score==earned and resumed.weapon=="pistol","Checkpoint retry cannot pay an already-claimed NPC twice")
 	check(resumed.rescue_roles.has(str(npc.id)),"Actual rescued role survives checkpoint reports")

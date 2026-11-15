@@ -8,6 +8,16 @@ func fresh(hero: String="aion") -> AionCampaignWorld:
 	var w:=AionCampaignWorld.new();w.begin(hero);w.state="playing";w.enemies.clear();w.gates.clear();w.objects.clear();w.hazards.clear();w.pickups.clear();w.crates.clear();return w
 func tick(w,seconds: float) -> void:
 	for i in ceili(seconds*100.):w.step(.01)
+func claim_gift(w,npc: Dictionary) -> bool:
+	# A giver's thanks does not award its item. Use the real visible world
+	# pickup and normal overlap step; no direct collect()/effect injection.
+	var id: String=str(npc.id)+":supply"
+	var items: Array=w.pickups.filter(func(p):return str(p.id)==id)
+	if items.is_empty():return false
+	w.attack_release();w.move_axis=Vector2.ZERO;w.velocity=Vector2.ZERO
+	w.player=Vector2(float(items[0].x),float(items[0].y)+25.)
+	tick(w,.3)
+	return w.taken.has(id) and w.awarded.has(str(npc.id)+":gift")
 func _initialize() -> void:call_deferred("run")
 func run() -> void:
 	for hero in AionCampaignWorld.HEROES:
@@ -17,13 +27,15 @@ func run() -> void:
 		var anchor:=w.player;w.move_axis.x=1.;tick(w,.24)
 		check(not n.freed and w.player==anchor,"Anticipation keeps feet planted and ropes intact: "+hero)
 		tick(w,.10);check(n.freed and w.rescued.has(str(n.id)),"Cut contact frees the correct NPC: "+hero)
-		w.move_axis=Vector2.ZERO;w.player=Vector2(float(n.x),float(n.y));tick(w,1.3);check(w.weapon=="heavy" and w.ammunition==90,"Gratitude gives a real rapid-fire weapon: "+hero)
+		w.move_axis=Vector2.ZERO;w.player=Vector2(float(n.x),float(n.y));tick(w,1.3)
+		check(w.weapon=="pistol" and not w.awarded.has(str(n.id)+":gift"),"Gratitude leaves a visible unclaimed item: "+hero)
+		check(claim_gift(w,n) and w.weapon=="heavy" and w.ammunition==90,"Touching the extracted bag item grants the real weapon: "+hero)
 		var score:=w.score;w.attack_release();w.attack_press();tick(w,.8);check(w.rescued.size()==1 and w.score==score,"Repeated action cannot duplicate rescue or gift: "+hero)
 		var saved:=w.snapshot();var copy:=AionCampaignWorld.new();check(copy.restore(saved),"Expanded checkpoint restores")
 		var rescued_npc: Dictionary=copy.npcs[0];check(rescued_npc.freed,"Same stable keeper remains free on re-entry")
 		copy.state="playing";tick(copy,1.1);check(copy.score==score and copy.weapon=="pistol","Retry cannot farm the already claimed supply")
 	var w:=fresh();var n: Dictionary=w.npcs[0];w.player=Vector2(float(n.x)-65.,0.);w.attack_press();tick(w,.35)
-	var pending:=w.snapshot();var resume:=AionCampaignWorld.new();check(resume.restore(pending),"Save between cut and thanks remains valid");resume.state="playing";resume.player=Vector2(float(resume.npcs[0].x),float(resume.npcs[0].y));tick(resume,1.2);check(resume.weapon=="heavy","Pending supply survives save before its contact and handover")
+	var pending:=w.snapshot();var resume:=AionCampaignWorld.new();check(resume.restore(pending),"Save between cut and thanks remains valid");resume.state="playing";resume.player=Vector2(float(resume.npcs[0].x),float(resume.npcs[0].y));tick(resume,1.2);check(resume.weapon=="pistol" and claim_gift(resume,resume.npcs[0]) and resume.weapon=="heavy","Pending supply survives save and needs actual gift contact after handover")
 	var legacy:=pending.duplicate(true);legacy.schema=1;legacy.erase("discovered");legacy.erase("activated");var old:=AionCampaignWorld.new();check(old.restore(legacy),"0.23 schema1 saves migrate safely");old.state="playing";tick(old,1.1);check(old.weapon=="pistol","Legacy rescues do not create retroactive free weapons")
 	var total:=0;var roles: Dictionary={}
 	for stage in CampaignRescue.COUNTS:
@@ -44,7 +56,7 @@ func run() -> void:
 			w.player=Vector2(float(npc.x)-60.,float(npc.y));w.velocity=Vector2.ZERO;w.move_axis=Vector2.ZERO;w.facing=1
 			w.attack_release();w.fire_time=0.;w.attack_press();tick(w,.65)
 			w.player=Vector2(float(npc.x),float(npc.y));tick(w,1.1)
-			check(npc.freed and w.awarded.has(str(npc.id)+":gift"),"Every authored NPC has a real cut and one handover: "+str(npc.id))
+			check(npc.freed and claim_gift(w,npc),"Every authored NPC has a real cut, bag drop and contact collection: "+str(npc.id))
 			var claimed:=w.score;var ammo:=w.ammunition;w.rescue(npc);tick(w,.2)
 			check(w.score==claimed and w.ammunition==ammo,"Every NPC's repeated rescue cannot duplicate its effect: "+str(npc.id))
 	for leaf in ["water","terrace","roots"]:
@@ -81,7 +93,7 @@ func run() -> void:
 	check(w.platforms.has(bridge),"Opening a bridge creates its real one-way surface")
 	CampaignContent.apply_surface(w,w.objects[0]);check(w.platforms.count(bridge)==1,"Restoring an activated bridge never duplicates the collision surface")
 	w=fresh();w.spawn_enemy("gnome",280.,0.,0);w.collect({"id":"beam","kind":"beam"});w.attack_press();w.step(.05);check(w.enemies[0].defeated,"Fast beam uses segment collision instead of tunnelling past a target")
-	w=fresh();w.boss={"active":true,"engaged":true,"hp":90,"x":230.,"phase":1};var trap: Dictionary={"kind":"trap","owner":"hero","p":Vector2(175,-8),"v":Vector2.ZERO,"damage":3,"colour":"ffffff","age":.2}
+	w=fresh();w.boss={"active":true,"engaged":true,"hp":90,"x":230.,"y":0.,"phase":1};var trap: Dictionary={"kind":"trap","owner":"hero","p":Vector2(175,-8),"v":Vector2.ZERO,"damage":3,"colour":"ffffff","age":.2}
 	check(CampaignWeapons.step(w,trap,.01) and w.boss.hp==87,"A placed trap can actually trigger against the main boss")
 	var nova: Dictionary={"kind":"nova","owner":"hero","p":Vector2(200,-40),"v":Vector2.RIGHT,"damage":3,"colour":"ffffff","age":1.19,"life":1.2}
 	check(CampaignWeapons.step(w,nova,.02) and w.boss.hp==84 and nova.age==99.,"Timed nova consumes itself after exactly one area burst")
@@ -89,7 +101,7 @@ func run() -> void:
 	w=fresh();w.collect({"id":"magnet","kind":"magnet"});w.pickups=[{"id":"apple","x":300.,"y":-30.,"kind":"fruit_0"}];tick(w,.7);check(w.taken.has("apple"),"Magnet pulls and collects reachable loot")
 	w=fresh();w.collect({"id":"power","kind":"power"});w.attack_press();check(w.bullets[0].damage==2,"Power buff changes real projectile damage")
 	for type in ["shell","wind","drill"]:
-		w=fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":4,"type":type};check(w.interact(),"Vehicle begins boarding: "+type);tick(w,.46)
+		w=fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":3,"type":type};check(w.interact(),"Vehicle begins boarding: "+type);tick(w,.46)
 		w.attack_press();check(w.bullets.size()==(3 if type=="wind" else 1),"Vehicle has its own attack: "+type)
 		w.jump_press()
 		if type=="shell":check(float(w.mount.dive)>0.,"Shell jump action actually dives")

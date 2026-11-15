@@ -6,6 +6,7 @@ const GRAVITY := 1700.0
 const JUMP_SPEED := -650.0
 const CHARGE_SECONDS := 1.2
 const CHARGE_HEROES := ["rabbit","eren"]
+const PLAYABLE_HEROES := ["aion","sheep","rabbit","eren"]
 const RABBIT_TAP_HEIGHT_RATIO := 1.75
 const RABBIT_FULL_HEIGHT_RATIO := 4.0
 const OWL_FLAPS := 3
@@ -29,6 +30,7 @@ var frontier = preload("res://scripts/frontier.gd").new()
 var adventure = preload("res://scripts/adventure.gd").new()
 var pending_events: Array[String] = []
 var character := "aion"
+var pose_visual_scale := 1.0
 var pose_motion_enabled := true # Ephemeral rendering contract; never saved.
 var jumps_used := 0
 var jump_held := false
@@ -68,6 +70,9 @@ var event_id := 0
 var field_width := 1152.0
 
 func reset() -> void:
+	# Removed playable companions keep their old assets, not an inaccessible
+	# selected save. Other preferences and earned records remain owned by UI.
+	if character not in PLAYABLE_HEROES:character="aion"
 	state = "running"
 	adventure.reset()
 	orchard.reset()

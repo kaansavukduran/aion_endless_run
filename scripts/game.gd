@@ -11,14 +11,14 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.25.0"
+const GAME_VERSION = "0.26.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
 const REGISTRATION = preload("res://assets/SPRITE-REGISTRATION.json")
 const NORMAL_HEIGHT := 90.0
 const FOLLOWER_RATIO := 0.72
-const FRIENDS := ["aion", "sheep", "wolf", "owl", "rabbit", "eren"]
+const FRIENDS := ["aion", "sheep", "rabbit", "eren"]
 const COLORS := [Color("f4a7cd"), Color("ffca84"), Color("b8baf0"), Color("b8ebd3")]
 var interface_options := preload("res://scripts/interface_options.gd").new()
 var native_diagnostics := preload("res://scripts/native_diagnostics.gd").new()
@@ -35,6 +35,8 @@ var touch_mode := false
 var landscape := preload("res://scripts/landscape_view.gd").new()
 var terrain := preload("res://scripts/terrain_view.gd").new()
 var frames := preload("res://scripts/frame_bank.gd").new()
+var menu_hero_art := preload("res://scripts/m1_hero_art.gd").new()
+var menu_weapon_art := ForgeItemBank.new()
 var world := World.new()
 var language := "en"
 var language_override := false
@@ -659,7 +661,7 @@ func character_portrait(id: String) -> TextureRect:
 	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var atlas := AtlasTexture.new()
-	picture.texture = frames.pose("runner-"+id,1,0).texture
+	picture.texture = menu_hero_art.pose(id,"idle_fire",0).texture if menu_hero_art.has(id) else frames.pose("runner-"+id,1,0).texture
 	if id != "aion":
 		var mat := ShaderMaterial.new()
 		mat.shader = preload("res://scripts/companion_alpha.gdshader")
@@ -1226,6 +1228,8 @@ func update_hud() -> void:
 	var powers: Array[String] = []
 	for id in world.adventure.powers:
 		if float(world.adventure.powers[id]) > 0.0: powers.append(text("power_" + id) + " " + str(ceili(world.adventure.powers[id])) + "s")
+	for helper in world.adventure.assists:
+		if int(helper.charges)>0:powers.append(text("power_"+str(helper.kind))+" ×"+str(helper.charges))
 	if world.adventure.rush_time > 0.0: powers.append(text("gate_rush") % ceili(world.adventure.rush_time))
 	if world.adventure.lightning_charges > 0: powers.append(text("power_lightning") + " ×" + str(world.adventure.lightning_charges))
 	if is_instance_valid(power_label): power_label.text = (" · ".join(powers) if not powers.is_empty() else text("power_hint")) + "  |  " + text("defeated") % world.adventure.kills + "  |  " + str(roundi(world.speed() / 320 * 100)) + "%"
@@ -1553,7 +1557,7 @@ func update_friend() -> void:
 		friend_combat = -1
 		if world.state == "running":
 			if a.attack_time > 0.0: friend_combat = COMBAT_ROWS[character]
-			elif a.ducking(world): friend_combat = COMBAT_ROWS[character] + FRIENDS.size()
+			elif a.ducking(world): friend_combat = COMBAT_ROWS[character] + COMBAT_ROWS.size()
 	friend_sprite.visible = not (world.state=="ready" and pixel_ui.split_main())
 	gun_echo.visible = false
 	for item in followers: item.visible = false
@@ -1609,11 +1613,11 @@ func update_friend() -> void:
 	var anchor_x := ((view_w*.5-92)/scene_zoom+World.PLAYER_X) if portrait else view_w*.73
 	place_companion(friend_sprite, character, friend_row, friend_frame, Vector2(anchor_x if preview else World.PLAYER_X, ground + world.y), 0.62 * (1.65 if preview else visual_size), friend_action)
 	if friend_combat >= 0:
-		var pose_spec := combat_pose(character,friend_combat >= FRIENDS.size() or a.ducking(world))
+		var pose_spec := combat_pose(character,friend_combat >= COMBAT_ROWS.size() or a.ducking(world))
 		var combat_count := frames.count(pose_spec.key,pose_spec.row)
-		var combat_frame: int = (contact_frame(combat_count) if friend_combat < FRIENDS.size() else a.roll_frame(combat_count)) if motion else combat_count/2
+		var combat_frame: int = (contact_frame(combat_count) if friend_combat < COMBAT_ROWS.size() else a.roll_frame(combat_count)) if motion else combat_count/2
 		var combat_anchor := Vector2(World.PLAYER_X,ground+world.y)+combat_lunge()
-		place_combat(friend_sprite, character, friend_combat, combat_frame, combat_anchor, visual_size, friend_combat >= FRIENDS.size() or a.ducking(world))
+		place_combat(friend_sprite, character, friend_combat, combat_frame, combat_anchor, visual_size, friend_combat >= COMBAT_ROWS.size() or a.ducking(world))
 	if world.state in ["running","paused"] and not a.ducking(world) and not a.hugging() and world.y>=0 and not world.boosting() and not (world.state=="paused" and character=="wolf" and friend_row==6):
 		var firing: bool = world.frontier.shot_flash>0
 		var key := "gun-fire" if firing else "gun-run"
@@ -1664,6 +1668,77 @@ func update_friend() -> void:
 			if float(pose.get("duck", 0.0)) > 0.5:
 				place_combat(followers[i], "sheep", 6, a.roll_pose(float(pose.get("roll_phase",0.0)),float(pose.get("roll_remaining",0.0)),bool(pose.get("roll_held",false)),frames.count("rolls",2)) if motion else 5, Vector2(World.PLAYER_X - World.FLOCK_GAP * (i + 1), ground + float(pose.y)), FOLLOWER_RATIO, true)
 		if world.invulnerable > 0.0 and motion and int(world.time * 12) % 2 == 0: friend_sprite.modulate.a = 0.45
+
+	update_m1_friend()
+
+func update_m1_friend() -> void:
+	if not M1HeroArt.has(character):return
+	# Locomotion/fire replacements must not erase the authored elemental and
+	# cause-specific defeat clips. Ayça has her own identity-preserving bank.
+	if world.state in ["ice","fire","bonk"]:
+		if M1DamageArt.has(character):place_m1_damage()
+		return
+	world.pose_motion_enabled=motion and not interface_options.reduced_motion
+	world.pose_visual_scale=visual_size
+	var spec: Dictionary=M1CombatArt.runner_spec(world)
+	var preview: bool=world.state=="ready" and page=="main"
+	var anchor_x: float=((view_w*.5-92)/scene_zoom+World.PLAYER_X) if portrait else view_w*.73
+	var anchor:=Vector2(anchor_x if preview else World.PLAYER_X,ground+world.y)
+	var growth: float=1.65 if preview else visual_size
+	place_m1_body(friend_sprite,character,str(spec.action),int(spec.frame),anchor,growth)
+	gun_echo.visible=world.state in ["running","paused"] and not world.adventure.hugging() and not world.frontier.storytelling()
+	if gun_echo.visible:
+		var attachment: Dictionary=M1CombatArt.runner_attachment(world)
+		var weapon: Dictionary=attachment.weapon
+		gun_echo.texture=M1CombatArt.weapon_texture(menu_weapon_art,"pistol");gun_echo.region_enabled=false;gun_echo.rotation=0.;gun_echo.offset=Vector2(weapon.offset)/float(weapon.factor);gun_echo.scale=Vector2.ONE*float(weapon.factor)*visual_size;gun_echo.position=anchor+Vector2(attachment.grip)*visual_size
+		gun_echo.modulate=Color("ffaaaa") if world.frontier.red_weapon else Color.WHITE
+	if character!="sheep":return
+	for i in followers.size():
+		var follower: Sprite2D=followers[i]
+		# Life count and fatal-state visibility remain controlled by update_friend.
+		if not follower.visible:continue
+		var delayed: Dictionary=world.flock_pose(i)
+		var action: String="walk"
+		var frame: int=posmod(int((world.travel_distance()-World.FLOCK_GAP*(i+1))/174.*6.),6)
+		if world.state=="ready":action="idle_fire";frame=0
+		elif float(delayed.get("duck",0.))>.5:
+			action="crouch_walk"
+			frame=world.adventure.roll_pose(float(delayed.get("roll_phase",0.)),float(delayed.get("roll_remaining",0.)),bool(delayed.get("roll_held",false)),6)
+		elif float(delayed.y)<-.01 or float(delayed.get("landing_time",0.))>0.:
+			action="air_fire"
+			frame=World.flight_frame_for(float(delayed.velocity),float(delayed.air_time),6) if float(delayed.y)<-.01 else 5
+		if not world.pose_motion_enabled:frame=0
+		# Followers have no independent weapon/fire action. Their original .72
+		# scale and actual spatially delayed movement are shared with this art.
+		place_m1_body(follower,"sheep",action,frame,Vector2(World.PLAYER_X-World.FLOCK_GAP*(i+1),ground+float(delayed.y)),FOLLOWER_RATIO)
+
+func place_m1_body(item: Sprite2D,hero: String,action: String,frame: int,anchor: Vector2,growth: float) -> void:
+	# Reuse the preloaded body bank; no per-frame bank/image construction.
+	var pose: Dictionary=menu_hero_art.pose(hero,action,frame)
+	var factor: float=float(pose.size.x)/float(pose.texture.get_width())
+	item.texture=pose.texture;item.region_enabled=false;item.offset=Vector2(pose.offset)/factor;item.position=anchor;item.scale=Vector2.ONE*factor*growth
+	item.set_meta("source_key",pose.source_key);item.set_meta("source_row",pose.source_row);item.set_meta("source_frame",pose.source_frame)
+	item.set_meta("pose_key","m1-body");item.set_meta("pose_action",action);item.set_meta("pose_row",pose.source_row);item.set_meta("pose_frame",pose.source_frame)
+	item.set_meta("gun_embedded",false);item.set_meta("pose_height",float(pose.height)*growth)
+	item.set_meta("eye_world",anchor+Vector2(pose.face_local)*growth);item.set_meta("head_probe_world",anchor+Vector2(pose.face_local)*growth)
+	var reference: Dictionary=M1HeroArt.DATA.data.atlases[str(pose.source_key).trim_prefix("m1-body-")].calibration[hero]
+	item.set_meta("head_size",float(reference.face_patch[2])*float(pose.source_scale)*growth)
+	item.set_meta("foot_world",anchor)
+	item.set_meta("face_visible",true)
+
+func place_m1_damage() -> void:
+	if not has_meta("m1_damage_bank"):set_meta("m1_damage_bank",M1DamageArt.new())
+	var action: String="freeze" if world.state=="ice" else ("fire" if world.state=="fire" else ("faceplant" if world.death_cause=="enemy" else "impact"))
+	var duration: float=.7 if world.state in ["ice","fire"] else 1.25
+	var frame: int=clampi(int(world.hit_time/duration*6.),0,5) if motion and not interface_options.reduced_motion else 5
+	var pose: Dictionary=get_meta("m1_damage_bank").pose(character,action,frame)
+	var factor: float=float(pose.size.x)/float(pose.texture.get_width())
+	var anchor:=Vector2(World.PLAYER_X,ground+world.y)
+	friend_sprite.texture=pose.texture;friend_sprite.region_enabled=false;friend_sprite.offset=Vector2(pose.offset)/factor;friend_sprite.position=anchor;friend_sprite.scale=Vector2.ONE*factor*visual_size
+	for key in ["source_key","source_row","source_frame","gun_embedded","face_visible"]:friend_sprite.set_meta(key,pose[key])
+	friend_sprite.set_meta("pose_key","m1-damage");friend_sprite.set_meta("pose_action",action);friend_sprite.set_meta("pose_height",float(pose.height)*visual_size)
+	friend_sprite.set_meta("head_size",float(pose.head_size)*visual_size);friend_sprite.set_meta("head_probe_world",anchor+Vector2(pose.face_local)*visual_size);friend_sprite.set_meta("foot_world",anchor)
+	gun_echo.hide()
 
 func place_held_gun() -> void:
 	if bool(friend_sprite.get_meta("gun_embedded",false)):
@@ -1909,10 +1984,10 @@ func build_front_help() -> void:
 	var column: VBoxContainer=card(800)
 	column.add_child(wrap_label(RunnerFrontText.word(language,"how")+" · "+str(help_step+1)+"/"+str(keys.size()),23))
 	column.add_child(wrap_label(RunnerFrontText.word(language,keys[help_step]),22))
-	var preview:=RunnerHeroPreview.new();preview.hero=character;preview.action=keys[help_step];preview.animate=decorative_motion();preview.custom_minimum_size=Vector2(200,140);column.add_child(preview)
-	var keyboard: Array=["A / D · ← / → · W / S", "Space", "F / J · "+text("control_shoot"), "G", "E", "F / J · "+text("control_shoot"), "A / D · Space", "A / × · Enter", front_ability(character)]
-	var pads: Array=["L / D-pad · R",gamepad.binding_name("jump"),gamepad.binding_name("shoot")+" / "+gamepad.binding_name("attack"),gamepad.binding_name("duck"),"Y / △",gamepad.binding_name("shoot"),"L · "+gamepad.binding_name("jump"),"A / ×",front_ability(character)]
-	var touch: Array=["↔ ↕",text("control_jump"),text("control_shoot"),AionCampaignText.word(language,"grenade"),AionCampaignText.word(language,"mount"),text("control_shoot"),"↔ · "+text("control_jump"),"✓",front_ability(character)]
+	var preview:=RunnerHeroPreview.new();preview.hero=character;preview.body_art=menu_hero_art;preview.weapon_art=menu_weapon_art;preview.action=keys[help_step];preview.animate=decorative_motion();preview.custom_minimum_size=Vector2(200,140);column.add_child(preview)
+	var keyboard: Array=["A / D · ← / → · W / S", "Space", "F / J · "+text("control_shoot"), "G", "E", "F / J · "+text("control_shoot"), "A / D · Space", "Space · S/↓ + Space", front_ability(character)]
+	var pads: Array=["L / D-pad · R",gamepad.binding_name("jump"),gamepad.binding_name("shoot")+" / "+gamepad.binding_name("attack"),gamepad.binding_name("duck"),"Y / △",gamepad.binding_name("shoot"),"L · "+gamepad.binding_name("jump"),"↓ + "+gamepad.binding_name("jump"),front_ability(character)]
+	var touch: Array=["↔ ↕",text("control_jump"),text("control_shoot"),AionCampaignText.word(language,"grenade"),AionCampaignText.word(language,"mount"),text("control_shoot"),"↔ · "+text("control_jump"),"↓ + ↑",front_ability(character)]
 	column.add_child(wrap_label(str((pads if active_input=="gamepad" else (touch if touch_mode else keyboard))[help_step]),20))
 	var navigation:=HBoxContainer.new();column.add_child(navigation)
 	var previous:=button(RunnerFrontText.word(language,"previous"),func():help_step=maxi(0,help_step-1);rebuild());previous.name="FrontHelpPrevious";previous.disabled=help_step==0;previous.size_flags_horizontal=Control.SIZE_EXPAND_FILL;navigation.add_child(previous)

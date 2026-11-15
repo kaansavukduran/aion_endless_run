@@ -25,10 +25,17 @@ static func populate(w) -> void:
 			if x>pit.x-45. and x<pit.y+45.:x=pit.x-65.
 		var index: int=abs(w.section.hash())+i
 		var freed: bool=w.rescued.has(id)
+		var dropped: bool=w.gift_drops.has(id)
 		var roles: Array=REGIONAL_ROLES.get(w.section,ROLES)
 		var role: String=str(roles[posmod(i,roles.size())])
 		if secret!="":role={"water":"observer","terrace":"gardener","roots":"archivist"}[w.section]
-		w.npcs.append({"id":id,"x":x,"home_x":x,"y":y,"freed":freed,"variant":posmod(index,8),"role":role,"gift":GIFTS[posmod(index,GIFTS.size())] if i>0 else "heavy","free_age":99. if freed and w.awarded.has(id+":gift") else 0.,"phase":("departed" if w.awarded.has(id+":gift") else ("thanks" if w.greeted.has(id) else "free")) if freed else "bound","thank_age":99. if w.awarded.has(id+":gift") else 0.,"facing":-1,"roam_clock":0.,"secret":secret})
+		w.npcs.append({"id":id,"x":x,"home_x":x,"y":y,"freed":freed,"variant":posmod(index,8),"role":role,"gift":GIFTS[posmod(index,GIFTS.size())] if i>0 else "heavy","free_age":99. if freed and (w.awarded.has(id+":gift") or dropped) else 0.,"phase":("departed" if w.awarded.has(id+":gift") or dropped else ("thanks" if w.greeted.has(id) else "free")) if freed else "bound","thank_age":99. if w.awarded.has(id+":gift") or dropped else 0.,"facing":-1,"roam_clock":0.,"secret":secret})
+	for n in w.npcs:
+		var id: String=str(n.id)
+		if w.gift_drops.has(id) and not w.taken.has(id+":supply"):
+			var item: Dictionary=Dictionary(w.gift_drops[id]).duplicate(true)
+			item.age=0. # A resumed gift remains visible before contact can claim it.
+			w.pickups.append(item)
 	# A cage protects an actual captive, rather than being an unrelated prop.
 	for o in w.objects:
 		if o.kind!="cage" or w.npcs.is_empty():continue
@@ -39,7 +46,7 @@ static func populate(w) -> void:
 			if bool(n.freed):o.active=true
 
 static func nearest(w) -> Dictionary:
-	if w.state!="playing" or not w.grounded() or bool(w.mount.ridden):return {}
+	if w.state!="playing" or not w.grounded() or w.crouching() or bool(w.mount.ridden):return {}
 	for n in w.npcs:
 		if bool(n.freed) or (str(n.secret)!="" and not w.discovered.has(str(n.secret))):continue
 		if w.objects.any(func(o):return str(o.id)==str(n.get("cage","")) and not bool(o.active)):continue
@@ -86,16 +93,28 @@ static func has_support(w,n: Dictionary,x: float) -> bool:
 
 static func handover(w,n: Dictionary) -> void:
 	var id: String=str(n.id)
+	if w.awarded.has(id+":gift") or w.gift_drops.has(id):return
+	# A visible bag extraction produces a real item. Thanks/contact alone is
+	# not a weapon/ammunition grant; only touching this pickup claims it.
+	var direction: int=int(n.get("facing",-1))
+	var x: float=float(n.x)+direction*100.
+	if not has_support(w,n,x):x=float(n.x)+direction*75.
+	if not has_support(w,n,x):x=float(n.x)
+	var item: Dictionary={"id":id+":supply","kind":str(n.gift),"x":x,"y":float(n.y)-25.,"rescue_id":id,"role":str(n.role),"age":0.,"from_bag":true}
+	w.gift_drops[id]=item.duplicate(true);w.pickups.append(item)
+	w.pending_events.append("gift_drop")
+
+static func on_gift_collected(w,item: Dictionary) -> void:
+	var id: String=str(item.rescue_id)
 	if w.awarded.has(id+":gift"):return
-	# Persist the claim with the real effect. The freed NPC cannot pay out
-	# just because time passed remotely, and retry never duplicates a gift.
-	w.award(id+":gift",500 if n.gift=="points" else 0)
-	if n.gift!="points":w.collect({"id":id+":supply","kind":str(n.gift),"x":n.x,"y":n.y})
-	w.notice="arc_maintenance" if n.role=="archivist" else "arc_thanks";w.notice_time=2.;w.pending_events.append("rescue_gift")
-	if n.role=="technician":
-		w.mount.hp=mini(4,int(w.mount.hp)+1)
+	w.award(id+":gift",0);w.gift_drops.erase(id)
+	w.grenades=mini(9,w.grenades+1);w.hp=mini(w.max_hp,w.hp+1)
+	if w.character=="sheep":w.flock=mini(3,w.flock+1)
+	w.notice="arc_maintenance" if item.get("role","")=="archivist" else "arc_thanks";w.notice_time=2.;w.pending_events.append("rescue_gift")
+	if item.get("role","")=="technician":
+		w.mount.hp=mini(CampaignVehicles.MAX_HP,int(w.mount.hp)+1)
 		for o in w.objects:
-			if o.kind=="gate" and absf(float(o.x)-float(n.x))<400.:o.active=true;w.activated[str(o.id)]=true
+			if o.kind=="gate" and absf(float(o.x)-float(item.x))<400.:o.active=true;w.activated[str(o.id)]=true
 
 static func step(w,dt: float) -> void:
 	if w.rescue_time>0.:
