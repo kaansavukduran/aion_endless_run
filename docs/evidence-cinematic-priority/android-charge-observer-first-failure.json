@@ -1,0 +1,189 @@
+{
+  "source_commit": "8193be0c1d70fa5ed1f37665a607ee3dd840814a",
+  "version": "0.26.1",
+  "run_id": 43713661524,
+  "android_job_id": 132811206255,
+  "artifact_id": 14161619013,
+  "artifact_sha256": "bfb2491d9aa6d4a6f5ac898dccf761160b3002b7ff41dd9a016e262752d66f34",
+  "diagnosis": "The real Eren hold charged and released correctly. The last-only latest() poll missed the transient charging state. The subsequent unattended run ended in bonk while the observer continued waiting.",
+  "time_basis": "Device logcat MM-DD HH:MM:SS.mmm; same CI run UTC chronology.",
+  "gesture_ms": 500,
+  "jump_layout": {
+    "sequence": 33,
+    "line": 2803,
+    "device_time": "11-15 12:31:02.378",
+    "value": {
+      "actions": {
+        "duck": [
+          1010,
+          2403
+        ],
+        "jump": [
+          189,
+          2403
+        ],
+        "shoot": [
+          1271,
+          2243
+        ]
+      },
+      "buttons": [
+        {
+          "name": "PauseRun",
+          "point": [
+            1264,
+            68
+          ],
+          "text": "Pause"
+        },
+        {
+          "name": "LanguageMenu",
+          "point": [
+            1285,
+            100
+          ],
+          "text": "EN"
+        }
+      ],
+      "character": "eren",
+      "language": "en",
+      "level": 1,
+      "orientation": "portrait",
+      "page": "",
+      "regions": {},
+      "score": 2
+    }
+  },
+  "jump_target": [
+    189,
+    2403
+  ],
+  "display_bounds": [
+    1440,
+    2560
+  ],
+  "target_inside_display": true,
+  "adb_input_process_pid": 3435,
+  "adb_input_process_timeline": [
+    {
+      "line": 2808,
+      "device_time": "11-15 12:31:02.592",
+      "raw": "11-15 12:31:02.592  3435  3435 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<"
+    },
+    {
+      "line": 2824,
+      "device_time": "11-15 12:31:02.696",
+      "raw": "11-15 12:31:02.696  3435  3435 D AndroidRuntime: Calling main entry com.android.commands.input.Input"
+    },
+    {
+      "line": 2837,
+      "device_time": "11-15 12:31:03.218",
+      "raw": "11-15 12:31:03.218  3435  3435 D AndroidRuntime: Shutting down VM"
+    }
+  ],
+  "grounded_charge_packets": [
+    {
+      "line": 2829,
+      "device_time": "11-15 12:31:03.203",
+      "character": "eren",
+      "state": "running",
+      "page": "",
+      "airborne": false,
+      "charging": true,
+      "charge_ratio": 0.0138888888888889
+    },
+    {
+      "line": 2830,
+      "device_time": "11-15 12:31:03.213",
+      "character": "eren",
+      "state": "running",
+      "page": "",
+      "airborne": false,
+      "charging": true,
+      "charge_ratio": 0.0277777777777778
+    },
+    {
+      "line": 2831,
+      "device_time": "11-15 12:31:03.214",
+      "character": "eren",
+      "state": "running",
+      "page": "",
+      "airborne": false,
+      "charging": true,
+      "charge_ratio": 0.0416666666666667
+    },
+    {
+      "line": 2832,
+      "device_time": "11-15 12:31:03.215",
+      "character": "eren",
+      "state": "running",
+      "page": "",
+      "airborne": false,
+      "charging": true,
+      "charge_ratio": 0.0555555555555556
+    },
+    {
+      "line": 2833,
+      "device_time": "11-15 12:31:03.216",
+      "character": "eren",
+      "state": "running",
+      "page": "",
+      "airborne": false,
+      "charging": true,
+      "charge_ratio": 0.0694444444444444
+    },
+    {
+      "line": 2834,
+      "device_time": "11-15 12:31:03.216",
+      "character": "eren",
+      "state": "running",
+      "page": "",
+      "airborne": false,
+      "charging": true,
+      "charge_ratio": 0.0833333333333333
+    },
+    {
+      "line": 2835,
+      "device_time": "11-15 12:31:03.217",
+      "character": "eren",
+      "state": "running",
+      "page": "",
+      "airborne": false,
+      "charging": true,
+      "charge_ratio": 0.0972222222222222
+    },
+    {
+      "line": 2836,
+      "device_time": "11-15 12:31:03.217",
+      "character": "eren",
+      "state": "running",
+      "page": "",
+      "airborne": false,
+      "charging": true,
+      "charge_ratio": 0.111111111111111
+    }
+  ],
+  "ordered_release": {
+    "line": 2838,
+    "device_time": "11-15 12:31:03.399",
+    "character": "eren",
+    "state": "running",
+    "page": "",
+    "airborne": true,
+    "charging": false,
+    "charge_ratio": 0.0
+  },
+  "ordered_landing": {
+    "line": 2863,
+    "device_time": "11-15 12:31:05.170",
+    "character": "eren",
+    "state": "running",
+    "page": "",
+    "airborne": false,
+    "charging": false,
+    "charge_ratio": 0.0
+  },
+  "game_script_error_lines": [],
+  "failure_observer": "packaging/android_input_smoke.py latest(): tests predicate only on values[-1]; its500ms Eren action uses a last-only transient-state assertion.",
+  "scope": "Read-only raw artifact diagnosis. No game, driver, timings, assertions, workflow state or source files changed; no retry."
+}

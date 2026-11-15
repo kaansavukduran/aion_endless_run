@@ -1,6 +1,7 @@
 """Use real ADB gestures and passive Godot layout/state logs; no state injection."""
 import argparse,json,re,subprocess,time,os
 from android_packets import decode_packets
+from android_gestures import charged_jump_sequence, wait_for_charged_jump
 from android_readiness import capture_main_frame, layout_matches_display, wait_for_main
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=Path('build'));a=p.parse_args();a.output.mkdir(exist_ok=True,parents=True)
@@ -68,9 +69,39 @@ def capture_main():
  capture_main_frame(lambda:packets('AION_UI '),display_bounds,
   lambda:adb('exec-out','screencap','-p'),
   lambda name,png:(a.output/name).write_bytes(png),record_target)
-def hold(action,duration=1200):
- layout=latest('AION_UI ',lambda s:action in s['actions']);x,y=layout['actions'][action]
+def hold(action,duration=1200,layout=None):
+ if layout is None:layout=latest('AION_UI ',lambda s:action in s['actions'])
+ x,y=layout['actions'][action]
+ record_target({'event':'hold','action':action,'duration_ms':duration,'point':[x,y],'character':layout['character'],'page':layout['page'],'orientation':layout['orientation'],'issued_at_unix':time.time()})
  return subprocess.Popen(['adb','shell','input','swipe',str(x),str(y),str(x),str(y),str(duration)],stdout=subprocess.DEVNULL)
+def charged_jump(character,duration,charge_message,release_message,*,minimum_ratio=None,charge_capture=None,release_capture):
+ bounds=display_bounds()
+ layout=latest('AION_UI ',lambda s:s['page']=='' and s['character']==character and 'jump' in s['actions'] and layout_matches_display(s,bounds) and all(0<=s['actions']['jump'][axis]<bounds[axis] for axis in [0,1]))
+ latest('AION_STATE ',lambda s:s['character']==character and s['page']=='' and s['state']=='running' and not s['airborne'] and not s['charging'])
+ cursor=len(packets('AION_STATE '))
+ trace={'event':'charged_jump_trace','character':character,'cursor':cursor,'duration_ms':duration,'minimum_charge_ratio_exclusive':minimum_ratio,'target':layout['actions']['jump'],'display':bounds,'captures':[]}
+ try:
+  gesture=hold('jump',duration,layout)
+  try:
+   wait_for_charged_jump(lambda:packets('AION_STATE '),cursor,character,'charge',minimum_ratio=minimum_ratio)
+   check(True,charge_message)
+   if charge_capture:
+    trace['captures'].append({'file':'android-'+charge_capture+'.png','latest_state':packets('AION_STATE ')[-1]})
+    capture(charge_capture)
+  finally:gesture.wait(timeout=5)
+  wait_for_charged_jump(lambda:packets('AION_STATE '),cursor,character,'release',minimum_ratio=minimum_ratio)
+  trace['captures'].append({'file':'android-'+release_capture+'.png','latest_state':packets('AION_STATE ')[-1]})
+  capture(release_capture)
+  check(True,release_message)
+ except Exception as error:
+  trace['error']=repr(error)
+  raise
+ finally:
+  history=packets('AION_STATE ')
+  trace['states']=[{'index':index,'state':state} for index,state in enumerate(history[cursor:],start=cursor)]
+  trace['sequence']=charged_jump_sequence(history,cursor,character,minimum_ratio)
+  (a.output/('android-'+character+'-jump-states.json')).write_text(json.dumps(trace,indent=2)+'\n')
+  record_target(trace)
 def pause():
  menu_button(text=r'^(Pause|Duraklat|Pozastavit)$')
  latest('AION_STATE ',lambda s:s['page']=='paused')
@@ -121,16 +152,9 @@ gesture=hold('duck',600)
 try:latest('AION_STATE ',lambda s:s['rolling']);capture('duck');check(True,'Real native Roll touch reaches the actual roll state')
 finally:gesture.wait(timeout=5)
 pause();main();menu_button(name='StartSelect_eren');latest('AION_UI ',lambda s:s['character']=='eren' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-gesture=hold('jump',500)
-try:latest('AION_STATE ',lambda s:s['charging'] and not s['airborne']);check(True,'Native Eren independently charges while grounded')
-finally:gesture.wait(timeout=5)
-latest('AION_STATE ',lambda s:s['airborne'] and not s['charging']);capture('eren');check(True,'Native Eren releases his own charged leap')
+charged_jump('eren',500,'Native Eren independently charges while grounded','Native Eren releases his own charged leap',release_capture='eren')
 pause();main();menu_button(name='StartSelect_rabbit');latest('AION_UI ',lambda s:s['character']=='rabbit' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-gesture=hold('jump',1000)
-try:
- latest('AION_STATE ',lambda s:s['charging'] and not s['airborne'] and s['charge_ratio']>.1);capture('rabbit-charge');check(True,'Native Ayça holds on the ground and accumulates charge')
-finally:gesture.wait(timeout=5)
-latest('AION_STATE ',lambda s:s['airborne'] and not s['charging']);capture('rabbit-leap');check(True,'Native Ayça releases a real charged leap')
+charged_jump('rabbit',1000,'Native Ayça holds on the ground and accumulates charge','Native Ayça releases a real charged leap',minimum_ratio=.1,charge_capture='rabbit-charge',release_capture='rabbit-leap')
 pause();old=latest('AION_UI ',lambda s:s['page']=='paused');adb('shell','wm','size','2560x1440')
 try:
  rotated=latest('AION_UI ',lambda s:s['page']=='paused' and s['orientation']=='landscape');capture('landscape-paused')

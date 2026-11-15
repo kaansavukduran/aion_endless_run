@@ -452,72 +452,144 @@ with sync_playwright() as playwright:
             check(True, 'Releasing Down exits crouch without a stuck posture')
 
             if args.rescue:
-                # Keep Fire held while approaching: no new contextual knife press
-                # is issued near the target. Only an actual projectile can free it.
-                keys(['f', 'd'])
-                deadline = time.monotonic()+150
-                target = None
-                last_jump = 0.
+                class PrecontactDeath(Exception):
+                    pass
+
                 retries = 0
-                while time.monotonic() < deadline:
-                    data = campaign()
-                    if data['menu'] == 'dead':
-                        keys([])
-                        assert retries < 3, ('Rescue approach exceeded ordinary checkpoint retries', data)
-                        tap('CampaignRetry', in_campaign=True)
-                        retries += 1
+                last_jump = 0.
+                attempt = 0
+                rescue_attempts = []
+                observations['rescue_attempts'] = rescue_attempts
+
+                def rescue_trace(stage, current, selected=None, requested=()):
+                    npc = next((n for n in current['npcs'] if selected and n['id'] == selected['id']), None)
+                    packet = {'attempt': attempt, 'stage': stage, 'wall_time': time.monotonic(), 'world_time': current['time'], 'state': current['state'], 'hp': current['hp'], 'player': current['player'], 'requested_keys': list(requested), 'npc': npc, 'greeted': bool(npc and current['greeted'].get(npc['id'])), 'bag_items': [item for item in current['pickups'] if npc and item.get('rescue_id') == npc['id']]}
+                    with (args.evidence/'rescue-attempts.jsonl').open('a') as log:
+                        log.write(json.dumps(packet, ensure_ascii=False)+'\n')
+                    return packet
+
+                def require_live(current, stage, selected=None, recover=False):
+                    rescue_trace(stage, current, selected)
+                    if current['hp'] <= 0 or current['state'] in ['dying', 'dead']:
+                        npc = next((n for n in current['npcs'] if selected and n['id'] == selected['id']), None)
+                        contact_known = bool(npc and (current['greeted'].get(npc['id']) or npc['phase'] in ['thanks', 'departed']))
+                        if recover and not contact_known:
+                            raise PrecontactDeath(stage, current, selected)
+                        raise AssertionError(('Live hero required after confirmed NPC contact', stage, current))
+                    assert current['state'] == 'playing' and not current['menu'], ('Rescue action is not available', stage, current)
+
+                def rescue_check(condition, label):
+                    # Retries keep their full attempt trace. Rechecking an
+                    # already-proved contract must still fail if it regresses,
+                    # without counting the same product assertion twice.
+                    assert condition, label
+                    if label not in checks:
+                        check(condition, label)
+
+                while True:
+                    target = None
+                    try:
+                        # Held Fire actually frees ropes, then keeps the hero
+                        # defended while reaching a new, uncontacted free NPC.
                         keys(['f', 'd'])
-                        continue
-                    x, y = data['player']
-                    gap = any(0 < pit[0]-x < 160 for pit in data['pits'])
-                    danger = any(math.hypot(bullet[0]-x, bullet[1]-(y-37)) < 120 for bullet in data.get('bullets', []))
-                    if data.get('grounded') and (gap or danger) and time.monotonic()-last_jump > .75:
-                        page.keyboard.press('Space')
-                        last_jump = time.monotonic()
-                    candidate = next((npc for npc in data['npcs'] if npc['freed'] and not npc['secret'] and not data['awarded'].get(npc['id']+':gift') and abs(npc['y']-y) < 25 and 95 < npc['x']-x < 500), None)
-                    if candidate:
-                        target = candidate
-                        keys([])
+                        deadline = time.monotonic()+90
+                        while time.monotonic() < deadline:
+                            current = campaign()
+                            require_live(current, 'search', recover=True)
+                            x, y = current['player']
+                            gap = any(0 < pit[0]-x < 160 for pit in current['pits'])
+                            danger = any(math.hypot(b[0]-x, b[1]-(y-37)) < 120 for b in current.get('bullets', []))
+                            if current.get('grounded') and (gap or danger) and time.monotonic()-last_jump > .75:
+                                page.keyboard.press('Space'); last_jump = time.monotonic()
+                            target = next((n for n in current['npcs'] if n['freed'] and n['phase'] == 'free' and not n['secret'] and not current['awarded'].get(n['id']+':gift') and abs(n['y']-y) < 25 and 95 < n['x']-x < 500), None)
+                            if target:
+                                keys([]); rescue_trace('free_candidate', current, target); break
+                            page.wait_for_timeout(60)
+                        assert target, 'No projectile-freed captive was reached by ordinary controls'
+                        require_live(campaign(), 'freed_before_contact', target, recover=True)
+                        rescue_check(campaign()['rescue_time'] == 0, 'A held gunshot frees a real captive without starting the knife clip')
+                        page.wait_for_timeout(300)
+                        current = campaign()
+                        require_live(current, 'walking_before_contact', target, recover=True)
+                        rescue_check(not current['awarded'].get(target['id']+':gift'), 'Freed NPC grants no gift before hero contact')
+                        moved = next(n for n in current['npcs'] if n['id'] == target['id'])
+                        rescue_check(moved['x'] != target['x'], 'The freed NPC actually walks before the hero approaches')
+                        page.screenshot(path=str(args.evidence/'projectile-freed-walking.png'))
+                        deadline = time.monotonic()+15
+                        contacted = None
+                        while time.monotonic() < deadline:
+                            current = campaign()
+                            require_live(current, 'approach_contact', target, recover=True)
+                            npc = next(n for n in current['npcs'] if n['id'] == target['id'])
+                            if npc['phase'] == 'thanks' and current['greeted'].get(target['id']):
+                                contacted = current; keys([]); break
+                            assert npc['phase'] == 'free', ('Expected a newly freed, uncontacted NPC', npc)
+                            x, y = current['player']
+                            wanted = ['f', 'd' if npc['x'] > x else 'a']
+                            keys(wanted)
+                            gap = any(0 < pit[0]-x < 160 for pit in current['pits'])
+                            danger = any(math.hypot(b[0]-x, b[1]-(y-37)) < 120 for b in current.get('bullets', []))
+                            flyer = any(abs(e['x']-x) < 180 and e['y'] < y-25 for e in current['enemies'])
+                            if current.get('grounded') and (gap or danger or flyer) and time.monotonic()-last_jump > .75:
+                                page.keyboard.press('Space'); last_jump = time.monotonic()
+                            rescue_trace('approach_input', current, target, wanted)
+                            page.wait_for_timeout(40)
+                        current = campaign()
+                        require_live(current, 'contact_deadline', target, recover=contacted is None)
+                        assert contacted, ('Actual live NPC contact was not acknowledged; no bag wait is valid', current)
+                        (args.evidence/'rescue-live-contact.json').write_text(json.dumps(contacted, ensure_ascii=False, indent=2)+'\n')
+                        rescue_attempts.append({'attempt': attempt, 'outcome': 'live_contact', 'npc': target['id'], 'hp': contacted['hp'], 'world_time': contacted['time']})
                         break
-                    page.wait_for_timeout(60)
-                assert target, 'No projectile-freed captive was reached by ordinary controls'
-                check(campaign()['rescue_time'] == 0, 'A held gunshot frees a real captive without starting the knife clip')
-                before = campaign()
-                page.wait_for_timeout(300)
-                data = campaign()
-                check(not data['awarded'].get(target['id']+':gift'), 'Freed NPC grants no gift before hero contact')
-                moved = next(npc for npc in data['npcs'] if npc['id'] == target['id'])
-                check(moved['x'] != target['x'], 'The freed NPC actually walks before the hero approaches')
-                page.screenshot(path=str(args.evidence/'projectile-freed-walking.png'))
-                deadline = time.monotonic()+15
-                while time.monotonic() < deadline:
-                    data = campaign()
-                    npc = next(npc for npc in data['npcs'] if npc['id'] == target['id'])
-                    if npc['phase'] == 'thanks' or data['awarded'].get(target['id']+':gift'):
+                    except PrecontactDeath as death:
+                        stage, dead, failed_target = death.args
+                        # Only a proven death BEFORE valid contact is retried.
+                        # Preserve it before releasing input or using real UI.
+                        event = {'attempt': attempt, 'stage': stage, 'outcome': 'proven_death_before_contact', 'json_phase': 'before-input-cleanup', 'screenshot_phase': 'after-input-cleanup', 'state': dead, 'target': failed_target}
+                        (args.evidence/('rescue-attempt-%d-death.json' % attempt)).write_text(json.dumps(event, ensure_ascii=False, indent=2)+'\n')
+                        rescue_attempts.append({'attempt': attempt, 'outcome': event['outcome'], 'stage': stage, 'hp': dead['hp']})
                         keys([])
-                        break
-                    keys(['d'] if npc['x'] > data['player'][0] else ['a'])
-                    if data.get('grounded') and any(0 < pit[0]-data['player'][0] < 160 for pit in data['pits']):
-                        page.keyboard.press('Space')
-                    page.wait_for_timeout(40)
-                # The NPC now takes an item from her bag. Crossing to her other
-                # side keeps the hero away from the thrown item's side, so this
-                # explicitly proves that the thank-you timer itself pays nothing.
-                npc = next(npc for npc in campaign()['npcs'] if npc['id'] == target['id'])
+                        page.screenshot(path=str(args.evidence/('rescue-attempt-%d-death.png' % attempt)))
+                        assert retries < 3, ('Rescue approach exceeded ordinary checkpoint retries', dead)
+                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.menu==='dead' && d.ui_ready}", timeout=10000)
+                        tap('CampaignRetry', in_campaign=True)
+                        retries += 1; attempt += 1
+                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.ui_ready}", timeout=15000)
+                        canvas.focus()
+
+                # Only this same living hero's confirmed THANKS phase permits
+                # crossing away and waiting for the physical bag item. Missing
+                # handoff while alive stays a failure, never a retry.
+                npc = next(n for n in contacted['npcs'] if n['id'] == target['id'])
                 cross = 'd' if int(npc['facing']) < 0 else 'a'
+                side = 1 if cross == 'd' else -1
                 keys([cross])
-                page.wait_for_function("([id,side])=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign),n=d.npcs.find(n=>n.id===id);return (d.player[0]-n.x)*side>75}", arg=[target['id'], 1 if cross == 'd' else -1], timeout=8000)
+                deadline = time.monotonic()+8
+                crossed = False
+                while time.monotonic() < deadline:
+                    current = campaign(); require_live(current, 'cross_after_contact', target)
+                    npc = next(n for n in current['npcs'] if n['id'] == target['id'])
+                    assert npc['phase'] in ['thanks', 'departed'] and current['greeted'].get(target['id']), ('Contact acknowledgment was lost', npc)
+                    if (current['player'][0]-npc['x'])*side > 75:
+                        crossed = True; break
+                    page.wait_for_timeout(40)
+                assert crossed, 'Live hero did not cross away from the acknowledged NPC'
                 keys([])
-                page.wait_for_function("id=>JSON.parse(document.querySelector('canvas').dataset.campaign).pickups.some(p=>p.rescue_id===id && p.from_bag)", arg=target['id'], timeout=15000)
-                check(not campaign()['awarded'].get(target['id']+':gift'), 'The bag produces a visible world item without remotely granting its power-up')
+                deadline = time.monotonic()+15
+                dropped = None
+                while time.monotonic() < deadline:
+                    current = campaign(); require_live(current, 'await_actual_bag', target)
+                    dropped = next((item for item in current['pickups'] if item.get('rescue_id') == target['id'] and item.get('from_bag')), None)
+                    if dropped: break
+                    page.wait_for_timeout(50)
+                assert dropped, ('Alive, contacted NPC did not produce its actual bag item', current)
+                check(not current['awarded'].get(target['id']+':gift'), 'The bag produces a visible world item without remotely granting its power-up')
                 page.screenshot(path=str(args.evidence/'bag-item-before-contact.png'))
                 deadline = time.monotonic()+15
                 while time.monotonic() < deadline:
-                    data = campaign()
-                    if data['awarded'].get(target['id']+':gift'):
-                        break
-                    item = next(item for item in data['pickups'] if item.get('rescue_id') == target['id'])
-                    keys(['d'] if item['x'] > data['player'][0] else ['a'])
+                    current = campaign(); require_live(current, 'approach_dropped_item', target)
+                    if current['awarded'].get(target['id']+':gift'): break
+                    item = next(item for item in current['pickups'] if item.get('rescue_id') == target['id'])
+                    keys(['d'] if item['x'] > current['player'][0] else ['a'])
                     page.wait_for_timeout(40)
                 keys([])
                 page.wait_for_function("id=>JSON.parse(document.querySelector('canvas').dataset.campaign).awarded[id+':gift']===true", arg=target['id'], timeout=5000)
