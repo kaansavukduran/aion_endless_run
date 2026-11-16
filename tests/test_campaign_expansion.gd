@@ -17,6 +17,8 @@ func claim_gift(w,npc: Dictionary) -> bool:
 	w.attack_release();w.move_axis=Vector2.ZERO;w.velocity=Vector2.ZERO
 	w.player=Vector2(float(items[0].x),float(items[0].y)+25.)
 	tick(w,.3)
+	var offer: Dictionary=CampaignRhythm.offer(w)
+	if str(offer.get("id",""))==id:w.interact()
 	return w.taken.has(id) and w.awarded.has(str(npc.id)+":gift")
 func _initialize() -> void:call_deferred("run")
 func run() -> void:
@@ -61,7 +63,7 @@ func run() -> void:
 			check(w.score==claimed and w.ammunition==ammo,"Every NPC's repeated rescue cannot duplicate its effect: "+str(npc.id))
 	for leaf in ["water","terrace","roots"]:
 		w=fresh();w.load_section(leaf)
-		check(w.encounters.size()==6 and w.rooms.size()==2,"Every leaf has six encounters and two optional rooms")
+		check(w.encounters.size()==8 and w.rooms.size()==2,"Every leaf has eight tactical groups and two optional rooms")
 		check(w.npcs.size()==int(CampaignRescue.COUNTS[leaf]),"Route rescue count matches authored content")
 		for kind in CampaignContent.REGIONS[leaf]:check(w.enemies.any(func(e):return e.kind==kind),"Route really contains its exclusive enemy "+kind)
 		var guard: Dictionary=w.enemies.filter(func(e):return bool(e.mini))[0]

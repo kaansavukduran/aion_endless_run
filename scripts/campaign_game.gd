@@ -6,6 +6,9 @@ const FONT = preload("res://assets/PixelifySans.ttf")
 const TRAVEL_DURATION := .36
 const REDUCED_TRAVEL_DURATION := .1
 var world := AionCampaignWorld.new()
+var impact_hold := 0.
+var impact_cooldown := 0.
+var defeat_sound_wait := 0.
 var native_diagnostics := preload("res://scripts/campaign_native_diagnostics.gd").new()
 var options := RunnerInterfaceOptions.new()
 var pad := RunnerGamepad.new()
@@ -189,7 +192,8 @@ func build_ui() -> void:
 	else:
 		control_hint=paragraph(t("keys"),15);ui.add_child(control_hint);control_hint.position=Vector2(16,view_h-48);control_hint.size=Vector2(view_w-32,45)
 	ride_button=Button.new();ride_button.name="CampaignRide";ride_button.text=t("ride")+ (" · E" if not touch_mode else "");ride_button.add_theme_font_size_override("font_size",font_size(17));ride_button.pressed.connect(func():world.interact());ui.add_child(ride_button)
-	ride_button.position=Vector2(view_w*.5-110,view_h-(190 if touch_mode else 98));ride_button.size=Vector2(220,52)
+	ride_button.size=Vector2(180,76) if portrait and touch_mode else Vector2(220,52)
+	ride_button.position=Vector2((view_w-ride_button.size.x)*.5,view_h-(205 if portrait and touch_mode else (190 if touch_mode else 98)))
 	fade_panel=ColorRect.new();fade_panel.color=Color(0.06,.06,.09,0);fade_panel.mouse_filter=Control.MOUSE_FILTER_IGNORE;fade_panel.size=Vector2(view_w,view_h);ui.add_child(fade_panel)
 	presentation=null;presentation_skip=null
 	if presentation_stage!="":build_presentation()
@@ -318,7 +322,7 @@ func report_lines() -> Array[String]:
 	for role in roles:roles_text.append(t(str(role))+" ×"+str(roles[role]))
 	var record: Dictionary=Dictionary(Dictionary(saved.get("performance",{})).get("hero:"+world.character,{}))
 	var values: Array[String]=[t("route")+": "+" → ".join(world.route.map(func(s):return t(s))),
-		t("elapsed")+": "+elapsed_time(world.time)+" · "+t("defeated")+": "+str(world.kills),
+		t("elapsed")+": "+elapsed_time(world.time)+" · "+t("defeated")+": "+str(world.kills)+" · "+t("best_chain")+": "+str(world.best_chain),
 		t("damage_taken")+": "+str(world.losses)+" · "+t("secrets_found")+": "+str(world.discovered.size()),
 		t("keepers")+": "+str(world.rescued.size())+" · "+t("arena")+": "+t("won"),
 		old("best")+": %05d"%int(saved.get("best_score",world.score)),
@@ -668,6 +672,7 @@ func update_arcade_aim(dt: float=0.) -> void:
 	world.move_axis=Vector2(axis,vertical)
 
 func _process(dt: float) -> void:
+	impact_cooldown=maxf(0.,impact_cooldown-dt);defeat_sound_wait=maxf(0.,defeat_sound_wait-dt)
 	native_diagnostics.step(dt)
 	world.pose_motion_enabled=motion_enabled and not options.reduced_motion
 	if not is_instance_valid(view):return
@@ -680,7 +685,11 @@ func _process(dt: float) -> void:
 	if world.state=="playing" and menu_kind=="" and fade<0.:
 		update_arcade_aim(clampf(dt,0.,.05))
 		if (stick_touch>=0 or mouse_stick):world.boost_held=absf(world.move_axis.x)>.85 or not Dictionary(held.get("boost",{})).is_empty()
-		world.step(dt)
+		var simulation_dt: float=clampf(dt,0.,.05)
+		if impact_hold>0. and motion_enabled and not options.reduced_motion:
+			var held_time: float=minf(impact_hold,simulation_dt);impact_hold-=held_time;simulation_dt-=held_time
+		else:impact_hold=0.
+		if simulation_dt>0.:world.step(simulation_dt)
 	if world.state=="travel" and fade<0.:start_travel()
 	if world.state in ["victory","dying"]:world.step(dt)
 	advance_travel(dt)
@@ -695,7 +704,8 @@ func _process(dt: float) -> void:
 			build_ui()
 	for event in world.pending_events:
 		if event in ["checkpoint","rescue","rescue_gift","secret","mechanism"] and menu_kind!="briefing":save_checkpoint()
-		if event in ["shot","melee","grenade","blast","pickup","rescue","hurt","cut","rescue_gift","secret","mechanism","enemy_shot","guardian","boss_attack","complete","checkpoint"]:sound(event)
+		if event=="enemy" and impact_cooldown<=0. and motion_enabled and not options.reduced_motion and world.state=="playing":impact_hold=.035;impact_cooldown=.18
+		if event in ["shot","melee","grenade","blast","pickup","rescue","hurt","cut","rescue_gift","secret","mechanism","enemy_shot","guardian","boss_attack","complete","checkpoint","enemy","armour_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	view.camera_x=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
@@ -726,8 +736,9 @@ func update_hud() -> void:
 	boss_health.value=world.boss.hp
 	if boss_health.visible:subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+( " · "+t("boss_warning") if float(world.boss.windup)>0. or float(world.boss.get("beam_warning",0.))>0. else "")
 	subtitle.position.y=boss_health.position.y+(20. if boss_health.visible else 0.)
-	ride_button.visible=active_controls and (bool(world.mount.ridden) or CampaignVehicles.can_board(world))
-	ride_button.text=t("exit_vehicle") if bool(world.mount.ridden) else t("board")
+	var offer: Dictionary=CampaignRhythm.offer(world)
+	ride_button.visible=active_controls and (not offer.is_empty() or bool(world.mount.ridden) or CampaignVehicles.can_board(world))
+	ride_button.text=t("swap_weapon") if not offer.is_empty() else (t("exit_vehicle") if bool(world.mount.ridden) else t("board"))
 	if is_instance_valid(stick):stick.visible=active_controls
 	for key in actions:
 		var item: AionCampaignTouch=actions[key];item.visible=active_controls;item.pressed=not Dictionary(held.get(key,{})).is_empty()
@@ -763,15 +774,22 @@ func update_ambient() -> void:
 
 func sound(event: String) -> void:
 	if not audio_enabled:return
+	if event in ["enemy","armour_hit"]:
+		if defeat_sound_wait>0.:return
+		defeat_sound_wait=.055
 	if voices.is_empty():
 		for i in 6:
 			var voice:=AudioStreamPlayer.new();voice.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(voice);voices.append(voice)
 	if not sound_cache.has(event):
-		var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else 1400
+		var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else (2400 if event in ["enemy","armour_hit"] else 1400)
 		var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.}.get(event,660.)
+		if event=="enemy":pitch=180.
+		elif event=="armour_hit":pitch=1140.
 		for i in count:
 			var phase: float=float(i)/22050.;var envelope: float=pow(1.-float(i)/count,2.)
 			var sample:=sin(phase*pitch*TAU*(1.-float(i)/count*.4))*envelope*.22
+			if event=="enemy":sample=(sin(phase*180.*TAU)*.6+sin(phase*73.*TAU)*.4)*envelope*.26
+			elif event=="armour_hit":sample=(sin(phase*1140.*TAU)*.6+sin(phase*1733.*TAU)*.4)*envelope*.20
 			bytes.append_array(PackedByteArray([int(sample*32700.)&255,(int(sample*32700.)>>8)&255]))
 		var stream:=AudioStreamWAV.new();stream.format=AudioStreamWAV.FORMAT_16_BITS;stream.mix_rate=22050;stream.data=bytes;sound_cache[event]=stream
 	for voice in voices:
@@ -813,6 +831,8 @@ func metadata() -> void:
 	# Passive acceptance observations: these mirror real state, never mutate it.
 	data.engine_process_frames=Engine.get_process_frames();data.engine_physics_frames=Engine.get_physics_frames()
 	data.crouching=world.crouching()
+	data.rally=world.rally;data.retry_count=world.retry_count;data.chain=world.chain;data.chain_time=world.chain_time;data.best_chain=world.best_chain
+	data.weapon_offer=CampaignRhythm.offer(world);data.bridge_timers=world.bridge_timers;data.boss_ports=world.boss.get("ports",[]);data.boss_dash=world.boss.get("dash",0.)
 	var hit: Vector2=world.player_hit_center()
 	data.player_hit_center=[hit.x,hit.y];data.player_hit_radius=world.player_hit_radius()
 	data.assist_attacks=world.assist_attacks;data.assists=[]

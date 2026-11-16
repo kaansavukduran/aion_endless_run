@@ -1,0 +1,995 @@
+{
+  "checks": [
+    "Visible reachable menu action: @Button@93",
+    "Visible reachable menu action: CampaignBegin",
+    "Visible reachable menu action: @Button@113",
+    "Visible reachable menu action: CampaignGo",
+    "Main menu \u2192 Arcade \u2192 mission \u2192 play through normal buttons",
+    "D moves the player right; this is not automatic scrolling",
+    "A moves and faces left",
+    "Held fire produces real, spaced gunshots",
+    "G spends exactly one energy grenade",
+    "Actual right Fire touch reaches a gunshot or contextual close strike",
+    "Actual right Grenade touch spends one bomb without a second underlying command",
+    "Pause freezes the active mission",
+    "Visible reachable menu action: @Button@211",
+    "Visible reachable menu action: @Button@212",
+    "Visible reachable menu action: @Button@213",
+    "Visible reachable menu action: @Button@214",
+    "Visible reachable menu action: @Button@215",
+    "Portrait rotation preserves checkpoint and score",
+    "Approved fixed left stick and three right actions exist",
+    "Touch target is inside portrait viewport: attack",
+    "Touch target is inside portrait viewport: grenade",
+    "Touch target is inside portrait viewport: jump",
+    "Real multitouch moves and jumps simultaneously",
+    "Touch cancellation releases the joystick without a stuck direction",
+    "Actual Shift key increases current hero running speed",
+    "Actual right mouse click throws one grenade",
+    "Held fire emits an actual projectile between the eight primary angles",
+    "Virtual Xbox left stick plus LB routes to sprint",
+    "Virtual Xbox Start pauses the actual world",
+    "Virtual Xbox A activates the real Resume button",
+    "Virtual Xbox RB fires through the real game input path",
+    "Virtual Xbox A jumps during normal gameplay",
+    "Virtual Xbox B throws a grenade during normal gameplay",
+    "Actual offline Continue restores mid-route position and checkpoint stock",
+    "Actual E deliberately swaps a visible special weapon: heavy \u2192 arc",
+    "Actual E deliberately swaps a visible special weapon: arc \u2192 scatter",
+    "Actual E deliberately swaps a visible special weapon: scatter \u2192 seeker",
+    "Actual E deliberately swaps a visible special weapon: seeker \u2192 heavy",
+    "Actual E deliberately swaps a visible special weapon: heavy \u2192 arc",
+    "Actual E deliberately swaps a visible special weapon: arc \u2192 spore",
+    "Actual E deliberately swaps a visible special weapon: spore \u2192 harpoon",
+    "Actual E deliberately swaps a visible special weapon: harpoon \u2192 arc",
+    "Actual E deliberately swaps a visible special weapon: arc \u2192 spore",
+    "Actual E deliberately swaps a visible special weapon: spore \u2192 harpoon",
+    "Mission 1 is completable with actual keyboard/mouse-equivalent gameplay",
+    "The chosen branch was actually recorded",
+    "Every required route fork was traversed through ordinary movement",
+    "Actual completed checkpoint and campaign best are persisted",
+    "Return to the original runner clears stale campaign observations",
+    "Returning to main preserves the completed campaign",
+    "Offline reload starts the real game and preserves its separate campaign checkpoint",
+    "No browser or Godot script errors during the actual flow: []"
+  ],
+  "errors": [],
+  "build": "3a77349cbc99cbf2",
+  "final": {
+    "actions": {
+      "attack": [
+        977.0,
+        413.0,
+        100.0,
+        100.0
+      ],
+      "grenade": [
+        922.0,
+        523.0,
+        100.0,
+        100.0
+      ],
+      "jump": [
+        1032.0,
+        523.0,
+        100.0,
+        100.0
+      ]
+    },
+    "activated": {},
+    "aim": [
+      1.0,
+      0.0
+    ],
+    "ammunition": 0,
+    "assist_attacks": 0,
+    "assists": [],
+    "awarded": {},
+    "best_chain": 0,
+    "boss_beam_x": -999.0,
+    "boss_dash": 0.0,
+    "boss_hp": 90,
+    "boss_phase": 1,
+    "boss_ports": [],
+    "boss_warning": 0.0,
+    "boss_x": 7380.0,
+    "bridge_timers": {},
+    "bullets": [],
+    "buttons": {
+      "@Button@94": [
+        172.0,
+        435.0,
+        808.0,
+        54.0,
+        "Ana men\u00fc"
+      ],
+      "CampaignBegin": [
+        172.0,
+        313.0,
+        808.0,
+        48.0,
+        "G\u00f6reve ba\u015fla"
+      ],
+      "CampaignLastReport": [
+        172.0,
+        371.0,
+        808.0,
+        54.0,
+        "G\u00f6rev raporu"
+      ]
+    },
+    "camera": 0.0,
+    "camera_y": 0.0,
+    "chain": 0,
+    "chain_time": 0.0,
+    "character": "aion",
+    "checkpoint": "shore",
+    "checkpoint_ready": true,
+    "completed": false,
+    "crouching": false,
+    "discovered": {},
+    "enemies": [
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 500.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 758.366973876953,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 1007.22235107422,
+        "y": -70.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1137.88496398926,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 1294.29179382324,
+        "y": -70.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 1443.71713256836,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 1578.87358093262,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 2200.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 2380.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2445.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2645.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 2750.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 3622.10556030273,
+        "y": -70.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 3802.10556030273,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 3867.10556030273,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 4067.10556030273,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "moth",
+        "windup": 0.0,
+        "x": 4172.10556030273,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 4751.03778076172,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 4856.03778076172,
+        "y": -70.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 5036.03778076172,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "slime",
+        "windup": 0.0,
+        "x": 5161.03778076172,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "drone",
+        "windup": 0.0,
+        "x": 5321.03778076172,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 6565.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 6565.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 6385.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 6510.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 6670.0,
+        "y": -120.0
+      }
+    ],
+    "engine_physics_frames": 605,
+    "engine_process_frames": 101,
+    "facing": 1,
+    "flock": 1,
+    "gates": [
+      {
+        "closed": true,
+        "x": 1080.0
+      },
+      {
+        "closed": false,
+        "x": 2080.0
+      },
+      {
+        "closed": false,
+        "x": 3080.0
+      },
+      {
+        "closed": false,
+        "x": 4080.0
+      },
+      {
+        "closed": false,
+        "x": 5080.0
+      },
+      {
+        "closed": false,
+        "x": 6080.0
+      },
+      {
+        "closed": true,
+        "x": 2960.0
+      },
+      {
+        "closed": true,
+        "x": 6860.0
+      }
+    ],
+    "gift_drops": {},
+    "greeted": {},
+    "grenades": 5,
+    "ground": 428.0,
+    "grounded": true,
+    "help_step": 0,
+    "hero_projectiles": [],
+    "hp": 3,
+    "hud_summary": "Aion \u00b7 SKOR 00000 \u00b7 Can 3/3 \u00b7 Bomba 5 \u00b7 Silah: Tabanca \u221e \u00b7 Bek\u00e7iler 0",
+    "input_kind": "keyboard",
+    "invulnerable": 1.2,
+    "kills": 0,
+    "losses": 0,
+    "melee": 0.0,
+    "menu": "briefing",
+    "mount_transition": "",
+    "mount_transition_time": 0.0,
+    "mount_type": "skimmer",
+    "mounted": false,
+    "music_starts": 1,
+    "native_memory": 0.0,
+    "node_count": 33.0,
+    "npcs": [
+      {
+        "age": 0.0,
+        "facing": -1,
+        "freed": false,
+        "gift": "heavy",
+        "id": "shore:keeper",
+        "phase": "bound",
+        "secret": "",
+        "thank_age": 0.0,
+        "x": 4290.0,
+        "y": 0.0
+      },
+      {
+        "age": 0.0,
+        "facing": -1,
+        "freed": false,
+        "gift": "points",
+        "id": "shore:keeper:1",
+        "phase": "bound",
+        "secret": "",
+        "thank_age": 0.0,
+        "x": 3725.0,
+        "y": 0.0
+      },
+      {
+        "age": 0.0,
+        "facing": -1,
+        "freed": false,
+        "gift": "arc",
+        "id": "shore:keeper:2",
+        "phase": "bound",
+        "secret": "",
+        "thank_age": 0.0,
+        "x": 6900.0,
+        "y": 0.0
+      }
+    ],
+    "objects": [
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:0",
+        "kind": "turret",
+        "secret": "",
+        "x": 450.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:1",
+        "kind": "panel",
+        "secret": "",
+        "x": 1800.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:2",
+        "kind": "planks",
+        "secret": "",
+        "x": 3150.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:3",
+        "kind": "gate",
+        "secret": "",
+        "x": 4500.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:4",
+        "kind": "lamp",
+        "secret": "",
+        "x": 5850.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:5",
+        "kind": "relay",
+        "secret": "",
+        "x": 7200.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 1,
+        "id": "shore:lamp:0",
+        "kind": "lamp",
+        "secret": "",
+        "x": 720.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 1,
+        "id": "shore:lamp:1",
+        "kind": "lamp",
+        "secret": "",
+        "x": 1320.0,
+        "y": 0.0
+      }
+    ],
+    "pickups": [
+      {
+        "id": "shore:fruit:1",
+        "kind": "fruit_1",
+        "x": 255.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:2",
+        "kind": "fruit_2",
+        "x": 475.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:3",
+        "kind": "fruit_3",
+        "x": 695.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:4",
+        "kind": "fruit_4",
+        "x": 915.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:5",
+        "kind": "fruit_5",
+        "x": 1135.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:6",
+        "kind": "fruit_6",
+        "x": 1355.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:7",
+        "kind": "fruit_7",
+        "x": 1575.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:8",
+        "kind": "fruit_0",
+        "x": 1795.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:9",
+        "kind": "fruit_1",
+        "x": 2015.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:10",
+        "kind": "fruit_2",
+        "x": 2235.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:11",
+        "kind": "fruit_3",
+        "x": 2455.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:12",
+        "kind": "fruit_4",
+        "x": 2675.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:13",
+        "kind": "fruit_5",
+        "x": 2895.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:14",
+        "kind": "fruit_6",
+        "x": 3115.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:15",
+        "kind": "fruit_7",
+        "x": 3335.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:16",
+        "kind": "fruit_0",
+        "x": 3555.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:17",
+        "kind": "fruit_1",
+        "x": 3775.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:18",
+        "kind": "fruit_2",
+        "x": 3995.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:19",
+        "kind": "fruit_3",
+        "x": 4215.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:20",
+        "kind": "fruit_4",
+        "x": 4435.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:21",
+        "kind": "fruit_5",
+        "x": 4655.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:22",
+        "kind": "fruit_6",
+        "x": 4875.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:23",
+        "kind": "fruit_7",
+        "x": 5095.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:24",
+        "kind": "fruit_0",
+        "x": 5315.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:25",
+        "kind": "fruit_1",
+        "x": 5535.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:26",
+        "kind": "fruit_2",
+        "x": 5755.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:27",
+        "kind": "fruit_3",
+        "x": 5975.0,
+        "y": -82.0
+      },
+      {
+        "id": "shore:fruit:28",
+        "kind": "fruit_4",
+        "x": 6195.0,
+        "y": -82.0
+      },
+      {
+        "id": "shore:fruit:29",
+        "kind": "fruit_5",
+        "x": 6415.0,
+        "y": -82.0
+      },
+      {
+        "id": "shore:fruit:30",
+        "kind": "fruit_6",
+        "x": 6635.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:31",
+        "kind": "fruit_7",
+        "x": 6855.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:32",
+        "kind": "fruit_0",
+        "x": 7075.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:33",
+        "kind": "fruit_1",
+        "x": 7295.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:fruit:34",
+        "kind": "fruit_2",
+        "x": 7515.0,
+        "y": -40.0
+      },
+      {
+        "id": "shore:owl_feather",
+        "kind": "owl_feather",
+        "x": 1200.0,
+        "y": -35.0
+      },
+      {
+        "id": "shore:skill-fruit:650:0",
+        "kind": "fruit_3",
+        "x": 675.0,
+        "y": -112.0
+      },
+      {
+        "id": "shore:skill-fruit:650:1",
+        "kind": "fruit_4",
+        "x": 720.0,
+        "y": -112.0
+      },
+      {
+        "id": "shore:skill-fruit:650:2",
+        "kind": "fruit_5",
+        "x": 765.0,
+        "y": -112.0
+      },
+      {
+        "id": "shore:skill-fruit:1300:0",
+        "kind": "fruit_3",
+        "x": 1325.0,
+        "y": -112.0
+      },
+      {
+        "id": "shore:skill-fruit:1300:1",
+        "kind": "fruit_4",
+        "x": 1370.0,
+        "y": -112.0
+      },
+      {
+        "id": "shore:skill-fruit:1300:2",
+        "kind": "fruit_5",
+        "x": 1415.0,
+        "y": -112.0
+      },
+      {
+        "id": "shore:skill-fruit:1950:0",
+        "kind": "fruit_3",
+        "x": 1975.0,
+        "y": -112.0
+      },
+      {
+        "id": "shore:skill-fruit:1950:1",
+        "kind": "fruit_4",
+        "x": 2020.0,
+        "y": -112.0
+      },
+      {
+        "id": "shore:skill-fruit:1950:2",
+        "kind": "fruit_5",
+        "x": 2065.0,
+        "y": -112.0
+      },
+      {
+        "id": "shore:bridge-fruit:0",
+        "kind": "fruit_0",
+        "x": 5860.0,
+        "y": -100.0
+      },
+      {
+        "id": "shore:bridge-fruit:1",
+        "kind": "fruit_1",
+        "x": 6010.0,
+        "y": -100.0
+      },
+      {
+        "id": "shore:bridge-fruit:2",
+        "kind": "fruit_2",
+        "x": 6160.0,
+        "y": -100.0
+      },
+      {
+        "id": "shore:bridge-fruit:3",
+        "kind": "fruit_3",
+        "x": 6310.0,
+        "y": -100.0
+      }
+    ],
+    "pits": [
+      [
+        5840.0,
+        6440.0
+      ]
+    ],
+    "platforms": [
+      [
+        650.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1300.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1950.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        2600.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3250.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3900.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        4550.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        5200.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        6500.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        7150.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3070.0,
+        -55.0,
+        160.0,
+        18.0
+      ],
+      [
+        952.222351074219,
+        -70.0,
+        110.0,
+        20.0
+      ],
+      [
+        1239.29174804688,
+        -70.0,
+        110.0,
+        20.0
+      ],
+      [
+        3567.10546875,
+        -70.0,
+        110.0,
+        20.0
+      ],
+      [
+        4801.03759765625,
+        -70.0,
+        110.0,
+        20.0
+      ],
+      [
+        5800.0,
+        -40.0,
+        310.0,
+        20.0
+      ],
+      [
+        6110.0,
+        -40.0,
+        360.0,
+        20.0
+      ]
+    ],
+    "player": [
+      140.0,
+      0.0
+    ],
+    "player_hit_center": [
+      140.0,
+      -37.0
+    ],
+    "player_hit_radius": 30.0,
+    "pose": {
+      "anchor": [
+        140.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "muzzle": [
+        184.903358459473,
+        -38.7539405822754
+      ],
+      "row": 1,
+      "source": "m1-body-aion"
+    },
+    "presentation": "",
+    "presentation_time": 0.0,
+    "rally": {
+      "ammunition": 0,
+      "flock": 1,
+      "grenades": 5,
+      "mount": {
+        "available": false,
+        "hp": 3,
+        "ridden": false,
+        "x": 0.0
+      },
+      "section": "shore",
+      "shield": 0,
+      "weapon": "pistol",
+      "x": 140.0
+    },
+    "raw": [
+      1152.0,
+      648.0
+    ],
+    "report_lines": [
+      "Rota: ",
+      "S\u00fcre: 00:00 \u00b7 Yenilen d\u00fc\u015fmanlar: 0 \u00b7 En iyi zincir: 0",
+      "Kaybedilen can: 0 \u00b7 Bulunan s\u0131rlar: 0",
+      "Bek\u00e7iler: 0 \u00b7 K\u00f6k Motoru: G\u00f6rev tamamland\u0131",
+      "REKOR: 44025",
+      "En h\u0131zl\u0131 tamamlama: 05:15 \u00b7 En \u00e7ok kurtarma: 13.0",
+      "Kullan\u0131lan silahlar: \u2014",
+      "Kullan\u0131lan ara\u00e7lar: \u2014",
+      "Kurtar\u0131lan bek\u00e7iler: \u2014"
+    ],
+    "rescue_candidate": "",
+    "rescue_roles": {},
+    "rescue_time": 0.0,
+    "rescued": [],
+    "retry_count": 0,
+    "rooms": [],
+    "route": [],
+    "run_seed": 1116356615,
+    "save_ok": true,
+    "schema": 3,
+    "score": 0,
+    "section": "shore",
+    "shots": 0,
+    "spiders": [],
+    "state": "briefing",
+    "stick": [
+      24.0,
+      471.0,
+      150.0,
+      150.0
+    ],
+    "taken": {},
+    "time": 0.0,
+    "transform": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "travel_active": false,
+    "travel_target": "",
+    "ui_generation": 1,
+    "ui_ready": true,
+    "vehicles_used": [],
+    "velocity": [
+      0.0,
+      0.0
+    ],
+    "view": [
+      1152.0,
+      648.0
+    ],
+    "weapon": "pistol",
+    "weapon_offer": {},
+    "weapons_used": []
+  }
+}

@@ -3,6 +3,7 @@ extends RefCounted
 const SUPPLEMENT=preload("res://assets/locales/campaign.json")
 const EXPANSION=preload("res://assets/locales/campaign_expansion.json")
 const UI=preload("res://assets/locales/campaign_ui.json")
+const RHYTHM=preload("res://assets/locales/campaign_rhythm.json")
 
 const EN := {
 "arcade":"Arcade", "endless":"Endless", "title":"Beaconfall", "start":"Begin mission", "continue":"Continue checkpoint", "brief":"The coast's lanterns have gone dark. Free the keepers, follow the broken relay and stop the Root Engine.",
@@ -33,6 +34,7 @@ const LOCAL := {
 
 static func word(locale: String,key: String) -> String:
 	locale=GameText.language_for_locale(locale)
+	if RHYTHM.data.has(locale) and RHYTHM.data[locale].has(key):return str(RHYTHM.data[locale][key])
 	if key=="fork_one":return "Fener Kavşağı" if locale=="tr" else "Lantern Junction"
 	if key=="fork_two":return "Asma Geçit" if locale=="tr" else "Hanging Passage"
 	if key=="continue_short":return "Sürdür" if locale=="tr" else "Continue"

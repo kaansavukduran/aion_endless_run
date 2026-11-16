@@ -1,0 +1,52 @@
+PASS Cold-launch opening completes naturally without a forced extra wait
+PASS Desktop main: all current actions fit and have positive hit areas
+PASS Fresh UI uses dark theme and system body font
+PASS Retired owl/wolf are not offered as playable choices
+PASS Real character selection and confirmation: aion
+PASS Retired owl/wolf are not offered as playable choices
+PASS Real character selection and confirmation: sheep
+PASS Retired owl/wolf are not offered as playable choices
+PASS Real character selection and confirmation: rabbit
+PASS Retired owl/wolf are not offered as playable choices
+PASS Real character selection and confirmation: eren
+PASS Interactive help: all current actions fit and have positive hit areas
+PASS Replayed opening skips through a normal Enter input
+PASS Help Next advances a real tutorial page
+PASS Help Previous returns without entering live gameplay
+PASS Rotated portrait main: all current actions fit and have positive hit areas
+PASS Rotation preserves selected hero: portrait
+PASS Rotated landscape main: all current actions fit and have positive hit areas
+PASS Rotation preserves selected hero: landscape
+PASS Attract scene actually moves and fires through its isolated game model
+PASS Attract gameplay leaves campaign Continue and Endless saved data unchanged
+PASS An ordinary input leaves Attract Mode immediately
+PASS Leaving Attract Mode also preserves both save stores
+PASS Endless starts through its actual main-menu action
+PASS Endless pause returns to the same main menu
+PASS Campaign briefing: all current actions fit and have positive hit areas
+PASS Actual Arcade briefing/help/start presentation reaches playable Mission 1
+PASS Normal D input moves the Arcade hero
+PASS Actual touch Bomb spends one grenade
+PASS Actual touch Jump reaches the same physics action
+PASS Virtual Gamepad API Start pauses the actual world
+PASS Campaign portrait pause: all current actions fit and have positive hit areas
+PASS Paused rotation preserves campaign progress
+PASS Virtual Gamepad API confirm activates the selected Resume action
+PASS Actual keyboard aim and gun action: [1, 0]
+PASS Actual keyboard aim and gun action: [1, -1]
+PASS Actual keyboard aim and gun action: [0, -1]
+PASS Actual keyboard aim and gun action: [-1, -1]
+PASS Actual keyboard aim and gun action: [-1, 0]
+PASS Actual keyboard aim and gun action: [-1, 1]
+PASS Actual keyboard aim and gun action: [0, 1]
+PASS Actual keyboard aim and gun action: [1, 1]
+PASS Actual checkpoint UI supplies a living, actionable actor before the independent crouch test
+PASS Down + movement + Fire reaches real crouch locomotion and a shot together
+PASS Releasing Down exits crouch without a stuck posture
+PASS A held gunshot frees a real captive without starting the knife clip
+PASS Freed NPC grants no gift before hero contact
+PASS The freed NPC actually walks before the hero approaches
+PASS The bag produces a visible world item without remotely granting its power-up
+PASS Actual dropped-item contact applies the power-up and persists it once
+PASS No uncaught browser or Godot script errors in the tested ordinary-input flow
+51 ordinary-input Forge checks passed

@@ -1,0 +1,1028 @@
+{
+  "before": {
+    "activated": {
+      "shore:lamp:0": true,
+      "shore:lamp:1": true,
+      "shore:object:0": true,
+      "shore:object:1": true
+    },
+    "awarded": {
+      "shore:enemy:0": true,
+      "shore:enemy:1": true,
+      "shore:enemy:1:style": true,
+      "shore:enemy:2": true,
+      "shore:enemy:3": true,
+      "shore:enemy:300": true,
+      "shore:enemy:300:style": true,
+      "shore:enemy:301": true,
+      "shore:enemy:301:style": true,
+      "shore:enemy:302": true,
+      "shore:enemy:302:style": true,
+      "shore:enemy:303": true,
+      "shore:enemy:303:style": true,
+      "shore:enemy:304": true,
+      "shore:enemy:304:style": true,
+      "shore:enemy:3:style": true,
+      "shore:enemy:4": true,
+      "shore:enemy:4:style": true,
+      "shore:enemy:5": true,
+      "shore:enemy:5:style": true,
+      "shore:fruit:1": true,
+      "shore:fruit:10": true,
+      "shore:fruit:11": true,
+      "shore:fruit:2": true,
+      "shore:fruit:3": true,
+      "shore:fruit:4": true,
+      "shore:fruit:5": true,
+      "shore:fruit:6": true,
+      "shore:fruit:7": true,
+      "shore:fruit:8": true,
+      "shore:fruit:9": true,
+      "shore:lamp:0:power": true,
+      "shore:lamp:1:power": true,
+      "shore:object:0:power": true,
+      "shore:object:1:power": true,
+      "shore:skill-fruit:1950:0": true,
+      "shore:skill-fruit:1950:1": true,
+      "shore:skill-fruit:1950:2": true,
+      "shore:skill-fruit:650:0": true
+    },
+    "best_chain": 7,
+    "best_score": 0,
+    "character": "aion",
+    "checkpoint": "shore",
+    "checkpoint_ready": true,
+    "completed": false,
+    "discovered": {},
+    "flock": 1,
+    "gift_drops": {},
+    "greeted": {},
+    "kills": 11,
+    "losses": 2,
+    "performance": {},
+    "rally": {
+      "ammunition": 69,
+      "flock": 1,
+      "grenades": 4,
+      "mount": {
+        "available": false,
+        "hp": 3,
+        "hurt": 0,
+        "ridden": false,
+        "wreck_age": 19.8651026214526,
+        "x": 0
+      },
+      "section": "shore",
+      "shield": 3,
+      "weapon": "heavy",
+      "x": 2600
+    },
+    "rescue_roles": {},
+    "rescued": [],
+    "retry_count": 0,
+    "route": [],
+    "run_seed": 534253810,
+    "schema": 3,
+    "score": 2000,
+    "taken": {
+      "shore:crate:1": true,
+      "shore:crate:2": true,
+      "shore:crate:3": true,
+      "shore:fruit:1": true,
+      "shore:fruit:10": true,
+      "shore:fruit:11": true,
+      "shore:fruit:2": true,
+      "shore:fruit:3": true,
+      "shore:fruit:4": true,
+      "shore:fruit:5": true,
+      "shore:fruit:6": true,
+      "shore:fruit:7": true,
+      "shore:fruit:8": true,
+      "shore:fruit:9": true,
+      "shore:owl_feather": true,
+      "shore:skill-fruit:1950:0": true,
+      "shore:skill-fruit:1950:1": true,
+      "shore:skill-fruit:1950:2": true,
+      "shore:skill-fruit:650:0": true
+    },
+    "time": 20.156535954786,
+    "vehicles_used": [],
+    "weapons_used": [
+      "pistol",
+      "heavy"
+    ]
+  },
+  "after": {
+    "actions": {
+      "attack": [
+        977.0,
+        413.0,
+        100.0,
+        100.0
+      ],
+      "grenade": [
+        922.0,
+        523.0,
+        100.0,
+        100.0
+      ],
+      "jump": [
+        1032.0,
+        523.0,
+        100.0,
+        100.0
+      ]
+    },
+    "activated": {
+      "shore:lamp:0": true,
+      "shore:lamp:1": true,
+      "shore:object:0": true,
+      "shore:object:1": true
+    },
+    "aim": [
+      1.0,
+      0.0
+    ],
+    "ammunition": 69,
+    "assist_attacks": 0,
+    "assists": [],
+    "awarded": {
+      "shore:enemy:0": true,
+      "shore:enemy:1": true,
+      "shore:enemy:1:style": true,
+      "shore:enemy:2": true,
+      "shore:enemy:3": true,
+      "shore:enemy:300": true,
+      "shore:enemy:300:style": true,
+      "shore:enemy:301": true,
+      "shore:enemy:301:style": true,
+      "shore:enemy:302": true,
+      "shore:enemy:302:style": true,
+      "shore:enemy:303": true,
+      "shore:enemy:303:style": true,
+      "shore:enemy:304": true,
+      "shore:enemy:304:style": true,
+      "shore:enemy:3:style": true,
+      "shore:enemy:4": true,
+      "shore:enemy:4:style": true,
+      "shore:enemy:5": true,
+      "shore:enemy:5:style": true,
+      "shore:fruit:1": true,
+      "shore:fruit:10": true,
+      "shore:fruit:11": true,
+      "shore:fruit:2": true,
+      "shore:fruit:3": true,
+      "shore:fruit:4": true,
+      "shore:fruit:5": true,
+      "shore:fruit:6": true,
+      "shore:fruit:7": true,
+      "shore:fruit:8": true,
+      "shore:fruit:9": true,
+      "shore:lamp:0:power": true,
+      "shore:lamp:1:power": true,
+      "shore:object:0:power": true,
+      "shore:object:1:power": true,
+      "shore:skill-fruit:1950:0": true,
+      "shore:skill-fruit:1950:1": true,
+      "shore:skill-fruit:1950:2": true,
+      "shore:skill-fruit:650:0": true
+    },
+    "best_chain": 7,
+    "boss_beam_x": -999.0,
+    "boss_dash": 0.0,
+    "boss_hp": 90,
+    "boss_phase": 1,
+    "boss_ports": [],
+    "boss_warning": 0.0,
+    "boss_x": 7380.0,
+    "bridge_timers": {},
+    "bullets": [],
+    "buttons": {},
+    "camera": 2208.32,
+    "camera_y": 0.0,
+    "chain": 0,
+    "chain_time": 0.0,
+    "character": "aion",
+    "checkpoint": "shore",
+    "checkpoint_ready": true,
+    "completed": false,
+    "crouching": false,
+    "discovered": {},
+    "enemies": [
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 500.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 655.442245483398,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 842.203704833984,
+        "y": -70.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 1066.04830932617,
+        "y": -115.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 1206.80125427246,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 1472.35530090332,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2247.99486666667,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 2305.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 2485.0,
+        "y": -106.147304408269
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 2610.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 2770.0,
+        "y": -106.147304408269
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 3618.36239624023,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 3723.36239624023,
+        "y": -70.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 3903.36239624023,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "beetle",
+        "windup": 0.0,
+        "x": 4028.36239624023,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "moth",
+        "windup": 0.0,
+        "x": 4188.36239624023,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 4709.28436279297,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 4859.28436279297,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 5034.28436279297,
+        "y": -70.0
+      },
+      {
+        "hp": 1,
+        "kind": "slime",
+        "windup": 0.0,
+        "x": 5099.28436279297,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "drone",
+        "windup": 0.0,
+        "x": 5319.28436279297,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "seed",
+        "windup": 0.0,
+        "x": 6565.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 6280.0,
+        "y": -120.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 6500.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "gnome",
+        "windup": 0.0,
+        "x": 6545.0,
+        "y": 0.0
+      },
+      {
+        "hp": 1,
+        "kind": "crow",
+        "windup": 0.0,
+        "x": 6650.0,
+        "y": -120.0
+      }
+    ],
+    "engine_physics_frames": 542,
+    "engine_process_frames": 192,
+    "facing": 1,
+    "flock": 1,
+    "gates": [
+      {
+        "closed": true,
+        "x": 1080.0
+      },
+      {
+        "closed": false,
+        "x": 2080.0
+      },
+      {
+        "closed": false,
+        "x": 3080.0
+      },
+      {
+        "closed": false,
+        "x": 4080.0
+      },
+      {
+        "closed": false,
+        "x": 5080.0
+      },
+      {
+        "closed": false,
+        "x": 6080.0
+      },
+      {
+        "closed": true,
+        "x": 2960.0
+      },
+      {
+        "closed": true,
+        "x": 6860.0
+      }
+    ],
+    "gift_drops": {},
+    "greeted": {},
+    "grenades": 4,
+    "ground": 428.0,
+    "grounded": true,
+    "help_step": 0,
+    "hero_projectiles": [],
+    "hp": 3,
+    "hud_summary": "Aion \u00b7 SKOR 02000 \u00b7 Can 3/3 \u00b7 Bomba 4 \u00b7 Silah: I\u015f\u0131k Ya\u011fmuru: 69 \u00b7 Bek\u00e7iler 0 \u00b7 Kalkan 3",
+    "input_kind": "touch",
+    "invulnerable": 0.852211111111111,
+    "kills": 11,
+    "losses": 2,
+    "melee": 0.0,
+    "menu": "",
+    "mount_transition": "",
+    "mount_transition_time": 0.0,
+    "mount_type": "skimmer",
+    "mounted": false,
+    "music_starts": 1,
+    "native_memory": 0.0,
+    "node_count": 24.0,
+    "npcs": [
+      {
+        "age": 0.0,
+        "facing": -1,
+        "freed": false,
+        "gift": "heavy",
+        "id": "shore:keeper",
+        "phase": "bound",
+        "secret": "",
+        "thank_age": 0.0,
+        "x": 4290.0,
+        "y": 0.0
+      },
+      {
+        "age": 0.0,
+        "facing": -1,
+        "freed": false,
+        "gift": "points",
+        "id": "shore:keeper:1",
+        "phase": "bound",
+        "secret": "",
+        "thank_age": 0.0,
+        "x": 3725.0,
+        "y": 0.0
+      },
+      {
+        "age": 0.0,
+        "facing": -1,
+        "freed": false,
+        "gift": "arc",
+        "id": "shore:keeper:2",
+        "phase": "bound",
+        "secret": "",
+        "thank_age": 0.0,
+        "x": 6900.0,
+        "y": 0.0
+      }
+    ],
+    "objects": [
+      {
+        "active": true,
+        "changed": 9.34778888888889,
+        "hp": 2,
+        "id": "shore:object:0",
+        "kind": "turret",
+        "secret": "",
+        "x": 450.0,
+        "y": 0.0
+      },
+      {
+        "active": true,
+        "changed": 9.34778888888889,
+        "hp": 2,
+        "id": "shore:object:1",
+        "kind": "panel",
+        "secret": "",
+        "x": 1800.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:2",
+        "kind": "planks",
+        "secret": "",
+        "x": 3150.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:3",
+        "kind": "gate",
+        "secret": "",
+        "x": 4500.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:4",
+        "kind": "lamp",
+        "secret": "",
+        "x": 5850.0,
+        "y": 0.0
+      },
+      {
+        "active": false,
+        "hp": 2,
+        "id": "shore:object:5",
+        "kind": "relay",
+        "secret": "",
+        "x": 7200.0,
+        "y": 0.0
+      },
+      {
+        "active": true,
+        "changed": 9.34778888888889,
+        "hp": 1,
+        "id": "shore:lamp:0",
+        "kind": "lamp",
+        "secret": "",
+        "x": 720.0,
+        "y": 0.0
+      },
+      {
+        "active": true,
+        "changed": 9.34778888888889,
+        "hp": 1,
+        "id": "shore:lamp:1",
+        "kind": "lamp",
+        "secret": "",
+        "x": 1320.0,
+        "y": 0.0
+      }
+    ],
+    "pickups": [
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:12",
+        "kind": "fruit_4",
+        "x": 2675.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:13",
+        "kind": "fruit_5",
+        "x": 2895.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:14",
+        "kind": "fruit_6",
+        "x": 3115.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:15",
+        "kind": "fruit_7",
+        "x": 3335.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:16",
+        "kind": "fruit_0",
+        "x": 3555.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:17",
+        "kind": "fruit_1",
+        "x": 3775.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:18",
+        "kind": "fruit_2",
+        "x": 3995.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:19",
+        "kind": "fruit_3",
+        "x": 4215.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:20",
+        "kind": "fruit_4",
+        "x": 4435.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:21",
+        "kind": "fruit_5",
+        "x": 4655.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:22",
+        "kind": "fruit_6",
+        "x": 4875.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:23",
+        "kind": "fruit_7",
+        "x": 5095.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:24",
+        "kind": "fruit_0",
+        "x": 5315.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:25",
+        "kind": "fruit_1",
+        "x": 5535.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:26",
+        "kind": "fruit_2",
+        "x": 5755.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:27",
+        "kind": "fruit_3",
+        "x": 5975.0,
+        "y": -82.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:28",
+        "kind": "fruit_4",
+        "x": 6195.0,
+        "y": -82.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:29",
+        "kind": "fruit_5",
+        "x": 6415.0,
+        "y": -82.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:30",
+        "kind": "fruit_6",
+        "x": 6635.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:31",
+        "kind": "fruit_7",
+        "x": 6855.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:32",
+        "kind": "fruit_0",
+        "x": 7075.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:33",
+        "kind": "fruit_1",
+        "x": 7295.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:fruit:34",
+        "kind": "fruit_2",
+        "x": 7515.0,
+        "y": -40.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:skill-fruit:650:1",
+        "kind": "fruit_4",
+        "x": 720.0,
+        "y": -112.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:skill-fruit:650:2",
+        "kind": "fruit_5",
+        "x": 765.0,
+        "y": -112.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:skill-fruit:1300:0",
+        "kind": "fruit_3",
+        "x": 1325.0,
+        "y": -112.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:skill-fruit:1300:1",
+        "kind": "fruit_4",
+        "x": 1370.0,
+        "y": -112.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:skill-fruit:1300:2",
+        "kind": "fruit_5",
+        "x": 1415.0,
+        "y": -112.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:bridge-fruit:0",
+        "kind": "fruit_0",
+        "x": 5860.0,
+        "y": -100.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:bridge-fruit:1",
+        "kind": "fruit_1",
+        "x": 6010.0,
+        "y": -100.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:bridge-fruit:2",
+        "kind": "fruit_2",
+        "x": 6160.0,
+        "y": -100.0
+      },
+      {
+        "age": 0.347788888888889,
+        "id": "shore:bridge-fruit:3",
+        "kind": "fruit_3",
+        "x": 6310.0,
+        "y": -100.0
+      }
+    ],
+    "pits": [
+      [
+        5840.0,
+        6440.0
+      ]
+    ],
+    "platforms": [
+      [
+        650.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1300.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        1950.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        2600.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3250.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3900.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        4550.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        5200.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        6500.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        7150.0,
+        -70.0,
+        170.0,
+        20.0
+      ],
+      [
+        3070.0,
+        -55.0,
+        160.0,
+        18.0
+      ],
+      [
+        787.203735351562,
+        -70.0,
+        110.0,
+        20.0
+      ],
+      [
+        3668.3623046875,
+        -70.0,
+        110.0,
+        20.0
+      ],
+      [
+        4979.2841796875,
+        -70.0,
+        110.0,
+        20.0
+      ],
+      [
+        5800.0,
+        -40.0,
+        310.0,
+        20.0
+      ],
+      [
+        6110.0,
+        -40.0,
+        360.0,
+        20.0
+      ]
+    ],
+    "player": [
+      2600.0,
+      0.0
+    ],
+    "player_hit_center": [
+      2600.0,
+      -37.0
+    ],
+    "player_hit_radius": 30.0,
+    "pose": {
+      "anchor": [
+        2600.0,
+        0.0
+      ],
+      "facing": 1,
+      "floor": 0.0,
+      "frame": 0,
+      "muzzle": [
+        2655.08291625977,
+        -35.5702285766602
+      ],
+      "row": 1,
+      "source": "m1-body-aion"
+    },
+    "presentation": "",
+    "presentation_time": 0.0,
+    "rally": {
+      "ammunition": 69.0,
+      "flock": 1.0,
+      "grenades": 4.0,
+      "mount": {
+        "available": false,
+        "hp": 3.0,
+        "hurt": 0.0,
+        "ridden": false,
+        "wreck_age": 19.8651026214526,
+        "x": 0.0
+      },
+      "section": "shore",
+      "shield": 3.0,
+      "weapon": "heavy",
+      "x": 2600.0
+    },
+    "raw": [
+      1152.0,
+      648.0
+    ],
+    "report_lines": [
+      "Rota: ",
+      "S\u00fcre: 00:20 \u00b7 Yenilen d\u00fc\u015fmanlar: 11 \u00b7 En iyi zincir: 7",
+      "Kaybedilen can: 2 \u00b7 Bulunan s\u0131rlar: 0",
+      "Bek\u00e7iler: 0 \u00b7 K\u00f6k Motoru: G\u00f6rev tamamland\u0131",
+      "REKOR: 00000",
+      "En h\u0131zl\u0131 tamamlama: 00:20 \u00b7 En \u00e7ok kurtarma: 0",
+      "Kullan\u0131lan silahlar: Tabanca \u221e",
+      "Kullan\u0131lan silahlar: I\u015f\u0131k Ya\u011fmuru",
+      "Kullan\u0131lan ara\u00e7lar: \u2014",
+      "Kurtar\u0131lan bek\u00e7iler: \u2014"
+    ],
+    "rescue_candidate": "",
+    "rescue_roles": {},
+    "rescue_time": 0.0,
+    "rescued": [],
+    "retry_count": 0,
+    "rooms": [],
+    "route": [],
+    "run_seed": 534253810,
+    "save_ok": true,
+    "schema": 3,
+    "score": 2000,
+    "section": "shore",
+    "shots": 0,
+    "spiders": [],
+    "state": "playing",
+    "stick": [
+      24.0,
+      471.0,
+      150.0,
+      150.0
+    ],
+    "taken": {
+      "shore:crate:1": true,
+      "shore:crate:2": true,
+      "shore:crate:3": true,
+      "shore:fruit:1": true,
+      "shore:fruit:10": true,
+      "shore:fruit:11": true,
+      "shore:fruit:2": true,
+      "shore:fruit:3": true,
+      "shore:fruit:4": true,
+      "shore:fruit:5": true,
+      "shore:fruit:6": true,
+      "shore:fruit:7": true,
+      "shore:fruit:8": true,
+      "shore:fruit:9": true,
+      "shore:owl_feather": true,
+      "shore:skill-fruit:1950:0": true,
+      "shore:skill-fruit:1950:1": true,
+      "shore:skill-fruit:1950:2": true,
+      "shore:skill-fruit:650:0": true
+    },
+    "time": 20.5043248436749,
+    "transform": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "travel_active": false,
+    "travel_target": "",
+    "ui_generation": 2,
+    "ui_ready": true,
+    "vehicles_used": [],
+    "velocity": [
+      0.0,
+      0.0
+    ],
+    "view": [
+      1152.0,
+      648.0
+    ],
+    "weapon": "heavy",
+    "weapon_offer": {},
+    "weapons_used": [
+      "pistol",
+      "heavy"
+    ]
+  }
+}

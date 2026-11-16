@@ -100,7 +100,8 @@ func run() -> void:
 			if e.kind not in ["crow","moth","wisp","drone"]:check(w.floor_at(float(e.x))==0.,"Ground enemy starts on actual floor")
 		for crate in w.crates:check(w.floor_at(float(crate.x))==0.,"Supply crate starts on floor")
 		for item in w.pickups:
-			if w.floor_at(float(item.x))!=0.:check(float(item.y)==-105.,"Gap fruit is above its reachable stepping platform")
+			if w.floor_at(float(item.x))!=0.:
+				check(w.platforms.any(func(p):return float(item.x)>=p.position.x and float(item.x)<=p.end.x and float(item.y)<p.position.y and p.position.y-float(item.y)<=70.),"Gap fruit is above an actual reachable stepping platform")
 	w=fresh();w.load_section("arena");tick(w,2.);w.damage_boss(99);check(w.boss.clock==0. and w.bullets.is_empty() and w.boss.hp==90,"Offscreen boss waits for introduction and cannot be killed before it")
 	w.boss.engaged=true;w.boss.hp=90;w.boss.wait=0.;tick(w,1.1);check(w.bullets.size()>=5,"Boss actually fires fan attack")
 	w.boss.windup=0.;w.boss.wait=0.;w.boss.attack=1;w.bullets.clear();tick(w,1.1);check(w.bullets.any(func(b):return b.kind=="wave"),"Boss fires jumpable root wave")

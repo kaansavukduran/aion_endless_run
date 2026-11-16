@@ -27,16 +27,20 @@ static func populate(w) -> void:
 	var is_leaf: bool=not regional.is_empty()
 	if not is_leaf and w.section!="arena":regional=["gnome","seed","crow"] if w.section!="quay" else ["drone","beetle","gnome"]
 	if not regional.is_empty():
-		var count: int=6 if is_leaf else (2 if w.section=="canopy" else 4)
+		var count: int=8 if is_leaf else (2 if w.section=="canopy" else 4)
+		var rhythm_rng:=RandomNumberGenerator.new();rhythm_rng.seed=w.run_seed+abs(w.section.hash())+1703
 		for i in count:
 			var x: float=lerpf(1600. if is_leaf else 2200.,w.length()-1700.,float(i)/maxf(1.,count-1))
+			var variant: int=rhythm_rng.randi_range(0,2)
+			if i>0 and i<count-1:x+=rhythm_rng.randf_range(-180.,180.)
+			var spacing: Array=[[0.,105.,285.,410.,570.],[0.,180.,245.,445.,550.],[0.,150.,325.,390.,610.]][variant]
 			var ids: Array[String]=[]
 			for k in 5:
-				var kind: String=regional[k%3] if k<3 else ["gnome","crow","seed","beetle","drone","slime"][i]
-				w.spawn_enemy(kind,x+120.*k,-120. if flying(kind) else 0.,300+i*10+k)
+				var kind: String=regional[(k+variant)%3] if k<3 else (["gnome","beetle","slime"][i%3] if k==3 else ["crow","moth","drone"][i%3])
+				w.spawn_enemy(kind,x+float(spacing[k]),-120. if flying(kind) else 0.,300+i*10+k)
 				ids.append(w.section+":enemy:"+str(300+i*10+k))
-			w.gates.append({"x":x+720.,"ids":ids})
-			w.encounters.append({"id":w.section+":encounter:"+str(i),"x":x,"scene":SCENES[w.section][i/2] if is_leaf else w.section,"enemies":ids})
+			if is_leaf or i==0 or i==count-1:w.gates.append({"x":x+760.,"ids":ids})
+			w.encounters.append({"id":w.section+":encounter:"+str(i),"x":x,"variant":variant,"scene":SCENES[w.section][clampi(int(i*3/count),0,2)] if is_leaf else w.section,"enemies":ids})
 	if is_leaf:
 		for i in 2:
 			var x: float=w.length()*(.30 if i==0 else .68)
@@ -147,4 +151,7 @@ static func step(w,dt: float) -> void:
 	for x in w.platform_timers:
 		w.platform_timers[x]=maxf(0.,float(w.platform_timers[x])-dt)
 		if float(w.platform_timers[x])>0.:w.disabled_platforms[x]=true
+	for x in w.bridge_timers:
+		w.bridge_timers[x]=maxf(0.,float(w.bridge_timers[x])-dt)
+		if float(w.bridge_timers[x])<=0.:w.disabled_platforms[x]=true
 	if w.section=="arena" and int(w.boss.phase)>=2 and fmod(float(w.boss.clock),7.)>3.5:w.disabled_platforms[690.]=true

@@ -69,6 +69,14 @@ var taken: Dictionary = {}
 var route: Array[String] = []
 var checkpoint := "shore"
 var checkpoint_ready := false
+var rally: Dictionary = {}
+var retry_count := 0
+var chain := 0
+var chain_time := 0.
+var best_chain := 0
+var score_popups: Array[Dictionary] = []
+var bridge_warned := false
+var bridge_timers: Dictionary = {}
 var travel_target := ""
 var completed := false
 var victory_time := 0.0
@@ -194,6 +202,7 @@ func begin(hero: String) -> void:
 	losses=0;weapons_used.clear();vehicles_used.clear()
 	discovered.clear();activated.clear();buffs.clear()
 	completed = false; flock = 1; weapon = "pistol"; ammunition = 0; shield = 0
+	rally.clear();retry_count=0;chain=0;chain_time=0.;best_chain=0;score_popups.clear()
 	shot_flash=0.;shot_weapon=""
 	load_section("shore")
 	state = "briefing"
@@ -226,6 +235,7 @@ func load_section(id: String) -> void:
 	enemies.clear(); bullets.clear(); bombs.clear(); blasts.clear(); pickups.clear()
 	platforms.clear(); pits.clear(); crates.clear(); gates.clear(); npcs.clear(); trail.clear()
 	platform_timers.clear();disabled_platforms.clear()
+	bridge_timers.clear()
 	mount = {"available":false, "ridden":false, "x":0., "hp":3}
 	boss = {"active":false, "engaged":false, "hp":90, "max_hp":90, "x":length()-420., "y":0., "clock":0., "attack":0, "windup":0., "wait":1.4, "phase":1}
 	var types: Array = ["gnome", "beetle", "seed", "crow"]
@@ -287,16 +297,21 @@ func load_section(id: String) -> void:
 	else:
 		CampaignContent.populate(self)
 		CampaignRescue.populate(self)
+	CampaignRhythm.populate(self)
 	if not carried.is_empty():
 		mount=carried;mount.x=player.x;player.y=-42.;mount.hurt=0.
 	state = "playing"
+	CampaignRecovery.enter(self)
 	notice = "arc_checkpoint"; notice_time = 2.
 	pending_events.append("checkpoint")
 
 func retry() -> void:
+	var point: Dictionary=rally.duplicate(true)
+	retry_count+=1
 	hp = max_hp; grenades = maxi(3, grenades); weapon = "pistol"; ammunition = 0
 	shot_flash=0.;shot_weapon=""
 	load_section(checkpoint)
+	CampaignRecovery.retry(self,point)
 
 func choose_route(choice: String) -> bool:
 	if state == "fork_one" and choice in ["canopy", "water"]:
@@ -414,20 +429,21 @@ func throw_grenade() -> bool:
 
 func interact() -> bool:
 	if state != "playing" or mount_transition!="": return false
+	var offer: Dictionary=CampaignRhythm.offer(self)
+	if not offer.is_empty():collect(offer);return true
 	return CampaignVehicles.interact(self)
 
 func award(id: String, points: int) -> void:
 	if awarded.has(id): return
 	awarded[id] = true; score += points
 
-func damage_enemy(e: Dictionary, amount: int) -> void:
+func damage_enemy(e: Dictionary, amount: int, style: String="") -> void:
 	if bool(e.defeated): return
-	if int(e.get("armour",0))>0:e.armour=int(e.armour)-1;e.flash=.25;return
+	if int(e.get("armour",0))>0:e.armour=int(e.armour)-1;e.flash=.25;pending_events.append("armour_hit");return
 	e.hp = int(e.hp)-amount
 	if int(e.hp) > 0: return
 	e.defeated = true; e.dead_age = 0.
-	if not awarded.has(str(e.id)): kills += 1
-	award(str(e.id),500 if bool(e.mini) else (400 if bool(e.get("heavy",false)) else 100))
+	CampaignStyle.defeat(self,e,500 if bool(e.mini) else (400 if bool(e.get("heavy",false)) else 100),style)
 	blasts.append({"p":Vector2(float(e.x),float(e.y)-25.), "age":0., "radius":40., "color":"85d7c4"})
 	pending_events.append("enemy")
 
@@ -440,6 +456,7 @@ func damage_boss(amount: int) -> void:
 
 func damage_player(cause: String="enemy") -> void:
 	if state != "playing" or invulnerable > 0. or mount_transition!="": return
+	chain=0;chain_time=0.
 	invulnerable = 1.2; hurt_time = .3
 	if shield > 0: shield -= 1
 	elif bool(mount.ridden):
@@ -485,7 +502,9 @@ func collect(item: Dictionary) -> void:
 	var kind: String = str(item.kind)
 	if kind.begins_with("fruit_"): award(id,25)
 	elif kind in CampaignWeapons.SPECIAL:
-		weapon = kind; ammunition = int(CampaignWeapons.SPECS[kind].ammo)
+		var stock: int=int(CampaignWeapons.SPECS[kind].ammo)
+		ammunition=mini(stock*2,ammunition+stock) if weapon==kind else stock
+		weapon = kind
 		if not weapons_used.has(kind):weapons_used.append(kind)
 	elif kind == "grenade": grenades = mini(9,grenades+3)
 	elif kind == "shield": shield = mini(3,shield+2)
@@ -506,6 +525,7 @@ func gate_closed(gate: Dictionary) -> bool:
 func enemy_shot(e: Dictionary, fan: bool = false) -> void:
 	pending_events.append("enemy_shot")
 	e.flash=.24
+	if CampaignRhythm.lane_shot(self,e):return
 	if e.kind in ["gnome","beetle","slime"]:
 		e.dash=.45 if e.kind=="gnome" else .65
 		e.dash_direction=signf(player.x-float(e.x));return
@@ -567,7 +587,8 @@ func step_boss(dt: float) -> void:
 	if not bool(boss.active) or not bool(boss.get("engaged",false)): return
 	boss.clock = float(boss.clock)+dt
 	boss.phase = 1 + int(int(boss.hp)<60) + int(int(boss.hp)<30)
-	boss.x = length()-420.+sin(float(boss.clock)*.65)*75.
+	if CampaignBossPressure.motion(self,dt):return
+	if int(boss.phase)<3:boss.x = length()-420.+sin(float(boss.clock)*.65)*75.
 	boss.y = 0. # A walking root machine stays on its actual collision floor.
 	boss.beam_warning=maxf(0.,float(boss.get("beam_warning",0.))-dt)
 	if float(boss.beam_warning)>0. and float(boss.beam_warning)<=dt:
@@ -580,8 +601,11 @@ func step_boss(dt: float) -> void:
 			if int(boss.phase)>=2 and int(boss.attack)%2==1:
 				boss.beam_x=player.x;boss.beam_warning=.9
 			var attack: int = int(boss.attack)%3
-			if attack == 0:
+			if CampaignBossPressure.attack(self):pass
+			elif attack == 0:
 				for offset in [-.32,-.16,0.,.16,.32]:
+					var ports: Array=boss.get("ports",[3,3])
+					if (offset<0. and int(ports[0])<=0) or (offset>0. and int(ports[1])<=0):continue
 					var aim := (player+Vector2(0,-42)-Vector2(float(boss.x)-55.,-90.)).normalized().rotated(offset)
 					bullets.append({"p":Vector2(float(boss.x)-55.,-90.),"v":aim*230.,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
 			elif attack == 1:
@@ -617,8 +641,9 @@ func step_bullets(dt: float) -> void:
 				damage_enemy(e,int(b.damage)); b.hit.append(str(e.id)); b.pierce = int(b.pierce)-1
 				if int(b.pierce)<0: b.age = 99.; break
 		if float(b.age)>=float(b.get("life",3.)):continue
+		if bool(boss.active) and bool(boss.get("engaged",false)) and CampaignBossPressure.hit(self,b,previous,b.p):b.age=99.;continue
 		if bool(boss.active) and Geometry2D.get_closest_point_to_segment(Vector2(float(boss.x),float(boss.y)-75.),previous,b.p).distance_to(Vector2(float(boss.x),float(boss.y)-75.))<105. and not "boss" in b.hit:
-			if boss_vulnerable():damage_boss(int(b.damage))
+			if boss_vulnerable():damage_boss(CampaignBossPressure.core_damage(self,b,previous,b.p))
 			b.hit.append("boss"); b.age = 99.
 		if float(b.age)>=float(b.get("life",3.)):continue
 		for crate in crates:
@@ -655,6 +680,7 @@ func step(dt: float) -> void:
 		CampaignVehicles.step_transition(self,dt)
 		return
 	time += dt
+	CampaignStyle.step(self,dt)
 	CampaignRescue.step(self,dt)
 	CampaignContent.step(self,dt);CampaignVehicles.step_parked(self,dt)
 	for property in ["invulnerable","hurt_time","fire_time","shot_flash","melee_time","grenade_time","flap_time","notice_time","drop_through_time"]: set(property,maxf(0.,float(get(property))-dt))
@@ -664,7 +690,7 @@ func step(dt: float) -> void:
 			if absf(float(boss.x)-player.x)<150.:damage_boss(2)
 		else:
 			for enemy in enemies:
-				if str(enemy.id)==melee_target and absf(float(enemy.x)-player.x)<125. and absf(float(enemy.y)-player.y)<85.:damage_enemy(enemy,2)
+				if str(enemy.id)==melee_target and absf(float(enemy.x)-player.x)<125. and absf(float(enemy.y)-player.y)<85.:damage_enemy(enemy,2,"melee")
 	var on_floor := grounded()
 	if charging: charge_time = minf(1.2,charge_time+dt)
 	var speed: float = 235.*(1.55 if boost_held else 1.)*(1.35 if bool(mount.ridden) else 1.)*(1.25 if float(buffs.get("haste",0.))>0. else 1.)*(.65 if float(buffs.get("slow",0.))>0. else 1.)
@@ -699,7 +725,7 @@ func step(dt: float) -> void:
 			if bool(enemy.defeated) or CampaignEnemies.hidden(enemy):continue
 			var top: float=float(enemy.y)-58.
 			if absf(player.x-float(enemy.x))<34. and old_y<=top and player.y>=top:
-				damage_enemy(enemy,2 if bool(enemy.mini) else 1);player.y=top-2.;velocity.y=-420.;jumps=1;air_time=0.;pending_events.append("melee");break
+				damage_enemy(enemy,2 if bool(enemy.mini) else 1,"stomp");player.y=top-2.;velocity.y=-420.;jumps=1;air_time=0.;pending_events.append("melee");break
 	if fire_held: attack()
 	step_enemies(dt); CampaignAssists.step(self,dt); step_boss(dt); step_bullets(dt)
 	for bomb in bombs:
@@ -712,9 +738,11 @@ func step(dt: float) -> void:
 	for item in pickups:
 		item.age=float(item.get("age",0.))+dt
 		if item.has("secret") and not discovered.has(str(item.secret)):continue
+		if not CampaignRhythm.can_auto_collect(self,item):continue
 		if item.has("rescue_id"):
 			if float(item.age)>=.25 and not taken.has(str(item.id)) and touches_pickup(item):collect(item)
 		elif not taken.has(str(item.id)) and touches_pickup(item): collect(item)
+	CampaignRhythm.step(self);CampaignRecovery.step(self)
 	trail.append({"p":player,"time":time,"facing":facing,"grounded":grounded(),"crouched":crouching(),"walk_distance":walk_distance,"moving":absf(velocity.x)>1.,"velocity_y":velocity.y,"air_time":air_time})
 	while trail.size()>1 and time-float(trail[0].time)>4.: trail.pop_front()
 	if CampaignRoutes.is_fork(section):
@@ -730,7 +758,7 @@ func step(dt: float) -> void:
 			travel_target = next; state = "travel"; stop_inputs()
 
 func snapshot() -> Dictionary:
-	return {"schema":3,"rescue_roles":rescue_roles,"greeted":greeted,"gift_drops":gift_drops,"losses":losses,"weapons_used":weapons_used,"vehicles_used":vehicles_used,"run_seed":run_seed,"character":character,"checkpoint":checkpoint,"checkpoint_ready":checkpoint_ready,"score":score,"kills":kills,"rescued":rescued,"awarded":awarded,"taken":taken,"route":route,"completed":completed,"time":time,"flock":flock,"discovered":discovered,"activated":activated}.duplicate(true)
+	return {"schema":3,"rally":rally,"retry_count":retry_count,"best_chain":best_chain,"rescue_roles":rescue_roles,"greeted":greeted,"gift_drops":gift_drops,"losses":losses,"weapons_used":weapons_used,"vehicles_used":vehicles_used,"run_seed":run_seed,"character":character,"checkpoint":checkpoint,"checkpoint_ready":checkpoint_ready,"score":score,"kills":kills,"rescued":rescued,"awarded":awarded,"taken":taken,"route":route,"completed":completed,"time":time,"flock":flock,"discovered":discovered,"activated":activated}.duplicate(true)
 
 func restore(data: Dictionary) -> bool:
 	if int(data.get("schema",0)) not in [1,2,3] or not STAGES.has(str(data.get("checkpoint",""))): return false
@@ -752,6 +780,11 @@ func restore(data: Dictionary) -> bool:
 		var number=data.get(key,0)
 		if typeof(number) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(number)) or absf(float(number))>1000000000.:return false
 	if data.has("completed") and not data.completed is bool:return false
+	if not CampaignRecovery.valid(data.get("rally",{}),str(data.checkpoint)):return false
+	for key in ["retry_count","best_chain"]:
+		var value=data.get(key,0)
+		if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)) or float(value)<0. or float(value)>1000000.:return false
+	rally=Dictionary(data.get("rally",{})).duplicate(true);retry_count=int(data.get("retry_count",0));best_chain=int(data.get("best_chain",0))
 	character = str(data.character) if str(data.character) in HEROES else "aion"; score = maxi(0,int(data.get("score",0))); kills = maxi(0,int(data.get("kills",0)))
 	losses=maxi(0,int(data.get("losses",0)));weapons_used.assign(Array(data.get("weapons_used",[])));vehicles_used.assign(Array(data.get("vehicles_used",[])))
 	greeted=Dictionary(data.get("greeted",{}));gift_drops=Dictionary(data.get("gift_drops",{}));rescue_roles=Dictionary(data.get("rescue_roles",{}))
@@ -763,5 +796,6 @@ func restore(data: Dictionary) -> bool:
 	route.assign(Array(data.get("route",[]))); completed = bool(data.get("completed",false)); time = maxf(0.,float(data.get("time",0.)))
 	flock = clampi(int(data.get("flock",1)),1,3); hp = max_hp; grenades = 5
 	load_section(str(data.checkpoint))
+	CampaignRecovery.apply(self,rally)
 	if completed: state = "complete"; checkpoint_ready = false; boss.active = false
 	return true

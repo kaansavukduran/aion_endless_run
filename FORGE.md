@@ -1,3 +1,9 @@
+# 0.28.0 · Mission 1 oynanış ritmi
+
+Başlangıç temiz main `a1d7cc483973dc48f1e8837dbcce807c4c9fc291`, Godot4.6.3. Kullanıcının kabul ettiği altı öneri uygulandı: farklı karar gerektiren karşılaşmalar, öğrenilebilir silah dağılımı ve seçim, vuruş geri bildirimi, gerçek ara kayıt/ikmal, bölüme özgü köprü ve boss evreleri, zincir/ustalık puanı. Yeni motor veya karakter yeniden çizimi yok; mevcut kayıt, kadro, TR/EN ve klavye/dokunma/gamepad şeması korunur.
+
+Kaynak/model/sahne testleri ayrı; normal tarayıcı girişleri ve açıkça kurulan render fixture'ları birbirine karıştırılmaz. İlk denemelerdeki başarısızlıklar ve düzeltme nedenleri teslim belgesinde kaydedilir. 56 taze kaynak paketi/38.358 kontrol geçti. Bu sayı fiziksel cihaz veya insan eğlencesi ölçümü değildir. [Yeni kapsam ve kanıt](docs/evidence-rhythm/README.md). Son web/CI/yayın sonuçları ayrıca doğrulanır; eski sonuçlar aşağıda tarihsel kalır.
+
 # 0.27.1 · Kutu ve platform görsel düzeltmesi
 
 Başlangıç temiz main `2a20d2f1206bd4e7b1021c463cda0a55fb540e1d`. İstek yalnız ekrandaki ikmal kutusu ve çıkılabilir ahşap platformun kalitesini artırmak. `campaign_view.gd` içindeki düz renk şekillerin yerine yerel olarak özgün çizilmiş `campaign-timber.png` ve ortak `CampaignTimberArt` çizicisi eklendi. Kaynak pikseli oyun birimidir; doku/çivi esnetilmez. Platform üst yüzeyi aynı Y'dedir; ayaklar gerçek zemin yüksekliğini kullanır, çukur dibine dekoratif ayak çizilmez. Dünya fiziği, karakter paftaları, kontroller, kayıtlar ve eşya kuralları değiştirilmedi.

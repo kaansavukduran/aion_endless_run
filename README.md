@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.28.0 · Mission 1 ritmi ve toparlanma
+
+Üst/alt atış rolleri ve sınırları belirli karşılaşma varyantları, bilinçli silah seçimi, ara kontrol noktaları, çöken köprü, zincir puanı ve üç evreli Kök Motoru davranışı. Aynı silahın cephanesi eklenir; farklı özel silah yerde kalır: **E / Y / Değiştir** ile seçilir. Araçla temas ederek ikmal alma korunur. Kontrol noktaları konumu ve ikmali saklar; tekrar denemede kazanılmış puan/eşyalar ikinci kez verilmez. [Kapsam ve gerçek doğrulama](docs/evidence-rhythm/README.md).
+
 ## 0.27.1 · Ahşap platformlar ve ikmal kutuları
 
 Kutu ve çıkılabilir platformlar, yerel olarak çizilmiş perçinli ahşap pixel-art parçaları kullanır. Kapak/çerçeve, ahşap damarları, metal köşeler, çift yönlü payanda ve yere oturan ayaklar vardır. Uzun kirişler dokuyu esnetmeden döşenir. Rota, platform çarpışmaları, kutu içeriği ve kayıtlar korunur. [Görsel ve doğrulama kaydı](docs/evidence-timber/README.md).
@@ -14,7 +18,7 @@ Korsan bekçinin iki kolu görülen altı yeni yürüyüş karesi, araçlarda ge
 
 Ömer ve Melun artık oynanabilir karakter değil, toplanan yardımcı güçlerdir: tüy iki alan etkili taş saldırısı, kurt simgesi iki ayrı hedefe koşup ısırma sağlar. Aynı beş hareket/ateş eylemi için ortak gövde, el ve zemin kaydı kullanılır. Ateş etmek koşu karelerini durdurmaz. Ayça, eski Emre yuvasında kendine ait etekli/tokalı çizimini kullanır; Eren ayrı kalır. Eski kaynak paftaları değiştirilmez.
 
-**Arcade kontrolleri:** A/D veya oklarla yürü; S/Aşağı basılı tutarak eğil ve ilerle; Space zıpla; F/sol tık ateş et; G bomba; E bin/in. Aşağı+Zıpla ile tek yönlü platformdan in. Telefonda solda sabit joystick, sağda Zıpla/Ateş/Bomba; joystick'i aşağı çekerek eğil. Kolda sol çubuk/yön tuşları, A/× zıpla, RB/R1 veya X/□ ateş, B/○ bomba, Y/△ bin/in, Start/Options duraklat; kayıtlı eşlemeler korunur. Araçta sağ çubuk veya fareyle kesintisiz nişan al. Araçlar üç can taşır.
+**Arcade kontrolleri:** A/D veya oklarla yürü; S/Aşağı basılı tutarak eğil ve ilerle; Space zıpla; F/sol tık ateş et; sağ tık/G bomba; Shift depar; E bin/in veya silah değiştir. Aşağı+Zıpla ile tek yönlü platformdan in. Telefonda solda sabit joystick, sağda Zıpla/Ateş/Bomba; joystick'i aşağı çekerek eğil. Kolda sol çubuk/yön tuşları, A/× zıpla, RB/R1 veya X/□ ateş, B/○ bomba, Y/△ bin/in, Start/Options duraklat; kayıtlı eşlemeler korunur. Araçta sağ çubuk veya fareyle kesintisiz nişan al. Araçlar üç can taşır.
 
 Yürüyen örümcek mayınları hedefe gider; beş saniye içinde patlar. Kurtarılan fener bekçileri çantadan fiziksel ikmal bırakır; eşyaya temas edince alınır. Menü ve oyun yalnız **Türkçe/English** sunar. Dikey/yatay telefon, klavye/fare ve gamepad desteği korunur. Eski sonsuz mod ayrı kaydıyla erişilebilirdir.
 

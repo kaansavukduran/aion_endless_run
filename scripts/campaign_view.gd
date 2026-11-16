@@ -130,6 +130,19 @@ func _draw() -> void:
 	draw_world()
 	ground=base_ground
 
+func draw_boss_port(point: Vector2,hp: int) -> void:
+	# Stepped bronze casing around a dark vent; lit slats track actual port HP.
+	var edge:=PackedVector2Array([Vector2(-9,-14),Vector2(9,-14),Vector2(9,-10),Vector2(14,-10),Vector2(14,10),Vector2(9,10),Vector2(9,14),Vector2(-9,14),Vector2(-9,10),Vector2(-14,10),Vector2(-14,-10),Vector2(-9,-10)])
+	var points:=PackedVector2Array()
+	for p in edge:points.append(point+p)
+	draw_colored_polygon(points,Color("342c2a"))
+	draw_rect(Rect2(point-Vector2(9,12),Vector2(18,24)),Color("8b6946"))
+	draw_rect(Rect2(point-Vector2(7,10),Vector2(14,20)),Color("393b2d"))
+	draw_rect(Rect2(point-Vector2(9,12),Vector2(18,2)),Color("d0a86b"))
+	for i in 3:
+		draw_rect(Rect2(point+Vector2(-5,-8+i*6),Vector2(10,3)),Color("edbd72") if i<hp else Color("594631"))
+	for side in [-1.,1.]:draw_rect(Rect2(point+Vector2(side*11.-1.,-1.),Vector2(2,2)),Color("bc9d68"))
+
 func draw_world() -> void:
 	# Ground props share the exact collision groundline. They are decorative,
 	# never platforms or invisible obstacles.
@@ -148,6 +161,11 @@ func draw_world() -> void:
 		if platform.end.x<camera_x-50. or platform.position.x>camera_x+scene_w+50.:continue
 		if world.disabled_platforms.has(platform.position.x):continue
 		CampaignTimberArt.walkway(self,platform)
+		if world.bridge_timers.has(platform.position.x) and float(world.bridge_timers[platform.position.x])<1.4:
+			draw_rect(Rect2(at(platform.position),Vector2(platform.size.x,3)),Color("e8a36c"))
+	for x in CampaignRecovery.points(world):
+		if x<camera_x-80. or x>camera_x+scene_w+80.:continue
+		draw_flag(Vector2(x,world.floor_at(x)),.55)
 	CampaignRoutes.draw_landmarks(self)
 	for gate in world.gates:
 		if float(gate.x)<camera_x-100. or float(gate.x)>camera_x+scene_w+100.:continue
@@ -155,7 +173,15 @@ func draw_world() -> void:
 		var p := at(Vector2(float(gate.x),0))
 		draw_rect(Rect2(p-Vector2(6,155),Vector2(12,155)),Color("44445f"))
 		for y in range(8,151,18): draw_rect(Rect2(p-Vector2(3,y),Vector2(6,9)),Color("f2bf77"))
-		caption(host.t("arc_clear"),p+Vector2(-72,-168),16)
+		var blockers: Array=world.enemies.filter(func(e):return str(e.id) in gate.ids and not bool(e.defeated))
+		caption(host.t("gate_remaining")%blockers.size(),p+Vector2(-100,-168),14)
+		if absf(world.player.x-float(gate.x))<180.:
+			blockers.sort_custom(func(a,b):return absf(float(a.x)-world.player.x)<absf(float(b.x)-world.player.x))
+			for enemy in blockers.slice(0,3):
+				var target: Vector2=at(Vector2(float(enemy.x),float(enemy.y)-75.))
+				var arrow: String="◀" if target.x<16. else ("▶" if target.x>scene_w-24. else "▼")
+				target.x=clampf(target.x,16.,scene_w-24.);target.y=maxf(target.y,host.hud_panel.strip_height+55.)
+				caption(arrow,target+Vector2(-5,0),16)
 	draw_npcs(false)
 	for crate in world.crates:
 		if float(crate.x)<camera_x-80. or float(crate.x)>camera_x+scene_w+80.:continue
@@ -220,6 +246,7 @@ func draw_world() -> void:
 		if attack and not bool(e.defeated):
 			var point := at(p+Vector2(0,-70))
 			draw_circle(point,5,Color("f7bb70")); caption("!",point+Vector2(-3,-10),20)
+			if e.has("shot_lane"):caption(host.t("high_lane" if str(e.shot_lane)=="high" else "low_lane"),point+Vector2(-14,-25),11)
 		if (bool(e.mini) or bool(e.get("heavy",false))) and not bool(e.defeated):small_health(at(p+Vector2(-35,-130)),70,float(e.hp)/float(e.max_hp))
 	if bool(world.boss.active) or world.completed:
 		var phase: int=2 if world.completed else clampi(int(world.boss.phase)-1,0,2)
@@ -230,7 +257,19 @@ func draw_world() -> void:
 		if not world.completed and not world.boss_vulnerable():
 			var core:=at(Vector2(float(world.boss.x),float(world.boss.y)-75.))
 			draw_arc(core,48.,0.,TAU,24,Color("efd58a"),3.);caption(host.t("shield"),core+Vector2(-28,-56),16)
-		if float(world.boss.windup)>0.: caption(host.t("arc_boss_warning"),at(Vector2(float(world.boss.x)-130.,-215.)),19)
+		if float(world.boss.windup)>0.:
+			var warning: String="boss_dash" if int(world.boss.phase)==3 and int(world.boss.attack)%3==2 else ("boss_core" if int(world.boss.phase)==2 else "arc_boss_warning")
+			caption(host.t(warning),at(Vector2(float(world.boss.x)-130.,-215.)),16)
+		if not world.completed and int(world.boss.phase)==1:
+			for i in 2:
+				var point: Vector2=at(Vector2(float(world.boss.x)+(-65. if i==0 else 65.),-95.))
+				if int(world.boss.get("ports",[3,3])[i])<=0:continue
+				draw_boss_port(point,int(world.boss.get("ports",[3,3])[i]))
+		elif not world.completed and int(world.boss.phase)==2 and world.boss_vulnerable():
+			var core: Vector2=at(Vector2(float(world.boss.x),-75.))
+			for side in [-1.,1.]:
+				draw_rect(Rect2(core+Vector2(side*23.-2.,-15.),Vector2(4,30)),Color("f1c681"))
+				draw_rect(Rect2(core+Vector2(-15.,side*23.-2.),Vector2(30,4)),Color("f1c681"))
 	if (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and float(world.mount.get("floor_y",world.floor_at(float(world.mount.x))))<180.):
 		var p: Vector2=vehicle_draw_position()
 		var firing: bool=world.shot_flash>0. and bool(world.mount.ridden)
@@ -296,6 +335,8 @@ func draw_world() -> void:
 		var color := Color(str(blast.color));color.a=(1.-phase)*.8
 		draw_arc(at(blast.p),float(blast.radius)*phase,0,TAU,24,color,6.)
 		for i in 8: draw_rect(Rect2(at(blast.p)+Vector2.from_angle(i*TAU/8.)*float(blast.radius)*phase-Vector2(3,3),Vector2(6,6)),color)
+	for popup in world.score_popups:
+		caption(host.t("chain_bonus")%[int(popup.bonus),int(popup.chain)],at(Vector2(popup.p)-Vector2(0,float(popup.age)*24.)),13)
 	draw_assists()
 	if world.section!="arena" and not CampaignRoutes.is_fork(world.section):
 		var p := at(Vector2(world.length()-140.,0))

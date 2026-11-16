@@ -6,7 +6,7 @@ import argparse,json,math,time,os,shutil
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-p=argparse.ArgumentParser();p.add_argument('--url',required=True);p.add_argument('--evidence',type=Path,required=True);p.add_argument('--route',choices=['water','terrace','roots'],default='water');p.add_argument('--play-through',action='store_true');p.add_argument('--browser',choices=['chromium','firefox'],default='chromium');p.add_argument('--offline',action='store_true');p.add_argument('--expanded-rescue',action='store_true');p.add_argument('--rescue-only',action='store_true');p.add_argument('--record-video',action='store_true');p.add_argument('--profile',action='store_true');p.add_argument('--debug-port',type=int);p.add_argument('--headed',action='store_true');p.add_argument('--angle-gl',action='store_true');p.add_argument('--steering-file',type=Path);p.add_argument('--combat-controls',action='store_true');a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--url',required=True);p.add_argument('--evidence',type=Path,required=True);p.add_argument('--route',choices=['water','terrace','roots'],default='water');p.add_argument('--play-through',action='store_true');p.add_argument('--browser',choices=['chromium','firefox'],default='chromium');p.add_argument('--offline',action='store_true');p.add_argument('--expanded-rescue',action='store_true');p.add_argument('--rescue-only',action='store_true');p.add_argument('--record-video',action='store_true');p.add_argument('--profile',action='store_true');p.add_argument('--debug-port',type=int);p.add_argument('--headed',action='store_true');p.add_argument('--angle-gl',action='store_true');p.add_argument('--steering-file',type=Path);p.add_argument('--combat-controls',action='store_true');p.add_argument('--rhythm',action='store_true');a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];console=[]
 def check(condition,message):
     assert condition,message
@@ -227,6 +227,8 @@ with sync_playwright() as pw:
                 if rescue_presentation(current):continue
                 assert current['state']=='playing',('Dropped item approach interrupted',current['state'],current['menu'])
                 item=next(item for item in current['pickups'] if item.get('rescue_id')==captive['id'])
+                if current.get('weapon_offer',{}).get('id')==item['id']:
+                    keys([]);page.keyboard.press('e');page.wait_for_timeout(150);continue
                 keys(['d'] if item['x']>current['player'][0] else ['a'])
                 page.wait_for_timeout(40)
             keys([])
@@ -287,6 +289,28 @@ with sync_playwright() as pw:
                     page.wait_for_timeout(min(5000,max(0,int(command.get('milliseconds',300)))));keys([])
                     (a.evidence/('guided-input-'+str(steering_id)+'.json')).write_text(json.dumps({'command':command,'state_after':data()},indent=2)+'\n')
                     continue
+            offer=d.get('weapon_offer',{})
+            if offer:
+                keys([]);before_weapon=d['weapon'];page.keyboard.press('e')
+                page.wait_for_function('id=>JSON.parse(document.querySelector("canvas").dataset.campaign).taken[id]===true',arg=offer['id'],timeout=5000)
+                check(data()['weapon']==offer['kind'],'Actual E deliberately swaps a visible special weapon: '+before_weapon+' → '+offer['kind'])
+                with (a.evidence/'weapon-swaps.jsonl').open('a') as swap_log:swap_log.write(json.dumps({'before':before_weapon,'offer':offer,'after':data()})+'\n')
+                continue
+            if a.rhythm and float(d.get('rally',{}).get('x',140))>180 and not (a.evidence/'rally-offline.json').exists():
+                keys([]);canvas.focus();page.keyboard.press('Escape')
+                page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
+                before_save=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
+                page.evaluate('navigator.serviceWorker.ready.then(()=>true)');context.set_offline(True);page.reload(timeout=120000)
+                page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
+                page.get_by_role('button',name='Arcade',exact=True).focus();page.keyboard.press('Enter')
+                page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
+                button('CampaignContinue')
+                while data()['menu']=='help':button('CampaignGo')
+                page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).state==="playing"')
+                after_resume=data()
+                check(abs(after_resume['player'][0]-float(before_save['rally']['x']))<1 and after_resume['weapon']==before_save['rally']['weapon'] and after_resume['ammunition']==before_save['rally']['ammunition'],'Actual offline Continue restores mid-route position and checkpoint stock')
+                (a.evidence/'rally-offline.json').write_text(json.dumps({'before':before_save,'after':after_resume},indent=2)+'\n')
+                page.screenshot(path=str(a.evidence/'rally-offline-restored.png'));context.set_offline(False);canvas.focus();continue
             x,y=d['player'];onfloor=d.get('grounded',y==0);targets=[e for e in d['enemies'] if abs(e['x']-x)<680]
             target=min(targets,key=lambda e:abs(e['x']-x)) if targets else None
             if d['mounted'] and not d.get('mount_transition'):
@@ -297,7 +321,7 @@ with sync_playwright() as pw:
                     keys([]);page.keyboard.press('e');page.wait_for_timeout(650)
                     vehicle_inputs.append({'action':'exit','section':section,'x':x,'reason':'close ground target' if target else 'raised route'})
                     continue
-            direction='d';wanted=['f']
+            direction='d';wanted=['f'] if targets or section=='arena' else []
             closed=any(g['closed'] and 0<=g['x']-x<180 for g in d['gates'])
             if target and (closed or abs(target['x']-x)<320):
                 facing=1 if target['x']>=x else -1;direction='d' if facing==1 else 'a'
@@ -317,7 +341,8 @@ with sync_playwright() as pw:
             gap=any(0<p[0]-x<150 for p in d['pits'])
             object_gate=not targets and any(o['kind']=='gate' and not o['active'] and 0<o['x']-x<110 for o in d.get('objects',[]))
             danger=any(math.hypot(b[0]-x,b[1]-(y-37))<100 for b in d.get('bullets',[]))
-            if onfloor and (flyer or gap or danger or object_gate) and now-last_jump>.85:
+            charge=section=='arena' and float(d.get('boss_dash',0))>0 and abs(float(d.get('boss_x',0))-x)<360
+            if onfloor and (flyer or gap or danger or object_gate or charge) and now-last_jump>.85:
                 page.keyboard.press('Space');last_jump=now
             near=any(abs(e['x']-x)<95 and abs(e['y']-y)<75 for e in targets)
             if near and now-last_melee>.35:page.keyboard.up('f');page.keyboard.down('f');last_melee=now

@@ -1,0 +1,36 @@
+PASS Visible reachable menu action: @Button@93
+PASS Visible reachable menu action: CampaignBegin
+PASS Visible reachable menu action: @Button@113
+PASS Visible reachable menu action: CampaignGo
+PASS Main menu → Arcade → mission → play through normal buttons
+PASS D moves the player right; this is not automatic scrolling
+PASS A moves and faces left
+PASS Held fire produces real, spaced gunshots
+PASS G spends exactly one energy grenade
+PASS Actual right Fire touch reaches a gunshot or contextual close strike
+PASS Actual right Grenade touch spends one bomb without a second underlying command
+PASS Pause freezes the active mission
+PASS Visible reachable menu action: @Button@211
+PASS Visible reachable menu action: @Button@212
+PASS Visible reachable menu action: @Button@213
+PASS Visible reachable menu action: @Button@214
+PASS Visible reachable menu action: @Button@215
+PASS Portrait rotation preserves checkpoint and score
+PASS Approved fixed left stick and three right actions exist
+PASS Touch target is inside portrait viewport: attack
+PASS Touch target is inside portrait viewport: grenade
+PASS Touch target is inside portrait viewport: jump
+PASS Real multitouch moves and jumps simultaneously
+PASS Touch cancellation releases the joystick without a stuck direction
+PASS Actual Shift key increases current hero running speed
+PASS Actual right mouse click throws one grenade
+PASS Held fire emits an actual projectile between the eight primary angles
+PASS Virtual Xbox left stick plus LB routes to sprint
+PASS Virtual Xbox Start pauses the actual world
+PASS Virtual Xbox A activates the real Resume button
+PASS Virtual Xbox RB fires through the real game input path
+PASS Virtual Xbox A jumps during normal gameplay
+PASS Virtual Xbox B throws a grenade during normal gameplay
+PASS Offline reload starts the real game and preserves its separate campaign checkpoint
+PASS Actual Continue resumes saved checkpoint offline
+PASS No browser or Godot script errors during the actual flow: []
