@@ -1,0 +1,51 @@
+{
+  "checks": [
+    "Visible reachable menu action: @Button@93",
+    "Visible reachable menu action: CampaignBegin",
+    "Visible reachable menu action: @Button@113",
+    "Visible reachable menu action: CampaignGo",
+    "Main menu \u2192 Arcade \u2192 mission \u2192 play through normal buttons",
+    "D moves the player right; this is not automatic scrolling",
+    "A moves and faces left",
+    "Held fire produces real, spaced gunshots",
+    "G spends exactly one energy grenade",
+    "Actual right Fire touch reaches a gunshot or contextual close strike",
+    "Actual right Grenade touch spends one bomb without a second underlying command",
+    "Pause freezes the active mission",
+    "Visible reachable menu action: @Button@211",
+    "Visible reachable menu action: @Button@212",
+    "Visible reachable menu action: @Button@213",
+    "Visible reachable menu action: @Button@214",
+    "Visible reachable menu action: @Button@215",
+    "Portrait rotation preserves checkpoint and score",
+    "Approved fixed left stick and three right actions exist",
+    "Touch target is inside portrait viewport: attack",
+    "Touch target is inside portrait viewport: grenade",
+    "Touch target is inside portrait viewport: jump",
+    "Real multitouch moves and jumps simultaneously",
+    "Touch cancellation releases the joystick without a stuck direction",
+    "Actual Shift key increases current hero running speed",
+    "Actual right mouse click throws one grenade",
+    "Held fire emits an actual projectile between the eight primary angles",
+    "Virtual Xbox left stick plus LB routes to sprint",
+    "Virtual Xbox Start pauses the actual world",
+    "Virtual Xbox A activates the real Resume button",
+    "Virtual Xbox RB fires through the real game input path",
+    "Virtual Xbox A jumps during normal gameplay",
+    "Virtual Xbox B throws a grenade during normal gameplay",
+    "Actual portrait touch deliberately swaps a visible gun: heavy \u2192 arc",
+    "Portrait Swap does not also fire or throw a grenade",
+    "Actual virtual Xbox Y deliberately swaps a visible gun: arc \u2192 heavy",
+    "No engine/browser errors in actual extra gun-choice input flow"
+  ],
+  "errors": [],
+  "modes": [
+    "portrait touch",
+    "virtual Xbox Y"
+  ],
+  "manifest_observed_after_test": {
+    "version": "0.28.0",
+    "build": "3015b0de059c5e13"
+  },
+  "scope": "Ordinary-input local web export; Gamepad API controller is synthetic. No game state injection."
+}

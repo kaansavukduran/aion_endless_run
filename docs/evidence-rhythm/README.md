@@ -63,3 +63,13 @@ python3 tests/browser_campaign.py --url http://127.0.0.1:8798/ --evidence build/
 python3 tests/browser_forge.py --url http://127.0.0.1:8798/ --evidence build/forge-browser --scenario all --rescue
 AION_RHYTHM_REVIEW=build/rhythm-review xvfb-run -a godot --audio-driver Dummy --script tests/render_campaign_rhythm.gd
 ```
+
+## CI input-probe correction
+
+The first pushed run (`43879338423`, gameplay commit `a989c74`) passed all 56 source suites (38,427 checks on that runner), Windows, macOS, Android offline smoke and all native render fixtures. Linux's ordinary-input test then failed while waiting for RB to emit a projectile. Its captured failure state was `dead`, HP0, with a crow at X721 beside the actor at X723/Y−70 and a last contextual-strike timer. This is evidence that the test's long idle sequence lost its live/clear firing precondition, not evidence that RB was disconnected. Local/public passes were retained as separate results; the failed CI was not relabelled green.
+
+The independent controller probe now enters Retry checkpoint through the actual pause/death UI before connecting the virtual controller. It explicitly checks a living actor at the recorded rally; RB must still create a real projectile. No invulnerability, enemy deletion, teleport, direct world mutation or accepting melee instead of a shot was added. The shot baseline is sampled before pressing RB. Gameplay code and art are unchanged by this harness correction. A new commit/run verifies it; final delivery identifies that run.
+
+An extra ordinary-input walk also reached actual gun drops and passed portrait-touch Swap (without an extra shot/grenade) and virtual Xbox Y Swap. The first extra harness run failed only while writing its receipt with a nonexistent telemetry key; the corrected receipt run passed. These exploratory test-writer mistakes are not game fixes or hardware-controller evidence.
+
+The corrected local harness passed **37 checks**, including real offline Continue; [receipt](isolated-pad-results.json). [Extra portrait touch/Y choice receipt](choice-input-results.json) records both actual input paths and the unchanged local build manifest observed after the test.

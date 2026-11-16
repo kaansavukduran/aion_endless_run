@@ -137,7 +137,19 @@ with sync_playwright() as pw:
         packets=page.evaluate('clearInterval(sweepTimer);sweepPackets');(a.evidence/'sweep-packets.json').write_text(json.dumps(packets,indent=2)+'\n')
         mid=[b for q in packets for b in q['projectiles'] if b['age']<.14 and abs(b['v'][1])>30 and abs(abs(b['v'][0])-abs(b['v'][1]))>30]
         check(bool(mid),'Held fire emits an actual projectile between the eight primary angles')
-        page.evaluate('qaPadConnect(true)');page.wait_for_timeout(150)
+        # The independent pad probe needs a live actor and room to fire.
+        # Earlier idle input checks let a crow reach contextual-strike range
+        # on a slower CI runner. Reset only through the real checkpoint UI;
+        # keep the strict projectile assertion below (do not accept a melee).
+        if data()['state']=='dying':page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).state==="dead"')
+        if data()['state']=='dead':button('CampaignRetry')
+        else:
+            canvas.focus();page.keyboard.press('Escape')
+            page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
+            button(text='Kontrol noktasından dene')
+        page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && d.menu==="" && d.hp>0}')
+        check(abs(data()['player'][0]-data()['rally']['x'])<1,'Actual checkpoint UI isolates the independent gamepad input probe')
+        canvas.focus();page.evaluate('qaPadConnect(true)');page.wait_for_timeout(150)
         page.evaluate('qaPad.axes[0]=1;qaPadButton(4,true)')
         page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>350')
         check(True,'Virtual Xbox left stick plus LB routes to sprint')
@@ -146,7 +158,7 @@ with sync_playwright() as pw:
         frozen=data()['time'];page.wait_for_timeout(180);check(data()['time']==frozen,'Virtual Xbox Start pauses the actual world')
         page.evaluate('qaPadButton(0,true)');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu===""');page.evaluate('qaPadButton(0,false)')
         check(data()['state']=='playing','Virtual Xbox A activates the real Resume button')
-        page.evaluate('qaPadButton(5,true)');before_shots=data()['shots']
+        before_shots=data()['shots'];page.evaluate('qaPadButton(5,true)')
         page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).shots>n',arg=before_shots)
         page.evaluate('qaPadButton(5,false)');check(True,'Virtual Xbox RB fires through the real game input path')
         page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).grounded')
