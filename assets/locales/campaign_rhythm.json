@@ -2,7 +2,7 @@
   "en": {
     "rally": "Rally point saved · stock secured",
     "bridge_warning": "Failing bridge ahead · keep moving",
-    "swap_weapon": "Swap weapon",
+    "swap_weapon": "Swap",
     "interact": "Ride / swap",
     "gate_remaining": "Clear threats · %d left",
     "chain_bonus": "+%d · chain %d",
@@ -19,7 +19,7 @@
   "tr": {
     "rally": "Ara kontrol noktası · ikmal korundu",
     "bridge_warning": "İleride köprü çöküyor · hareket et",
-    "swap_weapon": "Silahı değiştir",
+    "swap_weapon": "Değiştir",
     "interact": "Bin / değiştir",
     "gate_remaining": "Tehditleri temizle · %d kaldı",
     "chain_bonus": "+%d · zincir %d",

@@ -43,4 +43,7 @@ func run() -> void:
 	w.load_section("shore");w.weapon="heavy";w.ammunition=45;w.player=Vector2(900.,0.);game.view.camera_x=600.;w.pickups.append({"id":"offer-review","kind":"arc","x":920.,"y":-35.})
 	await snap("portrait-offer")
 	check(Rect2(Vector2.ZERO,Vector2(root.size)).encloses(root.get_final_transform()*game.screen_transform*game.ride_button.get_global_rect()),"Portrait gun choice target is inside viewport: raw="+str(root.size)+" control="+str(game.ride_button.get_global_rect())+" transform="+str(game.screen_transform)+" final="+str(root.get_final_transform()))
+	game.options.text_scale=2.;game.ui.theme=game.options.theme(game.FONT)
+	await snap("portrait-offer-large")
+	check(not game.ride_button.get_global_rect().intersects(game.actions.attack.get_global_rect()),"200 percent actual gun choice stays separate from Fire")
 	print("RESULT: %d rhythm render checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

@@ -1,0 +1,47 @@
+[
+  {
+    "suite": "campaign_rhythm",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 164,
+    "results": [
+      [
+        "164",
+        "campaign rhythm checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_ui",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 967,
+    "results": [
+      [
+        "967",
+        "campaign UI checks",
+        "0"
+      ]
+    ]
+  },
+  {
+    "suite": "campaign_presentation",
+    "exit_code": 0,
+    "passed": true,
+    "script_error": false,
+    "assertion_error": false,
+    "checks": 504,
+    "results": [
+      [
+        "504",
+        "campaign presentation checks",
+        "0"
+      ]
+    ]
+  }
+]

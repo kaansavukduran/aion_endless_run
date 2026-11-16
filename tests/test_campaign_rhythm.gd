@@ -101,13 +101,18 @@ func run() -> void:
 	for locale in ["tr","en"]:
 		for key in ["rally","bridge_warning","swap_weapon","gate_remaining","chain_bonus","boss_core","boss_dash"]:
 			check(AionCampaignText.word(locale,key)!=key,"New gameplay feedback is translated: "+locale+"/"+key)
-	game.touch_mode=true;game.menu_kind="";game.world.state="playing"
+	game.touch_mode=true;game.menu_kind="";game.world.begin("aion");game.world.state="playing";game.world.weapon="heavy";game.language="tr"
+	game.world.pickups.assign([{"id":"scale-offer","kind":"arc","x":140.,"y":-35.}])
 	for dimensions in [Vector2i(320,568),Vector2i(393,873),Vector2i(844,390),Vector2i(1280,720)]:
-		root.size=dimensions;await process_frame;game.resize()
-		var context_rect: Rect2=game.ride_button.get_global_rect()
-		check(Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h)).encloses(context_rect),"Context touch action fits: "+str(dimensions))
-		for key in game.actions:
-			check(not context_rect.intersects(game.actions[key].get_global_rect()),"Context action never overlaps manual touch routing: "+str(dimensions)+"/"+key)
-		check(not context_rect.intersects(game.stick.get_global_rect()),"Context action stays clear of the joystick: "+str(dimensions))
+		root.size=dimensions;await process_frame
+		for scale in [1.,1.5,2.]:
+			game.options.text_scale=scale;game.ui.theme=game.options.theme(game.FONT);game.resize();game.update_hud();await process_frame;await process_frame
+			var context_rect: Rect2=game.ride_button.get_global_rect()
+			var label: String=str(dimensions)+"/"+str(scale)
+			check(game.ride_button.visible and game.ride_button.text==game.t("swap_weapon"),"Actual gun choice is laid out after its translated text: "+label)
+			check(Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h)).encloses(context_rect),"Context touch action fits: "+label)
+			for key in game.actions:
+				check(not context_rect.intersects(game.actions[key].get_global_rect()),"Context action never overlaps manual touch routing: "+label+"/"+key)
+			check(not context_rect.intersects(game.stick.get_global_rect()),"Context action stays clear of the joystick: "+label)
 	game.queue_free();await process_frame
 	print("RESULT: %d campaign rhythm checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

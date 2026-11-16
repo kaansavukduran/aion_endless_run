@@ -1,0 +1,3 @@
+{"suite": "campaign_rhythm", "exit_code": 1, "passed": false, "script_error": false, "assertion_error": true, "checks": 164, "results": [["164", "campaign rhythm checks", "2"]]}
+campaign_rhythm: FAIL: Context action never overlaps manual touch routing: (320, 568)/2.0/attack
+campaign_rhythm: FAIL: Context action never overlaps manual touch routing: (393, 873)/2.0/attack

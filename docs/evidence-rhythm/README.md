@@ -73,3 +73,11 @@ The independent controller probe now enters Retry checkpoint through the actual 
 An extra ordinary-input walk also reached actual gun drops and passed portrait-touch Swap (without an extra shot/grenade) and virtual Xbox Y Swap. The first extra harness run failed only while writing its receipt with a nonexistent telemetry key; the corrected receipt run passed. These exploratory test-writer mistakes are not game fixes or hardware-controller evidence.
 
 The corrected local harness passed **37 checks**, including real offline Continue; [receipt](isolated-pad-results.json). [Extra portrait touch/Y choice receipt](choice-input-results.json) records both actual input paths and the unchanged local build manifest observed after the test.
+
+## Large-text edge case
+
+Final scale review proved another real defect: after the long gun-choice caption's minimum-size calculation, 200% TR text grew the portrait target from 180 to 234 logical pixels and overlapped Fire. The first overlap tests had used the short Ride caption before a real gun offer, so they did not prove this case. The strengthened regression lays out a real translated offer, waits for minimum-size calculation and tests four viewports at 100/150/200% text. Before the fix it failed at both portrait sizes (164 assertions, 2 genuine failures).
+
+The action caption is now **Değiştir / Swap**; font size and touch area are preserved. The enlarged-text native fixture also checks the real drawn state. This is an accessibility correction to the new context action, not a change to movement, combat or inventory rules. Final verification records this additional commit separately from the already successful `ddffafe` run.
+
+Post-fix: **164 rhythm checks**, plus UI/presentation for **1,635 focused checks**, all pass. [Red regression](large-text-red.log), [green results](large-text-green-results.json), [21 native render assertions](large-text-native.log). The [200% portrait screenshot](portrait-offer-large.png) is a deliberately staged native fixture, not normal traversal.
