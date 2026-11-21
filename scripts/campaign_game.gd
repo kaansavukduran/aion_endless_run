@@ -45,6 +45,9 @@ var up_down := false
 var down_down := false
 var mouse_stick := false
 var mouse_axis := Vector2.ZERO
+# Desktop pointer aim: the held gun turns toward the mouse in the play area.
+var mouse_aim := false
+var mouse_point := Vector2.ZERO
 var pad_axis := Vector2.ZERO
 var pad_look := Vector2.ZERO
 var fade := -1.
@@ -533,8 +536,8 @@ func _notification(what: int) -> void:
 	elif what==NOTIFICATION_APPLICATION_FOCUS_IN or what==NOTIFICATION_WM_WINDOW_FOCUS_IN:application_active=true
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch or event is InputEventScreenDrag:active_input="touch"
-	elif event is InputEventJoypadButton or event is InputEventJoypadMotion:active_input="gamepad"
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:active_input="touch";mouse_aim=false
+	elif event is InputEventJoypadButton or event is InputEventJoypadMotion:active_input="gamepad";mouse_aim=false
 	elif event is InputEventKey or (event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION):active_input="keyboard"
 	if fade>=0. or world.state=="travel":
 		release_all();get_viewport().set_input_as_handled();return
@@ -587,6 +590,8 @@ func _input(event: InputEvent) -> void:
 				for key in actions:
 					if actions[key].hit(p):set_action(key,"mouse-touch",true);get_viewport().set_input_as_handled();return
 				if is_instance_valid(stick) and Rect2(stick.position,stick.size).has_point(p):mouse_stick=true;mouse_axis=stick.value(p);stick.axis=mouse_axis;stick.active=true;stick.queue_redraw();get_viewport().set_input_as_handled()
+	elif event is InputEventMouseMotion and not mouse_stick and event.device!=InputEvent.DEVICE_ID_EMULATION:
+		mouse_aim=true;mouse_point=event.position
 	elif event is InputEventMouseMotion and mouse_stick:
 		mouse_axis=stick.value(screen_transform.affine_inverse()*event.position);stick.axis=mouse_axis;stick.queue_redraw();get_viewport().set_input_as_handled()
 
@@ -678,14 +683,29 @@ func update_arcade_aim(dt: float=0.) -> void:
 	if stick_touch>=0 and is_instance_valid(stick):
 		axis=stick.axis.x;vertical=stick.axis.y
 	var raw:=Vector2(axis,vertical)
+	var analog: bool=stick_touch>=0 or mouse_stick or absf(pad_axis.x)>.01 or absf(pad_axis.y)>.01
 	# A grounded Down press is a low firing stance, not accidental floor aim.
 	if vertical>.55 and world.grounded() and not bool(world.mount.ridden):raw.y=0.
-	if pad_look.length_squared()>.25:raw=pad_look
+	if pad_look.length_squared()>.25:raw=pad_look;analog=true
+	world.move_axis=Vector2(axis,vertical)
+	# Mouse aim: any angle toward the pointer, unless a stick, pad or W/S aim is in use.
+	if mouse_aim and not analog and not up_down and not down_down and is_instance_valid(view):
+		var direction:=pointer_aim()
+		if direction!=Vector2.ZERO:world.steer_aim(direction,0.);return
 	if raw.length_squared()<.04:raw=Vector2(world.facing,0.)
+	if analog and not bool(world.mount.ridden):
+		# Sticks aim freely through 360 degrees; a nearly level push stays level.
+		if absf(raw.y)<.12*raw.length():raw.y=0.
+		world.steer_aim(raw.normalized(),dt);return
 	var snapped:=Vector2(signf(raw.x) if absf(raw.x)>.25 else 0.,signf(raw.y) if absf(raw.y)>.25 else 0.)
 	if snapped.length_squared()<.5:snapped=Vector2(world.facing,0.)
 	world.steer_aim(raw.normalized() if bool(world.mount.ridden) else snapped.normalized(),dt)
-	world.move_axis=Vector2(axis,vertical)
+
+func pointer_aim() -> Vector2:
+	# Direction from the hand (or vehicle saddle) to the pointer, in screen space.
+	var hand: Vector2=world.player+(Vector2(0.,-42.) if bool(world.mount.ridden) else Vector2(M1CombatArt.placement(world).grip))
+	var toward: Vector2=mouse_point-view.get_global_transform_with_canvas()*view.at(hand)
+	return toward.normalized() if toward.length()>10. else Vector2.ZERO
 
 func _process(dt: float) -> void:
 	impact_cooldown=maxf(0.,impact_cooldown-dt);defeat_sound_wait=maxf(0.,defeat_sound_wait-dt)

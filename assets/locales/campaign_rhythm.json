@@ -12,7 +12,7 @@
     "high_lane": "HIGH",
     "low_lane": "LOW",
     "help": "Move, crouch and aim both ways. Hold fire; a nearby enemy changes it to a single strike. Different guns stay on the ground until you choose Swap; matching ammo refills automatically.",
-    "keys": "A/D move · S/↓ crouch · W/↑ aim · Space jump · F/left click fire · Right click grenade · Shift sprint · E ride/swap · Esc",
+    "keys": "A/D move · S/↓ crouch · W/↑/mouse aim · Space jump · F/left click fire · Right click grenade · Shift sprint · E ride/swap · Esc",
     "best_chain": "Best chain",
     "boss_intro": "ROOT ENGINE: Every road grows into my cage.\nKEEPER: Break the glowing ports, strike the exposed core and jump its final charge!"
   },
@@ -29,7 +29,7 @@
     "high_lane": "ÜST",
     "low_lane": "ALT",
     "help": "İki yöne yürü, eğil ve nişan al. Ateşi tut; yakın düşmanda tek temas vuruşu yapar. Farklı silahı Değiştir ile seç; aynı silahın ikmali otomatik eklenir.",
-    "keys": "A/D yürü · S/↓ eğil · W/↑ nişan · Space zıpla · F/sol tık ateş · Sağ tık bomba · Shift depar · E bin/değiştir · Esc",
+    "keys": "A/D yürü · S/↓ eğil · W/↑/fare nişan · Space zıpla · F/sol tık ateş · Sağ tık bomba · Shift depar · E bin/değiştir · Esc",
     "best_chain": "En iyi zincir",
     "boss_intro": "KÖK MOTORU: Her yol kafesime uzanır.\nBEKÇİ: Parlayan bağlantıları kır, açılan çekirdeğe vur ve son hücumunu zıplayarak aş!"
   }
