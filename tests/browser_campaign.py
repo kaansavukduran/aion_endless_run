@@ -314,7 +314,7 @@ with sync_playwright() as pw:
                 before_save=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
                 page.evaluate('navigator.serviceWorker.ready.then(()=>true)');context.set_offline(True);page.reload(timeout=120000)
                 page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
-                page.get_by_role('button',name='Arcade',exact=True).focus();page.keyboard.press('Enter')
+                page.get_by_role('button',name='Oyna',exact=True).focus();page.keyboard.press('Enter')
                 page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
                 button('CampaignContinue')
                 while data()['menu']=='help':button('CampaignGo')
@@ -412,12 +412,12 @@ with sync_playwright() as pw:
             check(canvas.get_attribute('data-campaign') is None,'Return to the original runner clears stale campaign observations')
             check(page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1')).completed"),'Returning to main preserves the completed campaign')
             # Re-enter via the real semantic counterpart of the actual Godot button.
-            page.get_by_role('button',name='Arcade',exact=True).focus();page.keyboard.press('Enter');page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
+            page.get_by_role('button',name='Oyna',exact=True).focus();page.keyboard.press('Enter');page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
     if a.offline:
         if data()['state']=='playing':canvas.focus();page.keyboard.press('Escape');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
         before=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
         page.evaluate('navigator.serviceWorker.ready.then(()=>true)');context.set_offline(True);page.reload(timeout=120000);page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
-        page.get_by_role('button',name='Arcade',exact=True).focus();page.keyboard.press('Enter');page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
+        page.get_by_role('button',name='Oyna',exact=True).focus();page.keyboard.press('Enter');page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
         after=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
         check(after['checkpoint']==before['checkpoint'] and after['score']==before['score'],'Offline reload starts the real game and preserves its separate campaign checkpoint')
         if not before['completed']:
