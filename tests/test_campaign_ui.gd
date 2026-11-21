@@ -62,6 +62,7 @@ func run() -> void:
 		var clock: float=game.world.time;game._process(.016)
 		check(game.world.time>clock and game.menu_kind=="","Actual fork remains live gameplay instead of opening a modal")
 		check(game.ui.find_children("Route_*","Button",true,false).is_empty(),"No text-choice controls exist at a physical route fork")
+		if str(pair[1])=="roots":CampaignContent.hit_object(game.world,Vector2(CampaignRoutes.HATCH_LOCK_X,-35.),4)
 		game.world.player=Vector2(1490.,float(pair[2]));game.world.velocity=Vector2.ZERO;game.world.step(.016)
 		check(game.world.travel_target==str(pair[1]),"Actual feet at the branch exit choose "+str(pair[1]))
 		game.fade=-1.

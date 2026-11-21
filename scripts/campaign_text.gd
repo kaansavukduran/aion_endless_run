@@ -40,7 +40,7 @@ static func word(locale: String,key: String) -> String:
 	if key=="continue_short":return "Sürdür" if locale=="tr" else "Continue"
 	if key in ["owl_feather","arc_owl_feather"]:return "Ömer’in Tüyü · İki kaya saldırısı" if locale=="tr" else "Omar’s Feather · Two stone strikes"
 	if key in ["wolf_charm","arc_wolf_charm"]:return "Melun’un Tılsımı · İki ısırık" if locale=="tr" else "Melun’s Charm · Two bites"
-	if key=="help_route":return "Yüksek yola zıpla veya alttaki kanala ilerle. Tek yönlü platformdan inmek için aşağı ve zıplamayı birlikte kullan. Yolunu hareketin belirler." if locale=="tr" else "Jump onto the upper path or walk into the lower channel. Hold down and jump to drop through a one-way platform. Your movement chooses the route."
+	if key=="help_route":return "Yolu dünya belirler: basamaklardan tırman, alçak geçitte eğilip sürün ya da kökle kilitli kapağı kırıp aşağı in." if locale=="tr" else "The world sets your path: climb the steps, crouch through a low passage, or break a root lock to open the hatch."
 	if key=="keys":return "A/D yürü · S/↓ eğil · W/↑ yukarı nişan · Space zıpla · F/sol tık ateş · Sağ tık bomba · Shift depar · E bin/in · Esc" if locale=="tr" else "A/D move · S/↓ crouch · W/↑ aim up · Space jump · F/left click fire · Right click grenade · Shift sprint · E ride/exit · Esc"
 	if key=="crouch":return "Eğil" if locale=="tr" else "Crouch"
 	if key=="touch":return "Sol joystick: yürü (dış kenarda depar); aşağı tutarak eğil · Sağda zıpla, ateş ve bomba · Yakında Bin" if locale=="tr" else "Left stick: move (outer edge sprints); hold down to crouch · Right: jump, fire and grenade · Ride when near"

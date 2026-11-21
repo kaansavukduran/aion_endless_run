@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.30.0 · Doğal yol ayrımları
+
+Mission 1'in iki yol ayrımı artık farklı fiziksel fikirlerle seçiliyor. Kıyıda alt su yoluna iskele binasının altındaki alçak bakım geçidinden eğilip sürünerek girilir; tavan gerçek çarpışmadır. Kanopide kökle kilitli kapağın mekanizması kırılınca kök geçidi açılır; üst hizmet yolunun orta açıklığı basıldıktan sonra çöker. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
+
 ## 0.29.0 · Serbest nişan ve hızlı açılış
 
 Görev modunda silah bilgisayarda fare imlecini takip eder; mobil joystick ve gamepad 8 yöne yuvarlanmadan gerçek açıya nişan alır, klavye 8 yönü korur. Web açılışı ve oyun içi akıcılık optimize edildi: sprite kareleri GPU geri okuması olmadan çözülür, oyuncu sürümünde kare başına test verisi yazılmaz, motor PCK ile paralel iner, sekme gizlenince koşu duraklar. Kullanılmayan dosyalar paketten çıkarıldı (PCK 174,6 → 168,5 MB).

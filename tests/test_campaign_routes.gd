@@ -13,18 +13,27 @@ func travel(w,upper: bool) -> Dictionary:
 	# measures path reachability, not a claim of a full normal-input mission.
 	w.enemies.clear()
 	var count:=0
-	while w.state=="playing" and count<1800:
-		w.move_axis=Vector2.RIGHT
+	var crawled:=false
+	while w.state=="playing" and count<2400:
+		# Lower route: crouch only once in the channel (the crawlway needs it),
+		# and keep firing in the canopy yard to break the hatch lock.
+		var in_channel: bool=CampaignRoutes.foot(w).y>1.
+		w.move_axis=Vector2(1.,1. if (not upper and in_channel and w.section=="fork_one" and w.player.x<1200.) else 0.)
+		if not upper and w.section=="fork_two" and not CampaignRoutes.hatch_open(w):
+			if not w.fire_held:w.attack_press()
+		elif w.fire_held:w.attack_release()
 		if upper and w.grounded() and w.player.x<1000.:
 			w.jump_press();w.jump_release()
 		w.step(1./60.);count+=1
-	return {"frames":count,"state":w.state,"target":w.travel_target,"foot":CampaignRoutes.foot(w)}
+		if CampaignRoutes.low_ceiling(w):crawled=true
+	return {"frames":count,"state":w.state,"target":w.travel_target,"foot":CampaignRoutes.foot(w),"crawled":crawled}
 
 func auto_travel(game: AionCampaignGame,source: String,destination: String,reduced: bool=false,mounted: bool=false) -> void:
 	game.presentation_stage="";game.menu_kind="";game.fade=-1.;game.application_active=true
 	game.options.reduced_motion=reduced;game.world.load_section(source)
 	game.world.enemies.clear();game.world.npcs.clear();game.world.gates.clear();game.world.pits.clear()
 	game.world.score=1234;game.world.weapon="arc";game.world.ammunition=37
+	if source=="fork_two":game.world.activated[CampaignRoutes.HATCH_ID]=true
 	var gift: Dictionary={"id":"shore:keeper:supply","kind":"heavy","x":4000.,"y":-25.,"rescue_id":"shore:keeper","role":"keeper","from_bag":true}
 	game.world.gift_drops["shore:keeper"]=gift.duplicate(true)
 	game.world.mount={"available":mounted,"ridden":mounted,"x":1490.,"hp":2,"type":"skimmer"}
@@ -53,29 +62,79 @@ func auto_travel(game: AionCampaignGame,source: String,destination: String,reduc
 	check(game.world.mount.ridden==mounted and (not mounted or game.world.mount.hp==2),"Automatic travel carries the actual damaged vehicle")
 	check(str(game.saved.get("checkpoint",""))==destination and Dictionary(game.saved.get("gift_drops",{})).has("shore:keeper"),"Destination checkpoint includes persistent unclaimed-drop state")
 	check(game.held.is_empty() and not game.world.fire_held and not game.world.jump_held,"No source remains latched when the fade completes")
+func route_structures() -> void:
+	# fork_one: a standing body meets the pier wall; a crouched one crawls under it.
+	var w:=fresh();w.enemies.clear();w.player=Vector2(700.,90.);w.velocity=Vector2.ZERO
+	for frame in 90:w.move_axis=Vector2.RIGHT;w.step(1./60.)
+	check(absf(w.player.x-(CampaignRoutes.PIER.position.x-CampaignRoutes.BODY_HALF_WIDTH))<.5,"A standing hero cannot walk into the low crawlway")
+	check(w.notice=="arc_crawl_hint","Pressing into the crawl mouth shows the crouch hint")
+	for frame in 60:w.move_axis=Vector2(1,1);w.step(1./60.)
+	check(CampaignRoutes.low_ceiling(w) and w.crouching(),"Crouching enters the crawlway under its real ceiling")
+	w.move_axis=Vector2.ZERO;w.step(1./60.)
+	check(w.crouching() and absf(w.player.y-90.)<.1,"Releasing Down under the ceiling keeps the hero crouched instead of standing into it")
+	var before_y: float=w.player.y;w.jump_press();w.jump_release();w.step(1./60.)
+	check(absf(w.player.y-before_y)<.1 and w.velocity.y>=0.,"Jumping under the crawl ceiling is refused")
+	check(w.player_hit_center().y>CampaignRoutes.CRAWL_CEILING,"The crouched hit centre fits below the ceiling")
+	var frames:=0
+	while CampaignRoutes.low_ceiling(w) and frames<900:w.move_axis=Vector2.RIGHT;w.step(1./60.);frames+=1
+	w.move_axis=Vector2.ZERO;w.step(1./60.)
+	check(not CampaignRoutes.low_ceiling(w) and not w.crouching() and w.player.x>CampaignRoutes.PIER.end.x,"Holding only Right crawls out and stands up once the ceiling ends")
+	var back:=fresh();back.enemies.clear();back.player=Vector2(1250.,90.)
+	for frame in 30:back.move_axis=Vector2.LEFT;back.step(1./60.)
+	check(back.player.x>=CampaignRoutes.PIER.end.x+CampaignRoutes.BODY_HALF_WIDTH-.5,"The crawlway is a wall from the far side for a standing body, too")
+	var rider:=fresh();rider.enemies.clear();rider.mount={"available":true,"ridden":true,"x":700.,"hp":3,"type":"skimmer"};rider.player=Vector2(700.,48.)
+	for frame in 90:rider.move_axis=Vector2(1,1);rider.step(1./60.)
+	check(rider.player.x<=CampaignRoutes.PIER.position.x-CampaignRoutes.BODY_HALF_WIDTH+.5,"A vehicle cannot enter the crawlway")
+	var roof:=fresh();roof.enemies.clear();roof.player=Vector2(980.,-195.);roof.move_axis=Vector2(0,1);roof.jump_press();roof.jump_release()
+	for frame in 90:roof.step(1./60.)
+	check(absf(roof.player.y+195.)<.1 and roof.grounded(),"Down+Jump on the pier roof cannot fall through into the crawlway")
+	var shot:=fresh();shot.enemies.clear();shot.bullets=[{"p":Vector2(760.,70.),"v":Vector2(-800.,-1200.),"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[],"life":2.}]
+	shot.bullets[0].p=Vector2(990.,10.);shot.step(1./60.)
+	check(shot.bullets.is_empty(),"The pier house blocks a shot inside its solid body")
+	# fork_two: a closed hatch yard, a breakable lock and a failing service span.
+	var yard:=fresh();yard.load_section("fork_two");yard.enemies.clear();yard.player=Vector2(1300.,0.)
+	for frame in 60:yard.move_axis=Vector2.RIGHT;yard.step(1./60.)
+	check(yard.player.x<=CampaignRoutes.YARD_END_X+.5 and CampaignRoutes.choice_at(yard)=="","The closed hatch yard ends at its fence without choosing a route")
+	var lock: Dictionary=yard.objects.filter(func(o):return str(o.id)==CampaignRoutes.HATCH_ID)[0]
+	for hit in 4:CampaignContent.hit_object(yard,Vector2(CampaignRoutes.HATCH_LOCK_X,-35.),1)
+	check(bool(lock.active) and CampaignRoutes.hatch_open(yard) and yard.floor_at(1000.)==90.,"Breaking the root lock opens the hatch floor")
+	for frame in 90:yard.move_axis=Vector2.ZERO;yard.step(1./60.)
+	check(yard.grounded() and absf(yard.player.y-90.)<.1,"Standing over the opened hatch drops into the root channel")
+	var restored:=AionCampaignWorld.new();restored.restore(yard.snapshot());restored.load_section("fork_two")
+	check(CampaignRoutes.hatch_open(restored),"An opened hatch stays open after checkpoint restore")
+	var span:=fresh();span.load_section("fork_two");span.enemies.clear();span.player=Vector2(620.,-140.);span.velocity=Vector2.ZERO
+	span.step(1./60.);check(span.bridge_timers.has(CampaignRoutes.SERVICE_BRIDGE_X),"Stepping on the service span starts its visible collapse timer")
+	for frame in 220:span.move_axis=Vector2.ZERO;span.step(1./60.)
+	check(span.player.y>-1. and span.disabled_platforms.has(CampaignRoutes.SERVICE_BRIDGE_X),"Waiting on the failing span drops the hero to the yard, not into a pit")
 func run() -> void:
 	for section in CampaignRoutes.FORKS:
 		var w:=fresh();w.load_section(section)
 		check(w.state=="playing","Fork starts as live physics, not a choice state: "+section)
 		check(w.platforms.size()==3 and w.pits.is_empty(),"Junction has authored reachable stairs and a real lower floor")
 		for surface in w.platforms:
-			check(surface.size.x>=200. and surface.size.y>0.,"Upper route is actual one-way collision geometry")
-		check(w.floor_at(500.)==0. and w.floor_at(900.)==90.,"Material step matches actual floor heights")
+			check(surface.size.x>=140. and surface.size.y>0.,"Upper route is actual one-way collision geometry")
+		if section=="fork_one":check(w.floor_at(500.)==0. and w.floor_at(900.)==90.,"Material step matches actual floor heights")
+		else:check(w.floor_at(500.)==0. and w.floor_at(1000.)==0.,"The canopy yard floor is closed until its hatch opens")
 		for high in [false,true]:
 			w=fresh();w.load_section(section)
 			var result:=travel(w,high)
 			var expected: String=("canopy" if high else "water") if section=="fork_one" else ("terrace" if high else "roots")
 			check(result.state=="travel" and result.target==expected,"Actual movement chooses "+expected+" without a modal")
+			if not high and section=="fork_one":check(result.crawled,"The water route is entered by actually crawling under the pier")
+			if not high and section=="fork_two":check(CampaignRoutes.hatch_open(w),"The roots route opened its hatch by breaking the lock")
 			check(w.route.has(expected),"Crossing exit records the real route once")
 			w.finish_travel();check(w.section==expected and w.state=="playing","Physical route loads its actual destination")
 	for hero in AionCampaignWorld.HEROES:
-		var w:=fresh(hero);var result:=travel(w,true)
-		check(result.target=="canopy","Every current hero can climb the upper stairs: "+hero)
+		for section in CampaignRoutes.FORKS:
+			for high in [true,false]:
+				var w:=fresh(hero);w.load_section(section);var result:=travel(w,high)
+				var expected: String=("canopy" if high else "water") if section=="fork_one" else ("terrace" if high else "roots")
+				check(result.target==expected,"Every current hero completes "+expected+" by ordinary movement: "+hero)
 	var w:=fresh();w.enemies.clear();w.player=Vector2(1550.,-300.);w.velocity=Vector2.ZERO
 	check(CampaignRoutes.choice_at(w)=="","Flying across a doorway cannot choose a path before landing")
 	w.player=Vector2(1550.,-195.);check(w.grounded() and CampaignRoutes.choice_at(w)=="canopy","Upper exit is activated by actual feet on its deck")
 	w=fresh();w.player=Vector2(1550.,90.);check(w.grounded() and CampaignRoutes.choice_at(w)=="water","Lower exit uses the lower collision floor")
-	var dropper:=fresh();dropper.enemies.clear();dropper.player=Vector2(1000.,-195.);dropper.move_axis=Vector2(1,1)
+	var dropper:=fresh();dropper.enemies.clear();dropper.player=Vector2(1300.,-195.);dropper.move_axis=Vector2(1,1)
 	dropper.step(.05);check(absf(dropper.player.y+195.)<.1 and dropper.crouching(),"Down alone crawls on the upper deck without silently choosing the lower path")
 	dropper.move_axis=Vector2(0,1);dropper.jump_press();dropper.jump_release()
 	for frame in 90:dropper.step(1./60.)
@@ -108,6 +167,7 @@ func run() -> void:
 			check(rider.interact(),"Parked fork vehicle can be boarded again at the same height")
 			for frame in 32:rider.step(1./60.)
 			check(rider.mount.ridden and absf(rider.player.y+42.-deck)<.1,"Reboarding preserves the real hull floor")
+	route_structures()
 	var snap:=w.snapshot();var restored:=AionCampaignWorld.new();check(restored.restore(snap) and restored.section=="fork_one" and restored.state=="playing","A junction checkpoint restores into gameplay")
 	var game:=AionCampaignGame.new();root.add_child(game);await process_frame;game.set_process(false)
 	game.world.load_section("fork_one");game.menu_kind="";game.build_ui();await process_frame;await process_frame
