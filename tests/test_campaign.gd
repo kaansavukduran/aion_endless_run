@@ -89,7 +89,8 @@ func run() -> void:
 	w=fresh();w.load_section("fork_one");w.player=Vector2(1500.,CampaignRoutes.UPPER_FLOOR);w.step(.01)
 	check(w.state=="travel" and w.travel_target=="canopy","Actual upper walkway contact selects the first high route")
 	w.finish_travel();check(w.section=="canopy","First high branch is a real stage")
-	w.load_section("fork_two");w.player=Vector2(1500.,CampaignRoutes.LOWER_FLOOR);w.step(.01)
+	w.load_section("fork_two");CampaignContent.hit_object(w,Vector2(CampaignRoutes.HATCH_LOCK_X,-35.),4)
+	w.player=Vector2(1500.,CampaignRoutes.LOWER_FLOOR);w.step(.01)
 	check(w.state=="travel" and w.travel_target=="roots","Actual lower channel selects the second low route")
 	w.finish_travel();check(w.section=="roots" and w.route==["canopy","roots"],"Two physical branch contacts record the actual route")
 	for leaf in ["water","terrace","roots"]:

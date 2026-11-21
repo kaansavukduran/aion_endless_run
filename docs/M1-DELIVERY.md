@@ -1,5 +1,7 @@
 # Mission1 · 0.26.1 teslim ve doğrulama
 
+Güncel Mission 1 oynanış çalışması ve devri: [MISSION1-GAMEPLAY-HANDOFF.md](MISSION1-GAMEPLAY-HANDOFF.md).
+
 ## 0.26.1 · Gerçek ara sahne regresyonu
 
 Son görsel katman incelemesi yeni M1 gövde seçicisinin sonsuz moddaki mevcut tepki/sarılma pozlarını ve kırmızı silah teslimini örttüğünü kanıtladı. Hareket katmanı bu sahnelerde mevcut animasyona öncelik verir; Ayça eski erkek tavşan yerine kendi tokalı/etekli çizimini kullanır. İki koyun takipçisi güncel iki ayaklı çizimle görünür kalır. Arcade fizik/rota, kayıt şeması veya eski kaynak PNG'ler bu yamada değişmez.

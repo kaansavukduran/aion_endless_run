@@ -133,13 +133,14 @@ var pending_events: Array[String] = []
 func biome() -> int: return int(STAGES[section].biome)
 func length() -> float: return float(STAGES[section].length)
 func charge_ratio() -> float: return clampf(charge_time / 1.2, 0., 1.)
-func floor_at(x: float) -> float:
-	if CampaignRoutes.is_fork(section):return CampaignRoutes.floor_height(x)
+## y is the support query height; the default asks for the lowest floor.
+func floor_at(x: float,y: float=1e9) -> float:
+	if CampaignRoutes.is_fork(section):return CampaignRoutes.floor_height(self,x,y)
 	for pit in pits:
 		if x > pit.x and x < pit.y: return 1000.
 	return 0.
 func crossing_floor(x: float,old_y: float,new_y: float,falling_speed: float) -> float:
-	var support:=floor_at(x)
+	var support:=floor_at(x,old_y)
 	for platform in platforms:
 		if drop_through_time>0. or disabled_platforms.has(platform.position.x):continue
 		if x>=platform.position.x-9. and x<=platform.end.x+9. and old_y<=platform.position.y+.01 and new_y>=platform.position.y and falling_speed>=0.:support=minf(support,platform.position.y)
@@ -158,7 +159,8 @@ func grounded() -> bool:
 	return false
 
 func crouching() -> bool:
-	return state=="playing" and mount_transition=="" and not bool(mount.ridden) and grounded() and move_axis.y>.55
+	# A real low ceiling keeps the hero crouched until there is room to stand.
+	return state=="playing" and mount_transition=="" and not bool(mount.ridden) and grounded() and (move_axis.y>.55 or CampaignRoutes.low_ceiling(self))
 
 func player_hit_center() -> Vector2:
 	return player+Vector2(0.,-20. if crouching() else -37.)
@@ -328,8 +330,10 @@ func finish_travel() -> void:
 func jump_press() -> void:
 	if state != "playing" or rescue_time>0. or mount_transition!="" or jump_held: return
 	jump_held = true
+	# No jump into a low ceiling: the crawlway keeps the hero on its floor.
+	if CampaignRoutes.low_ceiling(self):return
 	# Down+Jump drops through one-way platforms; Down alone is a crawl.
-	if move_axis.y>.55 and not bool(mount.ridden) and grounded() and player.y<floor_at(player.x)-1.:
+	if move_axis.y>.55 and not bool(mount.ridden) and grounded() and player.y<floor_at(player.x,player.y)-1.:
 		drop_through_time=.25;player.y+=3.;velocity.y=70.;jumps=1;return
 	if CampaignVehicles.jump(self):return
 	if grounded() and character in ["rabbit","eren"] and not bool(mount.ridden):
@@ -624,6 +628,8 @@ func step_bullets(dt: float) -> void:
 		b.erase("start")
 		if b.has("gravity"):b.v=Vector2(b.v)+Vector2(0,float(b.gravity)*dt)
 		b.age = float(b.age)+dt; b.p = Vector2(b.p)+Vector2(b.v)*dt
+		# Solid route structures stop shots from either side.
+		if CampaignRoutes.solid_at(self,b.p):b.age=99.;continue
 		if b.owner == "enemy":
 			if float(b.p.y)>0. and floor_at(float(b.p.x))==0.:b.age=99.;continue
 			if Vector2(b.p).distance_to(player_hit_center())<player_hit_radius(): damage_player(); b.age = 99.
