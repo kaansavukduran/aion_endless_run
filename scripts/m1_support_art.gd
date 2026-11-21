@@ -8,7 +8,7 @@ func pose(key: String,frame: int=0) -> Dictionary:
  assert(DATA.data.frames.has(id),'Unknown support art: '+id)
  if cache.has(id):return cache[id]
  if image==null:
-  image=load('res://'+str(DATA.data.path)).get_image()
+  image=RunnerSourcePixels.image('res://'+str(DATA.data.path))
   if image.is_compressed():image.decompress()
  var f: Dictionary=DATA.data.frames[id];var b: Array=f.bounds
  var isolated:=Image.create_empty(int(b[2])-int(b[0])+4,int(b[3])-int(b[1])+4,false,Image.FORMAT_RGBA8)

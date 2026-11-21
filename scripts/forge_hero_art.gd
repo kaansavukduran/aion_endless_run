@@ -13,8 +13,7 @@ func pose(key: String, row: int, frame: int) -> Dictionary:
 	var id := key + ":" + str(row) + ":" + str(frame)
 	if cache.has(id): return cache[id]
 	if not images.has(key):
-		var source: Texture2D = load("res://" + str(atlas.path))
-		var pixels := source.get_image()
+		var pixels := RunnerSourcePixels.image("res://" + str(atlas.path))
 		if pixels.is_compressed(): pixels.decompress()
 		pixels.convert(Image.FORMAT_RGBA8)
 		images[key] = pixels

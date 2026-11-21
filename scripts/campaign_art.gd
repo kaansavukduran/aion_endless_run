@@ -12,8 +12,11 @@ func melee(hero: String, frame: int) -> Dictionary:
 	if cache.has(key): return cache[key]
 	var data: Dictionary = MELEE.data.heroes[hero]
 	if not melee_sources.has(hero):
-		var texture: Texture2D = load("res://"+str(data.path))
-		var image := texture.get_image()
+		# Heroes that share one melee sheet share one read-only decoded copy.
+		for other in melee_sources:
+			if str(MELEE.data.heroes[other].path)==str(data.path):melee_sources[hero]=melee_sources[other];break
+	if not melee_sources.has(hero):
+		var image := RunnerSourcePixels.image("res://"+str(data.path))
 		if image.is_compressed(): image.decompress()
 		image.convert(Image.FORMAT_RGBA8); melee_sources[hero] = image
 	var f: Dictionary = data.frames[clampi(frame,0,5)]
@@ -30,7 +33,7 @@ func pose(row: int, frame: int) -> Dictionary:
 	var key := Vector2i(row,frame)
 	if cache.has(key): return cache[key]
 	if source == null:
-		source = SOURCE.get_image()
+		source = RunnerSourcePixels.image(SOURCE.resource_path)
 		if source.is_compressed(): source.decompress()
 		source.convert(Image.FORMAT_RGBA8)
 	var f: Dictionary = META.data.frames[row][frame]

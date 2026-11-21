@@ -89,8 +89,7 @@ func pose(kind: String, phase: int, frame: int, target_height: float = 0.) -> Di
 	var key := kind + ":" + str(phase) + ":" + str(frame) + ":" + str(target_height)
 	if cache.has(key): return cache[key]
 	if not images.has(kind):
-		var texture: Texture2D = load("res://" + str(data.path))
-		var image := texture.get_image()
+		var image := RunnerSourcePixels.image("res://" + str(data.path))
 		if image.is_compressed(): image.decompress()
 		image.convert(Image.FORMAT_RGBA8)
 		images[kind] = image

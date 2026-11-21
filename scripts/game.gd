@@ -132,6 +132,13 @@ var front := preload("res://scripts/front_presentation.gd").new()
 var help_step := 0
 var camera_rise := 0.0
 var campaign_resume_requested := false
+# Browser QA reads ~150 canvas data-* observations. Normal players only need the
+# accessible state, so the full mirror runs for automation or ?aion-qa only.
+var web_qa := false
+var web_essential_key := ""
+var web_essential_at := -1000
+var web_hidden_callback: JavaScriptObject
+var tone_cache := {}
 
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("0a1222"))
@@ -172,7 +179,13 @@ func _ready() -> void:
 		# Clear ownership in capture phase before such a release can launch Emre.
 		# Do not cancel on pointercancel: Chrome emits it for valid legacy-touch holds.
 		JavaScriptBridge.eval("if(!window.aionTouchCancelInstalled){window.aionTouchCancelInstalled=true;window.addEventListener('touchcancel',()=>window.aionCancelTouches?.(),{capture:true,passive:true})}")
-		JavaScriptBridge.eval("document.getElementById('canvas').addEventListener('contextmenu',e=>{if(e.currentTarget.dataset.page==='')e.preventDefault()})")
+		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');if(c&&!c.dataset.aionContextGuard){c.dataset.aionContextGuard='1';c.addEventListener('contextmenu',e=>{if(e.currentTarget.dataset.page==='')e.preventDefault()})}})()")
+		web_qa = bool(JavaScriptBridge.eval("navigator.webdriver===true||/[?&]aion-qa(=|&|$)/.test(location.search)"))
+		# Godot's Web platform sends no application focus/pause notification when
+		# the tab is hidden; pause the run exactly like a native focus loss.
+		web_hidden_callback = JavaScriptBridge.create_callback(on_web_page_hidden)
+		JavaScriptBridge.get_interface("window").aionPageHidden = web_hidden_callback
+		JavaScriptBridge.eval("if(!window.aionVisibilityInstalled){window.aionVisibilityInstalled=true;document.addEventListener('visibilitychange',()=>{if(document.hidden)window.aionPageHidden?.()})}")
 	for i in 2:
 		followers.append(make_companion_sprite())
 	sheep_collectible = make_companion_sprite()
@@ -1198,6 +1211,13 @@ func handle_event(value: String) -> void:
 
 func tone(frequency: float, duration: float) -> void:
 	if not audio_enabled or volume <= 0.0 or DisplayServer.get_name() == "headless": return
+	# The same synthesized samples are reused instead of rebuilt per event.
+	var cache_key := "%s:%s:%s" % [frequency, duration, volume]
+	if tone_cache.has(cache_key):
+		player_sound.stream = tone_cache[cache_key]
+		player_sound.play()
+		return
+	if tone_cache.size() >= 64: tone_cache.clear()
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
 	stream.mix_rate = 22050
@@ -1209,6 +1229,7 @@ func tone(frequency: float, duration: float) -> void:
 		var sample := sin(TAU * frequency * float(i) / 22050.0) * envelope * 6500.0 * volume
 		data.encode_s16(i * 2, int(sample))
 	stream.data = data
+	tone_cache[cache_key] = stream
 	player_sound.stream = stream
 	player_sound.play()
 
@@ -1223,8 +1244,9 @@ func update_hud() -> void:
 	score_label.text = "%05d" % world.score
 	best_label.text = "%05d" % best
 	crystal_label.text = "%02d" % world.gems
-	biome_label.text = text(World.BIOME_NAMES[world.biome()])
-	biome_label.text += "  ·  " + text("weather_" + world.adventure.weather)
+	# Each label receives its final text once per tick; an unchanged string is
+	# then a no-op instead of a new shaping and container layout pass.
+	biome_label.text = text(World.BIOME_NAMES[world.biome()]) + "  ·  " + text("weather_" + world.adventure.weather)
 	var powers: Array[String] = []
 	for id in world.adventure.powers:
 		if float(world.adventure.powers[id]) > 0.0: powers.append(text("power_" + id) + " " + str(ceili(world.adventure.powers[id])) + "s")
@@ -1242,13 +1264,13 @@ func update_hud() -> void:
 	boss_bar.visible = boss_label.visible
 	boss_bar.max_value = maxi(1,boss.max_hp)
 	boss_bar.value = boss.hp
-	footer_label.text=text("firearm_touch") if touch_mode else text("firearm_hint")
-	if active_input=="gamepad":footer_label.text=gamepad.prompts(boss.active())
+	footer_label.text=gamepad.prompts(boss.active()) if active_input=="gamepad" else (text("firearm_touch") if touch_mode else text("firearm_hint"))
 	var exit_fade: float = 1.0-smoothstep(0.0,world.frontier.RETURN_DURATION,world.frontier.stage_time) if world.frontier.phase=="return" else 1.0
 	boss_label.modulate.a = exit_fade
 	boss_bar.modulate.a = exit_fade
-	boss_label.text = text(["boss_name","boss_ray","boss_root"][boss.boss_kind]) + "  ·  %d/%d  ·  " % [boss.hp,boss.max_hp] + text("boss_hearts") % boss.player_hp
-	if boss.warning != "": boss_label.text += " · " + text("boss_pattern_"+boss.pattern) + " · " + text("boss_dodge_"+boss.warning)
+	var boss_status: String = text(["boss_name","boss_ray","boss_root"][boss.boss_kind]) + "  ·  %d/%d  ·  " % [boss.hp,boss.max_hp] + text("boss_hearts") % boss.player_hp
+	if boss.warning != "": boss_status += " · " + text("boss_pattern_"+boss.pattern) + " · " + text("boss_dodge_"+boss.warning)
+	boss_label.text = boss_status
 	var ids: Array = ["jump","duck","shoot"]
 	if character=="wolf": ids.append("boost")
 	for id in action_buttons:
@@ -1285,31 +1307,32 @@ func update_hud() -> void:
 	pause_button.visible = page == "" and world.state == "running"
 	notice_label.text = text("saved_error") if save_failed else (notice if notice_time > 0.0 and page == "" else "")
 	if is_instance_valid(ability_label):
-		ability_label.text = text(("touch_ability_" if touch_mode else "ability_") + character)
+		var ability: String = text(("touch_ability_" if touch_mode else "ability_") + character)
 		if active_input=="gamepad":
-			ability_label.text=text("pad_ability_"+character)
-			if character!="sheep":ability_label.text=ability_label.text % gamepad.binding_name("boost" if character=="wolf" else "jump")
-		if portrait and character in World.CHARGE_HEROES and active_input=="gamepad":ability_label.text=gamepad.binding_name("jump")+" ↑"
-		if world.frontier.active(): ability_label.text = text("boss_hearts") % world.frontier.player_hp
-		elif character == "sheep": ability_label.text = text("flock") % world.sheep_count
+			ability=text("pad_ability_"+character)
+			if character!="sheep":ability=ability % gamepad.binding_name("boost" if character=="wolf" else "jump")
+		if portrait and character in World.CHARGE_HEROES and active_input=="gamepad":ability=gamepad.binding_name("jump")+" ↑"
+		if world.frontier.active(): ability = text("boss_hearts") % world.frontier.player_hp
+		elif character == "sheep": ability = text("flock") % world.sheep_count
 		elif world.charging:
-			ability_label.text="↑ %d%%" % roundi(world.charge_ratio()*100)
+			ability="↑ %d%%" % roundi(world.charge_ratio()*100)
 			ability_label.accessibility_name=text("charging") % roundi(world.charge_ratio()*100)
-		elif world.riding_gust: ability_label.text = text("riding_gust") if world.wind_kind() == "up" else text("riding_"+world.wind_kind())
-		elif world.gliding: ability_label.text = text("owl_flaps") % maxi(0,World.OWL_FLAPS-world.owl_flaps_used)
-		elif world.boosting(): ability_label.text = text("boosting")
+		elif world.riding_gust: ability = text("riding_gust") if world.wind_kind() == "up" else text("riding_"+world.wind_kind())
+		elif world.gliding: ability = text("owl_flaps") % maxi(0,World.OWL_FLAPS-world.owl_flaps_used)
+		elif world.boosting(): ability = text("boosting")
 		if portrait and touch_mode:
 			# The narrow lane above Jump shows live ability state. Full input
 			# instructions stay in the tutorial/help and accessibility name.
-			ability_label.accessibility_name=ability_label.text if not world.charging else text("charging") % roundi(world.charge_ratio()*100)
-			if character=="sheep":ability_label.text=ability_label.text.replace("・","·").get_slice("·",0).strip_edges()
-			elif world.charging:ability_label.text="↑ %d%%" % roundi(world.charge_ratio()*100)
-			elif world.riding_gust:ability_label.text="↑" if world.wind_kind()=="up" else ("→" if world.wind_kind()=="forward" else "↑→")
-			elif world.gliding:ability_label.text=text("owl_flaps") % maxi(0,World.OWL_FLAPS-world.owl_flaps_used)
-			elif world.boosting():ability_label.text=text("boosting")
-			elif character=="aion":ability_label.text="↑ ×%d" % maxi(0,2-world.jumps_used)
+			ability_label.accessibility_name=ability if not world.charging else text("charging") % roundi(world.charge_ratio()*100)
+			if character=="sheep":ability=ability.replace("・","·").get_slice("·",0).strip_edges()
+			elif world.charging:ability="↑ %d%%" % roundi(world.charge_ratio()*100)
+			elif world.riding_gust:ability="↑" if world.wind_kind()=="up" else ("→" if world.wind_kind()=="forward" else "↑→")
+			elif world.gliding:ability=text("owl_flaps") % maxi(0,World.OWL_FLAPS-world.owl_flaps_used)
+			elif world.boosting():ability=text("boosting")
+			elif character=="aion":ability="↑ ×%d" % maxi(0,2-world.jumps_used)
 			else:ability_label.hide()
-			ability_label.text=ability_label.text.replace("・","·").get_slice("·",0).strip_edges()
+			ability=ability.replace("・","·").get_slice("·",0).strip_edges()
+		ability_label.text=ability
 	if interface_options.text_scale>1.0:
 		biome_label.hide();power_label.hide();goal_label.hide();ability_label.hide();footer_label.hide()
 	story_ui.update()
@@ -1318,8 +1341,34 @@ func update_hud() -> void:
 		for control in action_buttons.values():control.hide()
 	publish_web_status()
 
+func on_web_page_hidden(_arguments: Array) -> void:
+	if not is_inside_tree(): return
+	clear_held_controls()
+	pause_run()
+
+func publish_web_essentials() -> void:
+	# Screen-reader summary, language and page state at most 10 times a second,
+	# immediately when the page, run state, language or focused control changes.
+	var focused: Control = get_viewport().gui_get_focus_owner()
+	var key := "%s:%s:%s:%s:%d" % [page, world.state, language, str(focused.get_instance_id()) if is_instance_valid(focused) else "none", layout_generation]
+	var now := Time.get_ticks_msec()
+	if key == web_essential_key and now - web_essential_at < 100: return
+	web_essential_key = key
+	web_essential_at = now
+	var canvas = JavaScriptBridge.get_interface("document").getElementById("canvas")
+	if canvas == null: return
+	web_accessibility.update()
+	canvas.setAttribute("role", "application")
+	canvas.setAttribute("lang", language)
+	canvas.setAttribute("aria-label", "Aion Endless Run. " + text("hint") + ". " + text("score") + " " + str(world.score))
+	canvas.setAttribute("data-state", world.state)
+	canvas.setAttribute("data-page", page)
+
 func publish_web_status() -> void:
 	if not OS.has_feature("web"): return
+	if not web_qa:
+		publish_web_essentials()
+		return
 	var stamp := "%s:%s:%d:%s:%s:%s:%d:%s:%s:%d" % [world.state, page, world.score, character, language, world.y < 0.0, world.jumps_used, world.gliding, world.boosting(), world.sheep_count]
 	stamp += ":" + str(world.adventure.hug_time) + ":" + str(world.adventure.attack_variant) + ":" + str(world.adventure.mushroom_chance) + ":" + str(prism_intensity)
 	stamp += ":" + world.frontier.phase + ":" + str(world.frontier.hp) + ":" + str(world.frontier.shot_flash)

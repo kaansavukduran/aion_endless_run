@@ -8,8 +8,7 @@ func pose(kind: String) -> Dictionary:
 	assert(DATA.data.frames.has(kind),"Unknown actual item: "+kind)
 	if cache.has(kind):return cache[kind]
 	if source==null:
-		var texture: Texture2D=load("res://assets/forge-items.png")
-		source=texture.get_image()
+		source=RunnerSourcePixels.image("res://assets/forge-items.png")
 		if source.is_compressed():source.decompress()
 		source.convert(Image.FORMAT_RGBA8)
 	var f: Dictionary=DATA.data.frames[kind]
