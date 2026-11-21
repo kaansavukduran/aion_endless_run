@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.29.0 · Serbest nişan ve hızlı açılış
+
+Görev modunda silah bilgisayarda fare imlecini takip eder; mobil joystick ve gamepad 8 yöne yuvarlanmadan gerçek açıya nişan alır, klavye 8 yönü korur. Web açılışı ve oyun içi akıcılık optimize edildi: sprite kareleri GPU geri okuması olmadan çözülür, oyuncu sürümünde kare başına test verisi yazılmaz, motor PCK ile paralel iner, sekme gizlenince koşu duraklar. Kullanılmayan dosyalar paketten çıkarıldı (PCK 174,6 → 168,5 MB).
+
 ## 0.28.0 · Mission 1 ritmi ve toparlanma
 
 Üst/alt atış rolleri ve sınırları belirli karşılaşma varyantları, bilinçli silah seçimi, ara kontrol noktaları, çöken köprü, zincir puanı ve üç evreli Kök Motoru davranışı. Aynı silahın cephanesi eklenir; farklı özel silah yerde kalır: **E / Y / Değiştir** ile seçilir. Araçla temas ederek ikmal alma korunur. Kontrol noktaları konumu ve ikmali saklar; tekrar denemede kazanılmış puan/eşyalar ikinci kez verilmez. [Kapsam ve gerçek doğrulama](docs/evidence-rhythm/README.md).
