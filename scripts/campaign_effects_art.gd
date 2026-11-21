@@ -9,7 +9,7 @@ func pose(key: String,row: int,frame: int) -> Dictionary:
  if cache.has(id):return cache[id]
  var bank: Dictionary=DATA.data.banks[key];var f: Dictionary=bank.frames[row][frame];var b: Array=f.bounds
  if not images.has(key):
-  var texture: Texture2D=load('res://'+str(bank.path));var im:=texture.get_image()
+  var im:=RunnerSourcePixels.image('res://'+str(bank.path))
   if im.is_compressed():im.decompress()
   im.convert(Image.FORMAT_RGBA8);images[key]=im
  var result:=Image.create_empty(int(b[2])-int(b[0])+4,int(b[3])-int(b[1])+4,false,Image.FORMAT_RGBA8)

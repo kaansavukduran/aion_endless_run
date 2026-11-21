@@ -14,7 +14,7 @@ func pose(key: String,row: int,frame: int) -> Dictionary:
 	var id:=key+":"+str(row)+":"+str(frame)
 	if cache.has(id):return cache[id]
 	if not images.has(image_key):
-		var texture: Texture2D=load("res://"+str(a.path));var image:=texture.get_image()
+		var image:=RunnerSourcePixels.image("res://"+str(a.path))
 		if image.is_compressed():image.decompress()
 		image.convert(Image.FORMAT_RGBA8);images[image_key]=image
 	var f: Dictionary=a.frames[source_row][source_frame];var b: Array=f.bounds

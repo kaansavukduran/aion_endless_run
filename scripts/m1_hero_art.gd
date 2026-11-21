@@ -30,8 +30,7 @@ func pose(hero: String, action: String, frame: int=0) -> Dictionary:
 	if cache.has(id):return cache[id]
 	var atlas: Dictionary=DATA.data.atlases[key]
 	if not images.has(key):
-		var source: Texture2D=load("res://"+str(atlas.path))
-		var pixels:=source.get_image()
+		var pixels:=RunnerSourcePixels.image("res://"+str(atlas.path))
 		if pixels.is_compressed():pixels.decompress()
 		pixels.convert(Image.FORMAT_RGBA8);images[key]=pixels
 	var f: Dictionary=atlas.frames[row][frame];var b: Array=f.bounds

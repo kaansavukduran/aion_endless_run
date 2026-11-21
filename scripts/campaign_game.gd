@@ -93,6 +93,10 @@ var checkpoint_invalid := false
 var tutorial_seen := false
 var settings_ok := true
 
+# The large data-campaign QA mirror is for browser automation or ?aion-qa only.
+var web_qa := false
+var web_hidden_callback: JavaScriptObject
+
 func _ready() -> void:
 	native_diagnostics.host=self
 	var cfg := ConfigFile.new(); cfg.load("user://save.cfg")
@@ -111,6 +115,11 @@ func _ready() -> void:
 	if OS.has_feature("web"):
 		accessibility_callback=JavaScriptBridge.create_callback(accessible_action)
 		JavaScriptBridge.get_interface("window").aionAccessibleAction=accessibility_callback
+		web_qa=bool(JavaScriptBridge.eval("navigator.webdriver===true||/[?&]aion-qa(=|&|$)/.test(location.search)"))
+		# Godot's Web platform reports no focus loss for a hidden tab.
+		web_hidden_callback=JavaScriptBridge.create_callback(on_web_page_hidden)
+		JavaScriptBridge.get_interface("window").aionPageHidden=web_hidden_callback
+		JavaScriptBridge.eval("if(!window.aionVisibilityInstalled){window.aionVisibilityInstalled=true;document.addEventListener('visibilitychange',()=>{if(document.hidden)window.aionPageHidden?.()})}")
 		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');if(!c)return;['data-state','data-page','data-ui-ready','data-ui'].forEach(k=>c.removeAttribute(k));c.dataset.mode='campaign'})()")
 	get_viewport().size_changed.connect(resize)
 	Input.joy_connection_changed.connect(func(_id,_connected):release_all())
@@ -119,7 +128,14 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	if OS.has_feature("web"):
-		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');c?.removeAttribute('data-campaign');c?.removeAttribute('data-mode');window.aionAccessibleAction=null})()")
+		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');c?.removeAttribute('data-campaign');c?.removeAttribute('data-mode');window.aionAccessibleAction=null;window.aionPageHidden=null})()")
+
+func on_web_page_hidden(_arguments: Array) -> void:
+	if not is_inside_tree():return
+	# Release inputs and pause an active run, as on focus loss. A hidden tab runs
+	# no frames, so application_active stays untouched and cannot remain stuck.
+	release_all()
+	if is_instance_valid(ui) and world.state=="playing":toggle_pause()
 
 func t(key: String) -> String:
 	if key.begins_with("arc_"):key=key.trim_prefix("arc_")
@@ -800,6 +816,7 @@ func sound(event: String) -> void:
 func metadata() -> void:
 	if not OS.has_feature("web"):return
 	accessible_update()
+	if not web_qa:return
 	var data: Dictionary=world.snapshot()
 	data.merge({"state":world.state,"menu":menu_kind,"section":world.section,"player":[world.player.x,world.player.y],"facing":world.facing,"hp":world.hp,"shots":world.shots,"grenades":world.grenades,"melee":world.melee_time,"mounted":world.mount.ridden,"boss_hp":world.boss.hp,"save_ok":save_ok,"view":[view_w,view_h],"camera":view.camera_x,"pose":view.hero_marker,"actions":{},"transform":[screen_transform.x.x,screen_transform.origin.x,screen_transform.origin.y],"enemies":[],"platforms":[],"gates":[],"pits":[]})
 	for key in actions:data.actions[key]=[actions[key].position.x,actions[key].position.y,actions[key].size.x,actions[key].size.y]

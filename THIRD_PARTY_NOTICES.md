@@ -21,7 +21,7 @@ The packaged PNG hashes match the donor. Display pixelation of companions happen
 
 ## Font
 
-Lexend, SIL Open Font License 1.1. The unchanged local font and its license are included in `assets/Lexend.ttf` and `assets/LEXEND-OFL.txt`. The font is bundled and requires no network request. Upstream: https://github.com/google/fonts/tree/main/ofl/lexend .
+Lexend, SIL Open Font License 1.1. The unchanged local font and its license remain in the source as `assets/Lexend.ttf` and `assets/LEXEND-OFL.txt`. The game no longer uses it, so exported builds exclude the font file; no network request is made. Upstream: https://github.com/google/fonts/tree/main/ofl/lexend .
 
 ## Engine
 

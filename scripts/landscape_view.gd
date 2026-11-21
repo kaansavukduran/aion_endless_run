@@ -6,7 +6,7 @@ var panels: Array[Texture2D]=[]
 
 func prepare() -> void:
 	if not panels.is_empty():return
-	var image:=SOURCE.get_image()
+	var image:=RunnerSourcePixels.image(SOURCE.resource_path)
 	if image.is_compressed():image.decompress()
 	for region in META.data.panels:
 		panels.append(ImageTexture.create_from_image(image.get_region(Rect2i(region[0],region[1],region[2],region[3]))))

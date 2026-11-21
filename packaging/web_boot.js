@@ -52,7 +52,8 @@
       }}));
     } catch (error) { console.info('Aion offline storage unavailable:',error.name); }
   }
-  async function loadPack(url, expected, progress) {
+  const EARLY_ENGINE_BYTES = 4 * 1024 * 1024;
+  async function loadPack(url, expected, progress, trusted) {
     let last;
     for (let attempt = 0; attempt < 3; attempt++) {
       state.attempts++; stamp('downloading'); notice(words[0]);
@@ -73,6 +74,7 @@
               if (part.done) break;
               if (size + part.value.byteLength > bytes.byteLength) throw new Error('pack-too-large');
               bytes.set(part.value,size); size += part.value.byteLength;
+              if (size >= Math.min(EARLY_ENGINE_BYTES,expected.bytes) && bytes[0]===71 && bytes[1]===68 && bytes[2]===80 && bytes[3]===67) trusted?.();
               progress?.(size,expected.bytes);
               paintSegments(size/expected.bytes);
               const output=document.getElementById('aion-loading-percent');
@@ -138,7 +140,13 @@
   async function start(engine, config, options) {
     const url = new URL(config.executable+'.pck',location.href).href;
     const expected = ASSETS[config.executable+'.pck'];
-    let pack = await loadPack(url,expected,options.onProgress);
+    // Fetch and compile the engine while the pack streams, but only once a 200
+    // response has the GDPC signature and real bulk: HTML, partial and short
+    // responses never start the engine. Engine.init is memoized, so startGame
+    // reuses this promise and still reports any failure on its normal path.
+    let engineStarted = false;
+    const startEngine = () => { if (!engineStarted) { engineStarted = true; engine.init(config.executable).catch(() => {}); } };
+    let pack = await loadPack(url,expected,options.onProgress,startEngine);
     const original = engine.preloadFile;
     // Network URL and virtual filesystem path are deliberately separate.
     // Always preload the verified bytes, never download the PCK a second time.

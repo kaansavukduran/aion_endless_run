@@ -111,8 +111,7 @@ func pose(key: String, row: int, column: int, original_source: bool=false) -> Di
 	if frames.has(cache_key): return frames[cache_key]
 	var f: Dictionary = d.frames[row][column]
 	if not images.has(key):
-		var texture: Texture2D = load("res://"+str(d.path))
-		var source := texture.get_image()
+		var source := RunnerSourcePixels.image("res://"+str(d.path))
 		if source.is_compressed(): source.decompress()
 		source.convert(Image.FORMAT_RGBA8)
 		images[key] = source
