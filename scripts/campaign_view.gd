@@ -217,22 +217,23 @@ func draw_world() -> void:
 			var source_facing: int=CampaignEffectsArt.DATA.data.references[str(e.kind)].facing
 			draw_pose(effects_art.death(str(e.kind),f),p,source_facing*(-1 if int(e.facing)<0 else 1))
 			continue
-		var tint := Color.WHITE
-		var attack: bool = float(e.windup)>0. or float(e.get("flash",0.))>0. or float(e.get("dash",0.))>0. or float(e.get("dive",0.))>0.
+		var recovering: bool = float(e.get("recover",0.))>0. and CampaignEnemies.active_time(e)<=0.
+		var tint := Color("cbd8e8") if recovering and not bool(e.defeated) else Color.WHITE
+		var attack: bool = float(e.windup)>0. or (not recovering and (float(e.get("flash",0.))>0. or CampaignEnemies.active_time(e)>0. or float(e.get("dash",0.))>0. or float(e.get("dive",0.))>0.))
 		var frame: int = posmod(int(float(e.age)*9.),6)
 		if bool(e.defeated):frame=clampi(int(float(e.get("dead_age",0.))/.65*6.),0,5)
 		elif float(e.windup)>0.:frame=clampi(int((1.-float(e.windup)/(.85 if bool(e.mini) else .65))*3.),0,2)
 		elif float(e.get("flash",0.))>0.:frame=clampi(3+int((.24-float(e.flash))/.24*3.),3,5)
 		if CampaignContent.NEW_ENEMIES.has(str(e.kind)):
 			var spec: Dictionary=CampaignContent.NEW_ENEMIES[str(e.kind)]
-			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
+			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if attack and not recovering else 0))
 			if CampaignEnemies.hidden(e):phase=1
 			draw_pose(catalogue.pose(str(spec.atlas),int(spec.row)+phase,frame),p,direction,1.,tint)
 		elif str(e.kind) in CampaignContent.HEAVIES and catalogue.DATA.data.atlases.has("heavy-machines"):
-			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
+			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if attack and not recovering else 0))
 			draw_pose(catalogue.pose("heavy-machines",CampaignContent.HEAVIES.find(str(e.kind))*4+phase,frame),p,direction,1.,tint)
 		elif bool(e.mini) and catalogue.DATA.data.atlases.has("mini-bosses"):
-			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
+			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if attack and not recovering else 0))
 			var row: int=["current_guard","terrace_guard","drill_guard"].find(str(e.get("mini_role","current_guard")))*4+phase
 			draw_pose(catalogue.pose("mini-bosses",row,frame),p,direction,1.,tint)
 		elif str(e.kind) in ["drone","seed","warden"]:
@@ -243,6 +244,17 @@ func draw_world() -> void:
 		else:
 			var row: int = {"moth":0,"slime":1,"beetle":2,"wisp":3}.get(str(e.kind),0)
 			existing("creatures",row,frame,p,direction,1.,tint)
+		if not bool(e.defeated) and bool(e.get("emerge_warn",false)):
+			var gp := at(Vector2(float(e.x),0.))
+			var r: float = 16. if host.options.reduced_motion else 12.+absf(sin(world.time*14.))*10.
+			draw_arc(gp,r,PI,TAU,14,Color("e8a36c"),3.)
+			caption("!",gp+Vector2(-3,-22),16)
+		if not bool(e.defeated) and float(e.get("buff_pulse",0.))>0.:
+			var pr: float = (1.-float(e.buff_pulse)/.5)*90.
+			draw_arc(at(p+Vector2(0,-35)),maxf(14.,pr),0.,TAU,20,Color("f5d27a"),2.)
+		if not bool(e.defeated) and str(e.kind)=="mirror" and float(e.windup)>0.:
+			var mp := at(p+Vector2(int(e.facing)*20.,-34.))
+			draw_arc(mp,24.,-PI*.45 if int(e.facing)>0 else PI*.55,PI*.45 if int(e.facing)>0 else PI*1.45,12,Color("9be5f5"),3.)
 		if attack and not bool(e.defeated):
 			var point := at(p+Vector2(0,-70))
 			draw_circle(point,5,Color("f7bb70")); caption("!",point+Vector2(-3,-10),20)
@@ -257,9 +269,22 @@ func draw_world() -> void:
 		if not world.completed and not world.boss_vulnerable():
 			var core:=at(Vector2(float(world.boss.x),float(world.boss.y)-75.))
 			draw_arc(core,48.,0.,TAU,24,Color("efd58a"),3.);caption(host.t("shield"),core+Vector2(-28,-56),16)
+		if not world.completed and float(world.boss.get("shift_pause",0.))>0.:
+			var sc := at(Vector2(float(world.boss.x),-80.))
+			var sr: float = 72. if host.options.reduced_motion else 54.+(1.-float(world.boss.shift_pause)/.75)*58.
+			draw_arc(sc,sr,0.,TAU,28,Color("ffcf8c"),4.)
+		if not world.completed and float(world.boss.get("recover",0.))>0.:
+			var rc := at(Vector2(float(world.boss.x),-75.))
+			draw_arc(rc,34.,0.,TAU,18,Color("9fe3c8"),3.)
 		if float(world.boss.windup)>0.:
-			var warning: String="boss_dash" if int(world.boss.phase)==3 and int(world.boss.attack)%3==2 else ("boss_core" if int(world.boss.phase)==2 else "arc_boss_warning")
+			var is_dash: bool = int(world.boss.phase)==3 and int(world.boss.attack)%3==2
+			var warning: String="boss_dash" if is_dash else ("boss_core" if int(world.boss.phase)==2 else "arc_boss_warning")
 			caption(host.t(warning),at(Vector2(float(world.boss.x)-130.,-215.)),16)
+			if is_dash:
+				var dir: float = -1. if world.player.x<float(world.boss.x) else 1.
+				var lane_from := at(Vector2(float(world.boss.x), -10.))
+				var lane_to := at(Vector2(float(world.boss.x)+dir*340., -10.))
+				draw_line(lane_from,lane_to,Color("f28c6b"),4.)
 		if not world.completed and int(world.boss.phase)==1:
 			for i in 2:
 				var point: Vector2=at(Vector2(float(world.boss.x)+(-65. if i==0 else 65.),-95.))

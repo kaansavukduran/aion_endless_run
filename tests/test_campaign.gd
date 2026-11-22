@@ -10,6 +10,25 @@ func fresh(hero: String="aion") -> AionCampaignWorld:
 	var w:=World.new();w.begin(hero);w.run_seed=7719;w.state="playing";w.enemies.clear();w.gates.clear();return w
 func tick(w: AionCampaignWorld,seconds: float) -> void:
 	for i in ceili(seconds*120.):w.step(1./120.)
+func gap_fruit_reachable(source: AionCampaignWorld,item: Dictionary) -> bool:
+	# Geometry/pickup fixture only. Authored jump arcs can place fruit above a
+	# gap without a platform directly underneath the fruit. Require a real
+	# supported start and actual physics collection, rather than a relaxed
+	# vertical-distance constant. This does not claim a full combat playthrough.
+	for support in source.platforms:
+		if support.position.y<=float(item.y) or support.position.y-float(item.y)>200.:continue
+		if float(item.x)<support.position.x-100. or float(item.x)>support.end.x+100.:continue
+		var probe:=fresh();probe.run_seed=source.run_seed;probe.load_section(source.section)
+		probe.enemies.clear();probe.gates.clear();probe.hazards.clear();probe.objects.clear()
+		var start_x:=clampf(float(item.x)-75.,support.position.x+5.,support.end.x-5.)
+		probe.player=Vector2(start_x,support.position.y);probe.velocity=Vector2.ZERO
+		if not probe.grounded():continue
+		probe.move_axis=Vector2.RIGHT if start_x<float(item.x) else Vector2.LEFT
+		probe.jump_press();probe.jump_release()
+		for frame in 90:
+			probe.step(1./60.)
+			if probe.taken.has(str(item.id)):return true
+	return false
 func _initialize() -> void:call_deferred("run")
 
 func run() -> void:
@@ -102,7 +121,7 @@ func run() -> void:
 		for crate in w.crates:check(w.floor_at(float(crate.x))==0.,"Supply crate starts on floor")
 		for item in w.pickups:
 			if w.floor_at(float(item.x))!=0.:
-				check(w.platforms.any(func(p):return float(item.x)>=p.position.x and float(item.x)<=p.end.x and float(item.y)<p.position.y and p.position.y-float(item.y)<=70.),"Gap fruit is above an actual reachable stepping platform")
+				check(gap_fruit_reachable(w,item),"Gap fruit is collected by actual jump physics from a supporting platform: "+str(item.id))
 	w=fresh();w.load_section("arena");tick(w,2.);w.damage_boss(99);check(w.boss.clock==0. and w.bullets.is_empty() and w.boss.hp==90,"Offscreen boss waits for introduction and cannot be killed before it")
 	w.boss.engaged=true;w.boss.hp=90;w.boss.wait=0.;tick(w,1.1);check(w.bullets.size()>=5,"Boss actually fires fan attack")
 	w.boss.windup=0.;w.boss.wait=0.;w.boss.attack=1;w.bullets.clear();tick(w,1.1);check(w.bullets.any(func(b):return b.kind=="wave"),"Boss fires jumpable root wave")

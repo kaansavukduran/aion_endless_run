@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.30.0"
+const GAME_VERSION = "0.49.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -26,6 +26,7 @@ var web_accessibility := preload("res://scripts/web_accessibility.gd").new()
 var active_input := "keyboard"
 var theme_check := 0.0
 var story_ui := preload("res://scripts/boss_story.gd").new()
+var campaign_started := false
 var pixel_ui := preload("res://scripts/pixel_interface.gd").new()
 var touch_controls := preload("res://scripts/touch_controls.gd").new()
 var scene_w := 1152.0
@@ -471,6 +472,7 @@ func wrap_label(value: String, size: int = 15, color: String = "a6b8d1") -> Labe
 	return item
 
 func show_page(value: String) -> void:
+	if pixel_ui.launch_pending:return
 	if value!=page:menu_pages.reset(value)
 	if value == "characters" and world.state != "ready": return
 	language_picker_open = false
@@ -777,6 +779,8 @@ func start_run() -> void:
 	tone(440.0, 0.09)
 
 func start_campaign() -> void:
+	if campaign_started:return
+	campaign_started=true
 	front.skip_intro();front.stop_demo()
 	clear_held_controls()
 	save_settings()
@@ -824,6 +828,7 @@ func _notification(what: int) -> void:
 		pause_run()
 
 func select_character(id: String) -> void:
+	if pixel_ui.launch_pending:return
 	if id not in FRIENDS or world.state != "ready" or page not in ["main", "characters"]: return
 	character = id
 	pixel_ui.roster_page=FRIENDS.find(id)/2
@@ -965,6 +970,8 @@ func on_wolf(point: Vector2) -> bool:
 	return character == "wolf" and Rect2(World.PLAYER_X - 65, ground + world.y - 115, 130, 130).has_point(point)
 
 func _input(event: InputEvent) -> void:
+	if pixel_ui.launch_pending:
+		get_viewport().set_input_as_handled();return
 	if is_instance_valid(front) and is_instance_valid(front.host) and front.input(event):
 		get_viewport().set_input_as_handled();return
 	if event is InputEventScreenTouch and event.pressed: active_input="touch"
@@ -1047,7 +1054,7 @@ func _input(event: InputEvent) -> void:
 		elif event.keycode in [KEY_SPACE, KEY_ENTER] and page == "main" and not language_picker_open:
 			var focused := get_viewport().gui_get_focus_owner()
 			if focused == null or str(focused.name)=="StartRun":
-				start_run()
+				pixel_ui.request_launch(start_run)
 				get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F11:
 			fullscreen = not fullscreen

@@ -2,8 +2,9 @@ class_name CampaignEffectsArt
 extends RefCounted
 const DATA=preload('res://assets/CAMPAIGN-EFFECTS.json')
 const LEGACY=['crow','gnome','moth','slime','beetle','wisp','drone','seed','warden']
-var images: Dictionary={}
-var cache: Dictionary={}
+# 0.41.0: Process-wide shared effects & legacy death cache.
+static var images: Dictionary={}
+static var cache: Dictionary={}
 func pose(key: String,row: int,frame: int) -> Dictionary:
  var id:=key+str(row)+str(frame)
  if cache.has(id):return cache[id]

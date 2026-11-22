@@ -9,6 +9,22 @@ const REGIONAL_ROLES := {"shore":["keeper","technician","courier"],"quay":["tech
 const GIFTS := ["heavy","repair","beam","shield","scatter","points","arc","grenade","seeker","haste","power","reveal","magnet","disc","harpoon","spore","trap","nova"]
 const CUT_SECONDS := .6
 const CONTACT := .3
+## Explicit NPC animation/state contract for runtime & Sol 6.2 art handoff.
+const NPC_ANIM_SPEC := {
+	"idle_bound":{"phase":"bound","frames":[0,1],"loop":true,"foot":[0,0],"body":[0,-40],"event":"cut_or_shot"},
+	"rescue_react":{"phase":"free","frames":[6,7],"loop":false,"until":0.35,"foot":[0,0],"body":[0,-40],"event":"rescue"},
+	"free_roam":{"phase":"free","frames":[6,7],"loop":true,"foot":[0,0],"body":[0,-40],"event":"npc_contact"},
+	"salute_thanks":{"phase":"thanks","frames":[2],"loop":false,"until":0.45,"foot":[0,0],"body":[0,-40],"satchel":[22,-52],"event":"npc_contact"},
+	"drop_gift":{"phase":"thanks","frames":[3],"loop":false,"from":0.45,"until":1.7,"foot":[0,0],"body":[0,-40],"satchel":[22,-52],"event":"gift_drop"},
+	"depart_run":{"phase":"departed","frames":[6,7],"loop":true,"until":4.8,"foot":[0,0],"body":[0,-40],"event":"courier_cover"}
+}
+
+static func clip_name(n: Dictionary) -> String:
+	var phase: String=str(n.get("phase","free" if bool(n.get("freed",false)) else "bound"))
+	if phase=="bound":return "idle_bound"
+	if phase=="free":return "rescue_react" if float(n.get("free_age",0.))<.35 else "free_roam"
+	if phase=="thanks":return "salute_thanks" if float(n.get("thank_age",0.))<.45 else "drop_gift"
+	return "depart_run"
 
 static func populate(w) -> void:
 	for i in int(COUNTS[w.section]):
@@ -25,11 +41,14 @@ static func populate(w) -> void:
 			if x>pit.x-45. and x<pit.y+45.:x=pit.x-65.
 		var index: int=abs(w.section.hash())+i
 		var freed: bool=w.rescued.has(id)
+		var claimed: bool=w.awarded.has(id+":gift") or w.taken.has(id+":supply")
 		var dropped: bool=w.gift_drops.has(id)
 		var roles: Array=REGIONAL_ROLES.get(w.section,ROLES)
 		var role: String=str(roles[posmod(i,roles.size())])
 		if secret!="":role={"water":"observer","terrace":"gardener","roots":"archivist"}[w.section]
-		w.npcs.append({"id":id,"x":x,"home_x":x,"y":y,"freed":freed,"variant":posmod(index,8),"role":role,"gift":GIFTS[posmod(index,GIFTS.size())] if i>0 else "heavy","free_age":99. if freed and (w.awarded.has(id+":gift") or dropped) else 0.,"phase":("departed" if w.awarded.has(id+":gift") or dropped else ("thanks" if w.greeted.has(id) else "free")) if freed else "bound","thank_age":99. if w.awarded.has(id+":gift") or dropped else 0.,"facing":-1,"roam_clock":0.,"secret":secret})
+		var npc_entry: Dictionary={"id":id,"x":x,"home_x":x,"y":y,"freed":freed,"variant":posmod(index,8),"role":role,"gift":GIFTS[posmod(index,GIFTS.size())] if i>0 else "heavy","free_age":99. if freed and (claimed or dropped) else 0.,"phase":("departed" if claimed or dropped else ("thanks" if w.greeted.has(id) else "free")) if freed else "bound","thank_age":99. if claimed or dropped else 0.,"facing":-1,"roam_clock":0.,"secret":secret}
+		npc_entry.clip=clip_name(npc_entry)
+		w.npcs.append(npc_entry)
 	for n in w.npcs:
 		var id: String=str(n.id)
 		if w.gift_drops.has(id) and not w.taken.has(id+":supply"):
@@ -101,7 +120,7 @@ static func has_support(w,n: Dictionary,x: float) -> bool:
 
 static func handover(w,n: Dictionary) -> void:
 	var id: String=str(n.id)
-	if w.awarded.has(id+":gift") or w.gift_drops.has(id):return
+	if w.awarded.has(id+":gift") or w.taken.has(id+":supply") or w.gift_drops.has(id):return
 	# A visible bag extraction produces a real item. Thanks/contact alone is
 	# not a weapon/ammunition grant; only touching this pickup claims it.
 	var direction: int=int(n.get("facing",-1))
@@ -155,4 +174,13 @@ static func step(w,dt: float) -> void:
 				if has_support(w,n,next):n.x=next;n.facing=-1
 			if n.role=="courier" and w.awarded.has(str(n.id)+":gift") and float(n.thank_age)>1.3 and float(n.thank_age)<4.2:
 				if int(float(n.thank_age)*2.)!=int((float(n.thank_age)-dt)*2.):
-					w.bullets.append({"p":Vector2(float(n.x),float(n.y)-40.),"v":Vector2(w.facing*600.,0.),"owner":"hero","age":0.,"kind":"helper","damage":1,"pierce":0,"hit":[]})
+					var origin:=Vector2(float(n.x),float(n.y)-40.)
+					var aim:=Vector2(w.facing,0.)
+					var best_d:=520.
+					for e in w.enemies:
+						if bool(e.defeated) or CampaignEnemies.hidden(e):continue
+						var ep:=Vector2(float(e.x),float(e.y)-30.)
+						var d: float=origin.distance_to(ep)
+						if d<best_d:best_d=d;aim=(ep-origin).normalized()
+					w.bullets.append({"p":origin,"v":aim*600.,"owner":"hero","age":0.,"kind":"helper","damage":1,"pierce":0,"hit":[]})
+		n.clip=clip_name(n)

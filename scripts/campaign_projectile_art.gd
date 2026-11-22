@@ -2,7 +2,8 @@ class_name CampaignProjectileArt
 extends RefCounted
 ## Small authored pixel silhouettes. Cache is bounded by actual weapon palettes
 ## and two exhaust phases; art changes never resize projectile collision rules.
-var cache: Dictionary={}
+# 0.41.0: Process-wide shared projectile silhouette cache.
+static var cache: Dictionary={}
 func pose(kind: String,ink: String,phase: int=0) -> Dictionary:
  var key:=kind+ink+str(posmod(phase,2))
  if cache.has(key):return cache[key]

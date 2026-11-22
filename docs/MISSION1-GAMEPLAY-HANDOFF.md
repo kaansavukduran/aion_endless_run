@@ -49,3 +49,35 @@ Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVER
 - Kahraman gövde yükseklikleri (kural): ayakta 74, çömelik 40, araçlı 132 px. Çömelik vuruş merkezi ayaktan −20, ayakta −37.
 - Kapak: kilit nesnesi x=820 (vuruş noktası y=−35, yarıçap 45). Kapak zemini x 900–1400; çit x=1400. Çöken hizmet açıklığı x 540–740, y=−140, 2,4 s.
 - Bu değerler kuraldır; yeni sprite yalnızca görüntüyü değiştirmeli, çarpışma ve zamanlama sabitlerini değiştirmemelidir.
+
+## Sol 6.2 · 23 Kasım 2026 (Europe/Istanbul) · 0.49.0 ara entegrasyon doğrulaması
+
+Bu tur altı kahramanlı Mission 1 kabul adayı değildir. Ara sürümde mevcut Aion, Kutsanmış, Ayça ve Eren korunur; Armadillo ve Kurbağa ile yeni geri yürüme ve bomba sanatı sonraki entegrasyonda doğrulanacaktır. Kullanıcı kabulü bekliyor. Mission 2 kapsam dışıdır.
+
+- Kaynak: `main` `466492fac40eb4760456738a648eb36f3f2a61c7` (0.30.0) üzerine özgün Neon 0.48 yamasının 28 dosyası, ardından düşman evreleri ve karakter seçimi düzeltmeleri. Canlı AIONIA v1.7, ilgili v1.1 regresyon kaydı ve güncel referans dizini bu oturumda yetkili Drive bağlayıcısıyla okundu. Özel belgelerin tam metinleri depoya eklenmedi.
+- Başlangıç yayın ayrımı: GitHub Actions `44913207727`, 0.30.0 Linux render adımında `Rendered junction actor has real collision support: fork_two` ile başarısızdı. Son başarılı Pages işi `44902975788`, `24fb2850e9eaa7274415f9fa8342956be48411ca` kaynaklıydı. 22 Kasım başlangıç canlı `build.json`: 0.29.0, `56d6256c05dff7a1`. Bu eski yayın yeni adayın doğrulaması sayılmaz.
+- İlk yerel web çıktısı: Godot 4.6.3, tek iş parçacığı, `packaging/build_web.py`; 0.49.0, build `31309b2d2e4a89f6`. Bu çıktı rota kanıtının kimliğini korumak için `http://127.0.0.1:8798` üzerinde saklandı. Son küçük düşman düzeltmelerinden sonraki nihai yerel çıktı: `a053514fb2ad2016`, `http://127.0.0.1:8799`. Bunlar yayımlanmış adres değildir.
+
+| Kontrol | Durum ve kanıt |
+| --- | --- |
+| İlk 61 motor paketi | 59 PASS; `campaign` içinde iki eski doğrudan-platform meyve koşulu FAIL; `campaign_selection_flow` 19/19 gözlendiği halde sonuç satırı biçimi nedeniyle çalıştırıcı FAIL. Özgün günlükler korundu. |
+| Meyve erişimi düzeltmesi | PASS, `campaign` 419/419. Yeni test, boşluğun üstündeki meyveyi keyfî mesafe eşiğiyle kabul etmek yerine destek yüzeyinden gerçek zıplama fiziğiyle `taken[id]` oluştuğunu sınar. Bu yalıtılmış geometri testi tam normal oyun kanıtı değildir. |
+| Seçim testi sonuç satırı | PASS, düzeltilmiş `campaign_selection_flow` 19/19. Önceki yanlış FAIL silinmedi. |
+| Son yerel gerçek renderer | PASS, Godot 4.6.3 / Linux X11: 657/657 kontrol (`049-render.log`). Bu görsel/motor kontrolü normal oyuncu rotasının yerine geçmez. |
+| İngilizce normal ön yüz | PASS, Chromium/SwiftShader, Linux, 1280×720; 26 kontrol. Dört kahramanın gerçek seçim/onayı, yardım ileri/geri, açılışı yeniden oynat/atla, 393×873 ve 873×393 yön değişimi, kayıt yazmayan Attract, Sonsuz başlat/duraklat/ana menü. Yakalanan Godot/tarayıcı script hatası yok. |
+| İlk normal su rotası denemesi | FAIL, 210 saniye sonunda `fork_one` x=764, y=48, araçta. Bot araçtan inmeden alçak geçide basıyordu; görünen araç ve gerçek tavan çarpışması doğru biçimde geçişi engelledi. Bu kayıt ürün kusuru diye sınıflandırılmadı. İlk hata görüntüsü, gözlemi ve performans oturumu korundu. |
+| Düzeltilmiş normal su rotası | PASS, ilk `31309b2d2e4a89f6` çıktısı: 348,49 saniye, sıfır ölüm. Shore → quay → gerçek çömelerek iskele geçidi → water → relay → üç evreli boss → zafer/sonuç → kalıcı tamamlanma → ana menü. Gerçek E silah değişimi ve `crawled_under_pier` gözlendi. Godot/tarayıcı script hatası yok. Rota düğmesi, konum/zafer yazımı, düşman temizleme veya dokunulmazlık kullanılmadı. |
+| Diğer normal rotalar | NOT TESTED (tamamlama kapısı). Teras denemesi normal girdilerle sürüyor; iki ölüm ve gerçek checkpoint tekrarları günlükte korunuyor. Kök rotasının tam normal oynanışı bu kayıt anında henüz başlatılmadı. |
+| Beş ardışık gerçek Retry | PASS, teras denemesinin başında normal duraklat → checkpoint Retry; 10 doğrulama. Her denemede kahraman/bölüm ve `awarded`/`taken` durumu korundu, düğüm sayısı 24 kaldı. Gözlenen süre 1,32–1,82 saniye. |
+| Nihai yerel build smoke | PASS: `a053514fb2ad2016`, yeni profil, gerçek hareket/ateş/bomba, dokunma/çoklu dokunma/iptal, yön değiştirme, Shift/RMB ve sentetik Xbox sprint/duraklat/devam/ateş/zıpla/bomba. Çevrimdışı tekrar açılış ve gerçek Continue checkpoint/skoru korudu. Script hatası yok. Sentetik gamepad fiziksel donanım kanıtı değildir. |
+| Fiziksel cihazlar | NOT TESTED: gerçek telefon/tablet, fiziksel Xbox/gamepad, macOS/Safari ve Windows/Edge. Tarayıcı boyutlandırması fiziksel cihaz testi sayılmadı. |
+| Yayın | NOT VERIFIED: bu ara kayıtta 0.49.0 için yeni main/Pages yayını doğrulanmadı. |
+
+Performans kaydı oyun ve tarayıcı ölçümlerini ayırır: gerçek Godot process/physics kare sayaçları, QA `Performance.TIME_PROCESS` / `TIME_PHYSICS_PROCESS` gözlemleri, ayrı tarayıcı rAF/uzun görev örnekleri ve CDP heap bilgisi. 10 Hz monitör gözlemleri tüm motor karelerinin izi değildir. Web'de `MEMORY_STATIC` sıfır döndüğünde bellek sıfır diye sunulmaz, ölçüm kullanılamaz olarak kaydedilir. İlk deneme açılışı 12,66 saniyedir; iki eşzamanlı yazılım render bağlamında ölçülmüştür ve fiziksel cihaz performansı iddiası değildir. Önbellekli açılış, beş ardışık gerçek checkpoint Retry, rota geçişi ve boss örnekleri ayrıca tamamlanacak.
+
+Modern Web Guidance: kurulu paket 1.0.1; kaynak HEAD `64a6d708f5a43f2cd3fde5d4d7db3905ba1bdf65`. `DISABLE_TELEMETRY=1` ile genel, hedefli sorgular kullanılarak `performance`, `interaction-paint-timing`, `progress`, `spatial-navigation`, `accessibility` okundu. Bu tur HTML/CSS/ürün JavaScript'i değiştirilmedi. Canvas içindeki sahne değişimi DOM soft-navigation veya içerik boyaması sayılmadı; browser rAF oyun FPS'i diye raporlanmadı. Mevcut Godot renderer, WASD ve onaylı dokunmatik düzen korundu; deneysel API açılmadı ve dış tarama yapılmadı.
+
+
+Doğrulanmış kaynak anlık kopyası: [neon-import.json](evidence-sol62/neon-import.json). 26 betik ve 2 testin tamamı özgün baytlarıyla karşılaştırıldı; indirme sonrası iki Drive klasörünün kimlik, boyut ve değiştirilme tarihleri tekrar listelendi, değişiklik yoktu. Yama körlemesine mevcut dosyaların üstüne kopyalanmadı; temiz güncel temel üzerine uygulandı.
+
+Bu entegrasyonda saldırı etkinliği ile toparlanma ardışık hale getirildi; toparlanma saldırı sırasında tüketilmez. Gerçek mini-boss mermisi testi önce iki hatayı yakaladı, düzeltmeden sonra 53/53 döngü kontrolü geçti. Kardeş ritim/genişleme/seçim testleriyle son odaklı tur 632/632 PASS. Gerçek Xvfb/llvmpipe CampaignGame renderi 657/657 PASS; önceki fork_two zemin desteği hatası yeni koşuda görülmedi. Web paketleme 7, Android paket sözleşmeleri 27 ve macOS DMG sözleşmeleri 3 test PASS; bunlar fiziksel cihaz veya kurulmuş paket testi değildir.

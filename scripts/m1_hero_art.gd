@@ -5,8 +5,9 @@ extends RefCounted
 const DATA=preload("res://assets/M1-HEROES-PROVENANCE.json")
 const HEROES := ["aion","sheep","rabbit","eren"]
 const ACTIONS := ["walk","idle_fire","air_fire","crouch_walk","crouch_fire"]
-var images: Dictionary={}
-var cache: Dictionary={}
+# 0.40.0: Process-wide shared cache avoids re-decompressing hero atlases per view/preview.
+static var images: Dictionary={}
+static var cache: Dictionary={}
 
 static func has(hero: String) -> bool:
 	return hero in HEROES

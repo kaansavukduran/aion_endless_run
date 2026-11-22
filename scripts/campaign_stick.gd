@@ -11,6 +11,8 @@ func _draw() -> void:
 	for i in 8: points.append((center+Vector2.from_angle((i+.5)*TAU/8.)*radius).round())
 	draw_colored_polygon(points,Color("27212edd")); draw_polyline(points+PackedVector2Array([points[0]]),ink,3.)
 	draw_line(center-Vector2(radius*.7,0),center+Vector2(radius*.7,0),Color("6a5969"),2.)
+	draw_line(center-Vector2(0,radius*.55),center+Vector2(0,radius*.55),Color("6a5969",.7),2.)
+	if active and absf(axis.x)>.85:draw_polyline(points+PackedVector2Array([points[0]]),Color("ffcf8c"),3.5)
 	var knob := center+axis*radius*.48
 	var inner := PackedVector2Array()
 	for i in 8: inner.append((knob+Vector2.from_angle((i+.5)*TAU/8.)*radius*.40).round())

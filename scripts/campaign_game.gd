@@ -62,6 +62,7 @@ var motion_enabled := true
 var audio_volume := .45
 var voices: Array[AudioStreamPlayer] = []
 var sound_cache: Dictionary = {}
+static var ambient_cache: Dictionary = {}
 var ambient: AudioStreamPlayer
 var ambient_key:=""
 var ambient_started:=false
@@ -299,6 +300,8 @@ func build_menu() -> void:
 		"complete":
 			column.add_child(paragraph(old("name_"+world.character)+" · "+old("score")+" %05d"%world.score,22))
 			column.add_child(paragraph(t("keepers")+" %d · "%world.rescued.size()+t("elapsed")+" "+elapsed_time(world.time),18))
+			if not world.route.is_empty() and options.text_scale<=1.5:
+				column.add_child(paragraph(t("route")+": "+" → ".join(world.route.map(func(s):return t(s))),16))
 			if new_best:column.add_child(paragraph(t("new_best"),17))
 			action(t("restart"),begin_new,true).name="CampaignReplay"
 			action(t("details"),func():detail_page=0;menu_kind="result_details";build_ui()).name="CampaignReportDetails"
@@ -325,7 +328,18 @@ func fit_menu(target: PanelContainer) -> void:
 	var height: float=target.get_combined_minimum_size().y
 	target.size.y=height
 	target.position=Vector2(floorf((view_w-target.size.x)*.5),maxf(8.,floorf((view_h-height)*.5)))
-	if not buttons.is_empty():focus_index=0;buttons[0].grab_focus()
+	for i in buttons.size():
+		if is_instance_valid(buttons[i]) and buttons[i].is_visible_in_tree() and not buttons[i].disabled:
+			focus_index=i;buttons[i].grab_focus();break
+
+func menu_back() -> bool:
+	match menu_kind:
+		"paused":close_menu();return true
+		"settings":menu_kind=menu_previous;build_ui();return true
+		"result_details":menu_kind="complete";build_ui();return true
+		"help":finish_help();return true
+		"briefing":return_main();return true
+	return false
 
 func elapsed_time(seconds: float) -> String:
 	return "%02d:%02d"%[int(seconds)/60,int(seconds)%60]
@@ -556,7 +570,8 @@ func _input(event: InputEvent) -> void:
 			elif event.button_index in [JOY_BUTTON_A,JOY_BUTTON_X]:
 				var focus:=get_viewport().gui_get_focus_owner()
 				if focus is Button and focus.is_inside_tree() and focus.is_visible_in_tree() and not focus.disabled:focus.pressed.emit()
-			elif event.button_index in [JOY_BUTTON_B,JOY_BUTTON_START] and menu_kind=="paused":close_menu()
+			elif event.button_index==JOY_BUTTON_B:menu_back()
+			elif event.button_index==JOY_BUTTON_START and menu_kind=="paused":close_menu()
 			get_viewport().set_input_as_handled();return
 		if event.button_index==JOY_BUTTON_START and event.pressed:toggle_pause();get_viewport().set_input_as_handled();return
 		for key in ["jump","attack","shoot","duck","boost"]:
@@ -600,7 +615,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		release_all();get_viewport().set_input_as_handled();return
 	if event is InputEventKey:
 		if event.echo:return
-		if event.keycode==KEY_ESCAPE and event.pressed:toggle_pause();get_viewport().set_input_as_handled();return
+		if event.keycode==KEY_ESCAPE and event.pressed:
+			if menu_kind!="":menu_back()
+			else:toggle_pause()
+			get_viewport().set_input_as_handled();return
 		if menu_kind!="":return
 		match event.physical_keycode:
 			KEY_A,KEY_LEFT:left_down=event.pressed
@@ -741,7 +759,7 @@ func _process(dt: float) -> void:
 	for event in world.pending_events:
 		if event in ["checkpoint","rescue","rescue_gift","secret","mechanism"] and menu_kind!="briefing":save_checkpoint()
 		if event=="enemy" and impact_cooldown<=0. and motion_enabled and not options.reduced_motion and world.state=="playing":impact_hold=.035;impact_cooldown=.18
-		if event in ["shot","melee","grenade","blast","pickup","rescue","hurt","cut","rescue_gift","secret","mechanism","enemy_shot","guardian","boss_attack","complete","checkpoint","enemy","armour_hit"]:sound(event)
+		if event in ["shot","melee","grenade","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","guardian","boss_attack","complete","checkpoint","enemy","armour_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	view.camera_x=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
@@ -770,14 +788,21 @@ func update_hud() -> void:
 	boss_health.position.y=hud_panel.strip_height+6.
 	boss_health.visible=world.section=="arena" and bool(world.boss.active) and menu_kind=="" and presentation_stage==""
 	boss_health.value=world.boss.hp
-	if boss_health.visible:subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+( " · "+t("boss_warning") if float(world.boss.windup)>0. or float(world.boss.get("beam_warning",0.))>0. else "")
+	if boss_health.visible:
+		var boss_cue: String=""
+		if int(world.boss.phase)==3 and float(world.boss.windup)>0. and int(world.boss.attack)%3==2:boss_cue=" · "+t("boss_dash")
+		elif float(world.boss.windup)>0. or float(world.boss.get("beam_warning",0.))>0.:boss_cue=" · "+t("boss_warning")
+		elif int(world.boss.phase)==2 and world.boss_vulnerable():boss_cue=" · "+t("boss_core")
+		subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+boss_cue
 	subtitle.position.y=boss_health.position.y+(20. if boss_health.visible else 0.)
 	var offer: Dictionary=CampaignRhythm.offer(world)
 	ride_button.visible=active_controls and (not offer.is_empty() or bool(world.mount.ridden) or CampaignVehicles.can_board(world))
 	ride_button.text=t("swap_weapon") if not offer.is_empty() else (t("exit_vehicle") if bool(world.mount.ridden) else t("board"))
 	if is_instance_valid(stick):stick.visible=active_controls
 	for key in actions:
-		var item: AionCampaignTouch=actions[key];item.visible=active_controls;item.pressed=not Dictionary(held.get(key,{})).is_empty()
+		var item: AionCampaignTouch=actions[key]
+		var prev_vis:=item.visible;var prev_p:=item.pressed;var prev_act:=item.action;var prev_cap:=item.caption;var prev_dis:=item.disabled;var prev_cd:=item.cooldown
+		item.visible=active_controls;item.pressed=not Dictionary(held.get(key,{})).is_empty()
 		if key=="attack":
 			var near:=not world.close_enemy().is_empty() and not bool(world.mount.ridden)
 			var captive:=absf(world.aim_direction.y)<.25 and not CampaignRescue.nearest(world).is_empty() and not near
@@ -786,7 +811,8 @@ func update_hud() -> void:
 		if key=="jump":
 			var diving: bool=bool(world.mount.ridden) and CampaignVehicles.kind(world)=="shell"
 			item.caption=t("dive") if diving else old("control_jump");item.action="dive" if diving else "jump"
-		item.queue_redraw()
+		if item.visible and (item.visible!=prev_vis or item.pressed!=prev_p or item.action!=prev_act or item.caption!=prev_cap or item.disabled!=prev_dis or not is_equal_approx(item.cooldown,prev_cd)):
+			item.queue_redraw()
 	if is_instance_valid(control_hint):control_hint.text=pad_help() if active_input=="gamepad" else t("keys")
 
 func update_ambient() -> void:
@@ -799,9 +825,11 @@ func update_ambient() -> void:
 		ambient=AudioStreamPlayer.new();ambient.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(ambient)
 	if ambient_key!=key:
 		ambient.stop();ambient_started=false
-		var stream: AudioStreamWAV=load("res://assets/audio/campaign-"+key+".wav").duplicate()
-		stream.loop_mode=AudioStreamWAV.LOOP_FORWARD;stream.loop_begin=0;stream.loop_end=int(stream.get_length()*stream.mix_rate)
-		ambient.stream=stream;ambient_key=key
+		if not ambient_cache.has(key):
+			var loaded: AudioStreamWAV=load("res://assets/audio/campaign-"+key+".wav").duplicate()
+			loaded.loop_mode=AudioStreamWAV.LOOP_FORWARD;loaded.loop_begin=0;loaded.loop_end=int(loaded.get_length()*loaded.mix_rate)
+			ambient_cache[key]=loaded
+		ambient.stream=ambient_cache[key];ambient_key=key
 	ambient.volume_db=linear_to_db(maxf(.001,audio_volume*.28))
 	# Web sample playback does not provide a reliable frame-by-frame playing
 	# signal for a paused/looping source. Start once at a track/unmute boundary.
@@ -818,7 +846,7 @@ func sound(event: String) -> void:
 			var voice:=AudioStreamPlayer.new();voice.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(voice);voices.append(voice)
 	if not sound_cache.has(event):
 		var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else (2400 if event in ["enemy","armour_hit"] else 1400)
-		var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.}.get(event,660.)
+		var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"gift_drop":780.,"npc_contact":920.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.}.get(event,660.)
 		if event=="enemy":pitch=180.
 		elif event=="armour_hit":pitch=1140.
 		for i in count:
@@ -867,6 +895,7 @@ func metadata() -> void:
 	data.presentation=presentation_stage;data.presentation_time=presentation_time;data.help_step=help_step;data.hud_summary=hud_panel.summary;data.report_lines=report_lines();data.input_kind=active_input;data.mount_transition=world.mount_transition;data.mount_transition_time=world.mount_transition_time
 	# Passive acceptance observations: these mirror real state, never mutate it.
 	data.engine_process_frames=Engine.get_process_frames();data.engine_physics_frames=Engine.get_physics_frames()
+	data.engine_process_seconds=Performance.get_monitor(Performance.TIME_PROCESS);data.engine_physics_seconds=Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)
 	data.crouching=world.crouching()
 	data.rally=world.rally;data.retry_count=world.retry_count;data.chain=world.chain;data.chain_time=world.chain_time;data.best_chain=world.best_chain
 	data.weapon_offer=CampaignRhythm.offer(world);data.bridge_timers=world.bridge_timers;data.boss_ports=world.boss.get("ports",[]);data.boss_dash=world.boss.get("dash",0.)

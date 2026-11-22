@@ -3,9 +3,10 @@ extends RefCounted
 
 const DATA = preload("res://assets/FORGE-VEHICLES-PROVENANCE.json")
 const TURRETS = preload("res://assets/M1-VEHICLE-TURRETS.json")
-var images: Dictionary = {}
-var cache: Dictionary = {}
-var split_cache: Dictionary = {}
+# 0.40.0: Process-wide shared cache avoids repeated pixel-by-pixel turret polygon cuts in WebAssembly.
+static var images: Dictionary = {}
+static var cache: Dictionary = {}
+static var split_cache: Dictionary = {}
 
 static func mounted_phase(kind: String, phase: int) -> int:
 	var count: int=DATA.data.types[kind].frames.size()

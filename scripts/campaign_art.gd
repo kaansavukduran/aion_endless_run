@@ -2,10 +2,11 @@ class_name AionCampaignArt
 extends RefCounted
 const META = preload("res://assets/ARCADE-MACHINES-PROVENANCE.json")
 const SOURCE = preload("res://assets/arcade-machines.png")
-var source: Image
-var cache: Dictionary = {}
+# 0.41.0: Process-wide shared arcade-machines & melee cache.
+static var source: Image
+static var cache: Dictionary = {}
 const MELEE = preload("res://assets/CAMPAIGN-MELEE-PROVENANCE.json")
-var melee_sources: Dictionary = {}
+static var melee_sources: Dictionary = {}
 
 func melee(hero: String, frame: int) -> Dictionary:
 	var key := hero+str(frame)
