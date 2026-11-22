@@ -82,7 +82,7 @@ with sync_playwright() as pw:
         page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
         cached_launch_seconds=time.monotonic()-second_start
     canvas=page.locator('canvas')
-    browser_info={'engine':a.browser,'version':browser.version(),'user_agent':page.evaluate('navigator.userAgent'),'platform':page.evaluate('navigator.platform')}
+    browser_info={'engine':a.browser,'version':browser.version,'user_agent':page.evaluate('navigator.userAgent'),'platform':page.evaluate('navigator.platform')}
     def front_buttons():
         return json.loads(canvas.get_attribute('data-ui') or '[]')
     def front_tap(name):
