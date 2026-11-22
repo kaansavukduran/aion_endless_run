@@ -68,7 +68,12 @@ with sync_playwright() as pw:
         if 'ERROR:' in m.text or 'SCRIPT ERROR' in m.text:errors.append(m.text)
     page.on('console',message)
     navigation_start=time.monotonic()
-    page.goto(a.url,timeout=120000);page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
+    try:
+        page.goto(a.url,timeout=120000);page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
+    except Exception as error:
+        (a.evidence/'failure.json').write_text(json.dumps({'stage':'boot','url':a.url,'error':str(error),'console_errors':errors,'console':console},indent=2)+'\n')
+        page.screenshot(path=str(a.evidence/'failure.png'))
+        raise
     launch_seconds=time.monotonic()-navigation_start
     cached_launch_seconds=None
     if a.warm_launch:
@@ -77,6 +82,7 @@ with sync_playwright() as pw:
         page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
         cached_launch_seconds=time.monotonic()-second_start
     canvas=page.locator('canvas')
+    browser_info={'engine':a.browser,'version':browser.version(),'user_agent':page.evaluate('navigator.userAgent'),'platform':page.evaluate('navigator.platform')}
     def front_buttons():
         return json.loads(canvas.get_attribute('data-ui') or '[]')
     def front_tap(name):
@@ -112,6 +118,7 @@ with sync_playwright() as pw:
         metrics=page.evaluate('window.qaMetrics')
         metrics['launch_seconds']=launch_seconds
         metrics['cached_launch_seconds']=cached_launch_seconds
+        metrics['browser']=browser_info
         metrics['build']=page.evaluate("fetch('build.json').then(r=>r.json())")
         metrics['scope']='Local/browser-emulated environment. Engine counters are sampled at 10Hz; rAF measures browser scheduling, not engine FPS. Monitor durations, if present, are 10Hz observations, not a trace of every engine frame.'
         groups={}
@@ -542,6 +549,6 @@ with sync_playwright() as pw:
         page.screenshot(path=str(a.evidence/'offline-restored.png'));context.set_offline(False)
     (a.evidence/'console.json').write_text(json.dumps(console,indent=2)+'\n')
     check(not errors,'No browser or Godot script errors during the actual flow: '+str(errors[:3]))
-    (a.evidence/'results.json').write_text(json.dumps({'checks':checks,'errors':errors,'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(x=>x.build)"),'final':data()},indent=2)+'\n')
+    (a.evidence/'results.json').write_text(json.dumps({'checks':checks,'errors':errors,'browser':browser_info,'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(x=>x.build)"),'final':data()},indent=2)+'\n')
     save_profile()
     context.close();browser.close()
