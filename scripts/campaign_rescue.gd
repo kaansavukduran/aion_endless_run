@@ -32,6 +32,7 @@ static func populate(w) -> void:
 		var count: int=COUNTS[w.section]
 		var x: float=lerpf(550.,w.length()-900.,float(i)/maxf(1.,count-1))
 		if i==0:x=w.length()*.55 # Keep the original keeper's location and ID.
+		if w.section=="arena" and i==2:x=w.length()*.46 # Leave clear silhouettes and independent approach space.
 		var y:=0.
 		var secret: String=""
 		if w.section in ["water","terrace","roots"] and i in [count-2,count-1]:
