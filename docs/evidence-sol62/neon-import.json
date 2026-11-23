@@ -204,5 +204,7 @@
       "modified": "2026-11-21T16:26:42.070Z",
       "sha256": "09925b5c417162b7434b2817c2ba614dbcc9ed2a1073212280fbc6620319c28f"
     }
-  ]
+  ],
+  "integrated_candidate": "0.50.0",
+  "interim_0_49_published": false
 }

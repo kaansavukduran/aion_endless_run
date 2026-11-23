@@ -13,6 +13,7 @@ p.add_argument('--play-only',action='store_true',help='Skip the independently ch
 p.add_argument('--retry-profile',action='store_true',help='Exercise five real checkpoint Retry actions and record their timing and retained progress.')
 p.add_argument('--warm-launch',action='store_true',help='Measure a second launch after the service worker has cached the actual PCK.')
 p.add_argument('--special-probe',action='store_true',help='Use the selected new hero skill through ordinary keys before the full mission, without injecting a target.')
+p.add_argument('--pause-crouch-probe',action='store_true',help='Observe the real crouched gun pose across Pause and Resume, using ordinary keys and pointer aim.')
 a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];console=[]
 def check(condition,message):
@@ -220,10 +221,33 @@ with sync_playwright() as pw:
             check(after['awarded']==before['awarded'] and after['taken']==before['taken'],'Actual Retry preserves single-award progress: '+str(attempt+1))
             retry_metrics.append({'attempt':attempt+1,'seconds':time.monotonic()-start,'before':{'rally':before.get('rally'),'score':before['score'],'nodes':before.get('node_count')},'after':{'rally':after.get('rally'),'score':after['score'],'nodes':after.get('node_count')},'heap':retry_cdp.send('Runtime.getHeapUsage') if retry_cdp else None})
             (a.evidence/'five-retries.json').write_text(json.dumps(retry_metrics,indent=2)+'\n')
+    if a.pause_crouch_probe:
+        canvas.focus();page.keyboard.down('s');page.mouse.move(*xy(data()['view'][0]*.78,data()['view'][1]*.28))
+        page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.crouching && d.pose.body_action==="crouch_fire" && d.pose.gun_visible && d.aim[1]<-.1}',timeout=10000)
+        page.wait_for_timeout(400) # Let the real eight-angle sweep reach its pointer target before freezing it.
+        before=data();page.screenshot(path=str(a.evidence/'crouched-gun-before-pause.png'))
+        page.keyboard.press('Escape')
+        page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.menu==="paused" && d.pose.body_action==="crouch_fire" && d.pose.gun_visible}',timeout=10000)
+        page.keyboard.up('s');page.wait_for_timeout(350);paused=data()
+        frozen_fields=['source','row','frame','body_action','body_mirror','rendered_muzzle']
+        check(paused['crouching'] and all(paused['pose'][k]==before['pose'][k] for k in frozen_fields),'Pause preserves the actual crouched gun source/cel/mirror and visible barrel')
+        check(paused['aim']==before['aim'],'Pause preserves the visible diagonal gun aim')
+        page.screenshot(path=str(a.evidence/'crouched-gun-paused.png'));page.wait_for_timeout(350);still=data()
+        check(still['time']==paused['time'] and all(still['pose'][k]==paused['pose'][k] for k in frozen_fields),'The paused crouched gun remains frozen across further rendered frames')
+        page.keyboard.press('Escape')
+        page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.menu==="" && d.state==="playing" && !d.crouching && Math.abs(d.velocity[0])<1}',timeout=10000)
+        resumed=data();page.wait_for_timeout(200);after=data()
+        check(not after['crouching'] and abs(after['player'][0]-resumed['player'][0])<1,'Resume clears the released crouch without restoring a held direction')
+        (a.evidence/'pause-crouch.json').write_text(json.dumps({'scope':'Real keyboard crouch and diagonal pointer aim → Pause → physical key release → Resume. Gun pose only; grenade and tongue pause are separately covered by native scene tests.','before':before,'paused':paused,'still':still,'resumed':resumed,'after':after},indent=2)+'\n')
+        # A real background touch returns from persistent pointer aiming to
+        # movement aiming before the independent keyboard-direction smoke.
+        page.touchscreen.tap(*xy(after['view'][0]*.5,after['view'][1]*.35))
     if not a.play_only:
         p0=data()['player'][0];page.keyboard.down('d');page.wait_for_function('(x)=>JSON.parse(document.querySelector("canvas").dataset.campaign).player[0]>x+80',arg=p0,timeout=10000);page.keyboard.up('d');page.wait_for_timeout(200);p1=data()['player'][0]
         check(p1>p0+75,'D moves the player right; this is not automatic scrolling')
-        page.keyboard.down('a');page.wait_for_function('(x)=>JSON.parse(document.querySelector("canvas").dataset.campaign).player[0]<x-35',arg=p1,timeout=10000);page.keyboard.up('a');page.wait_for_timeout(150);check(data()['player'][0]<p1-30 and data()['facing']==-1,'A moves and faces left')
+        # Keep the real key down through the bounded turn.35px can be reached
+        # in three50ms physics steps, before aim has crossed to the left.
+        page.keyboard.down('a');page.wait_for_function('(x)=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.player[0]<x-35 && d.facing===-1}',arg=p1,timeout=10000);page.keyboard.up('a');page.wait_for_timeout(150);check(data()['player'][0]<p1-30 and data()['facing']==-1,'A moves and faces left')
         page.keyboard.down('d');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).facing===1',timeout=10000);page.keyboard.up('d');page.keyboard.down('f');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).shots>=2',timeout=10000);page.keyboard.up('f');page.wait_for_timeout(150);check(data()['shots']>=2,'Held fire produces real, spaced gunshots')
         count=data()['grenades'];page.keyboard.press('g')
         page.wait_for_function('count=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===count-1',arg=count,timeout=10000)
@@ -257,10 +281,16 @@ with sync_playwright() as pw:
             before=data()['grenades'];page.mouse.click(850,260,button='right')
             page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===n-1',arg=before)
             check(True,'Actual right mouse click throws one grenade')
-            page.keyboard.down('w');page.keyboard.down('d');page.keyboard.down('f');page.wait_for_timeout(100)
+            # The new authored throw recovers after ammo is spent. Prepare a
+            # real fresh upward shot before the independent airborne sweep;
+            # a fixed100ms wall delay can still be inside throw recovery.
+            page.wait_for_function('!JSON.parse(document.querySelector("canvas").dataset.campaign).grenade_throw.phase',timeout=10000)
+            before_shots=data()['shots'];page.keyboard.down('w');page.keyboard.down('d');page.keyboard.down('f')
+            page.wait_for_function('n=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.shots>n && d.hero_projectiles.some(b=>b.age<.14 && b.v[1]<-30)}',arg=before_shots,timeout=10000)
             page.keyboard.press('Space');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-25')
             page.evaluate("""window.sweepPackets=[];window.sweepTimer=setInterval(()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);sweepPackets.push({aim:d.aim,shots:d.shots,projectiles:d.hero_projectiles,grounded:d.grounded})},8)""")
-            page.keyboard.up('w');page.keyboard.down('s');page.wait_for_timeout(230)
+            page.keyboard.up('w');page.keyboard.down('s')
+            page.wait_for_function('sweepPackets.some(q=>q.projectiles.some(b=>b.age<.14 && Math.abs(b.v[1])>30 && Math.abs(Math.abs(b.v[0])-Math.abs(b.v[1]))>30))',timeout=10000)
             page.keyboard.up('s');page.keyboard.up('d');page.keyboard.up('f')
             packets=page.evaluate('clearInterval(sweepTimer);sweepPackets');(a.evidence/'sweep-packets.json').write_text(json.dumps(packets,indent=2)+'\n')
             mid=[b for q in packets for b in q['projectiles'] if b['age']<.14 and abs(b['v'][1])>30 and abs(abs(b['v'][0])-abs(b['v'][1]))>30]
@@ -386,6 +416,11 @@ with sync_playwright() as pw:
             if d.get('travel_active'):keys([]);page.wait_for_timeout(65);continue
             if d['menu'] and not d.get('ui_ready',True):keys([]);page.wait_for_timeout(50);continue
             if section not in stages:stages.append(section);page.screenshot(path=str(a.evidence/(section+'.png')));print('STAGE',section,'HP',d['hp'],'score',d['score'],flush=True)
+            route_sections={'water':{'water'},'terrace':{'canopy','terrace'},'roots':{'canopy','roots'}}
+            if section in {'water','canopy','terrace','roots'} and section not in route_sections[a.route]:
+                keys([])
+                (a.evidence/'playthrough.json').write_text(json.dumps({'completed':False,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'vehicle_inputs':vehicle_inputs,'physical_forks':fork_inputs,'rescue_story_inputs':rescue_presentations,'final':d,'failure':'Requested '+a.route+' but physically entered '+section},indent=2)+'\n')
+                check(False,'Requested physical '+a.route+' route must not enter '+section)
             if state=='complete':
                 keys([])
                 # The boss death and new short celebration must finish before
@@ -420,7 +455,19 @@ with sync_playwright() as pw:
                     page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return !d.mounted && !d.mount_transition}',timeout=15000)
                     vehicle_inputs.append({'action':'exit','section':section,'x':d['player'][0],'reason':'physical foot passage'})
                     continue
-                wanted=['d','f']
+                wanted=['d','f'];jump_target=None
+                if upper and d.get('grounded') and d['player'][1]>-194:
+                    # Climb the visible stairs from a deliberate takeoff point.
+                    # Repeated jumps from entry can overshoot the narrow first
+                    # service step. Select the next reachable physical surface,
+                    # then walk/backtrack to its approach through real controls.
+                    higher=[p for p in d['platforms'] if 1<d['player'][1]-p[1]<=105]
+                    if higher:
+                        jump_target=max(higher,key=lambda p:p[1])
+                        takeoff=jump_target[0]-70
+                        if d['player'][0]>jump_target[0]+jump_target[2]-35:wanted=['a','f']
+                        elif d['player'][0]>=takeoff and now-last_jump>.25:
+                            page.keyboard.press('Space');last_jump=now
                 if not upper and section=='fork_one' and 620<d['player'][0]<1210 and d['player'][1]>35:
                     wanted.append('s')
                 keys(wanted)
@@ -432,11 +479,11 @@ with sync_playwright() as pw:
                     if not fork_inputs[-1].get('root_lock_broken'):
                         page.screenshot(path=str(a.evidence/(a.hero+'-root-lock-open.png')))
                     fork_inputs[-1]['root_lock_broken']=True
-                if upper and d.get('grounded') and d['player'][0]<1000 and now-last_jump>.25:
-                    page.keyboard.press('Space');last_jump=now
-                elif not upper and d['player'][0]>1000 and d.get('grounded') and now-last_jump>.85 and any(math.hypot(b[0]-d['player'][0],b[1]-(d['player'][1]-37))<100 for b in d.get('bullets',[])):
+                if not upper and d['player'][0]>1000 and d.get('grounded') and now-last_jump>.85 and any(math.hypot(b[0]-d['player'][0],b[1]-(d['player'][1]-37))<100 for b in d.get('bullets',[])):
                     page.keyboard.press('Space');last_jump=now
                 fork_inputs[-1]['latest_position']=d['player']
+                with (a.evidence/'physical-fork-inputs.jsonl').open('a') as log:
+                    log.write(json.dumps({'section':section,'time':d['time'],'player':d['player'],'velocity':d['velocity'],'grounded':d['grounded'],'keys':wanted,'next_surface':jump_target,'bridge_timers':d.get('bridge_timers')})+'\n')
                 page.wait_for_timeout(50)
                 continue
             if a.steering_file and a.steering_file.exists():

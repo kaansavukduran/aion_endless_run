@@ -3,6 +3,7 @@ import argparse,json,re,subprocess,time,os
 from android_packets import decode_packets
 from android_gestures import charged_jump_sequence, start_grounded_gesture, wait_for_charged_jump
 from android_readiness import capture_main_frame, layout_matches_display, wait_for_main
+from android_roster import CURRENT_ROSTER, RETIRED_ROSTER, NativeRoster
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=Path('build'));a=p.parse_args();a.output.mkdir(exist_ok=True,parents=True)
 results=[]
@@ -36,11 +37,15 @@ def menu_button(name=None,text=None):
  history=packets('AION_UI ')
  if history and not layout_matches_display(history[-1],bounds):
   record_target({'event':'rejected_stale_layout','wanted':name or text,'display':bounds,'layout':history[-1]})
- state=latest('AION_UI ',lambda s:layout_matches_display(s,bounds) and any(b['name']==name or (text and re.search(text,b['text'])) for b in s['buttons']))
+ if name in CURRENT_ROSTER:
+  state=native_roster.find(name)
+ else:
+  state=latest('AION_UI ',lambda s:layout_matches_display(s,bounds) and any(b['name']==name or (text and re.search(text,b['text'])) for b in s['buttons']))
  chosen=next(b for b in state['buttons'] if b['name']==name or (text and re.search(text,b['text'])))
  record={'event':'tap','name':chosen['name'],'text':chosen['text'],'point':chosen['point'],'orientation':state['orientation'],'page':state['page'],'display':bounds}
  record_target(record)
  tap(chosen['point'])
+native_roster=NativeRoster(lambda:packets('AION_UI '),display_bounds,lambda name:menu_button(name=name))
 def ready_main(cold=False):
  def skip_opening(button,state,bounds):
   record_target({'event':'tap','name':button['name'],'text':button['text'],'point':button['point'],'orientation':state['orientation'],'page':state['page'],'display':bounds})
@@ -125,9 +130,15 @@ for code in ['tr','en']:
  check(panel[1]+panel[3]<=chooser[1] and chooser[3]<100, 'Native system-font menu and heading/roster stay separated: '+code)
  capture('main-'+code)
 layout=ready_main()
-visible={button['name'] for button in layout['buttons']}
-check(not ({'StartSelect_owl','StartSelect_wolf'} & visible),'Retired owl and wolf are not playable native menu choices')
-check({'StartSelect_aion','StartSelect_sheep','StartSelect_rabbit','StartSelect_eren'} <= visible,'All four current playable characters are reachable on the native menu')
+roster_pages=[]
+def record_roster_page(state):
+ record={'event':'native_roster_page','visible':sorted(native_roster.names(state)),'layout':state,'display':display_bounds()}
+ roster_pages.append(record)
+ (a.output/'android-roster-pages.json').write_text(json.dumps(roster_pages,indent=2)+'\n')
+ record_target(record);capture('roster-page-'+str(len(roster_pages)))
+visible=native_roster.inspect(record_roster_page)
+check(not (RETIRED_ROSTER & visible),'Retired owl and wolf are absent across all native roster pages')
+check(set(CURRENT_ROSTER)==visible,'All six current playable characters are reachable through actual native roster pages')
 menu_button(name='StartSelect_aion');latest('AION_UI ',lambda s:s['character']=='aion' and s['page']=='main')
 menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
 before_jump=len(packets('AION_STATE '));gesture=hold('jump',350)

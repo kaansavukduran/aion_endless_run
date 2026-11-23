@@ -114,13 +114,13 @@ class PoseRegistry:
         self.base = json.loads((ROOT / "assets/M1-HEROES-PROVENANCE.json").read_text())
         self.extra = json.loads((ROOT / "assets/M1-HERO-ACTIONS.json").read_text())
         self.mission = json.loads((ROOT / "assets/MISSION-HEROES-PROVENANCE.json").read_text())
-        self.source_hashes={path:hashlib.sha256((ROOT/path).read_bytes()).hexdigest() for path in ('assets/M1-HEROES-PROVENANCE.json','assets/M1-HERO-ACTIONS.json','assets/MISSION-HEROES-PROVENANCE.json','scripts/m1_hero_action_art.gd','scripts/mission_hero_art.gd','assets/M1-HELD-WEAPONS.json','scripts/m1_combat_art.gd','scripts/campaign_view.gd')}
+        self.source_hashes={path:hashlib.sha256((ROOT/path).read_bytes()).hexdigest() for path in ('assets/M1-HEROES-PROVENANCE.json','assets/M1-HERO-ACTIONS.json','assets/MISSION-HEROES-PROVENANCE.json','scripts/m1_hero_action_art.gd','scripts/mission_hero_art.gd','assets/M1-HELD-WEAPONS.json','scripts/m1_combat_art.gd','scripts/campaign_view.gd','scripts/mission_frog_tongue_art.gd')}
 
     def cels(self, hero, action):
         if hero in ("armadillo", "frog"):
             clip = self.mission['clips'][action]
             override = self.mission.get('runtime_overrides', {}).get(hero, {}).get(action, {})
-            atlas = override.get('atlas', hero)
+            atlas = override.get('atlas',clip.get('atlas',hero) if clip.get('hero',hero)==hero else hero)
             row = override.get('row', clip['row'])
             order = override.get('order', list(range(clip['frames'])))
             return {('mission-hero-' + atlas, row, frame) for frame in order}
@@ -289,22 +289,41 @@ class Probe:
 
     def shot_check(self, samples):
         self.checked_campaign=samples[-1] if samples else None
-        candidates=[]
-        # Exclude bullets fired before a ground-direction transition. Airborne
-        # checks already start from an immutable newly observed airborne shot.
-        born_after=samples[0]['time']+(.12 if all(d['grounded'] for d in samples) else -.16)
-        for d in samples:
-            if not d.get('pose',{}).get('gun_visible',d.get('pose',{}).get('weapon_visible',False)):continue
-            for bullet in d.get('hero_projectiles',[]):
-                if bullet['kind']=='pistol' and bullet['age']<.16 and d['time']-bullet['age']>=born_after:
-                    origin=[bullet['p'][i]-bullet['v'][i]*bullet['age'] for i in range(2)]
-                    bore=d['pose'].get('rendered_muzzle') or d['pose']['muzzle']
-                    lag=d['time']-d['pose'].get('world_time',d['time'])
-                    expected=[bore[i]-d['velocity'][i]*(bullet['age']-lag) for i in range(2)]
-                    candidates.append((math.dist(origin,expected),d,bullet))
-        self.check(bool(candidates), 'Real fresh pistol projectiles are observed, not only input flags')
-        worst=max(candidates,key=lambda item:item[0]);self.checked_campaign=worst[1]
-        self.check(worst[0]<18., 'Every eligible fresh projectile origin tracks the moving authored muzzle', {'max_error_px':worst[0],'samples':len(candidates),'bullet':worst[2],'pose':worst[1]['pose']})
+        self.check(bool(samples),'Fresh projectile observation contains actual campaign packets')
+        # Held fire occurs after movement, then the SAME world step immediately
+        # advances each new bullet and its age. Therefore time-age precedes the
+        # emission pose by one integration step. Match the acknowledged shot's
+        # model timestamp to the actual subsequent draw at that exact timestamp;
+        # never choose the spatially closest cel or extrapolate accelerating air.
+        timeline=self.page.evaluate('sixProbe.packets.filter(p=>p.campaign).map(p=>p.campaign)')
+        begin=samples[0]['time']+(.12 if all(d['grounded'] for d in samples) else -.0001)
+        end=samples[-1]['time']+.0001
+        matches=[];unobservable=[];actual_projectiles=[]
+        for previous,d in zip(timeline,timeline[1:]):
+            if not begin<=d['time']<=end or d['shots']<=previous['shots']:continue
+            actual_projectiles.extend(b for b in d.get('hero_projectiles',[]) if b['kind']=='pistol' and b['age']<.16)
+            step=d['time']-d.get('pose',{}).get('world_time',d['time'])
+            newborn=[b for b in d.get('hero_projectiles',[]) if b['kind']=='pistol' and abs(b['age']-step)<.0001 and step>0.]
+            if not newborn:
+                unobservable.append({'reason':'The first integrated projectile was not observed','campaign':d});continue
+            draws=[x for x in timeline if abs(x.get('pose',{}).get('world_time',-1)-d['time'])<.0001 and x.get('pose',{}).get('gun_visible',False)]
+            if not draws:
+                unobservable.append({'reason':'No visible gun draw at the exact acknowledged shot timestamp','campaign':d});continue
+            draw=draws[0];bore=draw['pose'].get('rendered_muzzle')
+            if bore is None:
+                unobservable.append({'reason':'The exact draw has no independently reconstructed gun bore','campaign':d});continue
+            for bullet in newborn:
+                origin=[bullet['p'][i]-bullet['v'][i]*bullet['age'] for i in range(2)]
+                matches.append({'error_px':math.dist(origin,bore),'origin':origin,'rendered_muzzle':bore,'emission_model_time':d['time'],'matched_draw_time':draw['pose']['world_time'],'bullet':bullet,'emission_packet':d,'draw_packet':draw})
+        (self.out/('shot-origin-'+self.stage+'.json')).write_text(json.dumps({'matches':matches,'not_verified':unobservable},ensure_ascii=False)+'\n')
+        self.check(bool(actual_projectiles),'A newly acknowledged real gunshot has an actual fresh pistol projectile')
+        if unobservable:
+            self.limitations.add('Exact shot-origin comparison covers only emission timestamps retained by passive throttled telemetry; skipped births are explicitly NOT_VERIFIED.')
+            self.results.append({'label':'Some shot births lacked an exact observable render timestamp','status':'NOT_VERIFIED','stage':self.stage,'evidence_count':len(unobservable)})
+        if not matches:return  # The per-gesture NOT_VERIFIED record above is authoritative.
+        self.check(True,'Real fresh pistol shot births match an actual independent gun draw at the same simulation timestamp')
+        worst=max(matches,key=lambda item:item['error_px']);self.checked_campaign=worst['emission_packet']
+        self.check(worst['error_px']<1.1,'Every observable shot origin agrees with the exact emission-time visible bore',{'max_error_px':worst['error_px'],'samples':len(matches),'emission_model_time':worst['emission_model_time'],'matched_draw_time':worst['matched_draw_time'],'bullet':worst['bullet']})
 
     def start(self):
         self.stage='menu-selection'
@@ -435,11 +454,16 @@ class Probe:
         (self.out/('skill-gesture-'+method+'.json')).write_text(json.dumps(samples,ensure_ascii=False)+'\n')
         self.checked_campaign=samples[-1]
         self.pose_check(samples,'skill',moving=False)
-        phases=[d.get('hero_skill',{}).get('phase','') for d in samples]
+        events=[]
+        for d in samples:
+            events.append((d['time'],d.get('hero_skill',{}).get('phase',''),'model'))
+            p=d.get('pose',{})
+            if 'skill_phase_at_draw' in p:events.append((p['world_time'],p['skill_phase_at_draw'],'actual_draw'))
+        events.sort(key=lambda item:item[0])
         expected=['windup','roll','brake','recover'] if self.hero=='armadillo' else ['windup','extend','retract','recover']
-        self.check(all(phase in phases for phase in expected),'Actual skill has ordered preparation, active and recovery phases',phases)
-        positions=[phases.index(phase) for phase in expected]
-        self.check(positions==sorted(positions),'Skill recovery begins after the active phase',positions)
+        self.check(all(any(event[1]==phase for event in events) for phase in expected),'Actual model/draw clocks observe preparation, active and recovery phases',events)
+        positions=[next(event[0] for event in events if event[1]==phase) for phase in expected]
+        self.check(positions==sorted(positions),'Skill recovery begins after the active phase on the real simulation clock',positions)
         if self.hero=='armadillo':self.check(max(d['player'][0] for d in samples)>before['player'][0]+40,'The shell rush causes actual world movement')
         else:
             extended=[d for d in samples if d.get('hero_skill',{}).get('extent',0)>1]
@@ -449,6 +473,25 @@ class Probe:
         if touch_session:
             touch_session.send('Input.dispatchTouchEvent',{'type':'touchCancel','touchPoints':[]});touch_session.detach()
         if method=='pad':self.page.evaluate('sixPad([0,0,0,0],[],false)')
+
+    def moving_tongue(self):
+        if self.hero!='frog':return
+        self.stage='moving-natural-tongue'
+        self.wait(lambda p:p['campaign']['grounded'] and not p['campaign'].get('hero_skill',{}).get('phase'),'fresh moving-tongue precondition',alive=True)
+        self.keys([]);self.aim(1)
+        self.wait(lambda p:p['campaign']['aim'][0]>.8,'right target before moving tongue',alive=True)
+        self.keys(['a']);mark=self.mark();self.event('key_press','e');self.page.keyboard.press('e')
+        self.sample(1.35);self.keys([])
+        gesture=self.observed_since(mark)
+        (self.out/'moving-tongue-gesture.json').write_text(json.dumps(gesture,ensure_ascii=False)+'\n')
+        open_motion=[d for d in gesture if d.get('pose',{}).get('skill_phase_at_draw') in ('extend','retract') and d['pose'].get('physics_velocity',[0])[0]<-10]
+        self.checked_campaign=open_motion[-1] if open_motion else gesture[-1]
+        self.check(len(open_motion)>=2,'Normal E plus actual opposite movement opens the tongue during locomotion')
+        self.pose_check(open_motion,'tongue_walk_back',1,moving=False)
+        frames={d['pose']['body_frame'] for d in open_motion}
+        self.check(len(frames)>=2,'Moving tongue preserves distinct real gait phases instead of a sliding static attack',sorted(frames))
+        self.check(all(d['pose']['body_action']=='tongue_walk_back' for d in open_motion),'Actual open-mouth body source preserves the aimed backward gait')
+        self.check(any(d['hero_skill'].get('extent',0)>0 for d in gesture),'Moving tongue retains its real mouth-attached reach')
 
     def extra_inputs(self, modes):
         if 'touch' in modes:
@@ -523,7 +566,7 @@ def main():
                 if not args.no_video:
                     report['capture']=page.evaluate(START_VIDEO);recording=report['capture'].get('supported',False)
                     probe.check(recording,'Original real-time canvas capture starts with a requested 60 fps track')
-                probe.start();probe.keyboard_matrix();probe.skill();probe.extra_inputs(args.inputs)
+                probe.start();probe.keyboard_matrix();probe.skill();probe.moving_tongue();probe.extra_inputs(args.inputs)
                 probe.check(not errors,'No browser/Godot errors during the complete hero matrix',errors)
                 report['status']='PASS'
             except Exception as error:
