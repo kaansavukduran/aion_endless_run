@@ -1,4 +1,10 @@
-# 0.22.0 doğrulaması
+# Güncel doğrulama · 0.50.0
+
+[Mission1'in tek güncel devir ve doğrulama kaydı](MISSION1-GAMEPLAY-HANDOFF.md): altı kahraman, tam kaynak/normal girdi/render/CI/Pages sonuçları, kesin build kimlikleri ve fiziksel cihaz sınırları burada ayrılır. [Son kaynak sonucu](evidence-sol62/source-results-0.50-final-ci.json) ve [canlı dosya bütünlüğü](evidence-sol62/public-0.50-integrity.json) ayrı makbuzlardır. Kullanıcı görsel/oynanış kabulü bekliyor; Mission2 kapsam dışıdır.
+
+Aşağıdaki kayıtlar tarihî sürümlere aittir; eski kadro, dil, sürüm ve test sayıları güncel0.50 sonucu değildir.
+
+## 0.22.0 doğrulaması
 
 [Kaynak, gerçek giriş ve teslim kanıtı](evidence-v0220/README.md). Son yerel21 Godot grubunda12.127, nihai temiz CI ortamında12.178 kontrol PASS. Windows/Linux/macOS gerçek paket açılışları ve Android API30 emülatöründe15 native giriş kontrolü de geçti. 265 tarayıcı kontrolü PASS;9 paket/2 makbuz yayımlandı ve11 kamu dosya özeti denetlendi. Gerçek indirilen APK, Mac ZIP ve19 dosyalı offline arşiv ayrıca doğrulandı. Ayrıntılı kapsam sürümlü teslim kaydında ayrı tutulur. Bağımsız RGB ölçümü36 gerçek render karesinde yüz kaymasını0–1 ekran pikseli aralığında sınar. Normal oyuna dünya/sağlık/RNG setter eklenmedi.
 

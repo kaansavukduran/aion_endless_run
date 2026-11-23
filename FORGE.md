@@ -354,6 +354,6 @@ Platform fontu regresyonu ayrıca önizleme/roster bütçesine ve sıfır geniş
 Current source/provenance, actual checks and remaining six-hero work are in [the canonical Mission 1 handoff](docs/MISSION1-GAMEPLAY-HANDOFF.md). This is an interim integration, not user acceptance; Mission 2 is out of scope.
 
 
-### 0.50.0 · Six-hero Mission 1 technical candidate in verification
+### 0.50.0 · Published six-hero Mission 1 technical candidate
 
-Six-hero action art, abilities, genuine backsteps, one-release grenades, the lantern-grove opening and geometry-preserving pier facade are integrated. The canonical [Mission 1 handoff](docs/MISSION1-GAMEPLAY-HANDOFF.md) separates exact build evidence, staging, normal input, CI/Pages and user acceptance. No Mission 2 work.
+Six-hero action art, abilities, genuine backsteps, one-release grenades, the lantern-grove opening and geometry-preserving pier facade are integrated. PR10 merged as8167621 after green required CI; main45100627441 and exact-artifact Pages45102014529 passed. Initial public0.50 buildabfb88139e9af7d3 has13 verified public asset downloads, actual Ayça WATER17/Eren TERRACE15 full-mission checks, same legacy-profile online/offline10 and actual public Firefox153 startup/offline10. The canonical [Mission 1 handoff](docs/MISSION1-GAMEPLAY-HANDOFF.md) separates exact build evidence, retained first failures, normal input, old-save upgrade, CI/Pages and pending owner acceptance. Vercel separately reports Account is blocked. Final documentation/evidence changes do not change product code. No Mission2 work.

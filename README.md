@@ -4,7 +4,7 @@
 
 Aion, Kutsanmış, Ayça ve Eren korunur; Armadillo eğilerek kabuğuna kapanıp hücum eder, Kurbağa ağzına bağlı diliyle mesafeli saldırır. Yeni yetenekler **E / Y / bağlamsal dokunma düğmesi** ile kullanılır; yakındaki araç ve bilinçli silah değişimi önceliklidir. Armadillo için önce eğil. Ömer ve Melun yardımcı güçler olarak kalır. Klasik Sonsuz modu özgün dört kahramanla ayrıdır.
 
-Gerçek geri yürüme klipleri, tek bırakma anıyla el bombası, ardışık saldırı/toparlanma, altılı seçim ve yeni fener korusu açılışı entegre edilmiştir. Bu başlık bir canlı yayın ya da kullanıcı kabulü iddiası değildir: kaynak, test ve yayın durumları [tek Mission 1 devir kaydında](docs/MISSION1-GAMEPLAY-HANDOFF.md) ayrı tutulur. **Mission 2 geliştirilmez.**
+Gerçek geri yürüme klipleri, tek bırakma anıyla el bombası, ardışık saldırı/toparlanma, altılı seçim ve yeni fener korusu açılışı entegre edilmiştir. 0.50 GitHub Pages'te yayımlandı; kullanıcı görsel/oynanış kabulü bekliyor. Kaynak, test ve yayın durumları [tek Mission 1 devir kaydında](docs/MISSION1-GAMEPLAY-HANDOFF.md) ayrı tutulur. **Mission 2 geliştirilmez.**
 
 [GitHub Pages oyun adresi](https://kaansavukduran.github.io/aion_endless_run/)
 
