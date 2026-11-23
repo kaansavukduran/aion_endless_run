@@ -387,6 +387,7 @@ with sync_playwright() as playwright:
                 pass
             aim_retries = 0
             observations['aim_deaths'] = []
+            observations['aim_attempts'] = []
             def alive_aim_wait(expression, arg=None, timeout=10000):
                 script = "args=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);if(d.hp<=0 || ['dying','dead'].includes(d.state))return {actor_dead:d};return ("+expression+");}"
                 handle=page.wait_for_function(script,arg=arg,timeout=timeout)
@@ -400,27 +401,46 @@ with sync_playwright() as playwright:
                     try:
                         current=campaign()
                         if current['hp']<=0 or current['state'] in ['dying','dead']:raise AimActorDied(current)
+                        length = math.hypot(*target)
+                        expected = [target[0]/length, target[1]/length]
+                        attempt = {'case': index, 'keys': inputs, 'expected': expected, 'stage': 'neutralizing', 'initial': current}
+                        observations['aim_attempts'].append(attempt)
                         # Grounded Down is intentionally a horizontal crouch shot.
                         # Every downward test must use its own real jump, rather than
                         # the descending tail of the preceding case's flight.
                         keys([])
                         downward = target[1] > 0
                         ground_packet = None
+                        direction_armed = False
                         if downward:
-                            ground_packet = alive_aim_wait("d.state==='playing' && d.hp>0 && d.grounded ? d : false")
+                            ground_packet = alive_aim_wait("d.state==='playing' && d.hp>0 && d.grounded && !d.crouching && Math.abs(d.velocity[0])<1 ? d : false")
+                            attempt.update(stage='grounded', ground_before_jump=ground_packet)
+                            # Settle direction input BEFORE takeoff on the base
+                            # floor. Slow CDP key calls must not consume the short
+                            # rising/downward-aim window we are about to test.
+                            # On a raised one-way platform Down+Jump means drop;
+                            # retain jump-before-Down there instead.
+                            if abs(ground_packet['player'][1]-ground_packet['pose']['floor'])<1:
+                                keys(inputs)
+                                direction_armed = True
+                                armed = alive_aim_wait("d.state==='playing' && d.hp>0 && d.grounded && d.crouching && Math.abs(d.player[1]-d.pose.floor)<1 && (args===0 || Math.sign(d.aim[0])===args) ? d : false", target[0])
+                                attempt.update(stage='direction_armed_before_jump', armed=armed)
+                            (args.evidence/('aim-case-%d-attempt-%d.json' % (index, len(observations['aim_attempts'])))).write_text(json.dumps(attempt, ensure_ascii=False, indent=2)+'\n')
                             page.keyboard.press('Space')
+                            attempt['stage'] = 'jump_sent'
                         elif index in [0, 3]:
                             page.keyboard.press('Space')
-                        keys(inputs)
-                        length = math.hypot(*target)
-                        expected = [target[0]/length, target[1]/length]
+                        if not direction_armed:
+                            keys(inputs)
                         prepared = alive_aim_wait("d.state==='playing' && d.hp>0 && Math.hypot(d.aim[0]-args[0][0],d.aim[1]-args[0][1])<.03 && (!args[1] || (!d.grounded && d.player[1]<-20 && d.velocity[1]<0)) ? d : false", [expected, downward])
+                        attempt.update(stage='prepared', prepared=prepared)
                         shots = prepared['shots']
                         page.keyboard.down('f')
                         # Return the actual packet that first observes this shot. Do
                         # not re-read after landing and label its grounded aim as the
                         # direction of an earlier airborne shot.
                         data = alive_aim_wait("d.shots>args ? d : false", shots, timeout=5000)
+                        attempt.update(stage='shot_observed', observed_shot=data)
                         packet = {'case': index, 'keys': inputs, 'expected': expected, 'downward_air_required': downward, 'ground_before_jump': ground_packet, 'prepared': prepared, 'shots_before_fire': shots, 'observed_shot': data}
                         aim_samples.append(packet)
                         observations['keyboard_aim'] = aim_samples
