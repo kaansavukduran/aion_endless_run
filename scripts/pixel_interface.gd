@@ -423,15 +423,15 @@ func main(column: VBoxContainer) -> Button:
 	var roster_at: float=roster_y()
 	var roster_left: float=h.view_w*.5+14 if split_main() else 28.
 	roster_group.position=Vector2(roster_left,roster_at)
-	roster_group.add_child(choose)
-	choose.position=Vector2(0,-chooser_height()-6);choose.size.y=chooser_height()
+	h.menu_layer.add_child(choose)
+	choose.position=roster_group.position-Vector2(0,chooser_height()+6);choose.size.y=chooser_height()
 	roster(roster_group,Vector2.ZERO,roster_width())
 	if launch_pending:trigger_launch_preview(h.character)
-	fit_main.call_deferred(column,roster_group,h.layout_generation)
+	fit_main.call_deferred(column,choose,roster_group,h.layout_generation)
 	return arcade
 
-func fit_main(column: VBoxContainer,roster_group: Control,generation: int) -> void:
-	if not is_instance_valid(host) or not host.is_inside_tree() or generation!=host.layout_generation or not is_instance_valid(column) or not is_instance_valid(roster_group):return
+func fit_main(column: VBoxContainer,choose: Label,roster_group: Control,generation: int) -> void:
+	if not is_instance_valid(host) or not host.is_inside_tree() or generation!=host.layout_generation or not is_instance_valid(column) or not is_instance_valid(choose) or not is_instance_valid(roster_group):return
 	var panel: PanelContainer=column.get_parent()
 	# Size the background to the real wrapped content instead of a large fixed
 	# preview slot. The font and chosen text scale remain unchanged.
@@ -443,6 +443,7 @@ func fit_main(column: VBoxContainer,roster_group: Control,generation: int) -> vo
 		var gap: float=22. if host.interface_options.text_scale<=1. else 16.
 		var heading: float=chooser_height()
 		roster_group.position.y=minf(roster_group.position.y,panel.position.y+panel.size.y+gap+heading+(6. if heading>0. else 0.))
+		choose.position.y=roster_group.position.y-heading-6.
 
 
 func characters() -> void:
