@@ -4,10 +4,12 @@ Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVER
 
 ### Güncel durum · Mission 1 teknik adayı
 
+**Canlı 0.55.1 `391e2e13365e0776`.** Main `648e131163bb0e82669c60342ae0e81f5259c836`, [ana derleme](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45195038936) ve [Pages yayını](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45198476658) başarılı. 13 gerçek HTTP dosyası manifestteki boyut ve SHA-256 ile eşleşti. WASM MIME türü doğrulandı. Canlı Chromium yaşam/Continue ve çevrimdışı kontrolü 23/23, baştan sona oyun 27/27. Linux Firefox açılış, hareket ve dikeye dönme geçti. [Oyunu aç](https://kaansavukduran.github.io/aion_endless_run/)
+
 AIONIA v1.7 bu turda canlı standart belgesinden okundu. Drive’daki 21 Kasım tarihli Neon devam ve oynanış devri temel alındı. Eski 0.48 paketi zaten sürüm ağacında bulunduğu için yeniden aktarılmadı.
 
 - 0.55.0 [PR 15](https://github.com/kaansavukduran/aion_endless_run/pull/15) ile `main` `da4e7c669ebc015e010a6f3433f366dde55bebf9` oldu. [PR doğrulaması](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45183289836) 70 paket ve 54.940 kaynak kontrolüyle geçti. Android emülatörü, Windows/macOS paketleri ve Linux tarayıcı/renderer işleri de başarılı. PR Web çıktısı `9ee777554eedf4b8`. [Aynı main commit’inin derlemesi](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45187292906) ve [Pages dağıtımı](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45190702402) başarılı.
-- **Canlı 0.55.0 `ba50961df0326477`.** Manifest ve 13 gerçek HTTP dosyası SHA-256, boyut ve WebAssembly MIME türüyle doğrulandı. Canlı Chromium Continue, Firefox ve tam görev akışları çalışıyor. [GitHub Pages](https://kaansavukduran.github.io/aion_endless_run/)
+- **Önceki canlı 0.55.0 `ba50961df0326477`.** Manifest ve 13 gerçek HTTP dosyası SHA-256, boyut ve WebAssembly MIME türüyle doğrulandı. Canlı Chromium yaşam/Continue/offline 23 kontrol, Firefox açılış/hareket/dönüş ve Kök Geçidi tam görev 16 kontrol geçti. WebAudio duraklat, oynat ve yeniden duraklat dizisi de geçti. [GitHub Pages](https://kaansavukduran.github.io/aion_endless_run/)
 - Önceki canlı sürüm 0.52.0 `1303c953cb98dce4` ve kaynak `d85ac8a`. [Pages kaydı](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45182729343) ve 13 gerçek HTTP dosyasının boyutu, SHA-256 özeti ve WASM MIME türü doğrulandı. Gerçek canlı Chromium’da 23 kontrol ve Linux Firefox’ta açılış/hareket/dikey dönüş geçti. [Canlı oyun](https://kaansavukduran.github.io/aion_endless_run/)
 - 0.52.1 [PR 14](https://github.com/kaansavukduran/aion_endless_run/pull/14) ile `main` `9c26f28` oldu. Sıfır boyutlu dokunma düğmesi hatası yeniden üretildi ve düzeltildi. Linux renderer’da 42, hedefli kaynakta 1.565 kontrol geçti. İki Chromium main denemesinde sanal Start beklenirken test kahramanı üç yaşamını kaybetti. 0.52.1 için Pages yayını üretilmedi. Yerine geçen 0.55.0 PR’ında aynı sanal Start ve A akışı geçti. [0.52.1 ana derleme kaydı](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45183998492)
 - Gerçek yerel Web paketi 0.55.0 `6a6055e881b8dd9f`. Kök Geçidi’nde Armadillo 36.625, Su Kanalı’nda Kurbağa 32.275 skorla üç evreyi geçip sonuçlarını kaydetti. İki koşu da gerçek menü ve klavye/fare girdileriyle başladı. Su Kanalı’nın sonu aynı tarayıcı oturumunda klavye/fare kumandası devralınarak doğrulandı. Eren iki fiziksel üst ayrımdan Bahçe Terasları’nı ve Bakır Röle’yi geçti, üç boss evresini bitirdi ve 35.875 skoru kaydetti. Aynı tarayıcı oturumundaki ayrı kumanda kaydı üç evreyi gösterir. İlk sürücü arenada durdurulduğu için kendi evre örnekleri kontrolü başarısız kaldı. Kukla karakter veya durum enjeksiyonu kullanılmadı.
@@ -17,21 +19,35 @@ AIONIA v1.7 bu turda canlı standart belgesinden okundu. Drive’daki 21 Kasım 
 
 | Forge | Oyuna bağlanan kapsam | Gerçek doğrulama | Açık kalan |
 | --- | --- | --- | --- |
-| F1 · Yaşam ve Continue | Bir etkin, iki yedek yaşam. 10→0 Continue, altı kahraman, korunmuş karşılaşma ve şema 4 kayıt. | Canlı 0.52.0 normal Chromium 23 kontrol. PR 15 aynı kapıda 23 kontrol ve çevrimdışı tekrar yükleme. | Canlı adayda tekrar. Fiziksel cihaz odağı. |
+| F1 · Yaşam ve Continue | Bir etkin, iki yedek yaşam. 10→0 Continue, altı kahraman, korunmuş karşılaşma ve şema 4 kayıt. | Canlı 0.52.0 normal Chromium 23 kontrol. PR 15 aynı kapıda 23 kontrol ve çevrimdışı tekrar yükleme. | Fiziksel cihaz odağı. |
 | F2 · Araçlar | 4 araç, 1 HP, 100 ms darbe duruşu, tek patlama ve güvenli tahliye. | Motor yaşam/araç paketi ve Xvfb gerçek çizim geçti. | Dört aracın her birinde aynı normal oyuncu akışının kayıtları. |
-| F3 · Arazi | Yedi bölümde doğal yükselti ve havza, final arenasında ayrıca arazi. Sekme, atış, NPC, araç ve yedek yaşam aynı yüzeyi kullanır. | Gerçek çizim ve üç rota üzerinde sıradan girdi. Su Kanalı ayağı y=208, köprü sonrası açık destek y=−98. | Yeni fiziksel düzenin canlı rotaları. |
+| F3 · Arazi | Yedi bölümde doğal yükselti ve havza, final arenasında ayrıca arazi. Sekme, atış, NPC, araç ve yedek yaşam aynı yüzeyi kullanır. | Gerçek çizim ve üç rota üzerinde sıradan girdi. Su Kanalı ayağı y=208, köprü sonrası açık destek y=−98. | Su ve Teras’ın yeni pakette ayrı canlı tekrarları. |
 | F4 · Kara atıcıları | İki özgün atlas ve iki ayrı düşman rolü. Her düşmana altı yürüyüş karesi, ayrı hazırlık/atış/toparlanma ve üç yenilgi karesi. | 24 hedefli motor kontrolü ve dört çizim. İki rol, normal Chromium’da ayrı karşılaşmalarda hazırlık/atış/toparlanma verdi. | Son adayda yeni seslerin normal karşılaşma kaydı. |
-| F5 · Kök Motoru | Arenadan yükselen boss, üç evre, atış portları, kırılan üst yol, çekirdek penceresi, son hücum ve zafer. | Başlangıç tabancası ile ayrı arena koşusunda 6/6 kahraman. Normal girişten üç tamamlanmış rota. Yeniden başlatma rekoru korudu. | Canlı sürümle tam rota ve oyuncu kabulü. |
+| F5 · Kök Motoru | Arenadan yükselen boss, üç evre, atış portları, kırılan üst yol, çekirdek penceresi, son hücum ve zafer. | Başlangıç tabancası ile ayrı arena koşusunda 6/6 kahraman. Normal girişten üç tamamlanmış rota. Yeniden başlatma rekoru korudu. | Oyuncu kabulü. |
 | F6 · Sanat, giriş ve performans | Aion ve Kutsanmış’ın pafta temelli atlasları önceki teslimden sürer. Yeni düşmanlar ve arena çizimi eklendi. | İki dilde yerleşim ve Xvfb çizimi. PR’da 38 genel tarayıcı, 55 Forge tarayıcı kontrolü, sıfır kaydedilen hata. WebAudio oynat/duraklat örneği. | Yoğun finalin cihaz doğrulaması ve kapsamlı hareket kaydı. |
-| F7 · Yayın ve kabul | 0.55.0 `main` ve Pages’te. | PR ve main paketleri geçti. Gerçek sitede `ba50961df0326477` ve 13 dosya doğrulandı. | Canlı normal final ve açık kullanıcı kabulü. |
+| F7 · Yayın ve kabul | 0.55.1 `main` ve Pages’te. | Tam ana kapı, Pages, canlı 13 dosya ve baştan sonuca normal Kök Geçidi 27/27 geçti. | Fiziksel cihazlar ve açık kullanıcı kabulü. |
 
 Yerel kanıt kökleri `/workspace/work/arcade-lives` ve `/workspace/work/mission1-root-engine-runtime`. Dosya adları `roots-final-normal/playthrough.json`, `water-final-frog/operator-arena-result.json`, `water-final-frog/actual-terrain.json`, `terrace-final-eren/manual-fork-proof.jsonl` ve `pr15-evidence-0/source-results.json`. Yerel paket ile PR paketi farklı parmak izlerine sahiptir. Oyun kaynakları karşılaştırılmıştır ve her ölçüm kendi paketiyle anılır.
 
 ### 0.55.1 · Dikey menü ve arena toparlanması
 
-- [PR 16](https://github.com/kaansavukduran/aion_endless_run/pull/16), `de8d192`. Dikeyde ölçülmüş eylem panelinin hemen arkasına kahraman seçimi geliyor. Önizleme için daha geniş bir oyun sahnesi kullanılıyor. 320 piksel ve %200 metin dahil 1.181 yerleşim kontrolü geçti. Bu sürümün iki dilli gerçek tarayıcı ve yayın kapıları ayrıca izleniyor.
+- [PR 16](https://github.com/kaansavukduran/aion_endless_run/pull/16), `de8d192`. Dikeyde ölçülmüş eylem panelinin hemen arkasına kahraman seçimi geliyor. Önizleme için daha geniş bir oyun sahnesi kullanılıyor. 320 piksel ve %200 metin dahil 1.181 yerleşim kontrolü geçti. Gerçek Chromium’da Türkçe standart menü 30, İngilizce %200 menü 34 kontrol geçti. [Son PR çalışması](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45191575133) 70 paket ve 55.268 kaynak kontrolüyle başarılı. Windows, macOS, Android emülatörü ve Linux Web PASS. 0.55.1 `main` `648e131163bb0e82669c60342ae0e81f5259c836`. [Main yayın kapısı](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45195038936) ve [Pages](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45198476658) geçti. Canlı normal koşu da geçti.
 - Gerçek Teras koşusunda art arda ölüm oyuncuyu Kök Motoru’ndan uzaklaştırdı, sağ kalan dronlar yeni dalgayla üst üste bindi. Yedek yaşam kamerası artık etkin boss’un sol yaklaşımını çerçeveliyor. Eski kamera zaten karşılaşmayı gösteriyorsa konumu korunur. En fazla iki etkin dron var ve sonraki dalga yalnız kaybedilen dronları yerine koyar. Boss sağlığı, kırılmış portlar, gerçek üst soldan giriş ve tek yaşam tüketimi korunur.
+- Tam normal Aion koşusu `e02bd1074e7d0e3e` PR paketinde sonuç verdi. 26 kontrol, 34.875 skor, üç boss evresi, normal ana menü dönüşü ve sıfır kaydedilen tarayıcı hatası. Dokuz gerçek yedek girişte oyuncu etkin yaklaşımda kaldı ve gözlenen yaşayan dron zirvesi birdi. Kontrollü motor sınır testi iki dron sınırını ve yenileme olayını ayrıca çalıştırdı. `pr16-normal-aion/results.json` ve `boss-reentry.json`.
+- Önceki 0.52.0 → 0.55.0 → 0.55.1 geçişi üç gerçek paketle denendi. İlk yerel denemenin servisi süre sınırında etkinleşmedi. İkinci deneme son paketi, çevrimiçi kaydı ve normal duraklatma sonrasındaki çevrimdışı kaydı doğruladı. `update-052-to-0551-worker/update-results.json`.
 - Yeni yaşam/araç paketi eski kaynakta 15 hatayı yakaladı. Düzeltmeden sonra 184 kontrolün hepsi geçti. Ayrı arenadan altı kahramanla üç evre, başlangıç tabancası ve gerçek tekrar düğmesi tekrar geçti. Kayıtlı Teras koşusu değişiklik öncesi 0.55.0 davranışını gösterir.
+
+### Canlı 0.55.1 görev kaydı
+
+Aion, gerçek Pages adresinde normal klavye ve fare girdileriyle açılıştan Kök Motoru sonucuna ulaştı. İki fiziksel yol ayrımı ve kök kilidi geçildi. Üç evre sonunda boss HP 0, skor **34.275**, 13 Continue ve 40 ölüm kaydedildi. Oyunun zaman sayacı 274,35 sn, otomasyonun duvar süresi 444,02 sn. Bu koşuda 27 kontrol geçti. On bir gerçek yedek giriş boss yaklaşımında kaldı. Gözlenen yaşayan dron zirvesi birdi. Sınır testi iki dronu ve yenileme olayını ayrıca doğruladı. Gerçek **Ana menü** eylemi tamamlanan sonucu korudu. `live-0551-aion/results.json`, `boss-reentry.json` ve `mission-complete.png`.
+
+Aynı canlı pakette Chromium’un 23 yaşam/Continue kontrolü gerçek ağ engeliyle çevrimdışı açılışı ve dikey altılı seçimi kapsar. Firefox aynı paketle gerçek klavye ve dikeye dönüş akışından geçti. Yerel eski bir 0.55.1 ara pakette sıfır yazı boyutu konsol kaydı görüldü. Son PR ve main Linux kapıları ile canlı normal koşuda yeniden görülmedi. Fiziksel cihaz gözlemi ve açık kullanıcı kabulü bekleniyor.
+
+### Canlı 0.55.0 görev kaydı
+
+Armadillo normal açılış, brifing, iki fiziksel yol ayrımı ve açılan kök kapağından Bakır Röle'ye ulaştı. Kök Motoru'nun üç evresini geçerek **34.825** puanla sonuç ekranına çıktı. 15 Continue kullanıldı. Kaydedilen sonuç ana menüye dönünce korundu. Chromium'da 16 kontrol geçti, tarayıcı veya Godot betik hatası kaydedilmedi. Canlı paket `ba50961df0326477`, kanıt `live-055-roots/results.json`, `playthrough.json` ve `mission-complete.png`. 0.55.1'in arena iyileştirmesi bu koşuda yer almıyor.
+
+Çevrimdışı sayaç ve altı kahramanın canlı tarayıcı sonucu `root-live-arcade/arcade-lives.json` içinde. Masaüstü sanal ekranın sekme ve pencere denemeleri gerçek DOM odak kaybı oluşturmadı. Bu koşul **NOT TESTED**, motor odak olayı geçmiştir. Üç gerçek paketle yerel güncelleme testinde eski kayıt güncel çıktıdan hem çevrimiçi hem çevrimdışı açıldı. Çevrimdışı karşılaştırma, aradaki normal oynamadan sonra duraklatılarak oluşturulan son gerçek kaydı esas aldı. Önceki iki başarısız örnek ve kimlik farkı günlükleri tutuldu. Doğrulanan son güncellemede kaybolan ödül kimliği yok.
 
 ### Yerel tarayıcı performans ölçümleri
 
@@ -47,10 +63,12 @@ Chromium SwiftShader, 1280×720, yerel HTTP, iki ayrı yeni profil ve pasif QA t
 
 Oyunda gözlenen kare aralıkları bu yük altında hedef cihaz performansı ölçümü olarak kullanılamaz. Açılış örneğinde 0.55.0 daha uzun sürdü. Beş örnekteki heap değişimi kalıcı sızıntıyı doğrulamaz. Kanıtlar `performance-baseline/performance-session.json` ve `performance-candidate/performance-session.json` altında.
 
+Sonraki iki ölçümde başka yerel tarayıcı koşusu çalışmıyordu. Aynı Chromium ve yerel sunuş koşulunda 0.52.0 ilk açılış **16,98 sn**, önbellekli **12,79 sn**, beş yeniden başlatma medyanı **3,81 sn**. 0.55.1 PR paketi ilk açılış **14,95 sn**, önbellekli **12,55 sn**, medyan **3,77 sn**. İki sürüm de beş örnekte 24 düğüm gösterdi. Her sürüm için tek ilk açılış gözlendiği için bu sonuçlar genellenmiş hızlanma ölçüsü olarak kullanılmaz. Ham dosyalar `performance-clean-baseline` ve `performance-clean-0551` altında.
+
 ### Sıradaki ilk işler
 
-1. 0.55.0 canlı açılış, Continue, ses ve normal rota sonucunu kaydet. 0.55.1’in aynı kaynak doğrulamasını ve gerçek tarayıcı kontrollerini tamamla.
-2. Güncel pakette tam canlı Mission 1 oynat. Fiziksel cihaz ve kullanıcı onayı açık.
+1. Oyuncunun Mission 1 görsel ve oynanış kabulü bekleniyor. Geri bildirimi canlı sürüm, karakter ve rota ile eşleştir.
+2. Fiziksel Poco/iPhone ve gerçek Xbox/PS kolu açıldığında mevcut doğrulama matrisiyle dene.
 
 ## 23 Kasım 2026 · Yerel 0.54.0 kara atıcıları adayı
 
