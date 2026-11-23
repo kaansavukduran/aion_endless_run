@@ -64,6 +64,7 @@ func icon_image() -> Image:
    if code!=".":canvas.set_pixel(x+1,y+1,accent if code=="3" else light)
  return canvas
 func _draw() -> void:
+ if size.x<1. or size.y<1.:return
  var side:=grid_size()
  var key:=JSON.stringify([side,pressed,disabled,palette])
  if not skins.has(key):skins[key]=ImageTexture.create_from_image(skin_image(side))
@@ -78,7 +79,7 @@ func _draw() -> void:
  var origin: Vector2=((Vector2((size.x-icon_size.x)*.5,size.y*.13)*scale_value).round()/scale_value)+shift
  draw_texture_rect(icons[icon_key],Rect2(origin,icon_size),false)
  if font:
-  var font_size:=roundi(size.x*.21)
+  var font_size:=maxi(1,roundi(size.x*.21))
   while font_size>16 and font.get_string_size(caption,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>size.x*.80:font_size-=1
   var measured:=font.get_string_size(caption,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size)
   var at: Vector2=(Vector2((size.x-measured.x)*.5,size.y*.80)*scale_value).round()/scale_value+shift

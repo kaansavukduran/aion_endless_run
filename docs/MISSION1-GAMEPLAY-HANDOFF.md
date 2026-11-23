@@ -2,6 +2,12 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 23 Kasım 2026 · 0.52.1 · Dokunma düğmesi yerleşimi
+
+- 0.52.0 PR’sı geçti ve `d85ac8a` ile `main`e alındı. İlk `main` paketinde normal kurtarma akışı geçti. Konsol kapısı `TextServer` sıfır yazı boyutu hatasını yakaladı. Başarısız iş aynı `main` commit’inde yeniden çalıştırılıyor. [GitHub Actions](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45177198891)
+- Gerçek Linux çiziminde aynı hata sıfır boyutlu mobil Ateş düğmesiyle yeniden üretildi. Yığın `scripts/touch_button.gd` içindeki yazı ölçümünü gösterdi. Boyutu henüz verilmemiş düğmeler çizilmiyor. Ufak geçici boyutta yazı ölçüsü pozitif tutuluyor.
+- Yeni görsel regresyon sıfır boyutu, iki piksellik geçici boyutu ve geçerli düğme boyutunu çiziyor. Boyut verilince dokunma alanı açılıyor. Linux render sürecindeki 42 kontrol geçti. 0.52.1’in tam CI ve Pages doğrulaması bekliyor.
+
 ## 23 Kasım 2026 · 0.52.0 · Arcade yaşamı ve araçlar
 
 - Başlangıç, uzaktaki `main` `482d5781da4c58507031c5ce2ea47416750bfd44` ve canlı Pages 0.51.1 (`93a6fb65be472fed`). Neon'un iki Drive devir belgesi 0.48 paketini ve 28 dosya manifestini veriyor. Güncel AIONIA belgesi v1.7. Depodaki altılı kadro ve 0.51.1 düzeltmeleri temel alındı.
