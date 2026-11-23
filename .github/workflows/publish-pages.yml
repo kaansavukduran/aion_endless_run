@@ -4,6 +4,12 @@ on:
     workflows: ['Test and package']
     types: [completed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: Successful main Test and package run to publish again
+        required: true
+        type: string
 permissions:
   contents: read
   actions: read
@@ -14,20 +20,44 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy:
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository
+    if: >-
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository) ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-24.04
+    env:
+      PAGES_ARTIFACT: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Select the successful main package
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN: ${{ github.event.workflow_run.id || inputs.source_run }}
+        run: |
+          [[ "$SOURCE_RUN" =~ ^[0-9]+$ ]]
+          meta=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN")
+          sha=$(jq -er --arg repo "$GITHUB_REPOSITORY" \
+            'select(.conclusion == "success" and .event == "push" and .head_branch == "main"
+            and .head_repository.full_name == $repo and .path == ".github/workflows/build.yml")
+            | .head_sha' <<< "$meta")
+          printf 'run_id=%s\nsha=%s\n' "$SOURCE_RUN" "$sha" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ steps.source.outputs.sha }}
+      - name: Require identical current game sources for a manual retry
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git fetch --no-tags --depth=1 origin refs/heads/main
+          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code HEAD FETCH_HEAD -- . ':(exclude).github/workflows/publish-pages.yml'
       - uses: actions/configure-pages@v5
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ steps.source.outputs.run_id }}
           name: web-game
           path: site
       - name: Verify the exact web output of the successful platform run
@@ -49,7 +79,29 @@ jobs:
           print('Verified',version,meta['build'],'and every fingerprinted asset')
           PYCODE
       - uses: actions/upload-pages-artifact@v3
+        id: upload
         with:
           path: site
+          name: ${{ env.PAGES_ARTIFACT }}
+      - name: Wait for the exact uploaded archive to be listed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact_id }}
+        run: |
+          [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          for delay in 1 2 4 8 15; do
+            sleep "$delay"
+            if result=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=$PAGES_ARTIFACT"); then
+              if jq -e --arg name "$PAGES_ARTIFACT" --argjson id "$ARTIFACT_ID" \
+                '.artifacts | length == 1 and .[0].id == $id and .[0].name == $name and .[0].expired == false' \
+                <<< "$result" > /dev/null; then
+                exit 0
+              fi
+            fi
+          done
+          echo "::error::The exact uploaded Pages artifact is missing from the workflow list."
+          exit 1
       - uses: actions/deploy-pages@v4
         id: deployment
+        with:
+          artifact_name: ${{ env.PAGES_ARTIFACT }}
