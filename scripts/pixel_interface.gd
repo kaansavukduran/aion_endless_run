@@ -3,6 +3,7 @@ extends RefCounted
 var host
 var roster_page := 0
 var roster_previews: Dictionary = {}
+var last_roster_capacity := 0
 
 var launch_pending := false
 var launch_committed := false
@@ -20,7 +21,7 @@ func request_launch(callback: Callable,quick: bool=false) -> void:
 	# A saved selection can be on a different roster page. Show its real card
 	# before starting the transition rather than animating another identity.
 	if not is_instance_valid(roster_previews.get(host.character,null)):
-		roster_page=host.FRIENDS.find(host.character)/2
+		roster_page=roster_page_for(host.character)
 		host.rebuild()
 	trigger_launch_preview(host.character)
 
@@ -53,12 +54,25 @@ func refresh_preview_state(tile: Button,image: RunnerHeroPreview,id: String) -> 
 	if not is_instance_valid(image):return
 	image.set_select_state("launch" if launch_pending and id==host.character else ("select" if id==host.character else ("focus" if tile.has_focus() or tile.is_hovered() else "idle")))
 
-func paged_roster() -> bool:
-	if host.page!="main":return false
+func main_roster_geometry(allow_paging: bool=true) -> Dictionary:
+	var width: float=host.view_w-56 if host.portrait else host.view_w*.5-42
+	return roster_geometry(width,false,allow_paging,true)
+
+func main_roster_paged() -> bool:
 	if host.portrait and (host.interface_options.text_scale>1. or host.FRIENDS.size()>4):return true
-	# Measure the actual font before choosing pages; a wide system face may
-	# need more height than two rows can occupy in a short landscape window.
-	return float(roster_geometry(roster_width(),false,false).total_height)>host.view_h-80.
+	return float(main_roster_geometry(false).total_height)>host.view_h-80.
+
+func paged_roster() -> bool:
+	return host.page=="main" and main_roster_paged()
+
+func roster_page_capacity() -> int:
+	return int(main_roster_geometry(false).columns) if main_roster_paged() else host.FRIENDS.size()
+
+func roster_page_count() -> int:
+	return ceili(float(host.FRIENDS.size())/roster_page_capacity())
+
+func roster_page_for(id: String) -> int:
+	return floori(float(maxi(0,host.FRIENDS.find(id)))/roster_page_capacity())
 
 
 func split_main() -> bool:
@@ -244,18 +258,27 @@ func card(width: float) -> VBoxContainer:
 	else:panel.add_child(column)
 	return column
 
-func roster_geometry(width: float,separate: bool=false,allow_paging: bool=true) -> Dictionary:
+func roster_geometry(width: float,separate: bool=false,allow_paging: bool=true,for_main: bool=false) -> Dictionary:
 	var h=host
 	var enlarged: bool=h.interface_options.text_scale>1.0
-	var columns: int=2 if split_main() or h.portrait or separate else h.FRIENDS.size()
+	var columns: int=2 if for_main or split_main() or h.portrait or separate else h.FRIENDS.size()
 	var stacked: bool=true
-	var tile_w: float=(width-float(columns-1)*10)/columns
 	var tile_h:=132.0 if h.portrait else 152.0
 	var probe: Label=h.wrap_label("",20)
 	probe.add_theme_font_size_override("font_size",h.ui_size(20))
 	probe.theme=h.ui.theme
 	probe.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	h.ui.add_child(probe)
+	# Keep the user's exact font and size. A canonical name that cannot fit
+	# a column gets a wider card instead of a character-level orphan line.
+	if for_main or h.page=="main":
+		var font: Font=probe.get_theme_font("font")
+		var longest:=0.
+		for id in h.FRIENDS:
+			longest=maxf(longest,font.get_string_size(h.character_name(id),HORIZONTAL_ALIGNMENT_LEFT,-1,h.ui_size(20)).x)
+		while columns>1 and longest>floorf((width-float(columns-1)*10)/columns)-16:
+			columns-=1
+	var tile_w: float=(width-float(columns-1)*10)/columns
 	# Label shaping includes the actual fallback font, smart wrapping and theme
 	# line spacing. Measure at the smallest integer width the grid can allocate.
 	probe.size=Vector2(maxf(60,floorf(tile_w)-(16 if stacked else 76)),0)
@@ -265,7 +288,7 @@ func roster_geometry(width: float,separate: bool=false,allow_paging: bool=true) 
 			probe.get_line_count()
 			tile_h=maxf(tile_h,ceilf(probe.get_minimum_size().y)+22+(96 if stacked else 0))
 	probe.free()
-	var paged: bool=allow_paging and not separate and paged_roster()
+	var paged: bool=allow_paging and not separate and (main_roster_paged() if for_main else paged_roster())
 	var rows:=1 if paged else ceili(float(h.FRIENDS.size())/columns)
 	return {"columns":columns,"width":tile_w,"height":tile_h,"total_height":tile_h*rows+float(rows-1)*10+(ceilf(h.ui_size(30)*1.6)+28 if paged else 0)}
 
@@ -293,6 +316,12 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 	var enlarged: bool=h.interface_options.text_scale>1.0
 	var geometry:=roster_geometry(width,separate)
 	var columns: int=geometry.columns
+	var paged: bool=paged_roster() and not separate
+	var capacity: int=columns if paged else h.FRIENDS.size()
+	if h.page=="main" and not separate:
+		if last_roster_capacity!=capacity:roster_page=floori(float(maxi(0,h.FRIENDS.find(h.character)))/capacity)
+		last_roster_capacity=capacity
+		roster_page=clampi(roster_page,0,ceili(float(h.FRIENDS.size())/capacity)-1)
 	var grid:=GridContainer.new()
 	grid.columns=columns
 	grid.add_theme_constant_override("h_separation",10)
@@ -300,7 +329,7 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 	parent.add_child(grid)
 	grid.position=at
 	var tile_w: float=geometry.width
-	var shown: Array=h.FRIENDS.slice(roster_page*2,roster_page*2+2) if paged_roster() and not separate else h.FRIENDS
+	var shown: Array=h.FRIENDS.slice(roster_page*capacity,roster_page*capacity+capacity) if paged else h.FRIENDS
 	for id in shown:
 		var tile: Button=h.button("",func():h.select_character(id),id==h.character)
 		tile.name=("Select_" if separate else "StartSelect_")+id
@@ -329,6 +358,7 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 		tile.focus_exited.connect(func():refresh_preview_state(tile,image,id))
 		tile.mouse_exited.connect(func():refresh_preview_state(tile,image,id))
 		var title: Label=h.wrap_label(h.character_name(id),20,"fff1d5")
+		title.name="HeroName"
 		title.add_theme_font_size_override("font_size",h.ui_size(20))
 		title.add_theme_color_override("font_color",h.interface_options.color("on_primary" if id==h.character else "text"))
 		title.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -336,10 +366,11 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 		title.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 		if stacked:title.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		row.add_child(title)
-	if paged_roster() and not separate:
+	if paged:
+		var pages:=ceili(float(h.FRIENDS.size())/capacity)
 		var navigation:=HBoxContainer.new();navigation.position=at+Vector2(0,float(geometry.height)+10);parent.add_child(navigation)
 		var before: Button=h.button("‹",func():roster_page=maxi(0,roster_page-1);h.rebuild());before.name="RosterPrevious";before.disabled=roster_page==0
-		var after: Button=h.button("›",func():roster_page=mini(ceili(float(h.FRIENDS.size())/2.)-1,roster_page+1);h.rebuild());after.name="RosterNext";after.disabled=roster_page>=ceili(float(h.FRIENDS.size())/2.)-1
+		var after: Button=h.button("›",func():roster_page=mini(pages-1,roster_page+1);h.rebuild());after.name="RosterNext";after.disabled=roster_page>=pages-1
 		for b in [before,after]:b.custom_minimum_size=Vector2((width-12)*.5,62);navigation.add_child(b)
 
 func main(column: VBoxContainer) -> Button:

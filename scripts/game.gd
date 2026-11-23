@@ -835,7 +835,7 @@ func select_character(id: String) -> void:
 	if pixel_ui.launch_pending:return
 	if id not in FRIENDS or world.state != "ready" or page not in ["main", "characters"]: return
 	character = id
-	pixel_ui.roster_page=FRIENDS.find(id)/2
+	pixel_ui.roster_page=pixel_ui.roster_page_for(id)
 	world.character = id
 	clear_held_controls()
 	save_settings()

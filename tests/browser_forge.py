@@ -129,6 +129,21 @@ with sync_playwright() as playwright:
             page.wait_for_selector('canvas[data-ui-ready="true"]', timeout=30000)
             buttons = front_buttons()
         button = next((button for button in buttons if button['name'] == name), None) if name else next((button for button in buttons if button['text'] == text), None)
+        if not button and not in_campaign and name and name.startswith('StartSelect_'):
+            roster = ['aion', 'sheep', 'rabbit', 'eren', 'armadillo', 'frog']
+            target = roster.index(name[len('StartSelect_'):])
+            visited_rosters = set()
+            for _ in roster:
+                names = frozenset(b['name'] for b in buttons if b['name'].startswith('StartSelect_'))
+                if not names or names in visited_rosters:
+                    break
+                visited_rosters.add(names)
+                indices = [roster.index(value[len('StartSelect_'):]) for value in names]
+                tap('RosterPrevious' if target < min(indices) else 'RosterNext')
+                buttons = front_buttons()
+                button = next((value for value in buttons if value['name'] == name), None)
+                if button:
+                    break
         if not button and not in_campaign and name not in ['NextPage', 'PreviousPage', 'RosterNext', 'RosterPrevious']:
             # Use the real visible pager, never reveal hidden controls via JS.
             visited = set()
@@ -150,6 +165,7 @@ with sync_playwright() as playwright:
                     break
         assert button, ('Visible action not found', name, text, [button['name'] for button in buttons])
         before_page = int(raw().get('menuPage', 0)) if not in_campaign else None
+        before_roster = [b['name'] for b in buttons if b['name'].startswith('StartSelect_')]
         before_campaign_generation = campaign().get('ui_generation', 0) if in_campaign else None
         page.touchscreen.tap(*coords(button['x']+button['w']/2, button['y']+button['h']/2, in_campaign))
         if in_campaign:
@@ -161,6 +177,8 @@ with sync_playwright() as playwright:
             if name in ['NextPage', 'PreviousPage']:
                 expected = before_page+(1 if name == 'NextPage' else -1)
                 page.wait_for_function("expected=>{const d=document.querySelector('canvas').dataset;return Number(d.menuPage)===expected && d.uiReady==='true'}", arg=expected, timeout=15000)
+            if name in ['RosterNext', 'RosterPrevious']:
+                page.wait_for_function("old=>{const d=document.querySelector('canvas').dataset;const names=JSON.parse(d.ui).filter(b=>b.name.startsWith('StartSelect_')).map(b=>b.name);return d.uiReady==='true' && JSON.stringify(names)!==JSON.stringify(old)}", arg=before_roster, timeout=15000)
         page.wait_for_timeout(180)
 
     def fit(label, in_campaign=False):
@@ -238,27 +256,15 @@ with sync_playwright() as playwright:
                 check(raw()['textScale'] == '2.0', 'Actual settings apply 200% text without changing the selected font')
                 fit('Desktop 200% main')
             page.screenshot(path=str(args.evidence/'main.png'))
-            for hero in ['aion', 'sheep', 'rabbit', 'eren']:
+            for hero in ['aion', 'sheep', 'rabbit', 'eren', 'armadillo', 'frog']:
                 tap('ChooseHero')
-                for _ in range(12):
-                    if any(button['name'] == 'Select_'+hero for button in front_buttons()):
-                        break
-                    tap('NextPage')
                 tap('Select_'+hero)
                 check(not any(button['name'] in ['Select_owl', 'Select_wolf'] for button in front_buttons()), 'Retired owl/wolf are not offered as playable choices')
                 # Selection may rebuild and repaginate the current card.
-                for _ in range(12):
-                    if any(button['name'] == 'ConfirmHero' for button in front_buttons()):
-                        break
-                    tap('NextPage')
                 tap('ConfirmHero')
                 ready()
                 check(raw()['character'] == hero, 'Real character selection and confirmation: '+hero)
-            if args.large_text:
-                for _ in range(4):
-                    if any(button['name'] == 'StartSelect_aion' for button in front_buttons()):
-                        break
-                    tap('RosterPrevious')
+                if args.large_text:page.screenshot(path=str(args.evidence/('main-200-'+hero+'.png')))
             tap('StartSelect_aion')
             tap('HowToPlay')
             fit('Interactive help')

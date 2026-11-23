@@ -74,13 +74,13 @@ func run():
    for lang in ["tr","en"]:
     g.language=lang;g.page="main";g.language_picker_open=false;g.rebuild();await process_frame;await process_frame;await process_frame
     var screen:=Rect2(0,0,g.view_w,g.view_h)
-    # Large portrait uses explicit two-card pages; visit them through the real controls.
+    # Visit every measured roster page through its real controls.
     var previous=g.menu_layer.find_child("RosterPrevious",true,false)
     while previous!=null and not previous.disabled:
      previous.pressed.emit();await process_frame;await process_frame;await process_frame
      previous=g.menu_layer.find_child("RosterPrevious",true,false)
     var seen:={}
-    for roster_page in (ceili(float(g.FRIENDS.size())/2.) if g.pixel_ui.paged_roster() else 1):
+    for roster_page in g.pixel_ui.roster_page_count():
      var tiles: Array=g.menu_layer.find_children("StartSelect_*","Button",true,false)
      var panel: Control=g.menu_layer.get_node("PagePanel")
      for tile in tiles:
@@ -88,6 +88,9 @@ func run():
       check(screen.grow(1).encloses(tile.get_global_rect()),"200% hero card fits "+family+lang+str(dims)+str(tile.name))
       check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"200% hero title/image fits its actual card "+family+lang+str(dims)+str(tile.name)+" tile="+str(tile.get_global_rect())+" body="+str(tile.get_child(0).get_global_rect()))
       check(not panel.get_global_rect().intersects(tile.get_global_rect()),"Large-text main actions never overlap hero cards")
+      var name_label: Label=tile.find_child("HeroName",true,false)
+      check(name_label!=null and name_label.get_line_count()==1,"Actual canonical hero name has no character-only orphan line at200% "+family+lang+str(dims)+str(tile.name))
+      if name_label!=null:check(name_label.text==g.character_name(str(tile.name).trim_prefix("StartSelect_")) and name_label.get_theme_font_size("font_size")==g.ui_size(20),"Canonical name and requested font size stay unchanged "+str(tile.name))
      var following=g.menu_layer.find_child("RosterNext",true,false)
      if following!=null:
       check(screen.grow(1).encloses(following.get_global_rect()),"Actual roster next action is inside viewport")
@@ -101,6 +104,24 @@ func run():
     check(languages.size()==3,"System, Turkish and English remain individually reachable")
     for option in languages:check(screen.grow(1).encloses(option.get_global_rect()),"200% language fits "+family+lang+str(dims)+str(option.name))
     g.language_picker_open=false
+ # Exercise the actual selection delegate in both Main and Characters,
+ # then change capacity through text/viewport settings while Frog is selected.
+ root.size=Vector2i(1280,720);await process_frame;g.touch_mode=false;g.language="en";g.interface_options.text_scale=2;g.build_theme();g.ui.theme=g.ui_theme;g.main_menu();g.select_character("sheep")
+ await process_frame;await process_frame;await process_frame
+ var sheep: Button=g.menu_layer.find_child("StartSelect_sheep",true,false)
+ check(sheep!=null and sheep.is_visible_in_tree(),"EN200 selection reveals the actual Kutsanmış card")
+ if sheep!=null:
+  var name_label: Label=sheep.find_child("HeroName",true,false)
+  check(name_label!=null and name_label.text=="Kutsanmış" and name_label.get_line_count()==1 and name_label.get_theme_font_size("font_size")==40,"Actual EN200 Kutsanmış renders on one line at the requested40px size")
+ check(g.pixel_ui.roster_page==g.pixel_ui.roster_page_for("sheep"),"Selection delegate uses measured Main capacity")
+ g.show_page("characters");g.select_character("frog");g.main_menu();await process_frame;await process_frame;await process_frame
+ check(g.menu_layer.find_child("StartSelect_frog",true,false)!=null and g.pixel_ui.roster_page==g.pixel_ui.roster_page_for("frog"),"Characters selection lands on the correct visible Main roster page")
+ root.size=Vector2i(393,873);await process_frame;g.rebuild();await process_frame;await process_frame;await process_frame
+ check(g.menu_layer.find_child("StartSelect_frog",true,false)!=null and g.pixel_ui.roster_page==g.pixel_ui.roster_page_for("frog"),"Resize retains the selected Frog on its actual capacity page")
+ g.interface_options.text_scale=1;g.build_theme();g.ui.theme=g.ui_theme;g.rebuild();await process_frame;await process_frame;await process_frame
+ check(g.menu_layer.find_child("StartSelect_frog",true,false)!=null and g.pixel_ui.roster_page==g.pixel_ui.roster_page_for("frog"),"Changing text capacity preserves the selected card")
+ root.size=Vector2i(1152,648);await process_frame;g.rebuild();await process_frame;await process_frame;await process_frame
+ check(int(g.pixel_ui.main_roster_geometry().columns)==2 and not g.pixel_ui.paged_roster() and g.menu_layer.find_children("StartSelect_*","Button",true,false).size()==6,"Returning to desktop100% restores the unchanged six-card grid")
  g.build_theme();g.ui.theme=g.ui_theme
  g.interface_options.text_scale=1;g.main_menu();g.select_character("rabbit");g.start_run();g.press_jump("key");advance(g.world,.5);g.release_jump("key");g.world.step(.01)
  check(g.world.y<0,"Actual scene key press/release routes into charged leap")
