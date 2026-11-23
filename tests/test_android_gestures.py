@@ -4,7 +4,8 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'packaging'))
-from android_gestures import charged_jump_sequence, wait_for_charged_jump
+from android_gestures import (charged_jump_sequence, start_grounded_gesture,
+                              wait_for_charged_jump)
 
 
 def state(character='eren', *, charging=False, airborne=False, ratio=0,
@@ -88,6 +89,71 @@ class ChargedJumpTests(unittest.TestCase):
                          {'charge': None, 'release': None})
         with self.assertRaises(ValueError):
             charged_jump_sequence([], -1, 'eren')
+
+
+class GroundedGestureStartTests(unittest.TestCase):
+    def test_issue_and_cursor_share_the_accepted_ground_packet_read(self):
+        history = [state(airborne=True), state()]
+        calls = []
+        def read():
+            calls.append('read')
+            return history
+        def issue():
+            calls.append('issue')
+            # A device can advance while ADB starts. The packet must remain
+            # inside the gesture's observation interval, not be discarded.
+            history.append(state(airborne=True))
+            return 'real-adb-process'
+        gesture, cursor, observation = start_grounded_gesture(read, 'eren', issue)
+        self.assertEqual(calls, ['read', 'issue'])
+        self.assertEqual(gesture, 'real-adb-process')
+        self.assertEqual(cursor, 2)
+        self.assertEqual(observation, {'index': 1, 'state': state()})
+        self.assertTrue(history[cursor]['airborne'])
+        self.assertEqual(charged_jump_sequence(history, cursor, 'eren'),
+                         {'charge': None, 'release': None})
+
+    def test_waits_for_latest_ground_and_never_cherry_picks_prior_ground(self):
+        snapshots = [[state(), state(airborne=True)],
+                     [state(), state(airborne=True), state()]]
+        reads = []
+        now = [0.]
+        def read():
+            reads.append(len(reads))
+            return snapshots[min(len(reads)-1, len(snapshots)-1)]
+        gesture, cursor, observation = start_grounded_gesture(
+            read, 'eren', lambda: 'gesture', clock=lambda: now[0],
+            sleep=lambda duration: now.__setitem__(0, now[0]+duration))
+        self.assertEqual(len(reads), 2)
+        self.assertEqual(cursor, 3)
+        self.assertEqual(observation['index'], 2)
+        self.assertEqual(gesture, 'gesture')
+
+    def test_invalid_live_context_never_issues_the_gesture(self):
+        for invalid in [state('rabbit'), state(airborne=True),
+                        state(charging=True), state(page='paused'),
+                        state(phase='bonk'), {**state(), 'rolling': True},
+                        {**state(), 'airborne': None}]:
+            with self.subTest(invalid=invalid):
+                now = [0.]
+                issued = []
+                with self.assertRaisesRegex(AssertionError, 'latest live grounded eren'):
+                    start_grounded_gesture(
+                        lambda: [state(), invalid], 'eren',
+                        lambda: issued.append(True), timeout=.2,
+                        clock=lambda: now[0],
+                        sleep=lambda duration: now.__setitem__(0, now[0]+duration))
+                self.assertEqual(issued, [])
+
+    def test_empty_history_cannot_issue_or_invent_a_cursor(self):
+        now = [0.]
+        issued = []
+        with self.assertRaisesRegex(AssertionError, 'before issuing charge: \\[\\]'):
+            start_grounded_gesture(
+                lambda: [], 'eren', lambda: issued.append(True), timeout=.2,
+                clock=lambda: now[0],
+                sleep=lambda duration: now.__setitem__(0, now[0]+duration))
+        self.assertEqual(issued, [])
 
 
 if __name__ == '__main__':

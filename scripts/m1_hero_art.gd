@@ -5,13 +5,32 @@ extends RefCounted
 const DATA=preload("res://assets/M1-HEROES-PROVENANCE.json")
 const HEROES := ["aion","sheep","rabbit","eren"]
 const ACTIONS := ["walk","idle_fire","air_fire","crouch_walk","crouch_fire"]
-var images: Dictionary={}
-var cache: Dictionary={}
+# 0.40.0: Process-wide shared cache avoids re-decompressing hero atlases per view/preview.
+static var images: Dictionary={}
+static var cache: Dictionary={}
+
+const EXTRA_ACTIONS := ['walk_back','crouch_walk_back','grenade_throw','crouch_grenade_throw']
+static var mission_provider: Script
+
+static func _provider() -> Script:
+	if mission_provider==null and ResourceLoader.exists('res://scripts/mission_hero_art.gd'):
+		mission_provider=load('res://scripts/mission_hero_art.gd')
+	return mission_provider
 
 static func has(hero: String) -> bool:
-	return hero in HEROES
+	if hero in HEROES:return true
+	var provider:=_provider()
+	return provider!=null and provider.owns(hero)
+
+static func clip_spec(hero: String,action: String) -> Dictionary:
+	if hero not in HEROES:return _provider().clip_spec(hero,action)
+	if action in EXTRA_ACTIONS or action in M1HeroActionArt.TUNNEL_ACTIONS:return M1HeroActionArt.clip_spec(hero,action)
+	var clip: Dictionary=DATA.data.playback[action]
+	return {'frames':int(clip.frames),'fps':float(clip.frames)/float(clip.get('seconds',.75)),'loop':bool(clip.get('loop',false))}
 
 static func metrics(hero: String, action: String, frame: int=0) -> Dictionary:
+	if hero not in HEROES:return _provider().metrics(hero,action,frame)
+	if action in EXTRA_ACTIONS or action in M1HeroActionArt.TUNNEL_ACTIONS:return M1HeroActionArt.metrics(hero,action,frame)
 	assert(has(hero),"Unknown playable body: "+hero)
 	assert(action in ACTIONS,"Unsupported body action: "+action)
 	var spec: Array=DATA.data.runtime_rows[hero][action]
@@ -21,6 +40,8 @@ static func metrics(hero: String, action: String, frame: int=0) -> Dictionary:
 	return {"offset":(Vector2(float(b[0])-2.,float(b[1])-2.)-origin)*scale,"size":Vector2(float(b[2]-b[0])+4.,float(b[3]-b[1])+4.)*scale,"grip_local":(Vector2(float(f.grip[0]),float(f.grip[1]))-origin)*scale,"face_local":(Vector2(float(f.face_landmark[0]),float(f.face_landmark[1]))-origin)*scale,"height":float(f.body_bounds[3]-f.body_bounds[1])*scale,"source_key":"m1-body-"+key,"source_row":row,"source_frame":frame,"source_scale":scale,"ground_contact":bool(f.ground_contact),"gun_embedded":false,"body_only":true}
 
 func pose(hero: String, action: String, frame: int=0) -> Dictionary:
+	if hero not in HEROES:return _provider().pose(hero,action,frame)
+	if action in EXTRA_ACTIONS or action in M1HeroActionArt.TUNNEL_ACTIONS:return M1HeroActionArt.pose(hero,action,frame)
 	assert(has(hero),"Unknown playable body: "+hero)
 	assert(action in ACTIONS,"Unsupported body action: "+action)
 	var spec: Array=DATA.data.runtime_rows[hero][action]

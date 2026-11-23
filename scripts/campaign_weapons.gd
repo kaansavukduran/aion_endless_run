@@ -40,12 +40,14 @@ static func fire(w) -> void:
 	var floor: float=w.floor_at(origin.x)
 	if origin.y>=floor:origin.y=floor-.5
 
+	var eligible: Array=[]
+	if not riding and w.weapon=="seeker":
+		eligible=w.enemies.filter(func(e):return not bool(e.defeated) and not CampaignEnemies.hidden(e) and absf(float(e.x)-w.player.x)<900.)
+		eligible.sort_custom(func(a,b):return absf(float(a.x)-w.player.x)<absf(float(b.x)-w.player.x))
 	var index:=0
 	for angle in angles:
 		var target: String=""
-		var eligible: Array=w.enemies.filter(func(e):return not bool(e.defeated) and absf(float(e.x)-w.player.x)<900.)
-		eligible.sort_custom(func(a,b):return absf(float(a.x)-w.player.x)<absf(float(b.x)-w.player.x))
-		if w.weapon=="seeker" and not eligible.is_empty():target=str(eligible[mini(index,eligible.size()-1)].id)
+		if not eligible.is_empty():target=str(eligible[mini(index,eligible.size()-1)].id)
 		var b: Dictionary={"p":origin,"v":aim.rotated(angle)*float(spec.speed),"owner":"hero","age":0.,"kind":"vehicle" if riding else w.weapon,"damage":int(spec.damage)+int(riding)+int(float(w.buffs.get("power",0.))>0.),"pierce":int(spec.pierce),"hit":[],"life":float(spec.life),"colour":str(spec.colour),"target":target,"bounces":0}
 		b.start=origin-aim*(maxf(32.,absf(offset.x)) if absf(aim.y)<.15 else 32.)
 		if w.weapon=="trap" and not riding:b.gravity=550.;b.spider=true;b.walking=false;b.facing=w.facing

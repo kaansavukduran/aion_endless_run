@@ -1,0 +1,22 @@
+{
+  "created": "2026-11-22",
+  "author": "Codex original deterministic synthesis",
+  "license": "Original project audio; no sampled third-party recordings",
+  "events": {
+    "hero_roll": {
+      "path": "assets/audio/hero-roll.wav",
+      "duration": 0.2,
+      "sha256": "c13b27fed7190c8067cb378a731a64ebeb45ebb3c7a5500ceae9a8d8fadc0d1f"
+    },
+    "hero_tongue": {
+      "path": "assets/audio/hero-tongue.wav",
+      "duration": 0.14,
+      "sha256": "71f8fd06a15e1e33c18377dc192bc41c1263e89d1db450f44ccc6569685f858a"
+    },
+    "hero_contact": {
+      "path": "assets/audio/hero-contact.wav",
+      "duration": 0.07,
+      "sha256": "78a3d4b4d85dbbd23f77b0606fa64819ada59711f6478b50f1d0a3594be64e64"
+    }
+  }
+}

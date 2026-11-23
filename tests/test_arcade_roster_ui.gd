@@ -12,7 +12,7 @@ func run():
  cfg.set_value('prefs','language_mode_revision',2);cfg.set_value('prefs','language_override',true);cfg.set_value('prefs','language','it');cfg.save('user://save.cfg')
  var game=load('res://scripts/game.gd').new();root.add_child(game);await settle();game.set_physics_process(false);game.front.skip_intro();await settle()
  check(GameText.LANGUAGES==['tr','en'],'Only Turkish and English are selectable')
- check(game.FRIENDS==['aion','sheep','rabbit','eren'],'Four playable heroes; companions are absent')
+ check(game.FRIENDS==['aion','sheep','rabbit','eren','armadillo','frog'],'Six playable heroes preserve original four order; companions are absent')
  check(game.character=='aion' and game.best==731,'Removed saved hero migrates without deleting the record')
  check(game.language==game.default_language() and not game.language_override,'Removed saved locale follows the supported device fallback')
  check(game.character_name('rabbit')=='Ayça','Stable rabbit save key displays the new game identity')
@@ -26,8 +26,10 @@ func run():
    for locale in GameText.LANGUAGES:
     game.interface_options.text_scale=scale_value;game.language=locale;game.build_theme();game.ui.theme=game.ui_theme;game.rebuild();await settle()
     var seen=[]
-    for page in range(2 if game.pixel_ui.paged_roster() else 1):
-     game.pixel_ui.roster_page=page;game.rebuild();await settle()
+    var previous=game.menu_layer.find_child('RosterPrevious',true,false)
+    while previous!=null and not previous.disabled:
+     previous.pressed.emit();await settle();previous=game.menu_layer.find_child('RosterPrevious',true,false)
+    for page in game.FRIENDS.size():
      for button in game.menu_layer.find_children('*','Button',true,false):
       if not button.is_visible_in_tree():continue
       var rect=button.get_global_rect()
@@ -36,6 +38,9 @@ func run():
      for required in ['StartCampaign','StartRun','OpenSettings','HowToPlay']:
       var button=game.menu_layer.find_child(required,true,false)
       check(button!=null and button.is_visible_in_tree(),'Primary menu action remains reachable: '+required)
+     var following=game.menu_layer.find_child('RosterNext',true,false)
+     if following==null or following.disabled:break
+     following.pressed.emit();await settle()
     for hero in game.FRIENDS:check(hero in seen,'Playable hero appears through real roster pages: '+hero)
     check(not game.menu_layer.find_child('StartSelect_owl',true,false) and not game.menu_layer.find_child('StartSelect_wolf',true,false),'Companions never appear as selectable hero cards')
  # A wide system font must not inflate a width-zero heading or hide a second card row.

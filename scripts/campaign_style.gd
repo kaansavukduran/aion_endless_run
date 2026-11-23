@@ -6,8 +6,9 @@ extends RefCounted
 static func step(w,dt: float) -> void:
 	w.chain_time=maxf(0.,w.chain_time-dt)
 	if w.chain_time<=0.:w.chain=0
-	for popup in w.score_popups:popup.age=float(popup.age)+dt
-	w.score_popups=w.score_popups.filter(func(p):return float(p.age)<1.)
+	if not w.score_popups.is_empty():
+		for popup in w.score_popups:popup.age=float(popup.age)+dt
+		w.score_popups=w.score_popups.filter(func(p):return float(p.age)<1.)
 
 static func defeat(w,e: Dictionary,base: int,style: String) -> void:
 	var id: String=str(e.id)

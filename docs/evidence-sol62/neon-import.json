@@ -1,0 +1,210 @@
+{
+  "baseline_commit": "466492fac40eb4760456738a648eb36f3f2a61c7",
+  "upstream_candidate": "Neon 0.48.0 (not a previously published GitHub release)",
+  "integration_version": "0.49.0",
+  "patch_sha256": "657ff9a5cb78ab2b61392d10d22904964045770723f42f6a9fb6fe330317fe6f",
+  "patch_bytes": 99658,
+  "original_files_verified": 28,
+  "snapshot_relisted_unchanged": true,
+  "scope": "26 scripts and 2 tests; all original bytes match the manifest and applied patch before local fixes",
+  "files": [
+    {
+      "id": "1II1qIFLzV-FEex_i3PyV_X5bopddtGph",
+      "path": "scripts/pixel_interface.gd",
+      "size": "22192",
+      "modified": "2026-11-21T20:01:58.857Z",
+      "sha256": "2500c7a683ba2d77a1801b29736d73fbf5dc659a44fb71bfb30cf5463db71e9a"
+    },
+    {
+      "id": "18MAUB9PL46OuIBHCnLdGntzj18yVdTPV",
+      "path": "scripts/campaign_content.gd",
+      "size": "22722",
+      "modified": "2026-11-21T18:24:21.508Z",
+      "sha256": "b04325195a1bfa745709f654629d2fca41a741be0cf3af832ae852ab19c5329f"
+    },
+    {
+      "id": "1pfoO4oY0Pk4uby0z7_Kc0D8oMKfqZOz5",
+      "path": "scripts/campaign_world.gd",
+      "size": "43602",
+      "modified": "2026-11-21T18:24:21.471Z",
+      "sha256": "576e5ab5d3c95487af9d5768c5e354c9854331add873c1539a3c48155f057c73"
+    },
+    {
+      "id": "1c1r-WMrQkwFibLrPheSy5bC31FpbyBkr",
+      "path": "scripts/hero_preview.gd",
+      "size": "5062",
+      "modified": "2026-11-21T19:43:23.987Z",
+      "sha256": "ff994b671ea3f604f5bd786d3d874f51107c6e99ac5947723edd7e19133909cc"
+    },
+    {
+      "id": "1ye4AhTruKS4G0mICP9NwHpplTNMedII0",
+      "path": "scripts/campaign_game.gd",
+      "size": "55922",
+      "modified": "2026-11-21T20:08:48.207Z",
+      "sha256": "688ced84bb2451706efb09f5d163a956120a1f3158a8beb67a660750f3a4ab49"
+    },
+    {
+      "id": "1XaLFFv9WcH3G3XVyxtSVf38yVSd6kh7n",
+      "path": "scripts/campaign_rescue.gd",
+      "size": "10854",
+      "modified": "2026-11-21T18:24:21.366Z",
+      "sha256": "dc20e2704651394f38448c3c5714762590631aa7be938e47d44724c1f47e1cdb"
+    },
+    {
+      "id": "1OfmchyvMqeW-G5BkYbJbuPTslA7GOVxr",
+      "path": "scripts/campaign_recovery.gd",
+      "size": "5101",
+      "modified": "2026-11-21T17:24:40.264Z",
+      "sha256": "d000c63412d9ec5781e0f55ece37c94f464ff386304426c53110feca7bcb79fa"
+    },
+    {
+      "id": "1XZihc-tKb-nWr9wWhvqVo6nhMRkau3EZ",
+      "path": "scripts/campaign_style.gd",
+      "size": "1023",
+      "modified": "2026-11-21T17:22:11.256Z",
+      "sha256": "ee50fa4177096108bcef43d9494686758ef75982ead686a7a58ccc9915a31889"
+    },
+    {
+      "id": "1aVuTKKOjkiHzpY-Zf1ZDYPM5QEyLBFtP",
+      "path": "scripts/campaign_stick.gd",
+      "size": "1194",
+      "modified": "2026-11-21T17:22:11.127Z",
+      "sha256": "172ee7db10c3f6c5f71195eee7294d166f884307c661e4c9294905e61b0fe014"
+    },
+    {
+      "id": "1Mg7dMS2xNejlvojANlLNFLe59HYdDCzK",
+      "path": "scripts/campaign_projectile_art.gd",
+      "size": "2208",
+      "modified": "2026-11-21T16:52:11.149Z",
+      "sha256": "482a3470318d33eaa53760e4b8157c1224e4ff03e9c139e677a29bc190d873fd"
+    },
+    {
+      "id": "1CV2TMkHNS_5x8xM2U04R1uR3d0aopXI8",
+      "path": "scripts/forge_vehicle_art.gd",
+      "size": "6626",
+      "modified": "2026-11-21T16:49:05.832Z",
+      "sha256": "bbc04da216c2ad8a8fb610b266abf704bfc09bf68d37843feb7da66cdb8ef354"
+    },
+    {
+      "id": "1MRwerAzywlZ-Goo9ldesAqwK8N-3jPeS",
+      "path": "scripts/campaign_effects_art.gd",
+      "size": "1501",
+      "modified": "2026-11-21T16:52:10.868Z",
+      "sha256": "7b2777fd5a166b50aed4d5856b008b44952a8a2877e3b6dd2cf050644e83ab3b"
+    },
+    {
+      "id": "1_f4aEsynJMt1qIEkLds6cN4fwU3Vs71D",
+      "path": "scripts/campaign_art.gd",
+      "size": "2583",
+      "modified": "2026-11-21T16:52:10.874Z",
+      "sha256": "e35515509530f0645f69e09abc186bc71842b2d20b7ad1be74b8eb04606a1d25"
+    },
+    {
+      "id": "1jS5ChBqqQ0VmuCgan5gcbd_x8tfmWcG-",
+      "path": "scripts/m1_support_art.gd",
+      "size": "1218",
+      "modified": "2026-11-21T16:52:10.868Z",
+      "sha256": "0136b028e3b727a8b618e1564db72719595be96168fff7f1b38532cb3ce52699"
+    },
+    {
+      "id": "1dwpGGhSa_jupZdpO3zdSeDEfI0pIrDXh",
+      "path": "scripts/forge_hero_art.gd",
+      "size": "2365",
+      "modified": "2026-11-21T16:49:05.826Z",
+      "sha256": "3f4a4666da1210ba402a05371cf5da8c1915d7302cf2b94052eb49d9ff4cf024"
+    },
+    {
+      "id": "1AVxkk3Tyqp3NGLrsdGn3iPVAd1YNB-l2",
+      "path": "scripts/forge_item_bank.gd",
+      "size": "1089",
+      "modified": "2026-11-21T16:49:05.534Z",
+      "sha256": "4db5a29b7650094dcd3861897bc913a3abf7267d8e0dd45dadd593d8ef41b53f"
+    },
+    {
+      "id": "1xvXuVLkxavoavX661u74cru3NAhReqRo",
+      "path": "scripts/m1_hero_art.gd",
+      "size": "2660",
+      "modified": "2026-11-21T16:49:05.632Z",
+      "sha256": "75b3abb37e95d39fc0d0cab755eb9bb93f99269191a4079b0cf5796c86d3c3bd"
+    },
+    {
+      "id": "1_x1i7Hv1GYt74ShX2umvABG7BGv4wGX_",
+      "path": "scripts/campaign_environment_view.gd",
+      "size": "5002",
+      "modified": "2026-11-21T16:41:46.076Z",
+      "sha256": "f4cd07931acebfbe59f58c28a677575264d7786bbf296b6167a08f3680c0b3b5"
+    },
+    {
+      "id": "1zcWzRqrGqHLlja0m0ik9TwIYJAM1FwRl",
+      "path": "scripts/campaign_catalog.gd",
+      "size": "1746",
+      "modified": "2026-11-21T16:45:05.262Z",
+      "sha256": "3a9355c1ddd86c75492b603d1b62bc1b9ab30608f15bcccdcbce315412d04db8"
+    },
+    {
+      "id": "1sXtfHrohrpxj2kznmwfi3-ewHzXwPLI1",
+      "path": "scripts/frame_bank.gd",
+      "size": "10415",
+      "modified": "2026-11-21T16:45:05.593Z",
+      "sha256": "c96b5ef0d74b52ed49a1069b1041bdaf6825d30e809bd54e748b377b2bd7fc7a"
+    },
+    {
+      "id": "1ANwhi0AMrez9iWBCYvUTX8FB5mznrKzb",
+      "path": "scripts/campaign_enemies.gd",
+      "size": "5709",
+      "modified": "2026-11-21T16:26:42.230Z",
+      "sha256": "88b3c61e45b6dd141db6609fe85189a6e9271408266f83104321443369713b5e"
+    },
+    {
+      "id": "1f5bYg08DozhqlQtOFhrNaktv9v9CHO1o",
+      "path": "scripts/campaign_weapons.gd",
+      "size": "7607",
+      "modified": "2026-11-21T16:39:21.727Z",
+      "sha256": "8e5686fc0ddf2133c14130f23f9481c4446afa696a6d3705b98db39dfb6a0bf1"
+    },
+    {
+      "id": "1oORTOmeCzR50NQ7tOwT5Kc5KP22izOq3",
+      "path": "scripts/campaign_hud.gd",
+      "size": "5224",
+      "modified": "2026-11-21T16:26:42.181Z",
+      "sha256": "153af404e29d8ca146d4c0f5d5e4b6ffcf2297a2027783ade8d22111a2d98c43"
+    },
+    {
+      "id": "1E-HzmpV8FpNtrzyeNQeamIuud962pose",
+      "path": "scripts/campaign_view.gd",
+      "size": "29677",
+      "modified": "2026-11-21T16:31:25.395Z",
+      "sha256": "f930d467d2d4a26877c28e932a9dec319e9466df686f2753e6338289ec3f5a4f"
+    },
+    {
+      "id": "1HfipSI8opANgc-3s5SlMJUCXaH0vXS5J",
+      "path": "scripts/campaign_assists.gd",
+      "size": "3975",
+      "modified": "2026-11-21T16:39:22.134Z",
+      "sha256": "7ccf462f17d5c1847eb0de12951123b5e069cb2d29a17f268ae6d0922794cee8"
+    },
+    {
+      "id": "1JJIUtd-6ChZr5kMBrq7CFpFT3J4m2ALQ",
+      "path": "tests/test_campaign_forge_m1.gd",
+      "size": "9067",
+      "modified": "2026-11-21T20:08:48.443Z",
+      "sha256": "15ca325b2955f0d8e147795f8bd45b1cb10b88a361a5db1279df4bb14011f8b5"
+    },
+    {
+      "id": "13jX5idaibj0ql8Xv8lppSDwrD1pgvp5L",
+      "path": "tests/render_campaign_review.gd",
+      "size": "7903",
+      "modified": "2026-11-21T18:24:21.526Z",
+      "sha256": "cd5686f62d63a839a698f4bb289525b79bce8bbd85c7eeb9e81391011580fff1"
+    },
+    {
+      "id": "1iSre_Wr0hdRzAzqG5lA5n14qj_WG5hCK",
+      "path": "scripts/campaign_boss_pressure.gd",
+      "size": "2538",
+      "modified": "2026-11-21T16:26:42.070Z",
+      "sha256": "09925b5c417162b7434b2817c2ba614dbcc9ed2a1073212280fbc6620319c28f"
+    }
+  ],
+  "integrated_candidate": "0.50.0",
+  "interim_0_49_published": false
+}

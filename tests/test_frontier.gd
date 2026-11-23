@@ -155,7 +155,8 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_physics_process(false)
-	for id in game.FRIENDS:
+	# These fixtures exercise the preserved classic Endless animation bank.
+	for id in RunnerWorld.PLAYABLE_HEROES:
 		var legacy_target: float=84.0*game.frames.EREN.data.atlas.scale[0] if id=="eren" else (53.2 if id=="rabbit" else (70.0 if id == "aion" else 65.0))
 		var target: float={"aion":63.689320,"owl":57.434599,"sheep":64.109091,"wolf":52.380228,"rabbit":36.923077,"eren":53.004115}[id]
 		for row in ([0,1,2] if id == "aion" else [0,1,2,6,7]):

@@ -17,29 +17,50 @@ static func display_source(kind: String) -> String:
 static func body_facing(w) -> int:
  return (-1 if w.aim_direction.x<0. else 1) if absf(w.aim_direction.x)>.1 else int(w.facing)
 static func body_spec(w) -> Dictionary:
+ if w.character not in M1HeroArt.HEROES and M1HeroArt.has(w.character):return M1HeroArt._provider().body_spec(w)
  var action: String='idle_fire';var frame:=0
  var crouched: bool=w.crouching() or w.charging
  if crouched:
-  action='crouch_walk' if absf(w.velocity.x)>1. and not w.charging else 'crouch_fire'
-  frame=posmod(int(w.walk_distance/110.*6.),6) if action=='crouch_walk' else (clampi(int((.18-w.shot_flash)/.18*6.),0,5) if w.shot_flash>0. else 0)
+  action=('crouch_walk_back' if w.velocity.x*body_facing(w)<-1. else 'crouch_walk') if absf(w.velocity.x)>1. and not w.charging else 'crouch_fire'
+  frame=posmod(int(w.walk_distance/(94. if action=='crouch_walk_back' else 110.)*6.),6) if action in ['crouch_walk','crouch_walk_back'] else (clampi(int((.18-w.shot_flash)/.18*6.),0,5) if w.shot_flash>0. else 0)
  elif not w.grounded():
   action='air_fire';frame=clampi(int((.18-w.shot_flash)/.18*6.),0,5) if w.shot_flash>0. else RunnerWorld.flight_frame_for(w.velocity.y,w.air_time,6)
  elif absf(w.velocity.x)>1.:
-  action='walk';frame=posmod(int(w.walk_distance/174.*6.),6)
+  action='walk_back' if w.velocity.x*body_facing(w)<-1. else 'walk';frame=posmod(int(w.walk_distance/(132. if action=='walk_back' else 174.)*6.),6)
  elif w.shot_flash>0.:
   frame=clampi(int((.18-w.shot_flash)/.18*6.),0,5)
- if w.rescue_time>0. or w.melee_time>0.:
-  action='idle_fire';frame=clampi(int((.6-w.rescue_time)/.6*6.),0,5) if w.rescue_time>0. else clampi(int((.28-w.melee_time)/.28*6.),0,5)
+ if w.rescue_time>0. or (w.melee_time>0. and absf(w.velocity.x)<=1. and w.grounded()):
+  action='crouch_fire' if crouched else 'idle_fire';frame=clampi(int((.6-w.rescue_time)/.6*6.),0,5) if w.rescue_time>0. else clampi(int((.28-w.melee_time)/.28*6.),0,5)
+ var throw_value=w.get('grenade_throw')
+ var throw_state: Dictionary=throw_value if throw_value is Dictionary else {}
+ var throwing: bool=not throw_state.is_empty()
+ if throwing:
+  action='crouch_grenade_throw' if crouched else 'grenade_throw';frame=CampaignGrenade.frame_at(float(throw_state.elapsed))
+ if CampaignRoutes.low_ceiling(w) and M1HeroActionArt.supports(w.character,'tunnel_idle'):
+  if throwing:action='tunnel_throw'
+  elif absf(w.velocity.x)>1.:action='tunnel_walk_back' if w.velocity.x*body_facing(w)<-1. else 'tunnel_walk'
+  else:action='tunnel_idle'
  if w.state in ['dying','dead']:
-  action='crouch_fire';frame=5
- if not w.pose_motion_enabled:frame=0
- return {'hero':w.character,'action':action,'frame':frame,'mirror':body_facing(w),'key':'m1-body'}
+  action='tunnel_idle' if CampaignRoutes.low_ceiling(w) else 'crouch_fire';frame=5
+ if not w.pose_motion_enabled and not throwing:frame=0
+ return {'hero':w.character,'action':action,'frame':frame,'mirror':int(throw_state.direction) if throwing else body_facing(w),'key':'m1-body'}
 static func metrics(w) -> Dictionary:
  var s:=body_spec(w)
  return M1HeroArt.metrics(str(s.hero),str(s.action),int(s.frame))
 static func weapon_metrics(kind: String,crouched: bool=false) -> Dictionary:
  if not SOCKETS.has(kind):kind='pistol'
  var source_kind:=display_source(kind)
+ var registration: Dictionary=M1HeldWeaponBank.registration(kind)
+ if registration.has('path'):
+  var canvas: Array=registration.canvas_size
+  var dimensions:=Vector2(float(canvas[0]),float(canvas[1]))
+  var factor: float=float(registration.display_width)/dimensions.x
+  var grip_pixel:=Vector2(float(registration.grip_pixel[0]),float(registration.grip_pixel[1]))
+  var muzzle_pixel:=Vector2(float(registration.muzzle_pixel[0]),float(registration.muzzle_pixel[1]))
+  if int(registration.source_facing)<0:
+   grip_pixel.x=dimensions.x-1.-grip_pixel.x;muzzle_pixel.x=dimensions.x-1.-muzzle_pixel.x
+  var grip:=grip_pixel*factor
+  return {'kind':kind,'display_source':source_kind,'held_source':str(registration.path),'size':dimensions*factor,'offset':-grip,'muzzle':muzzle_pixel*factor-grip,'factor':factor,'grip_pixel':grip_pixel,'muzzle_pixel':muzzle_pixel}
  var source: Dictionary=ForgeItemBank.DATA.data.frames[source_kind]
  var b: Array=source.bounds
  var dimensions:=Vector2(float(b[2]-b[0])+4.,float(b[3]-b[1])+4.)

@@ -17,6 +17,10 @@ func run() -> void:
 	for hero in AionCampaignWorld.HEROES:
 		for direction in dirs:
 			var w:=fresh(hero);w.aim_direction=direction
+			# Exercise an unobstructed straight-down vector from the air. At the
+			# lower new-hero hands the real pistol barrel reaches the solid floor;
+			# the separate grounded cases below verify that clearance rule.
+			if direction==Vector2.DOWN:w.player.y=-150.;w.air_time=.2
 			w.attack_press()
 			check(w.bullets.size()>0,"Projectile fires for "+hero+" / "+str(direction))
 			if not w.bullets.is_empty():
@@ -25,6 +29,29 @@ func run() -> void:
 				check(is_equal_approx(Vector2(projectile.v).length(),760.),"Diagonal velocity does not exceed straight velocity "+hero)
 				check(Vector2(projectile.p).y<0.,"Muzzle begins above the actual floor")
 			check(w.shots==1,"Eight-way shoot counts once, no duplicate event")
+	# Keep grounded DOWN coverage too: derive the requested barrel position
+	# from the registered body hand and weapon bore, independently of placement.
+	# A genuine floor intersection must produce the same safe rendered shot;
+	# a clear barrel must preserve DOWN. Neither case may move the held grip.
+	for hero in AionCampaignWorld.HEROES:
+		var w:=fresh(hero);w.aim_direction=Vector2.DOWN
+		var body:=M1CombatArt.metrics(w);var spec:=M1CombatArt.body_spec(w)
+		var face: int=int(spec.mirror);var weapon:=M1CombatArt.weapon_metrics("pistol")
+		var grip: Vector2=Vector2(body.grip_local)*Vector2(face,1.)
+		var bore: Vector2=Vector2(weapon.muzzle)*Vector2(1.,face)
+		var requested_muzzle: Vector2=w.player+grip+bore.rotated(PI*.5)
+		var floor: float=w.floor_at(requested_muzzle.x)
+		var obstructed: bool=requested_muzzle.y>=floor-1.
+		var expected_aim:=Vector2(face,0.) if obstructed else Vector2.DOWN
+		var expected_muzzle: Vector2=w.player+grip+bore.rotated(expected_aim.angle())
+		w.attack_press()
+		check(w.bullets.size()==1 and w.shots==1,"Grounded DOWN fires exactly once for "+hero)
+		if not w.bullets.is_empty():
+			var projectile: Dictionary=w.bullets[0]
+			check(Vector2(projectile.v).normalized().distance_to(expected_aim)<.001,"Grounded DOWN preserves a clear vector or uses the real floor-intersection fallback: "+hero)
+			check(is_equal_approx(Vector2(projectile.v).length(),760.),"Grounded floor clearance preserves pistol speed: "+hero)
+			check(Vector2(projectile.p).distance_to(expected_muzzle)<.001 and (w.player+w.armed_muzzle()).distance_to(expected_muzzle)<.001,"Grounded projectile and actual rendered barrel share the unchanged registered hand/bore: "+hero)
+			check(expected_muzzle.y<w.floor_at(expected_muzzle.x),"Grounded barrel remains above real solid support: "+hero)
 	for name in CampaignWeapons.SPECIAL:
 		for direction in [Vector2.UP,Vector2(1.,-1.).normalized(),Vector2.DOWN]:
 			var w:=fresh()
@@ -57,7 +84,8 @@ func run() -> void:
 			elif posture=="air":w.player.y=-150.;w.air_time=.2
 			w.aim_direction=Vector2.RIGHT
 			var body_before: Dictionary=M1CombatArt.body_spec(w)
-			check(str(body_before.hero)==hero and str(body_before.key)=="m1-body","Current authored body remains selected: "+hero+"/"+posture)
+			var expected_body_key: String="mission-hero" if hero in ["armadillo","frog"] else "m1-body"
+			check(str(body_before.hero)==hero and str(body_before.key)==expected_body_key,"Current authored hero and its exact body provider remain selected: "+hero+"/"+posture)
 			check(int(body_before.mirror)==1,"Body yaw follows independent aim while movement may face left")
 			w.attack_press()
 			check(w.bullets.size()==1 and Vector2(w.bullets[0].v).normalized().is_equal_approx(Vector2.RIGHT),"Idle/walk/crouch/air fire produces a real forward shot: "+hero+"/"+posture)

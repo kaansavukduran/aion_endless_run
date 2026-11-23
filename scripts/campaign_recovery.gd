@@ -3,14 +3,20 @@ extends RefCounted
 
 ## Checkpoint stock is a snapshot, not the player's current inventory. Score,
 ## claims and rescue IDs remain owned by World and are never rolled back.
+static var _points_cache_key := ""
+static var _points_cache: Array[float] = []
+
 static func points(w) -> Array[float]:
+	if CampaignRoutes.is_fork(w.section) or w.section=="arena":return []
+	var key: String="%s|%d|%d|%d|%.0f"%[w.section,w.run_seed,w.encounters.size(),w.pits.size(),w.length()]
+	if key==_points_cache_key:return _points_cache
 	var values: Array[float]=[]
-	if CampaignRoutes.is_fork(w.section) or w.section=="arena":return values
 	var fixed: Dictionary={"shore":[2600.,5480.,6750.],"quay":[3000.,6200.,8400.],"canopy":[2450.],"relay":[3000.,6500.,8600.]}
 	if fixed.has(w.section):
 		for x in fixed[w.section]:values.append(safe_x(w,float(x)))
 	else:
 		for encounter in w.encounters:values.append(safe_x(w,float(encounter.x)+900.))
+	_points_cache_key=key;_points_cache=values
 	return values
 
 static func safe_x(w,x: float) -> float:

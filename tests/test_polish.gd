@@ -71,7 +71,7 @@ func run():
  # Derive the expected barrel from raw reviewed source coordinates plus the
  # actual rendered weapon transform; do not call runner_attachment as an oracle.
  g.motion=true;g.interface_options.reduced_motion=false
- var registration: Dictionary=M1HeldWeaponBank.DATA.data.weapons.pistol
+ var registration: Dictionary=M1HeldWeaponBank.registration('pistol')
  var grip_pixel:=Vector2(registration.grip_pixel[0],registration.grip_pixel[1])
  var muzzle_pixel:=Vector2(registration.muzzle_pixel[0],registration.muzzle_pixel[1])
  var canvas_width: float=registration.canvas_size[0]

@@ -1,5 +1,13 @@
 # Aion Endless Run
 
+## 0.50.0 · Altı kahramanlı Mission 1 adayı
+
+Aion, Kutsanmış, Ayça ve Eren korunur; Armadillo eğilerek kabuğuna kapanıp hücum eder, Kurbağa ağzına bağlı diliyle mesafeli saldırır. Yeni yetenekler **E / Y / bağlamsal dokunma düğmesi** ile kullanılır; yakındaki araç ve bilinçli silah değişimi önceliklidir. Armadillo için önce eğil. Ömer ve Melun yardımcı güçler olarak kalır. Klasik Sonsuz modu özgün dört kahramanla ayrıdır.
+
+Gerçek geri yürüme klipleri, tek bırakma anıyla el bombası, ardışık saldırı/toparlanma, altılı seçim ve yeni fener korusu açılışı entegre edilmiştir. Bu başlık bir canlı yayın ya da kullanıcı kabulü iddiası değildir: kaynak, test ve yayın durumları [tek Mission 1 devir kaydında](docs/MISSION1-GAMEPLAY-HANDOFF.md) ayrı tutulur. **Mission 2 geliştirilmez.**
+
+[GitHub Pages oyun adresi](https://kaansavukduran.github.io/aion_endless_run/)
+
 ## 0.30.0 · Doğal yol ayrımları
 
 Mission 1'in iki yol ayrımı artık farklı fiziksel fikirlerle seçiliyor. Kıyıda alt su yoluna iskele binasının altındaki alçak bakım geçidinden eğilip sürünerek girilir; tavan gerçek çarpışmadır. Kanopide kökle kilitli kapağın mekanizması kırılınca kök geçidi açılır; üst hizmet yolunun orta açıklığı basıldıktan sonra çöker. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
@@ -22,7 +30,7 @@ Araçla NPC teması ve gerçek eşya toplama, sekiz hedef yönü arasında ara a
 
 Korsan bekçinin iki kolu görülen altı yeni yürüyüş karesi, araçlarda gerçek zıplama ve üçlü yayılım, ipleri patlamasıyla çözen örümcek ve daha hızlı/uzun menzilli özel mermiler. [Test ve görsel kanıt](docs/evidence-combat-0262/README.md).
 
-**Arcade / Sönen Fenerler**: Aion, iki ayaklı Kutsanmış, Ayça ve Eren ile Mission 1. İki yol ayrımında üst köprülere zıpla veya alt kanaldan ilerle; oyun rotayı fiziksel konumundan seçer. Yol seçme metin menüsü yoktur. Bölüm geçişleri otomatik kısa solmayla gerçekleşir.
+**Arcade / Sönen Fenerler**: Aion, iki ayaklı Kutsanmış, Ayça, Eren, Armadillo ve Kurbağa ile Mission 1. İki yol ayrımında üst köprülere zıpla veya alt kanaldan ilerle; oyun rotayı fiziksel konumundan seçer. Yol seçme metin menüsü yoktur. Bölüm geçişleri otomatik kısa solmayla gerçekleşir.
 
 Ömer ve Melun artık oynanabilir karakter değil, toplanan yardımcı güçlerdir: tüy iki alan etkili taş saldırısı, kurt simgesi iki ayrı hedefe koşup ısırma sağlar. Aynı beş hareket/ateş eylemi için ortak gövde, el ve zemin kaydı kullanılır. Ateş etmek koşu karelerini durdurmaz. Ayça, eski Emre yuvasında kendine ait etekli/tokalı çizimini kullanır; Eren ayrı kalır. Eski kaynak paftaları değiştirilmez.
 
@@ -30,7 +38,7 @@ Korsan bekçinin iki kolu görülen altı yeni yürüyüş karesi, araçlarda ge
 
 Yürüyen örümcek mayınları hedefe gider; beş saniye içinde patlar. Kurtarılan fener bekçileri çantadan fiziksel ikmal bırakır; eşyaya temas edince alınır. Menü ve oyun yalnız **Türkçe/English** sunar. Dikey/yatay telefon, klavye/fare ve gamepad desteği korunur. Eski sonsuz mod ayrı kaydıyla erişilebilirdir.
 
-[Oyunu oyna](https://aionendlessrun.vercel.app/) · [Teslim ve gerçek testler](docs/M1-DELIVERY.md) · [Fiziksel rotalar](docs/M1-FLOW-VALIDATION.md) · [Karakter paftaları](docs/M1-HERO-ART.md) · [Yerel Unslop kuralları ve QA](docs/M1-SKILL-QA-INVENTORY.md)
+[Oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [Teslim ve gerçek testler](docs/M1-DELIVERY.md) · [Fiziksel rotalar](docs/M1-FLOW-VALIDATION.md) · [Karakter paftaları](docs/M1-HERO-ART.md) · [Yerel Unslop kuralları ve QA](docs/M1-SKILL-QA-INVENTORY.md)
 
 Bu sürüm Mission 1'i geliştirir; Mission 2–5'in tamamlandığı iddia edilmez. Önceki yayımlanmış indirme paketleri yeni web sürümünden ayrıdır. Aşağıdaki bölüm önceki teslimlerin tarihsel kaydıdır; eski karakter/dil listeleri güncel kadroyu tarif etmez.
 

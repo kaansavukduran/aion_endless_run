@@ -186,30 +186,91 @@ static func draw_floor(v) -> bool:
 	return true
 
 static func draw_pier(v) -> void:
-	# Placeholder pier house shapes; collision is PIER, not these pixels.
+	# Native timber pixels share the existing bridge/crate material. The entire
+	# facade stays within PIER; its roof and underside are the collision edges.
 	var origin: Vector2=v.at(PIER.position)
 	var size: Vector2=PIER.size
-	v.draw_rect(Rect2(origin,size),Color("4a3b33"))
-	v.draw_rect(Rect2(origin+Vector2(6,8),size-Vector2(12,14)),Color("6d5442"))
-	for i in 4:
-		var window: Vector2=origin+Vector2(34.+i*96.,40.)
-		v.draw_rect(Rect2(window,Vector2(40,34)),Color("2b2430"))
-		v.draw_rect(Rect2(window+Vector2(3,3),Vector2(34,28)),Color("f2c36b",.55 if i%2==0 else .25))
-	# Crawl ceiling beam and the dark maintenance passage below it.
-	var beam: Vector2=v.at(Vector2(PIER.position.x,CRAWL_CEILING))
-	v.draw_rect(Rect2(beam-Vector2(0,10),Vector2(size.x,10)),Color("2e2420"))
+	v.draw_rect(Rect2(origin,size),Color("302d30"))
+	# Recessed, staggered siding. Every source pixel remains one world pixel;
+	# the final board is cropped, never stretched to fit the building.
+	for y in range(24,220,16):
+		for x in range(8,392,32):
+			var width: int=mini(32,392-x)
+			var height: int=mini(13,220-y)
+			var variant: int=posmod(x/32+y/16,3)
+			CampaignTimberArt.piece(v,Rect2(48+variant*32,6,width,height),origin+Vector2(x,y))
+		if y+13<220:v.draw_rect(Rect2(origin+Vector2(8,y+13),Vector2(384,2)),Color("433638"))
+	# Mortised vertical beams, iron straps and small directional bolt glints.
+	for x in [0,126,262,388]:
+		for y in range(12,220,32):
+			CampaignTimberArt.piece(v,Rect2(152,0,12,mini(32,220-y)),origin+Vector2(x,y))
+		for y in [26,126,200]:
+			v.draw_rect(Rect2(origin+Vector2(x+1,y),Vector2(10,8)),Color("343b3f"))
+			v.draw_rect(Rect2(origin+Vector2(x+2,y),Vector2(7,1)),Color("74807c"))
+			v.draw_rect(Rect2(origin+Vector2(x+3,y+3),Vector2(2,2)),Color("b4b69a"))
+	# Two deep workshop windows, with stepped metal frames and six warm panes.
+	# They are facade details inside the solid house, never extra entry points.
+	for x in [29.,292.]:
+		var p: Vector2=origin+Vector2(x,47.)
+		v.draw_rect(Rect2(p+Vector2(2,5),Vector2(80,70)),Color("30282a"))
+		var edge:=PackedVector2Array([Vector2(0,7),Vector2(7,0),Vector2(69,0),Vector2(76,7),Vector2(76,57),Vector2(69,64),Vector2(7,64),Vector2(0,57)])
+		for i in edge.size():edge[i]+=p
+		v.draw_polygon(edge,PackedColorArray([Color("4b5353")]))
+		v.draw_line(p+Vector2(8,1),p+Vector2(68,1),Color("9ca38c"),1.)
+		v.draw_line(p+Vector2(1,8),p+Vector2(1,55),Color("79847d"),1.)
+		for row in 3:
+			var pane: Color=[Color("e5b975"),Color("bd884f"),Color("8d5c3b")][row]
+			v.draw_rect(Rect2(p+Vector2(8,8+row*16),Vector2(60,14)),pane)
+			v.draw_rect(Rect2(p+Vector2(10,9+row*16),Vector2(20,1)),pane.lightened(.16))
+		v.draw_rect(Rect2(p+Vector2(36,7),Vector2(4,50)),Color("49463f"))
+		v.draw_rect(Rect2(p+Vector2(36,8),Vector2(1,48)),Color("b1a17e"))
+		for dx in [8,62]:
+			CampaignTimberArt.piece(v,Rect2(48,0,16,7),p+Vector2(dx,64))
+	# A closed ventilation/pump bay breaks the siding rhythm without inventing
+	# a door, pickup, ladder, or another traversable surface.
+	var vent: Vector2=origin+Vector2(158,43)
+	v.draw_rect(Rect2(vent,Vector2(84,58)),Color("32373b"))
+	v.draw_rect(Rect2(vent+Vector2(2,2),Vector2(80,54)),Color("6a7370"))
+	v.draw_rect(Rect2(vent+Vector2(6,6),Vector2(72,46)),Color("29343a"))
+	for y in range(8,49,7):
+		v.draw_rect(Rect2(vent+Vector2(8,y),Vector2(68,3)),Color("545f60"))
+		v.draw_rect(Rect2(vent+Vector2(8,y),Vector2(68,1)),Color("858d7e"))
+	for dx in [3,78]:
+		for dy in [3,51]:v.draw_rect(Rect2(vent+Vector2(dx,dy),Vector2(2,2)),Color("b6b59c"))
+	# Short braces and a weathered service conduit remain entirely in the wall.
+	for x in [14.,274.]:
+		CampaignTimberArt.piece(v,CampaignTimberArt.BRACE,origin+Vector2(x,155))
+		CampaignTimberArt.piece(v,CampaignTimberArt.BRACE_RIGHT,origin+Vector2(x+64,155))
+	var pipe: Vector2=origin+Vector2(200,116)
+	v.draw_rect(Rect2(pipe+Vector2(-4,0),Vector2(8,88)),Color("373c3d"))
+	v.draw_rect(Rect2(pipe+Vector2(-2,0),Vector2(4,88)),Color("8c7660"))
+	v.draw_rect(Rect2(pipe+Vector2(-2,1),Vector2(1,86)),Color("b2a080"))
+	for y in [8,70]:
+		v.draw_rect(Rect2(pipe+Vector2(-6,y),Vector2(12,4)),Color("5a6260"))
+		v.draw_rect(Rect2(pipe+Vector2(-5,y),Vector2(9,1)),Color("9c9d86"))
+	# A flat, continuous roof cap is the actual -195 walk surface. No raised
+	# roof ornaments imply a platform that collision does not provide.
+	for x in range(0,400,32):
+		CampaignTimberArt.piece(v,Rect2(48+posmod(x/32,3)*32,0,mini(32,400-x),12),origin+Vector2(x,0))
+		CampaignTimberArt.piece(v,Rect2(48+posmod(x/32+1,3)*32,6,mini(32,400-x),10),origin+Vector2(x,220))
+	v.draw_rect(Rect2(origin+Vector2(0,229),Vector2(400,1)),Color("242e31"))
+	# The entire 55px crawl opening stays visibly empty. Existing bridge posts
+	# are background supports; this layer adds no posts or hanging obstacles.
 	var passage: Vector2=v.at(Vector2(PIER.position.x,CRAWL_CEILING))
-	v.draw_rect(Rect2(passage,Vector2(size.x,LOWER_FLOOR-CRAWL_CEILING)),Color("0e121a",.82))
-	# A framed low mouth on both sides makes the clearance readable at game scale.
-	for side in [PIER.position.x-10.,PIER.end.x]:
-		var post: Vector2=v.at(Vector2(side,CRAWL_CEILING-10.))
-		v.draw_rect(Rect2(post,Vector2(10,LOWER_FLOOR-CRAWL_CEILING+10.)),Color("3a2c24"))
-		v.draw_rect(Rect2(post+Vector2(2,0),Vector2(3,LOWER_FLOOR-CRAWL_CEILING+10.)),Color("9c7a52"))
-	# Water and light cues: ripples at the mouth, warm light at the far end.
+	v.draw_rect(Rect2(passage,Vector2(size.x,LOWER_FLOOR-CRAWL_CEILING)),Color("101d23",.65))
+	# Small wall-mounted bulkhead lights end above the exact underside edge.
+	for x in [20.,364.]:
+		var lamp: Vector2=origin+Vector2(x,199)
+		v.draw_rect(Rect2(lamp,Vector2(16,21)),Color("343a3b"))
+		v.draw_rect(Rect2(lamp+Vector2(2,2),Vector2(12,17)),Color("94704a"))
+		v.draw_rect(Rect2(lamp+Vector2(4,4),Vector2(8,12)),Color("f3c778"))
+		v.draw_rect(Rect2(lamp+Vector2(5,4),Vector2(3,10)),Color("ffe7a8"))
+		v.draw_rect(Rect2(lamp+Vector2(2,9),Vector2(12,2)),Color("635343"))
+	# Reflected light and water sit on the route floor, with no flat glow panel.
 	var mouth: Vector2=v.at(Vector2(PIER.position.x-60.,LOWER_FLOOR-8.))
-	for i in 3:v.draw_rect(Rect2(mouth+Vector2(i*22.,-i*3.),Vector2(16,3)),Color("8fd3e8",.8))
-	var glow: Vector2=v.at(Vector2(PIER.end.x-40.,CRAWL_CEILING+6.))
-	v.draw_rect(Rect2(glow,Vector2(40,LOWER_FLOOR-CRAWL_CEILING-6.)),Color("ffd77a",.35))
+	for i in 3:v.draw_rect(Rect2(mouth+Vector2(i*22.,-i*3.),Vector2(16,2)),Color("8fd3e8",.75))
+	var glow: Vector2=v.at(Vector2(PIER.end.x-54.,LOWER_FLOOR-4.))
+	for i in 3:v.draw_rect(Rect2(glow+Vector2(i*14.,-i*3.),Vector2(22-i*3,2)),Color("d8b46c",.48-i*.08))
 
 static func draw_hatch(v) -> void:
 	var w=v.world

@@ -31,6 +31,7 @@ static func step_parked(w,dt: float) -> void:
 	if float(w.mount.floor_y)>180. and target>=180.:w.mount.available=false
 
 static func eject(w) -> void:
+	CampaignGrenade.cancel(w)
 	var foot: float=park(w)
 	w.mount.ridden=false;w.mount.available=false;w.mount.wreck_age=0.
 	w.mount_transition="";w.mount_transition_time=0.;w.drop_through_time=0.;w.stop_inputs()

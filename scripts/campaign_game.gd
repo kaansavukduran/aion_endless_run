@@ -5,6 +5,14 @@ const Words = preload("res://scripts/campaign_text.gd")
 const FONT = preload("res://assets/PixelifySans.ttf")
 const TRAVEL_DURATION := .36
 const REDUCED_TRAVEL_DURATION := .1
+const GRENADE_SOUNDS := {
+	"grenade":preload("res://assets/audio/grenade-release.wav"),
+	"grenade_bounce":preload("res://assets/audio/grenade-bounce.wav"),
+	"grenade_blast":preload("res://assets/audio/grenade-blast.wav"),
+	"hero_roll":preload("res://assets/audio/hero-roll.wav"),
+	"hero_tongue":preload("res://assets/audio/hero-tongue.wav"),
+	"hero_contact":preload("res://assets/audio/hero-contact.wav")
+}
 var world := AionCampaignWorld.new()
 var impact_hold := 0.
 var impact_cooldown := 0.
@@ -62,6 +70,7 @@ var motion_enabled := true
 var audio_volume := .45
 var voices: Array[AudioStreamPlayer] = []
 var sound_cache: Dictionary = {}
+static var ambient_cache: Dictionary = {}
 var ambient: AudioStreamPlayer
 var ambient_key:=""
 var ambient_started:=false
@@ -137,7 +146,7 @@ func on_web_page_hidden(_arguments: Array) -> void:
 	if not is_inside_tree():return
 	# Release inputs and pause an active run, as on focus loss. A hidden tab runs
 	# no frames, so application_active stays untouched and cannot remain stuck.
-	release_all()
+	cancel_unspent_actions();release_all()
 	if is_instance_valid(ui) and world.state=="playing":toggle_pause()
 
 func t(key: String) -> String:
@@ -210,7 +219,7 @@ func build_ui() -> void:
 	if touch_mode: build_touch()
 	else:
 		control_hint=paragraph(t("keys"),15);ui.add_child(control_hint);control_hint.position=Vector2(16,view_h-48);control_hint.size=Vector2(view_w-32,45)
-	ride_button=Button.new();ride_button.name="CampaignRide";ride_button.text=t("ride")+ (" · E" if not touch_mode else "");ride_button.add_theme_font_size_override("font_size",font_size(17));ride_button.pressed.connect(func():world.interact());ui.add_child(ride_button)
+	ride_button=Button.new();ride_button.name="CampaignRide";ride_button.text=t("ride")+ (" · E" if not touch_mode else "");ride_button.add_theme_font_size_override("font_size",font_size(17));ride_button.pressed.connect(activate_context);ui.add_child(ride_button)
 	ride_button.size=Vector2(180,76) if portrait and touch_mode else Vector2(220,52)
 	ride_button.position=Vector2((view_w-ride_button.size.x)*.5,view_h-(205 if portrait and touch_mode else (190 if touch_mode else 98)))
 	fade_panel=ColorRect.new();fade_panel.color=Color(0.06,.06,.09,0);fade_panel.mouse_filter=Control.MOUSE_FILTER_IGNORE;fade_panel.size=Vector2(view_w,view_h);ui.add_child(fade_panel)
@@ -299,6 +308,8 @@ func build_menu() -> void:
 		"complete":
 			column.add_child(paragraph(old("name_"+world.character)+" · "+old("score")+" %05d"%world.score,22))
 			column.add_child(paragraph(t("keepers")+" %d · "%world.rescued.size()+t("elapsed")+" "+elapsed_time(world.time),18))
+			if not world.route.is_empty() and options.text_scale<=1.5:
+				column.add_child(paragraph(t("route")+": "+" → ".join(world.route.map(func(s):return t(s))),16))
 			if new_best:column.add_child(paragraph(t("new_best"),17))
 			action(t("restart"),begin_new,true).name="CampaignReplay"
 			action(t("details"),func():detail_page=0;menu_kind="result_details";build_ui()).name="CampaignReportDetails"
@@ -325,7 +336,18 @@ func fit_menu(target: PanelContainer) -> void:
 	var height: float=target.get_combined_minimum_size().y
 	target.size.y=height
 	target.position=Vector2(floorf((view_w-target.size.x)*.5),maxf(8.,floorf((view_h-height)*.5)))
-	if not buttons.is_empty():focus_index=0;buttons[0].grab_focus()
+	for i in buttons.size():
+		if is_instance_valid(buttons[i]) and buttons[i].is_visible_in_tree() and not buttons[i].disabled:
+			focus_index=i;buttons[i].grab_focus();break
+
+func menu_back() -> bool:
+	match menu_kind:
+		"paused":close_menu();return true
+		"settings":menu_kind=menu_previous;build_ui();return true
+		"result_details":menu_kind="complete";build_ui();return true
+		"help":finish_help();return true
+		"briefing":return_main();return true
+	return false
 
 func elapsed_time(seconds: float) -> String:
 	return "%02d:%02d"%[int(seconds)/60,int(seconds)%60]
@@ -442,11 +464,12 @@ func resume_saved() -> void:
 	menu_kind="";help_step=0;world.state="playing";boss_announced=false;view.camera_x=0.;intro_pending=false;build_ui()
 func close_menu() -> void:
 	if menu_kind=="boss":world.boss.engaged=true
-	release_all();menu_kind="";world.state="playing";build_ui()
+	release_all();menu_kind="";world.paused_crouch=false;world.state="playing";build_ui()
 	if intro_pending:intro_pending=false;start_presentation("intro")
 func toggle_pause() -> void:
 	if world.state=="playing":
-		release_all();world.state="paused";menu_kind="paused";save_checkpoint();build_ui()
+		world.paused_crouch=world.crouching();world.state="paused"
+		release_all();menu_kind="paused";save_checkpoint();build_ui()
 	elif menu_kind=="paused":close_menu()
 func return_main() -> void:
 	if leaving_scene:return
@@ -500,14 +523,22 @@ func save_checkpoint() -> void:
 	if save_ok:saved=data.duplicate(true)
 
 func release_all() -> void:
+	# Pause clears input sources but retains the frozen visible aim. Menu and
+	# settings rebuilds release inputs again, so preservation belongs here.
+	var keep_paused_aim: bool=world.state=="paused"
+	var frozen_aim: Vector2=world.aim_direction
 	held.clear();touch_actions.clear();stick_touch=-1;left_down=false;right_down=false;up_down=false;down_down=false;mouse_stick=false;mouse_axis=Vector2.ZERO;pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
 	world.stop_inputs()
+	if keep_paused_aim:world.aim_direction=frozen_aim
 	if is_instance_valid(stick):stick.axis=Vector2.ZERO;stick.active=false;stick.queue_redraw()
 
 func set_action(key: String,source: String,down: bool,canceled: bool=false) -> void:
 	# A press during the section fade must not remain latched when the next
 	# section opens. Releases remain safe even for an already hidden control.
 	if down and (fade>=0. or world.state=="travel"):return
+	# Reject compact-form presses before adding a source to held. Reopening
+	# the shell must require a new press, never a queued gun/jump/grenade.
+	if down and key in ["attack","jump","grenade"] and MissionHeroAbilities.compact(world):return
 	var sources: Dictionary=held.get(key,{})
 	var before:=not sources.is_empty()
 	if down:sources[source]=true
@@ -528,10 +559,28 @@ func set_action(key: String,source: String,down: bool,canceled: bool=false) -> v
 			if after:world.throw_grenade()
 		"boost":world.boost_held=after
 
+func discard_compact_actions() -> void:
+	if not MissionHeroAbilities.compact(world):return
+	for key in ["attack","jump","grenade"]:held.erase(key)
+	world.attack_release();world.jump_release(false);world.jump_buffer_timer=0.
+
+func cancel_unspent_actions() -> void:
+	# Losing the application is an interruption, unlike an explicit pause.
+	# Released bombs remain physical projectiles; only the held throw ends.
+	CampaignGrenade.cancel(world)
+	MissionHeroAbilities.cancel(world)
+
+func activate_context() -> bool:
+	if menu_kind!="" or presentation_stage!="" or fade>=0. or world.state!="playing":return false
+	update_arcade_aim()
+	var used: bool=world.interact()
+	discard_compact_actions()
+	return used
+
 func _notification(what: int) -> void:
 	if what==NOTIFICATION_APPLICATION_FOCUS_OUT or what==NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		application_active=false
-		release_all()
+		cancel_unspent_actions();release_all()
 		if is_instance_valid(ui) and world.state=="playing":toggle_pause()
 	elif what==NOTIFICATION_APPLICATION_FOCUS_IN or what==NOTIFICATION_WM_WINDOW_FOCUS_IN:application_active=true
 
@@ -556,25 +605,40 @@ func _input(event: InputEvent) -> void:
 			elif event.button_index in [JOY_BUTTON_A,JOY_BUTTON_X]:
 				var focus:=get_viewport().gui_get_focus_owner()
 				if focus is Button and focus.is_inside_tree() and focus.is_visible_in_tree() and not focus.disabled:focus.pressed.emit()
-			elif event.button_index in [JOY_BUTTON_B,JOY_BUTTON_START] and menu_kind=="paused":close_menu()
+			elif event.button_index==JOY_BUTTON_B:menu_back()
+			elif event.button_index==JOY_BUTTON_START and menu_kind=="paused":close_menu()
 			get_viewport().set_input_as_handled();return
 		if event.button_index==JOY_BUTTON_START and event.pressed:toggle_pause();get_viewport().set_input_as_handled();return
 		for key in ["jump","attack","shoot","duck","boost"]:
 			if event.button_index==pad.bindings[key]:set_action({"shoot":"attack","duck":"grenade"}.get(key,key),"pad"+str(event.button_index),event.pressed)
-		if event.pressed and event.button_index==interact_binding():world.interact()
+		if event.pressed and event.button_index==interact_binding():activate_context()
 		get_viewport().set_input_as_handled();return
 	if menu_kind!="":return
 	if event is InputEventScreenTouch:
 		var p: Vector2=screen_transform.affine_inverse()*event.position
 		if event.pressed and not event.canceled:
+			# BaseButton's emulated mouse is owned by the first touch. Route
+			# the contextual action explicitly so another finger can hold the
+			# joystick. Consume it before GUI emulation and latch this finger
+			# until release; swapping a weapon must never also fire a skill.
+			if touch_actions.has(event.index):
+				get_viewport().set_input_as_handled();return
+			if is_instance_valid(ride_button) and ride_button.is_visible_in_tree() and ride_button.get_global_rect().has_point(p):
+				touch_actions[event.index]="context"
+				if not ride_button.disabled:activate_context()
+				get_viewport().set_input_as_handled();return
 			for key in actions:
 				if actions[key].hit(p):touch_actions[event.index]=key;set_action(key,"touch"+str(event.index),true);get_viewport().set_input_as_handled();return
 			if is_instance_valid(stick) and stick_touch<0 and Rect2(stick.position,stick.size).has_point(p):
 				stick_touch=event.index;stick.axis=stick.value(p);stick.active=true;stick.queue_redraw();get_viewport().set_input_as_handled()
 		else:
-			if touch_actions.has(event.index):set_action(str(touch_actions[event.index]),"touch"+str(event.index),false,event.canceled);touch_actions.erase(event.index);get_viewport().set_input_as_handled()
+			if touch_actions.has(event.index):
+				var action: String=str(touch_actions[event.index])
+				if action!="context":set_action(action,"touch"+str(event.index),false,event.canceled)
+				touch_actions.erase(event.index);get_viewport().set_input_as_handled()
 			if event.index==stick_touch:stick_touch=-1;stick.axis=Vector2.ZERO;stick.active=false;stick.queue_redraw();get_viewport().set_input_as_handled()
 	elif event is InputEventScreenDrag:
+		if touch_actions.get(event.index,"")=="context":get_viewport().set_input_as_handled();return
 		if event.index==stick_touch:stick.axis=stick.value(screen_transform.affine_inverse()*event.position);stick.queue_redraw();get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION:
 		var p: Vector2=screen_transform.affine_inverse()*event.position
@@ -600,7 +664,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		release_all();get_viewport().set_input_as_handled();return
 	if event is InputEventKey:
 		if event.echo:return
-		if event.keycode==KEY_ESCAPE and event.pressed:toggle_pause();get_viewport().set_input_as_handled();return
+		if event.keycode==KEY_ESCAPE and event.pressed:
+			if menu_kind!="":menu_back()
+			else:toggle_pause()
+			get_viewport().set_input_as_handled();return
 		if menu_kind!="":return
 		match event.physical_keycode:
 			KEY_A,KEY_LEFT:left_down=event.pressed
@@ -612,7 +679,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_G:set_action("grenade","keyboard",event.pressed)
 			KEY_SHIFT:set_action("boost","keyboard",event.pressed)
 			KEY_E:
-				if event.pressed:world.interact()
+				if event.pressed:activate_context()
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION and menu_kind=="" and event.button_index==MOUSE_BUTTON_LEFT:
 		set_action("attack","mouse",event.pressed);get_viewport().set_input_as_handled()
@@ -629,7 +696,9 @@ func interact_binding() -> int:
 	return JOY_BUTTON_Y
 
 func pad_help() -> String:
-	return t("move")+" ↖ ↑ ↗ ← → ↙ ↓ ↘ · "+pad.binding_name("jump")+" "+old("control_jump")+" · "+pad.binding_name("shoot")+" "+old("control_shoot")+" · "+pad.binding_name("duck")+" "+t("grenade")+" · "+pad.binding_name("boost")+" "+old("control_boost")+" · "+str(pad.NAMES[interact_binding()])+" "+t("ride")
+	var skill: Dictionary=MissionHeroAbilities.context(world)
+	var context_label: String=t("ride")+(" / "+t(str(skill.label_key)) if bool(skill.visible) else "")
+	return t("move")+" ↖ ↑ ↗ ← → ↙ ↓ ↘ · "+pad.binding_name("jump")+" "+old("control_jump")+" · "+pad.binding_name("shoot")+" "+old("control_shoot")+" · "+pad.binding_name("duck")+" "+t("grenade")+" · "+pad.binding_name("boost")+" "+old("control_boost")+" · "+str(pad.NAMES[interact_binding()])+" "+context_label
 
 func poll_pad() -> void:
 	pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
@@ -689,7 +758,7 @@ func update_arcade_aim(dt: float=0.) -> void:
 	if pad_look.length_squared()>.25:raw=pad_look;analog=true
 	world.move_axis=Vector2(axis,vertical)
 	# Mouse aim: any angle toward the pointer, unless a stick, pad or W/S aim is in use.
-	if mouse_aim and not analog and not up_down and not down_down and is_instance_valid(view):
+	if mouse_aim and not analog and not up_down and (not down_down or world.grounded()) and is_instance_valid(view):
 		var direction:=pointer_aim()
 		if direction!=Vector2.ZERO:world.steer_aim(direction,0.);return
 	if raw.length_squared()<.04:raw=Vector2(world.facing,0.)
@@ -720,6 +789,7 @@ func _process(dt: float) -> void:
 	poll_pad()
 	if world.state=="playing" and menu_kind=="" and fade<0.:
 		update_arcade_aim(clampf(dt,0.,.05))
+		discard_compact_actions()
 		if (stick_touch>=0 or mouse_stick):world.boost_held=absf(world.move_axis.x)>.85 or not Dictionary(held.get("boost",{})).is_empty()
 		var simulation_dt: float=clampf(dt,0.,.05)
 		if impact_hold>0. and motion_enabled and not options.reduced_motion:
@@ -741,7 +811,7 @@ func _process(dt: float) -> void:
 	for event in world.pending_events:
 		if event in ["checkpoint","rescue","rescue_gift","secret","mechanism"] and menu_kind!="briefing":save_checkpoint()
 		if event=="enemy" and impact_cooldown<=0. and motion_enabled and not options.reduced_motion and world.state=="playing":impact_hold=.035;impact_cooldown=.18
-		if event in ["shot","melee","grenade","blast","pickup","rescue","hurt","cut","rescue_gift","secret","mechanism","enemy_shot","guardian","boss_attack","complete","checkpoint","enemy","armour_hit"]:sound(event)
+		if event in ["shot","melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","guardian","boss_attack","complete","checkpoint","enemy","armour_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	view.camera_x=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
@@ -770,23 +840,41 @@ func update_hud() -> void:
 	boss_health.position.y=hud_panel.strip_height+6.
 	boss_health.visible=world.section=="arena" and bool(world.boss.active) and menu_kind=="" and presentation_stage==""
 	boss_health.value=world.boss.hp
-	if boss_health.visible:subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+( " · "+t("boss_warning") if float(world.boss.windup)>0. or float(world.boss.get("beam_warning",0.))>0. else "")
+	if boss_health.visible:
+		var boss_cue: String=""
+		if int(world.boss.phase)==3 and float(world.boss.windup)>0. and int(world.boss.attack)%3==2:boss_cue=" · "+t("boss_dash")
+		elif float(world.boss.windup)>0. or float(world.boss.get("beam_warning",0.))>0.:boss_cue=" · "+t("boss_warning")
+		elif int(world.boss.phase)==2 and world.boss_vulnerable():boss_cue=" · "+t("boss_core")
+		subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+boss_cue
 	subtitle.position.y=boss_health.position.y+(20. if boss_health.visible else 0.)
 	var offer: Dictionary=CampaignRhythm.offer(world)
-	ride_button.visible=active_controls and (not offer.is_empty() or bool(world.mount.ridden) or CampaignVehicles.can_board(world))
+	var primary_context: bool=not offer.is_empty() or bool(world.mount.ridden) or CampaignVehicles.can_board(world)
+	var skill: Dictionary=MissionHeroAbilities.context(world)
+	var skill_context: bool=not primary_context and bool(skill.visible)
+	ride_button.visible=active_controls and (primary_context or skill_context)
+	ride_button.disabled=skill_context and not bool(skill.ready)
 	ride_button.text=t("swap_weapon") if not offer.is_empty() else (t("exit_vehicle") if bool(world.mount.ridden) else t("board"))
+	if skill_context:
+		ride_button.text=t(str(skill.label_key))
+		if not bool(skill.ready):ride_button.text+="\n"+t(str(skill.status_key))
+		if str(skill.phase) in ["recover","cooldown"] and float(skill.get("remaining",0.))>0.:ride_button.text+=" %.1f s"%float(skill.remaining)
+	ride_button.tooltip_text=ride_button.text+(" · "+str(pad.NAMES[interact_binding()]) if active_input=="gamepad" else ("" if touch_mode else " · E"))
 	if is_instance_valid(stick):stick.visible=active_controls
 	for key in actions:
-		var item: AionCampaignTouch=actions[key];item.visible=active_controls;item.pressed=not Dictionary(held.get(key,{})).is_empty()
+		var item: AionCampaignTouch=actions[key]
+		var prev_vis:=item.visible;var prev_p:=item.pressed;var prev_act:=item.action;var prev_cap:=item.caption;var prev_dis:=item.disabled;var prev_cd:=item.cooldown
+		item.visible=active_controls;item.pressed=not Dictionary(held.get(key,{})).is_empty()
 		if key=="attack":
 			var near:=not world.close_enemy().is_empty() and not bool(world.mount.ridden)
 			var captive:=absf(world.aim_direction.y)<.25 and not CampaignRescue.nearest(world).is_empty() and not near
-			item.action="cut" if captive else ("melee" if near else "shoot");item.caption=t("cut") if captive else (t("melee") if near else old("control_shoot"));item.cooldown=world.fire_time/.32
-		if key=="grenade":item.disabled=world.grenades<=0;item.cooldown=world.grenade_time/.55
+			item.action="cut" if captive else ("melee" if near else "shoot");item.caption=t("cut") if captive else (t("melee") if near else old("control_shoot"));item.cooldown=world.fire_time/.32;item.disabled=MissionHeroAbilities.compact(world)
+		if key=="grenade":item.disabled=not CampaignGrenade.can_press(world);item.cooldown=world.grenade_time/.55
 		if key=="jump":
 			var diving: bool=bool(world.mount.ridden) and CampaignVehicles.kind(world)=="shell"
 			item.caption=t("dive") if diving else old("control_jump");item.action="dive" if diving else "jump"
-		item.queue_redraw()
+			item.disabled=MissionHeroAbilities.compact(world)
+		if item.visible and (item.visible!=prev_vis or item.pressed!=prev_p or item.action!=prev_act or item.caption!=prev_cap or item.disabled!=prev_dis or not is_equal_approx(item.cooldown,prev_cd)):
+			item.queue_redraw()
 	if is_instance_valid(control_hint):control_hint.text=pad_help() if active_input=="gamepad" else t("keys")
 
 func update_ambient() -> void:
@@ -799,9 +887,11 @@ func update_ambient() -> void:
 		ambient=AudioStreamPlayer.new();ambient.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(ambient)
 	if ambient_key!=key:
 		ambient.stop();ambient_started=false
-		var stream: AudioStreamWAV=load("res://assets/audio/campaign-"+key+".wav").duplicate()
-		stream.loop_mode=AudioStreamWAV.LOOP_FORWARD;stream.loop_begin=0;stream.loop_end=int(stream.get_length()*stream.mix_rate)
-		ambient.stream=stream;ambient_key=key
+		if not ambient_cache.has(key):
+			var loaded: AudioStreamWAV=load("res://assets/audio/campaign-"+key+".wav").duplicate()
+			loaded.loop_mode=AudioStreamWAV.LOOP_FORWARD;loaded.loop_begin=0;loaded.loop_end=int(loaded.get_length()*loaded.mix_rate)
+			ambient_cache[key]=loaded
+		ambient.stream=ambient_cache[key];ambient_key=key
 	ambient.volume_db=linear_to_db(maxf(.001,audio_volume*.28))
 	# Web sample playback does not provide a reliable frame-by-frame playing
 	# signal for a paused/looping source. Start once at a track/unmute boundary.
@@ -817,17 +907,19 @@ func sound(event: String) -> void:
 		for i in 6:
 			var voice:=AudioStreamPlayer.new();voice.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(voice);voices.append(voice)
 	if not sound_cache.has(event):
-		var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else (2400 if event in ["enemy","armour_hit"] else 1400)
-		var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.}.get(event,660.)
-		if event=="enemy":pitch=180.
-		elif event=="armour_hit":pitch=1140.
-		for i in count:
-			var phase: float=float(i)/22050.;var envelope: float=pow(1.-float(i)/count,2.)
-			var sample:=sin(phase*pitch*TAU*(1.-float(i)/count*.4))*envelope*.22
-			if event=="enemy":sample=(sin(phase*180.*TAU)*.6+sin(phase*73.*TAU)*.4)*envelope*.26
-			elif event=="armour_hit":sample=(sin(phase*1140.*TAU)*.6+sin(phase*1733.*TAU)*.4)*envelope*.20
-			bytes.append_array(PackedByteArray([int(sample*32700.)&255,(int(sample*32700.)>>8)&255]))
-		var stream:=AudioStreamWAV.new();stream.format=AudioStreamWAV.FORMAT_16_BITS;stream.mix_rate=22050;stream.data=bytes;sound_cache[event]=stream
+		if GRENADE_SOUNDS.has(event):sound_cache[event]=GRENADE_SOUNDS[event]
+		else:
+			var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else (2400 if event in ["enemy","armour_hit"] else 1400)
+			var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"gift_drop":780.,"npc_contact":920.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.}.get(event,660.)
+			if event=="enemy":pitch=180.
+			elif event=="armour_hit":pitch=1140.
+			for i in count:
+				var phase: float=float(i)/22050.;var envelope: float=pow(1.-float(i)/count,2.)
+				var sample:=sin(phase*pitch*TAU*(1.-float(i)/count*.4))*envelope*.22
+				if event=="enemy":sample=(sin(phase*180.*TAU)*.6+sin(phase*73.*TAU)*.4)*envelope*.26
+				elif event=="armour_hit":sample=(sin(phase*1140.*TAU)*.6+sin(phase*1733.*TAU)*.4)*envelope*.20
+				bytes.append_array(PackedByteArray([int(sample*32700.)&255,(int(sample*32700.)>>8)&255]))
+			var stream:=AudioStreamWAV.new();stream.format=AudioStreamWAV.FORMAT_16_BITS;stream.mix_rate=22050;stream.data=bytes;sound_cache[event]=stream
 	for voice in voices:
 		if not voice.playing:voice.stream=sound_cache[event];voice.volume_db=linear_to_db(maxf(.001,audio_volume));voice.play();break
 	if event=="hurt" and pad.haptics:
@@ -851,6 +943,9 @@ func metadata() -> void:
 		for b in buttons:
 			if is_instance_valid(b) and b.is_inside_tree() and b.is_visible_in_tree():rects[b.name]=[b.global_position.x,b.global_position.y,b.size.x,b.size.y,b.text]
 	data.buttons=rects
+	data.context_action={"visible":false}
+	if is_instance_valid(ride_button):
+		data.context_action={"rect":[ride_button.global_position.x,ride_button.global_position.y,ride_button.size.x,ride_button.size.y],"visible":ride_button.is_visible_in_tree(),"disabled":ride_button.disabled,"text":ride_button.text}
 	data.ui_generation=ui_generation
 	data.ui_ready=ui_ready
 	data.raw=[get_viewport_rect().size.x,get_viewport_rect().size.y]
@@ -867,6 +962,7 @@ func metadata() -> void:
 	data.presentation=presentation_stage;data.presentation_time=presentation_time;data.help_step=help_step;data.hud_summary=hud_panel.summary;data.report_lines=report_lines();data.input_kind=active_input;data.mount_transition=world.mount_transition;data.mount_transition_time=world.mount_transition_time
 	# Passive acceptance observations: these mirror real state, never mutate it.
 	data.engine_process_frames=Engine.get_process_frames();data.engine_physics_frames=Engine.get_physics_frames()
+	data.engine_process_seconds=Performance.get_monitor(Performance.TIME_PROCESS);data.engine_physics_seconds=Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)
 	data.crouching=world.crouching()
 	data.rally=world.rally;data.retry_count=world.retry_count;data.chain=world.chain;data.chain_time=world.chain_time;data.best_chain=world.best_chain
 	data.weapon_offer=CampaignRhythm.offer(world);data.bridge_timers=world.bridge_timers;data.boss_ports=world.boss.get("ports",[]);data.boss_dash=world.boss.get("dash",0.)
@@ -881,6 +977,15 @@ func metadata() -> void:
 	for item in world.pickups:
 		if not world.taken.has(str(item.id)):data.pickups.append(item.duplicate(true))
 	data.hero_projectiles=[]
+	var mouth: Vector2=MissionHeroAbilities.mouth(world)
+	var tongue_tip: Vector2=MissionHeroAbilities.tongue_tip(world)
+	data.hero_skill={"phase":world.hero_skill.get("phase",""),"clock":world.hero_skill.get("clock",0.),"hits":world.hero_skill.get("hits",[]).duplicate(),"extent":world.hero_skill.get("extent",0.),"mouth":[mouth.x,mouth.y],"tongue_tip":[tongue_tip.x,tongue_tip.y]}
+	data.grenade_throw={"phase":world.grenade_throw.get("phase",""),"elapsed":world.grenade_throw.get("elapsed",0.),"released":world.grenade_throw.get("released",false)}
+	data.bombs=[]
+	for bomb in world.bombs:data.bombs.append({"p":[bomb.p.x,bomb.p.y],"v":[bomb.v.x,bomb.v.y],"age":bomb.age})
+	data.grenade_blasts=[]
+	for blast in world.blasts:
+		if str(blast.get("kind",""))=="grenade":data.grenade_blasts.append({"p":[blast.p.x,blast.p.y],"age":blast.age})
 	for bullet in world.bullets:
 		if bullet.owner=="hero":data.hero_projectiles.append({"p":[bullet.p.x,bullet.p.y],"v":[bullet.v.x,bullet.v.y],"kind":bullet.kind,"age":bullet.age})
 	data.spiders=[]

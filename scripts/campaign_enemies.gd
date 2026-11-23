@@ -2,8 +2,32 @@ class_name CampaignEnemies
 extends RefCounted
 
 ## New roles retain one normal HP. Armoured machines and guardians are separate.
+## 0.32.0: Explicit 4-stage readability cycle (telegraph -> active -> recovery -> reposition).
+## Timings are rule constants; Sol 6.2 art must match these windows rather than alter them.
+const ROLE_TIMING := {
+	"leech":{"windup":0.75,"recover":0.55},
+	"hopper":{"windup":0.70,"recover":0.50},
+	"siphon":{"windup":0.90,"recover":0.60},
+	"kite":{"windup":0.80,"recover":0.55},
+	"mirror":{"windup":0.95,"recover":0.70},
+	"vine":{"windup":0.95,"recover":0.65},
+	"burrow":{"windup":0.65,"recover":0.55},
+	"conductor":{"windup":0.95,"recover":0.65},
+	"mimic":{"windup":0.80,"recover":0.60},
+	"sweeper":{"windup":1.00,"recover":0.75},
+	"glider":{"windup":0.95,"recover":0.70},
+	"borer":{"windup":1.00,"recover":0.80},
+	"patrol":{"windup":0.95,"recover":0.70}
+}
+
+static func timing_for(e: Dictionary) -> Dictionary:
+	if bool(e.get("mini",false)):return {"windup":0.90,"recover":0.55}
+	return ROLE_TIMING.get(str(e.get("kind","")),{"windup":0.85,"recover":0.55})
+
 static func hidden(e: Dictionary) -> bool:
-	return e.kind=="burrow" and fmod(float(e.age),4.)<1.4
+	# Once surfaced for an attack, the burrow commits through the complete
+	# readable attack and punish interval. Its age/ambush clock keeps running.
+	return e.kind=="burrow" and fmod(float(e.age),4.)<1.4 and float(e.get("windup",0.))<=0. and active_time(e)<=0. and float(e.get("recover",0.))<=0.
 
 static func shot(w,e: Dictionary,offset: float=0.,height: float=-35.,speed: float=220.) -> void:
 	var origin:=Vector2(float(e.x),float(e.y)+height)
@@ -11,7 +35,8 @@ static func shot(w,e: Dictionary,offset: float=0.,height: float=-35.,speed: floa
 	w.bullets.append({"p":origin,"v":direction*speed,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
 
 static func attack(w,e: Dictionary) -> void:
-	e.flash=.45;e.attacks=int(e.attacks)+1
+	var timing: Dictionary=timing_for(e)
+	e.flash=.45;e.attacks=int(e.attacks)+1;e.recover=float(timing.recover)
 	w.pending_events.append("guardian" if bool(e.mini) else "enemy_shot")
 	var kind: String=e.kind
 	if bool(e.mini):
@@ -33,7 +58,7 @@ static func attack(w,e: Dictionary) -> void:
 		return
 	match kind:
 		"leech":e.lunge=.65
-		"hopper":e.leap=.8
+		"hopper":e.leap=.8;e.leap_duration=.8
 		"siphon":
 			for o in w.objects:
 				if o.kind=="lamp" and absf(float(o.x)-float(e.x))<300.:o.active=false;w.activated.erase(str(o.id))
@@ -46,10 +71,11 @@ static func attack(w,e: Dictionary) -> void:
 			if absf(w.player.x-float(e.x))<210. and w.player.y> -85.:w.damage_player()
 		"burrow":e.lunge=.55
 		"conductor":
+			e.buff_pulse=.5
 			for other in w.enemies:
-				if other!=e and absf(float(other.x)-float(e.x))<300.:other.energised=2.
+				if other!=e and not bool(other.defeated) and absf(float(other.x)-float(e.x))<300.:other.energised=2.
 			shot(w,e)
-		"mimic":e.leap=.6;e.lunge=.6
+		"mimic":e.leap=.6;e.leap_duration=.6;e.lunge=.6
 		"sweeper":
 			for angle in [-.18,0.,.18]:shot(w,e,angle,-40.,210.)
 		"glider":shot(w,e,-.25);shot(w,e,.25)
@@ -57,31 +83,59 @@ static func attack(w,e: Dictionary) -> void:
 		"patrol":
 			shot(w,e,0.,-95. if int(e.attacks)%2==0 else -20.,260.)
 
+static func active_time(e: Dictionary) -> float:
+	return maxf(float(e.get("lunge",0.)),maxf(float(e.get("leap",0.)),float(e.get("sweep",0.))))
+
 static func step(w,e: Dictionary,dt: float) -> bool:
 	var kind: String=e.kind
 	if not CampaignContent.NEW_ENEMIES.has(kind) and kind not in CampaignContent.HEAVIES and not bool(e.mini):return false
 	var spec: Dictionary=CampaignContent.NEW_ENEMIES.get(kind,{"speed":45.,"range":500.})
+	var timing: Dictionary=timing_for(e)
 	var dx: float=w.player.x-float(e.x)
 	var flying: bool=CampaignContent.flying(kind)
+	var is_hidden: bool=hidden(e)
+	if kind=="burrow":
+		var cycle: float=fmod(float(e.age),4.)
+		e.emerge_warn=is_hidden and cycle>=0.95 and cycle<1.4
+	# Recovery is reserved by attack(), but its clock starts only once the
+	# longest active action ends. Spend a boundary-crossing tick once only.
+	var active_before: float=active_time(e)
+	var lunge_before: float=float(e.get("lunge",0.))
+	var recovery_before: float=float(e.get("recover",0.))
+	for key in ["lunge","leap","sweep","energised","buff_pulse"]:
+		e[key]=maxf(0.,float(e.get(key,0.))-dt)
+	e.recover=maxf(0.,recovery_before-maxf(0.,dt-active_before))
+	var recovering: bool=recovery_before>0. and active_time(e)<=0.
+	var active_dt: float=minf(dt,active_before)
 	if flying:
 		e.y=float(e.home.y)+sin(float(e.age)*(3. if kind=="kite" else 1.5))*28.
-	if absf(dx)>180. and kind not in ["mirror","vine","conductor"] and not hidden(e):
+	if absf(dx)>180. and kind not in ["mirror","vine","conductor"] and not is_hidden and not recovering:
 		var candidate: float=float(e.x)+signf(dx)*float(spec.speed)*dt
 		if flying or w.floor_at(candidate)==0.:e.x=candidate
-	if kind=="hopper":e.y=-absf(sin(float(e.age)*3.))*85.
-	for key in ["lunge","leap","sweep","energised"]:e[key]=maxf(0.,float(e.get(key,0.))-dt)
-	if float(e.leap)>0.:e.y=-sin(float(e.leap)/.8*PI)*100.
-	if float(e.lunge)>0.:
-		var next: float=float(e.x)+signf(dx)*(230. if kind!="borer" else 270.)*dt
+	if kind=="hopper" and not recovering:e.y=-absf(sin(float(e.age)*3.))*85.
+	if float(e.leap)>0.:
+		var leap_duration: float=float(e.get("leap_duration",.6 if kind=="mimic" else .8))
+		var leap_phase: float=clampf(1.-float(e.leap)/leap_duration,0.,1.)
+		e.y=float(e.home.y)-sin(leap_phase*PI)*100.
+	if lunge_before>0.:
+		var next: float=float(e.x)+signf(dx)*(230. if kind!="borer" else 270.)*minf(active_dt,lunge_before)
 		if w.floor_at(next)==0.:e.x=next
-	if hidden(e):e.y=0.
-	if absf(dx)<38. and absf(w.player.y-float(e.y))<55. and not hidden(e):
+	if recovering and not flying:e.y=float(e.home.y)
+	if is_hidden:e.y=0.
+	# Prevent instant spawn-frame contact hits and reward attacking during recovery.
+	var active_contact: bool=float(e.age)>0.45 and (not recovering or float(e.get("lunge",0.))>0. or float(e.get("leap",0.))>0.)
+	if active_contact and absf(w.player.x-float(e.x))<38. and absf(w.player.y-float(e.y))<55. and not is_hidden:
 		w.damage_player()
 		if kind=="leech":w.buffs.slow=2.
+	# The attack and punish interval own their full ticks, including the
+	# final recovery tick. Reposition/windup cannot run concurrently.
+	if active_before>0. or recovery_before>0.:return true
 	if float(e.windup)>0.:
 		e.windup=maxf(0.,float(e.windup)-dt)
 		if float(e.windup)==0.:attack(w,e);e.wait=2.1 if not bool(e.mini) else 1.8
-	else:
+	elif not recovering:
 		e.wait=float(e.wait)-dt*(1.4 if float(e.energised)>0. else 1.)
-		if float(e.wait)<=0. and absf(dx)<float(spec.range) and not hidden(e):e.windup=.9
+		# Keep telegraph starts within readable onscreen distance.
+		if float(e.wait)<=0. and absf(dx)<minf(float(spec.range),520.) and not is_hidden:
+			e.windup=float(timing.windup)
 	return true

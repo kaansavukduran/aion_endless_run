@@ -2,6 +2,7 @@ class_name RunnerFrontPresentation
 extends Node2D
 ## Authored title presentation and read-only autonomous attract scene.
 ## The demo has its own rules/view and deliberately owns no persistence API.
+const OPENING_VISTA=preload("res://assets/opening-lantern-grove.png")
 var host
 var intro_time := 0.
 var intro_active := true
@@ -108,27 +109,32 @@ func _draw() -> void:
 	if not is_instance_valid(host) or host.page!="main":return
 	var width: float=host.view_w;var height: float=host.view_h
 	if intro_active:
-		var reveal:=smoothstep(.3,2.4,intro_time)
-		draw_rect(Rect2(0,0,width,height),Color(0.025,.035,.055,1.-reveal*.94))
-		var center:=Vector2(width*.5,height*.4)
-		var light:=Color("ffcf8c");light.a=clampf(intro_time/.8,0.,1.)
-		# Crisp copper/glass lantern; never a replacement official logo.
-		draw_rect(Rect2(center+Vector2(-15,-32),Vector2(30,38)),Color("69564a"))
-		draw_rect(Rect2(center+Vector2(-10,-27),Vector2(20,27)),light)
-		draw_rect(Rect2(center+Vector2(-20,8),Vector2(40,5)),Color("b88c67"))
-		if intro_time>2.2:
+		# A dedicated opaque vista prevents the menu's standing hero and floor
+		# from leaking through the opening, especially in portrait mode.
+		var image_size:=OPENING_VISTA.get_size()
+		var scale: float=maxf(width/image_size.x,height/image_size.y)
+		var target_size:=image_size*scale
+		draw_texture_rect(OPENING_VISTA,Rect2(((Vector2(width,height)-target_size)*.5).floor(),target_size),false)
+		var reveal:=smoothstep(0.,.8,intro_time) if host.decorative_motion() else 1.
+		if reveal<1.:draw_rect(Rect2(0,0,width,height),Color(0.025,.035,.055,1.-reveal))
+		if intro_time>1. or not host.decorative_motion():
 			var title: String="AIONIA"
 			var fs: int=host.ui_size(44)
-			var size: Vector2=host.FONT.get_string_size(title,HORIZONTAL_ALIGNMENT_LEFT,-1,fs)
-			draw_string(host.FONT,Vector2((width-size.x)*.5,height*.25),title,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color("ffcf8c"))
-		if intro_time>3.3:
+			var title_size: Vector2=host.FONT.get_string_size(title,HORIZONTAL_ALIGNMENT_LEFT,-1,fs)
+			draw_string(host.FONT,Vector2((width-title_size.x)*.5,height*.2),title,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color("ffcf8c"))
+		if intro_time>2.2 or not host.decorative_motion():
+			var portrait: bool=height>width
 			for i in host.FRIENDS.size():
 				var hero: String=host.FRIENDS[i]
-				var key: String="runner-"+hero
-				var row:=2 if hero=="aion" else (6 if hero in ["owl","wolf","rabbit","eren"] else 1)
-				var pose: Dictionary=host.menu_hero_art.pose(hero,"walk",posmod(int(intro_time*7.),6) if host.decorative_motion() else 0) if host.menu_hero_art.has(hero) else host.frames.pose(key,row,host.frames.cycle(key,row,intro_time,.85) if host.decorative_motion() else 0)
+				var clip: Dictionary=host.menu_hero_art.clip_spec(hero,"idle_fire")
+				# Idle poses stay grounded on the authored wet-stone path; the
+				# opening never runs stationary walk cycles or changes body scale.
+				var frame: int=0
+				if host.decorative_motion():frame=posmod(int(maxf(0.,intro_time-2.2)*3.),int(clip.frames))
+				var pose: Dictionary=host.menu_hero_art.pose(hero,"idle_fire",frame)
 				var factor: float=float(pose.get("scale",1.))
-				var anchor:=Vector2(width*(float(i)+.5)/float(host.FRIENDS.size()),height*.65)
+				var anchor:=Vector2(width*(.12+float(i)*.152),height*.73)
+				if portrait:anchor=Vector2(width*(.2+float(i%3)*.3),height*(.71+float(i/3)*.12))
 				draw_texture_rect(pose.texture,Rect2((anchor+Vector2(pose.offset)*factor).round(),pose.get("size",pose.texture.get_size()*factor)),false)
 	elif demo_world!=null:
 		var text: String=copy("demo")

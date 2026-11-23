@@ -33,7 +33,30 @@ const ABILITIES := {
 	"es":["Pulsa dos veces: doble salto","Un rebaño de tres","Mantén: carrera a cuatro patas","Mantén: planear · Tres aleteos","Toca: 1,75× · Mantén: 4×","Toca: 1,75× · Mantén: 4×"],
 	"it":["Premi due volte: doppio salto","Un gregge di tre","Tieni: corsa a quattro zampe","Tieni: plana · Tre battiti d'ali","Tocco: 1,75× · Tieni: 4×","Tocco: 1,75× · Tieni: 4×"]
 }
+const MISSION_ABILITIES := {
+	"armadillo":{
+		"tr":"Eğil + Yetenek: kabuğa kapan ve ileri yuvarlan. Hamleden sonra kısa toparlanma.",
+		"en":"Crouch + Skill: curl up and roll forward. Brief recovery after the rush."
+	},
+	"frog":{
+		"tr":"Yetenek: nişan yönünde dil saldırısı. İlk hedefte veya engelde geri çekilir.",
+		"en":"Skill: launch your tongue along your aim. Retracts at the first target or obstacle."
+	}
+}
+static func endless_limited_label(language: String) -> String:
+	return "Sonsuz · 4" if GameText.language_for_locale(language)=="tr" else "Endless · 4"
+
+static func endless_availability(language: String) -> String:
+	return "Sonsuz: ilk dört kahramanla." if GameText.language_for_locale(language)=="tr" else "Endless: original four heroes."
+
+static func ability_summary(language: String,hero: String) -> String:
+	language=GameText.language_for_locale(language)
+	if hero=="armadillo":return "Eğil + Yuvarlan" if language=="tr" else "Crouch + Roll"
+	if hero=="frog":return "Dil saldırısı" if language=="tr" else "Tongue attack"
+	return ability(language,hero)
+
 static func ability(language: String,hero: String) -> String:
 	language=GameText.language_for_locale(language)
+	if MISSION_ABILITIES.has(hero):return str(MISSION_ABILITIES[hero].get(language,MISSION_ABILITIES[hero].en))
 	var index: int=["aion","sheep","wolf","owl","rabbit","eren"].find(hero)
 	return str(ABILITIES.get(language,ABILITIES.en)[maxi(0,index)])

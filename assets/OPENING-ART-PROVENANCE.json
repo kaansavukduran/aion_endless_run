@@ -1,0 +1,36 @@
+{
+  "created": "2026-11-22",
+  "status": "Original game opening environmental art candidate; visual user acceptance pending",
+  "generator": "OpenAI image_gen",
+  "source_generation_id": "exec-4ab14cb4-3e70-41d8-896b-cecd43ff988e",
+  "source_sha256": "2eb73bf2f9d45d74bb811c26ef210b1484952336754d13e1a488123a6ca1e9ac",
+  "path": "assets/opening-lantern-grove.png",
+  "dimensions": [
+    1672,
+    941
+  ],
+  "sha256": "2eb73bf2f9d45d74bb811c26ef210b1484952336754d13e1a488123a6ca1e9ac",
+  "scope": "Intro vista only. Existing main-menu composition, roster and gameplay art preserved. No new character or canon design.",
+  "art_direction": "Original lantern grove/inlet. Warm copper/glass light, cool layered blue forest and distinct wet-stone foreground. Clear upper-center title area and lower actor support plane.",
+  "reference_study": {
+    "repository": "https://github.com/kaansavukduran/drive-by-wire",
+    "commit": "69904f45999e0de28051a4a641e78a7155c4d283",
+    "primary": [
+      "assets/ui/road_aftermath.png",
+      "assets/sprites/aion_story.png",
+      "assets/sprites/eren_story.png"
+    ],
+    "secondary": [
+      "assets/art/cliff.png",
+      "assets/art/kurt_scene.png"
+    ],
+    "principles": "Warm/cool lighting, grounded actors, separated depth planes and distinct material highlights. Reference art was inspected, not copied or imported into this game; draft character adaptations are not final canon approval."
+  },
+  "runtime": {
+    "texture_filter": "nearest",
+    "background_fill": "cover with centered crop",
+    "support_plane": 0.72,
+    "characters": "Existing approved project body atlas layers, unchanged",
+    "motion": "No camera zoom, shake or particle overlay; reduced-motion uses a stable scene"
+  }
+}

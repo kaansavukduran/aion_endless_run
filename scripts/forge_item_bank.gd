@@ -1,8 +1,9 @@
 class_name ForgeItemBank
 extends RefCounted
 const DATA=preload("res://assets/FORGE-ITEMS-PROVENANCE.json")
-var source: Image
-var cache: Dictionary={}
+# 0.40.0: Process-wide shared item atlas & crop cache.
+static var source: Image
+static var cache: Dictionary={}
 
 func pose(kind: String) -> Dictionary:
 	assert(DATA.data.frames.has(kind),"Unknown actual item: "+kind)

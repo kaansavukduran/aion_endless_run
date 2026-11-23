@@ -12,7 +12,8 @@ func run() -> void:
 	var game=load("res://main.tscn").instantiate();root.add_child(game);await process_frame
 	game.set_physics_process(false);game.touch_tutorial_done=true;game.interface_options.reduced_motion=false
 	var body:=M1HeroArt.new();var damage:=M1DamageArt.new()
-	for hero in game.FRIENDS:
+	# Mission 1 six-hero presentation is covered by campaign_selection_flow.
+	for hero in RunnerWorld.PLAYABLE_HEROES:
 		for animated in [true,false]:
 			game.main_menu();game.select_character(hero);game.start_run();game.motion=animated
 			game.world.sheep_count=3;game.world.frontier.request_boss(5);game.world.step(.01)

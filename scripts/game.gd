@@ -11,21 +11,22 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.30.0"
+const GAME_VERSION = "0.50.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
 const REGISTRATION = preload("res://assets/SPRITE-REGISTRATION.json")
 const NORMAL_HEIGHT := 90.0
 const FOLLOWER_RATIO := 0.72
-const FRIENDS := ["aion", "sheep", "rabbit", "eren"]
-const COLORS := [Color("f4a7cd"), Color("ffca84"), Color("b8baf0"), Color("b8ebd3")]
+const FRIENDS := ["aion", "sheep", "rabbit", "eren", "armadillo", "frog"]
+const COLORS := [Color("f4a7cd"), Color("ffca84"), Color("b8baf0"), Color("b8ebd3"), Color("c49268"), Color("80bd64")]
 var interface_options := preload("res://scripts/interface_options.gd").new()
 var native_diagnostics := preload("res://scripts/native_diagnostics.gd").new()
 var web_accessibility := preload("res://scripts/web_accessibility.gd").new()
 var active_input := "keyboard"
 var theme_check := 0.0
 var story_ui := preload("res://scripts/boss_story.gd").new()
+var campaign_started := false
 var pixel_ui := preload("res://scripts/pixel_interface.gd").new()
 var touch_controls := preload("res://scripts/touch_controls.gd").new()
 var scene_w := 1152.0
@@ -471,6 +472,7 @@ func wrap_label(value: String, size: int = 15, color: String = "a6b8d1") -> Labe
 	return item
 
 func show_page(value: String) -> void:
+	if pixel_ui.launch_pending:return
 	if value!=page:menu_pages.reset(value)
 	if value == "characters" and world.state != "ready": return
 	language_picker_open = false
@@ -761,6 +763,10 @@ func open_subpage(value: String) -> void:
 	show_page(value)
 
 func start_run() -> void:
+	if character not in World.PLAYABLE_HEROES:
+		clear_held_controls()
+		show_page("main")
+		return
 	front.skip_intro();front.stop_demo()
 	visual_size = 1.0
 	if OS.has_feature("web"):
@@ -777,6 +783,8 @@ func start_run() -> void:
 	tone(440.0, 0.09)
 
 func start_campaign() -> void:
+	if campaign_started:return
+	campaign_started=true
 	front.skip_intro();front.stop_demo()
 	clear_held_controls()
 	save_settings()
@@ -824,9 +832,10 @@ func _notification(what: int) -> void:
 		pause_run()
 
 func select_character(id: String) -> void:
+	if pixel_ui.launch_pending:return
 	if id not in FRIENDS or world.state != "ready" or page not in ["main", "characters"]: return
 	character = id
-	pixel_ui.roster_page=FRIENDS.find(id)/2
+	pixel_ui.roster_page=pixel_ui.roster_page_for(id)
 	world.character = id
 	clear_held_controls()
 	save_settings()
@@ -965,6 +974,8 @@ func on_wolf(point: Vector2) -> bool:
 	return character == "wolf" and Rect2(World.PLAYER_X - 65, ground + world.y - 115, 130, 130).has_point(point)
 
 func _input(event: InputEvent) -> void:
+	if pixel_ui.launch_pending:
+		get_viewport().set_input_as_handled();return
 	if is_instance_valid(front) and is_instance_valid(front.host) and front.input(event):
 		get_viewport().set_input_as_handled();return
 	if event is InputEventScreenTouch and event.pressed: active_input="touch"
@@ -1046,8 +1057,11 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.keycode in [KEY_SPACE, KEY_ENTER] and page == "main" and not language_picker_open:
 			var focused := get_viewport().gui_get_focus_owner()
-			if focused == null or str(focused.name)=="StartRun":
-				start_run()
+			if focused == null:
+				pixel_ui.request_launch(start_campaign)
+				get_viewport().set_input_as_handled()
+			elif str(focused.name)=="StartRun" and not focused.disabled:
+				pixel_ui.request_launch(start_run)
 				get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F11:
 			fullscreen = not fullscreen
@@ -1385,6 +1399,12 @@ func publish_web_status() -> void:
 	for field in settings_inputs.values(): stamp += ":" + str(field.get_global_rect())
 	var focused: Control = get_viewport().gui_get_focus_owner()
 	stamp += ":"+str(focused.get_instance_id()) if is_instance_valid(focused) else ":none"
+	var preview_status: Dictionary={}
+	for id in pixel_ui.roster_previews:
+		var preview=pixel_ui.roster_previews[id]
+		if is_instance_valid(preview) and preview.is_visible_in_tree():
+			preview_status[id]={"state":preview.select_state,"frame":preview.rendered_frame,"paused":preview.paused,"source_key":str(preview.rendered_pose.get("source_key",""))}
+	stamp+=":"+str(pixel_ui.launch_pending)+":"+str(preview_status)
 	if stamp == web_stamp: return
 	web_stamp = stamp
 	var document = JavaScriptBridge.get_interface("document")
@@ -1392,7 +1412,7 @@ func publish_web_status() -> void:
 	if canvas == null: return
 	web_accessibility.update()
 	canvas.setAttribute("data-ui-ready", str(ui_layout_ready))
-	canvas.setAttribute("data-front",JSON.stringify({"intro":front.intro_active,"intro_time":front.intro_time,"idle":front.idle_time,"demo":front.demo_world!=null,"demo_index":front.demo_index,"demo_time":front.demo_time,"help_step":help_step,"selected":character,"demo_player":[front.demo_world.player.x,front.demo_world.player.y] if front.demo_world!=null else [],"demo_shots":front.demo_world.shots if front.demo_world!=null else 0,"demo_section":front.demo_world.section if front.demo_world!=null else ""}))
+	canvas.setAttribute("data-front",JSON.stringify({"intro":front.intro_active,"intro_time":front.intro_time,"idle":front.idle_time,"demo":front.demo_world!=null,"demo_index":front.demo_index,"demo_time":front.demo_time,"help_step":help_step,"selected":character,"launch_pending":pixel_ui.launch_pending,"previews":preview_status,"demo_player":[front.demo_world.player.x,front.demo_world.player.y] if front.demo_world!=null else [],"demo_shots":front.demo_world.shots if front.demo_world!=null else 0,"demo_section":front.demo_world.section if front.demo_world!=null else ""}))
 	canvas.setAttribute("data-level-elapsed",str(world.adventure.level_elapsed))
 	canvas.setAttribute("data-level-distance",str(world.adventure.level_distance(world)))
 	canvas.setAttribute("data-celebration-x",str(world.adventure.celebration_x(world,motion)))
@@ -1601,6 +1621,26 @@ func runner_region(id: String, row: int, frame: int) -> Rect2:
 
 func update_friend() -> void:
 	world.pose_motion_enabled=motion
+	if character in ["armadillo","frog"]:
+		# These bodies have their own atlas and never enter the retired runner
+		# row lookup. Campaign selection and the menu use the same body bank.
+		friend_character=character;friend_combat=-1;friend_action=false
+		friend_sprite.visible=not (world.state=="ready" and pixel_ui.split_main())
+		gun_echo.hide();sheep_collectible.hide()
+		for follower in followers:follower.hide()
+		var cinematic: bool=world.frontier.storytelling() or world.adventure.hugging()
+		if world.state in ["ready","running","paused"] and not cinematic:
+			update_m1_friend()
+		else:
+			var preview: bool=world.state=="ready" and page=="main"
+			var anchor_x: float=((view_w*.5-92)/scene_zoom+World.PLAYER_X) if portrait else view_w*.73
+			var anchor:=Vector2(anchor_x if preview else World.PLAYER_X,ground+world.y)
+			var defeated: bool=world.state in ["ice","fire","bonk","fall","over"]
+			var action: String="death" if defeated else "idle_fire"
+			var frame: int=clampi(int(world.hit_time*8.),0,5) if defeated and decorative_motion() else (5 if defeated else 0)
+			place_m1_body(friend_sprite,character,action,frame,anchor,visual_size)
+		friend_row=int(friend_sprite.get_meta("source_row",0));friend_frame=int(friend_sprite.get_meta("source_frame",0))
+		return
 	var a = world.adventure
 	if world.state != "paused" or friend_character != character:
 		friend_combat = -1
@@ -1780,8 +1820,14 @@ func place_m1_body(item: Sprite2D,hero: String,action: String,frame: int,anchor:
 	item.set_meta("pose_key","m1-body");item.set_meta("pose_action",action);item.set_meta("pose_row",pose.source_row);item.set_meta("pose_frame",pose.source_frame)
 	item.set_meta("gun_embedded",false);item.set_meta("pose_height",float(pose.height)*growth)
 	item.set_meta("eye_world",anchor+Vector2(pose.face_local)*growth);item.set_meta("head_probe_world",anchor+Vector2(pose.face_local)*growth)
-	var reference: Dictionary=M1HeroArt.DATA.data.atlases[str(pose.source_key).trim_prefix("m1-body-")].calibration[hero]
-	item.set_meta("head_size",float(reference.face_patch[2])*float(pose.source_scale)*growth)
+	var source_atlas: String=str(pose.source_key).trim_prefix("m1-body-")
+	var reference: Dictionary=M1HeroArt.DATA.data.atlases.get(source_atlas,{}).get("calibration",{}).get(hero,{})
+	if pose.has("head_size"):item.set_meta("head_size",float(pose.head_size)*growth)
+	elif reference.has("face_patch"):item.set_meta("head_size",float(reference.face_patch[2])*float(pose.source_scale)*growth)
+	elif item.has_meta("head_size"):item.remove_meta("head_size")
+	# A provider without a measured head patch must not inherit the previous
+	# hero's diagnostic width. It still uses its fixed authored body scale.
+
 	item.set_meta("foot_world",anchor)
 	item.set_meta("face_visible",true)
 
@@ -2047,6 +2093,10 @@ func build_front_help() -> void:
 	var keyboard: Array=["A / D · ← / → · W / S", "Space", "F / J · "+text("control_shoot"), "G", "E", "F / J · "+text("control_shoot"), "A / D · Space", "Space · S/↓ + Space", front_ability(character)]
 	var pads: Array=["L / D-pad · R",gamepad.binding_name("jump"),gamepad.binding_name("shoot")+" / "+gamepad.binding_name("attack"),gamepad.binding_name("duck"),"Y / △",gamepad.binding_name("shoot"),"L · "+gamepad.binding_name("jump"),"↓ + "+gamepad.binding_name("jump"),front_ability(character)]
 	var touch: Array=["↔ ↕",text("control_jump"),text("control_shoot"),AionCampaignText.word(language,"grenade"),AionCampaignText.word(language,"mount"),text("control_shoot"),"↔ · "+text("control_jump"),"↓ + ↑",front_ability(character)]
+	if character in ["armadillo","frog"]:
+		keyboard[-1]="E · "+front_ability(character)
+		pads[-1]="Y / △ · "+front_ability(character)
+		touch[-1]=RunnerFrontText.word(language,"ability")+" · "+front_ability(character)
 	column.add_child(wrap_label(str((pads if active_input=="gamepad" else (touch if touch_mode else keyboard))[help_step]),20))
 	var navigation:=HBoxContainer.new();column.add_child(navigation)
 	var previous:=button(RunnerFrontText.word(language,"previous"),func():help_step=maxi(0,help_step-1);rebuild());previous.name="FrontHelpPrevious";previous.disabled=help_step==0;previous.size_flags_horizontal=Control.SIZE_EXPAND_FILL;navigation.add_child(previous)

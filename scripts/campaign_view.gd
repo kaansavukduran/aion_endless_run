@@ -16,6 +16,7 @@ var camera_y := 0.0
 var font: Font
 var gun_parts: Dictionary = {}
 var hero_marker: Dictionary = {}
+var qa_pose_bounds: Dictionary = {}
 var npc_growth_cache: Dictionary = {}
 var item_bank := ForgeItemBank.new()
 var vehicle_art := ForgeVehicleArt.new()
@@ -217,22 +218,23 @@ func draw_world() -> void:
 			var source_facing: int=CampaignEffectsArt.DATA.data.references[str(e.kind)].facing
 			draw_pose(effects_art.death(str(e.kind),f),p,source_facing*(-1 if int(e.facing)<0 else 1))
 			continue
-		var tint := Color.WHITE
-		var attack: bool = float(e.windup)>0. or float(e.get("flash",0.))>0. or float(e.get("dash",0.))>0. or float(e.get("dive",0.))>0.
+		var recovering: bool = float(e.get("recover",0.))>0. and CampaignEnemies.active_time(e)<=0.
+		var tint := Color("cbd8e8") if recovering and not bool(e.defeated) else Color.WHITE
+		var attack: bool = enemy_attacking(e)
 		var frame: int = posmod(int(float(e.age)*9.),6)
 		if bool(e.defeated):frame=clampi(int(float(e.get("dead_age",0.))/.65*6.),0,5)
 		elif float(e.windup)>0.:frame=clampi(int((1.-float(e.windup)/(.85 if bool(e.mini) else .65))*3.),0,2)
 		elif float(e.get("flash",0.))>0.:frame=clampi(3+int((.24-float(e.flash))/.24*3.),3,5)
 		if CampaignContent.NEW_ENEMIES.has(str(e.kind)):
 			var spec: Dictionary=CampaignContent.NEW_ENEMIES[str(e.kind)]
-			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
+			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if attack and not recovering else 0))
 			if CampaignEnemies.hidden(e):phase=1
 			draw_pose(catalogue.pose(str(spec.atlas),int(spec.row)+phase,frame),p,direction,1.,tint)
 		elif str(e.kind) in CampaignContent.HEAVIES and catalogue.DATA.data.atlases.has("heavy-machines"):
-			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
+			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if attack and not recovering else 0))
 			draw_pose(catalogue.pose("heavy-machines",CampaignContent.HEAVIES.find(str(e.kind))*4+phase,frame),p,direction,1.,tint)
 		elif bool(e.mini) and catalogue.DATA.data.atlases.has("mini-bosses"):
-			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if float(e.get("flash",0.))>0. else 0))
+			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if attack and not recovering else 0))
 			var row: int=["current_guard","terrace_guard","drill_guard"].find(str(e.get("mini_role","current_guard")))*4+phase
 			draw_pose(catalogue.pose("mini-bosses",row,frame),p,direction,1.,tint)
 		elif str(e.kind) in ["drone","seed","warden"]:
@@ -243,10 +245,6 @@ func draw_world() -> void:
 		else:
 			var row: int = {"moth":0,"slime":1,"beetle":2,"wisp":3}.get(str(e.kind),0)
 			existing("creatures",row,frame,p,direction,1.,tint)
-		if attack and not bool(e.defeated):
-			var point := at(p+Vector2(0,-70))
-			draw_circle(point,5,Color("f7bb70")); caption("!",point+Vector2(-3,-10),20)
-			if e.has("shot_lane"):caption(host.t("high_lane" if str(e.shot_lane)=="high" else "low_lane"),point+Vector2(-14,-25),11)
 		if (bool(e.mini) or bool(e.get("heavy",false))) and not bool(e.defeated):small_health(at(p+Vector2(-35,-130)),70,float(e.hp)/float(e.max_hp))
 	if bool(world.boss.active) or world.completed:
 		var phase: int=2 if world.completed else clampi(int(world.boss.phase)-1,0,2)
@@ -257,9 +255,6 @@ func draw_world() -> void:
 		if not world.completed and not world.boss_vulnerable():
 			var core:=at(Vector2(float(world.boss.x),float(world.boss.y)-75.))
 			draw_arc(core,48.,0.,TAU,24,Color("efd58a"),3.);caption(host.t("shield"),core+Vector2(-28,-56),16)
-		if float(world.boss.windup)>0.:
-			var warning: String="boss_dash" if int(world.boss.phase)==3 and int(world.boss.attack)%3==2 else ("boss_core" if int(world.boss.phase)==2 else "arc_boss_warning")
-			caption(host.t(warning),at(Vector2(float(world.boss.x)-130.,-215.)),16)
 		if not world.completed and int(world.boss.phase)==1:
 			for i in 2:
 				var point: Vector2=at(Vector2(float(world.boss.x)+(-65. if i==0 else 65.),-95.))
@@ -289,13 +284,56 @@ func draw_world() -> void:
 	var tint := Color.WHITE
 	if world.invulnerable>0.: tint=Color("ffd9ca")
 	if not bool(world.mount.ridden) and world.mount_transition.is_empty():
-		draw_pose(pose,world.player,M1CombatArt.body_facing(world),1.,tint)
+		draw_pose(pose,world.player,int(M1CombatArt.body_spec(world).mirror),1.,tint)
 	if not world.mount_transition.is_empty():
 		draw_embark()
-	elif not bool(world.mount.ridden) and world.state in ["playing","briefing"]:
+	elif not bool(world.mount.ridden) and world.state in ["playing","briefing","paused"]:
 		draw_hero_weapon()
+		CampaignGrenadeArt.draw_held(self)
+	MissionHeroArt.draw_tongue(self)
 
 	hero_marker={"anchor":[world.player.x,world.player.y],"facing":world.facing,"source":pose.get("source_key","campaign-melee"),"row":pose.get("source_row",0),"frame":pose.get("source_frame",0),"floor":world.floor_at(world.player.x),"muzzle":[world.player.x+world.muzzle_offset().x,world.player.y+world.muzzle_offset().y]}
+	# Passive QA evidence follows the exact visible cel and drawing transform.
+	# Texture alpha bounds are measured once per cel, only in explicit QA mode.
+	if host.get("web_qa")==true:
+		var selected: Dictionary=M1CombatArt.body_spec(world)
+		hero_marker.world_time=world.time
+		hero_marker.skill_phase_at_draw=str(world.hero_skill.get("phase",""))
+		hero_marker.skill_clock_at_draw=float(world.hero_skill.get("clock",0.))
+		hero_marker.grounded_at_draw=world.grounded()
+		hero_marker.render_process_frame=Engine.get_process_frames()
+		hero_marker.physics_velocity=[world.velocity.x,world.velocity.y]
+		var drawn_anchor: Vector2=at(world.player)
+		hero_marker.rendered_anchor=[drawn_anchor.x+camera_x,drawn_anchor.y-ground]
+		hero_marker.body_action=str(selected.action)
+		hero_marker.body_frame=int(selected.frame)
+		hero_marker.body_mirror=int(selected.mirror)
+		hero_marker.ground_contact=bool(pose.get("ground_contact",false))
+		hero_marker.hand_layers_visible=world.state in ["playing","briefing","paused"] and not bool(world.mount.ridden) and world.mount_transition.is_empty()
+		hero_marker.gun_visible=hero_marker.hand_layers_visible and hero_weapon_visible() and world.melee_time<=0. and world.rescue_time<=0.
+		hero_marker.weapon_visible=hero_marker.gun_visible
+		hero_marker.melee_at_draw=world.melee_time
+		hero_marker.rescue_at_draw=world.rescue_time
+		hero_marker.attack_mode_at_draw="hidden"
+		if hero_marker.hand_layers_visible:
+			hero_marker.attack_mode_at_draw="grenade" if not world.grenade_throw.is_empty() else ("rescue" if world.rescue_time>0. else ("melee" if world.melee_time>0. else ("gun" if hero_marker.gun_visible else "hidden")))
+		var cache_key: String=str(pose.get("source_key",""))+":"+str(pose.get("source_row",0))+":"+str(pose.get("source_frame",0))
+		if not qa_pose_bounds.has(cache_key):
+			var pixels: Image=pose.texture.get_image()
+			if pixels.is_compressed():pixels.decompress()
+			qa_pose_bounds[cache_key]=pixels.get_used_rect()
+		var used: Rect2i=qa_pose_bounds[cache_key]
+		var factor: float=float(pose.get("scale",1.))
+		var size: Vector2=pose.get("size",pose.texture.get_size()*factor)
+		var local_origin: Vector2=(Vector2(pose.offset)*factor).round()
+		hero_marker.visible_bottom_y=world.player.y+local_origin.y+float(used.end.y)*size.y/pose.texture.get_height()
+		hero_marker.rendered_muzzle=null
+		if hero_marker.weapon_visible:
+			var gun: Dictionary=M1CombatArt.placement(world)
+			var pixel: Vector2=gun.weapon.muzzle_pixel
+			var barrel: Vector2=Vector2(gun.grip)+((Vector2(gun.weapon.offset)+pixel*float(gun.weapon.factor))*Vector2(1.,float(gun.mirror_y))).rotated(float(gun.angle))
+			hero_marker.rendered_muzzle=[world.player.x+barrel.x,world.player.y+barrel.y]
+
 
 	if world.character=="sheep":
 		for i in world.flock-1:
@@ -326,10 +364,11 @@ func draw_world() -> void:
 			draw_texture(shot.texture,shot.offset)
 			draw_set_transform(Vector2.ZERO,0.,Vector2.ONE)
 	for bomb in world.bombs:
-		var p := at(bomb.p); var color := Color(str(bomb.color))
-		draw_circle(p,9,Color("292331"));draw_circle(p,6,color);draw_rect(Rect2(p-Vector2(2,13),Vector2(4,7)),Color("f5e6bf"))
-		for a in 4: draw_circle(p+Vector2.from_angle(world.time*5.+a*PI*.5)*12.,2,color)
+		CampaignGrenadeArt.draw_bomb(self,bomb)
 	for blast in world.blasts:
+		if str(blast.get("kind",""))=="grenade":
+			CampaignGrenadeArt.draw_blast(self,blast)
+			continue
 		var phase: float=float(blast.age)/.5
 		if str(blast.get("kind",""))=="spider":draw_pose(support_art.pose("spider-burst",clampi(int(phase*6.),0,5)),Vector2(blast.p))
 		var color := Color(str(blast.color));color.a=(1.-phase)*.8
@@ -338,11 +377,65 @@ func draw_world() -> void:
 	for popup in world.score_popups:
 		caption(host.t("chain_bonus")%[int(popup.bonus),int(popup.chain)],at(Vector2(popup.p)-Vector2(0,float(popup.age)*24.)),13)
 	draw_assists()
+	draw_combat_cues()
 	if world.section!="arena" and not CampaignRoutes.is_fork(world.section):
 		var p := at(Vector2(world.length()-140.,0))
 		draw_flag(Vector2(world.length()-140.,0))
 
+func enemy_attacking(e: Dictionary) -> bool:
+	var recovering: bool=float(e.get("recover",0.))>0. and CampaignEnemies.active_time(e)<=0.
+	return float(e.windup)>0. or (not recovering and (float(e.get("flash",0.))>0. or CampaignEnemies.active_time(e)>0. or float(e.get("dash",0.))>0. or float(e.get("dive",0.))>0.))
+
+func draw_combat_cues() -> void:
+	# Critical intent stays above smoke and impacts; FX never owns attack timing.
+	if world.section=="arena" and float(world.boss.get("beam_warning",0.))>0.:
+		var p: Vector2=at(Vector2(float(world.boss.beam_x),0))
+		draw_rect(Rect2(p-Vector2(36,350),Vector2(72,350)),Color(1.,.7,.3,.18))
+		draw_line(p-Vector2(0,330),p,Color("ebc37f"),3.)
+	for e in world.enemies:
+		if bool(e.defeated) or float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
+		var p:=Vector2(float(e.x),float(e.y))
+		var attack: bool=enemy_attacking(e)
+		if not bool(e.defeated) and bool(e.get("emerge_warn",false)):
+			var gp := at(Vector2(float(e.x),0.))
+			var r: float = 16. if host.options.reduced_motion else 12.+absf(sin(world.time*14.))*10.
+			draw_arc(gp,r,PI,TAU,14,Color("e8a36c"),3.)
+			caption("!",gp+Vector2(-3,-22),16)
+		if not bool(e.defeated) and float(e.get("buff_pulse",0.))>0.:
+			var pr: float = (1.-float(e.buff_pulse)/.5)*90.
+			draw_arc(at(p+Vector2(0,-35)),maxf(14.,pr),0.,TAU,20,Color("f5d27a"),2.)
+		if not bool(e.defeated) and str(e.kind)=="mirror" and float(e.windup)>0.:
+			var mp := at(p+Vector2(int(e.facing)*20.,-34.))
+			draw_arc(mp,24.,-PI*.45 if int(e.facing)>0 else PI*.55,PI*.45 if int(e.facing)>0 else PI*1.45,12,Color("9be5f5"),3.)
+		if attack and not bool(e.defeated):
+			var point := at(p+Vector2(0,-70))
+			draw_circle(point,5,Color("f7bb70")); caption("!",point+Vector2(-3,-10),20)
+			if e.has("shot_lane"):caption(host.t("high_lane" if str(e.shot_lane)=="high" else "low_lane"),point+Vector2(-14,-25),11)
+	if bool(world.boss.active) and not world.completed:
+		if not world.completed and float(world.boss.get("shift_pause",0.))>0.:
+			var sc := at(Vector2(float(world.boss.x),-80.))
+			var sr: float = 72. if host.options.reduced_motion else 54.+(1.-float(world.boss.shift_pause)/.75)*58.
+			draw_arc(sc,sr,0.,TAU,28,Color("ffcf8c"),4.)
+		if not world.completed and float(world.boss.get("recover",0.))>0.:
+			var rc := at(Vector2(float(world.boss.x),-75.))
+			draw_arc(rc,34.,0.,TAU,18,Color("9fe3c8"),3.)
+		if float(world.boss.windup)>0.:
+			var is_dash: bool = int(world.boss.phase)==3 and int(world.boss.attack)%3==2
+			var warning: String="boss_dash" if is_dash else ("boss_core" if int(world.boss.phase)==2 else "arc_boss_warning")
+			caption(host.t(warning),at(Vector2(float(world.boss.x)-130.,-215.)),16)
+			if is_dash:
+				var dir: float = -1. if world.player.x<float(world.boss.x) else 1.
+				var lane_from := at(Vector2(float(world.boss.x), -10.))
+				var lane_to := at(Vector2(float(world.boss.x)+dir*340., -10.))
+				draw_line(lane_from,lane_to,Color("f28c6b"),4.)
+
+func hero_weapon_visible() -> bool:
+	# The authored throw includes release and follow-through with an open hand.
+	# Re-equipping waits for the complete action, matching World's fire gate.
+	return world.grenade_throw.is_empty() and not MissionHeroAbilities.compact(world)
+
 func draw_hero_weapon() -> void:
+	if not hero_weapon_visible():return
 	var transform: Dictionary=M1CombatArt.placement(world)
 	var point: Vector2=world.player+Vector2(transform.grip)
 	draw_set_transform(at(point),float(transform.angle),Vector2(1,int(transform.mirror_y)))

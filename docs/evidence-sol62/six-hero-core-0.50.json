@@ -1,0 +1,131 @@
+{
+  "version": "0.50.0",
+  "immutable_build": "a9b8f2321cba8a3d",
+  "scope": "Normal menu + keyboard/mouse full gait/fire/grenade/native-skill matrix",
+  "status": "PASS",
+  "heroes": [
+    {
+      "hero": "aion",
+      "status": "PASS",
+      "passed_checks": 754,
+      "not_verified_gestures": 7,
+      "exact_observable_shot_births": 0,
+      "telemetry_skipped_shot_births": 24,
+      "max_exact_origin_error_px": null,
+      "moving_melee_draw_packets": 0,
+      "moving_melee_actions": [],
+      "console_errors": [],
+      "actual_encoded_video_fps": 10.444958104594049,
+      "video_status": "BELOW_60_FPS_TARGET",
+      "report": "/workspace/work/sol62-selection/browser-six-050-a9-clockmatched/aion/results.json",
+      "original_video": "/workspace/work/sol62-selection/browser-six-050-a9-clockmatched/aion/normal-input-original.webm"
+    },
+    {
+      "hero": "sheep",
+      "status": "PASS",
+      "passed_checks": 1088,
+      "not_verified_gestures": 6,
+      "exact_observable_shot_births": 4,
+      "telemetry_skipped_shot_births": 20,
+      "max_exact_origin_error_px": 2.402047949212759e-05,
+      "moving_melee_draw_packets": 2,
+      "moving_melee_actions": [
+        "walk_back"
+      ],
+      "console_errors": [],
+      "actual_encoded_video_fps": 6.729002270024862,
+      "video_status": "BELOW_60_FPS_TARGET",
+      "report": "/workspace/work/sol62-selection/browser-six-050-a9-clockmatched/sheep/results.json",
+      "original_video": "/workspace/work/sol62-selection/browser-six-050-a9-clockmatched/sheep/normal-input-original.webm"
+    },
+    {
+      "hero": "rabbit",
+      "status": "PASS",
+      "passed_checks": 1119,
+      "not_verified_gestures": 6,
+      "exact_observable_shot_births": 7,
+      "telemetry_skipped_shot_births": 14,
+      "max_exact_origin_error_px": 1.831452013175399e-05,
+      "moving_melee_draw_packets": 1,
+      "moving_melee_actions": [
+        "walk_back"
+      ],
+      "console_errors": [],
+      "actual_encoded_video_fps": 5.505908780154312,
+      "video_status": "BELOW_60_FPS_TARGET",
+      "report": "/workspace/work/sol62-selection/browser-six-050-a9-clockmatched/rabbit/results.json",
+      "original_video": "/workspace/work/sol62-selection/browser-six-050-a9-clockmatched/rabbit/normal-input-original.webm"
+    },
+    {
+      "hero": "eren",
+      "status": "PASS",
+      "passed_checks": 1104,
+      "not_verified_gestures": 7,
+      "exact_observable_shot_births": 4,
+      "telemetry_skipped_shot_births": 18,
+      "max_exact_origin_error_px": 4.145226340969626e-05,
+      "moving_melee_draw_packets": 0,
+      "moving_melee_actions": [],
+      "console_errors": [],
+      "actual_encoded_video_fps": 5.456249389118549,
+      "video_status": "BELOW_60_FPS_TARGET",
+      "report": "/workspace/work/sol62-selection/browser-six-050-a9-clockmatched/eren/results.json",
+      "original_video": "/workspace/work/sol62-selection/browser-six-050-a9-clockmatched/eren/normal-input-original.webm"
+    },
+    {
+      "hero": "armadillo",
+      "status": "PASS",
+      "passed_checks": 855,
+      "not_verified_gestures": 9,
+      "exact_observable_shot_births": 0,
+      "telemetry_skipped_shot_births": 29,
+      "max_exact_origin_error_px": null,
+      "moving_melee_draw_packets": 0,
+      "moving_melee_actions": [],
+      "console_errors": [],
+      "actual_encoded_video_fps": 9.049677856900646,
+      "video_status": "BELOW_60_FPS_TARGET",
+      "report": "/workspace/work/sol62-selection/browser-six-050-a9-new2-authored/armadillo/results.json",
+      "original_video": "/workspace/work/sol62-selection/browser-six-050-a9-new2-authored/armadillo/normal-input-original.webm"
+    },
+    {
+      "hero": "frog",
+      "status": "PASS",
+      "passed_checks": 937,
+      "not_verified_gestures": 9,
+      "exact_observable_shot_births": 1,
+      "telemetry_skipped_shot_births": 26,
+      "max_exact_origin_error_px": 1.3734234388908216e-05,
+      "moving_melee_draw_packets": 0,
+      "moving_melee_actions": [],
+      "console_errors": [],
+      "actual_encoded_video_fps": 7.630104502509705,
+      "video_status": "BELOW_60_FPS_TARGET",
+      "report": "/workspace/work/sol62-selection/browser-six-050-a9-new2-authored/frog/results.json",
+      "original_video": "/workspace/work/sol62-selection/browser-six-050-a9-new2-authored/frog/normal-input-original.webm",
+      "moving_tongue": {
+        "draw_packets": 3,
+        "body_frames": [
+          0,
+          1,
+          2
+        ],
+        "all_grounded_at_draw": true,
+        "body_actions": [
+          "tongue_walk_back"
+        ]
+      }
+    }
+  ],
+  "limits": [
+    "Requested canvas capture60fps; actual cadence below target; original videos have never been transcoded/retimed/padded.",
+    "Emission timestamp skipped by throttled passive telemetry remains NOT_VERIFIED.",
+    "Physical device/gamepad NOT_TESTED. Touch/virtual Y supplement pending targeted multi-touch context fix."
+  ],
+  "before_evidence": {
+    "moving_melee_defect": "/workspace/work/sol62-selection/browser-six-050-bc7af24e/aion",
+    "aion_corrected_moving_melee_7_packets_same_a9": "/workspace/work/sol62-selection/browser-six-050-a9b8f232/aion",
+    "exact_shot_clock_diagnostic": "/workspace/work/sol62-selection/shot-birth-clock-diagnostic-v2",
+    "multitouch_context_failure": "/workspace/work/sol62-selection/browser-six-050-a9-activations-clear/armadillo"
+  }
+}
