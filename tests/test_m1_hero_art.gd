@@ -79,13 +79,13 @@ func run():
   w.invulnerable=0.
   w.damage_player()
   check(M1CombatArt.body_spec(w).action=='hurt','Real damage selects the redrawn standing reaction: '+hero)
-  w.hp=1;w.flock=1;w.invulnerable=0.;w.damage_player()
-  check(w.state=='dying' and M1CombatArt.body_spec(w).action=='death','Fatal hit plays the separate collapse sequence: '+hero)
+  check(w.state=='dying' and w.hp==0 and w.attempts_remaining==2,'The same lethal hit begins the collapse and spends one body: '+hero)
   var seen: Dictionary={}
   for tick in 16:
    var pose:=M1CombatArt.body_spec(w)
-   seen[pose.frame]=true
-   check(pose.action=='death','Dying hero keeps its own collapse sequence: '+hero)
+   if w.death_time>=CampaignLives.impact_duration(w.death_cause):
+    seen[pose.frame]=true
+    check(pose.action=='death','The hurt reaction flows into the authored collapse: '+hero)
    w.step(.05)
   check(seen.size()==6 and M1CombatArt.body_spec(w).frame==5,'Collapse reaches every frame, including the final grounded pose: '+hero)
  # The original four keep their precise canonical registration above. The

@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.51.1"
+const GAME_VERSION = "0.52.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -2077,7 +2077,7 @@ func has_campaign_checkpoint() -> bool:
 		if mirror is String and not mirror.is_empty():content=mirror
 	if content.is_empty():return false
 	var parsed=JSON.parse_string(content)
-	if not parsed is Dictionary or bool(parsed.get("completed",false)):return false
+	if not parsed is Dictionary or bool(parsed.get("completed",false)) or str(parsed.get("phase","playing"))=="dead" or (str(parsed.get("phase","playing"))=="continue_offer" and float(parsed.get("offer_remaining",0.))<=0.):return false
 	var probe:=AionCampaignWorld.new()
 	return probe.restore(parsed)
 

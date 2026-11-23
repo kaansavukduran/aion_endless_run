@@ -180,7 +180,7 @@ static func populate(w) -> void:
 			for j in 3:w.pickups.append({"id":id+":loot:"+str(j),"x":x-65.+j*65.,"y":-178.,"kind":["magnet","reveal","points"][j],"secret":id})
 		var heavy: String={"water":"sweeper","terrace":"glider","roots":"borer"}[w.section]
 		w.spawn_enemy(heavy,w.length()*.63,-90. if heavy=="glider" else 0.,700)
-		w.mount={"available":true,"ridden":false,"x":560.,"hp":3,"type":{"water":"shell","terrace":"wind","roots":"drill"}[w.section],"hurt":0.,"wreck_age":0.}
+		w.mount={"available":true,"ridden":false,"x":560.,"hp":CampaignVehicles.MAX_HP,"type":{"water":"shell","terrace":"wind","roots":"drill"}[w.section],"hurt":0.,"wreck_age":0.}
 		# Two signature environmental zones synced with mid & late encounters.
 		var zone_kind: String="current" if w.section=="water" else ("updraft" if w.section=="terrace" else "dark")
 		w.zones.append({"id":w.section+":flow","kind":zone_kind,"x":w.length()*.38,"width":1050.})
@@ -234,7 +234,7 @@ static func hit_object(w,p: Vector2,damage: int,from: Vector2=Vector2.INF) -> bo
 			if str(o.secret)!="":
 				w.discovered[str(o.secret)]=true;w.award(str(o.secret),250);w.notice="arc_secret";w.notice_time=2.;w.pending_events.append("secret")
 			if o.kind in ["lamp","panel","relay","turret"] and not w.awarded.has(str(o.id)+":power"):
-				w.shield=mini(3,w.shield+1);w.award(str(o.id)+":power",0)
+				w.buffs["power"]=maxf(6.,float(w.buffs.get("power",0.)));w.award(str(o.id)+":power",0)
 			if o.kind in ["surprise","planks","rock"]:w.pickups.append({"id":str(o.id)+":gift","x":o.x,"y":-35.,"kind":"points"})
 			apply_surface(w,o)
 			if o.kind=="relay":w.notice="arc_maintenance";w.notice_time=3.

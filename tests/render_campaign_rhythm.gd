@@ -26,9 +26,11 @@ func run() -> void:
 	w.pickups.append({"id":"offer-review","kind":"arc","x":920.,"y":-35.})
 	await snap("weapon-offer")
 	check(game.ride_button.visible and game.ride_button.text==game.t("swap_weapon"),"Actual context button offers gun choice")
-	w.enemies.clear();w.gates.clear();w.player=Vector2(2610.,0.);CampaignRecovery.step(w);w.weapon="pistol";w.retry();game.view.camera_x=2350.
+	w.enemies.clear();w.gates.clear();w.player=Vector2(2610.,0.);CampaignRecovery.step(w);w.invulnerable=0.;w.damage_player();game.view.camera_x=2350.
+	for tick in 60:w.step(.02)
+	CampaignLives.start_entry(w,Rect2(2350.,-420.,1152.,600.));w.step(.05)
 	await snap("rally-return")
-	check(w.player.x==2600. and w.weapon=="heavy","Drawn recovery uses real checkpoint stock")
+	check(w.state=="respawn" and w.player.x>=2350. and w.attempts_remaining==2,"Drawn entry arrives from the current view with one spent life")
 	w.load_section("shore");w.player=Vector2(5940.,-40.);w.bridge_timers[5800.]=1.;game.view.camera_x=5460.
 	await snap("failing-bridge")
 	check(w.crossing_floor(5940.,-42.,-39.,10.)== -40.,"Warning deck is still physical before collapse")

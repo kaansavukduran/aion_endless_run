@@ -36,7 +36,7 @@ func auto_travel(game: AionCampaignGame,source: String,destination: String,reduc
 	if source=="fork_two":game.world.activated[CampaignRoutes.HATCH_ID]=true
 	var gift: Dictionary={"id":"shore:keeper:supply","kind":"heavy","x":4000.,"y":-25.,"rescue_id":"shore:keeper","role":"keeper","from_bag":true}
 	game.world.gift_drops["shore:keeper"]=gift.duplicate(true)
-	game.world.mount={"available":mounted,"ridden":mounted,"x":1490.,"hp":2,"type":"skimmer"}
+	game.world.mount={"available":mounted,"ridden":mounted,"x":1490.,"hp":1,"type":"skimmer"}
 	var exit_y: float=90. if CampaignRoutes.is_fork(source) else 0.
 	game.world.player=Vector2(1490. if CampaignRoutes.is_fork(source) else game.world.length()-120.,exit_y-(42. if mounted else 0.))
 	game.world.velocity=Vector2.ZERO
@@ -59,7 +59,7 @@ func auto_travel(game: AionCampaignGame,source: String,destination: String,reduc
 	check(game.world.time==clock and game.world.shots==shots,"Fade advances neither gameplay time nor queued fire")
 	check(game.world.score==1234 and game.world.weapon=="arc" and game.world.ammunition==ammunition,"Live combat inventory and score survive automatic travel")
 	check(game.world.gift_drops.get("shore:keeper",{})==gift and not game.world.awarded.has("shore:keeper:gift"),"Unclaimed bag gift is preserved without an invisible award")
-	check(game.world.mount.ridden==mounted and (not mounted or game.world.mount.hp==2),"Automatic travel carries the actual damaged vehicle")
+	check(game.world.mount.ridden==mounted and (not mounted or game.world.mount.hp==1),"Automatic travel carries the same live vehicle")
 	check(str(game.saved.get("checkpoint",""))==destination and Dictionary(game.saved.get("gift_drops",{})).has("shore:keeper"),"Destination checkpoint includes persistent unclaimed-drop state")
 	check(game.held.is_empty() and not game.world.fire_held and not game.world.jump_held,"No source remains latched when the fade completes")
 func route_structures() -> void:
@@ -82,7 +82,7 @@ func route_structures() -> void:
 	var back:=fresh();back.enemies.clear();back.player=Vector2(1250.,90.)
 	for frame in 30:back.move_axis=Vector2.LEFT;back.step(1./60.)
 	check(back.player.x>=CampaignRoutes.PIER.end.x+CampaignRoutes.BODY_HALF_WIDTH-.5,"The crawlway is a wall from the far side for a standing body, too")
-	var rider:=fresh();rider.enemies.clear();rider.mount={"available":true,"ridden":true,"x":700.,"hp":3,"type":"skimmer"};rider.player=Vector2(700.,48.)
+	var rider:=fresh();rider.enemies.clear();rider.mount={"available":true,"ridden":true,"x":700.,"hp":1,"type":"skimmer"};rider.player=Vector2(700.,48.)
 	for frame in 90:rider.move_axis=Vector2(1,1);rider.step(1./60.)
 	check(rider.player.x<=CampaignRoutes.PIER.position.x-CampaignRoutes.BODY_HALF_WIDTH+.5,"A vehicle cannot enter the crawlway")
 	var roof:=fresh();roof.enemies.clear();roof.player=Vector2(980.,-195.);roof.move_axis=Vector2(0,1);roof.jump_press();roof.jump_release()
@@ -145,17 +145,17 @@ func run() -> void:
 	w.mount.ridden=false;w.player.y=90.
 	for mounted in [false,true]:
 		var ledge:=fresh();ledge.enemies.clear();ledge.player=Vector2(651.,48. if mounted else 90.)
-		ledge.mount={"available":mounted,"ridden":mounted,"x":651.,"hp":3,"type":"skimmer"}
+		ledge.mount={"available":mounted,"ridden":mounted,"x":651.,"hp":1,"type":"skimmer"}
 		ledge.move_axis=Vector2.LEFT;ledge.step(.05)
 		check(ledge.player.x>=CampaignRoutes.DROP_X and absf(CampaignRoutes.foot(ledge).y-90.)<.1,"Walking back into the ledge cannot teleport actor or vehicle up90 pixels")
 		if not mounted:
 			ledge.jump_press();ledge.jump_release()
 			for frame in 42:ledge.move_axis=Vector2.LEFT;ledge.step(1./60.)
 			check(ledge.player.x<CampaignRoutes.DROP_X and absf(ledge.player.y)<.1,"The lower ledge remains physically climbable by jumping back")
-	var diver:=fresh();diver.mount={"available":true,"ridden":true,"x":1490.,"hp":3,"type":"shell","dive":.5};diver.player=Vector2(1490.,72.)
+	var diver:=fresh();diver.mount={"available":true,"ridden":true,"x":1490.,"hp":1,"type":"shell","dive":.5};diver.player=Vector2(1490.,72.)
 	check(diver.grounded() and CampaignRoutes.choice_at(diver)=="water","A diving shell uses the same contact feet for route selection and physics")
 	for deck in [90.,-195.]:
-		var rider:=fresh();rider.enemies.clear();rider.mount={"available":true,"ridden":true,"x":1200.,"hp":3,"type":"skimmer"};rider.player=Vector2(1200.,deck-42.);rider.velocity=Vector2.ZERO
+		var rider:=fresh();rider.enemies.clear();rider.mount={"available":true,"ridden":true,"x":1200.,"hp":1,"type":"skimmer"};rider.player=Vector2(1200.,deck-42.);rider.velocity=Vector2.ZERO
 		var exited: bool=rider.interact()
 		check(exited,"Vehicle can actually exit on fork support height "+str(deck))
 		if exited:

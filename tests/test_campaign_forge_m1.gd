@@ -44,7 +44,7 @@ func run() -> void:
 	w=clean();w.player=Vector2(400.,0.);w.spawn_enemy("leech",410.,0.,2)
 	var l: Dictionary=w.enemies[0];l.age=0.1;l.active=true
 	CampaignEnemies.step(w,l,.05)
-	check(w.hp==3,"Freshly activated enemy does not deal instant spawn-frame contact damage")
+	check(w.hp==1 and w.attempts_remaining==3,"Freshly activated enemy does not deal instant spawn-frame contact damage")
 	l.age=1.0;CampaignEnemies.attack(w,l)
 	check(float(l.get("recover",0.))>0.,"Enemy attack enters an explicit recovery punish window")
 
@@ -85,7 +85,7 @@ func run() -> void:
 	var game:=AionCampaignGame.new();game.language="en";root.add_child(game);await process_frame;game.set_process(false)
 	game.world.begin("aion");game.world.state="playing";game.hud_panel.refresh()
 	var sig1: String=game.hud_panel.last_signature
-	check(game.hud_panel.summary.begins_with(game.t("lives")),"HUD places combat-critical Life first in hierarchy")
+	check(game.hud_panel.summary.begins_with(game.t("reserve_lives")),"HUD places combat-critical reserve first in hierarchy")
 	game.hud_panel.refresh()
 	check(game.hud_panel.last_signature==sig1,"HUD dirty-state cache stays stable when world state is unchanged")
 	game.world.hp=2;game.hud_panel.refresh()

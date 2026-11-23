@@ -11,10 +11,14 @@ func run_case(hero: String,leaf: String) -> Dictionary:
   if w.section!=last_stage:stages.append(w.section);print("STAGE ",hero,"/",leaf," ",w.section," HP ",w.hp);last_stage=w.section
   if w.state=="complete":break
   if w.state=="dying":w.step(.02);continue
-  if w.state=="dead":
+  if w.state=="dead":break
+  if w.state=="continue_offer":
    retries+=1
    if retries>8:break
-   w.retry();fire=false;settled_until=0.;last_jump=-10.;continue
+   CampaignLives.open_picker(w);CampaignLives.confirm(w,hero)
+  if w.state=="respawn_pending":
+   CampaignLives.start_entry(w,Rect2(maxf(0.,w.player.x-400.),-420.,1152.,600.));fire=false;settled_until=0.;last_jump=-10.
+  if w.state=="respawn":w.step(.02);continue
   if w.state=="travel":w.finish_travel();fire=false;continue
   if w.state=="fork_one":w.choose_route("water" if leaf=="water" else "canopy");fire=false;continue
   if w.state=="fork_two":w.choose_route(leaf);fire=false;continue

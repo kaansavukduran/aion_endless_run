@@ -21,32 +21,31 @@ func run() -> void:
 	check(w.ammunition==46,"Matching supply adds ammunition instead of deleting remaining stock")
 	w.collect({"id":"arc-refill","kind":"arc"});check(w.ammunition==46,"Same supply cannot refill twice")
 	w.collect({"id":"arc-cap","kind":"arc"});check(w.ammunition==72,"Matching ammo has a finite two-magazine cap")
-	w.mount={"ridden":true,"available":true,"hp":3,"x":w.player.x};w.player.y=-42.
+	w.mount={"ridden":true,"available":true,"hp":1,"x":w.player.x};w.player.y=-42.
 	w.pickups.append({"id":"mounted","kind":"beam","x":w.player.x+30.,"y":-35.});w.step(.01)
 	check(w.weapon=="beam" and w.taken.has("mounted"),"Vehicle-contact supply collection remains available")
 	w=fresh();w.weapon="heavy";w.ammunition=38;w.player=Vector2(2610.,0.)
 	w.score=123;CampaignRecovery.step(w)
 	check(float(w.rally.get("x",0.))==2600. and int(w.rally.ammunition)==38,"Grounded rally point captures real position and stock")
 	w.weapon="disc";w.ammunition=3;w.awarded["already-paid"]=true;w.taken["already-claimed"]=true
-	w.hp=1;w.invulnerable=0.;w.damage_player();w.retry()
-	check(w.hp==3 and w.player==Vector2(2600.,0.) and w.weapon=="heavy" and w.ammunition==38,"Actual death/retry restores rally stock and a short segment")
+	w.invulnerable=0.;w.damage_player()
+	for tick in 60:w.step(.02)
+	CampaignLives.start_entry(w,Rect2(2350.,-430.,1152.,600.))
+	for tick in 32:w.step(.02)
+	check(w.hp==1 and w.player.x>=2350. and w.player.x<3502. and w.weapon=="pistol" and w.ammunition==0,"Death returns to the same visible encounter with the base pistol")
 	check(w.score==123 and w.awarded.has("already-paid") and w.taken.has("already-claimed"),"Recovery never rolls back one-time score or claims")
 	var saved: Dictionary=w.snapshot();var restored:=AionCampaignWorld.new()
-	check(restored.restore(saved) and restored.player.x==2600. and restored.weapon=="heavy" and restored.ammunition==38,"Save/Continue reopens the actual rally inventory")
-	w.mount={"available":false,"ridden":false,"type":"skimmer","hp":0,"x":2600.};w.rally=CampaignRecovery.capture(w,2600.);w.retry()
-	check(int(w.mount.hp)==0 and not bool(w.mount.available),"Recovery does not manufacture a vehicle destroyed before its rally snapshot")
-	var old: Dictionary=saved.duplicate(true);old.erase("rally");old.erase("retry_count");old.erase("best_chain")
+	check(restored.restore(saved) and restored.player==w.player and restored.weapon=="pistol" and restored.attempts_remaining==2,"Save/Continue preserves the exact position, inventory and remaining lives")
+	w.mount={"available":false,"ridden":false,"type":"skimmer","hp":0,"x":2600.};w.rally=CampaignRecovery.capture(w,2600.)
+	check(restored.restore(w.snapshot()) and int(restored.mount.hp)==0 and not bool(restored.mount.available),"Recovery does not manufacture a vehicle destroyed before its rally snapshot")
+	var old: Dictionary=saved.duplicate(true);old.schema=3;old.erase("rally");old.erase("retry_count");old.erase("best_chain")
 	var legacy:=AionCampaignWorld.new();check(legacy.restore(old) and legacy.player.x==140. and legacy.taken.has("already-claimed"),"Old schema3 checkpoint retains its safe section-start fallback")
 	for bad in [NAN,INF,-1.,99999999.]:
 		var invalid: Dictionary=saved.duplicate(true);invalid.rally.x=bad
 		check(not AionCampaignWorld.new().restore(invalid),"Malformed rally coordinates are rejected before restore")
-	var invalid: Dictionary=saved.duplicate(true);invalid.rally.mount={"available":true,"ridden":true,"hp":3,"x":"nan"}
+	var invalid: Dictionary=saved.duplicate(true);invalid.rally.mount={"available":true,"ridden":true,"hp":1,"x":"nan"}
 	check(not AionCampaignWorld.new().restore(invalid),"Malformed nested vehicle numbers cannot enter recovery")
-	w=fresh();w.retry();var kit: Dictionary=w.pickups.filter(func(p):return p.get("retry_kit",false))[0];var score:=w.score
-	w.pickups.assign([kit]) # Isolate the supply from adjacent authored fruit.
-	w.player=Vector2(float(kit.x),0.);w.step(.01)
-	check(w.weapon=="heavy" and w.score==score,"Pistol retry receives a physical zero-score safety supply")
-	w.retry();check(w.pickups.any(func(p):return p.get("retry_kit",false) and str(p.id)!=str(kit.id)),"A later retry can receive supplies without reopening an authored crate")
+	check(not restored.pickups.any(func(p):return p.get("retry_kit",false)),"Reopened encounter does not create a farming supply")
 	w=fresh()
 	for i in 3:
 		w.spawn_enemy("gnome",450.+i*40.,0.,i);w.damage_enemy(w.enemies[-1],1)
@@ -66,7 +65,11 @@ func run() -> void:
 	check(w.bridge_timers.has(5800.) and not w.disabled_platforms.has(5800.),"Bridge contact starts a warning, not an immediate fall")
 	CampaignContent.step(w,1.);check(not w.disabled_platforms.has(5800.),"Bridge deck remains load-bearing during its warning")
 	CampaignContent.step(w,1.5);check(w.disabled_platforms.has(5800.),"Warned deck really collapses after the countdown")
-	w.retry();check(w.bridge_timers.is_empty() and not w.disabled_platforms.has(5800.),"Retry rebuilds the bridge for another fair attempt")
+	w.invulnerable=0.;w.damage_player()
+	for tick in 100:w.step(.02)
+	CampaignLives.start_entry(w,Rect2(5430.,-430.,1152.,600.))
+	for tick in 32:w.step(.02)
+	check(w.grounded() and w.disabled_platforms.has(5800.),"Reserve entry finds supported ground without rebuilding the collapsed bridge")
 	for hero in AionCampaignWorld.HEROES:
 		w=fresh();w.character=hero;w.load_section("shore");w.enemies.clear();w.objects.clear();w.npcs.clear();w.gates.clear();w.pickups.clear();w.player=Vector2(5700.,0.)
 		var jumped:=false
@@ -76,7 +79,7 @@ func run() -> void:
 				w.jump_press();w.jump_release();jumped=true
 			w.step(1./60.)
 			if w.player.x>6500.:break
-		check(w.player.x>6470. and w.hp==3,"Actual move/jump rules cross the setpiece: "+hero)
+		check(w.player.x>6470. and w.hp==1 and w.attempts_remaining==3,"Actual move/jump rules cross the setpiece: "+hero)
 	w=fresh();w.load_section("arena");w.enemies.clear();w.boss.active=true;w.boss.engaged=true;w.boss.phase=1
 	var target:=Vector2(float(w.boss.x)-65.,-95.)
 	w.bullets=[{"p":target-Vector2(100,0),"v":Vector2(760,0),"owner":"hero","kind":"pistol","damage":1,"pierce":0,"age":0.,"life":1.,"hit":[]}]
@@ -89,7 +92,7 @@ func run() -> void:
 	check(float(w.boss.windup)>.9 and float(w.boss.get("dash",0.))==0.,"Final dash is telegraphed before motion or contact damage")
 	w.boss.windup=.01;w.step_boss(.02);var before_x: float=w.boss.x
 	w.player=Vector2(before_x-40.,-110.);w.invulnerable=0.;CampaignBossPressure.motion(w,.1)
-	check(absf(float(w.boss.x)-before_x)>35. and w.boss.y==0. and w.hp==3,"Final boss really moves; a high jump avoids the charge")
+	check(absf(float(w.boss.x)-before_x)>35. and w.boss.y==0. and w.hp==1 and w.attempts_remaining==3,"Final boss really moves; a high jump avoids the charge")
 	var game:=AionCampaignGame.new();root.add_child(game);await process_frame;game.set_process(false)
 	game.presentation_stage="";game.menu_kind="";game.fade=-1.;game.application_active=true;game.audio_enabled=true;game.options.reduced_motion=false;game.world.state="playing"
 	game.world.pending_events.append("enemy");game._process(.001)

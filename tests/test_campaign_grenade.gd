@@ -66,8 +66,8 @@ func run() -> void:
  check(w.bombs.size()==1 and w.bombs[0].p.y>44. and w.bombs[0].p.y<81.,'Crouched release stays inside real crawlway below its ceiling')
  w=fresh();w.throw_grenade();advance(w,.08);w.hp=1;w.invulnerable=0.;w.damage_player();advance(w,.3)
  check(w.grenades==5 and w.bombs.is_empty() and w.grenade_throw.is_empty(),'Death before release cancels without delayed object or ammunition spend')
- w=fresh();w.throw_grenade();advance(w,.2);w.retry()
- check(w.grenade_throw.is_empty() and w.bombs.is_empty() and w.blasts.is_empty(),'Retry clears scene-local throw, projectile and effect state')
+ w=fresh();w.throw_grenade();advance(w,.2);w.invulnerable=0.;w.damage_player();var age:=float(w.bombs[0].age);advance(w,1.)
+ check(w.grenade_throw.is_empty() and w.bombs.size()==1 and float(w.bombs[0].age)==age,'A released grenade freezes in place while the body is absent')
  # Damage is still the existing single World.explode result, independently of drawing.
  w=fresh();w.boss.active=true;w.boss.engaged=true;w.boss.x=600.;w.boss.y=0.;w.boss.hp=90
  b=bomb_at(w,Vector2(600,-70),Vector2.ZERO);b.age=1.14;CampaignGrenade.step(w,.02)
@@ -75,9 +75,9 @@ func run() -> void:
  CampaignGrenade.step(w,.3)
  check(int(w.boss.hp)==82 and event_count(w,'grenade_blast')==1,'Subsequent simulation cannot damage the target twice')
  w=fresh();w.throw_grenade();advance(w,.08);w.invulnerable=0.;w.damage_player()
- check(w.hp==2 and w.grenades==5 and w.grenade_throw.is_empty(),'Nonfatal damage interrupts an unspent throw without losing ammo')
- w=fresh();w.throw_grenade();advance(w,.2);w.invulnerable=0.;w.damage_player();advance(w,1.2)
- check(w.hp==2 and w.grenades==4 and w.bombs.is_empty() and event_count(w,'grenade_blast')==1,'Nonfatal damage after release preserves independent fuse and one explosion')
+ check(w.hp==0 and w.grenades==5 and w.grenade_throw.is_empty(),'A lethal hit interrupts an unspent throw without losing ammo')
+ w=fresh();w.throw_grenade();advance(w,.2);w.invulnerable=0.;w.damage_player();advance(w,1.2);CampaignLives.start_entry(w,Rect2(0,-420,1152,500));advance(w,1.8)
+ check(w.hp==1 and w.grenades==4 and w.bombs.is_empty() and event_count(w,'grenade_blast')==1,'A released grenade detonates once after the encounter resumes')
  w=fresh();w.mount={'available':true,'ridden':false,'x':400.,'hp':3};w.throw_grenade();advance(w,.08)
  check(w.interact() and w.grenade_throw.is_empty() and w.grenades==5,'Boarding cancels the held throw instead of queueing it through transition')
  w=fresh();w.mount={'available':true,'ridden':true,'x':400.,'hp':3};w.player.y=-42.;w.throw_grenade();advance(w,.08);CampaignVehicles.eject(w)
@@ -114,8 +114,8 @@ func run() -> void:
  view.free()
  w=fresh();w.throw_grenade();advance(w,.2);w.begin('aion');w.state='playing'
  check(w.grenade_time==0. and w.throw_grenade(),'A new run clears the previous run grenade cooldown')
- w=fresh();w.throw_grenade();advance(w,.2);w.retry();w.state='playing'
- check(w.grenade_time==0. and w.throw_grenade(),'Checkpoint retry clears stale grenade cooldown as well as its objects')
+ w=fresh();w.throw_grenade();advance(w,.2);w.state='travel';w.load_section('quay')
+ check(w.grenade_time==0. and w.bombs.is_empty(),'Travel clears cooldown and section-local grenades')
  # The actual common input latch must not turn a rejected press into a
  # delayed throw, and the game's real touch button mirrors that eligibility.
  var game:=AionCampaignGame.new();root.add_child(game);await process_frame;game.set_process(false)

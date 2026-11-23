@@ -1,12 +1,22 @@
 # Sönen Fenerler · İlk arcade görev
 
-Güncel **0.24 yerel genişleme**: [içerik/varlık envanteri ve yeni kurallar](CAMPAIGN-EXPANSION.md), [doğrulama ve açık sınırlar](evidence-campaign-expansion/README.md). Altı kahraman Ateş düğmesiyle bağlı NPC'yi bıçakla kurtarır; 43 sabit fırsat, 10 özel silah, dört araç ve üç farklı mini boss vardır. Bu sürüm yayımlanmamıştır. Aşağıdaki metin önceki 0.23 temel uygulamayı kaydeder; yeni silah ve kurtarma davranışında güncel genişleme belgesi geçerlidir.
+## Arcade yaşamı ve Continue · 0.52.0
 
-Bu mod mevcut Godot 4.6.3 oyununa eklenir. Sonsuz koşunun otomatik hareketi, 15 saniyelik seviyeleri, beş seviyede bir boss takvimi ve kayıtları değiştirilmez. Yeni modun sonlu haritası, elle hareketi, kontrol noktaları ve görev sonu vardır. Görev 2–5 yalnız plandır; bu sürüm Metal Slug 3'ün bütün uzunluğuna veya üretim hacmine ulaşmış sayılmaz.
+Mission 1'e bir etkin yaşam ve iki yedekle girilir. İlk geçerli isabet bir yaşam harcar. Yedek varken aynı kahraman mevcut karşılaşmanın sol üstünden iner. Kısa iniş koruması ilk saldırıyla biter. Açılan yollar, alınan ödüller, kurtarılan kişiler ve Kök Motoru'nun aldığı hasar korunur.
+
+Yedekler bitince **Devam edecek misin?** ekranı ön planda 10 saniye sayar. Enter, kolda A/× veya Start, telefonda **Kahraman seç** ile altı kahramandan birini seç. Onay, temel tabanca ve beş bombayla üç yaşamlık yeni stok verir. Kullanılan Continue sayısı sonuç ekranında görünür. Sayaç bittiğinde **Yeni görev** baştan başlar. Duraklatmadaki **Görevi baştan başlat** da yeni koşu açar.
+
+Dört aracın her biri tek darbede hasar görür. Sürüş ve ateş 100 ms kesilir, araç patlar ve pilot yaya devam eder. Onarım ikmali iki bomba, sağlık ikmali bir bomba verir. Stok zaten doluysa bu ikmaller puana dönüşür. Kutsanmış'ın sürüsü yakın meyveleri toplar. Kaydı yüklemek yaşam stokunu, açık karşılaşmayı ve varsa kalan Continue süresini korur. Şema 1–3 kayıtları ilk geçişte üç yaşam alır.
+
+[Ayrıntılı geliştirme ve doğrulama kaydı](MISSION1-GAMEPLAY-HANDOFF.md)
+
+## Görev ve kontroller
+
+Sönen Fenerler, Godot 4.6.3 oyunundaki sonlu arcade görevdir. Ana menüde **Arcade** bölümünü aç. Kadro Aion, Kutsanmış, Ayça, Eren, Armadillo ve Kurbağa'dan oluşur. Ömer ve Melun karşılaşmalarda yardımcıdır. Aşağıdaki rota ve erken dönem yapım notları 0.23–0.24 dönemini belgeler.
 
 ## Oynama yolu
 
-Ana menüde karakterini seç → **Arcade** → **Göreve başla**. Önceki tamamlanmamış görev varsa kontrol noktasından sürdürme ayrı düğmedir. Kısa yardım sayfaları atlanabilir.
+Ana menüde karakterini seç → **Arcade** → **Göreve başla**. Tamamlanmamış görevin varsa **Devam** aynı karşılaşmayı açar. Kısa yardım sayfaları atlanabilir.
 
 Kıyı → iskele → ilk ayrım:
 
@@ -28,7 +38,7 @@ flowchart LR
 
 Her son rotada bir Kök Bekçisi mini boss’u vardır. Normal düşmanlar tek vuruştur; mini boss 12, ana boss 90 candır. Kırmızı şapkalılar yaklaşır, böcekler yüklenir, kargalar dalar, uçan sporlar düşer, gözcü dronlar ikili atar, tohum makineleri nişan alır. Yukarıdan basılan normal düşman tek darbede yenilir ve kahraman seker. Son karşılaşmada tohum salvosu, atlanabilir kök dalgası ve dron çağrısı üç evreyle sıklaşır. Boss görünür menzile yaklaşınca konuşma açılır; konuşma bitmeden saldırmaz ve hasar almaz. Zafer animasyonu sonuçtan önce kısa süre tamamlanır.
 
-Düşman aralıkları ve sonraki türleri koşunun tohumu ile çeşitlenir. Kontrol noktasından denemede aynı düzen geri gelir. Köprüler, güvenli sıçrama yüzeyleri, boşluklar ve rota bağlantıları rastgele bozulmaz. Başlangıçtaki dört rol öğrenilebilir kalır.
+Düşman aralıkları ve sonraki türleri koşunun tohumu ile çeşitlenir. Yedek yaşam ve Continue aynı karşılaşmayı korur. Köprüler, güvenli sıçrama yüzeyleri, boşluklar ve rota bağlantıları rastgele bozulmaz. Başlangıçtaki dört rol öğrenilebilir kalır.
 
 ## Kontroller
 
@@ -46,7 +56,7 @@ Yeni modda Takla yoktur. Eski Takla eşlemesi bu modun Bomba eylemine karşılı
 
 Aion çift sıçrar. Ömer basılı tutunca süzülür; havada bırakıp yeniden basınca üç ek kanat hakkı kullanır. Emre ve Eren yerde basılı tutarak 1,2 saniyeye kadar güç biriktirir, bırakınca sıçrar. Melun depar yapar. Kutsanmış'ın kurtarmalarla kazanılan küçük takipçileri en fazla üç kişilik sürü oluşturur ve gecikmeli hareket eder; binekte arka basamağa alınırlar. Ana kahramanın tasarımı sıra numarasından değil atlas kimliğinden çözülür.
 
-## Ödül, silah ve kayıt
+## Ödül, silah ve kayıt · 0.23 tarihçesi
 
 - Temel tabanca sınırsız, 0,32 saniye aralıklıdır. Yakında tek bir temas saldırısı, animasyonun temas anında hasar verir. Aynı yakın vuruş basılı tutularak tekrarlanmaz.
 - Enerji bombası fiziksel yay çizer, sınırlıdır ve alan etkisi yapar. Rengi Aion pembe, Kutsanmış krem, Melun mor, Ömer kehribar, Emre turuncu, Eren turkuazdır.

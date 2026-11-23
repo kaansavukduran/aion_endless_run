@@ -389,6 +389,19 @@ with sync_playwright() as playwright:
             page.wait_for_timeout(500)
             canvas.focus()
 
+            def restart_for_probe():
+                page.wait_for_function("['playing','continue_offer','continue_pick','dead'].includes(JSON.parse(document.querySelector('canvas').dataset.campaign).state)",timeout=15000)
+                if campaign()['menu'] in ['continue_offer','continue_pick']:
+                    if campaign()['menu']=='continue_pick':tap('ArcadeBackToCountdown',in_campaign=True)
+                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
+                if campaign()['menu']!='dead':
+                    canvas.focus();page.keyboard.press('Escape')
+                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'",timeout=10000)
+                tap('CampaignRestart',in_campaign=True)
+                presentation_done()
+                page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp===1 && d.ui_ready}",timeout=15000)
+                canvas.focus()
+
             class AimActorDied(Exception):
                 pass
             aim_retries = 0
@@ -463,33 +476,14 @@ with sync_playwright() as playwright:
                         (args.evidence/('aim-case-%d-death-%d.json'%(index,aim_retries))).write_text(json.dumps(dead,indent=2)+'\n')
                         page.screenshot(path=str(args.evidence/('aim-case-%d-death-%d.png'%(index,aim_retries))))
                         keys([]);page.keyboard.up('f')
-                        assert aim_retries<3, ('Aim cases exceeded ordinary checkpoint retries',dead)
-                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.menu==='dead' && d.ui_ready}",timeout=10000)
-                        tap('CampaignRetry',in_campaign=True);aim_retries+=1
-                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.ui_ready}",timeout=10000)
-                        canvas.focus()
-            observations['aim_checkpoint_retries']=aim_retries
+                        assert aim_retries<3, ('Aim cases exceeded three fresh runs',dead)
+                        restart_for_probe();aim_retries+=1
+            observations['aim_new_runs']=aim_retries
 
             keys([])
-            # Eight real combat aim checks leave the actor exposed to enemies.
-            # A dead actor cannot satisfy an independent posture test. Retain
-            # that state, then use the actual checkpoint action, without a
-            # world setter, immunity or a hidden debug restart.
-            precondition = campaign()
-            observations['before_crouch_checkpoint'] = precondition
-            if precondition['state'] == 'dying':
-                page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'", timeout=10000)
-            if campaign().get('menu') == 'dead':
-                tap('CampaignRetry', in_campaign=True)
-            else:
-                canvas.focus()
-                page.keyboard.press('Escape')
-                page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'", timeout=10000)
-                tap(text='Kontrol noktasından dene' if args.locale.startswith('tr') else 'Retry checkpoint', in_campaign=True)
-            presentation_done()
-            page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.grounded && d.ui_ready}", timeout=15000)
-            canvas.focus()
-            check(True, 'Actual checkpoint UI supplies a living, actionable actor before the independent crouch test')
+            observations['before_crouch_restart'] = campaign()
+            restart_for_probe()
+            check(campaign()['grounded'], 'An explicit new run starts the independent crouch test on real ground')
             before = campaign()
             keys(['s', 'd', 'f'])
             page.wait_for_function("before=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.crouching && d.player[0]>before.x+12 && d.shots>before.shots}", arg={'x': before['player'][0], 'shots': before['shots']}, timeout=10000)
@@ -597,12 +591,9 @@ with sync_playwright() as playwright:
                         rescue_attempts.append({'attempt': attempt, 'outcome': event['outcome'], 'stage': stage, 'hp': dead['hp']})
                         keys([])
                         page.screenshot(path=str(args.evidence/('rescue-attempt-%d-death.png' % attempt)))
-                        assert retries < 3, ('Rescue approach exceeded ordinary checkpoint retries', dead)
-                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.menu==='dead' && d.ui_ready}", timeout=10000)
-                        tap('CampaignRetry', in_campaign=True)
+                        assert retries < 3, ('Rescue approach exceeded three fresh runs', dead)
+                        restart_for_probe()
                         retries += 1; attempt += 1
-                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.ui_ready}", timeout=15000)
-                        canvas.focus()
 
                 # Only this same living hero's confirmed THANKS phase permits
                 # crossing away and waiting for the physical bag item. Missing
@@ -646,7 +637,7 @@ with sync_playwright() as playwright:
                 saved = page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
                 check(saved['awarded'].get(target['id']+':gift') and saved['taken'].get(target['id']+':supply'), 'Actual dropped-item contact applies the power-up and persists it once')
                 observations['rescued_npc'] = target['id']
-                observations['rescue_checkpoint_retries'] = retries
+                observations['rescue_new_runs'] = retries
                 page.screenshot(path=str(args.evidence/'contact-thanks-gift.png'))
             observations['campaign_final'] = campaign()
             page.screenshot(path=str(args.evidence/'campaign-final.png'))

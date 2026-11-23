@@ -78,7 +78,7 @@ func run() -> void:
 				check(Vector2(b.v).normalized().dot(direction)>.55,"All actual spread/projectile vectors rotate with aim: "+weapon)
 			check(w.ammunition==int(spec.ammo)-1,"One directional burst spends one ammo: "+weapon)
 	for direction in dirs:
-		var w := fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":3,"type":"wind"};w.interact()
+		var w := fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":1,"type":"wind"};w.interact()
 		check(w.mount_transition=="enter" and not w.throw_grenade(),"Boarding blocks combat until the hatch transition finishes")
 		w.attack_press();check(w.bullets.is_empty(),"Boarding cannot fire a hidden extra shot")
 		tick(w,.46);w.aim_direction=direction;w.attack_press()
@@ -87,10 +87,10 @@ func run() -> void:
 		for b in w.bullets:check(Vector2(b.v).normalized().dot(direction)>.95,"Vehicle barrel follows aim rather than character facing")
 		w.attack_release();check(w.interact(),"Vehicle exit accepted")
 		tick(w,.46);check(not w.mount.ridden and w.grounded() and w.mount_transition=="","Exit finishes on supported ground")
-	var w := fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":3,"type":"drill"};w.interact();var frozen:=w.time
-	w.invulnerable=0.;w.damage_player();check(w.hp==3 and w.mount.hp==3,"Boarding is protected from damage")
+	var w := fresh();w.mount={"available":true,"ridden":false,"x":140.,"hp":1,"type":"drill"};w.interact();var frozen:=w.time
+	w.invulnerable=0.;w.damage_player();check(w.hp==1 and w.mount.hp==1,"Boarding is protected from damage")
 	tick(w,.4);check(w.time==frozen,"World simulation clock pauses during boarding");tick(w,.06)
-	w.invulnerable=0.;w.mount.hp=1;w.damage_player();check(not w.mount.ridden and w.mount_transition=="" and w.velocity.y<0.,"Vehicle destruction cancels transition and ejects safely")
+	w.invulnerable=0.;w.damage_player();tick(w,.1);check(not w.mount.ridden and w.mount_transition=="" and w.velocity.y<0.,"Vehicle destruction cancels transition and ejects safely")
 	# Bullet rescue occurs at distance; walking into the freed person, not
 	# elapsed time, authorizes the gratitude/gift state.
 	w=fresh();CampaignRescue.populate(w);var npc: Dictionary=w.npcs[0]
@@ -111,8 +111,8 @@ func run() -> void:
 	if not supplies.is_empty():
 		resumed.player=Vector2(float(supplies[0].x),float(supplies[0].y)+25.);resumed.velocity=Vector2.ZERO;tick(resumed,.3)
 	check(resumed.awarded.has(str(npc.id)+":gift") and resumed.weapon=="heavy","Only actual dropped-item contact claims the resumed handover")
-	var earned := resumed.score;resumed.retry();tick(resumed,1.5)
-	check(resumed.score==earned and resumed.weapon=="pistol","Checkpoint retry cannot pay an already-claimed NPC twice")
+	var earned := resumed.score;resumed.invulnerable=0.;resumed.damage_player();tick(resumed,1.);CampaignLives.start_entry(resumed,Rect2(0,-420,1152,500));tick(resumed,.65)
+	check(resumed.score==earned and resumed.weapon=="pistol","Reserve entry cannot pay an already-claimed NPC twice")
 	check(resumed.rescue_roles.has(str(npc.id)),"Actual rescued role survives checkpoint reports")
 	# A flying/angled beam still intersects ropes across a large timestep.
 	w=fresh();CampaignRescue.populate(w);npc=w.npcs[0];w.player=Vector2(float(npc.x)-500.,0.)
@@ -120,7 +120,8 @@ func run() -> void:
 	w.step(.05);w.step(.05);check(npc.freed,"Fast beam uses segment-vs-rope collision")
 	# Structured role/weapon/loss statistics are observations, not UI inventions.
 	w=fresh();w.invulnerable=0.;w.damage_player();check(w.losses==1,"Actual HP loss updates report once")
-	w.invulnerable=0.;w.shield=1;w.damage_player();check(w.losses==1,"Shield absorption does not invent a life lost")
+	w.invulnerable=0.;w.damage_player();check(w.losses==1,"Another hit cannot spend an additional life while dying")
+	tick(w,1.);CampaignLives.start_entry(w,Rect2(0,-420,1152,500));tick(w,.65)
 	w.attack_press();check(w.weapons_used==["pistol"],"Actual first pistol shot is recorded")
 	w.collect({"id":"gun","kind":"arc"});check(w.weapons_used.has("arc"),"Real weapon collection updates report")
 	var saved := w.snapshot();var copy := AionCampaignWorld.new();check(copy.restore(saved) and copy.losses==1 and copy.weapons_used==w.weapons_used,"Statistics persist without changing old checkpoint semantics")

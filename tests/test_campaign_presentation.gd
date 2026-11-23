@@ -24,9 +24,9 @@ func run() -> void:
 	check(game.presentation_stage=="" and game.world.state=="playing","Gamepad confirmation really skips to playable mission")
 	game.begin_new();check(game.menu_kind=="" and game.presentation_stage=="intro","A learned tutorial is not forced again on a new mission")
 	game.skip_presentation()
-	game.world.weapon="heavy";game.world.ammunition=7;game.world.hp=2;game.world.shield=1;game.world.rescued.append("shore:keeper")
+	game.world.weapon="heavy";game.world.ammunition=7;game.world.attempts_remaining=2;game.world.rescued.append("shore:keeper")
 	game.update_hud()
-	check(game.hud_panel.summary.contains("7") and game.hud_panel.summary.contains("2/3") and game.hud_panel.summary.contains("1"),"HUD responds to actual weapon, health, rescue and shield values")
+	check(game.hud_panel.summary.contains("7") and game.hud_panel.summary.contains(game.t("reserve_lives")+" 1") and game.hud_panel.summary.contains("1"),"HUD responds to actual weapon, reserve and rescue values")
 	game.world.mount.ridden=true;game.world.mount.type="shell";game.update_hud();await process_frame
 	check(game.hud_panel.summary.contains("∞") and not game.hud_panel.summary.contains(game.t("heavy")),"Mounted HUD shows the actual unlimited vehicle weapon rather than stowed hero ammunition")
 	game.world.mount.ridden=false
@@ -36,7 +36,7 @@ func run() -> void:
 			game.options.text_scale=text_scale
 			for locale in GameText.LANGUAGES:
 				game.language=locale;game.resize();game.world.state="paused"
-				for kind in ["paused","settings","complete","result_details","help"]:
+				for kind in ["paused","settings","complete","result_details","help","continue_offer","continue_pick","dead"]:
 					game.menu_kind=kind;game.build_ui();await process_frame;await process_frame
 					var area:=Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h))
 					check(area.encloses(game.menu.get_global_rect()),"Complete menu fits: "+str(viewport)+" "+str(text_scale)+" "+locale+" "+kind)
@@ -64,5 +64,32 @@ func run() -> void:
 	game.save_checkpoint();check(game.save_ok and game.saved.performance.has("hero:aion"),"Completed actual metrics persist by hero without changing Endless save")
 	var best:=JSON.stringify(game.saved.performance);game.save_checkpoint()
 	check(JSON.stringify(game.saved.performance)==best,"Repeated saving never manufactures a higher personal best")
+	# Synthetic controller events exercise the actual Godot focus handlers.
+	for button in [JOY_BUTTON_A,JOY_BUTTON_START]:
+		var released:=joy(button);released.pressed=false;game._input(released)
+	game.world.begin("aion");game.world.state="continue_offer";game.world.attempts_remaining=0
+	game.world.hp=0;game.world.continue_remaining=6.;game.menu_kind="continue_offer";game.build_ui()
+	await process_frame;await process_frame
+	game._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
+	game._process(.5)
+	check(game.world.continue_remaining==6.,"The native focus-loss path freezes the offer")
+	game._notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
+	game._process(.5)
+	check(is_equal_approx(game.world.continue_remaining,5.5),"The offer resumes from its existing value on focus return")
+	game._input(joy(JOY_BUTTON_START))
+	check(game.menu_kind=="continue_pick" and game.world.attempts_remaining==0,"Start opens the real picker without applying a credit")
+	game._input(joy(JOY_BUTTON_START))
+	check(game.world.continues_used==0,"Repeated Start cannot also confirm the picker")
+	game.life_menu_delay=0.
+	await process_frame;await process_frame
+	game._input(joy(JOY_BUTTON_DPAD_RIGHT));game._input(joy(JOY_BUTTON_DPAD_RIGHT))
+	game._input(joy(JOY_BUTTON_A))
+	check(game.world.continue_hero=="sheep" and game.world.continues_used==0,"D-pad navigates to the next hero and one A press browses")
+	game._input(joy(JOY_BUTTON_A))
+	check(game.world.continue_hero=="sheep","Held gamepad confirmation cannot repeat hero selection")
+	var released:=joy(JOY_BUTTON_A);released.pressed=false;game._input(released)
+	game._input(joy(JOY_BUTTON_DPAD_LEFT));game._input(joy(JOY_BUTTON_DPAD_LEFT))
+	game._input(joy(JOY_BUTTON_A))
+	check(game.world.continues_used==1 and game.world.character=="sheep","Fresh gamepad confirmation consumes one credit for the chosen hero")
 	game.queue_free();await process_frame
 	print("RESULT: %d campaign presentation checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

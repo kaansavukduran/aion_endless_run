@@ -36,23 +36,23 @@ func refresh() -> void:
 	for key in w.buffs:
 		if float(w.buffs[key])>0.:buff_parts.append(host.t(str(key))+" %ds"%ceili(float(w.buffs[key])))
 	var sig: String="%s|%d|%d|%d|%d|%s|%d|%d|%d|%d|%s|%s|%.0f|%d|%s"%[
-		w.character,w.score,w.hp,w.max_hp,w.grenades,active_weapon,w.rescued.size(),w.shield,
+		w.character,w.score,w.attempts_remaining,w.hp,w.grenades,active_weapon,w.rescued.size(),w.flock,
 		1 if bool(w.mount.ridden) else 0,int(w.mount.hp),
 		",".join(assist_parts),",".join(buff_parts),host.view_w,point_size,host.language]
 	if sig==last_signature and damage_flash<=0. and prev_flash<=0. and not rows.is_empty():
 		return
 	last_signature=sig
-	# Hierarchy: immediate combat decisions first (life, weapon/ammo, grenades, shield),
+	# Hierarchy: immediate combat decisions first (life, weapon/ammo, grenades),
 	# followed by mission context (hero, score, keepers, vehicle, assists, buffs).
 	var fields: Array[String]=[
-		host.t("lives")+" %d/%d"%[w.hp,w.max_hp],
+		host.t("reserve_lives")+" %d"%maxi(0,w.attempts_remaining-1),
 		host.t("weapon")+": "+active_weapon,
 		host.t("grenade")+" %d"%w.grenades]
-	if w.shield>0:fields.append(host.t("shield")+" %d"%w.shield)
 	fields.append(host.old("name_"+w.character))
 	fields.append(host.old("score")+" %05d"%w.score)
 	fields.append(host.t("keepers")+" %d"%w.rescued.size())
-	if bool(w.mount.ridden):fields.append(host.t(CampaignVehicles.kind(w))+" %d/3"%int(w.mount.hp))
+	if bool(w.mount.ridden):fields.append(host.t(CampaignVehicles.kind(w))+" %d/%d"%[int(w.mount.hp),CampaignVehicles.MAX_HP])
+	if w.character=="sheep" and w.flock>1:fields.append(host.t("flock_support"))
 	for a in assist_parts:fields.append(a)
 	for b in buff_parts:fields.append(b)
 	rows.clear();rows.append([])
@@ -76,10 +76,9 @@ func _draw() -> void:
 	draw_line(Vector2(0,size.y-2),Vector2(size.x,size.y-2),Color("a67e56"),2.)
 	draw_line(Vector2(0,size.y),Vector2(size.x,size.y),Color(colors.border),2.)
 	if damage_flash>0. and not host.options.reduced_motion:draw_rect(Rect2(Vector2.ONE,size-Vector2(2,2)),Color(colors.danger),false,2.)
-	var lives_prefix: String=host.t("lives")+" "
+	var lives_prefix: String=host.t("reserve_lives")+" "
 	var weapon_prefix: String=host.t("weapon")+":"
 	var grenade_prefix: String=host.t("grenade")+" "
-	var shield_prefix: String=host.t("shield")+" "
 	var primary_color:=Color(colors.text)
 	var muted_color:=Color(colors.text);muted_color.a=.82
 	var y:=7.+font.get_ascent(point_size)
@@ -89,7 +88,7 @@ func _draw() -> void:
 			var s:=str(value)
 			var tint: Color=primary_color
 			if s.begins_with(lives_prefix):
-				if w.hp<=1:tint=Color(colors.danger)
+				if w.attempts_remaining<=1:tint=Color(colors.danger)
 			elif s.begins_with(weapon_prefix):
 				var icon: Dictionary=host.view.vehicle_pose(CampaignVehicles.kind(w),0,0) if bool(w.mount.ridden) else items.pose(w.weapon)
 				if not icon.is_empty():
@@ -98,7 +97,7 @@ func _draw() -> void:
 					draw_texture_rect(icon.texture,Rect2(Vector2(x-1,y-16)+(Vector2(19,19)-icon_size)*.5,icon_size),false)
 				x+=20.
 				if not bool(w.mount.ridden) and w.weapon!="pistol" and w.ammunition<=5:tint=Color(colors.danger)
-			elif not s.begins_with(grenade_prefix) and not s.begins_with(shield_prefix):
+			elif not s.begins_with(grenade_prefix):
 				tint=muted_color
 			draw_string(font,Vector2(x,y),s,HORIZONTAL_ALIGNMENT_LEFT,-1,point_size,tint)
 			x+=font.get_string_size(s,HORIZONTAL_ALIGNMENT_LEFT,-1,point_size).x+26.

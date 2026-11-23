@@ -2,9 +2,19 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
-## Güncel durum · 23 Kasım 2026 · 0.50.0
+## 23 Kasım 2026 · 0.52.0 · Arcade yaşamı ve araçlar
 
-Bu üst kayıt güncel durumdur; aşağıdaki 0.29/0.30/0.49 başlangıçları ve ara kırmızı kapılar tarihçedir. Kullanıcı görsel/oynanış kabulü bekliyor; teknik test sonucu kullanıcı kabulü değildir.
+- Başlangıç, uzaktaki `main` `482d5781da4c58507031c5ce2ea47416750bfd44` ve canlı Pages 0.51.1 (`93a6fb65be472fed`). Güncel Drive listesinde Neon'un 0.48 tabanlı paketi değişmemişti. Depodaki yeni kaynak onun üstüne geri sarılmadı.
+- Yaya kahraman tek isabette bir yaşam kaybeder. Bir etkin, iki yedek yaşam vardır. Yeni beden sol üstten aynı karşılaşmaya döner ve ilk bilinçli saldırıya kadar en çok 1,25 saniye korunur. Yaşam bitince ücretsiz Continue 10’dan 0’a sayar ve yeni bir onayla altı gerçek kahramanı açar. Kullanılmış Continue sonuçta sayılır. Duraklatmadaki **Görevi baştan başlat** gerçekten yeni koşu açar.
+- Şema 4, karşılaşmayı ve harcanan yaşamı birlikte kaydeder. Şema 1–3 kayıtları ilk açılışta üç yaşamla göç eder. Canlı toparlanma, yükleme veya Continue; boss, ölen düşman, açılmış geçit ve ödül kimliğini geri sarmak için bölüm kurulumuna çağrı yapmaz.
+- Dört araç ilk isabette 0 HP’ye iner. Kendi 100 ms hasar pozundan sonra bir patlama ve güvenli pilot tahliyesi oluşur. Sağlık ve onarım ikmali bomba, dolu stokta puan verir. Kutsanmış’ın takipçileri meyve toplar.
+- Yerel doğrulama: 144 yaşam/araç, 709 sunum ve giriş, 82 düşman/boss döngüsü, 21 gerçek Linux render kontrolü geçti. Chromium Web çıktısında oyun girdileriyle üç yaşamın tükenmesi, iki yedek dönüş, sayacın reload sonrasında sürmesi, dikeyde altılı seçim, Kurbağa’yla aynı kıyıya dönüş ve süresi biten kaydın tekrar oynatılamaması doğrulandı. Masaüstü tarayıcı sekme odağı örneği, gerçek odak kaybı gözlemlenmedikçe **NOT TESTED**. Native odak olayı testi ve fiziksel aygıt testi birbirinden ayrıdır.
+- Yayın kanıtı bu kaynakla çalışan [Test and package](https://github.com/kaansavukduran/aion_endless_run/actions/workflows/build.yml) ve [GitHub Pages dağıtımı](https://github.com/kaansavukduran/aion_endless_run/actions/workflows/publish-pages.yml) kayıtlarındadır. Canlı Pages sürümü [manifestten](https://kaansavukduran.github.io/aion_endless_run/build.json) eşleştirilir.
+- Sıradaki Forge, Fener kıyısında çizilen ve fiziksel olarak kullanılan bir yürüyüş yüzeyi örneğiyle başlar. Aynı yüzey oyuncu, yürüyen düşman, NPC, araç, mermi, bomba ve yeniden girişe uygulanır. Ardından rota başına arazi farklılaşması, iki yürüyen atıcı rolü ve Kök Motoru finali gelir. Son kullanıcı kabulü bekliyor.
+
+## Tarihçe · 23 Kasım 2026 · 0.50.0
+
+Aşağıdaki kayıt, 0.50.0 doğrulamasının tarihçesidir. Kullanıcı görsel/oynanış kabulü bekliyor; teknik test sonucu kullanıcı kabulü değildir.
 
 - Yetkili kaynak: `kaansavukduran/aion_endless_run`, Godot4.6.3. [PR10](https://github.com/kaansavukduran/aion_endless_run/pull/10) başı `e88bad79b9d4c70c8e84ece2ca15f4f3ec227394`; geçmiş korunarak main'e birleştirme commit'i `8167621180f4c9b5817e5f7e3a9cfbc637e97d43`. Çalışma başlangıcındaki gerçek main `466492f` korundu; eski prompt commit'ine dönülmedi.
 - [Son PR CI45098562466](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45098562466), deneme2: **SUCCESS**. Godot66/66 paket, **54.217 kontrol PASS**; Python web7/Android40/macOS3 PASS. [Makinece okunabilir son kaynak sonucu](evidence-sol62/source-results-0.50-final-ci.json) tam e88 kaynağını tanımlar. Önceki sonuç dosyaları kendi commit'lerinin kanıtı olarak korunur.

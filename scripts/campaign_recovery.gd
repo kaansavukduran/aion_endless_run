@@ -31,7 +31,7 @@ static func capture(w,x: float) -> Dictionary:
 	# mid-route flag can explicitly preserve a rider and its recorded hull.
 	if x<=180. and bool(machine.get("ridden",false)):
 		machine.ridden=false;machine.x=x+100.;machine.floor_y=0.
-	return {"section":w.section,"x":x,"weapon":w.weapon,"ammunition":w.ammunition,"grenades":w.grenades,"shield":w.shield,"flock":w.flock,"mount":machine}
+	return {"section":w.section,"x":x,"weapon":w.weapon,"ammunition":w.ammunition,"grenades":w.grenades,"shield":0,"flock":w.flock,"mount":machine}
 
 static func enter(w) -> void:
 	if str(w.rally.get("section",""))!=w.section:w.rally=capture(w,140.)
@@ -50,22 +50,15 @@ static func apply(w,point: Dictionary) -> void:
 	if x<35. or x>w.length()-130. or w.floor_at(x)>=180.:return
 	w.player=Vector2(x,w.floor_at(x));w.velocity=Vector2.ZERO
 	w.weapon=str(point.get("weapon","pistol"));w.ammunition=int(point.get("ammunition",0))
-	w.grenades=maxi(3,int(point.get("grenades",3)));w.shield=int(point.get("shield",0));w.flock=int(point.get("flock",1))
+	w.grenades=int(point.get("grenades",3));w.flock=int(point.get("flock",1))
 	var machine: Dictionary=point.get("mount",{})
 	if not machine.is_empty():
 		w.mount=machine.duplicate(true)
+		w.mount.hp=mini(CampaignVehicles.MAX_HP,int(w.mount.hp))
 		if int(w.mount.get("hp",0))<=0:w.mount.ridden=false;w.mount.available=false
 		elif bool(w.mount.get("ridden",false)):
 			w.mount.x=x;w.mount.floor_y=w.floor_at(x);w.player.y-=42.
 	w.invulnerable=1.2
-
-static func retry(w,point: Dictionary) -> void:
-	apply(w,point)
-	# A supply is a real pickup, carries no points, and has a unique attempt
-	# ID. Previously claimed authored crates/rescues are never paid again.
-	if w.weapon=="pistol" or w.ammunition<12:
-		var x: float=safe_x(w,w.player.x+90.)
-		if x>0.:w.pickups.append({"id":w.section+":retry-kit:"+str(w.retry_count),"kind":"heavy","x":x,"y":-35.,"retry_kit":true})
 
 static func valid(point: Variant,section: String) -> bool:
 	if not point is Dictionary or point.size()>12:return false

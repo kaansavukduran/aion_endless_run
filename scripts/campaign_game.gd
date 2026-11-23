@@ -109,6 +109,14 @@ var settings_ok := true
 var web_qa := false
 var web_hidden_callback: JavaScriptObject
 var web_update_callback: JavaScriptObject
+var offer_label: Label
+var offer_hint: Label
+var offered_second := -1
+var picker_preview: RunnerHeroPreview
+var picker_info: Label
+var life_menu_delay := 0.
+var confirm_buttons_down: Dictionary={}
+const HeroPreview=preload("res://scripts/hero_preview.gd")
 
 func _ready() -> void:
 	native_diagnostics.host=self
@@ -135,11 +143,12 @@ func _ready() -> void:
 		web_update_callback=JavaScriptBridge.create_callback(prepare_web_update)
 		JavaScriptBridge.get_interface("window").aionSaveForUpdate=web_update_callback
 		JavaScriptBridge.eval("if(!window.aionVisibilityInstalled){window.aionVisibilityInstalled=true;document.addEventListener('visibilitychange',()=>{if(document.hidden)window.aionPageHidden?.()})}")
+		JavaScriptBridge.eval("if(!window.aionPageHideInstalled){window.aionPageHideInstalled=true;window.addEventListener('pagehide',()=>window.aionPageHidden?.())}")
 		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');if(!c)return;['data-state','data-page','data-ui-ready','data-ui'].forEach(k=>c.removeAttribute(k));c.dataset.mode='campaign'})()")
 	get_viewport().size_changed.connect(resize)
 	Input.joy_connection_changed.connect(func(_id,_connected):release_all())
 	resize()
-	if resume_on_ready and not saved.is_empty() and not bool(saved.get("completed",false)):resume_saved.call_deferred()
+	if resume_on_ready and not saved.is_empty() and saved_can_resume():resume_saved.call_deferred()
 
 func _exit_tree() -> void:
 	if OS.has_feature("web"):
@@ -150,12 +159,14 @@ func on_web_page_hidden(_arguments: Array) -> void:
 	# Release inputs and pause an active run, as on focus loss. A hidden tab runs
 	# no frames, so application_active stays untouched and cannot remain stuck.
 	cancel_unspent_actions();release_all()
-	if is_instance_valid(ui) and world.state=="playing":toggle_pause()
+	if is_instance_valid(ui):
+		if world.state=="playing":toggle_pause()
+		elif world.state in CampaignLives.TRANSITIONS:save_checkpoint()
 
 func prepare_web_update(_arguments: Array) -> bool:
 	if world.state=="playing":
 		toggle_pause()
-	elif not save_ok and (menu_kind=="paused" or world.completed):
+	elif world.state in CampaignLives.TRANSITIONS or (not save_ok and (menu_kind=="paused" or world.completed)):
 		save_checkpoint()
 	return save_ok
 
@@ -165,7 +176,7 @@ func t(key: String) -> String:
 func old(key: String) -> String: return GameText.get_text(language,key)
 func font_size(size: int) -> int: return roundi(size*options.text_scale)
 func menu_title() -> String:
-	return t({"briefing":"title","help":"controls","paused":"pause","boss":"arena","dead":"dead","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
+	return t({"briefing":"title","help":"controls","paused":"pause","boss":"arena","dead":"game_over","continue_offer":"continue_offer","continue_pick":"continue_pick","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
 
 func safe_rect(raw: Vector2) -> Rect2:
 	if OS.has_feature("web"):
@@ -262,7 +273,9 @@ func build_menu() -> void:
 	release_all()
 	var shade:=ColorRect.new();shade.color=Color("12101caa");shade.size=Vector2(view_w,view_h);ui.add_child(shade)
 	menu=PanelContainer.new();menu.name="CampaignMenu";ui.add_child(menu);menu.add_theme_stylebox_override("panel",options.style("surface","border",16))
-	menu.custom_minimum_size.x=minf(view_w-32,840. if not portrait else 508.)
+	var life_menu:=menu_kind in ["continue_offer","continue_pick","dead"]
+	if life_menu:menu.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR
+	menu.custom_minimum_size.x=minf(view_w-32,(570. if life_menu else 840.) if not portrait else 508.)
 	menu.size.x=menu.custom_minimum_size.x
 	column=VBoxContainer.new();column.add_theme_constant_override("separation",10);menu.add_child(column)
 	var title:=label(menu_title(),24)
@@ -272,9 +285,9 @@ func build_menu() -> void:
 			if checkpoint_invalid:column.add_child(paragraph(t("save_corrupt"),17))
 			column.add_child(paragraph(t("mission")+" · "+old("name_"+selected_hero),18))
 			column.add_child(paragraph(t("brief")))
-			if not saved.is_empty() and not bool(saved.get("completed",false)):
+			if saved_can_resume():
 				action(t("continue")+" · "+old("name_"+str(saved.get("character","aion"))),resume_saved,true).name="CampaignContinue"
-			action(t("restart") if not saved.is_empty() and not bool(saved.get("completed",false)) else t("start"),begin_new,true).name="CampaignBegin"
+			action(t("restart") if saved_can_resume() else t("start"),begin_new,true).name="CampaignBegin"
 			if not saved.is_empty() and bool(saved.get("completed",false)):
 				action(t("report"),func():
 					if world.restore(saved):menu_kind="complete";new_best=false;build_ui()).name="CampaignLastReport"
@@ -303,21 +316,29 @@ func build_menu() -> void:
 			action(old("story_skip"),finish_help)
 		"paused":
 			action(old("resume"),close_menu,true)
-			action(t("retry"),retry_checkpoint)
 			action(t("controls"),func():help_return="paused";menu_kind="help";help_step=0;build_ui())
 			action(t("settings"),func():menu_previous="paused";menu_kind="settings";settings_page=0;build_ui())
+			action(t("restart_mission"),begin_new).name="CampaignRestart"
 			action(t("back"),return_main)
 		"boss":
 			column.add_child(paragraph(t("boss_intro")))
 			action(t("next"),close_menu,true).name="CampaignBossGo"
 			action(t("back"),return_main)
+		"continue_offer":
+			offer_label=label("",52);offer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(offer_label)
+			offer_hint=paragraph("",16);column.add_child(offer_hint)
+			offered_second=-1;update_continue_offer()
+			action(t("continue_choose"),open_continue,true).name="ArcadeContinue"
+			action(t("back"),return_main).name="ArcadeContinueMain"
+		"continue_pick":
+			build_continue_picker()
 		"dead":
 			column.add_child(paragraph(old("score")+" %05d · " % world.score+t(world.checkpoint),20))
-			action(t("retry"),retry_checkpoint,true).name="CampaignRetry"
+			action(t("restart"),begin_new,true).name="CampaignRestart"
 			action(t("back"),return_main)
 		"complete":
 			column.add_child(paragraph(old("name_"+world.character)+" · "+old("score")+" %05d"%world.score,22))
-			column.add_child(paragraph(t("keepers")+" %d · "%world.rescued.size()+t("elapsed")+" "+elapsed_time(world.time),18))
+			column.add_child(paragraph(t("keepers")+" %d · "%world.rescued.size()+t("elapsed")+" "+elapsed_time(world.time)+" · "+t("continue_count")+" %d"%world.continues_used,18))
 			if not world.route.is_empty() and options.text_scale<=1.5:
 				column.add_child(paragraph(t("route")+": "+" → ".join(world.route.map(func(s):return t(s))),16))
 			if new_best:column.add_child(paragraph(t("new_best"),17))
@@ -353,6 +374,7 @@ func fit_menu(target: PanelContainer) -> void:
 func menu_back() -> bool:
 	match menu_kind:
 		"paused":close_menu();return true
+		"continue_pick":cancel_continue();return true
 		"settings":menu_kind=menu_previous;build_ui();return true
 		"result_details":menu_kind="complete";build_ui();return true
 		"help":finish_help();return true
@@ -439,8 +461,61 @@ func build_settings() -> void:
 	action(t("next")+" %d/3"%[settings_page+1],func():settings_page=(settings_page+1)%3;build_ui())
 	action(old("resume"),func():menu_kind=menu_previous;build_ui())
 
-func retry_checkpoint() -> void:
-	release_all();world.retry();menu_kind="";boss_announced=false;view.camera_x=0.;view.camera_y=0.;presentation_stage="";save_checkpoint();build_ui()
+func saved_can_resume() -> bool:
+	return not saved.is_empty() and not bool(saved.get("completed",false)) and str(saved.get("phase","playing"))!="dead" and not (str(saved.get("phase","playing"))=="continue_offer" and float(saved.get("offer_remaining",0.))<=0.)
+
+func update_continue_offer() -> void:
+	var seconds:=ceili(world.continue_remaining)
+	if is_instance_valid(offer_label) and seconds!=offered_second:
+		offered_second=seconds
+		offer_label.text=str(seconds)
+	if is_instance_valid(offer_hint):
+		var hint:=t("continue_touch" if active_input=="touch" else ("continue_pad" if active_input=="gamepad" else "continue_keys"))
+		if offer_hint.text!=hint:offer_hint.text=hint
+
+func build_continue_picker() -> void:
+	var id:=world.continue_hero
+	var preview:=HeroPreview.new()
+	preview.hero=id;preview.body_art=view.m1_heroes;preview.weapon_art=hud_items
+	preview.animate=motion_enabled and not options.reduced_motion
+	preview.custom_minimum_size=Vector2(120.,100. if options.text_scale<=1.25 else 68.)
+	preview.set_select_state("idle")
+	column.add_child(preview)
+	picker_preview=preview
+	var info:=paragraph(old("name_"+id)+"\n"+RunnerFrontText.ability_summary(language,id),18)
+	info.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(info)
+	picker_info=info
+	action(t("continue_enter"),confirm_continue,true).name="ArcadeConfirmHero"
+	var paging:=HBoxContainer.new();column.add_child(paging)
+	for direction in [-1,1]:
+		var button:=action(t("previous_hero") if direction<0 else t("next_hero"),func():page_continue_hero(direction))
+		button.name="ArcadePreviousHero" if direction<0 else "ArcadeNextHero"
+		button.reparent(paging,false);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	action(t("go_back"),cancel_continue).name="ArcadeBackToCountdown"
+
+func open_continue() -> void:
+	if life_menu_delay>0. or not CampaignLives.open_picker(world):return
+	life_menu_delay=.28
+	menu_kind="continue_pick";save_checkpoint();build_ui()
+
+func page_continue_hero(direction: int) -> void:
+	if life_menu_delay>0. or world.state!="continue_pick":return
+	world.continue_hero=world.HEROES[posmod(world.HEROES.find(world.continue_hero)+direction,world.HEROES.size())]
+	if is_instance_valid(picker_preview) and is_instance_valid(picker_info):
+		picker_preview.hero=world.continue_hero;picker_preview.clock=0.;picker_preview.queue_redraw()
+		picker_info.text=old("name_"+world.continue_hero)+"\n"+RunnerFrontText.ability_summary(language,world.continue_hero)
+	save_checkpoint();metadata()
+
+func cancel_continue() -> void:
+	if life_menu_delay>0. or not CampaignLives.cancel_picker(world):return
+	life_menu_delay=.28
+	menu_kind="continue_offer";save_checkpoint();build_ui()
+
+func confirm_continue() -> void:
+	if life_menu_delay>0. or not CampaignLives.confirm(world,world.continue_hero):return
+	selected_hero=world.character
+	life_menu_delay=.28
+	menu_kind="";save_checkpoint();build_ui()
 
 func finish_help() -> void:
 	if help_return!="":menu_kind=help_return;help_return="";build_ui();return
@@ -470,8 +545,15 @@ func begin_new() -> void:
 	checkpoint_invalid=false;world.begin(selected_hero);world.state="story";menu_kind="help";help_step=0;outro_step=0;boss_announced=false;view.camera_x=0.;complete_presented=false;intro_pending=true;new_best=false;save_checkpoint();build_ui()
 	if tutorial_seen:close_menu()
 func resume_saved() -> void:
-	if not world.restore(saved): saved.clear();begin_new();return
-	menu_kind="";help_step=0;world.state="playing";boss_announced=false;view.camera_x=0.;intro_pending=false;build_ui()
+	if not saved_can_resume():return
+	if not world.restore(saved):checkpoint_invalid=true;build_ui();return
+	menu_kind=world.state if world.state in ["continue_offer","continue_pick"] else ""
+	help_step=0;boss_announced=bool(world.boss.get("engaged",false));intro_pending=false
+	if world.recovery_view.has_area():
+		view.camera_x=world.recovery_view.position.x
+		view.camera_y=world.recovery_view.position.y+view.ground
+	else:view.camera_x=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
+	save_checkpoint();build_ui()
 func close_menu() -> void:
 	if menu_kind=="boss":world.boss.engaged=true
 	release_all();menu_kind="";world.paused_crouch=false;world.state="playing";build_ui()
@@ -484,7 +566,7 @@ func toggle_pause() -> void:
 func return_main() -> void:
 	if leaving_scene:return
 	release_all()
-	if world.checkpoint_ready or world.completed: save_checkpoint()
+	if menu_kind!="briefing" and (world.checkpoint_ready or world.completed):save_checkpoint()
 	if not save_ok: menu_kind="paused";build_ui();return
 	leaving_scene=true
 	# The emitting Button must remain in-tree until its input event finishes.
@@ -545,7 +627,7 @@ func release_all() -> void:
 func set_action(key: String,source: String,down: bool,canceled: bool=false) -> void:
 	# A press during the section fade must not remain latched when the next
 	# section opens. Releases remain safe even for an already hidden control.
-	if down and (fade>=0. or world.state=="travel"):return
+	if down and (fade>=0. or world.state!="playing" or CampaignVehicles.stunned(world)):return
 	# Reject compact-form presses before adding a source to held. Reopening
 	# the shell must require a new press, never a queued gun/jump/grenade.
 	if down and key in ["attack","jump","grenade"] and MissionHeroAbilities.compact(world):return
@@ -591,13 +673,25 @@ func _notification(what: int) -> void:
 	if what==NOTIFICATION_APPLICATION_FOCUS_OUT or what==NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		application_active=false
 		cancel_unspent_actions();release_all()
-		if is_instance_valid(ui) and world.state=="playing":toggle_pause()
+		if is_instance_valid(ui):
+			if world.state=="playing":toggle_pause()
+			elif world.state in CampaignLives.TRANSITIONS:save_checkpoint()
+	elif what==NOTIFICATION_WM_CLOSE_REQUEST and is_instance_valid(ui) and menu_kind!="briefing":save_checkpoint()
 	elif what==NOTIFICATION_APPLICATION_FOCUS_IN or what==NOTIFICATION_WM_WINDOW_FOCUS_IN:application_active=true
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:active_input="touch";mouse_aim=false
 	elif event is InputEventJoypadButton or event is InputEventJoypadMotion:active_input="gamepad";mouse_aim=false
 	elif event is InputEventKey or (event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION):active_input="keyboard"
+	if event is InputEventKey and menu_kind in ["continue_offer","continue_pick","dead"] and event.echo and (event.keycode in [KEY_ENTER,KEY_KP_ENTER,KEY_SPACE] or event.is_action("ui_accept")):
+		get_viewport().set_input_as_handled();return
+	if event is InputEventJoypadButton and event.button_index in [JOY_BUTTON_A,JOY_BUTTON_X,JOY_BUTTON_START]:
+		var identity:=Vector2i(event.device,event.button_index)
+		var was_down:=confirm_buttons_down.has(identity)
+		if event.pressed:confirm_buttons_down[identity]=true
+		else:confirm_buttons_down.erase(identity)
+		if event.pressed and was_down and menu_kind in ["continue_offer","continue_pick","dead"]:
+			get_viewport().set_input_as_handled();return
 	if fade>=0. or world.state=="travel":
 		release_all();get_viewport().set_input_as_handled();return
 	if presentation_stage!="":
@@ -616,7 +710,9 @@ func _input(event: InputEvent) -> void:
 				var focus:=get_viewport().gui_get_focus_owner()
 				if focus is Button and focus.is_inside_tree() and focus.is_visible_in_tree() and not focus.disabled:focus.pressed.emit()
 			elif event.button_index==JOY_BUTTON_B:menu_back()
-			elif event.button_index==JOY_BUTTON_START and menu_kind=="paused":close_menu()
+			elif event.button_index==JOY_BUTTON_START:
+				if menu_kind=="paused":close_menu()
+				elif menu_kind=="continue_offer":open_continue()
 			get_viewport().set_input_as_handled();return
 		if event.button_index==JOY_BUTTON_START and event.pressed:toggle_pause();get_viewport().set_input_as_handled();return
 		for key in ["jump","attack","shoot","duck","boost"]:
@@ -624,6 +720,7 @@ func _input(event: InputEvent) -> void:
 		if event.pressed and event.button_index==interact_binding():activate_context()
 		get_viewport().set_input_as_handled();return
 	if menu_kind!="":return
+	if world.state!="playing":get_viewport().set_input_as_handled();return
 	if event is InputEventScreenTouch:
 		var p: Vector2=screen_transform.affine_inverse()*event.position
 		if event.pressed and not event.canceled:
@@ -787,6 +884,7 @@ func pointer_aim() -> Vector2:
 	return toward.normalized() if toward.length()>10. else Vector2.ZERO
 
 func _process(dt: float) -> void:
+	life_menu_delay=maxf(0.,life_menu_delay-dt)
 	impact_cooldown=maxf(0.,impact_cooldown-dt);defeat_sound_wait=maxf(0.,defeat_sound_wait-dt)
 	native_diagnostics.step(dt)
 	world.pose_motion_enabled=motion_enabled and not options.reduced_motion
@@ -807,11 +905,24 @@ func _process(dt: float) -> void:
 		else:impact_hold=0.
 		if simulation_dt>0.:world.step(simulation_dt)
 	if world.state=="travel" and fade<0.:start_travel()
-	if world.state in ["victory","dying"]:world.step(dt)
+	if world.state=="respawn_pending" and application_active:
+		var area:=Rect2(view.camera_x,view.camera_y-view.ground,view.scene_w,view.ground+60.)
+		CampaignLives.start_entry(world,area)
+	if world.state in ["victory","dying","respawn"] and application_active:world.step(dt)
+	if world.state=="continue_offer" and menu_kind=="continue_offer":
+		var visible_play:=application_active
+		if OS.has_feature("web"):visible_play=visible_play and not bool(JavaScriptBridge.eval("document.hidden || !document.hasFocus()"))
+		if visible_play:
+			var before:=ceili(world.continue_remaining)
+			CampaignLives.tick_offer(world,dt)
+			if before!=ceili(world.continue_remaining):
+				save_checkpoint()
+				if world.continue_remaining>0.:sound("continue_tick")
+		update_continue_offer()
 	advance_travel(dt)
 	if fade<0. and world.section=="arena" and not boss_announced and world.state=="playing" and absf(world.player.x-float(world.boss.x))<view.scene_w*.40:
 		boss_announced=true;world.stop_inputs();world.state="story";menu_kind="boss";build_ui()
-	if menu_kind=="" and presentation_stage=="" and world.state in ["dead","complete"]:
+	if (menu_kind=="" or (menu_kind=="continue_offer" and world.state=="dead")) and presentation_stage=="" and world.state in ["continue_offer","dead","complete"]:
 		menu_kind=world.state;release_all()
 		if world.state=="complete" and not complete_presented:
 			complete_presented=true;save_checkpoint();start_presentation("victory")
@@ -819,15 +930,23 @@ func _process(dt: float) -> void:
 			if world.state=="complete":menu_kind="outro";save_checkpoint()
 			build_ui()
 	for event in world.pending_events:
-		if event in ["checkpoint","rescue","rescue_gift","secret","mechanism"] and menu_kind!="briefing":save_checkpoint()
+		if event in ["checkpoint","rescue","rescue_gift","secret","mechanism","life_changed","vehicle_impact","vehicle_wreck"] and menu_kind!="briefing":save_checkpoint()
 		if event=="enemy" and impact_cooldown<=0. and motion_enabled and not options.reduced_motion and world.state=="playing":impact_hold=.035;impact_cooldown=.18
+		if event in ["vehicle_impact","vehicle_wreck"]:
+			if event=="vehicle_impact":release_all()
+			sound("hurt" if event=="vehicle_impact" else "blast")
 		if event in ["shot","melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","guardian","boss_attack","complete","checkpoint","enemy","armour_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
-	view.camera_x=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
-	var desired_y:=minf(0.,world.player.y+225.)
-	desired_y=CampaignRoutes.camera_y(world,desired_y)
-	view.camera_y=desired_y if options.reduced_motion else lerpf(view.camera_y,desired_y,1.-exp(-minf(dt,.05)*9.))
+	if world.state not in CampaignLives.TRANSITIONS:
+		var desired_x:=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
+		if world.entry_guard and not options.reduced_motion:
+			view.camera_x=lerpf(view.camera_x,desired_x,1.-exp(-minf(dt,.05)*8.))
+		else:view.camera_x=desired_x
+		var desired_y:=minf(0.,world.player.y+225.)
+		desired_y=CampaignRoutes.camera_y(world,desired_y)
+		view.camera_y=desired_y if options.reduced_motion else lerpf(view.camera_y,desired_y,1.-exp(-minf(dt,.05)*9.))
+		world.recovery_view=Rect2(view.camera_x,view.camera_y-view.ground,view.scene_w,view.ground+60.)
 	view.queue_redraw();update_hud()
 	telemetry_clock+=dt
 	if telemetry_clock>.1:telemetry_clock=0.;metadata()
@@ -836,7 +955,7 @@ func _process(dt: float) -> void:
 func update_hud() -> void:
 	if not is_instance_valid(hud):return
 	hud_panel.refresh()
-	hud.text="%05d" % world.score+("\n" if portrait or options.text_scale>1. else "  ·  ")+t("lives")+" %d/%d" % [world.hp,world.max_hp]+"  ·  "+t("grenade")+" %d" % world.grenades
+	hud.text="%05d" % world.score+("\n" if portrait or options.text_scale>1. else "  ·  ")+t("reserve_lives")+" %d" % maxi(0,world.attempts_remaining-1)+"  ·  "+t("grenade")+" %d" % world.grenades
 	var region: String=world.section
 	if CampaignContent.SCENES.has(region):region=str(CampaignContent.SCENES[region][clampi(int(world.player.x/world.length()*3.),0,2)])
 	subtitle.text=t("mission")+" · "+t(region)
@@ -920,7 +1039,7 @@ func sound(event: String) -> void:
 		if GRENADE_SOUNDS.has(event):sound_cache[event]=GRENADE_SOUNDS[event]
 		else:
 			var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else (2400 if event in ["enemy","armour_hit"] else 1400)
-			var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"gift_drop":780.,"npc_contact":920.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.}.get(event,660.)
+			var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"gift_drop":780.,"npc_contact":920.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.,"continue_tick":385.}.get(event,660.)
 			if event=="enemy":pitch=180.
 			elif event=="armour_hit":pitch=1140.
 			for i in count:
@@ -939,7 +1058,7 @@ func metadata() -> void:
 	if not OS.has_feature("web"):return
 	accessible_update()
 	if not web_qa:return
-	var data: Dictionary=world.snapshot()
+	var data: Dictionary=world.snapshot(false)
 	data.merge({"state":world.state,"menu":menu_kind,"section":world.section,"player":[world.player.x,world.player.y],"facing":world.facing,"hp":world.hp,"shots":world.shots,"grenades":world.grenades,"melee":world.melee_time,"mounted":world.mount.ridden,"boss_hp":world.boss.hp,"save_ok":save_ok,"view":[view_w,view_h],"camera":view.camera_x,"pose":view.hero_marker,"actions":{},"transform":[screen_transform.x.x,screen_transform.origin.x,screen_transform.origin.y],"enemies":[],"platforms":[],"gates":[],"pits":[]})
 	for key in actions:data.actions[key]=[actions[key].position.x,actions[key].position.y,actions[key].size.x,actions[key].size.y]
 	if is_instance_valid(stick):data.stick=[stick.position.x,stick.position.y,stick.size.x,stick.size.y]
@@ -962,6 +1081,7 @@ func metadata() -> void:
 	data.velocity=[world.velocity.x,world.velocity.y]
 	data.npcs=[]
 	for n in world.npcs:data.npcs.append({"id":n.id,"x":n.x,"y":n.y,"freed":n.freed,"age":n.free_age,"gift":n.gift,"secret":n.secret,"phase":n.get("phase","bound"),"facing":n.get("facing",-1),"thank_age":n.get("thank_age",0.)})
+	data.continue_remaining=world.continue_remaining;data.continue_hero=world.continue_hero
 	data.boss_warning=world.boss.get("beam_warning",0.);data.boss_beam_x=world.boss.get("beam_x",-999.);data.boss_x=world.boss.x;data.boss_phase=world.boss.phase;data.mount_type=CampaignVehicles.kind(world);data.music_starts=ambient_starts;data.native_memory=Performance.get_monitor(Performance.MEMORY_STATIC);data.node_count=Performance.get_monitor(Performance.OBJECT_NODE_COUNT);data.rescue_candidate=CampaignRescue.cut_target(world).get("id","");data.rescue_time=world.rescue_time;data.weapon=world.weapon;data.ammunition=world.ammunition;data.objects=world.objects;data.rooms=world.rooms
 	data.bullets=[]
 	for bullet in world.bullets:
@@ -1016,6 +1136,8 @@ func accessible_update() -> void:
 	for item in ui.find_children("*","Button",true,false):
 		if item.is_visible_in_tree():entries.append({"id":str(item.get_instance_id()),"label":item.tooltip_text if item.text=="II" else item.text,"disabled":item.disabled,"toggle":false,"pressed":false})
 	var summary: String=menu_title() if menu_kind!="" else hud_panel.summary
+	if menu_kind=="continue_offer":summary+=" · %d"%ceili(world.continue_remaining)
+	if menu_kind=="continue_pick":summary+=" · "+old("name_"+world.continue_hero)+" · "+RunnerFrontText.ability_summary(language,world.continue_hero)
 	if menu_kind=="" and world.section=="arena" and bool(world.boss.active):summary+=" · "+t("arena")+" %d/%d"%[world.boss.hp,world.boss.max_hp]+" · "+t("phase")+" "+str(world.boss.phase)
 	if presentation_stage!="":summary=t("won")+" · "+t("lights_restored") if presentation_stage=="victory" else t("mission")+" · "+t("title")+" · "+t("intro_objective")
 	var payload:=JSON.stringify({"items":entries,"language":language,"page":menu_kind,"summary":summary})
