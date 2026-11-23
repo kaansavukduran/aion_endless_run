@@ -34,7 +34,7 @@ static func body_spec(w) -> Dictionary:
  if not crouched and w.grounded():
   if w.rescue_time>0. and M1HeroActionArt.supports(w.character,'rescue_cut'):
    action='rescue_cut'
-  elif w.melee_time>0. and M1HeroActionArt.supports(w.character,'melee'):
+  elif w.melee_time>0. and absf(w.velocity.x)<=1. and M1HeroActionArt.supports(w.character,'melee'):
    action='melee';frame=clampi(int((.28-w.melee_time)/.28*6.),0,5)
  var throw_value=w.get('grenade_throw')
  var throw_state: Dictionary=throw_value if throw_value is Dictionary else {}

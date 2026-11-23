@@ -64,6 +64,9 @@ func run():
   w.spawn_enemy('gnome',w.player.x+55.,w.player.y,501)
   w.attack_press();w.attack_release()
   check(M1CombatArt.body_spec(w).action=='melee' and not w.enemies[-1].defeated,'Context attack anticipates with the new unarmed sequence: '+hero)
+  w.velocity.x=-100.
+  check(M1CombatArt.body_spec(w).action=='walk_back','A moving close strike never pins the aimed backward stride: '+hero)
+  w.velocity.x=0.
   for tick in 9:w.step(1./60.)
   check(M1CombatArt.body_spec(w).frame==3 and w.enemies[-1].defeated,'The authored strike cel coincides with real close damage: '+hero)
   w.enemies.clear()
