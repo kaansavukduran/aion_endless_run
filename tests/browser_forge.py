@@ -528,6 +528,27 @@ with sync_playwright() as playwright:
                     if label not in checks:
                         check(condition, label)
 
+                def move_and_defend(current, direction, allow_grenade):
+                    global last_jump
+                    x, y = current['player']
+                    aim_high = [e for e in current['enemies'] if
+                                abs(e['x'] - x) < 290 and e['y'] < y - 42]
+                    nearest = min(aim_high, key=lambda e: abs(e['x'] - x), default=None)
+                    if nearest:
+                        dx = nearest['x'] - x
+                        commands = ['f', 'w'] if abs(dx) < 85 else ['f', 'w', 'd' if dx > 0 else 'a']
+                    else:
+                        commands = ['f', direction]
+                    keys(commands)
+                    gap = any(0 < pit[0] - x < 160 for pit in current['pits'])
+                    danger = any(math.hypot(b[0] - x, b[1] - (y - 37)) < 95 for b in current['bullets'])
+                    if current['grounded'] and (gap or danger) and current['time'] - last_jump > .70:
+                        page.keyboard.press('Space')
+                        last_jump = current['time']
+                    if allow_grenade and current['grenades'] and not current['grenade_throw']['phase'] and nearest and abs(nearest['x'] - x) < 125:
+                        page.keyboard.press('g')
+                    return commands
+
                 while True:
                     target = None
                     try:
@@ -539,11 +560,10 @@ with sync_playwright() as playwright:
                             current = campaign()
                             require_live(current, 'search', recover=True)
                             x, y = current['player']
-                            gap = any(0 < pit[0]-x < 160 for pit in current['pits'])
-                            danger = any(math.hypot(b[0]-x, b[1]-(y-37)) < 120 for b in current.get('bullets', []))
-                            if current.get('grounded') and (gap or danger) and time.monotonic()-last_jump > .75:
-                                page.keyboard.press('Space'); last_jump = time.monotonic()
-                            target = next((n for n in current['npcs'] if n['freed'] and n['phase'] == 'free' and not n['secret'] and not current['awarded'].get(n['id']+':gift') and abs(n['y']-y) < 25 and 95 < n['x']-x < 500), None)
+                            move_and_defend(current, 'd', allow_grenade=x<2750.)
+                            free = [n for n in current['npcs'] if n['freed'] and n['phase'] == 'free' and not n['secret']
+                                    and not current['awarded'].get(n['id']+':gift') and abs(n['y']-y) < 70 and abs(n['x']-x)<500]
+                            target = min(free, key=lambda n: abs(n['x']-x), default=None)
                             if target:
                                 keys([]); rescue_trace('free_candidate', current, target); break
                             page.wait_for_timeout(60)
@@ -567,13 +587,7 @@ with sync_playwright() as playwright:
                                 contacted = current; keys([]); break
                             assert npc['phase'] == 'free', ('Expected a newly freed, uncontacted NPC', npc)
                             x, y = current['player']
-                            wanted = ['f', 'd' if npc['x'] > x else 'a']
-                            keys(wanted)
-                            gap = any(0 < pit[0]-x < 160 for pit in current['pits'])
-                            danger = any(math.hypot(b[0]-x, b[1]-(y-37)) < 120 for b in current.get('bullets', []))
-                            flyer = any(abs(e['x']-x) < 180 and e['y'] < y-25 for e in current['enemies'])
-                            if current.get('grounded') and (gap or danger or flyer) and time.monotonic()-last_jump > .75:
-                                page.keyboard.press('Space'); last_jump = time.monotonic()
+                            wanted = move_and_defend(current, 'd' if npc['x'] > x else 'a', allow_grenade=False)
                             rescue_trace('approach_input', current, target, wanted)
                             page.wait_for_timeout(40)
                         current = campaign()
