@@ -83,7 +83,7 @@ func roster_width() -> float:
 
 func stage_y() -> float:
 	if host.portrait:
-		var preview: float=minf(360.0,host.view_h*0.31)
+		var preview: float=minf(360.0,host.view_h*0.36)
 		if host.page=="main":
 			# Preserve the actual translated roster and heading. A tall system
 			# font needs more room than the old fixed preview/sky allocation.
@@ -416,16 +416,22 @@ func main(column: VBoxContainer) -> Button:
 	# Width must exist before entering the tree; shaping at width zero caches
 	# a many-line minimum which otherwise leaves an oversized invisible label.
 	choose.size=Vector2(roster_width(),chooser_height());choose.visible=not enlarged
-	h.menu_layer.add_child(choose)
+	var roster_group:=Control.new()
+	roster_group.name="StartRoster"
+	roster_group.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	h.menu_layer.add_child(roster_group)
 	var roster_at: float=roster_y()
-	choose.position=Vector2(h.view_w*.5+14 if split_main() else 28,roster_at-chooser_height()-6);choose.size.y=chooser_height()
-	roster(h.menu_layer,Vector2(h.view_w*.5+14 if split_main() else 28,roster_at),roster_width())
+	var roster_left: float=h.view_w*.5+14 if split_main() else 28.
+	roster_group.position=Vector2(roster_left,roster_at)
+	roster_group.add_child(choose)
+	choose.position=Vector2(0,-chooser_height()-6);choose.size.y=chooser_height()
+	roster(roster_group,Vector2.ZERO,roster_width())
 	if launch_pending:trigger_launch_preview(h.character)
-	fit_main.call_deferred(column,h.layout_generation)
+	fit_main.call_deferred(column,roster_group,h.layout_generation)
 	return arcade
 
-func fit_main(column: VBoxContainer,generation: int) -> void:
-	if not is_instance_valid(host) or not host.is_inside_tree() or generation!=host.layout_generation or not is_instance_valid(column):return
+func fit_main(column: VBoxContainer,roster_group: Control,generation: int) -> void:
+	if not is_instance_valid(host) or not host.is_inside_tree() or generation!=host.layout_generation or not is_instance_valid(column) or not is_instance_valid(roster_group):return
 	var panel: PanelContainer=column.get_parent()
 	# Size the background to the real wrapped content instead of a large fixed
 	# preview slot. The font and chosen text scale remain unchanged.
@@ -433,6 +439,10 @@ func fit_main(column: VBoxContainer,generation: int) -> void:
 	var content_height: float=host.menu_pages.measure(column,panel.size.x-inset.x)
 	panel.size.y=ceilf(content_height+inset.y)
 	if split_main():panel.position.y=maxf(72,floorf((host.view_h-panel.size.y)*.5))
+	elif host.portrait:
+		var gap: float=22. if host.interface_options.text_scale<=1. else 16.
+		var heading: float=chooser_height()
+		roster_group.position.y=minf(roster_group.position.y,panel.position.y+panel.size.y+gap+heading+(6. if heading>0. else 0.))
 
 
 func characters() -> void:

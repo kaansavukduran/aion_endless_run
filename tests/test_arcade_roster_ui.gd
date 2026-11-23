@@ -20,11 +20,18 @@ func run():
   check(GameText.language_for_locale(locale)=='tr','Turkish device language: '+locale)
  for locale in ['en-US','cs-CZ','ja','it-IT']:
   check(GameText.language_for_locale(locale)=='en','Unsupported language falls back to English: '+locale)
- for viewport in [Vector2i(1152,648),Vector2i(873,393),Vector2i(393,873)]:
+ for viewport in [Vector2i(1152,648),Vector2i(873,393),Vector2i(393,873),Vector2i(320,700)]:
   root.size=viewport;await settle();game.touch_mode=viewport.x<1000
   for scale_value in [1.,1.5,2.]:
    for locale in GameText.LANGUAGES:
     game.interface_options.text_scale=scale_value;game.language=locale;game.build_theme();game.ui.theme=game.ui_theme;game.rebuild();await settle()
+    if viewport.y>viewport.x:
+     var panel=game.menu_layer.find_child('PagePanel',true,false)
+     var roster=game.menu_layer.find_child('StartRoster',true,false)
+     var heading=game.menu_layer.find_child('StartChooser',true,false)
+     var first_y: float=heading.get_global_rect().position.y if heading.is_visible_in_tree() else roster.get_global_rect().position.y
+     var gap: float=first_y-panel.get_global_rect().end.y
+     check(gap>=0. and gap<=24.,'Portrait actions and roster share a compact gap: '+str(viewport)+' '+str(scale_value)+' '+locale+' '+str(gap))
     var seen=[]
     var previous=game.menu_layer.find_child('RosterPrevious',true,false)
     while previous!=null and not previous.disabled:
