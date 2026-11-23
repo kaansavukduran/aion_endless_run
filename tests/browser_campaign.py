@@ -14,7 +14,7 @@ p.add_argument('--retry-profile',action='store_true',help='Measure five genuine 
 p.add_argument('--warm-launch',action='store_true',help='Measure a second launch after the service worker has cached the actual PCK.')
 p.add_argument('--special-probe',action='store_true',help='Use the selected new hero skill through ordinary keys before the full mission, without injecting a target.')
 p.add_argument('--observe-terrain', action='store_true', help='Capture actual supported feet on the Mission 1 terrain profiles during a complete route.')
-p.add_argument('--observe-shooters', action='store_true', help='Reach and observe both Shore shooters through ordinary player controls.')
+p.add_argument('--observe-shooters', nargs='?', const='both', choices=['both','lantern_scout','cap_lobber'], help='Reach and observe one or both Shore shooters through ordinary player controls.')
 p.add_argument('--pause-crouch-probe',action='store_true',help='Observe the real crouched gun pose across Pause and Resume, using ordinary keys and pointer aim.')
 a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];console=[]
@@ -426,6 +426,8 @@ with sync_playwright() as pw:
         arena_phases=set()
         shooter_proof={}
         shooter_types={'lantern_scout':'scout_bolt','cap_lobber':'lob_seed'}
+        if a.observe_shooters not in [None,'both']:
+            shooter_types={a.observe_shooters:shooter_types[a.observe_shooters]}
         skipped_shooter_assist=False
         previously_mounted=False
         next_move_refresh=0.
@@ -499,7 +501,7 @@ with sync_playwright() as pw:
                         shooter_proof[kind]={'enemy':shooter,'projectile':projectile,'player':d['player']}
                         page.screenshot(path=str(a.evidence/(kind+'-release.png')))
                         check((a.evidence/(kind+'-warning.png')).exists(),kind+' warns visibly before an actual projectile and recovery')
-                        if len(shooter_proof)==2:break
+                        if set(shooter_proof)==set(shooter_types):break
                     page.wait_for_timeout(65);continue
             if section in ['fork_one','fork_two']:
                 # These are real traversal sections. Upper uses reachable
@@ -627,8 +629,8 @@ with sync_playwright() as pw:
                 wanted=['f','s','d' if target['x']>x else 'a']
             preserve_target=a.observe_shooters and section=='shore' and target and target['kind'] in shooter_types and target['kind'] not in shooter_proof
             if a.observe_shooters:
-                observing_scout='lantern_scout' not in shooter_proof and x>=1160.
-                observing_lobber='lantern_scout' in shooter_proof and x>=2850.
+                observing_scout='lantern_scout' in shooter_types and 'lantern_scout' not in shooter_proof and x>=1160.
+                observing_lobber='cap_lobber' in shooter_types and not observing_scout and x>=2850.
                 if observing_scout or observing_lobber:wanted=[key for key in wanted if key!='f']
             keys(wanted)
             if direction and direction in wanted and onfloor and abs(float(d['velocity'][0]))<.1 and now>=next_move_refresh:
@@ -694,8 +696,8 @@ with sync_playwright() as pw:
         keys([])
         if a.observe_shooters:
             (a.evidence/'ground-shooters.json').write_text(json.dumps(shooter_proof,indent=2)+'\n')
-            check(len(shooter_proof)==2,'Both distinct Shore shooters prepare, release and recover in ordinary play')
-            check(not errors,'No page exceptions during the two ordinary-input encounters')
+            check(set(shooter_proof)==set(shooter_types),'Each requested Shore shooter prepares, releases and recovers in ordinary play')
+            check(not errors,'No page exceptions during the ordinary-input encounters')
             print(f'RESULT: {len(checks)} route input checks, 0 failures');raise SystemExit(0)
         (a.evidence/'playthrough.json').write_text(json.dumps({'completed':completed,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'vehicle_inputs':vehicle_inputs,'physical_forks':fork_inputs,'rescue_story_inputs':rescue_presentations,'final':data()},indent=2)+'\n')
         if a.rescue_only:check(bool(rescues_tested),'An actual captive was reached, cut free and rewarded through ordinary controls')
