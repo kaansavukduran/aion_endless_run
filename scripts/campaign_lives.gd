@@ -145,6 +145,11 @@ static func landing_clear(w,foot: Vector2) -> bool:
 
 static func start_entry(w,area: Rect2) -> void:
 	if w.state!="respawn_pending":return
+	if w.section=="arena" and bool(w.boss.engaged):
+		# After several losses, the follow camera can drift left out of the
+		# fight. Keep the entry on the left side of the active boss encounter.
+		var approach:=clampf(float(w.boss.x)-area.size.x*.75,0.,maxf(0.,float(w.length())-area.size.x))
+		area.position.x=maxf(area.position.x,approach)
 	w.recovery_view=area
 	w.entry_to=landing(w,area)
 	w.entry_from=Vector2(area.position.x+36.,area.position.y+60.)

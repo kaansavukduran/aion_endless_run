@@ -352,6 +352,19 @@ with sync_playwright() as playwright:
             page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).state==='playing'", timeout=15000)
             check(True, 'Actual Arcade briefing/help/start presentation reaches playable Mission 1')
             canvas.focus()
+            def restart_for_probe():
+                page.wait_for_function("['playing','continue_offer','continue_pick','dead'].includes(JSON.parse(document.querySelector('canvas').dataset.campaign).state)",timeout=15000)
+                if campaign()['menu'] in ['continue_offer','continue_pick']:
+                    if campaign()['menu']=='continue_pick':tap('ArcadeBackToCountdown',in_campaign=True)
+                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
+                if campaign()['menu']!='dead':
+                    canvas.focus();page.keyboard.press('Escape')
+                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'",timeout=10000)
+                tap('CampaignRestart',in_campaign=True)
+                presentation_done()
+                page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp===1 && d.ui_ready}",timeout=15000)
+                canvas.focus()
+
             initial_x = campaign()['player'][0]
             page.keyboard.down('d')
             page.wait_for_function("x=>JSON.parse(document.querySelector('canvas').dataset.campaign).player[0]>x+35", arg=initial_x)
@@ -367,8 +380,14 @@ with sync_playwright() as playwright:
             page.touchscreen.tap(*coords(rectangle[0]+rectangle[2]/2, rectangle[1]+rectangle[3]/2, True))
             page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).player[1]<-15")
             check(True, 'Actual touch Jump reaches the same physics action')
+
+            # The previous movement/jump probe can leave the first threat in
+            # range. Use a normal new mission for the independent Start probe.
+            restart_for_probe()
             page.evaluate('qaPadConnect(true)')
             page.wait_for_timeout(200)
+            observations['pad_pause_precondition'] = campaign()
+            check(observations['pad_pause_precondition']['state'] == 'playing', 'Virtual Start is sent during an active run')
             page.evaluate('qaPadButton(9,true)')
             page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'")
             page.evaluate('qaPadButton(9,false)')
@@ -388,20 +407,6 @@ with sync_playwright() as playwright:
             page.set_viewport_size({'width': 1280, 'height': 720})
             page.wait_for_timeout(500)
             canvas.focus()
-
-            def restart_for_probe():
-                page.wait_for_function("['playing','continue_offer','continue_pick','dead'].includes(JSON.parse(document.querySelector('canvas').dataset.campaign).state)",timeout=15000)
-                if campaign()['menu'] in ['continue_offer','continue_pick']:
-                    if campaign()['menu']=='continue_pick':tap('ArcadeBackToCountdown',in_campaign=True)
-                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
-                if campaign()['menu']!='dead':
-                    canvas.focus();page.keyboard.press('Escape')
-                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'",timeout=10000)
-                tap('CampaignRestart',in_campaign=True)
-                presentation_done()
-                page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp===1 && d.ui_ready}",timeout=15000)
-                canvas.focus()
-
             class AimActorDied(Exception):
                 pass
             aim_retries = 0

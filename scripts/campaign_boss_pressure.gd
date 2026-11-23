@@ -1,6 +1,17 @@
 class_name CampaignBossPressure
 extends RefCounted
 
+const ACTIVE_DRONE_LIMIT := 2
+
+static func call_drones(w) -> void:
+	var available:=ACTIVE_DRONE_LIMIT
+	for enemy in w.enemies:
+		if str(enemy.kind)=="drone" and not bool(enemy.defeated):available-=1
+	if available<=0:return
+	w.pending_events.append("boss_attack")
+	for i in available:
+		w.spawn_enemy("drone",float(w.boss.x)-120.-i*110.,float(w.boss.y)-135.-i*25.,200+int(w.boss.attack)*2+i)
+
 static func port_point(w,index: int) -> Vector2:
 	return Vector2(float(w.boss.x)+(-65. if index==0 else 65.),float(w.boss.y)-95.)
 

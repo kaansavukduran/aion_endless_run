@@ -912,6 +912,7 @@ func _process(dt: float) -> void:
 	if world.state=="respawn_pending" and application_active:
 		var area:=Rect2(view.camera_x,view.camera_y-view.ground,view.scene_w,view.ground+60.)
 		CampaignLives.start_entry(world,area)
+		view.camera_x=world.recovery_view.position.x
 	if world.state in ["victory","dying","respawn"] and application_active:world.step(dt)
 	if world.state=="continue_offer" and menu_kind=="continue_offer":
 		var visible_play:=application_active

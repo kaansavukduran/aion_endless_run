@@ -72,6 +72,32 @@ func test_legacy() -> void:
 	var invalid:=w.snapshot();invalid.encounter=invalid.encounter.substr(1)
 	check(not AionCampaignWorld.new().restore(invalid),"Truncated encounter cannot replace valid progress")
 
+func test_arena_reentry() -> void:
+	for width in [520.,1152.]:
+		var w:=AionCampaignWorld.new();w.begin("eren");w.load_section("arena")
+		w.boss.engaged=true;w.boss.hp=67;w.boss.ports=[0,3];w.player=Vector2(2115.,-40.)
+		for death in 6:
+			var previous_camera:=maxf(0.,w.player.x-width*.34)
+			w.invulnerable=0.;w.damage_player("shot");clock(w,.9)
+			if w.state=="continue_offer":
+				CampaignLives.open_picker(w);CampaignLives.confirm(w,"eren")
+			CampaignLives.start_entry(w,Rect2(previous_camera,-420.,width,500.))
+			check(is_equal_approx(w.entry_from.x,w.recovery_view.position.x+36.),"Arena entry still starts left of its actual camera")
+			clock(w,.65)
+			check(w.player.x>float(w.boss.x)-width*.75 and w.grounded(),"Consecutive boss deaths cannot drift out of the fight")
+			check(w.boss.hp==67 and w.boss.ports==[0,3],"Boss pressure and broken ports persist across the same encounter")
+
+func test_arena_drones() -> void:
+	var w:=AionCampaignWorld.new();w.begin("aion");w.load_section("arena")
+	w.boss.engaged=true
+	for attack in [2,5,8]:
+		w.boss.attack=attack;w.boss.windup=.01;w.step_boss(.02)
+		check(w.enemies.filter(func(e):return e.kind=="drone" and not e.defeated).size()==2,"The active reinforcement wave cannot stack")
+	var drone: Dictionary=w.enemies.filter(func(e):return e.kind=="drone").front()
+	w.damage_enemy(drone,100)
+	w.boss.attack=11;w.boss.windup=.01;w.step_boss(.02)
+	check(w.enemies.filter(func(e):return e.kind=="drone" and not e.defeated).size()==2,"The next wave replaces only the defeated drone")
+
 func test_vehicles() -> void:
 	for type in CampaignVehicles.TYPES:
 		for hz in [30.,60.,120.]:
@@ -115,6 +141,8 @@ func test_clearance_and_support() -> void:
 func run() -> void:
 	test_lives()
 	test_legacy()
+	test_arena_reentry()
+	test_arena_drones()
 	test_vehicles()
 	test_clearance_and_support()
 	print("RESULT: %d arcade life and vehicle checks, %d failures"%[checks,failures])
