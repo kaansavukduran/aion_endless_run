@@ -2,6 +2,13 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+### Çalışmayı sürdürmek için
+
+- Yayıma alınan kaynak aşaması `main` `d85ac8aa18157ab81923a43569c6c8d01ecaaa4e` ile 0.52.0. Dalı 54.895 kaynak kontrolünden geçen [PR 13](https://github.com/kaansavukduran/aion_endless_run/pull/13) birleştirdi. İlk main paketinin gerçek tarayıcı işi sıfır yazı boyutuyla durdu. İkinci deneme [ana CI kaydında](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45177198891/attempts/2) takip ediliyor. Bu not yazılırken [canlı Pages](https://kaansavukduran.github.io/aion_endless_run/) 0.51.1’i sunuyor.
+- Sıfır boyutlu Ateş düğmesi hatası Linux görüntüleyicisinde özel olarak yeniden üretildi. Düzeltilen 0.52.1 `9ebf6c8`, 42 görüntüleme ve 1.565 hedefli kaynak kontrolünden geçti. [PR 14](https://github.com/kaansavukduran/aion_endless_run/pull/14) paketi ve tarayıcı işini yeniden çalıştırıyor. İlk yayın eylemi main paketinin sonucunu, Pages’in aynı paketi aldığını ve gerçek sitede açılışı ayrı ayrı doğrulamak.
+- Yerel çalışma ağaçları `/workspace/work/mission1-ground`, `/workspace/work/mission1-ground-shooters` ve `/workspace/work/mission1-root-engine`. En ileri aday yerel 0.55.0 `6a6055e881b8dd9f` çıktısıdır. Düzeltme ve yayın kanıtları `/workspace/work/arcade-lives` altında, rota ve boss kanıtları `/workspace/work/mission1-root-engine-runtime` altında.
+- Eren’in normal koşusu Bahçe Terasları’nı ve Bakır Röle’yi geçerek arenaya ulaştı. 900 saniyelik tarayıcı denemesi ikinci evrede 30 boss canı kalmışken durdu. Ayrı arena testlerinde altı kahraman tabancayla üç evreyi tamamladı. Sonraki oyun eylemi `roots-final-normal` normal koşusunu izlemek, ardından üç rotayı sonuç ve yeniden denemeye kadar tamamlamak. Fiziksel cihaz ve oyuncu kabulü bekliyor.
+
 ## 23 Kasım 2026 · Yerel 0.55.0 Kök Motoru adayı
 
 - Kök Motoru arenanın içinde zeminden yükselir. Giriş 1,65 saniye sürer, atlama düğmesi ile kapanabilir ve azaltılmış harekette sabit kalır. Doğal bitiş ve atlama aynı savaş durumunu açar. Giriş boyunca saldırı saati çalışmaz.
