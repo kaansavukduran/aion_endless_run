@@ -428,6 +428,7 @@ with sync_playwright() as pw:
         shooter_types={'lantern_scout':'scout_bolt','cap_lobber':'lob_seed'}
         skipped_shooter_assist=False
         previously_mounted=False
+        next_move_refresh=0.
         while time.monotonic()-started<a.max_seconds:
             d=data();now=time.monotonic();state=d['state'];section=d['section']
             if previously_mounted and not d['mounted']:
@@ -630,6 +631,13 @@ with sync_playwright() as pw:
                 observing_lobber='lantern_scout' in shooter_proof and x>=2850.
                 if observing_scout or observing_lobber:wanted=[key for key in wanted if key!='f']
             keys(wanted)
+            if direction and direction in wanted and onfloor and abs(float(d['velocity'][0]))<.1 and now>=next_move_refresh:
+                # After a transition the game may consume the previously held
+                # action. Use a fresh physical key press in an open lane.
+                blocked=any(g['closed'] and abs(g['x']-x)<50 for g in d['gates'])
+                if not blocked:
+                    page.keyboard.up(direction);page.keyboard.down(direction)
+                    next_move_refresh=now+.8
             flyer=target and target['y']<y-65 and abs(target['x']-x)<450
             gap=any(0<p[0]-x<150 for p in d['pits'])
             object_gate=not targets and any(o['kind']=='gate' and not o['active'] and 0<o['x']-x<110 for o in d.get('objects',[]))
