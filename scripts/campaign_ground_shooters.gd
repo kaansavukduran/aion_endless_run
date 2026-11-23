@@ -92,7 +92,7 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 		w.bullets.append({"p":origin(e),"v":shot_velocity,"owner":"enemy","kind":str(spec.kind),
 			"colour":str(spec.colour),"gravity":float(spec.gravity),"age":0.,"damage":1,"pierce":0,"hit":[],"life":2.})
 		e.release=RELEASE_SECONDS;e.recover=float(spec.recover);e.wait=.26;e.attacks=int(e.attacks)+1
-		w.pending_events.append("enemy_shot")
+		w.pending_events.append("scout_shot" if e.kind=="lantern_scout" else "lob_throw")
 		return true
 	e.wait=maxf(0.,float(e.wait)-dt)
 	if float(e.age)>=FIRST_PREPARATION and float(e.wait)<=0. and absf(dx)<=float(spec.ready_range) and absf(w.player.y-float(e.y))<175. and visible_threat(w,e):
