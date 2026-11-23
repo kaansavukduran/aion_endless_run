@@ -13,13 +13,13 @@ Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVER
 
 - Fener kıyısında Fener Nöbetçisi ve Mantar Atıcısı normal bölüme bağlı. Nöbetçi okunur bir düz atış hattı gösterir. Atıcı önceden işaretlediği noktaya doğru yerçekimli bir kapsül yollar. İkisi de zeminle birlikte yürür, görünür alanda tam hazırlık yapar ve tek atıştan sonra kendi toparlanma süresini geçirir.
 - Özgün iki pafta oyunda çiziliyor. Her düşmanda altı yürüyüş karesi, ayrı hazırlık/atış/toparlanma pozları ve üç karelik yere çökme var. Kaynak, ayak ve atış bağlantıları [varlık kaydında](../assets/CAMPAIGN-GROUND-SHOOTERS-PROVENANCE.json).
-- 24 hedefli kaynak kontrolü, iki saldırı biçimi, saha dışı güvenlik, bağımsız toparlanma, yokuşta yön ve ölüm dizisini doğruladı. Gerçek oyundan kayıt ve konsol denetimi tamamlanmadan aday yayımlanmaz. Kök Motoru’nun yeni arena dramaturjisi sonraki iş.
+- 24 hedefli kaynak kontrolü ve dört Linux görüntüleme örneği geçti. Normal Chromium koşusunda Fener Nöbetçisi görünür hazırlıktan gerçek mermiye ve toparlanmaya geçti. Mantar Atıcısı için aynı tarayıcı makbuzu bekleniyor. İki rolün atış sesleri ayrıldı. Kök Motoru’nun yeni arenası ve giriş sahnesi `feat/mission1-root-engine` dalında ilerliyor.
 
 ## 23 Kasım 2026 · Yerel 0.53.0 arazi adayı
 
 - `feat/mission1-ground` çalışma dalında Fener kıyısı, Kırık iskele, Dalların arası, Su kanalı, Bahçe terasları, Kök geçidi ve Bakır röle gerçek yükseklik profilleri kullanıyor. Ortak yüzey hesabı yürüyüşü, araçları, yürüyen düşmanları, NPC ayaklarını, ikmali, mermi engellemesini, bomba sekmesini ve yedek yaşam inişini taşıyor. Eski kaydın konumu ve bekleyen yer hediyeleri gerçek yeni yüzeye uyarlanır.
-- Fener kıyısının ilk örneğinde gerçek oyuncu girdileriyle `x=3066.76, y=56` konumunda kahramanın ayakları tam destek üzerindeydi. Linux renderer beş sahne yakaladı. 208 birim derin Su kanalı havzası, gerçek çukurun düşüş eşiğinden ayrı doğrulandı. Yerel tarayıcı koşuları ve tüm yeni regresyon kapıları tamamlanmadan 0.53.0 yayımlanmış sayılmaz.
-- Sonraki ilk eylem, normal girdilerle üç fiziksel dalın ve Kök Motoru sonucunun tamamlanmasını doğrulamak. İki yürüyen atıcı rolü, arena evreleri ve final sanat/ses incelemesi sonraki Mission 1 işleri.
+- 54.871 kaynak kontrolü ve beş Linux görüntüleme örneği geçti. Yerel Chromium normal girişinde Fener kıyısında `y=56`, Kırık iskelede `y=38` ve Su Kanalı havzasında `y=208` seviyelerinde gerçek ayak desteği gözlemlendi. İlk ayrımda normal Aşağı + Zıpla, sonra eğilerek iskele altından Su Kanalı’na inildi. Koşu Bakır röleye ulaştı.
+- Sonraki ilk eylem, açık tarayıcı koşusunu sonuca kadar izlemek ve Dalların arası üzerinden Teras ve Kök Geçidi girişlerini doğrulamak. Aday yerel ve üç rotalı test sürüyor.
 
 ## 23 Kasım 2026 · 0.52.0 · Arcade yaşamı ve araçlar
 

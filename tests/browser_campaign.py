@@ -14,6 +14,7 @@ p.add_argument('--retry-profile',action='store_true',help='Measure five genuine 
 p.add_argument('--warm-launch',action='store_true',help='Measure a second launch after the service worker has cached the actual PCK.')
 p.add_argument('--special-probe',action='store_true',help='Use the selected new hero skill through ordinary keys before the full mission, without injecting a target.')
 p.add_argument('--observe-terrain', action='store_true', help='Capture actual supported feet on the Mission 1 terrain profiles during a complete route.')
+p.add_argument('--observe-shooters', action='store_true', help='Reach and observe both Shore shooters through ordinary player controls.')
 p.add_argument('--pause-crouch-probe',action='store_true',help='Observe the real crouched gun pose across Pause and Resume, using ordinary keys and pointer aim.')
 a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];console=[]
@@ -422,8 +423,11 @@ with sync_playwright() as pw:
             check(saved['awarded'].get(captive['id']+':gift') and saved['taken'].get(captive['id']+':supply') and captive['id'] in saved['rescued'],'Actual dropped-item contact and rescue reach persistent browser storage once')
             record_profile()
             return current
-        previously_mounted=False
         arena_phases=set()
+        shooter_proof={}
+        shooter_types={'lantern_scout':'scout_bolt','cap_lobber':'lob_seed'}
+        skipped_shooter_assist=False
+        previously_mounted=False
         while time.monotonic()-started<a.max_seconds:
             d=data();now=time.monotonic();state=d['state'];section=d['section']
             if previously_mounted and not d['mounted']:
@@ -475,6 +479,27 @@ with sync_playwright() as pw:
                 elif d['menu']=='paused':button(text='Devam et')
                 page.wait_for_timeout(120);canvas.focus();continue
             if state!='playing':keys([]);page.wait_for_timeout(80);continue
+            if a.observe_shooters and section=='shore':
+                x,y=d['player']
+                if not skipped_shooter_assist and 1090<x<1160 and d['grounded']:
+                    # Leave the normally available owl feather on the ground
+                    # so it cannot remove a shooter before the release probe.
+                    keys(['d']);page.keyboard.press('Space');last_jump=now
+                    skipped_shooter_assist=True
+                    page.wait_for_timeout(65);continue
+                shooter=next((e for e in d['enemies'] if e['kind'] in shooter_types and e['kind'] not in shooter_proof and abs(e['x']-x)<440),None)
+                if shooter and (shooter['windup']>0 or abs(shooter['x']-x)<350):
+                    keys([])
+                    kind=shooter['kind']
+                    if shooter['windup']>0 and not (a.evidence/(kind+'-warning.png')).exists():
+                        page.screenshot(path=str(a.evidence/(kind+'-warning.png')))
+                    projectile=next((b for b in d['bullets'] if b[4]==shooter_types[kind]),None)
+                    if shooter['recover']>0 and projectile:
+                        shooter_proof[kind]={'enemy':shooter,'projectile':projectile,'player':d['player']}
+                        page.screenshot(path=str(a.evidence/(kind+'-release.png')))
+                        check((a.evidence/(kind+'-warning.png')).exists(),kind+' warns visibly before an actual projectile and recovery')
+                        if len(shooter_proof)==2:break
+                    page.wait_for_timeout(65);continue
             if section in ['fork_one','fork_two']:
                 # These are real traversal sections. Upper uses reachable
                 # stepping platforms; lower walks into the channel. No route
@@ -599,6 +624,11 @@ with sync_playwright() as pw:
             if direction:wanted.append(direction)
             if d['mounted'] and target and target['y']>=y-75 and 100<=abs(target['x']-x)<250:
                 wanted=['f','s','d' if target['x']>x else 'a']
+            preserve_target=a.observe_shooters and section=='shore' and target and target['kind'] in shooter_types and target['kind'] not in shooter_proof
+            if a.observe_shooters:
+                observing_scout='lantern_scout' not in shooter_proof and x>=1160.
+                observing_lobber='lantern_scout' in shooter_proof and x>=2850.
+                if observing_scout or observing_lobber:wanted=[key for key in wanted if key!='f']
             keys(wanted)
             flyer=target and target['y']<y-65 and abs(target['x']-x)<450
             gap=any(0<p[0]-x<150 for p in d['pits'])
@@ -608,8 +638,11 @@ with sync_playwright() as pw:
             if onfloor and (flyer or gap or danger or object_gate or charge) and now-last_jump>.85:
                 page.keyboard.press('Space');last_jump=now
             near=any(abs(e['x']-x)<95 and abs(e['y']-y)<75 for e in targets)
-            if near and now-last_melee>.35:page.keyboard.up('f');page.keyboard.down('f');last_melee=now
-            if d['grenades']>0 and now-last_bomb>3 and (len([e for e in targets if 100<e['x']-x<440])>=3 or (target and target['hp']>1 and abs(target['x']-x)<400) or (section=='arena' and abs(float(d.get('boss_x',1400))-x)<430)):
+            if near and not preserve_target and now-last_melee>.35:
+                if a.observe_shooters:page.keyboard.press('f')
+                else:page.keyboard.up('f');page.keyboard.down('f')
+                last_melee=now
+            if not a.observe_shooters and d['grenades']>0 and now-last_bomb>3 and (len([e for e in targets if 100<e['x']-x<440])>=3 or (target and target['hp']>1 and abs(target['x']-x)<400) or (section=='arena' and abs(float(d.get('boss_x',1400))-x)<430)):
                 page.keyboard.press('g');last_bomb=now
             if a.expanded_rescue:
                 unclaimed=next((n for n in d.get('npcs',[]) if n['freed'] and not n['secret'] and not d['awarded'].get(n['id']+':gift') and abs(n['x']-x)<180 and abs(n['y']-y)<20 and not d['mounted']),None)
@@ -651,6 +684,11 @@ with sync_playwright() as pw:
                 print('PLAY',section,round(x),'y',round(y),'HP',d['hp'],'boss',d['boss_hp'],'retry',retries,flush=True);last_report=now
             page.wait_for_timeout(65)
         keys([])
+        if a.observe_shooters:
+            (a.evidence/'ground-shooters.json').write_text(json.dumps(shooter_proof,indent=2)+'\n')
+            check(len(shooter_proof)==2,'Both distinct Shore shooters prepare, release and recover in ordinary play')
+            check(not errors,'No page exceptions during the two ordinary-input encounters')
+            print(f'RESULT: {len(checks)} route input checks, 0 failures');raise SystemExit(0)
         (a.evidence/'playthrough.json').write_text(json.dumps({'completed':completed,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'vehicle_inputs':vehicle_inputs,'physical_forks':fork_inputs,'rescue_story_inputs':rescue_presentations,'final':data()},indent=2)+'\n')
         if a.rescue_only:check(bool(rescues_tested),'An actual captive was reached, cut free and rewarded through ordinary controls')
         else:

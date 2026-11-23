@@ -938,7 +938,7 @@ func _process(dt: float) -> void:
 		if event in ["vehicle_impact","vehicle_wreck"]:
 			if event=="vehicle_impact":release_all()
 			sound("hurt" if event=="vehicle_impact" else "blast")
-		if event in ["shot","melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","guardian","boss_attack","boss_port","boss_wave","boss_beam","complete","checkpoint","enemy","armour_hit"]:sound(event)
+		if event in ["shot","melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","guardian","boss_attack","boss_port","boss_wave","boss_beam","complete","checkpoint","enemy","armour_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	if world.state not in CampaignLives.TRANSITIONS:
@@ -1049,6 +1049,8 @@ func sound(event: String) -> void:
 			if event.begins_with("boss_"):count=4500 if event=="boss_wave" else 2800
 			if event=="enemy":pitch=180.
 			elif event=="armour_hit":pitch=1140.
+			elif event=="scout_shot":pitch=410.;count=1400
+			elif event=="lob_throw":pitch=155.;count=2800
 			for i in count:
 				var phase: float=float(i)/22050.;var envelope: float=pow(1.-float(i)/count,2.)
 				var sample:=sin(phase*pitch*TAU*(1.-float(i)/count*.4))*envelope*.22
@@ -1070,7 +1072,7 @@ func metadata() -> void:
 	for key in actions:data.actions[key]=[actions[key].position.x,actions[key].position.y,actions[key].size.x,actions[key].size.y]
 	if is_instance_valid(stick):data.stick=[stick.position.x,stick.position.y,stick.size.x,stick.size.y]
 	for e in world.enemies:
-		if not bool(e.defeated):data.enemies.append({"kind":e.kind,"x":e.x,"y":e.y,"hp":e.hp,"windup":e.windup})
+		if not bool(e.defeated):data.enemies.append({"kind":e.kind,"x":e.x,"y":e.y,"hp":e.hp,"windup":e.windup,"recover":e.get("recover",0.),"attacks":e.attacks})
 	for p in world.platforms:data.platforms.append([p.position.x,p.position.y,p.size.x,p.size.y])
 	for g in world.gates:data.gates.append({"x":g.x,"closed":world.gate_closed(g)})
 	for p in world.pits:data.pits.append([p.x,p.y])
@@ -1093,7 +1095,7 @@ func metadata() -> void:
 	data.boss_warning=world.boss.get("beam_warning",0.);data.boss_beam_x=world.boss.get("beam_x",-999.);data.boss_x=world.boss.x;data.boss_phase=world.boss.phase;data.mount_type=CampaignVehicles.kind(world);data.music_starts=ambient_starts;data.native_memory=Performance.get_monitor(Performance.MEMORY_STATIC);data.node_count=Performance.get_monitor(Performance.OBJECT_NODE_COUNT);data.rescue_candidate=CampaignRescue.cut_target(world).get("id","");data.rescue_time=world.rescue_time;data.weapon=world.weapon;data.ammunition=world.ammunition;data.objects=world.objects;data.rooms=world.rooms
 	data.bullets=[]
 	for bullet in world.bullets:
-		if bullet.owner=="enemy":data.bullets.append([bullet.p.x,bullet.p.y,bullet.v.x,bullet.v.y])
+		if bullet.owner=="enemy":data.bullets.append([bullet.p.x,bullet.p.y,bullet.v.x,bullet.v.y,bullet.kind])
 	data.camera_y=view.camera_y;data.ground=view.ground
 	data.travel_active=fade>=0. or world.state=="travel";data.travel_target=world.travel_target
 	data.grounded=world.grounded();data.invulnerable=world.invulnerable;data.aim=[world.aim_direction.x,world.aim_direction.y]
