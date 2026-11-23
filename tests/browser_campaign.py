@@ -304,10 +304,19 @@ with sync_playwright() as pw:
             page.wait_for_function('!JSON.parse(document.querySelector("canvas").dataset.campaign).grenade_throw.phase',timeout=10000)
             before_shots=data()['shots'];page.keyboard.down('w');page.keyboard.down('d');page.keyboard.down('f')
             page.wait_for_function('n=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.shots>n && d.hero_projectiles.some(b=>b.age<.14 && b.v[1]<-30)}',arg=before_shots,timeout=10000)
+            # The initial level-to-diagonal turn can legitimately spend the
+            # turn window. Begin this independent downward sweep only after it
+            # has rearmed in simulation time.
+            first_turn=data()
+            page.wait_for_function('t=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && d.time>t+.21 && Math.abs(d.aim[0]-.707)<.025 && Math.abs(d.aim[1]+.707)<.025}',arg=first_turn['time'],timeout=10000)
             page.evaluate("""window.sweepPackets=[];window.sweepTimer=setInterval(()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);sweepPackets.push({aim:d.aim,shots:d.shots,projectiles:d.hero_projectiles,grounded:d.grounded})},8)""")
             page.keyboard.down('Space')
             page.keyboard.up('w');page.keyboard.down('s');page.keyboard.up('Space')
-            page.wait_for_function('sweepPackets.some(q=>q.projectiles.some(b=>b.age<.14 && Math.abs(b.v[1])>30 && Math.abs(Math.abs(b.v[0])-Math.abs(b.v[1]))>30))',timeout=10000)
+            try:
+                original_wait('sweepPackets.some(q=>q.projectiles.some(b=>b.age<.14 && Math.abs(b.v[1])>30 && Math.abs(Math.abs(b.v[0])-Math.abs(b.v[1]))>30))',timeout=10000)
+            except Exception:
+                (a.evidence/'sweep-packets-failure.json').write_text(json.dumps(page.evaluate('clearInterval(sweepTimer);sweepPackets'),indent=2)+'\n')
+                raise
             page.keyboard.up('s');page.keyboard.up('d');page.keyboard.up('f')
             packets=page.evaluate('clearInterval(sweepTimer);sweepPackets');(a.evidence/'sweep-packets.json').write_text(json.dumps(packets,indent=2)+'\n')
             mid=[b for q in packets for b in q['projectiles'] if b['age']<.14 and abs(b['v'][1])>30 and abs(abs(b['v'][0])-abs(b['v'][1]))>30]

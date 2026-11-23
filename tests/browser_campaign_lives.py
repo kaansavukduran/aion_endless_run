@@ -160,12 +160,23 @@ with sync_playwright() as playwright:
             }""", timeout=120000)
             context.set_offline(True)
         boot(reload=True)
+        if args.offline:
+            # A HEAD request cannot be supplied by the game's GET cache.
+            network_blocked = page.evaluate("""async () => {
+                try {
+                    await fetch(new URL('build.json?offline_probe=' + Date.now(), location.href),
+                                {method:'HEAD', cache:'no-store'});
+                    return false;
+                } catch (_) {
+                    return true;
+                }
+            }""")
+            check(network_blocked, "The cached game loads while a fresh network request fails")
         tap_campaign("CampaignContinue")
         reopened = observe("d.menu==='continue_offer' && d.ui_ready")
         check(0. < reopened["continue_remaining"] <= elapsed_offer + .13 and reopened["attempts"] == 0,
               "Reload preserves the unspent countdown without refilling the credit")
         if args.offline:
-            check(not page.evaluate("navigator.onLine"), "The real service worker opens the saved countdown offline")
             context.set_offline(False)
         page.set_viewport_size({"width": 393, "height": 873})
         observe("d.ui_ready && d.view[1]>d.view[0]")
