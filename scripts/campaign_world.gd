@@ -645,7 +645,8 @@ func step_enemies(dt: float) -> void:
 			e.windup = maxf(0.,float(e.windup)-dt)
 			if float(e.windup)==0.:
 				enemy_shot(e,bool(e.mini)); e.attacks = int(e.attacks)+1
-				e.wait = 1.8 if bool(e.mini) else (1.85 if e.kind=="seed" else 2.2)+float(int(e.attacks)%3)*.25
+				var rapid_seed: bool=e.kind=="seed" and (section!="shore" or float(e.home.x)>=1850.)
+				e.wait = 1.8 if bool(e.mini) else (1.85 if rapid_seed else 2.2)+float(int(e.attacks)%3)*.25
 		else:
 			e.wait = float(e.wait)-dt
 			if float(e.wait)<=0. and absf(dx)<(150. if e.kind=="gnome" else 600.):

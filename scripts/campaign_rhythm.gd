@@ -8,7 +8,7 @@ const SHORE_BRIDGE := [Rect2(5800.,-40.,310.,20.),Rect2(6110.,-40.,360.,20.)]
 # Small ground-only reinforcements between the larger authored encounters.
 # Stable IDs preserve scoring and saves. The shore crossing stays clear.
 const GROUND_PATROLS := {
-	"shore":[["gnome",2650.],["beetle",4100.]],
+	"shore":[["gnome",2650.],["beetle",5220.]],
 	"quay":[["lantern_scout",3450.],["gnome",7160.]],
 	"canopy":[["beetle",3110.]],
 	"water":[["cap_lobber",4080.],["leech",11120.]],
