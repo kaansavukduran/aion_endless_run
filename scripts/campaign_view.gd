@@ -154,10 +154,13 @@ func draw_world() -> void:
 	if not CampaignRoutes.draw_floor(self):terrain.draw_campaign_floor(self,world.biome(),world,camera_x)
 	CampaignEnvironmentView.draw(self)
 	for pit in world.pits:
-		var rect := Rect2(pit.x-camera_x,ground,pit.y-pit.x,scene_h-ground)
-		draw_rect(rect,Color("131d26"))
-		for side in [pit.x-8.,pit.y]:
-			for y in range(0,120,12): draw_rect(Rect2(side-camera_x,ground+y,8,9),Color("536345"))
+		if pit.y<camera_x or pit.x>camera_x+scene_w:continue
+		var left:=at(Vector2(pit.x,world.floor_at(pit.x)))
+		var right:=at(Vector2(pit.y,world.floor_at(pit.y)))
+		draw_colored_polygon(PackedVector2Array([left,right,Vector2(right.x,scene_h),Vector2(left.x,scene_h)]),Color("131d26"))
+		for side in [left-Vector2(8.,0.),right]:
+			for y in range(0,120,12):
+				draw_rect(Rect2(side+Vector2(0.,y),Vector2(8.,9.)),Color("536345"))
 	for platform in world.platforms:
 		if platform.end.x<camera_x-50. or platform.position.x>camera_x+scene_w+50.:continue
 		if world.disabled_platforms.has(platform.position.x):continue

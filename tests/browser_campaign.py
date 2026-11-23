@@ -13,6 +13,7 @@ p.add_argument('--play-only',action='store_true',help='Skip the independently ch
 p.add_argument('--retry-profile',action='store_true',help='Measure five genuine new runs started from Pause.')
 p.add_argument('--warm-launch',action='store_true',help='Measure a second launch after the service worker has cached the actual PCK.')
 p.add_argument('--special-probe',action='store_true',help='Use the selected new hero skill through ordinary keys before the full mission, without injecting a target.')
+p.add_argument('--observe-terrain', action='store_true', help='Capture actual supported feet on the Mission 1 terrain profiles during a complete route.')
 p.add_argument('--pause-crouch-probe',action='store_true',help='Observe the real crouched gun pose across Pause and Resume, using ordinary keys and pointer aim.')
 a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];console=[]
@@ -340,7 +341,7 @@ with sync_playwright() as pw:
             check(True,'Virtual Xbox B throws a grenade during normal gameplay')
             page.evaluate('qaPadConnect(false)');canvas.focus()
     if a.play_through or a.rescue_only:
-        held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None;board_attempts=set();vehicle_inputs=[];fork_inputs=[];rescue_presentations=[]
+        held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None;board_attempts=set();vehicle_inputs=[];fork_inputs=[];rescue_presentations=[];terrain_samples={}
         def keys(wanted):
             global held
             for k in held-set(wanted):page.keyboard.up(k)
@@ -434,6 +435,12 @@ with sync_playwright() as pw:
                 keys([])
                 (a.evidence/'playthrough.json').write_text(json.dumps({'completed':False,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'vehicle_inputs':vehicle_inputs,'physical_forks':fork_inputs,'rescue_story_inputs':rescue_presentations,'final':d,'failure':'Requested '+a.route+' but physically entered '+section},indent=2)+'\n')
                 check(False,'Requested physical '+a.route+' route must not enter '+section)
+            if a.observe_terrain and state=='playing' and d['grounded'] and not d['mounted']:
+                floor=d.get('pose',{}).get('floor',0.)
+                if abs(floor)>21. and abs(d['player'][1]-floor)<1. and section not in terrain_samples:
+                    terrain_samples[section]={'player':d['player'],'floor':floor,'world_time':d['time'],'camera':d['camera']}
+                    (a.evidence/'actual-terrain.json').write_text(json.dumps(terrain_samples,indent=2)+'\n')
+                    page.screenshot(path=str(a.evidence/(section+'-supported-terrain.png')))
             if state=='complete':
                 keys([])
                 # The boss death and new short celebration must finish before
@@ -617,6 +624,8 @@ with sync_playwright() as pw:
         if a.rescue_only:check(bool(rescues_tested),'An actual captive was reached, cut free and rewarded through ordinary controls')
         else:
             check(completed,'Mission 1 is completable with actual keyboard/mouse-equivalent gameplay')
+            if a.observe_terrain:
+                check('shore' in terrain_samples and a.route in terrain_samples,'Actual controls cross non-zero supported ground on the opening route and chosen branch')
             check(a.route in data()['route'],'The chosen branch was actually recorded')
             check(len(fork_inputs)==(1 if a.route=='water' else 2),'Every required route fork was traversed through ordinary movement')
             if a.route=='water':check(any(f.get('crawled_under_pier') for f in fork_inputs),'Water entry includes actual crouched travel beneath the pier ceiling')

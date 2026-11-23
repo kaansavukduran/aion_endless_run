@@ -2,6 +2,12 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 23 Kasım 2026 · Yerel 0.53.0 arazi adayı
+
+- `feat/mission1-ground` çalışma dalında Fener kıyısı, Kırık iskele, Dalların arası, Su kanalı, Bahçe terasları, Kök geçidi ve Bakır röle gerçek yükseklik profilleri kullanıyor. Ortak yüzey hesabı yürüyüşü, araçları, yürüyen düşmanları, NPC ayaklarını, ikmali, mermi engellemesini, bomba sekmesini ve yedek yaşam inişini taşıyor. Eski kaydın konumu ve bekleyen yer hediyeleri gerçek yeni yüzeye uyarlanır.
+- Fener kıyısının ilk örneğinde gerçek oyuncu girdileriyle `x=3066.76, y=56` konumunda kahramanın ayakları tam destek üzerindeydi. Linux renderer beş sahne yakaladı. 208 birim derin Su kanalı havzası, gerçek çukurun düşüş eşiğinden ayrı doğrulandı. Yerel tarayıcı koşuları ve tüm yeni regresyon kapıları tamamlanmadan 0.53.0 yayımlanmış sayılmaz.
+- Sonraki ilk eylem, normal girdilerle üç fiziksel dalın ve Kök Motoru sonucunun tamamlanmasını doğrulamak. İki yürüyen atıcı rolü, arena evreleri ve final sanat/ses incelemesi sonraki Mission 1 işleri.
+
 ## 23 Kasım 2026 · 0.52.0 · Arcade yaşamı ve araçlar
 
 - Başlangıç, uzaktaki `main` `482d5781da4c58507031c5ce2ea47416750bfd44` ve canlı Pages 0.51.1 (`93a6fb65be472fed`). Neon'un iki Drive devir belgesi 0.48 paketini ve 28 dosya manifestini veriyor. Güncel AIONIA belgesi v1.7. Depodaki altılı kadro ve 0.51.1 düzeltmeleri temel alındı.

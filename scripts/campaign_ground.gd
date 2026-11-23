@@ -87,6 +87,12 @@ static func lift_flat_save(w) -> void:
 		if str(npc.get("secret","")).is_empty() and absf(float(npc.y))<.01:
 			var floor: float=w.floor_at(float(npc.x))
 			if has_floor(floor):npc.y=floor
+	for item in w.pickups:
+		if not item.has("rescue_id") or float(item.y)<-72.:continue
+		var floor: float=w.floor_at(float(item.x))
+		if has_floor(floor):
+			item.y=float(item.y)+floor
+			if w.gift_drops.has(str(item.rescue_id)):w.gift_drops[str(item.rescue_id)].y=item.y
 	var support: float=w.floor_at(w.player.x)
 	var saddle: float=42. if bool(w.mount.ridden) else 0.
 	if has_floor(support) and (absf(w.player.y+saddle)<.1 or w.player.y+saddle>support):

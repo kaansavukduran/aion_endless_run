@@ -26,7 +26,7 @@ func run() -> void:
 		game.world.player=Vector2(x,game.world.floor_at(x))
 		game.world.velocity=Vector2.ZERO
 		game.view.camera_x=x-420.
-		game.view.camera_y=maxf(0.,game.world.player.y)*.75
+		game.view.camera_y=maxf(0.,game.world.player.y)*.95
 		game.update_hud()
 		game.view.queue_redraw()
 		await process_frame
