@@ -37,3 +37,5 @@ Scope: Aion Endless Run at this repository only. This file records the explicit 
 - Every crouch/throw/hurt/death pose must fit the actual low ceiling at one fixed hero scale. Test opaque silhouette against ceiling, not only physics root. Never hide overlap with clipping or enlarge a passage silently.
 - Enemy recovery starts after its active movement and remains visible/targetable. Timed beams fire once when the warning crosses zero; smoke must not obscure critical warning lanes.
 - Original sources and game-local candidate adaptations remain separately attributed; user art acceptance is not inferred from a passing model test.
+
+- In multitouch tests, keep the movement finger held and complete the contextual button tap (both press and release) before judging activation. Verify that the second finger reaches the real action, stays independently owned until release/cancel, and cannot turn a weapon swap into an extra skill. Do not label an incomplete tap or a legitimate hurt/idle cel as a gameplay failure.

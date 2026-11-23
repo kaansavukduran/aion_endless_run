@@ -617,14 +617,28 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var p: Vector2=screen_transform.affine_inverse()*event.position
 		if event.pressed and not event.canceled:
+			# BaseButton's emulated mouse is owned by the first touch. Route
+			# the contextual action explicitly so another finger can hold the
+			# joystick. Consume it before GUI emulation and latch this finger
+			# until release; swapping a weapon must never also fire a skill.
+			if touch_actions.has(event.index):
+				get_viewport().set_input_as_handled();return
+			if is_instance_valid(ride_button) and ride_button.is_visible_in_tree() and ride_button.get_global_rect().has_point(p):
+				touch_actions[event.index]="context"
+				if not ride_button.disabled:activate_context()
+				get_viewport().set_input_as_handled();return
 			for key in actions:
 				if actions[key].hit(p):touch_actions[event.index]=key;set_action(key,"touch"+str(event.index),true);get_viewport().set_input_as_handled();return
 			if is_instance_valid(stick) and stick_touch<0 and Rect2(stick.position,stick.size).has_point(p):
 				stick_touch=event.index;stick.axis=stick.value(p);stick.active=true;stick.queue_redraw();get_viewport().set_input_as_handled()
 		else:
-			if touch_actions.has(event.index):set_action(str(touch_actions[event.index]),"touch"+str(event.index),false,event.canceled);touch_actions.erase(event.index);get_viewport().set_input_as_handled()
+			if touch_actions.has(event.index):
+				var action: String=str(touch_actions[event.index])
+				if action!="context":set_action(action,"touch"+str(event.index),false,event.canceled)
+				touch_actions.erase(event.index);get_viewport().set_input_as_handled()
 			if event.index==stick_touch:stick_touch=-1;stick.axis=Vector2.ZERO;stick.active=false;stick.queue_redraw();get_viewport().set_input_as_handled()
 	elif event is InputEventScreenDrag:
+		if touch_actions.get(event.index,"")=="context":get_viewport().set_input_as_handled();return
 		if event.index==stick_touch:stick.axis=stick.value(screen_transform.affine_inverse()*event.position);stick.queue_redraw();get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION:
 		var p: Vector2=screen_transform.affine_inverse()*event.position

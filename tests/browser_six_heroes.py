@@ -245,6 +245,22 @@ class Probe:
             self.page.wait_for_timeout(20)
         raise AssertionError('Engine simulation did not finish the bounded input observation')
 
+    def natural_hurt(self, packets):
+        if self.hero not in ('armadillo','frog') or not any(d['pose'].get('body_action')=='hurt' for d in packets):return []
+        history=self.page.evaluate('sixProbe.packets.filter(p=>p.campaign).map(p=>p.campaign)')
+        history=sorted(history,key=lambda d:d['time']);episodes=[];forgiven=[]
+        for previous,d in zip(history,history[1:]):
+            if d.get('invulnerable',0)>previous.get('invulnerable',0)+.2:
+                episodes.append({'hit_time':d['time']-(1.2-d['invulnerable']),'before':previous,'after':d})
+        hurt_cels=self.registry.cels(self.hero,'hurt')
+        for d in packets:
+            p=d['pose'];cel=(str(p.get('source')),p.get('row'),p.get('frame'))
+            if p.get('body_action')=='hurt' and cel in hurt_cels and d.get('invulnerable',0)>0 and any(e['hit_time']-.0001<=p['world_time']<=e['hit_time']+.3001 for e in episodes):forgiven.append(d)
+        number=len(list(self.out.glob('natural-hit-*.json')))+1
+        (self.out/f'natural-hit-{number:02d}-{self.stage}.json').write_text(json.dumps({'episodes':episodes,'authored_hurt_packets':forgiven},ensure_ascii=False)+'\n')
+        if forgiven:self.check(True,'A natural observed hit uses only its authored short hurt reaction',{'reaction_packets':len(forgiven),'hit_times':[e['hit_time'] for e in episodes]})
+        return forgiven
+
     def pose_check(self, samples, action, side=None, moving=True):
         self.checked_campaign=samples[-1] if samples else None
         accepted = self.registry.cels(self.hero,action)
@@ -256,9 +272,14 @@ class Probe:
             self.check(frames==expected_frames, 'Actual '+action+' gait visits every authored cel', {'observed':sorted(frames),'expected':sorted(expected_frames)})
             ordered=sorted(samples,key=lambda d:d['time'])
             settled=[d for d in ordered if d['time']>=ordered[0]['time']+.12 and d['grounded'] and abs(d['velocity'][0])>10]
-            # A contextual strike does not stop physical movement. Its upper
-            # action must preserve the same real locomotion cycle underneath.
-            self.check(bool(settled) and all(d['pose'].get('body_action')==action for d in settled), 'Moving fire and contextual punches both preserve the actual gait', [{'action':d['pose'].get('body_action'),'melee':d.get('melee',0),'time':d['time']} for d in settled])
+            # Natural damage has an authored, short hurt reaction on the new
+            # heroes. Excuse only a correct hurt cel inside an independently
+            # observed natural damage episode, never moving melee/idle_fire.
+            forgiven=self.natural_hurt(settled)
+            matching.extend(forgiven)  # Keep all anchor/contact/bore checks.
+            bad=[d for d in settled if d['pose'].get('body_action')!=action and d not in forgiven]
+            self.checked_campaign=bad[0] if bad else (settled[-1] if settled else self.checked_campaign)
+            self.check(bool(settled) and not bad, 'Moving fire and contextual punches both preserve the actual gait', [{'action':d['pose'].get('body_action'),'melee':d.get('melee',0),'time':d['time']} for d in settled])
         for d in matching:
             self.checked_campaign=d
             p = d['pose']; anchor = p['anchor']
@@ -377,9 +398,17 @@ class Probe:
             self.stage='reverse-to-forward-'+str(side)
             self.keys(['d' if side==1 else 'a','f'])
             forward=self.sample(.90,side);self.keys(['f']);self.pose_check(forward,'walk',side);self.shot_check(forward)
-            self.keys(['f']);stopped=self.sample(.20,side)
+            self.stage='stationary-held-fire-'+str(side)
+            self.keys(['f']);stopped=self.sample(.55,side);self.checked_campaign=stopped[-1]
             self.check(abs(stopped[-1]['velocity'][0])<1. and stopped[-1]['aim'][0]*side>.8,'Release stops physical locomotion without losing aim')
-            if stopped[-1]['grounded']:self.check(stopped[-1]['pose'].get('body_action')=='idle_fire','Stopped firing returns to the actual idle-fire body clip')
+            if stopped[-1]['grounded']:
+                d=stopped[-1];p=d['pose'];name=p.get('body_action')
+                stationary=('idle','idle_fire') if self.hero in ('armadillo','frog') else ('idle_fire',)
+                cel=(str(p.get('source')),p.get('row'),p.get('frame'))
+                correct=name in stationary and cel in self.registry.cels(self.hero,name)
+                hurt=d in self.natural_hurt([d])
+                self.check(abs(p['physics_velocity'][0])<1. and (correct or hurt),'Stopped held fire uses an exact authored stationary cel or independently observed hit reaction',{'action':name,'cel':cel,'draw_velocity':p['physics_velocity']})
+            self.shot_check(stopped)
             self.stage='crouch-backpedal-'+str(side)
             self.keys([move,'s','f']);samples=self.sample(1.25,side);self.keys(['f'])
             self.pose_check([d for d in samples if d.get('crouching')],'crouch_walk_back',side)
@@ -432,6 +461,7 @@ class Probe:
             elif method=='pad':self.page.evaluate('sixPad([0,1,1,0],[])')
             else:self.keys(['s'])
             self.wait(lambda p:p['campaign'].get('crouching'),'actual crouch requirement',alive=True)
+        self.wait(lambda p:p['campaign'].get('context_action',{}).get('visible') and not p['campaign']['context_action'].get('disabled',True),'naturally ready contextual skill control',alive=True)
         before=self.read()['campaign'];self.check(not before.get('weapon_offer') and not before['mounted'],'The contextual action is free for the native skill')
         skill_mark=self.mark()
         if method=='pad':
@@ -445,8 +475,10 @@ class Probe:
             r=context['rect'];point=self.ui_xy(r[0]+r[2]/2,r[1]+r[3]/2)
             if touch_session:
                 touch_session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]},{'id':2,'x':point[0],'y':point[1]}]})
-                self.wait(lambda p:bool(p['campaign'].get('hero_skill',{}).get('phase')),'two real touch points start the crouched skill',alive=True)
+                # A visible Button normally activates on release. Complete the
+                # second finger's tap while the first still holds crouch.
                 touch_session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]}]})
+                self.wait(lambda p:bool(p['campaign'].get('hero_skill',{}).get('phase')),'a completed second-finger context tap starts the crouched skill',alive=True)
             else:self.page.touchscreen.tap(*point)
         else:self.event('key_press','e');self.page.keyboard.press('e')
         self.sample(1.35)
@@ -477,7 +509,7 @@ class Probe:
     def moving_tongue(self):
         if self.hero!='frog':return
         self.stage='moving-natural-tongue'
-        self.wait(lambda p:p['campaign']['grounded'] and not p['campaign'].get('hero_skill',{}).get('phase'),'fresh moving-tongue precondition',alive=True)
+        self.wait(lambda p:p['campaign']['grounded'] and not p['campaign'].get('hero_skill',{}).get('phase') and not p['campaign'].get('context_action',{}).get('disabled',True),'fresh moving-tongue precondition',alive=True)
         self.keys([]);self.aim(1)
         self.wait(lambda p:p['campaign']['aim'][0]>.8,'right target before moving tongue',alive=True)
         self.keys(['a']);mark=self.mark();self.event('key_press','e');self.page.keyboard.press('e')
@@ -492,6 +524,54 @@ class Probe:
         self.check(len(frames)>=2,'Moving tongue preserves distinct real gait phases instead of a sliding static attack',sorted(frames))
         self.check(all(d['pose']['body_action']=='tongue_walk_back' for d in open_motion),'Actual open-mouth body source preserves the aimed backward gait')
         self.check(any(d['hero_skill'].get('extent',0)>0 for d in gesture),'Moving tongue retains its real mouth-attached reach')
+
+    def activation_methods(self, modes):
+        # This supplement proves input reach and cleanup. The full keyboard
+        # matrix separately owns choreography, gait and recovery assertions.
+        for method in [m for m in ('touch','pad') if m in modes]:
+            self.stage='context-activation-'+method;session=None;stick_point=None
+            self.keys([])
+            self.wait(lambda p:p['campaign']['grounded'] and not p['campaign'].get('hero_skill',{}).get('phase'),'naturally grounded context activation',alive=True)
+            try:
+                if method=='touch' and self.hero=='armadillo':
+                    if self.page.context.browser.browser_type.name!='chromium':raise RuntimeError('Touch-only Armadillo uses Chromium CDP; no keyboard substitute is allowed')
+                    r=self.read()['campaign']['stick'];stick_point=self.ui_xy(r[0]+r[2]*.5,r[1]+r[3]*.9)
+                    session=self.page.context.new_cdp_session(self.page)
+                    session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]}]})
+                elif method=='pad':self.page.evaluate('axes=>sixPad(axes,[])',[0,1 if self.hero=='armadillo' else 0,1,0])
+                if self.hero=='armadillo':self.wait(lambda p:p['campaign']['crouching'],'native input actually holds crouch',alive=True)
+                self.wait(lambda p:p['campaign'].get('context_action',{}).get('visible') and not p['campaign']['context_action'].get('disabled',True),'actual visible context button is ready',alive=True)
+                before=self.read()['campaign'];mark=self.mark();event_mark=self.page.evaluate('sixProbe.events.length')
+                self.check(not before.get('weapon_offer') and not before['mounted'],'The actual context is the native hero skill')
+                if method=='touch':
+                    r=before['context_action']['rect'];point=self.ui_xy(r[0]+r[2]/2,r[1]+r[3]/2)
+                    if session:
+                        session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]},{'id':2,'x':point[0],'y':point[1]}]})
+                        session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]}]})
+                        events=self.page.evaluate('i=>sixProbe.events.slice(i)',event_mark)
+                        near=lambda e,q:e.get('x') is not None and math.dist([e['x'],e['y']],q)<2.
+                        self.check(any(e['type']=='pointerup' and near(e,point) for e in events) and not any(e['type']=='pointerup' and near(e,stick_point) for e in events),'The second finger completes its actual context tap while the first finger stays down',events)
+                    else:self.page.touchscreen.tap(*point)
+                else:self.page.evaluate('axes=>sixPad(axes,[3])',[0,1 if self.hero=='armadillo' else 0,1,0])
+                observed=[];deadline=time.monotonic()+12
+                while time.monotonic()<deadline:
+                    self.wait(lambda p:bool(p['campaign']),'live context result',alive=True)
+                    observed=self.observed_since(mark)
+                    started=[d for d in observed if d.get('hero_skill',{}).get('phase') not in ('',None,'cooldown')]
+                    if started:break
+                    self.page.wait_for_timeout(20)
+                (self.out/('activation-'+method+'.json')).write_text(json.dumps({'before':before,'observed':observed},ensure_ascii=False)+'\n')
+                self.checked_campaign=started[0] if started else (observed[-1] if observed else before)
+                self.check(bool(started),'Completed '+method+' input reaches an actual native skill phase')
+                if self.hero=='armadillo':self.check(started[0]['crouching'],'Armadillo starts through actual crouch plus context input')
+                self.check(all(d['shots']==before['shots'] and d['grenades']==before['grenades'] and not d.get('bombs') for d in observed),'Context activation emits no unintended gunshot or grenade')
+            finally:
+                if session:
+                    session.send('Input.dispatchTouchEvent',{'type':'touchCancel','touchPoints':[]});session.detach()
+                if method=='pad':self.page.evaluate('sixPad([0,0,0,0],[],false)')
+                self.keys([])
+            self.wait(lambda p:not p['campaign'].get('hero_skill',{}).get('phase') and not p['campaign']['crouching'],'natural recovery with all owned inputs released',alive=True)
+            self.check(True,'Released input leaves no stuck crouch or repeated context skill')
 
     def extra_inputs(self, modes):
         if 'touch' in modes:
@@ -522,14 +602,17 @@ def main():
     parser.add_argument('--url',required=True);parser.add_argument('--evidence',type=Path,required=True)
     parser.add_argument('--heroes',nargs='+',choices=HEROES,default=list(HEROES))
     parser.add_argument('--browser',choices=['chromium','firefox'],default='chromium')
-    parser.add_argument('--inputs',nargs='+',choices=['keyboard','touch','pad'],default=['keyboard'],help='Additional activation probes; the complete keyboard/mouse matrix always runs')
+    parser.add_argument('--inputs',nargs='+',choices=['keyboard','touch','pad'],default=['keyboard'],help='Additional activation probes; the complete keyboard/mouse matrix runs unless --activation-only is explicitly selected')
     parser.add_argument('--expected-version',help='Reject a different actual front-menu build version')
+    parser.add_argument('--activation-only',action='store_true',help='Focused normal-menu skill/touch/pad activation supplement; does not replace the default full gait matrix')
     parser.add_argument('--headed',action='store_true');parser.add_argument('--angle-gl',action='store_true')
     parser.add_argument('--no-video',action='store_true');parser.add_argument('--require-60fps',action='store_true')
     parser.add_argument('--continue-on-failure',action='store_true',help='Continue only when independent hero failures are intentionally being compared; the default stops after the first failed case')
     args=parser.parse_args()
     if args.require_60fps and args.no_video:parser.error('--require-60fps cannot be combined with --no-video')
     args.heroes=list(dict.fromkeys(args.heroes))
+    if args.activation_only and any(hero not in ('armadillo','frog') for hero in args.heroes):parser.error('--activation-only is a focused native-skill supplement; select --heroes armadillo frog')
+    if args.activation_only and not any(mode in args.inputs for mode in ('touch','pad')):parser.error('--activation-only requires --inputs touch and/or pad')
     args.evidence.mkdir(parents=True,exist_ok=True)
     if any((args.evidence/hero/'results.json').exists() for hero in args.heroes):
         parser.error('Use a fresh --evidence directory: existing first-run observations must remain intact.')
@@ -556,7 +639,7 @@ def main():
                 console.append({'wall_monotonic':time.monotonic(),'type':item.type,'text':item.text})
                 if item.type=='error' or 'SCRIPT ERROR' in item.text or 'ERROR:' in item.text:errors.append(item.text)
             page.on('console',message)
-            probe=Probe(page,hero,out,registry);report={'hero':hero,'browser':args.browser,'version':browser.version,'url':url,'status':'FAIL','video':{'status':'NOT_TESTED'},'physical_device':'NOT_TESTED','physical_gamepad':'NOT_TESTED','authored_source_sha256':registry.source_hashes}
+            probe=Probe(page,hero,out,registry);report={'hero':hero,'browser':args.browser,'version':browser.version,'url':url,'status':'FAIL','video':{'status':'NOT_TESTED'},'physical_device':'NOT_TESTED','physical_gamepad':'NOT_TESTED','scope':'normal-input skill activation supplement' if args.activation_only else 'full normal-input gait/fire/grenade/skill matrix','authored_source_sha256':registry.source_hashes}
             recording=False
             try:
                 page.goto(url,timeout=120000);page.wait_for_selector('canvas[data-front]',timeout=120000)
@@ -566,7 +649,10 @@ def main():
                 if not args.no_video:
                     report['capture']=page.evaluate(START_VIDEO);recording=report['capture'].get('supported',False)
                     probe.check(recording,'Original real-time canvas capture starts with a requested 60 fps track')
-                probe.start();probe.keyboard_matrix();probe.skill();probe.moving_tongue();probe.extra_inputs(args.inputs)
+                probe.start()
+                if args.activation_only:probe.activation_methods(args.inputs)
+                else:
+                    probe.keyboard_matrix();probe.skill();probe.moving_tongue();probe.extra_inputs(args.inputs)
                 probe.check(not errors,'No browser/Godot errors during the complete hero matrix',errors)
                 report['status']='PASS'
             except Exception as error:

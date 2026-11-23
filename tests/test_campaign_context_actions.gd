@@ -99,11 +99,52 @@ func audio_events(g: AionCampaignGame) -> void:
 	g.audio_enabled=false;var previous: int=g.sound_cache.size();g.sound("muted-test")
 	check(g.sound_cache.size()==previous,"Mute still suppresses sound work")
 
+func finger(g: AionCampaignGame,index: int,point: Vector2,pressed: bool,canceled: bool=false) -> void:
+	var e:=InputEventScreenTouch.new();e.index=index;e.position=g.screen_transform*point;e.pressed=pressed;e.canceled=canceled
+	g._input(e)
+
+func touch_context(g: AionCampaignGame) -> void:
+	g.touch_mode=true
+	for size in [Vector2i(1152,648),Vector2i(393,873)]:
+		root.size=size;g.resize()
+		clean(g,"armadillo")
+		var disabled_point: Vector2=g.ride_button.global_position+g.ride_button.size*.5
+		finger(g,2,disabled_point,true)
+		g.down_down=true;g.update_arcade_aim();g.update_hud();finger(g,2,disabled_point,true)
+		check(g.world.hero_skill.is_empty() and g.touch_actions.get(2,"")=="context","A finger held on a disabled context never queues activation when it becomes ready")
+		finger(g,2,disabled_point,false);clean(g,"armadillo")
+		var down: Vector2=g.stick.position+g.stick.size*Vector2(.5,.9)
+		finger(g,7,down,true);g.update_arcade_aim();g.update_hud()
+		check(g.world.crouching() and g.stick_touch==7,"First real touch path holds crouch at "+str(size))
+		var point: Vector2=g.ride_button.global_position+g.ride_button.size*.5
+		finger(g,23,point,true)
+		check(not g.world.hero_skill.is_empty(),"Second finger activates the visible context at "+str(size))
+		check(g.touch_actions.get(23,"")=="context" and g.stick_touch==7,"Context finger has its own one-shot owner without releasing the stick")
+		for tick in 160:g.world.step(.01)
+		finger(g,23,point,true)
+		check(g.world.hero_skill.is_empty(),"A held/duplicate context finger cannot restart after cooldown")
+		var drag:=InputEventScreenDrag.new();drag.index=23;drag.position=g.screen_transform*(g.actions.attack.position+g.actions.attack.size*.5);g._input(drag)
+		check(g.world.shots==0 and not g.world.fire_held,"Dragging the context finger over Fire cannot create another action")
+		finger(g,23,point,false,true);g.update_arcade_aim()
+		check(not g.touch_actions.has(23) and g.stick_touch==7 and g.world.crouching(),"Canceled context releases only its own finger")
+		finger(g,7,down,false);g.update_arcade_aim()
+		check(g.stick_touch==-1 and g.world.move_axis==Vector2.ZERO,"Releasing both fingers leaves no held direction")
+		clean(g,"frog");g.world.weapon="arc";g.world.ammunition=10
+		g.world.pickups.append({"id":"touch-heavy","kind":"heavy","x":g.world.player.x+30.,"y":-35.});g.update_hud()
+		point=g.ride_button.global_position+g.ride_button.size*.5
+		finger(g,0,point,true);finger(g,0,point,true)
+		check(g.world.weapon=="heavy" and g.world.hero_skill.is_empty(),"One context touch swaps only once and cannot become an extra skill press")
+		finger(g,0,point,false);g.update_hud();finger(g,0,point,true)
+		check(not g.world.hero_skill.is_empty(),"A fresh context touch still activates Frog after the weapon swap")
+		g.release_all()
+		check(g.touch_actions.is_empty() and g.stick_touch==-1,"Focus/menu input release clears context ownership too")
+	root.size=Vector2i(1152,648);g.resize()
+
 func _initialize() -> void:call_deferred("run")
 
 func run() -> void:
 	var g:=AionCampaignGame.new();root.add_child(g);await process_frame;g.set_process(false)
-	context_routes(g);compact_inputs(g);interruptions(g);audio_events(g)
+	context_routes(g);compact_inputs(g);interruptions(g);audio_events(g);touch_context(g)
 	g.queue_free();await process_frame
 	print("RESULT: %d campaign context checks, %d failures"%[checks,failures])
 	quit(1 if failures else 0)

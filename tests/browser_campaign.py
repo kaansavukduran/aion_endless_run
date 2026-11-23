@@ -245,17 +245,31 @@ with sync_playwright() as pw:
     if not a.play_only:
         p0=data()['player'][0];page.keyboard.down('d');page.wait_for_function('(x)=>JSON.parse(document.querySelector("canvas").dataset.campaign).player[0]>x+80',arg=p0,timeout=10000);page.keyboard.up('d');page.wait_for_timeout(200);p1=data()['player'][0]
         check(p1>p0+75,'D moves the player right; this is not automatic scrolling')
-        # Keep the real key down through the bounded turn.35px can be reached
-        # in three50ms physics steps, before aim has crossed to the left.
+        # Keep the real key down through the bounded turn. 35 px can be reached
+        # in three 50 ms physics steps, before aim has crossed to the left.
         page.keyboard.down('a');page.wait_for_function('(x)=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.player[0]<x-35 && d.facing===-1}',arg=p1,timeout=10000);page.keyboard.up('a');page.wait_for_timeout(150);check(data()['player'][0]<p1-30 and data()['facing']==-1,'A moves and faces left')
         page.keyboard.down('d');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).facing===1',timeout=10000);page.keyboard.up('d');page.keyboard.down('f');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).shots>=2',timeout=10000);page.keyboard.up('f');page.wait_for_timeout(150);check(data()['shots']>=2,'Held fire produces real, spaced gunshots')
+        # Each independent grenade probe starts through the same checkpoint UI
+        # a player uses. Earlier timing/pause probes can let the live crow reach
+        # the actor; a hurt-state rejection is not a throw-input observation.
+        check(data()['state']=='playing' and data()['hp']>0,'The actor survives the preceding movement/fire controls')
+        canvas.focus();page.keyboard.press('Escape')
+        page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
+        button(text='Kontrol noktasından dene')
+        page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && !d.menu && !d.travel_active && d.hp>0}')
+        check(abs(data()['player'][0]-data()['rally']['x'])<1,'Actual checkpoint UI prepares the independent grenade-input probes')
+        canvas.focus()
         count=data()['grenades'];page.keyboard.press('g')
         page.wait_for_function('count=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===count-1',arg=count,timeout=10000)
+        grenade_released_at=data()['time']
         check(data()['grenades']==count-1,'G releases exactly one energy grenade and spends one unit')
         before=data();r=before['actions']['attack'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2))
         page.wait_for_function('(shots)=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.shots>shots || d.melee>0}',arg=before['shots'],timeout=10000)
         check(True,'Actual right Fire touch reaches a gunshot or contextual close strike')
-        page.wait_for_timeout(600);before=data();r=before['actions']['grenade'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2))
+        # Cooldown starts on real release, not on the G press. Software rendering
+        # can advance far less than 600 ms of simulation during 600 ms wall time.
+        page.wait_for_function('release=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && d.hp>0 && d.time>=release+.55 && !d.grenade_throw.phase && d.melee<=0 && d.invulnerable<=0 && d.pose.rescue_at_draw<=0}',arg=grenade_released_at,timeout=10000)
+        before=data();(a.evidence/'second-grenade-precondition.json').write_text(json.dumps({'first_observed_release_time':grenade_released_at,'eligible_after_release_plus_sim_seconds':.55,'state':before},indent=2)+'\n');r=before['actions']['grenade'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2))
         page.wait_for_function('(count)=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===count-1',arg=before['grenades'],timeout=10000)
         check(True,'Actual right Grenade touch spends one bomb without a second underlying command')
         page.keyboard.press('Escape');page.wait_for_timeout(200);frozen=data();page.wait_for_timeout(350);check(data()['time']==frozen['time'],'Pause freezes the active mission')
@@ -271,6 +285,11 @@ with sync_playwright() as pw:
             r=d['actions']['jump'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2));page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-10',timeout=10000);check(True,'Firefox actual touch reaches the same jump action; CDP multitouch is Chromium-only')
         page.set_viewport_size({'width':1280,'height':720});page.wait_for_timeout(700);page.screenshot(path=str(a.evidence/'landscape-playing.png'));canvas.focus()
         if a.combat_controls:
+            check(data()['state']=='playing' and data()['hp']>0,'The actor survives the preceding touch/rotation controls')
+            page.keyboard.press('Escape');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
+            button(text='Kontrol noktasından dene')
+            page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && !d.menu && !d.travel_active && d.hp>0}')
+            check(abs(data()['player'][0]-data()['rally']['x'])<1,'Actual checkpoint UI prepares the independent combat-control probes')
             canvas.focus();page.keyboard.down('d')
             page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>200')
             normal=data()['velocity'][0];page.keyboard.down('Shift')
@@ -283,7 +302,7 @@ with sync_playwright() as pw:
             check(True,'Actual right mouse click throws one grenade')
             # The new authored throw recovers after ammo is spent. Prepare a
             # real fresh upward shot before the independent airborne sweep;
-            # a fixed100ms wall delay can still be inside throw recovery.
+            # a fixed 100 ms wall delay can still be inside throw recovery.
             page.wait_for_function('!JSON.parse(document.querySelector("canvas").dataset.campaign).grenade_throw.phase',timeout=10000)
             before_shots=data()['shots'];page.keyboard.down('w');page.keyboard.down('d');page.keyboard.down('f')
             page.wait_for_function('n=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.shots>n && d.hero_projectiles.some(b=>b.age<.14 && b.v[1]<-30)}',arg=before_shots,timeout=10000)
