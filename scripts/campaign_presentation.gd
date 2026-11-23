@@ -1,7 +1,7 @@
 class_name CampaignPresentation
 extends Control
 
-## Reuses the actual approved actor poses; this is presentation, not new artwork.
+## Shows the same registered poses used by the playable actor.
 var host
 var tutorial_topic := ""
 var frames := RunnerFrameBank.new()
@@ -38,10 +38,10 @@ func _draw() -> void:
 		elif topic_index in [2,3] and not MissionHeroArt.has(host.world.character):actor_key="gun-fire";actor_row=frames.hero_row(host.world.character)
 		elif topic_index==4:actor_row=6
 		var pose: Dictionary
-		if MissionHeroArt.has(host.world.character):
+		if M1HeroArt.has(host.world.character) and (topic_index<4 or MissionHeroArt.has(host.world.character)):
 			var action: String=["walk","air_fire","idle_fire","grenade_throw","skill"][clampi(topic_index,0,4)]
-			var clip: Dictionary=MissionHeroArt.clip_spec(host.world.character,action)
-			pose=MissionHeroArt.pose(host.world.character,action,posmod(int(progress*float(clip.fps)),int(clip.frames)))
+			var clip: Dictionary=M1HeroArt.clip_spec(host.world.character,action)
+			pose=host.view.m1_heroes.pose(host.world.character,action,posmod(int(progress*float(clip.fps)),int(clip.frames)))
 		else:pose=frames.pose(actor_key,actor_row,frames.cycle(actor_key,actor_row,progress,1.))
 		rendered_source=str(pose.get("source_key",""));rendered_frame=int(pose.get("source_frame",0))
 		var dimensions: Vector2=pose.get("size",pose.texture.get_size()*float(pose.get("scale",1.)))
@@ -61,10 +61,10 @@ func _draw() -> void:
 	var color:=Color("ffcf8c")
 	var victory: bool=stage=="victory"
 	var pose: Dictionary
-	if MissionHeroArt.has(host.world.character):
+	if M1HeroArt.has(host.world.character):
 		var action: String="idle_fire" if victory else "walk"
-		var clip: Dictionary=MissionHeroArt.clip_spec(host.world.character,action)
-		pose=MissionHeroArt.pose(host.world.character,action,posmod(int(progress*float(clip.fps)),int(clip.frames)))
+		var clip: Dictionary=M1HeroArt.clip_spec(host.world.character,action)
+		pose=host.view.m1_heroes.pose(host.world.character,action,posmod(int(progress*float(clip.fps)),int(clip.frames)))
 	else:
 		var row:=frames.hero_row(host.world.character)
 		pose=frames.pose("heroes" if victory else "gun-run",row,frames.cycle("heroes" if victory else "gun-run",row,progress,1.))

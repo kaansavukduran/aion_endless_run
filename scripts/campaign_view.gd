@@ -283,6 +283,8 @@ func draw_world() -> void:
 	var pose: Dictionary = hero_pose(world.character,absf(world.velocity.x)>1.,not world.grounded(),world.walk_distance)
 	var tint := Color.WHITE
 	if world.invulnerable>0.: tint=Color("ffd9ca")
+	if host.motion_enabled and not host.options.reduced_motion:
+		MissionHeroArt.draw_shell_contacts(self)
 	if not bool(world.mount.ridden) and world.mount_transition.is_empty():
 		draw_pose(pose,world.player,int(M1CombatArt.body_spec(world).mirror),1.,tint)
 	if not world.mount_transition.is_empty():
@@ -436,9 +438,15 @@ func hero_weapon_visible() -> bool:
 
 func draw_hero_weapon() -> void:
 	if not hero_weapon_visible():return
+	var body := M1CombatArt.body_spec(world)
+	if body.action=="melee":return # The fist/hoof is drawn in the actual cel.
 	var transform: Dictionary=M1CombatArt.placement(world)
 	var point: Vector2=world.player+Vector2(transform.grip)
-	draw_set_transform(at(point),float(transform.angle),Vector2(1,int(transform.mirror_y)))
+	if body.action=="rescue_cut":
+		var cut_angle: float=[-.24,-.52,-.1,.64,.38,0.][int(body.frame)]
+		draw_set_transform(at(point),cut_angle*int(body.mirror),Vector2(int(body.mirror),1))
+	else:
+		draw_set_transform(at(point),float(transform.angle),Vector2(1,int(transform.mirror_y)))
 	if world.rescue_time>0.:
 		draw_rect(Rect2(-3,-2,6,5),Color("87583f"))
 		draw_polygon(PackedVector2Array([Vector2(1,-2),Vector2(20,-2),Vector2(24,0),Vector2(1,2)]),PackedColorArray([Color("d7e9e8")]))

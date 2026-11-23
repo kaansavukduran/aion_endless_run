@@ -43,6 +43,51 @@ func run():
   check(crouch.height<stand.height*.80,'Crouch lowers visible anatomy rather than merely changing a collider')
   check(crouch.face_local.y>stand.face_local.y+12.,'Crouched head is physically lower while the face scale stays registered')
  check(not ART.has('wolf') and not ART.has('owl'),'Assist characters are not assigned playable body layers')
+ for hero in ['aion','sheep']:
+  for action in M1HeroActionArt.CONTACT_ACTIONS+M1HeroActionArt.REACTION_ACTIONS+M1HeroActionArt.TUNNEL_ACTIONS:
+   var source: String='m1-action-'+hero+('_contact' if action in M1HeroActionArt.CONTACT_ACTIONS else ('_tunnel' if action in M1HeroActionArt.TUNNEL_ACTIONS else '_redraw'))
+   var hashes: Dictionary={}
+   for frame in 6:
+    var pose: Dictionary=bank.pose(hero,action,frame)
+    var image: Image=pose.texture.get_image()
+    var signature:=image.get_data().hex_encode().sha256_text()
+    var used:=image.get_used_rect()
+    var bottom: float=pose.offset.y+float(used.end.y)*pose.source_scale
+    var grip:=Vector2i(((Vector2(pose.grip_local)-Vector2(pose.offset))/float(pose.source_scale)).round())
+    check(pose.source_key==source and pose.source_frame==frame and not hashes.has(signature),'The new action resolves to every distinct authored cel: '+hero+'/'+action)
+    check(absf(bottom)<.01 and absf(pose.face_local.x-14.)<.001 and image.get_pixelv(grip).a>.5,'Actual opaque sole and hand pixels use fixed registrations: '+hero+'/'+action)
+    if action in M1HeroActionArt.TUNNEL_ACTIONS:
+     check(-(pose.offset.y+float(used.position.y)*pose.source_scale)<54.5,'New visible tunnel cel stays below the real ceiling including draw rounding: '+hero)
+    hashes[signature]=true
+  var w:=AionCampaignWorld.new();w.begin(hero);w.state='playing'
+  w.enemies.clear();w.hazards.clear();w.invulnerable=0.
+  w.spawn_enemy('gnome',w.player.x+55.,w.player.y,501)
+  w.attack_press();w.attack_release()
+  check(M1CombatArt.body_spec(w).action=='melee' and not w.enemies[-1].defeated,'Context attack anticipates with the new unarmed sequence: '+hero)
+  w.velocity.x=-100.
+  check(M1CombatArt.body_spec(w).action=='walk_back','A moving close strike never pins the aimed backward stride: '+hero)
+  w.velocity.x=0.
+  for tick in 9:w.step(1./60.)
+  check(M1CombatArt.body_spec(w).frame==3 and w.enemies[-1].defeated,'The authored strike cel coincides with real close damage: '+hero)
+  w.enemies.clear()
+  w.npcs=[{'id':'cut-sprite-test','x':w.player.x+72.,'y':w.player.y,'freed':false,'secret':'','variant':0}]
+  w.attack_press();w.attack_release()
+  check(M1CombatArt.body_spec(w).action=='rescue_cut' and not w.npcs[0].freed,'The normal rescue input selects the dedicated reach: '+hero)
+  for tick in 19:w.step(1./60.)
+  check(M1CombatArt.body_spec(w).frame==3 and w.npcs[0].freed,'The new knife motion reaches the normal rope contact event: '+hero)
+  for tick in 19:w.step(1./60.)
+  w.invulnerable=0.
+  w.damage_player()
+  check(M1CombatArt.body_spec(w).action=='hurt','Real damage selects the redrawn standing reaction: '+hero)
+  w.hp=1;w.flock=1;w.invulnerable=0.;w.damage_player()
+  check(w.state=='dying' and M1CombatArt.body_spec(w).action=='death','Fatal hit plays the separate collapse sequence: '+hero)
+  var seen: Dictionary={}
+  for tick in 16:
+   var pose:=M1CombatArt.body_spec(w)
+   seen[pose.frame]=true
+   check(pose.action=='death','Dying hero keeps its own collapse sequence: '+hero)
+   w.step(.05)
+  check(seen.size()==6 and M1CombatArt.body_spec(w).frame==5,'Collapse reaches every frame, including the final grounded pose: '+hero)
  # The original four keep their precise canonical registration above. The
  # two new animals use their own independently authored source anatomy.
  for hero in MissionHeroArt.HEROES:

@@ -1,5 +1,5 @@
 """Real PCK boot, packet faults, cache repair and mobile touch; no game setters."""
-import argparse,hashlib,http.server,json,os,threading,time
+import argparse,hashlib,http.server,json,os,shutil,threading,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 p=argparse.ArgumentParser();p.add_argument('--browser',choices=['chromium','firefox'],default='chromium');p.add_argument('--export',type=Path,default=Path('build/web'));p.add_argument('--evidence',type=Path,required=True);a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
@@ -34,17 +34,18 @@ with sync_playwright() as pw:
   env=dict(os.environ,DISPLAY=os.environ.get('DISPLAY',':99'),XDG_CACHE_HOME=str(a.evidence.resolve()/'firefox-cache'),XDG_CONFIG_HOME=str(a.evidence.resolve()/'firefox-config'),MOZ_DISABLE_CONTENT_SANDBOX='1',LIBGL_ALWAYS_SOFTWARE='1')
   browser=pw.firefox.launch(headless=False,env=env,firefox_user_prefs={'webgl.force-enabled':True,'dom.w3c_touch_events.enabled':1})
   mobile={'user_agent':'Mozilla/5.0 (Android 15; Mobile; rv:145.0) Gecko/145.0 Firefox/145.0'}
- else:browser=pw.chromium.launch(args=['--no-sandbox','--enable-unsafe-swiftshader']);mobile={'is_mobile':True}
+ else:browser=pw.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox','--enable-unsafe-swiftshader']);mobile={'is_mobile':True}
  def context(workers='block',portrait=False):
   ctx=browser.new_context(viewport={'width':393,'height':873} if portrait else {'width':850,'height':390},has_touch=True,device_scale_factor=2,locale='tr-TR',service_workers=workers,**mobile)
   page=ctx.new_page();page.on('dialog',lambda d:(dialogs.append(d.message),d.dismiss()));return ctx,page
  def ready(page):page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
  def data(page):return page.locator('canvas').evaluate('c=>({...c.dataset})')
- def tap_text(page,text):
-  v=data(page);b=next(b for b in json.loads(v['ui']) if b['text']==text);t=json.loads(v['screenTransform']);r=page.locator('canvas').bounding_box();x=b['x']+b['w']/2;y=b['y']+b['h']/2;page.touchscreen.tap(r['x']+(t[0]*x+t[2]*y+t[4])/float(v['rawWidth'])*r['width'],r['y']+(t[1]*x+t[3]*y+t[5])/float(v['rawHeight'])*r['height'])
+ def tap_control(page,key,value):
+  page.wait_for_function("([k,v])=>JSON.parse(document.querySelector('canvas').dataset.ui||'[]').some(b=>b[k]===v)",arg=[key,value])
+  v=data(page);b=next(b for b in json.loads(v['ui']) if b[key]==value);t=json.loads(v['screenTransform']);r=page.locator('canvas').bounding_box();x=b['x']+b['w']/2;y=b['y']+b['h']/2;page.touchscreen.tap(r['x']+(t[0]*x+t[2]*y+t[4])/float(v['rawWidth'])*r['width'],r['y']+(t[1]*x+t[3]*y+t[5])/float(v['rawHeight'])*r['height'])
  def tap_start(page):
-  tap_text(page,'Koşuya başla');page.wait_for_selector('canvas[data-state="running"]')
-  if any(b['text']=='Anladım · Devam et' for b in json.loads(data(page)['ui'])):tap_text(page,'Anladım · Devam et')
+  tap_control(page,'name','StartRun');page.wait_for_selector('canvas[data-state="running"]')
+  if any(b['text']=='Anladım · Devam et' for b in json.loads(data(page)['ui'])):tap_control(page,'text','Anladım · Devam et')
  faults[:]=['slow'];ctx,page=context();page.goto(url,wait_until='domcontentloaded')
  page.wait_for_function('()=>{const p=document.querySelector("#aion-loading-percent");return p&&/^\\d+%$/.test(p.textContent)&&parseInt(p.textContent)>4&&parseInt(p.textContent)<95}')
  check(page.locator('.fragaria-brand').inner_text()=='Fragaria\nInteractive','The Fragaria brand and live byte-derived percentage render while downloading')
@@ -75,7 +76,7 @@ with sync_playwright() as pw:
  page.screenshot(path=str(a.evidence/'retry-screen.png'));page.locator('#aion-retry').click();ready(page);check(True,'The normal Retry button recovers once the connection returns');ctx.close()
  # Real ServiceWorker/CacheStorage repair: save a score through ordinary input first.
  ctx,page=context(workers='allow');page.goto(url);ready(page);page.evaluate('navigator.serviceWorker.ready.then(()=>true)');page.reload();ready(page)
- tap_start(page);page.wait_for_timeout(1000);tap_text(page,'Duraklat');page.wait_for_selector('canvas[data-state="paused"]');saved=int(data(page)['score']);page.wait_for_timeout(2300)
+ tap_start(page);page.wait_for_function("Number(document.querySelector('canvas').dataset.score)>0");tap_control(page,'name','PauseRun');page.wait_for_selector('canvas[data-state="paused"]');saved=int(data(page)['score']);page.wait_for_function("n=>Number(document.querySelector('canvas').dataset.best)>=n",arg=saved)
  page.evaluate('''async ({build,pack})=>{const c=await caches.open('aion-offline-'+build);await c.put(new URL(pack,location.href).href,new Response('<html>bad cached pack</html>',{headers:{'Content-Type':'text/html'}}));}''',{'build':meta['build'],'pack':pack_name})
  page.reload();ready(page)
  check(page.evaluate('AION_BOOT.state.attempts')>=2,'A poisoned real offline cache is repaired automatically')

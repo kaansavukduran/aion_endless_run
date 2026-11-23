@@ -97,6 +97,7 @@ var shot_weapon := "" # Ephemeral last shot; not inventory or checkpoint state.
 var grenade_time := 0.0
 var grenade_throw: Dictionary = {}
 var hero_skill: Dictionary = {}
+var shell_contacts: Array[Dictionary] = []
 var jump_held := false
 var jumps := 0
 var flap_count := 0
@@ -236,6 +237,7 @@ func load_section(id: String) -> void:
 	paused_crouch=false
 	CampaignGrenade.cancel(self,true)
 	MissionHeroAbilities.cancel(self)
+	shell_contacts.clear()
 	var carried: Dictionary={}
 	if section!=id and id!="shore" and state not in ["dying","dead"] and bool(mount.get("ridden",false)) and int(mount.hp)>0:carried=mount.duplicate(true)
 	section = id; checkpoint = id; checkpoint_ready = true
@@ -771,6 +773,8 @@ func step(dt: float) -> void:
 			var top: float=float(enemy.y)-58.
 			if absf(player.x-float(enemy.x))<34. and old_y<=top and player.y>=top:
 				damage_enemy(enemy,2 if bool(enemy.mini) else 1,"stomp");player.y=top-2.;velocity.y=-420.;jumps=1;air_time=0.;pending_events.append("melee");break
+	if not shell_contacts.is_empty() or MissionHeroAbilities.rolling(self):
+		MissionHeroAbilities.trace_shell_contact(self,on_floor,player.x-old_x)
 	MissionHeroAbilities.step(self,dt)
 	if fire_held: attack()
 	step_enemies(dt); CampaignAssists.step(self,dt); step_boss(dt); step_bullets(dt)

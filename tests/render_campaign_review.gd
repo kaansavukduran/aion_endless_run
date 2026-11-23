@@ -31,7 +31,9 @@ func clip_pose(clip: String,frame: int) -> String:
 		"air_fire":game.world.player.y=-110.;game.world.velocity.y=-150.;game.world.air_time=.3;game.world.shot_flash=.18*(1.-(float(frame)+.1)/6.)
 		"melee":game.world.melee_time=.28*(1.-(float(frame)+.1)/6.)
 		_:game.world.shot_flash=.18*(1.-(float(frame)+.1)/6.)
-	return "idle_fire" if clip=="melee" else clip
+	if clip=="melee" and game.world.character not in ["aion","sheep"]:
+		return "idle_fire"
+	return clip
 func run() -> void:
 	output=OS.get_environment("AION_CAMPAIGN_REVIEW")
 	if output.is_empty():output="res://build/campaign-review"

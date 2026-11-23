@@ -125,6 +125,11 @@ class PoseRegistry:
             order = override.get('order', list(range(clip['frames'])))
             return {('mission-hero-' + atlas, row, frame) for frame in order}
         if action in ('walk_back', 'crouch_walk_back', 'grenade_throw', 'crouch_grenade_throw'):
+            redraw = hero + '_redraw'
+            if redraw in self.extra['atlases']:
+                row = self.extra['redraw_rows'][action]
+                return {('m1-action-' + redraw, row, frame)
+                        for frame in range(len(self.extra['atlases'][redraw]['frames'][row]))}
             result = set()
             for frame in range(self.extra['playback'][action]['frames']):
                 key = hero + ('_crouch' if action in ('crouch_walk_back','crouch_grenade_throw') else '_empty' if action == 'grenade_throw' and frame in (1,2) else '')

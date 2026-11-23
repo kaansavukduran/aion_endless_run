@@ -132,6 +132,19 @@ static func preview_spec(hero: String,action: String,clock: float) -> Dictionary
 	var frame: int=posmod(int(clock*float(clip.fps)),int(clip.frames)) if bool(clip.loop) else clampi(int(clock*float(clip.fps)),0,int(clip.frames)-1)
 	return {"hero":hero,"action":name,"frame":frame,"mirror":1,"key":"mission-hero"}
 
+## Three small earth chips arc backward from the actual shell contact point.
+static func draw_shell_contacts(view) -> void:
+	for contact in view.world.shell_contacts:
+		var progress: float=clampf((view.world.time-float(contact.born))/MissionHeroAbilities.SHELL_CONTACT_LIFE,0.,1.)
+		var center: Vector2=view.at(Vector2(contact.point))
+		var direction: float=float(contact.direction)
+		for i in 3:
+			var offset:=Vector2(-direction*(3.+i*4.+progress*(8.+i*5.)),-3.-sin(progress*PI)*(4.+i*2.))
+			var pixel: Vector2=(center+offset).round()
+			var alpha: float=(1.-progress)*.78
+			view.draw_rect(Rect2(pixel,Vector2(4.,3.)),Color(.38,.30,.24,alpha))
+			view.draw_rect(Rect2(pixel,Vector2(3.,1.)),Color(.83,.69,.49,alpha))
+
 ## A pixel ribbon follows the exact mouth/tip used by first-contact checks.
 ## Alternating two-pixel cells and a shaded rounded tip are discrete pixel
 ## art, not a stretched blurry tongue image or detached projectile.
