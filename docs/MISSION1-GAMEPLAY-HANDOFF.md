@@ -13,6 +13,12 @@ AIONIA v1.7 bu turda canlı standart belgesinden okundu. Drive’daki 21 Kasım 
 - Gerçek yerel Web paketi 0.55.0 `6a6055e881b8dd9f`. Kök Geçidi’nde Armadillo 36.625, Su Kanalı’nda Kurbağa 32.275 skorla üç evreyi geçip sonuçlarını kaydetti. İki koşu da gerçek menü ve klavye/fare girdileriyle başladı. Su Kanalı’nın sonu aynı tarayıcı oturumunda klavye/fare kumandası devralınarak doğrulandı. Eren iki fiziksel üst ayrımdan Bahçe Terasları’nı ve Bakır Röle’yi geçti, üç boss evresini bitirdi ve 35.875 skoru kaydetti. Aynı tarayıcı oturumundaki ayrı kumanda kaydı üç evreyi gösterir. İlk sürücü arenada durdurulduğu için kendi evre örnekleri kontrolü başarısız kaldı. Kukla karakter veya durum enjeksiyonu kullanılmadı.
 - Linux Firefox aynı yerel paketi açtı, klavyeyle ilerledi ve dikey geçişte kahramanı ve koşuyu korudu. Fiziksel Poco/iPhone veya Xbox kolu ve oyuncu kabulü bekliyor.
 
+### 0.55.2 · Fener Kıyısı köprüsü ve kurtarma paftaları
+
+- Zorunlu uçurum köprüsünün iki tabliyesi kalıcı. Eski bir kayıt çökme sırasında alındıysa Continue tabliyeleri onarır ve düşmekte olan oyuncuyu köprüye çıkarır. Bahçe Terasları'ndaki çöken servis geçidi kendi kurallarını kullanır.
+- Sekiz kurtarılabilir karakterin pozları ve korsanın altı yürüyüş karesi yeniden işlendi. Kimlikler, ayak hizası ve yürüyüş yönü korunarak yeni kareler mevcut kurtarma akışına bağlandı.
+- Altı kahramanla eski çökme süresini aşan bekleyiş ve normal geçiş, eski kayıt onarımı, gerçek Linux görüntüleme ve yerel Web dışa aktarması doğrulandı. Mission 1 için oyuncu kabulü bekliyor.
+
 ### Uygulama ve kanıt
 
 | Forge | Oyuna bağlanan kapsam | Gerçek doğrulama | Açık kalan |

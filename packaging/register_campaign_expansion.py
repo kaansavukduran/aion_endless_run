@@ -14,7 +14,7 @@ from campaign_registration import match_patch
 ROOT=Path(__file__).resolve().parents[1]
 SOURCES={
  'rescue-heroes':('campaign-rescue-heroes',6,6,90,'exec-19c5ee09-9b2d-4d34-97cd-ed1f613d5f64'),
- 'rescue-npcs':('campaign-rescue-npcs',8,8,76,'exec-5da02983-ad29-4679-9912-b9ce09a3bda6'),
+ 'rescue-npcs':('campaign-rescue-npcs',8,8,76,'exec-bbe09662-0766-43eb-8263-bc58c44561d3'),
  'water-enemies':('campaign-water-enemies',12,6,64,'exec-b3e1a87f-9fd5-42bf-ba84-50ecae93b62a'),
  'garden-enemies':('campaign-garden-enemies',12,6,70,'exec-a468c208-150c-44e2-b762-16b537a3f097'),
  'heavy-machines':('campaign-heavy-machines',16,5,100,'exec-1d8213dc-8549-4010-a7ea-accb0cc92e5e'),
