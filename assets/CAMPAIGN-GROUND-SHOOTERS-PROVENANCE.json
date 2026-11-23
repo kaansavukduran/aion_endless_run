@@ -1,0 +1,104 @@
+{
+  "source": "Original Fragaria Interactive Mission 1 sprite sheet generated for this project on 2026-11-23",
+  "source_image": "campaign-ground-shooters.png",
+  "cell_size": [
+    256,
+    256
+  ],
+  "scale": 0.31,
+  "source_facing": 1,
+  "role_columns": [
+    "walk",
+    "prepare_1",
+    "prepare_2",
+    "release",
+    "recover",
+    "fallen"
+  ],
+  "roles": {
+    "lantern_scout": {
+      "rows": [
+        0,
+        1
+      ],
+      "foot_x": 132,
+      "foot_bottom": [
+        [
+          224,
+          224,
+          224,
+          224,
+          222,
+          224
+        ],
+        [
+          224,
+          224,
+          223,
+          223,
+          223,
+          224
+        ]
+      ],
+      "release_pixel": [
+        208,
+        110
+      ],
+      "defeat": {
+        "row": 0,
+        "scale": 0.188,
+        "foot": [
+          254,
+          405
+        ]
+      }
+    },
+    "cap_lobber": {
+      "rows": [
+        2,
+        3
+      ],
+      "foot_x": 128,
+      "foot_bottom": [
+        [
+          224,
+          224,
+          224,
+          224,
+          224,
+          224
+        ],
+        [
+          224,
+          224,
+          224,
+          224,
+          224,
+          224
+        ]
+      ],
+      "release_pixel": [
+        200,
+        139
+      ],
+      "defeat": {
+        "row": 1,
+        "scale": 0.204,
+        "foot": [
+          240,
+          384
+        ]
+      }
+    }
+  },
+  "notes": "First row of each role is a six-cel grounded gait. Second row provides the prepared, release, recovery and fallen cels. Registration uses an invariant body X and measured foot edge at alpha 200. The runtime clips each original cell independently. The three separate fall cels use role-specific source scales measured against standing anatomy.",
+  "defeat_image": "campaign-ground-shooter-defeats.png",
+  "defeat_cell_size": [
+    512,
+    512
+  ],
+  "sha256": {
+    "campaign-ground-shooters.png": "781f8f2fadafe11b5a32fb6f06970b4733e254264efbc0c50f7366b75971797f",
+    "campaign-ground-shooter-defeats.png": "b246a4276d007973dce811644a8a7a1b3d2670dd4c0cf73e9c83a4c2dfa595ae"
+  }
+}

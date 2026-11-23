@@ -63,7 +63,7 @@ static func blast(w,p: Vector2,radius: float,damage: int,colour: String) -> void
 	w.blasts.append({"p":p,"age":0.,"radius":radius,"color":colour})
 	for e in w.enemies:
 		if not bool(e.defeated) and p.distance_to(Vector2(float(e.x),float(e.y)-30.))<radius:w.damage_enemy(e,damage)
-	if bool(w.boss.active) and p.distance_to(Vector2(float(w.boss.x),-70.))<radius+35.:w.damage_boss(damage)
+	if bool(w.boss.active) and p.distance_to(Vector2(float(w.boss.x),float(w.boss.y)-70.))<radius+35.:w.damage_boss(damage)
 	CampaignRescue.blast_ropes(w,p,radius)
 	w.pending_events.append("blast")
 
@@ -74,9 +74,10 @@ static func step(w,b: Dictionary,dt: float) -> bool:
 				var desired: Vector2=(Vector2(float(e.x),float(e.y)-30.)-Vector2(b.p)).normalized()*float(SPECS.seeker.speed)
 				b.v=Vector2(b.v).lerp(desired,minf(1.,dt*5.));break
 	if b.kind=="disc":
-		if float(b.p.y)>-8. or float(b.p.x)<20. or float(b.p.x)>w.length()-20.:
+		var floor: float=w.floor_at(float(b.p.x),float(b.p.y))
+		if (CampaignGround.has_floor(floor) and float(b.p.y)>floor-8.) or float(b.p.x)<20. or float(b.p.x)>w.length()-20.:
 			if int(b.bounces)>=2:b.age=99.;return true
-			b.bounces=int(b.bounces)+1;b.v=Vector2(-float(b.v.x),-absf(float(b.v.y))-90.);b.p.y=minf(-10.,float(b.p.y));b.hit=[]
+			b.bounces=int(b.bounces)+1;b.v=Vector2(-float(b.v.x),-absf(float(b.v.y))-90.);b.p.y=minf(floor-10.,float(b.p.y));b.hit=[]
 	if b.kind=="trap" and b.owner=="hero":
 		step_spider(w,b,dt)
 		return true # Spider owns age, movement, ground contact and detonation.
@@ -93,7 +94,7 @@ static func step_spider(w,b: Dictionary,dt: float) -> void:
 	if not bool(b.get("walking",false)):
 		b.v=Vector2(b.v)+Vector2(0.,550.*dt);b.p=Vector2(b.p)+Vector2(b.v)*dt
 		var support: float=w.crossing_floor(float(b.p.x),old.y+8.,float(b.p.y)+8.,float(b.v.y))
-		if support<180. and float(b.p.y)+8.>=support and float(b.v.y)>=0.:
+		if CampaignGround.has_floor(support) and float(b.p.y)+8.>=support and float(b.v.y)>=0.:
 			b.p.y=support-8.;b.v=Vector2.ZERO;b.gravity=0.;b.walking=true
 	var target:=Vector2.ZERO
 	var target_id:=""
@@ -121,7 +122,7 @@ static func step_spider(w,b: Dictionary,dt: float) -> void:
 			if direction!=0.:b.facing=int(direction)
 			var next: float=float(b.p.x)+direction*210.*dt
 			var support: float=w.crossing_floor(next,float(b.p.y)+8.,float(b.p.y)+24.,1.)
-			if support<180. and absf(support-(float(b.p.y)+8.))<24.:
+			if CampaignGround.has_floor(support) and absf(support-(float(b.p.y)+8.))<24.:
 				b.p=Vector2(clampf(next,12.,w.length()-12.),support-8.);b.v.x=direction*210.
 	if (not target_id.is_empty() and Vector2(b.p).distance_to(target)<65.) or float(b.age)>=5.-.000001:
 		var blast_index: int=w.blasts.size()

@@ -123,17 +123,21 @@ func run() -> void:
 		check(World.STAGES[leaf].next=="relay","All three branches converge: "+leaf)
 		check(w.enemies.any(func(e):return e.kind=="warden" and e.max_hp==12),"Each leaf has a guardian: "+leaf)
 		for e in w.enemies:
-			if e.kind not in ["crow","moth","wisp","drone"]:check(w.floor_at(float(e.x))==0.,"Ground enemy starts on actual floor")
-		for crate in w.crates:check(w.floor_at(float(crate.x))==0.,"Supply crate starts on floor")
+			if e.kind not in ["crow","moth","wisp","drone"]:check(CampaignGround.has_floor(w.floor_at(float(e.x))),"Ground enemy starts over actual floor")
+		for crate in w.crates:check(absf(float(crate.y)-w.floor_at(float(crate.x)))<.01,"Supply crate starts on the shared surface")
 		for item in w.pickups:
-			if w.floor_at(float(item.x))!=0.:
+			if not CampaignGround.has_floor(w.floor_at(float(item.x))):
 				check(gap_fruit_reachable(w,item),"Gap fruit is collected by actual jump physics from a supporting platform: "+str(item.id))
 	w=fresh();w.load_section("arena");tick(w,2.);w.damage_boss(99);check(w.boss.clock==0. and w.bullets.is_empty() and w.boss.hp==90,"Offscreen boss waits for introduction and cannot be killed before it")
 	w.boss.engaged=true;w.boss.hp=90;w.boss.wait=0.;tick(w,1.1);check(w.bullets.size()>=5,"Boss actually fires fan attack")
 	w.boss.windup=0.;w.boss.wait=0.;w.boss.attack=1;w.bullets.clear();tick(w,1.1);check(w.bullets.any(func(b):return b.kind=="wave"),"Boss fires jumpable root wave")
 	w.boss.windup=0.;w.boss.wait=0.;w.boss.attack=2;tick(w,1.1);check(w.enemies.size()>=2,"Boss deploys drones")
-	w.damage_boss(70);w.step(.01);check(w.boss.phase==3,"Boss changes phase with remaining health")
-	w.damage_boss(20);check(w.completed and w.state=="victory","Boss defeat settles before the result screen")
+	w.damage_boss(70);check(w.boss.phase==2 and w.boss.hp==59,"A strong hit reaches the next boss phase without crossing two")
+	w.damage_boss(70);check(w.boss.hp==59,"Fresh hits cannot cut through the visible phase transition")
+	w.boss.shift_pause=0.;w.boss.wait=.2;w.damage_boss(70)
+	check(w.boss.hp==59,"All hits respect the closed core")
+	w.boss.windup=.5;w.damage_boss(70);check(w.boss.phase==3 and w.boss.hp==29,"Opening the core allows the next phase")
+	w.boss.shift_pause=0.;w.damage_boss(29);check(w.completed and w.state=="victory","Boss defeat settles before the result screen")
 	tick(w,1.25);check(w.state=="complete","Finite mission actually ends after victory transition")
 	var final_score:=w.score;w.damage_boss(90);check(w.score==final_score,"Boss cannot grant completion reward twice")
 	var restore:=World.new();check(restore.restore(w.snapshot()) and restore.completed and restore.state=="complete","Completed campaign survives save/load")

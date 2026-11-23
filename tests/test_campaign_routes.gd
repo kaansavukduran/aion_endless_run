@@ -106,6 +106,15 @@ func route_structures() -> void:
 	span.step(1./60.);check(span.bridge_timers.has(CampaignRoutes.SERVICE_BRIDGE_X),"Stepping on the service span starts its visible collapse timer")
 	for frame in 220:span.move_axis=Vector2.ZERO;span.step(1./60.)
 	check(span.player.y>-1. and span.disabled_platforms.has(CampaignRoutes.SERVICE_BRIDGE_X),"Waiting on the failing span drops the hero to the yard, not into a pit")
+	var recovery:=fresh("sheep");recovery.load_section("fork_two");recovery.enemies.clear()
+	recovery.bridge_timers[CampaignRoutes.SERVICE_BRIDGE_X]=0.
+	recovery.player=Vector2(605.,0.);recovery.step(.01)
+	recovery.jump_press();recovery.jump_release()
+	for frame in 70:recovery.step(1./60.)
+	check(recovery.grounded() and absf(recovery.player.y+98.)<.1,"An ordinary jump lands on the exposed support after a collapsed span")
+	recovery.jump_press();recovery.jump_release();recovery.move_axis=Vector2.RIGHT
+	for frame in 48:recovery.step(1./60.)
+	check(recovery.grounded() and absf(recovery.player.y+195.)<.1,"A second ordinary jump recovers the upper route without a charged ability")
 func run() -> void:
 	for section in CampaignRoutes.FORKS:
 		var w:=fresh();w.load_section(section)

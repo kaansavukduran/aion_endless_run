@@ -151,7 +151,7 @@ static func roll_hits(w,from: Vector2,to: Vector2) -> void:
 		var target:=Vector2(float(w.boss.x),float(w.boss.y)-60.)
 		if Geometry2D.get_closest_point_to_segment(target,a,b).distance_to(target)<113.:
 			w.hero_skill.hits.append("boss")
-			if w.boss_vulnerable():w.damage_boss(3)
+			w.damage_boss(3)
 			if w.state!="playing":cancel(w);return
 			if w.hero_skill.is_empty():return
 			set_phase(w,"brake")
@@ -232,7 +232,7 @@ static func apply_contact(w,contact: Dictionary,damage: int) -> void:
 		"boss":
 			if not "boss" in w.hero_skill.hits:
 				w.hero_skill.hits.append("boss")
-				if w.boss_vulnerable():w.damage_boss(damage)
+				w.damage_boss(damage)
 				if w.state!="playing":cancel(w)
 		"crate":w.open_crate(contact.target)
 		"object":CampaignContent.hit_object(w,Vector2(float(contact.target.x),float(contact.target.y)-35.),damage)

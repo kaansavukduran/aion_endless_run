@@ -60,8 +60,8 @@ const LEAF_PLANS := {
 ## to preserve the crumbling bridge setpiece intact.
 const MAIN_PLANS := {
 	"shore": [
-		{"x":1850.,"role":"shore_priority","enemies":[["gnome",0.,0.],["seed",220.,0.],["gnome",360.,0.]],"platforms":[[110.,-70.,175.]],"crate":420.,"fruit":[130.,-112.,3],"gate":true},
-		{"x":3150.,"role":"shore_vertical","enemies":[["crow",60.,-120.],["gnome",210.,0.],["seed",390.,0.],["crow",500.,-130.]],"platforms":[[40.,-72.,165.],[240.,-135.,170.]],"prop":["bridge",180.],"fruit":[65.,-112.,3],"gate":false},
+		{"x":1850.,"role":"shore_priority","enemies":[["gnome",0.,0.],["lantern_scout",220.,0.],["gnome",360.,0.]],"platforms":[[110.,-70.,175.]],"crate":420.,"fruit":[130.,-112.,3],"gate":true},
+		{"x":3150.,"role":"shore_vertical","enemies":[["crow",60.,-120.],["gnome",210.,0.],["cap_lobber",390.,0.],["crow",500.,-130.]],"platforms":[[40.,-72.,165.],[240.,-135.,170.]],"prop":["bridge",180.],"fruit":[65.,-112.,3],"gate":false},
 		{"x":4450.,"role":"shore_pre_bridge","enemies":[["beetle",0.,0.],["seed",215.,0.],["crow",350.,-125.],["beetle",495.,0.]],"platforms":[[120.,-75.,170.],[340.,-128.,160.]],"prop":["turret",320.],"crate":560.,"fruit":[140.,-115.,3],"gate":false},
 		{"x":6680.,"role":"shore_finish","enemies":[["beetle",0.,0.],["seed",190.,0.],["crow",330.,-120.],["seed",470.,0.]],"platforms":[[90.,-75.,175.]],"crate":530.,"fruit":[115.,-115.,3],"gate":true}
 	],
@@ -119,7 +119,7 @@ static func populate(w) -> void:
 				ids.append(w.section+":enemy:"+str(300+i*10+k))
 			if plan.has("crate"):
 				var cx: float=x+float(plan.crate)
-				if w.floor_at(cx)==0.:
+				if CampaignGround.has_floor(w.floor_at(cx)):
 					var cid: String=w.section+":crate:"+str(crate_index)
 					if not w.taken.has(cid):w.crates.append({"id":cid,"x":cx,"y":0.,"kind":"heavy","hp":1})
 					crate_index+=1
@@ -145,7 +145,7 @@ static func populate(w) -> void:
 			if plan.has("prop"):
 				var pspec: Array=plan.prop
 				var pkind: String=str(pspec[0]);var px: float=x+float(pspec[1])
-				if w.floor_at(px)==0.:
+				if CampaignGround.has_floor(w.floor_at(px)):
 					var pid: String=w.section+":tactic:"+str(i)
 					w.objects.append({"id":pid,"kind":pkind,"x":px,"y":0.,"hp":2,"active":w.activated.has(pid),"secret":""})
 					if pkind=="planks":w.platforms.append(Rect2(px-80.,-55.,160.,18.))
@@ -158,7 +158,7 @@ static func populate(w) -> void:
 				ids.append(w.section+":enemy:"+str(300+i*10+k))
 			if plan.has("crate"):
 				var cx: float=x+float(plan.crate)
-				if w.floor_at(cx)==0.:
+				if CampaignGround.has_floor(w.floor_at(cx)):
 					var cid: String=w.section+":crate:"+str(main_crate_index)
 					if not w.taken.has(cid):w.crates.append({"id":cid,"x":cx,"y":0.,"kind":"heavy","hp":1})
 					main_crate_index+=1
@@ -194,7 +194,7 @@ static func populate(w) -> void:
 		for i in prop_count:
 			var kind: String=OBJECTS[(i+abs(w.section.hash()))%OBJECTS.size()]
 			var x: float=lerpf(620.,w.length()-820.,float(i)/maxf(1.,prop_count-1))
-			if w.floor_at(x)!=0.:continue
+			if not CampaignGround.has_floor(w.floor_at(x)):continue
 			w.objects.append({"id":w.section+":object:"+str(i),"kind":kind,"x":x,"y":0.,"hp":2,"active":w.activated.has(w.section+":object:"+str(i)),"secret":""})
 			if kind=="planks":w.platforms.append(Rect2(x-80.,-55.,160.,18.))
 		# The first coast lamps establish a visible change, not a tutorial modal.
@@ -250,7 +250,7 @@ static func step(w,dt: float) -> void:
 		if o.kind=="turret" and not bool(o.active) and absf(w.player.x-float(o.x))<500.:
 			o.clock=float(o.get("clock",0.))+dt
 			if fmod(float(o.clock),3.)<dt:
-				var origin:=Vector2(float(o.x),-45.);var velocity: Vector2=(w.player+Vector2(0,-38.)-origin).normalized()*200.
+				var origin:=Vector2(float(o.x),float(o.y)-45.);var velocity: Vector2=(w.player+Vector2(0,-38.)-origin).normalized()*200.
 				w.bullets.append({"p":origin,"v":velocity,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
 		if o.kind in ["current","updraft"] and absf(w.player.x-float(o.x))<110.:
 			if o.kind=="current" and w.grounded():w.player.x+=32.*dt
@@ -264,12 +264,15 @@ static func step(w,dt: float) -> void:
 		h.clock=float(h.clock)+dt;h.phase=fmod(float(h.clock),4.8);h.warn=float(h.phase)>2.6 and float(h.phase)<3.5
 		if float(h.phase)>=3.5 and float(h.phase)<4.1 and int(h.get("last_pulse",-1))!=int(float(h.clock)/4.8):
 			h.last_pulse=int(float(h.clock)/4.8)
+			var surface: float=w.floor_at(float(h.x))
+			if not CampaignGround.has_floor(surface):continue
 			if h.kind=="crystal":
-				for direction in [-1.,1.]:w.bullets.append({"p":Vector2(float(h.x),-115.),"v":Vector2(direction*220.,0.),"owner":"enemy","age":0.,"kind":"crystal","damage":1,"pierce":0,"hit":[]})
+				for direction in [-1.,1.]:w.bullets.append({"p":Vector2(float(h.x),surface-115.),"v":Vector2(direction*220.,0.),"owner":"enemy","age":0.,"kind":"crystal","damage":1,"pierce":0,"hit":[]})
 			if absf(w.player.x-float(h.x))<50.:
-				if h.kind=="gust" and w.player.y< -40.:w.player.x-=70.;w.velocity.y=-180.
-				elif h.kind=="sluice" and w.player.y> -60.:w.player.x-=60.;w.velocity.y=-200.
-				elif h.kind not in ["gust","sluice","crystal"] and w.player.y> -90.:
+				var above: float=surface-w.player.y
+				if h.kind=="gust" and above>40.:w.player.x-=70.;w.velocity.y=-180.
+				elif h.kind=="sluice" and above<60.:w.player.x-=60.;w.velocity.y=-200.
+				elif h.kind not in ["gust","sluice","crystal"] and above<90.:
 					if not (h.kind=="electric" and bool(w.mount.ridden) and float(w.mount.get("dive",0.))>0.):w.damage_player("hazard")
 	if not w.hazards.is_empty():w.hazards=w.hazards.filter(func(h):return not bool(h.get("once",false)) or float(h.clock)<4.2)
 	for z in w.zones:
@@ -280,7 +283,6 @@ static func step(w,dt: float) -> void:
 		for p in w.pickups:
 			var point:=Vector2(float(p.x),float(p.y))
 			if point.distance_to(w.player)<250.:point=point.move_toward(w.player,320.*dt);p.x=point.x;p.y=point.y
-	# Late boss phases alter one optional platform on a readable cycle, keeping the floor safe.
 	w.disabled_platforms.clear()
 	for x in w.platform_timers:
 		w.platform_timers[x]=maxf(0.,float(w.platform_timers[x])-dt)
@@ -288,4 +290,3 @@ static func step(w,dt: float) -> void:
 	for x in w.bridge_timers:
 		w.bridge_timers[x]=maxf(0.,float(w.bridge_timers[x])-dt)
 		if float(w.bridge_timers[x])<=0.:w.disabled_platforms[x]=true
-	if w.section=="arena" and int(w.boss.phase)>=2 and fmod(float(w.boss.clock),7.)>3.5:w.disabled_platforms[690.]=true

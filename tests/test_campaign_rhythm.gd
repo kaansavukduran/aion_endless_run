@@ -59,7 +59,7 @@ func run() -> void:
 		check(w.enemies.all(func(e):return bool(e.mini) or bool(e.heavy) or int(e.hp)==1),"Normal enemies retain one hit: "+section)
 		check(w.encounters.all(func(e):return int(e.variant)>=0 and int(e.variant)<=2),"Authored groups use bounded spacing variants: "+section)
 		if section!="shore":check(w.encounters.size()==8,"Long routes have eight closer tactical groups: "+section)
-		for x in CampaignRecovery.points(w):check(x>0. and w.floor_at(x)==0.,"Recovery flag has real floor support: "+section)
+		for x in CampaignRecovery.points(w):check(x>0. and CampaignGround.has_floor(w.floor_at(x)),"Recovery flag has real floor support: "+section)
 	w=fresh();w.load_section("shore");w.enemies.clear();w.gates.clear();w.npcs.clear();w.objects.clear()
 	w.player=Vector2(5920.,-40.);w.velocity=Vector2.ZERO;CampaignRhythm.step(w)
 	check(w.bridge_timers.has(5800.) and not w.disabled_platforms.has(5800.),"Bridge contact starts a warning, not an immediate fall")

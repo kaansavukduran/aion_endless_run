@@ -13,6 +13,9 @@ p.add_argument('--play-only',action='store_true',help='Skip the independently ch
 p.add_argument('--retry-profile',action='store_true',help='Measure five genuine new runs started from Pause.')
 p.add_argument('--warm-launch',action='store_true',help='Measure a second launch after the service worker has cached the actual PCK.')
 p.add_argument('--special-probe',action='store_true',help='Use the selected new hero skill through ordinary keys before the full mission, without injecting a target.')
+p.add_argument('--observe-terrain', action='store_true', help='Capture actual supported feet on the Mission 1 terrain profiles during a complete route.')
+p.add_argument('--observe-shooters', nargs='?', const='both', choices=['both','lantern_scout','cap_lobber'], help='Reach and observe one or both Shore shooters through ordinary player controls.')
+p.add_argument('--sprint-open', action='store_true', help='Use the ordinary sprint key on clear stretches during a complete route.')
 p.add_argument('--pause-crouch-probe',action='store_true',help='Observe the real crouched gun pose across Pause and Resume, using ordinary keys and pointer aim.')
 a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];console=[]
@@ -340,7 +343,7 @@ with sync_playwright() as pw:
             check(True,'Virtual Xbox B throws a grenade during normal gameplay')
             page.evaluate('qaPadConnect(false)');canvas.focus()
     if a.play_through or a.rescue_only:
-        held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None;board_attempts=set();vehicle_inputs=[];fork_inputs=[];rescue_presentations=[]
+        held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None;board_attempts=set();vehicle_inputs=[];fork_inputs=[];rescue_presentations=[];terrain_samples={}
         def keys(wanted):
             global held
             for k in held-set(wanted):page.keyboard.up(k)
@@ -421,8 +424,21 @@ with sync_playwright() as pw:
             check(saved['awarded'].get(captive['id']+':gift') and saved['taken'].get(captive['id']+':supply') and captive['id'] in saved['rescued'],'Actual dropped-item contact and rescue reach persistent browser storage once')
             record_profile()
             return current
+        arena_phases=set()
+        shooter_proof={}
+        shooter_types={'lantern_scout':'scout_bolt','cap_lobber':'lob_seed'}
+        if a.observe_shooters not in [None,'both']:
+            shooter_types={a.observe_shooters:shooter_types[a.observe_shooters]}
+        skipped_shooter_assist=False
+        previously_mounted=False
+        next_move_refresh=0.
         while time.monotonic()-started<a.max_seconds:
             d=data();now=time.monotonic();state=d['state'];section=d['section']
+            if previously_mounted and not d['mounted']:
+                # Vehicle impact releases the application's action sources.
+                # Re-press keys after the pilot is out, just as a player can.
+                keys([])
+            previously_mounted=d['mounted']
             # The real fade suppresses input through its second half, even
             # after the destination world is playing. Release held keys before
             # polling so a swallowed keydown is not cached as still applied.
@@ -434,6 +450,21 @@ with sync_playwright() as pw:
                 keys([])
                 (a.evidence/'playthrough.json').write_text(json.dumps({'completed':False,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'vehicle_inputs':vehicle_inputs,'physical_forks':fork_inputs,'rescue_story_inputs':rescue_presentations,'final':d,'failure':'Requested '+a.route+' but physically entered '+section},indent=2)+'\n')
                 check(False,'Requested physical '+a.route+' route must not enter '+section)
+            if a.observe_terrain and state=='playing' and d['grounded'] and not d['mounted']:
+                floor=d.get('pose',{}).get('floor',0.)
+                if abs(floor)>21. and abs(d['player'][1]-floor)<1. and section not in terrain_samples:
+                    terrain_samples[section]={'player':d['player'],'floor':floor,'world_time':d['time'],'camera':d['camera']}
+                    (a.evidence/'actual-terrain.json').write_text(json.dumps(terrain_samples,indent=2)+'\n')
+                    page.screenshot(path=str(a.evidence/(section+'-supported-terrain.png')))
+            if d.get('presentation')=='boss_reveal':
+                keys([])
+                if not (a.evidence/'boss-in-world.png').exists():
+                    check(not d['menu'] and not d['boss_engaged'],'Actual arena entrance holds threats for the in-world reveal')
+                    page.screenshot(path=str(a.evidence/'boss-in-world.png'))
+                page.wait_for_timeout(65);continue
+            if section=='arena' and d.get('boss_engaged') and d['boss_phase'] not in arena_phases:
+                arena_phases.add(d['boss_phase'])
+                page.screenshot(path=str(a.evidence/('boss-phase-'+str(d['boss_phase'])+'.png')))
             if state=='complete':
                 keys([])
                 # The boss death and new short celebration must finish before
@@ -449,12 +480,30 @@ with sync_playwright() as pw:
                 elif d['menu']=='dead':raise AssertionError(('Continue expired during the route playthrough',d))
                 elif d['menu'] in ['fork_one','fork_two']:
                     raise AssertionError(('Gameplay must not open a text route-choice menu',d))
-                elif d['menu']=='boss':
-                    (a.evidence/'boss-entry-state.json').write_text(json.dumps(d,indent=2)+'\n')
-                    canvas.focus();page.keyboard.press('Enter');page.wait_for_timeout(350)
                 elif d['menu']=='paused':button(text='Devam et')
                 page.wait_for_timeout(120);canvas.focus();continue
             if state!='playing':keys([]);page.wait_for_timeout(80);continue
+            if a.observe_shooters and section=='shore':
+                x,y=d['player']
+                if not skipped_shooter_assist and 1090<x<1160 and d['grounded']:
+                    # Leave the normally available owl feather on the ground
+                    # so it cannot remove a shooter before the release probe.
+                    keys(['d']);page.keyboard.press('Space');last_jump=now
+                    skipped_shooter_assist=True
+                    page.wait_for_timeout(65);continue
+                shooter=next((e for e in d['enemies'] if e['kind'] in shooter_types and e['kind'] not in shooter_proof and abs(e['x']-x)<440),None)
+                if shooter and (shooter['windup']>0 or abs(shooter['x']-x)<350):
+                    keys([])
+                    kind=shooter['kind']
+                    if shooter['windup']>0 and not (a.evidence/(kind+'-warning.png')).exists():
+                        page.screenshot(path=str(a.evidence/(kind+'-warning.png')))
+                    projectile=next((b for b in d['bullets'] if b[4]==shooter_types[kind]),None)
+                    if shooter['recover']>0 and projectile:
+                        shooter_proof[kind]={'enemy':shooter,'projectile':projectile,'player':d['player']}
+                        page.screenshot(path=str(a.evidence/(kind+'-release.png')))
+                        check((a.evidence/(kind+'-warning.png')).exists(),kind+' warns visibly before an actual projectile and recovery')
+                        if set(shooter_proof)==set(shooter_types):break
+                    page.wait_for_timeout(65);continue
             if section in ['fork_one','fork_two']:
                 # These are real traversal sections. Upper uses reachable
                 # stepping platforms; lower walks into the channel. No route
@@ -476,7 +525,8 @@ with sync_playwright() as pw:
                     # Repeated jumps from entry can overshoot the narrow first
                     # service step. Select the next reachable physical surface,
                     # then walk/backtrack to its approach through real controls.
-                    higher=[p for p in d['platforms'] if 1<d['player'][1]-p[1]<=105]
+                    exhausted={float(x) for x,timer in d.get('bridge_timers',{}).items() if timer<=0.}
+                    higher=[p for p in d['platforms'] if p[0] not in exhausted and 1<d['player'][1]-p[1]<=105]
                     if higher:
                         jump_target=max(higher,key=lambda p:p[1])
                         takeoff=jump_target[0]-70
@@ -485,7 +535,24 @@ with sync_playwright() as pw:
                             page.keyboard.press('Space');last_jump=now
                 if not upper and section=='fork_one' and 620<d['player'][0]<1210 and d['player'][1]>35:
                     wanted.append('s')
+                if not upper and section=='fork_one' and 660<d['player'][0]<777 and d['player'][1]<-5:
+                    # A jump or a vehicle dismount may land on the service
+                    # stair. Use the game's normal Down + Jump drop-through
+                    # before walking into the lower crawlway.
+                    wanted.append('s')
+                    keys(wanted)
+                    if d.get('grounded') and now-last_jump>.35:
+                        page.keyboard.press('Space');last_jump=now
+                if not upper and section=='fork_two':
+                    lock=next((o for o in d['objects'] if o.get('id')=='fork_two:root_lock' and not o['active']),None)
+                    if lock and 45<lock['x']-d['player'][0]<650:
+                        page.mouse.move(*xy(lock['x']-d['camera'],lock['y']+d['ground']-d['camera_y']-34.))
                 keys(wanted)
+                horizontal='a' if 'a' in wanted else 'd'
+                if d.get('grounded') and abs(float(d['velocity'][0]))<.1 and now>=next_move_refresh:
+                    for key in ('a','d'):page.keyboard.up(key)
+                    page.keyboard.down(horizontal)
+                    next_move_refresh=now+.8
                 if section=='fork_one' and 780<d['player'][0]<1180 and d.get('crouching') and d['player'][1]>35:
                     if not fork_inputs[-1].get('crawled_under_pier'):
                         page.screenshot(path=str(a.evidence/(a.hero+'-pier-crawl.png')))
@@ -542,7 +609,7 @@ with sync_playwright() as pw:
                 # The authored vehicle is twice the actor's height; its high
                 # cannon passes over a short nearby ground enemy. Aim downward
                 # from range, then use the real Exit control for close combat.
-                if section not in ['quay','water'] or (target and abs(target['x']-x)<100 and target['y']>=y-45):
+                if section not in ['quay','water'] or (target and abs(target['x']-x)<100 and target['y']>=y-45) or (a.observe_terrain and section=='water' and 5100<x<5650 and 'water' not in terrain_samples):
                     keys([]);page.keyboard.press('e');page.wait_for_timeout(650)
                     vehicle_inputs.append({'action':'exit','section':section,'x':x,'reason':'close ground target' if target else 'raised route'})
                     continue
@@ -550,19 +617,45 @@ with sync_playwright() as pw:
             closed=any(g['closed'] and 0<=g['x']-x<180 for g in d['gates'])
             if target and (closed or abs(target['x']-x)<320):
                 facing=1 if target['x']>=x else -1;direction='d' if facing==1 else 'a'
-                if target['y']<-65 and abs(target['x']-x)<280 and d['facing']==facing:direction=''
+                if target['y']<y-65 and abs(target['x']-x)<280 and d['facing']==facing:direction=''
             if section=='arena':
                 desired=float(d.get('boss_x',1400))-210
                 direction='d' if x<desired-35 else ('a' if x>desired+35 else ('d' if d['facing']<0 else ''))
                 if target and abs(target['x']-x)<450:
                     facing=1 if target['x']>=x else -1;direction='' if d['facing']==facing else ('d' if facing==1 else 'a')
                 if d.get('boss_warning',0)>0 and abs(x-d.get('boss_beam_x',-999))<95:direction='a'
-            if target and target['y']<-65 and abs((y-46)-(target['y']-30))>34:wanted=[]
+            if a.observe_terrain and (target or section=='arena') and not d['mounted']:
+                # Pointer aiming is a real player control. Terrain puts targets
+                # above and below the original zero-Y combat line.
+                target_x,target_y=(target['x'],target['y']-34.) if target else (d['boss_x'],d['boss_y']-75.)
+                sx=target_x-d['camera']
+                sy=target_y+d['ground']-d['camera_y']
+                if 24<sx<d['view'][0]-24 and 57<sy<d['view'][1]-25:
+                    page.mouse.move(*xy(sx,sy))
+                    wanted=['f']
+            elif target and target['y']<y-65 and abs((y-46)-(target['y']-30))>34:
+                wanted=[]
             if direction:wanted.append(direction)
+            if a.sprint_open and direction=='d' and onfloor and not targets and section!='arena' and not any(0<p[0]-x<160 for p in d['pits']):
+                wanted.append('Shift')
             if d['mounted'] and target and target['y']>=y-75 and 100<=abs(target['x']-x)<250:
                 wanted=['f','s','d' if target['x']>x else 'a']
+            preserve_target=a.observe_shooters and section=='shore' and target and target['kind'] in shooter_types and target['kind'] not in shooter_proof
+            if a.observe_shooters:
+                observing_scout='lantern_scout' in shooter_types and 'lantern_scout' not in shooter_proof and x>=1160.
+                observing_lobber='cap_lobber' in shooter_types and not observing_scout and x>=2850.
+                if observing_scout or observing_lobber:wanted=[key for key in wanted if key!='f']
             keys(wanted)
-            flyer=target and target['y']<-65 and abs(target['x']-x)<450
+            if direction and direction in wanted and onfloor and abs(float(d['velocity'][0]))<.1 and now>=next_move_refresh:
+                # After a transition the game may consume the previously held
+                # action. Use a fresh physical key press in an open lane.
+                blocked=any(g['closed'] and abs(g['x']-x)<50 for g in d['gates'])
+                if not blocked:
+                    with (a.evidence/'movement-refresh.jsonl').open('a') as log:
+                        log.write(json.dumps({'section':section,'position':d['player'],'move_axis':d.get('move_axis'),'keyboard':d.get('keyboard_movement'),'stunned':d.get('vehicle_stunned'),'key':direction})+'\n')
+                    page.keyboard.up(direction);page.keyboard.down(direction)
+                    next_move_refresh=now+.8
+            flyer=target and target['y']<y-65 and abs(target['x']-x)<450
             gap=any(0<p[0]-x<150 for p in d['pits'])
             object_gate=not targets and any(o['kind']=='gate' and not o['active'] and 0<o['x']-x<110 for o in d.get('objects',[]))
             danger=any(math.hypot(b[0]-x,b[1]-(y-37))<100 for b in d.get('bullets',[]))
@@ -570,8 +663,11 @@ with sync_playwright() as pw:
             if onfloor and (flyer or gap or danger or object_gate or charge) and now-last_jump>.85:
                 page.keyboard.press('Space');last_jump=now
             near=any(abs(e['x']-x)<95 and abs(e['y']-y)<75 for e in targets)
-            if near and now-last_melee>.35:page.keyboard.up('f');page.keyboard.down('f');last_melee=now
-            if d['grenades']>0 and now-last_bomb>3 and (len([e for e in targets if 100<e['x']-x<440])>=3 or (target and target['hp']>1 and abs(target['x']-x)<400) or (section=='arena' and abs(float(d.get('boss_x',1400))-x)<430)):
+            if near and not preserve_target and now-last_melee>.35:
+                if a.observe_shooters:page.keyboard.press('f')
+                else:page.keyboard.up('f');page.keyboard.down('f')
+                last_melee=now
+            if not a.observe_shooters and d['grenades']>0 and now-last_bomb>3 and (len([e for e in targets if 100<e['x']-x<440])>=3 or (target and target['hp']>1 and abs(target['x']-x)<400) or (section=='arena' and abs(float(d.get('boss_x',1400))-x)<430)):
                 page.keyboard.press('g');last_bomb=now
             if a.expanded_rescue:
                 unclaimed=next((n for n in d.get('npcs',[]) if n['freed'] and not n['secret'] and not d['awarded'].get(n['id']+':gift') and abs(n['x']-x)<180 and abs(n['y']-y)<20 and not d['mounted']),None)
@@ -613,10 +709,18 @@ with sync_playwright() as pw:
                 print('PLAY',section,round(x),'y',round(y),'HP',d['hp'],'boss',d['boss_hp'],'retry',retries,flush=True);last_report=now
             page.wait_for_timeout(65)
         keys([])
+        if a.observe_shooters:
+            (a.evidence/'ground-shooters.json').write_text(json.dumps(shooter_proof,indent=2)+'\n')
+            check(set(shooter_proof)==set(shooter_types),'Each requested Shore shooter prepares, releases and recovers in ordinary play')
+            check(not errors,'No page exceptions during the ordinary-input encounters')
+            print(f'RESULT: {len(checks)} route input checks, 0 failures');raise SystemExit(0)
         (a.evidence/'playthrough.json').write_text(json.dumps({'completed':completed,'stages':stages,'retries':retries,'elapsed_seconds':time.monotonic()-started,'rescues_tested':rescues_tested,'vehicle_inputs':vehicle_inputs,'physical_forks':fork_inputs,'rescue_story_inputs':rescue_presentations,'final':data()},indent=2)+'\n')
         if a.rescue_only:check(bool(rescues_tested),'An actual captive was reached, cut free and rewarded through ordinary controls')
         else:
             check(completed,'Mission 1 is completable with actual keyboard/mouse-equivalent gameplay')
+            check(arena_phases=={1,2,3},'An ordinary run reaches all three distinct boss phases')
+            if a.observe_terrain:
+                check('shore' in terrain_samples and a.route in terrain_samples,'Actual controls cross non-zero supported ground on the opening route and chosen branch')
             check(a.route in data()['route'],'The chosen branch was actually recorded')
             check(len(fork_inputs)==(1 if a.route=='water' else 2),'Every required route fork was traversed through ordinary movement')
             if a.route=='water':check(any(f.get('crawled_under_pier') for f in fork_inputs),'Water entry includes actual crouched travel beneath the pier ceiling')

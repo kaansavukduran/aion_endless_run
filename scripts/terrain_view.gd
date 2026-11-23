@@ -2,7 +2,8 @@ class_name RunnerTerrainView
 extends RefCounted
 
 ## Authored pixel materials, cached once per tile. No gameplay RNG, height offsets,
-## texture stretching or new collision surfaces. One source pixel = two world pixels.
+## texture stretching. Arcade floor heights come from the shared terrain query.
+## One source pixel = two world pixels.
 const TILE_SIZE := Vector2i(1024, 96)
 const PIXEL := 2
 const VARIANTS := 1
@@ -149,3 +150,50 @@ func draw_layer(host, kind: int, scroll: float, night: float, opacity: float) ->
 func draw(host, kind: int, previous: int, blend: float, scroll: float, night: float) -> void:
 	if blend < 1.0: draw_layer(host, previous, scroll, night, 1.0)
 	draw_layer(host, kind, scroll, night, blend)
+
+# Mission surfaces reuse the original pixel material at its native scale.
+# A sloped strip follows its sampled support instead of stretching the art.
+func draw_campaign_floor(host,kind: int,world,scroll: float) -> void:
+	var profile: Array=CampaignGround.PROFILES.get(world.section,[])
+	if profile.is_empty() or scroll>profile.back().x or scroll+host.scene_w<profile.front().x:
+		draw_layer(host,kind,scroll,.05,1.)
+		return
+	var palette_colors:=palette(kind)
+	var tint:=Color.WHITE.lerp(Color("7e86a4"),.016)
+	var sample_width:=8.
+	for strip in strips(host.scene_w,scroll):
+		var left: float=strip.x
+		var right: float=left+strip.width
+		var x:=maxf(left,0.)
+		while x<minf(right,host.scene_w):
+			var width:=minf(sample_width,minf(right,host.scene_w)-x)
+			var support: float=world.floor_at(scroll+x+width*.5)
+			var y: float=host.ground+(roundf(support) if CampaignGround.has_floor(support) else 0.)
+			var depth:=maxf(0.,host.scene_h-y)
+			var visible:=minf(depth,TILE_SIZE.y*PIXEL)
+			if depth>visible:host.draw_rect(Rect2(x,y+visible,width,depth-visible),palette_colors[6]*tint)
+			if visible>0.:
+				host.draw_texture_rect_region(tile(kind,strip.variant),Rect2(x,y,width,visible),
+					Rect2((x-left)/PIXEL,0.,width/PIXEL,visible/PIXEL),tint,false)
+			x+=width
+	# A thin crest line traces the actual shared surface landmarks.
+	for i in range(1,profile.size()):
+		var from: Vector2=host.at(profile[i-1])
+		var to: Vector2=host.at(profile[i])
+		if to.x>=0. and from.x<=host.scene_w:host.draw_line(from,to,palette_colors[0]*tint,2.)
+
+func draw_campaign_bank(host,kind: int,world,scroll: float) -> void:
+	var profile: Array=CampaignGround.PROFILES.get(world.section,[])
+	if profile.is_empty() or scroll>profile.back().x or scroll+host.scene_w<profile.front().x:return
+	var depth:=0.
+	for point in profile:depth=maxf(depth,point.y)
+	if depth<=0.:return
+	var colors:=palette(kind)
+	var shade:=Color.WHITE.lerp(Color("3d4b4d"),.57)
+	var pattern_height:=minf(depth+3.,(TILE_SIZE.y-21)*PIXEL)
+	if depth+3.>pattern_height:host.draw_rect(Rect2(0.,host.ground-3.+pattern_height,host.scene_w,depth+3.-pattern_height),colors[6]*shade)
+	for strip in strips(host.scene_w,scroll*.72):
+		host.draw_texture_rect_region(tile(kind,strip.variant),
+			Rect2(strip.x,host.ground-3.,strip.width,pattern_height),
+			Rect2(0.,21.,TILE_SIZE.x,pattern_height/PIXEL),shade,false)
+	host.draw_line(Vector2(0.,host.ground-3.),Vector2(host.scene_w,host.ground-3.),colors[2]*shade,2.)

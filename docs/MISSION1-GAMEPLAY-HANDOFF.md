@@ -2,6 +2,34 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+### Çalışmayı sürdürmek için
+
+- 0.52.0 kaynağı `main` `d85ac8aa18157ab81923a43569c6c8d01ecaaa4e`. [PR 13](https://github.com/kaansavukduran/aion_endless_run/pull/13) 54.895 kaynak kontrolüyle geçti. İlk main paketinde tarayıcı sıfır yazı boyutuna takıldı. [İkinci main denemesi](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45177198891/attempts/2) ve [Pages dağıtımı](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45182729343) başarılı. Canlı 0.52.0 `1303c953cb98dce4` manifestindeki 13 dosya, SHA-256 ve boyutla doğrulandı. WebAssembly MIME türü de doğru. Canlı tarayıcı koşusu bu sırada yürütülüyor. [Canlı oyun](https://kaansavukduran.github.io/aion_endless_run/)
+- Sıfır boyutlu Ateş düğmesi hatası Linux görüntüleyicisinde özel olarak yeniden üretildi. Düzeltilen 0.52.1 `9ebf6c8`, 42 görüntüleme ve 1.565 hedefli kaynak kontrolünden geçti. [PR 14](https://github.com/kaansavukduran/aion_endless_run/pull/14) paketi ve tarayıcı işini yeniden çalıştırıyor. İlk yayın eylemi main paketinin sonucunu, Pages’in aynı paketi aldığını ve gerçek sitede açılışı ayrı ayrı doğrulamak.
+- Yerel çalışma ağaçları `/workspace/work/mission1-ground`, `/workspace/work/mission1-ground-shooters` ve `/workspace/work/mission1-root-engine`. En ileri aday yerel 0.55.0 `6a6055e881b8dd9f` çıktısıdır. Düzeltme ve yayın kanıtları `/workspace/work/arcade-lives` altında, rota ve boss kanıtları `/workspace/work/mission1-root-engine-runtime` altında.
+- Armadillo `roots-final-normal` kaydında gerçek klavye ve fareyle Mission 1’i tamamladı. Kök kilidi açıldı, üç boss evresi geçildi, 36.625 skor ve sonuç kaydedildi. Test koşusunda 14 Continue kullanıldı. Yeniden başlatma, ayrıca gerçek arena arayüzündeki düğmeyle sınandı. Yeni görev, kahraman, üç yaşam ve önceki rekor doğrulandı. Eren’in önceki normal koşusu Teraslar’dan finale varıp ikinci evrede süre sınırına girdi. `water-final-frog` ve `terrace-final-eren` gerçek oyun koşularının sonucu bekleniyor.
+- 0.55.0 `6a6055e881b8dd9f` ayrıca Linux Firefox’ta açılma, normal klavye hareketi, dikey dönüşte kahraman ve koşuyu koruma kontrollerini geçti. İlk Firefox işlemi çalışma ortamının yazılabilir önbelleği eksikken tarayıcı açılışında zaman aşımına uğramıştı. Fiziksel cihaz ve oyuncu kabulü bekliyor.
+
+## 23 Kasım 2026 · Yerel 0.55.0 Kök Motoru adayı
+
+- Kök Motoru arenanın içinde zeminden yükselir. Giriş 1,65 saniye sürer, atlama düğmesi ile kapanabilir ve azaltılmış harekette sabit kalır. Doğal bitiş ve atlama aynı savaş durumunu açar. Giriş boyunca saldırı saati çalışmaz.
+- Aktif alanda alçak cep ve iki gerçek basamak var. Portların çıkışları, çekirdek, dalga, ışın ve yüklü gövde hareketi yerel zemini kullanır. İkinci evrede üst platform çökmeden önce kenarı işaretlenir. Evre değişiminde eski boss mermileri temizlenir. Hasar kaynakları aynı çekirdek açıklığını ve evre sınırlarını kullanır. Zafer tek sefer sayılır ve parçaların düşüşü zamanlanır.
+- Dört hedefli kaynak grubunda 632 kontrol, iki dilde ve iki yönde menü ve giriş testlerinde 961 kontrol ve Linux görüntüleyicide üç açığa çıkış karesi geçti. Atış dengesinin, üç yolun ve farklı kahramanların normal oyuncu girdileriyle finali tamamlamasının doğrulanması sürüyor.
+- Arenadan başlatılan motor testlerinde altı kahraman gerçek hareket, nişan, ateş, eğilme ve zıplama girişleriyle üç evreyi de geçti. Aion, Kutsanmış, Ayça, Eren ve Armadillo 70 atışla, Kurbağa 72 atışla kazandı. Koşuların her birinde iki yaşam tüketildi. Görevin girişinden finale uzanan tarayıcı koşusu ayrıca yürütülüyor.
+- Eren ile Kırık İskele’nin ve Dalların Arası’nın üst geçitleri normal klavye girdileriyle geçildi. İkinci köprü çöktükten sonra manuel bir şarjlı zıplama Bahçe Terasları’na ulaştırdı. Güç toplamayan kahramanlara da dönüş yolu açan destek basamağı eklendi. Kutsanmış’ın iki sıradan zıplamayla üst kata dönüşü dahil 179 fiziksel rota kontrolü geçti.
+- Sıradaki ilk eylem local Web adayında sıradan kontrol girdileriyle arena sonucu ve yeniden deneme akışını oynamak. Başarılı 0.52 kaydı sonrası arazi ve düşman yerel dallarıyla eşleştir, ardından doğrulanmış aday için yayın kapısını çalıştır.
+
+## 23 Kasım 2026 · Yerel 0.54.0 kara atıcıları adayı
+
+- Fener kıyısında Fener Nöbetçisi ve Mantar Atıcısı normal bölüme bağlı. Nöbetçi okunur bir düz atış hattı gösterir. Atıcı önceden işaretlediği noktaya doğru yerçekimli bir kapsül yollar. İkisi de zeminle birlikte yürür, görünür alanda tam hazırlık yapar ve tek atıştan sonra kendi toparlanma süresini geçirir.
+- Özgün iki pafta oyunda çiziliyor. Her düşmanda altı yürüyüş karesi, ayrı hazırlık/atış/toparlanma pozları ve üç karelik yere çökme var. Kaynak, ayak ve atış bağlantıları [varlık kaydında](../assets/CAMPAIGN-GROUND-SHOOTERS-PROVENANCE.json).
+- 24 hedefli kaynak kontrolü ve dört Linux görüntüleme örneği geçti. Fener Nöbetçisi ve Mantar Atıcısı, 0.54.0 yerel Chromium çıktısında ayrı koşularda görünür hazırlık, gerçek atış ve toparlanma verdi. Bu makbuzlar `ordinary-4` ve `ordinary-5` doğrulama klasörlerindedir. İki farklı atış sesi daha sonra bağlandı. O sesleri içeren son derlemenin sıradan tarayıcı koşusunu tamamlamak gerekiyor.
+
+## 23 Kasım 2026 · Yerel 0.53.0 arazi adayı
+
+- `feat/mission1-ground` çalışma dalında Fener kıyısı, Kırık iskele, Dalların arası, Su kanalı, Bahçe terasları, Kök geçidi ve Bakır röle gerçek yükseklik profilleri kullanıyor. Ortak yüzey hesabı yürüyüşü, araçları, yürüyen düşmanları, NPC ayaklarını, ikmali, mermi engellemesini, bomba sekmesini ve yedek yaşam inişini taşıyor. Eski kaydın konumu ve bekleyen yer hediyeleri gerçek yeni yüzeye uyarlanır.
+- 54.871 kaynak kontrolü ve beş Linux görüntüleme örneği geçti. Yerel Chromium normal girişinde Fener kıyısında `y=56`, Kırık iskelede `y=38` ve Su Kanalı havzasında `y=208` seviyelerinde gerçek ayak desteği gözlemlendi. İlk ayrımda normal Aşağı + Zıpla, sonra eğilerek iskele altından Su Kanalı’na inildi. Koşu Bakır röleye ulaştı.
+- Sonraki ilk eylem, açık tarayıcı koşusunu sonuca kadar izlemek ve Dalların arası üzerinden Teras ve Kök Geçidi girişlerini doğrulamak. Aday yerel ve üç rotalı test sürüyor.
 ## 23 Kasım 2026 · 0.52.1 · Dokunma düğmesi yerleşimi
 
 - 0.52.0 PR’sı geçti ve `d85ac8a` ile `main`e alındı. İlk `main` paketinde normal kurtarma akışı geçti. Konsol kapısı `TextServer` sıfır yazı boyutu hatasını yakaladı. Başarısız iş aynı `main` commit’inde yeniden çalıştırılıyor. [GitHub Actions](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45177198891)

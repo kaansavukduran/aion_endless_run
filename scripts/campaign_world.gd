@@ -1,7 +1,7 @@
 class_name AionCampaignWorld
 extends RefCounted
 
-## Finite arcade rules. Coordinates are world positions; floor Y is zero.
+## Finite arcade rules in world coordinates. Terrain supplies the foot support.
 ## The old RunnerWorld, its saves and its automatic-run rules are independent.
 const HEROES := ["aion", "sheep", "rabbit", "eren", "armadillo", "frog"]
 const COLORS := {"aion":"ef86b7", "sheep":"f5d6a6", "wolf":"aa84d2", "owl":"e8a34f", "rabbit":"f08d55", "eren":"58c4bb", "armadillo":"c49268", "frog":"80bd64"}
@@ -156,8 +156,8 @@ func charge_ratio() -> float: return clampf(charge_time / 1.2, 0., 1.)
 func floor_at(x: float,y: float=1e9) -> float:
 	if CampaignRoutes.is_fork(section):return CampaignRoutes.floor_height(self,x,y)
 	for pit in pits:
-		if x > pit.x and x < pit.y: return 1000.
-	return 0.
+		if x > pit.x and x < pit.y:return CampaignGround.VOID_HEIGHT
+	return CampaignGround.height(section,x)
 func crossing_floor(x: float,old_y: float,new_y: float,falling_speed: float) -> float:
 	var support:=floor_at(x,old_y)
 	for platform in platforms:
@@ -171,7 +171,7 @@ func grounded() -> bool:
 		for platform in platforms:
 			if not disabled_platforms.has(platform.position.x) and player.x>=platform.position.x-9. and player.x<=platform.end.x+9. and absf(foot-platform.position.y)<.1 and absf(velocity.y)<1.:return true
 		return false
-	if absf(player.y-floor_at(player.x)) < .1 and floor_at(player.x)<180.: return true
+	if absf(player.y-floor_at(player.x))<.1 and CampaignGround.has_floor(floor_at(player.x)):return true
 	for platform in platforms:
 		if disabled_platforms.has(platform.position.x):continue
 		if player.x >= platform.position.x - 9. and player.x <= platform.end.x + 9. and absf(player.y - platform.position.y) < .1: return true
@@ -332,14 +332,16 @@ func load_section(id: String) -> void:
 	else:
 		platforms.append(Rect2(690., -75., 175., 20.))
 		platforms.append(Rect2(980., -135., 150., 20.))
+		platforms.append_array(CampaignGround.ARENA_WALKWAYS)
 		boss.active = true
 	if CampaignRoutes.is_fork(section):CampaignRoutes.populate(self)
 	else:
 		CampaignContent.populate(self)
 		CampaignRescue.populate(self)
 	CampaignRhythm.populate(self)
+	CampaignGround.align_world(self)
 	if not carried.is_empty():
-		mount=carried;mount.x=player.x;player.y=-42.;mount.hurt=0.
+		mount=carried;mount.x=player.x;player.y=floor_at(player.x)-42.;mount.hurt=0.
 	state = "playing"
 	CampaignRecovery.enter(self)
 	notice = "arc_checkpoint"; notice_time = 2.
@@ -497,6 +499,8 @@ func damage_enemy(e: Dictionary, amount: int, style: String="") -> void:
 
 func damage_boss(amount: int) -> void:
 	if not bool(boss.active) or not bool(boss.get("engaged",false)): return
+	amount=CampaignBossPressure.damage_allowed(self,amount)
+	if amount<=0:return
 	boss.hp = maxi(0,int(boss.hp)-amount)
 	if int(boss.hp) == 0:
 		boss.active = false; boss.beam_warning = 0.; boss.windup = 0.; completed = true; state = "victory"; victory_time = 0.; checkpoint_ready = false
@@ -504,8 +508,13 @@ func damage_boss(amount: int) -> void:
 		hazards.clear()
 		for e in enemies:
 			if not bool(e.defeated): e.defeated = true; e.dead_age = 0.
-		blasts.append({"p":Vector2(float(boss.x),-80.), "age":0., "radius":130., "color":"ffcf8c"})
+		blasts.append({"p":Vector2(float(boss.x),float(boss.y)-80.), "age":0., "radius":130., "color":"ffcf8c"})
 		award("mission:1",3000+rescued.size()*300); stop_inputs(); pending_events.append("complete")
+	else:
+		var phase:=1+int(int(boss.hp)<60)+int(int(boss.hp)<30)
+		if phase>int(boss.phase):
+			CampaignBossPressure.on_phase_change(self,int(boss.phase),phase)
+			boss.phase=phase
 
 func damage_player(cause: String="enemy") -> void:
 	if state != "playing" or invulnerable > 0. or mount_transition!="" or CampaignVehicles.stunned(self): return
@@ -534,7 +543,7 @@ func open_crate(crate: Dictionary) -> void:
 	if int(crate.hp)<=0: return
 	crate.hp = 0
 	var id: String = str(crate.id)
-	if not taken.has(id): pickups.append({"id":id,"x":float(crate.x),"y":-35.,"kind":str(crate.kind)})
+	if not taken.has(id): pickups.append({"id":id,"x":float(crate.x),"y":float(crate.y)-35.,"kind":str(crate.kind)})
 
 func rescue(npc: Dictionary) -> void:
 	if bool(npc.freed): return
@@ -602,6 +611,7 @@ func step_enemies(dt: float) -> void:
 		if absf(float(e.x)-player.x)>780. and not bool(e.active): continue
 		e.active = true; e.age = float(e.age)+dt
 		e.flash=maxf(0.,float(e.get("flash",0.))-dt)
+		if CampaignGroundShooters.step(self,e,dt):continue
 		e.facing = -1 if float(e.x)>player.x else 1
 		if CampaignEnemies.step(self,e,dt):continue
 		var dx: float = player.x-float(e.x)
@@ -611,15 +621,15 @@ func step_enemies(dt: float) -> void:
 			if absf(dx)>240.: e.x = float(e.x)+signf(dx)*82.*dt
 		elif absf(dx)>155. and e.kind != "seed":
 			var candidate: float = clampf(float(e.x)+signf(dx)*(58. if bool(e.mini) else 76.)*dt,60.,length()-80.)
-			if floor_at(candidate)==0.: e.x = candidate
+			if CampaignGround.has_floor(floor_at(candidate)):e.x=candidate
 		if e.kind in ["gnome","slime"] and absf(dx)>75.:
 			var next_x: float=float(e.x)+signf(dx)*62.*dt
-			if floor_at(next_x)==0.:e.x=next_x
-		if e.kind=="slime":e.y=-absf(sin(float(e.age)*3.))*38.
+			if CampaignGround.has_floor(floor_at(next_x)):e.x=next_x
+		if e.kind=="slime":e.y=floor_at(float(e.x))-absf(sin(float(e.age)*3.))*38.
 		if float(e.get("dash",0.))>0.:
 			e.dash=maxf(0.,float(e.dash)-dt)
 			var next_x: float=float(e.x)+float(e.dash_direction)*(260. if e.kind=="beetle" else 220.)*dt
-			if floor_at(next_x)==0.:e.x=next_x
+			if CampaignGround.has_floor(floor_at(next_x)):e.x=next_x
 			if absf(player.x-float(e.x))<34. and absf(player.y-float(e.y))<55.:
 				damage_player()
 				if state!="playing":break
@@ -631,6 +641,7 @@ func step_enemies(dt: float) -> void:
 			if p.distance_to(player+Vector2(0,-25.))<35.:
 				damage_player()
 				if state!="playing":break
+		if not flying and e.kind!="slime" and CampaignGround.has_floor(floor_at(float(e.x))) and str(e.kind)!="seed":e.y=floor_at(float(e.x))
 		if float(e.windup)>0.:
 			e.windup = maxf(0.,float(e.windup)-dt)
 			if float(e.windup)==0.:
@@ -651,30 +662,38 @@ func step_boss(dt: float) -> void:
 		CampaignBossPressure.on_phase_change(self, old_phase, int(boss.phase))
 	if CampaignBossPressure.motion(self,dt):return
 	if int(boss.phase)<3:boss.x = length()-420.+sin(float(boss.clock)*.65)*75.
-	boss.y = 0. # A walking root machine stays on its actual collision floor.
+	boss.y = floor_at(float(boss.x))
 	var old_beam_warning: float=float(boss.get("beam_warning",0.))
 	boss.beam_warning=maxf(0.,old_beam_warning-dt)
 	if old_beam_warning>0. and float(boss.beam_warning)<=0.:
 		if absf(player.x-float(boss.get("beam_x",-999.)))<36.:damage_player("beam")
-		blasts.append({"p":Vector2(float(boss.beam_x),-100.),"age":0.,"radius":65.,"color":"efc97e"})
+		blasts.append({"p":Vector2(float(boss.beam_x),floor_at(float(boss.beam_x))-100.),"age":0.,"radius":65.,"color":"efc97e"})
 	if float(boss.windup)>0.:
 		boss.windup = maxf(0.,float(boss.windup)-dt)
 		if float(boss.windup)==0.:
-			pending_events.append("boss_attack")
-			if int(boss.phase)>=2 and int(boss.attack)%2==1:
-				boss.beam_x=player.x;boss.beam_warning=.9
 			var attack: int = int(boss.attack)%3
-			if CampaignBossPressure.attack(self):pass
+			if CampaignBossPressure.attack(self):pending_events.append("boss_attack")
+			elif int(boss.phase)==2 and attack==2:
+				boss.beam_x=player.x;boss.beam_warning=.9
+				pending_events.append("boss_beam")
 			elif attack == 0:
+				pending_events.append("boss_port")
 				for offset in [-.32,-.16,0.,.16,.32]:
 					var ports: Array=boss.get("ports",[3,3])
-					if (offset<0. and int(ports[0])<=0) or (offset>0. and int(ports[1])<=0):continue
-					var aim := (player+Vector2(0,-42)-Vector2(float(boss.x)-55.,-90.)).normalized().rotated(offset)
-					bullets.append({"p":Vector2(float(boss.x)-55.,-90.),"v":aim*230.,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
+					var port_index:=0 if offset<=0. else 1
+					if int(ports[port_index])<=0:continue
+					var port:=CampaignBossPressure.port_point(self,port_index)
+					var aim := (player+Vector2(0,-42)-port).normalized().rotated(offset)
+					bullets.append({"p":port,"v":aim*230.,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[],"boss_shot":true})
 			elif attack == 1:
-				bullets.append({"p":Vector2(float(boss.x)-60.,-16.),"v":Vector2(-320.,0.),"owner":"enemy","age":0.,"kind":"wave","damage":1,"pierce":0,"hit":[]})
+				pending_events.append("boss_wave")
+				var direction: float=-1. if player.x<=float(boss.x) else 1.
+				var wave_x:=float(boss.x)+direction*60.
+				bullets.append({"p":Vector2(wave_x,floor_at(wave_x)-16.),"v":Vector2(direction*320.,0.),"owner":"enemy","age":0.,"kind":"wave","damage":1,"pierce":0,"hit":[],"boss_shot":true})
+				if int(boss.phase)==2:platform_timers[2020.]=2.1
 			else:
-				for i in 2: spawn_enemy("drone",float(boss.x)-120.-i*110.,-135.-i*25.,200+int(boss.attack)*2+i)
+				pending_events.append("boss_attack")
+				for i in 2: spawn_enemy("drone",float(boss.x)-120.-i*110.,float(boss.y)-135.-i*25.,200+int(boss.attack)*2+i)
 			boss.attack = int(boss.attack)+1; boss.wait = 2.15-float(int(boss.phase)-1)*.25
 	else:
 		boss.wait = float(boss.wait)-dt
@@ -682,15 +701,20 @@ func step_boss(dt: float) -> void:
 
 func step_bullets(dt: float) -> void:
 	for b in bullets:
+		if float(b.age)>=float(b.get("life",3.)):continue
 		if CampaignWeapons.step(self,b,dt):continue
 		var previous: Vector2=b.get("start",b.p)
 		b.erase("start")
 		if b.has("gravity"):b.v=Vector2(b.v)+Vector2(0,float(b.gravity)*dt)
 		b.age = float(b.age)+dt; b.p = Vector2(b.p)+Vector2(b.v)*dt
+		if b.kind=="wave" and section=="arena":
+			b.p.y=floor_at(float(b.p.x))-16.
+			previous.y=floor_at(previous.x)-16.
 		# Solid route structures stop shots from either side.
-		if CampaignRoutes.solid_at(self,b.p):b.age=99.;continue
+		if CampaignRoutes.solid_at(self,b.p) or CampaignGround.touches_ground(self,previous,b.p):b.age=99.;continue
 		if b.owner == "enemy":
-			if float(b.p.y)>0. and floor_at(float(b.p.x))==0.:b.age=99.;continue
+			var floor:=floor_at(float(b.p.x))
+			if CampaignGround.has_floor(floor) and float(b.p.y)>floor:b.age=99.;continue
 			if Vector2(b.p).distance_to(player_hit_center())<player_hit_radius():
 				damage_player("shot")
 				b.age=99.
@@ -713,7 +737,7 @@ func step_bullets(dt: float) -> void:
 		if float(b.age)>=float(b.get("life",3.)):continue
 		if bool(boss.active) and bool(boss.get("engaged",false)) and CampaignBossPressure.hit(self,b,previous,b.p):b.age=99.;continue
 		if bool(boss.active) and Geometry2D.get_closest_point_to_segment(Vector2(float(boss.x),float(boss.y)-75.),previous,b.p).distance_to(Vector2(float(boss.x),float(boss.y)-75.))<105. and not "boss" in b.hit:
-			if boss_vulnerable():damage_boss(CampaignBossPressure.core_damage(self,b,previous,b.p))
+			damage_boss(CampaignBossPressure.core_damage(self,b,previous,b.p))
 			b.hit.append("boss"); b.age = 99.
 		if float(b.age)>=float(b.get("life",3.)):continue
 		for crate in crates:
@@ -740,11 +764,21 @@ func step(dt: float) -> void:
 		velocity.x=0.;velocity.y+=1700.*dt;player.y+=velocity.y*dt
 		var support:=crossing_floor(player.x,old_y,player.y,velocity.y)
 		if player.y>=support and velocity.y>=0.:player.y=support;velocity.y=0.
-		if death_time>=.8 and (grounded() or player.y>180. or death_time>1.8):CampaignLives.finish_death(self)
+		if death_time>=.8 and (grounded() or CampaignGround.fell_into_pit(self,player) or death_time>1.8):CampaignLives.finish_death(self)
 		return
 	if state=="victory":
-		CampaignRescue.step(self,clampf(dt,0.,.05))
-		victory_time+=clampf(dt,0.,.05);boss.clock=float(boss.clock)+clampf(dt,0.,.05)
+		dt=clampf(dt,0.,.05)
+		CampaignRescue.step(self,dt)
+		var earlier:=victory_time
+		victory_time+=dt;boss.clock=float(boss.clock)+dt
+		for blast in blasts:blast.age=float(blast.age)+dt
+		blasts=blasts.filter(func(b):return float(b.age)<float(b.get("life",.5)))
+		for moment in [.25,.62]:
+			if earlier<moment and victory_time>=moment:
+				var side:=-1. if moment<.4 else 1.
+				var part:=Vector2(float(boss.x)+side*76.,float(boss.y)-48.)
+				blasts.append({"p":part,"age":0.,"radius":55.,"color":"d9a873"})
+				if side>0.:pending_events.append("boss_wave")
 		if victory_time>=1.2:state="complete"
 		return
 	if state != "playing": return
@@ -794,6 +828,14 @@ func step(dt: float) -> void:
 	# an intent that a boundary, locked gate or solid pier has blocked.
 	velocity.x=(player.x-old_x)/dt if dt>0. else 0.
 	walk_distance += absf(player.x-old_x)
+	# Walking already grounded on the main surface follows its gradual
+	# height in both directions. Airborne actors still land via crossing_floor.
+	if on_floor and absf(player.x-old_x)>.01 and CampaignGround.PROFILES.has(section):
+		var saddle:=42. if bool(mount.ridden) else 0.
+		var previous_ground:=floor_at(old_x)
+		var upcoming_ground:=floor_at(player.x)
+		if CampaignGround.has_floor(upcoming_ground) and absf(player.y+saddle-previous_ground)<.1 and absf(upcoming_ground-previous_ground)<28.:
+			player.y=upcoming_ground-saddle
 	var old_y: float = player.y
 	if bool(mount.ridden):
 		mount.x = player.x
@@ -810,7 +852,7 @@ func step(dt: float) -> void:
 			if jump_buffer_timer > 0. and not CampaignRoutes.low_ceiling(self) and character not in ["rabbit","eren"]:
 				velocity.y = -650.; jumps = 1; jump_buffer_timer = 0.; coyote_timer = 0.
 		else: air_time += dt
-	if player.y>180.:
+	if CampaignGround.fell_into_pit(self,player):
 		damage_player("pit")
 		if state!="playing":return
 	if velocity.y>0.:

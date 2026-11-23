@@ -121,10 +121,15 @@ static func _advance_bomb(w,bomb: Dictionary,dt: float) -> void:
     else:next.x=grown.end.x;normal=Vector2.RIGHT
     break
   # Real ground support follows route floors, including pits and lower channels.
-  if normal==Vector2.ZERO and velocity.y>=0.:
+  if normal==Vector2.ZERO:
    var floor: float=w.floor_at(next.x,old.y+RADIUS)
-   if old.y+RADIUS<=floor+.01 and next.y+RADIUS>=floor and floor<900.:
-    next.y=floor-RADIUS;normal=Vector2.UP
+   var floor_normal:=CampaignGround.normal(w,next.x)
+   if CampaignGround.has_floor(floor) and velocity.dot(floor_normal)<0.:
+    var previous_floor: float=w.floor_at(old.x,old.y+RADIUS)
+    var previous_normal:=CampaignGround.normal(w,old.x)
+    var centre_y:=floor+RADIUS/floor_normal.y
+    if old.y<=previous_floor+RADIUS/previous_normal.y+.01 and next.y>=centre_y:
+     next.y=centre_y;normal=floor_normal
   # Return edge of the lower channel is a real vertical ledge.
   if normal==Vector2.ZERO and CampaignRoutes.is_fork(str(w.section)) and (str(w.section)=='fork_one' or CampaignRoutes.hatch_open(w)):
    var ledge: float=CampaignRoutes.lower_start(w)+RADIUS
@@ -133,7 +138,7 @@ static func _advance_bomb(w,bomb: Dictionary,dt: float) -> void:
   if normal!=Vector2.ZERO:
    var impact: float=absf(velocity.dot(normal))
    if velocity.dot(normal)<0.:velocity=velocity.bounce(normal)*.51
-   if normal==Vector2.UP:
+   if normal.y<-.7:
     velocity.x*=.76
     if absf(velocity.y)<62.:velocity.y=0.
    bomb.spin=float(bomb.get('spin',7.))*.72

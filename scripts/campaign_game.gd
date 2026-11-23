@@ -176,7 +176,7 @@ func t(key: String) -> String:
 func old(key: String) -> String: return GameText.get_text(language,key)
 func font_size(size: int) -> int: return roundi(size*options.text_scale)
 func menu_title() -> String:
-	return t({"briefing":"title","help":"controls","paused":"pause","boss":"arena","dead":"game_over","continue_offer":"continue_offer","continue_pick":"continue_pick","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
+	return t({"briefing":"title","help":"controls","paused":"pause","dead":"game_over","continue_offer":"continue_offer","continue_pick":"continue_pick","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
 
 func safe_rect(raw: Vector2) -> Rect2:
 	if OS.has_feature("web"):
@@ -235,7 +235,8 @@ func build_ui() -> void:
 	pause_button.position=Vector2(view_w-72,4);pause_button.size=Vector2(64,maxf(44.,band_height-8));pause_button.pressed.connect(toggle_pause)
 	subtitle=label("",16);ui.add_child(subtitle);subtitle.position=Vector2(12,band_height+6);subtitle.size=Vector2(view_w-24,90);subtitle.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	subtitle.add_theme_color_override("font_color",Color("fff3d8"));subtitle.add_theme_color_override("font_shadow_color",Color("211c29"));subtitle.add_theme_constant_override("shadow_outline_size",4)
-	boss_health=ProgressBar.new();ui.add_child(boss_health);boss_health.show_percentage=false;boss_health.max_value=world.boss.max_hp;boss_health.position=Vector2(12,band_height+6);boss_health.size=Vector2(view_w-24,12)
+	boss_health=ProgressBar.new();ui.add_child(boss_health);boss_health.show_percentage=false;boss_health.max_value=world.boss.max_hp
+	boss_health.position=Vector2(12,band_height+6);boss_health.size=Vector2(minf(view_w-24.,340.),10.)
 	boss_health.add_theme_stylebox_override("background",options.style("surface","border",1));boss_health.add_theme_stylebox_override("fill",options.style("primary","accent",1))
 	if touch_mode: build_touch()
 	else:
@@ -319,10 +320,6 @@ func build_menu() -> void:
 			action(t("controls"),func():help_return="paused";menu_kind="help";help_step=0;build_ui())
 			action(t("settings"),func():menu_previous="paused";menu_kind="settings";settings_page=0;build_ui())
 			action(t("restart_mission"),begin_new).name="CampaignRestart"
-			action(t("back"),return_main)
-		"boss":
-			column.add_child(paragraph(t("boss_intro")))
-			action(t("next"),close_menu,true).name="CampaignBossGo"
 			action(t("back"),return_main)
 		"continue_offer":
 			offer_label=label("",52);offer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(offer_label)
@@ -525,19 +522,26 @@ func finish_help() -> void:
 	close_menu()
 
 func build_presentation() -> void:
-	presentation=CampaignPresentation.new();presentation.host=self;presentation.clock=presentation_time;presentation.mouse_filter=Control.MOUSE_FILTER_IGNORE;presentation.size=Vector2(view_w,view_h);ui.add_child(presentation)
+	if presentation_stage!="boss_reveal":
+		presentation=CampaignPresentation.new();presentation.host=self;presentation.clock=presentation_time;presentation.mouse_filter=Control.MOUSE_FILTER_IGNORE;presentation.size=Vector2(view_w,view_h);ui.add_child(presentation)
 	presentation_skip=Button.new();presentation_skip.name="CampaignSkipPresentation";presentation_skip.text=old("story_skip");presentation_skip.add_theme_font_size_override("font_size",font_size(18));ui.add_child(presentation_skip)
-	presentation_skip.position=Vector2(16,view_h-76);presentation_skip.size=Vector2(view_w-32,58);presentation_skip.pressed.connect(skip_presentation)
+	var skip_minimum:=presentation_skip.get_combined_minimum_size()
+	var skip_width:=minf(maxf(176.,skip_minimum.x+16.),view_w-32.) if presentation_stage=="boss_reveal" else view_w-32.
+	var skip_height:=maxf(58.,skip_minimum.y+4.)
+	presentation_skip.position=Vector2(view_w-skip_width-16.,view_h-skip_height-18.);presentation_skip.size=Vector2(skip_width,skip_height);presentation_skip.pressed.connect(skip_presentation)
 	buttons.append(presentation_skip)
 
 func start_presentation(stage: String) -> void:
-	release_all();presentation_stage=stage;presentation_time=0.;menu_kind="";world.state="story" if stage=="intro" else "complete";sound("mission_start" if stage=="intro" else "victory");build_ui()
+	release_all();presentation_stage=stage;presentation_time=0.;menu_kind="";world.state="complete" if stage=="victory" else "story"
+	sound({"intro":"mission_start","boss_reveal":"boss_attack","victory":"victory"}[stage]);build_ui()
 
 func skip_presentation() -> void:
 	var stage:=presentation_stage
 	if stage=="":return
 	presentation_stage="";presentation_time=0.;release_all()
 	if stage=="intro":world.state="playing";save_checkpoint()
+	elif stage=="boss_reveal":
+		world.boss.engaged=true;world.state="playing";save_checkpoint()
 	else:menu_kind="outro";outro_step=0;save_checkpoint()
 	build_ui()
 
@@ -555,7 +559,6 @@ func resume_saved() -> void:
 	else:view.camera_x=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
 	save_checkpoint();build_ui()
 func close_menu() -> void:
-	if menu_kind=="boss":world.boss.engaged=true
 	release_all();menu_kind="";world.paused_crouch=false;world.state="playing";build_ui()
 	if intro_pending:intro_pending=false;start_presentation("intro")
 func toggle_pause() -> void:
@@ -891,7 +894,8 @@ func _process(dt: float) -> void:
 	if not is_instance_valid(view):return
 	if presentation_stage!="" and application_active:
 		presentation_time+=clampf(dt,0.,.05)
-		if presentation_time>=(2. if presentation_stage=="intro" else 1.8):skip_presentation()
+		var duration: float={"intro":2.,"boss_reveal":1.65,"victory":1.8}[presentation_stage]
+		if presentation_time>=duration:skip_presentation()
 	update_ambient()
 	pad_menu_wait=maxf(0.,pad_menu_wait-dt)
 	poll_pad()
@@ -921,7 +925,7 @@ func _process(dt: float) -> void:
 		update_continue_offer()
 	advance_travel(dt)
 	if fade<0. and world.section=="arena" and not boss_announced and world.state=="playing" and absf(world.player.x-float(world.boss.x))<view.scene_w*.40:
-		boss_announced=true;world.stop_inputs();world.state="story";menu_kind="boss";build_ui()
+		boss_announced=true;world.stop_inputs();start_presentation("boss_reveal")
 	if (menu_kind=="" or (menu_kind=="continue_offer" and world.state=="dead")) and presentation_stage=="" and world.state in ["continue_offer","dead","complete"]:
 		menu_kind=world.state;release_all()
 		if world.state=="complete" and not complete_presented:
@@ -935,7 +939,7 @@ func _process(dt: float) -> void:
 		if event in ["vehicle_impact","vehicle_wreck"]:
 			if event=="vehicle_impact":release_all()
 			sound("hurt" if event=="vehicle_impact" else "blast")
-		if event in ["shot","melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","guardian","boss_attack","complete","checkpoint","enemy","armour_hit"]:sound(event)
+		if event in ["shot","melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","guardian","boss_attack","boss_port","boss_wave","boss_beam","complete","checkpoint","enemy","armour_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	if world.state not in CampaignLives.TRANSITIONS:
@@ -944,6 +948,7 @@ func _process(dt: float) -> void:
 			view.camera_x=lerpf(view.camera_x,desired_x,1.-exp(-minf(dt,.05)*8.))
 		else:view.camera_x=desired_x
 		var desired_y:=minf(0.,world.player.y+225.)
+		if CampaignGround.PROFILES.has(world.section):desired_y+=maxf(0.,world.player.y)*.95
 		desired_y=CampaignRoutes.camera_y(world,desired_y)
 		view.camera_y=desired_y if options.reduced_motion else lerpf(view.camera_y,desired_y,1.-exp(-minf(dt,.05)*9.))
 		world.recovery_view=Rect2(view.camera_x,view.camera_y-view.ground,view.scene_w,view.ground+60.)
@@ -967,12 +972,18 @@ func update_hud() -> void:
 	hud_panel.visible=menu_kind=="" and presentation_stage==""
 	subtitle.visible=hud_panel.visible
 	boss_health.position.y=hud_panel.strip_height+6.
+	if boss_health.position.x+boss_health.size.x>pause_button.position.x:
+		boss_health.position.y=maxf(boss_health.position.y,pause_button.position.y+pause_button.size.y+6.)
 	boss_health.visible=world.section=="arena" and bool(world.boss.active) and menu_kind=="" and presentation_stage==""
 	boss_health.value=world.boss.hp
 	if boss_health.visible:
 		var boss_cue: String=""
-		if int(world.boss.phase)==3 and float(world.boss.windup)>0. and int(world.boss.attack)%3==2:boss_cue=" · "+t("boss_dash")
-		elif float(world.boss.windup)>0. or float(world.boss.get("beam_warning",0.))>0.:boss_cue=" · "+t("boss_warning")
+		var pattern:=int(world.boss.attack)%3
+		if float(world.boss.get("beam_warning",0.))>0.:boss_cue=" · "+t("boss_beam_move")
+		elif float(world.boss.windup)>0.:
+			if pattern==1:boss_cue=" · "+t("boss_wave_jump")
+			elif pattern==2 and int(world.boss.phase)==3:boss_cue=" · "+t("boss_dash")
+			else:boss_cue=" · "+t("boss_warning")
 		elif int(world.boss.phase)==2 and world.boss_vulnerable():boss_cue=" · "+t("boss_core")
 		subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+boss_cue
 	subtitle.position.y=boss_health.position.y+(20. if boss_health.visible else 0.)
@@ -1004,7 +1015,9 @@ func update_hud() -> void:
 			item.disabled=MissionHeroAbilities.compact(world)
 		if item.visible and (item.visible!=prev_vis or item.pressed!=prev_p or item.action!=prev_act or item.caption!=prev_cap or item.disabled!=prev_dis or not is_equal_approx(item.cooldown,prev_cd)):
 			item.queue_redraw()
-	if is_instance_valid(control_hint):control_hint.text=pad_help() if active_input=="gamepad" else t("keys")
+	if is_instance_valid(control_hint):
+		control_hint.visible=active_controls
+		control_hint.text=pad_help() if active_input=="gamepad" else t("keys")
 
 func update_ambient() -> void:
 	if not audio_enabled:
@@ -1039,9 +1052,12 @@ func sound(event: String) -> void:
 		if GRENADE_SOUNDS.has(event):sound_cache[event]=GRENADE_SOUNDS[event]
 		else:
 			var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else (2400 if event in ["enemy","armour_hit"] else 1400)
-			var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"gift_drop":780.,"npc_contact":920.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.,"continue_tick":385.}.get(event,660.)
+			var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"gift_drop":780.,"npc_contact":920.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"boss_port":310.,"boss_wave":68.,"boss_beam":424.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.,"continue_tick":385.}.get(event,660.)
+			if event.begins_with("boss_"):count=4500 if event=="boss_wave" else 2800
 			if event=="enemy":pitch=180.
 			elif event=="armour_hit":pitch=1140.
+			elif event=="scout_shot":pitch=410.;count=1400
+			elif event=="lob_throw":pitch=155.;count=2800
 			for i in count:
 				var phase: float=float(i)/22050.;var envelope: float=pow(1.-float(i)/count,2.)
 				var sample:=sin(phase*pitch*TAU*(1.-float(i)/count*.4))*envelope*.22
@@ -1063,7 +1079,7 @@ func metadata() -> void:
 	for key in actions:data.actions[key]=[actions[key].position.x,actions[key].position.y,actions[key].size.x,actions[key].size.y]
 	if is_instance_valid(stick):data.stick=[stick.position.x,stick.position.y,stick.size.x,stick.size.y]
 	for e in world.enemies:
-		if not bool(e.defeated):data.enemies.append({"kind":e.kind,"x":e.x,"y":e.y,"hp":e.hp,"windup":e.windup})
+		if not bool(e.defeated):data.enemies.append({"kind":e.kind,"x":e.x,"y":e.y,"hp":e.hp,"windup":e.windup,"recover":e.get("recover",0.),"attacks":e.attacks})
 	for p in world.platforms:data.platforms.append([p.position.x,p.position.y,p.size.x,p.size.y])
 	for g in world.gates:data.gates.append({"x":g.x,"closed":world.gate_closed(g)})
 	for p in world.pits:data.pits.append([p.x,p.y])
@@ -1079,13 +1095,17 @@ func metadata() -> void:
 	data.ui_ready=ui_ready
 	data.raw=[get_viewport_rect().size.x,get_viewport_rect().size.y]
 	data.velocity=[world.velocity.x,world.velocity.y]
+	data.move_axis=[world.move_axis.x,world.move_axis.y]
+	data.keyboard_movement=[left_down,right_down,up_down,down_down]
+	data.vehicle_stunned=CampaignVehicles.stunned(world)
 	data.npcs=[]
 	for n in world.npcs:data.npcs.append({"id":n.id,"x":n.x,"y":n.y,"freed":n.freed,"age":n.free_age,"gift":n.gift,"secret":n.secret,"phase":n.get("phase","bound"),"facing":n.get("facing",-1),"thank_age":n.get("thank_age",0.)})
 	data.continue_remaining=world.continue_remaining;data.continue_hero=world.continue_hero
+	data.boss_y=world.boss.y;data.boss_engaged=world.boss.engaged
 	data.boss_warning=world.boss.get("beam_warning",0.);data.boss_beam_x=world.boss.get("beam_x",-999.);data.boss_x=world.boss.x;data.boss_phase=world.boss.phase;data.mount_type=CampaignVehicles.kind(world);data.music_starts=ambient_starts;data.native_memory=Performance.get_monitor(Performance.MEMORY_STATIC);data.node_count=Performance.get_monitor(Performance.OBJECT_NODE_COUNT);data.rescue_candidate=CampaignRescue.cut_target(world).get("id","");data.rescue_time=world.rescue_time;data.weapon=world.weapon;data.ammunition=world.ammunition;data.objects=world.objects;data.rooms=world.rooms
 	data.bullets=[]
 	for bullet in world.bullets:
-		if bullet.owner=="enemy":data.bullets.append([bullet.p.x,bullet.p.y,bullet.v.x,bullet.v.y])
+		if bullet.owner=="enemy":data.bullets.append([bullet.p.x,bullet.p.y,bullet.v.x,bullet.v.y,bullet.kind])
 	data.camera_y=view.camera_y;data.ground=view.ground
 	data.travel_active=fade>=0. or world.state=="travel";data.travel_target=world.travel_target
 	data.grounded=world.grounded();data.invulnerable=world.invulnerable;data.aim=[world.aim_direction.x,world.aim_direction.y]
@@ -1139,7 +1159,8 @@ func accessible_update() -> void:
 	if menu_kind=="continue_offer":summary+=" · %d"%ceili(world.continue_remaining)
 	if menu_kind=="continue_pick":summary+=" · "+old("name_"+world.continue_hero)+" · "+RunnerFrontText.ability_summary(language,world.continue_hero)
 	if menu_kind=="" and world.section=="arena" and bool(world.boss.active):summary+=" · "+t("arena")+" %d/%d"%[world.boss.hp,world.boss.max_hp]+" · "+t("phase")+" "+str(world.boss.phase)
-	if presentation_stage!="":summary=t("won")+" · "+t("lights_restored") if presentation_stage=="victory" else t("mission")+" · "+t("title")+" · "+t("intro_objective")
+	if presentation_stage=="boss_reveal":summary=t("arena")
+	elif presentation_stage!="":summary=t("won")+" · "+t("lights_restored") if presentation_stage=="victory" else t("mission")+" · "+t("title")+" · "+t("intro_objective")
 	var payload:=JSON.stringify({"items":entries,"language":language,"page":menu_kind,"summary":summary})
 	if payload==accessibility_stamp:return
 	accessibility_stamp=payload

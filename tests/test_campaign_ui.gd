@@ -20,7 +20,7 @@ func run() -> void:
 			game.options.text_scale=scale;game.ui.theme=game.options.theme(game.FONT)
 			for language in GameText.LANGUAGES:
 				game.language=language;game.resize()
-				for kind in ["briefing","help","paused","boss","dead","outro","complete"]:
+				for kind in ["briefing","help","paused","dead","outro","complete"]:
 					if kind=="help":game.help_step=0
 					game.menu_kind=kind;game.build_ui();await process_frame;await process_frame
 					var view:=Rect2(0,0,game.view_w,game.view_h)
@@ -41,6 +41,17 @@ func run() -> void:
 			for language in GameText.LANGUAGES:
 				game.language=language;game.world.load_section("arena");game.menu_kind="";game.resize();game.update_hud();await process_frame
 				check(not game.subtitle.get_global_rect().intersects(game.boss_health.get_global_rect()),"Boss health and localized mission/inventory text never overlap in rotated layouts")
+				check(not game.pause_button.get_global_rect().intersects(game.boss_health.get_global_rect()),"The boss health strip does not share the Pause hit area")
+				game.boss_announced=false;game.fade=-1.
+				game.world.player=Vector2(float(game.world.boss.x)-140.,game.world.floor_at(float(game.world.boss.x)-140.))
+				game._process(.016);await process_frame
+				check(game.presentation_stage=="boss_reveal" and game.world.state=="story" and game.menu_kind=="","Entering the arena starts a reveal in the active world without a modal")
+				check(not game.world.boss.engaged and game.world.boss.clock==0.,"The engine launches no threats during the reveal")
+				check(Rect2(0.,0.,game.view_w,game.view_h).encloses(game.presentation_skip.get_global_rect()),"Skip stays accessible in the rotated boss reveal")
+				if scale==1.:game.presentation_skip.pressed.emit()
+				else:
+					for i in 35:game._process(.05)
+				check(game.presentation_stage=="" and game.world.state=="playing" and game.world.boss.engaged and game.world.boss.attack==0,"Natural and skipped reveals both enter the same fresh boss fight")
 	# Reproduce a first-time player after the layout matrix has intentionally
 	# completed the tutorial. Repeat-run tutorial suppression has its own test.
 	game.saved.clear() # A previous test run's Continue action is not a first visit.
@@ -99,7 +110,8 @@ func run() -> void:
 		touch.pressed=false;game._input(touch)
 		for frame in 36:game.world.step(.01)
 		check(npc.freed and game.world.rescued.has(str(npc.id)),"Touch release does not cancel the one valid knife cut: "+hero)
-		game.release_all();game.world.load_section(game.world.checkpoint);game.world.enemies.clear();game.world.player=Vector2(float(game.world.npcs[1].x)-65.,0.);game.world.facing=1
+		game.release_all();game.world.load_section(game.world.checkpoint);game.world.enemies.clear();var approach_x: float=float(game.world.npcs[1].x)-65.
+		game.world.player=Vector2(approach_x,game.world.floor_at(approach_x));game.world.facing=1
 		game._input(event(game.pad.bindings.shoot));check(game.world.rescue_time>0.,"Saved gamepad fire mapping uses the same knife action: "+hero);game._input(event(game.pad.bindings.shoot,false))
 	game.audio_enabled=true;game.world.load_section("water");game.world.state="playing";game.menu_kind="";game.update_ambient()
 	check(game.ambient.playing and not game.ambient.stream_paused,"Actual regional music stream starts with audio enabled")
