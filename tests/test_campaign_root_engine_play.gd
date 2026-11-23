@@ -32,7 +32,11 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false);game.audio_enabled=false
-	game.world.begin("aion");game.world.load_section("arena")
+	var hero:=OS.get_environment("AION_ARENA_HERO")
+	if hero.is_empty():hero="aion"
+	if hero not in AionCampaignWorld.HEROES:
+		printerr("Unknown arena fixture hero: "+hero);quit(1);return
+	game.selected_hero=hero;game.world.begin(hero);game.world.load_section("arena")
 	game.world.player=Vector2(2140.,game.world.floor_at(2140.))
 	game.world.move_axis=Vector2.ZERO
 	game.menu_kind="";game.fade=-1.;game.boss_announced=false
@@ -78,6 +82,6 @@ func run() -> void:
 	check(observed_reveal,"Actual arena scene starts its world reveal")
 	check(observed_shots and phases=={1:true,2:true,3:true},"Normal aiming and Fire cross all three phases with the starter pistol")
 	check(game.world.completed and game.world.awarded.has("mission:1"),"The starter gun wins the local arena fixture through actual input")
-	print("Arena input fixture: phases %s, boss HP %d, losses %d, shots %d"%[phases,int(game.world.boss.hp),game.world.losses,game.world.shots])
+	print("Arena input fixture: %s, phases %s, boss HP %d, losses %d, shots %d"%[hero,phases,int(game.world.boss.hp),game.world.losses,game.world.shots])
 	game.queue_free();await process_frame
 	print("RESULT: %d arena input checks, %d failures"%[checks,failures]);quit(1 if failures else 0)
