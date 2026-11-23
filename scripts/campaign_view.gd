@@ -532,6 +532,7 @@ func small_health(p: Vector2,width: float,ratio: float) -> void:
 	draw_rect(Rect2(p+Vector2(1,1),Vector2((width-2.)*clampf(ratio,0,1),5)),Color("e9ba7e"))
 
 func draw_npcs(mounted_front: bool) -> void:
+	var cut_id: String=CampaignRescue.cut_target(world).get("id","") if not mounted_front else ""
 	for npc in world.npcs:
 		if float(npc.x)<camera_x-150. or float(npc.x)>camera_x+scene_w+150.:continue
 		if str(npc.secret)!="" and not world.discovered.has(str(npc.secret)):continue
@@ -554,7 +555,12 @@ func draw_npcs(mounted_front: bool) -> void:
 				draw_pose(item_bank.pose(str(npc.gift)),bag_at+Vector2(float(npc.facing)*10.,-(age-.45)*80.),1,.6)
 		var p := at(Vector2(float(npc.x),float(npc.y)))
 		var label_top: float=maxf(46.,p.y+minf(-90.,float(npc_pose.offset.y)*growth-12.))
-		if phase=="bound":caption(host.t("cut"),Vector2(clampf(p.x-35.,8.,scene_w-200.),label_top),17)
+		if phase=="bound" and npc.id==cut_id and font!=null and p.x>=0. and p.x<=scene_w:
+			var hint: String=host.t("cut")
+			var width: float=font.get_string_size(hint,HORIZONTAL_ALIGNMENT_LEFT,-1,17).x
+			var label_at:=Vector2(clampf(p.x-width*.5,12.,scene_w-width-12.),label_top)
+			draw_rect(Rect2(label_at-Vector2(6.,17.),Vector2(width+12.,23.)),Color("312534"))
+			caption(hint,label_at,17)
 		elif phase=="thanks" and age<2.4:
 			caption(host.t("thanks"),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top),17)
 			if age>.9:caption(host.t(str(npc.gift)),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top+20.),16)

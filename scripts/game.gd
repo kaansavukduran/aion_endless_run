@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.51.0"
+const GAME_VERSION = "0.51.1"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -1610,9 +1610,10 @@ func animation_clock() -> float:
 	if not motion: return 0.0
 	return menu_clock if world.state == "ready" else world.time
 
-func prepare_web_update(_arguments: Array) -> void:
+func prepare_web_update(_arguments: Array) -> bool:
 	if world.state == "running": pause_run()
 	save_settings()
+	return not save_failed
 
 func runner_region(id: String, row: int, frame: int) -> Rect2:
 	var data: Dictionary = RUNNER_DATA.data.characters[id]

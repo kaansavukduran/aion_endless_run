@@ -12,45 +12,100 @@
     return ['tr','en','cs'].includes(code) ? code : 'en';
   }
   const words = {
-    tr: ['Yeni sürüm hazır · Güncelle', 'Kaydediliyor…'],
-    en: ['New version ready · Update', 'Saving…'],
-    cs: ['Nová verze je připravena · Aktualizovat', 'Ukládání…']
+    tr: ['Yeni sürüm hazır · Güncelle', 'Kaydediliyor…', 'Güncelleme bekliyor · Tekrar dene'],
+    en: ['New version ready · Update', 'Saving…', 'Update pending · Try again'],
+    cs: ['Nová verze je připravena · Aktualizovat', 'Ukládání…', 'Aktualizace čeká · Zkusit znovu']
   };
-  function showUpdate(data) {
-    if (!data || data.type !== 'aion-version' || data.build === BUILD) return;
-    const show = () => {
-      if (document.getElementById('aion-update')) return;
-      const button = document.createElement('button');
+  let offer;
+  let button;
+  let saving = false;
+  let retry = false;
+  let verification = 0;
+
+  async function isPublished(candidate) {
+    const manifest = new URL('./aion-latest.json', location.href);
+    manifest.searchParams.set('check', String(Date.now()));
+    const response = await fetch(manifest, {cache:'no-store', signal:AbortSignal.timeout(5000)});
+    if (!response.ok) return false;
+    const latest = await response.json();
+    return latest.build === candidate.build && latest.version === candidate.version &&
+      candidate.worker === navigator.serviceWorker.controller;
+  }
+
+  function renderOffer() {
+    if (!offer && !button) return;
+    if (!button) {
+      button = document.createElement('button');
       button.id = 'aion-update';
-      button.textContent = words[uiLanguage()][0] + ' v' + data.version;
-      Object.assign(button.style, {position:'fixed', bottom:'16px', right:'16px', zIndex:'100', background:'#b1eddb', color:'#102b30', border:'2px solid #e0fff0', borderRadius:'10px', padding:'14px 18px', font:'bold 14px sans-serif', cursor:'pointer'});
-      button.onclick = () => {
-        button.disabled = true;
-        button.textContent = words[uiLanguage()][1];
-        if (typeof window.aionSaveForUpdate === 'function') window.aionSaveForUpdate();
-        // Godot automatically flushes its IDBFS persistence once a second.
-        setTimeout(() => { location.href = './?build=' + encodeURIComponent(data.build); }, 2200);
-      };
+      button.type = 'button';
+      button.setAttribute('aria-live', 'polite');
+      Object.assign(button.style, {
+        position:'fixed', bottom:'max(16px, env(safe-area-inset-bottom))',
+        right:'max(16px, env(safe-area-inset-right))', zIndex:'100',
+        background:'#312534', color:'#fff1d5', border:'2px solid #edc88f',
+        padding:'12px 16px', minHeight:'44px', font:'bold 14px system-ui', cursor:'pointer'
+      });
+      button.addEventListener('click', applyUpdate);
       document.body.appendChild(button);
       const canvas = document.getElementById('canvas');
-      if (canvas) new MutationObserver(() => {
-        if (!button.disabled) button.textContent = words[uiLanguage()][0] + ' v' + data.version;
-      }).observe(canvas, {attributes:true, attributeFilter:['lang']});
-    };
-    if (document.body) show(); else addEventListener('DOMContentLoaded', show, {once:true});
+      if (canvas) new MutationObserver(renderOffer).observe(canvas, {attributes:true, attributeFilter:['lang']});
+    }
+    button.hidden = !offer && !saving;
+    button.disabled = saving;
+    button.textContent = saving ? words[uiLanguage()][1] :
+      retry ? words[uiLanguage()][2] : offer ? words[uiLanguage()][0] + ' v' + offer.version : '';
+  }
+
+  async function applyUpdate() {
+    if (!offer || saving) return;
+    saving = true;
+    retry = false;
+    renderOffer();
+    try {
+      if (window.aionSaveForUpdate?.() === false) throw new Error('Game progress could not be saved');
+      // Allow Godot's background IDBFS flush to finish before navigation.
+      await new Promise(resolve => setTimeout(resolve, 2200));
+      const candidate = offer;
+      if (!candidate || !await isPublished(candidate)) throw new Error('Update no longer ready');
+      const target = new URL(location.href);
+      target.searchParams.set('build', candidate.build);
+      location.replace(target.href);
+      return;
+    } catch (error) {
+      console.info('Aion update postponed:', error.message);
+    }
+    saving = false;
+    retry = true;
+    renderOffer();
+  }
+
+  async function checkOffer(data, worker) {
+    if (!worker || worker !== navigator.serviceWorker.controller ||
+        !/^[a-f0-9]{16}$/.test(data.build) || data.build === BUILD) return;
+    const ticket = ++verification;
+    const candidate = {build:data.build, version:data.version, worker};
+    try {
+      const published = await isPublished(candidate);
+      if (ticket !== verification) return;
+      offer = published ? candidate : null;
+      retry = false;
+      renderOffer();
+    } catch (_) {
+      // Keep a previously verified offer available for retry after reconnect.
+    }
   }
   navigator.serviceWorker.addEventListener('message', event => {
     if (event.data?.type === 'aion-client-query') {
       event.source?.postMessage({type:'aion-client',build:BUILD});
       return;
     }
-    showUpdate(event.data);
+    if (event.data?.type === 'aion-version') checkOffer(event.data, event.source);
   });
   const registerOffline = () => navigator.serviceWorker.register('./index.service.worker.js', {updateViaCache:'none'}).then(registration => {
     if (!registration) return; // Browsers/privacy tools may disable worker installation.
     const check = () => {
       registration.update().catch(() => {}); // Offline is an expected condition.
-      if (registration.active) registration.active.postMessage({type:'aion-version'});
+      navigator.serviceWorker.controller?.postMessage({type:'aion-version'});
     };
     navigator.serviceWorker.addEventListener('controllerchange', check);
     addEventListener('online', check);

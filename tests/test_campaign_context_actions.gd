@@ -70,6 +70,28 @@ func compact_inputs(g: AionCampaignGame) -> void:
 	g.set_action("attack","fresh-press",true)
 	check(g.world.shots==shots+1,"Fresh post-recovery gun press still works")
 
+func rescue_context(g: AionCampaignGame) -> void:
+	g.touch_mode=true;g.resize();clean(g,"aion")
+	var w:=g.world
+	var near: Dictionary={"id":"near","x":w.player.x+32.,"y":0.,"freed":false,"secret":"","cage":"closed"}
+	var farther: Dictionary={"id":"farther","x":w.player.x+77.,"y":0.,"freed":false,"secret":""}
+	w.npcs.append_array([farther,near])
+	w.aim_direction=Vector2.RIGHT
+	g.update_hud()
+	check(CampaignRescue.cut_target(w)==near and g.actions.attack.action=="cut","Cut cue chooses the nearest reachable rope, independent of NPC ordering")
+	w.aim_direction=Vector2.UP
+	g.update_hud()
+	check(CampaignRescue.cut_target(w).is_empty() and g.actions.attack.action=="shoot","Upward aiming gives no false cut cue")
+	w.aim_direction=Vector2.RIGHT
+	w.objects.append({"id":"closed","active":false,"kind":"cage"})
+	check(CampaignRescue.cut_target(w)==farther,"A closed cage cannot be offered for a knife cut")
+	w.enemies.append({"x":w.player.x+50.,"y":0.,"defeated":false})
+	g.update_hud()
+	check(CampaignRescue.cut_target(w).is_empty() and g.actions.attack.action=="melee","Close combat takes priority over the rescue cue")
+	w.enemies.clear();w.objects.clear()
+	w.attack_press()
+	check(w.rescue_target=="near" and w.shots==0,"The normal attack actually cuts the same rope indicated by the cue")
+
 func interruptions(g: AionCampaignGame) -> void:
 	clean(g,"frog")
 	g.set_action("grenade","test",true);g.world.step(.05)
@@ -144,7 +166,7 @@ func _initialize() -> void:call_deferred("run")
 
 func run() -> void:
 	var g:=AionCampaignGame.new();root.add_child(g);await process_frame;g.set_process(false)
-	context_routes(g);compact_inputs(g);interruptions(g);audio_events(g);touch_context(g)
+	context_routes(g);compact_inputs(g);rescue_context(g);interruptions(g);audio_events(g);touch_context(g)
 	g.queue_free();await process_frame
 	print("RESULT: %d campaign context checks, %d failures"%[checks,failures])
 	quit(1 if failures else 0)

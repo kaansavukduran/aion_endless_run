@@ -108,6 +108,7 @@ var settings_ok := true
 # The large data-campaign QA mirror is for browser automation or ?aion-qa only.
 var web_qa := false
 var web_hidden_callback: JavaScriptObject
+var web_update_callback: JavaScriptObject
 
 func _ready() -> void:
 	native_diagnostics.host=self
@@ -131,6 +132,8 @@ func _ready() -> void:
 		# Godot's Web platform reports no focus loss for a hidden tab.
 		web_hidden_callback=JavaScriptBridge.create_callback(on_web_page_hidden)
 		JavaScriptBridge.get_interface("window").aionPageHidden=web_hidden_callback
+		web_update_callback=JavaScriptBridge.create_callback(prepare_web_update)
+		JavaScriptBridge.get_interface("window").aionSaveForUpdate=web_update_callback
 		JavaScriptBridge.eval("if(!window.aionVisibilityInstalled){window.aionVisibilityInstalled=true;document.addEventListener('visibilitychange',()=>{if(document.hidden)window.aionPageHidden?.()})}")
 		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');if(!c)return;['data-state','data-page','data-ui-ready','data-ui'].forEach(k=>c.removeAttribute(k));c.dataset.mode='campaign'})()")
 	get_viewport().size_changed.connect(resize)
@@ -140,7 +143,7 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	if OS.has_feature("web"):
-		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');c?.removeAttribute('data-campaign');c?.removeAttribute('data-mode');window.aionAccessibleAction=null;window.aionPageHidden=null})()")
+		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');c?.removeAttribute('data-campaign');c?.removeAttribute('data-mode');window.aionAccessibleAction=null;window.aionPageHidden=null;window.aionSaveForUpdate=null})()")
 
 func on_web_page_hidden(_arguments: Array) -> void:
 	if not is_inside_tree():return
@@ -148,6 +151,13 @@ func on_web_page_hidden(_arguments: Array) -> void:
 	# no frames, so application_active stays untouched and cannot remain stuck.
 	cancel_unspent_actions();release_all()
 	if is_instance_valid(ui) and world.state=="playing":toggle_pause()
+
+func prepare_web_update(_arguments: Array) -> bool:
+	if world.state=="playing":
+		toggle_pause()
+	elif not save_ok and (menu_kind=="paused" or world.completed):
+		save_checkpoint()
+	return save_ok
 
 func t(key: String) -> String:
 	if key.begins_with("arc_"):key=key.trim_prefix("arc_")
@@ -866,7 +876,7 @@ func update_hud() -> void:
 		item.visible=active_controls;item.pressed=not Dictionary(held.get(key,{})).is_empty()
 		if key=="attack":
 			var near:=not world.close_enemy().is_empty() and not bool(world.mount.ridden)
-			var captive:=absf(world.aim_direction.y)<.25 and not CampaignRescue.nearest(world).is_empty() and not near
+			var captive:=not CampaignRescue.cut_target(world).is_empty()
 			item.action="cut" if captive else ("melee" if near else "shoot");item.caption=t("cut") if captive else (t("melee") if near else old("control_shoot"));item.cooldown=world.fire_time/.32;item.disabled=MissionHeroAbilities.compact(world)
 		if key=="grenade":item.disabled=not CampaignGrenade.can_press(world);item.cooldown=world.grenade_time/.55
 		if key=="jump":
@@ -952,7 +962,7 @@ func metadata() -> void:
 	data.velocity=[world.velocity.x,world.velocity.y]
 	data.npcs=[]
 	for n in world.npcs:data.npcs.append({"id":n.id,"x":n.x,"y":n.y,"freed":n.freed,"age":n.free_age,"gift":n.gift,"secret":n.secret,"phase":n.get("phase","bound"),"facing":n.get("facing",-1),"thank_age":n.get("thank_age",0.)})
-	data.boss_warning=world.boss.get("beam_warning",0.);data.boss_beam_x=world.boss.get("beam_x",-999.);data.boss_x=world.boss.x;data.boss_phase=world.boss.phase;data.mount_type=CampaignVehicles.kind(world);data.music_starts=ambient_starts;data.native_memory=Performance.get_monitor(Performance.MEMORY_STATIC);data.node_count=Performance.get_monitor(Performance.OBJECT_NODE_COUNT);data.rescue_candidate=CampaignRescue.nearest(world).get("id","");data.rescue_time=world.rescue_time;data.weapon=world.weapon;data.ammunition=world.ammunition;data.objects=world.objects;data.rooms=world.rooms
+	data.boss_warning=world.boss.get("beam_warning",0.);data.boss_beam_x=world.boss.get("beam_x",-999.);data.boss_x=world.boss.x;data.boss_phase=world.boss.phase;data.mount_type=CampaignVehicles.kind(world);data.music_starts=ambient_starts;data.native_memory=Performance.get_monitor(Performance.MEMORY_STATIC);data.node_count=Performance.get_monitor(Performance.OBJECT_NODE_COUNT);data.rescue_candidate=CampaignRescue.cut_target(world).get("id","");data.rescue_time=world.rescue_time;data.weapon=world.weapon;data.ammunition=world.ammunition;data.objects=world.objects;data.rooms=world.rooms
 	data.bullets=[]
 	for bullet in world.bullets:
 		if bullet.owner=="enemy":data.bullets.append([bullet.p.x,bullet.p.y,bullet.v.x,bullet.v.y])

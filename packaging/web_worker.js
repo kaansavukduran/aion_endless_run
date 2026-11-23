@@ -6,6 +6,7 @@ const FILES = __FILES__;
 const INFO = __FILE_INFO__;
 const versionMessage = {type:'aion-version',build:BUILD,version:VERSION};
 const modernClients = new Map();
+const entry = new URL(self.registration.scope);
 async function verifiedResponse(response, expected) {
   if (response.status !== 200) throw new Error('Incomplete offline response: '+response.status);
   const buffer = await response.arrayBuffer();
@@ -69,8 +70,21 @@ self.addEventListener('fetch',event => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
-  if (request.mode === 'navigate' || url.pathname.endsWith('/aion-latest.json')) {
+  const manifest = url.pathname === entry.pathname + 'aion-latest.json';
+  // The update button must compare with the deployed manifest, not this
+  // worker's installed generation. Ordinary offline requests still fall back.
+  if (manifest && request.cache === 'no-store') return;
+  if (request.mode === 'navigate' || manifest) {
     event.respondWith((async () => {
+      const appEntry = url.pathname === entry.pathname || url.pathname === entry.pathname + 'index.html';
+      const requestedBuild = url.searchParams.get('build');
+      if (request.mode === 'navigate' && appEntry && /^[a-f0-9]{16}$/.test(requestedBuild || '') &&
+          !url.searchParams.has('aion-recovery') && !url.searchParams.has('retry')) {
+        // Legacy open tabs may still link to the first version they offered.
+        // A versioned entry uses the active worker's already verified package.
+        const installed = await (await caches.open(CACHE)).match('index.html');
+        if (installed) return installed;
+      }
       try { const response = await fetch(request,{cache:'no-cache'}); if (response.ok) return response; } catch (_) {}
       return (await caches.open(CACHE)).match(request.mode === 'navigate' ? 'index.html':'aion-latest.json');
     })());
