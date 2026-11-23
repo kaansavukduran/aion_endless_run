@@ -1,0 +1,67 @@
+name: Diagnose Web text sizing
+on:
+  push:
+    branches: [diagnose/0553-web-font]
+permissions:
+  contents: read
+env:
+  GODOT_VERSION: 4.6.3
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: .ci-godot
+          key: godot-Linux-4.6.3
+      - name: Export the actual Godot Web game
+        run: |
+          python3 packaging/setup_godot.py
+          export PATH="$GITHUB_WORKSPACE/.ci-godot/bin:$PATH"
+          mkdir -p build/web
+          touch build/.gdignore
+          godot --headless --editor --import --quit
+          godot --headless --export-release Web
+          python3 packaging/web_updates.py
+      - name: Trace browser frame and screen at the error
+        run: |
+          python3 -m pip install playwright==1.62.0
+          python3 -m playwright install --with-deps chromium
+          cat >/tmp/aion-font-instrument.py <<'PY'
+          from pathlib import Path
+          p=Path('tests/browser_forge.py')
+          text=p.read_text()
+          js='''
+          const report = console.error.bind(console);
+          console.error = (...args) => {
+            if (args.some(value => String(value).includes('p_size <= 0'))) {
+              const c = document.querySelector('canvas');
+              const w = c?.dataset.campaign ? JSON.parse(c.dataset.campaign) : {};
+              const f = c?.dataset.front ? JSON.parse(c.dataset.front) : {};
+              report('FONT_FRAME', JSON.stringify({state:w.state,menu:w.menu,character:w.character,
+                campaignTime:w.time,player:w.player,view:w.view,pose:w.pose?.body_action,
+                front:f.page,browser:[innerWidth,innerHeight],build:c?.dataset.version,frame:w.engine_process_frames}));
+              report('FONT_WASM_STACK', new Error().stack);
+            }
+            return report(...args);
+          };
+          '''
+          line='    page = context.new_page()'
+          assert text.count(line)==1
+          text=text.replace(line,'    context.add_init_script('+repr(js)+')\n'+line)
+          line="        console.append({'type': message.type, 'text': message.text})"
+          assert text.count(line)==1
+          text=text.replace(line,line+"\n        if 'p_size <= 0' in message.text or message.text.startswith('FONT_'):\n            print('FONT_CONTEXT', checks[-1] if checks else 'boot', message.text, flush=True)")
+          Path('/tmp/aion-browser-forge-trace.py').write_text(text)
+          PY
+          python3 /tmp/aion-font-instrument.py
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory build/web >/tmp/aion-http.log 2>&1 &
+          preview=$!
+          trap 'kill "$preview"' EXIT
+          python3 /tmp/aion-browser-forge-trace.py --url http://127.0.0.1:8765 --evidence build/font-evidence --scenario all --rescue
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: font-diagnostics
+          path: build/font-evidence
