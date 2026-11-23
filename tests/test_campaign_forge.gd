@@ -53,11 +53,20 @@ func run() -> void:
 	var dirs: Array[Vector2]=[Vector2.RIGHT,Vector2(1,-1).normalized(),Vector2.UP,Vector2(-1,-1).normalized(),Vector2.LEFT,Vector2(-1,1).normalized(),Vector2.DOWN,Vector2(1,1).normalized()]
 	for hero in AionCampaignWorld.HEROES:
 		for direction in dirs:
-			var w := fresh(hero);w.aim_direction=direction;w.attack_press()
+			var w := fresh(hero)
+			# Downward aim is an airborne action in the real control scheme.
+			# A grounded low hand must not push its barrel through the floor.
+			if direction.y>.1:w.player.y=-150.;w.air_time=.2
+			w.aim_direction=direction;w.attack_press()
 			check(w.bullets.size()==1,"Each hero actually fires in eight directions")
 			var b: Dictionary=w.bullets[0]
-			check(Vector2(b.v).normalized().distance_to(direction)<.001 and absf(Vector2(b.v).length()-760.)<.001,"Direction normalized without diagonal speed bonus")
+			check(Vector2(b.v).normalized().distance_to(direction)<.001 and absf(Vector2(b.v).length()-760.)<.001,"Direction normalized without diagonal speed bonus: %s %s" % [hero,direction])
 			check(float(b.p.y)<0.,"Every initial muzzle remains above the floor")
+	for hero in ["armadillo","frog"]:
+		var w := fresh(hero);w.aim_direction=Vector2.DOWN;w.attack_press()
+		var b: Dictionary=w.bullets[0]
+		check(w.grounded() and Vector2(b.v).is_equal_approx(Vector2.RIGHT*760.),"Low grounded hero uses horizontal shot instead of a buried downward barrel: "+hero)
+		check(float(b.p.y)<w.floor_at(float(b.p.x)) and (Vector2(b.p)-w.player).distance_to(w.armed_muzzle())<.001,"Grounded floor fallback keeps actual projectile at the visible muzzle: "+hero)
 	for weapon in CampaignWeapons.SPECIAL:
 		for direction in dirs:
 			var w := fresh();w.collect({"id":"special","kind":weapon})
