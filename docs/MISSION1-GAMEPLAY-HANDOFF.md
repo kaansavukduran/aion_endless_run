@@ -5,8 +5,8 @@ Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVER
 ## 23 Kasım 2026 · Yerel 0.53.0 arazi adayı
 
 - `feat/mission1-ground` çalışma dalında Fener kıyısı, Kırık iskele, Dalların arası, Su kanalı, Bahçe terasları, Kök geçidi ve Bakır röle gerçek yükseklik profilleri kullanıyor. Ortak yüzey hesabı yürüyüşü, araçları, yürüyen düşmanları, NPC ayaklarını, ikmali, mermi engellemesini, bomba sekmesini ve yedek yaşam inişini taşıyor. Eski kaydın konumu ve bekleyen yer hediyeleri gerçek yeni yüzeye uyarlanır.
-- Fener kıyısının ilk örneğinde gerçek oyuncu girdileriyle `x=3066.76, y=56` konumunda kahramanın ayakları tam destek üzerindeydi. Linux renderer beş sahne yakaladı. 208 birim derin Su kanalı havzası, gerçek çukurun düşüş eşiğinden ayrı doğrulandı. Yerel tarayıcı koşuları ve tüm yeni regresyon kapıları tamamlanmadan 0.53.0 yayımlanmış sayılmaz.
-- Sonraki ilk eylem, normal girdilerle üç fiziksel dalın ve Kök Motoru sonucunun tamamlanmasını doğrulamak. İki yürüyen atıcı rolü, arena evreleri ve final sanat/ses incelemesi sonraki Mission 1 işleri.
+- 54.871 kaynak kontrolü ve beş Linux görüntüleme örneği geçti. Yerel Chromium normal girişinde Fener kıyısında `y=56`, Kırık iskelede `y=38` ve Su Kanalı havzasında `y=208` seviyelerinde gerçek ayak desteği gözlemlendi. İlk ayrımda normal Aşağı + Zıpla, sonra eğilerek iskele altından Su Kanalı’na inildi. Koşu Bakır röleye ulaştı.
+- Sonraki ilk eylem, açık tarayıcı koşusunu sonuca kadar izlemek ve Dalların arası üzerinden Teras ve Kök Geçidi girişlerini doğrulamak. Aday yerel ve üç rotalı test sürüyor.
 
 ## 23 Kasım 2026 · 0.52.0 · Arcade yaşamı ve araçlar
 
