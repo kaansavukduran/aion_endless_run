@@ -104,6 +104,7 @@ var melee_hit_done := true
 var fire_time := 0.0
 var shot_flash := 0.0
 var shot_weapon := "" # Ephemeral last shot; not inventory or checkpoint state.
+var last_shot_mounted := false
 var grenade_time := 0.0
 var grenade_throw: Dictionary = {}
 var hero_skill: Dictionary = {}
@@ -240,7 +241,6 @@ func begin(hero: String) -> void:
 	discovered.clear();activated.clear();buffs.clear()
 	completed = false; flock = 1; weapon = "pistol"; ammunition = 0
 	rally.clear();retry_count=0;chain=0;chain_time=0.;best_chain=0;score_popups.clear()
-	shot_flash=0.;shot_weapon=""
 	load_section("shore")
 	state = "briefing"
 
@@ -271,6 +271,7 @@ func load_section(id: String) -> void:
 	CampaignAssists.section_changed(self)
 	mount_transition="";mount_transition_time=0.;eject_target_x=-1.
 	jumps = 0; flap_count = 0; air_time = 0.; coyote_timer = 0.; jump_buffer_timer = 0.; drop_through_time=0.; fire_time = 0.; melee_time = 0.; grenade_time = 0.
+	shot_flash=0.;shot_weapon="";last_shot_mounted=false
 	melee_target="";melee_hit_done=true
 	rescue_time=0.;rescue_target="";rescue_contact=false;rescue_latched=false
 	invulnerable = 1.2; entry_guard=false; hurt_time = 0.; flap_time = 0.
@@ -410,12 +411,11 @@ func armed_art_spec() -> Dictionary:
 	if bool(mount.ridden) or mount_transition!="":return {}
 	return M1CombatArt.body_spec(self)
 
-## This exact phase/frame also drives the visible vehicle body. Its baked
-## forward muzzle flash is used only when the real shot follows the hull.
+## Visible vehicle and muzzle use the same pose selection.
 func vehicle_art_spec() -> Dictionary:
 	var aim: Vector2=aim_direction.normalized() if aim_direction.length_squared()>.01 else Vector2(facing,0.)
 	var aligned: bool=absf(aim.y)<.005 and aim.x*float(facing)>0.
-	var phase: int=2 if float(mount.get("hurt",0.))>0. else (1 if shot_flash>0. and aligned else 0)
+	var phase: int=2 if bool(mount.ridden) and float(mount.get("hurt",0.))>0. else (1 if CampaignVehicles.firing(self) and aligned else 0)
 	var frame: int=posmod(int(time*8.),6)
 	if phase==1:frame=clampi(int((.18-shot_flash)/.18*6.),0,5)
 	elif phase==2:frame=clampi(int((1.-float(mount.get("break_time",0.))/CampaignVehicles.IMPACT_SECONDS)*6.),0,5)
@@ -645,7 +645,7 @@ func step_enemies(dt: float) -> void:
 			e.windup = maxf(0.,float(e.windup)-dt)
 			if float(e.windup)==0.:
 				enemy_shot(e,bool(e.mini)); e.attacks = int(e.attacks)+1
-				e.wait = 1.8 if bool(e.mini) else 2.2+float(int(e.attacks)%3)*.25
+				e.wait = 1.8 if bool(e.mini) else (1.85 if e.kind=="seed" else 2.2)+float(int(e.attacks)%3)*.25
 		else:
 			e.wait = float(e.wait)-dt
 			if float(e.wait)<=0. and absf(dx)<(150. if e.kind=="gnome" else 600.):

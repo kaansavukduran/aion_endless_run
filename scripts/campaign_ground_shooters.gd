@@ -2,12 +2,13 @@ class_name CampaignGroundShooters
 extends RefCounted
 
 const ROLES := {
-	"lantern_scout":{"speed":78.,"ready_range":465.,"windup":.69,"recover":.74,"speed_px":345.,"gravity":0.,"colour":"f5c986","kind":"scout_bolt"},
-	"cap_lobber":{"speed":61.,"ready_range":425.,"windup":.88,"recover":.96,"speed_px":0.,"gravity":590.,"colour":"cde295","kind":"lob_seed"}
+	"lantern_scout":{"speed":78.,"ready_range":465.,"windup":.69,"recover":.69,"speed_px":345.,"gravity":0.,"colour":"f5c986","kind":"scout_bolt"},
+	"cap_lobber":{"speed":61.,"ready_range":425.,"windup":.88,"recover":.83,"speed_px":0.,"gravity":590.,"colour":"cde295","kind":"lob_seed"}
 }
 const ARC_SECONDS := .90
 const RELEASE_SECONDS := .14
 const FIRST_PREPARATION := .55
+const BURST_SPACING := .20
 const DATA := preload("res://assets/CAMPAIGN-GROUND-SHOOTERS-PROVENANCE.json")
 const ART := preload("res://assets/campaign-ground-shooters.png")
 const DEFEAT_ART := preload("res://assets/campaign-ground-shooter-defeats.png")
@@ -73,6 +74,12 @@ static func walk(w,e: Dictionary,direction: int,dt: float) -> void:
 		e.stride=float(e.get("stride",0.))+absf(candidate-float(e.x))
 		e.x=candidate;e.y=height;e.facing=direction
 
+static func release_shot(w,e: Dictionary,spec: Dictionary) -> void:
+	w.bullets.append({"p":origin(e),"v":velocity(e),"owner":"enemy","kind":str(spec.kind),
+		"colour":str(spec.colour),"gravity":float(spec.gravity),"age":0.,"damage":1,"pierce":0,"hit":[],"life":2.})
+	e.release=RELEASE_SECONDS
+	w.pending_events.append("scout_shot" if e.kind=="lantern_scout" else "lob_throw")
+
 static func step(w,e: Dictionary,dt: float) -> bool:
 	if not has(str(e.kind)):return false
 	var spec: Dictionary=ROLES[e.kind]
@@ -81,23 +88,25 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 	if float(e.get("recover",0.))>0.:
 		e.recover=maxf(0.,float(e.recover)-dt)
 		e.release=maxf(0.,float(e.get("release",0.))-dt)
+		if bool(e.get("burst_pending",false)) and float(e.recover)<=float(spec.recover)-BURST_SPACING:
+			e.burst_pending=false
+			if visible_threat(w,e) and dx*int(e.facing)>0. and absf(dx)<=float(spec.ready_range)+55.:
+				release_shot(w,e,spec)
 		return true
 	if float(e.windup)>0.:
 		e.windup=maxf(0.,float(e.windup)-dt)
 		if float(e.windup)>0.:return true
 		if not visible_threat(w,e) or absf(dx)>float(spec.ready_range)+55.:
-			e.wait=.25
+			e.wait=.25;e.burst_pending=false
 			return true
-		var shot_velocity:=velocity(e)
-		w.bullets.append({"p":origin(e),"v":shot_velocity,"owner":"enemy","kind":str(spec.kind),
-			"colour":str(spec.colour),"gravity":float(spec.gravity),"age":0.,"damage":1,"pierce":0,"hit":[],"life":2.})
-		e.release=RELEASE_SECONDS;e.recover=float(spec.recover);e.wait=.26;e.attacks=int(e.attacks)+1
-		w.pending_events.append("scout_shot" if e.kind=="lantern_scout" else "lob_throw")
+		release_shot(w,e,spec)
+		e.recover=float(spec.recover);e.wait=.23;e.attacks=int(e.attacks)+1
 		return true
 	e.wait=maxf(0.,float(e.wait)-dt)
 	if float(e.age)>=FIRST_PREPARATION and float(e.wait)<=0. and absf(dx)<=float(spec.ready_range) and absf(w.player.y-float(e.y))<175. and visible_threat(w,e):
 		e.windup=float(spec.windup);e.facing=face
 		e.throw_target=w.player+Vector2(0.,-31.)
+		e.burst_pending=e.kind=="lantern_scout" and int(e.attacks)%2==1
 	elif absf(dx)>float(spec.ready_range)*.72:
 		walk(w,e,face,dt)
 	elif absf(dx)<160. and int(e.attacks)>0:
@@ -115,6 +124,8 @@ static func draw(v,e: Dictionary,body: Vector2) -> void:
 			var mark:=start+Vector2(int(e.facing)*i*28.,0.)
 			if CampaignGround.touches_ground(v.world,start,mark):break
 			v.draw_rect(Rect2(v.at(mark),Vector2(6.,2.)),tint)
+			if bool(e.get("burst_pending",false)):
+				v.draw_rect(Rect2(v.at(mark+Vector2(0.,-6.)),Vector2(4.,2.)),tint)
 	else:
 		var direction:=velocity(e)
 		for i in range(1,8):

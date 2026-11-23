@@ -5,6 +5,30 @@ extends RefCounted
 ## remain physical play; no wave timers spawn threats behind the camera.
 const SHORE_BRIDGE := [Rect2(5800.,-40.,310.,20.),Rect2(6110.,-40.,360.,20.)]
 
+# Small ground-only reinforcements between the larger authored encounters.
+# Stable IDs preserve scoring and saves. The shore crossing stays clear.
+const GROUND_PATROLS := {
+	"shore":[["gnome",2650.],["beetle",4100.]],
+	"quay":[["lantern_scout",3450.],["gnome",7160.]],
+	"canopy":[["beetle",3110.]],
+	"water":[["cap_lobber",4080.],["leech",11120.]],
+	"terrace":[["lantern_scout",5210.],["vine",10180.]],
+	"roots":[["conductor",5440.],["burrow",10430.]],
+	"relay":[["cap_lobber",5480.],["beetle",7540.]]
+}
+
+# Optional walking decks: a low approach under fire, staggered jump shelves,
+# and longer high lanes to disengage. The ground route remains available.
+const SIDE_DECKS := {
+	"shore":[Rect2(2390.,-55.,125.,18.),Rect2(2540.,-112.,145.,18.)],
+	"quay":[Rect2(3230.,-62.,145.,18.),Rect2(3395.,-121.,220.,18.)],
+	"canopy":[Rect2(3020.,-72.,120.,18.),Rect2(3170.,-126.,130.,18.)],
+	"water":[Rect2(3810.,-58.,190.,18.),Rect2(4035.,-97.,180.,18.)],
+	"terrace":[Rect2(5070.,-60.,125.,18.),Rect2(5220.,-124.,120.,18.),Rect2(5360.,-82.,158.,18.)],
+	"roots":[Rect2(5280.,-72.,195.,18.),Rect2(5515.,-116.,140.,18.)],
+	"relay":[Rect2(5240.,-55.,115.,18.),Rect2(5375.,-116.,240.,18.)]
+}
+
 static func crate_kind(section: String,index: int) -> String:
 	var stock: Dictionary={
 		"shore":["heavy","grenade","shield","heal","arc","points","grenade","heavy","heal"],
@@ -33,6 +57,16 @@ static func populate(w) -> void:
 		for j in 3:
 			var id: String=w.section+":skill-fruit:"+str(int(surface.position.x))+":"+str(j)
 			if not w.taken.has(id):w.pickups.append({"id":id,"kind":"fruit_"+str((j+3)%8),"x":surface.position.x+25.+j*45.,"y":surface.position.y-42.})
+	var patrols: Array=GROUND_PATROLS.get(w.section,[])
+	for i in patrols.size():
+		w.spawn_enemy(str(patrols[i][0]),float(patrols[i][1]),0.,910+i)
+	var decks: Array=SIDE_DECKS.get(w.section,[])
+	w.platforms.append_array(decks)
+	if not decks.is_empty():
+		var deck: Rect2=decks[1]
+		var id: String=w.section+":high-lane:fruit"
+		if not w.taken.has(id):
+			w.pickups.append({"id":id,"kind":"fruit_4","x":deck.get_center().x,"y":deck.position.y-35.})
 	if w.section!="shore":return
 	# This crossing is required on every route. Both decks stay in place.
 	w.platforms=w.platforms.filter(func(p):return p.end.x<5800. or p.position.x>6470.)

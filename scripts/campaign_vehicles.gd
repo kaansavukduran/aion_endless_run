@@ -34,6 +34,9 @@ static func step_parked(w,dt: float) -> void:
 static func stunned(w) -> bool:
 	return bool(w.mount.get("ridden",false)) and float(w.mount.get("break_time",0.))>0.
 
+static func firing(w) -> bool:
+	return bool(w.mount.ridden) and w.mount_transition.is_empty() and w.last_shot_mounted and w.shot_flash>0.
+
 static func damage(w) -> void:
 	if int(w.mount.hp)<=0:return
 	w.mount.hp=0
@@ -60,6 +63,7 @@ static func eject(w) -> void:
 	CampaignGrenade.cancel(w)
 	var foot: float=park(w)
 	w.mount.ridden=false;w.mount.available=false;w.mount.wreck_age=0.
+	w.shot_flash=0.;w.last_shot_mounted=false
 	w.mount_transition="";w.mount_transition_time=0.;w.drop_through_time=0.;w.stop_inputs()
 	var target:=Vector2(w.player.x,support_below(w,w.player.x,foot))
 	if not CampaignGround.has_floor(target.y) or not CampaignLives.landing_clear(w,target):
@@ -94,6 +98,7 @@ static func interact(w) -> bool:
 		w.mount_transition_to=Vector2(float(w.mount.x),float(w.mount.get("floor_y",w.floor_at(float(w.mount.x))))-42.)
 	else:return false
 	w.mount.facing=w.facing;w.drop_through_time=0.
+	w.shot_flash=0.;w.last_shot_mounted=false
 	w.mount_transition_from=w.player;w.mount_transition_time=0.
 	w.velocity=Vector2.ZERO;w.stop_inputs()
 	return true

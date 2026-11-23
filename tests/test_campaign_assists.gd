@@ -76,8 +76,12 @@ func run() -> void:
   w.step(.01)
   if wolf.phase=='bite':break
  check(wolf.phase=='bite' and str(wolf.target)==str(doomed.id),'Cancelled-hit fixture reaches a real bite windup')
+ var planted:=Vector2(float(wolf.x),float(wolf.y));var bite_facing:=int(wolf.facing)
+ var preparation_art:=CampaignAssistArt.pose(wolf,true)
  var before: int=w.assist_attacks;w.damage_enemy(doomed,10)
  advance(w,.17)
+ check(Vector2(float(wolf.x),float(wolf.y))==planted and int(wolf.facing)==bite_facing and wolf.phase=='bite_recover','Wolf plants its feet and keeps its attack facing when its target is lost')
+ check(preparation_art.source_frame!=CampaignAssistArt.pose(wolf,true).source_frame,'The stationary bite advances through its own authored cels')
  check(int(wolf.remaining)==2 and w.assist_attacks==before,'A victim killed before contact does not spend a wolf bite or claim a hit')
  for tick in 400:
   w.step(.01)
@@ -90,6 +94,9 @@ func run() -> void:
   w.step(.01)
   if not owl.stones.is_empty():break
  check(not owl.stones.is_empty(),'Refresh fixture contains an already falling owl stone')
+ var hover:=Vector2(float(owl.x),float(owl.y));var flight_face:=int(owl.facing)
+ advance(w,.12)
+ check(Vector2(float(owl.x),float(owl.y))==hover and int(owl.facing)==flight_face and CampaignAssistArt.pose(owl,true).source_row==1,'Owl holds a stable release anchor and draws a separate talon-opening animation')
  collect(w,'owl_feather','owl:refresh:2')
  check(w.assists.any(func(a):return not a.stones.is_empty()),'Refreshing an owl preserves its already released falling stone')
  owl=w.assists[0]

@@ -19,6 +19,12 @@ AIONIA v1.7 bu turda canlı standart belgesinden okundu. Drive’daki 21 Kasım 
 - Sekiz kurtarılabilir karakterin pozları ve korsanın altı yürüyüş karesi yeniden işlendi. Kimlikler, ayak hizası ve yürüyüş yönü korunarak yeni kareler mevcut kurtarma akışına bağlandı.
 - Altı kahramanla eski çökme süresini aşan bekleyiş ve normal geçiş, eski kayıt onarımı, gerçek Linux görüntüleme ve yerel Web dışa aktarması doğrulandı. Mission 1 için oyuncu kabulü bekliyor.
 
+### 0.55.3 · Yaya karşılaşmaları ve yardımcı animasyonları
+
+- Yedi yürüyüş bölümündeki seçili karşılaşmalara 13 yer düşmanı ve 15 isteğe bağlı tırmanma yüzeyi eklendi. Fener Nöbetçisi dönüşümlü tek ve işaretli çift atış yapar. Mantar Atıcısı ve sabit makineler daha kısa arayla hazırlanır. Uçan düşmanların saldırı ayarları bu geçişte kapsam dışı.
+- Ömer’in uçuşu ve pençe açarak taş bırakması ile Melun’un bekleme, dört ayaklı koşu ve ısırma döngüleri 30 yeni kare kullanır. Hedef ve yüz yönü saldırı sırasında sabitlenir. Melun’un isabeti temas menzili ister.
+- İlk skimmer da dahil olmak üzere boş araçlar kahramanın atışını izlemiyor. Namlu, taban ve tutuş noktaları korunarak dört araç ve altı kahramanın ana çizimleri ile seçili geri yürüyüş, bomba ve tepki paftaları işlendi.
+
 ### Uygulama ve kanıt
 
 | Forge | Oyuna bağlanan kapsam | Gerçek doğrulama | Açık kalan |
