@@ -426,8 +426,14 @@ with sync_playwright() as pw:
         shooter_proof={}
         shooter_types={'lantern_scout':'scout_bolt','cap_lobber':'lob_seed'}
         skipped_shooter_assist=False
+        previously_mounted=False
         while time.monotonic()-started<a.max_seconds:
             d=data();now=time.monotonic();state=d['state'];section=d['section']
+            if previously_mounted and not d['mounted']:
+                # Vehicle impact releases the application's action sources.
+                # Re-press keys after the pilot is out, just as a player can.
+                keys([])
+            previously_mounted=d['mounted']
             # The real fade suppresses input through its second half, even
             # after the destination world is playing. Release held keys before
             # polling so a swallowed keydown is not cached as still applied.
@@ -517,6 +523,14 @@ with sync_playwright() as pw:
                             page.keyboard.press('Space');last_jump=now
                 if not upper and section=='fork_one' and 620<d['player'][0]<1210 and d['player'][1]>35:
                     wanted.append('s')
+                if not upper and section=='fork_one' and 660<d['player'][0]<777 and d['player'][1]<-5:
+                    # A jump or a vehicle dismount may land on the service
+                    # stair. Use the game's normal Down + Jump drop-through
+                    # before walking into the lower crawlway.
+                    wanted.append('s')
+                    keys(wanted)
+                    if d.get('grounded') and now-last_jump>.35:
+                        page.keyboard.press('Space');last_jump=now
                 keys(wanted)
                 if section=='fork_one' and 780<d['player'][0]<1180 and d.get('crouching') and d['player'][1]>35:
                     if not fork_inputs[-1].get('crawled_under_pier'):
@@ -574,7 +588,7 @@ with sync_playwright() as pw:
                 # The authored vehicle is twice the actor's height; its high
                 # cannon passes over a short nearby ground enemy. Aim downward
                 # from range, then use the real Exit control for close combat.
-                if section not in ['quay','water'] or (target and abs(target['x']-x)<100 and target['y']>=y-45):
+                if section not in ['quay','water'] or (target and abs(target['x']-x)<100 and target['y']>=y-45) or (a.observe_terrain and section=='water' and 5100<x<5650 and 'water' not in terrain_samples):
                     keys([]);page.keyboard.press('e');page.wait_for_timeout(650)
                     vehicle_inputs.append({'action':'exit','section':section,'x':x,'reason':'close ground target' if target else 'raised route'})
                     continue
