@@ -357,3 +357,8 @@ Current source/provenance, actual checks and remaining six-hero work are in [the
 ### 0.50.0 · Published six-hero Mission 1 technical candidate
 
 Six-hero action art, abilities, genuine backsteps, one-release grenades, the lantern-grove opening and geometry-preserving pier facade are integrated. PR10 merged as8167621 after green required CI; main45100627441 and exact-artifact Pages45102014529 passed. Initial public0.50 buildabfb88139e9af7d3 has13 verified public asset downloads, actual Ayça WATER17/Eren TERRACE15 full-mission checks, same legacy-profile online/offline10 and actual public Firefox153 startup/offline10. The canonical [Mission 1 handoff](docs/MISSION1-GAMEPLAY-HANDOFF.md) separates exact build evidence, retained first failures, normal input, old-save upgrade, CI/Pages and pending owner acceptance. Vercel separately reports Account is blocked. Final documentation/evidence changes do not change product code. No Mission2 work.
+
+
+### 0.51.0 · T-pose art update for Aion and Kutsanmış
+
+The two hero bodies have ten redrawn atlases and new close-strike, rescue and damage sequences. Their registered faces, feet, wrists and muzzle remain connected to the existing simulation. Source, test evidence and the pending publication gates are at [the Mission 1 handoff](docs/MISSION1-GAMEPLAY-HANDOFF.md).

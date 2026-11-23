@@ -19,9 +19,44 @@ func target(w,x: float,hp: int=10) -> Dictionary:
 	var e: Dictionary=w.enemies.back();e.hp=hp;e.max_hp=hp;e.wait=100.;e.armour=0
 	return e
 
+func test_shell_contacts() -> void:
+	for direction in [-1.,1.]:
+		var w:=clean("armadillo")
+		w.player=Vector2(600.,0.)
+		w.move_axis=Vector2.DOWN
+		w.aim_direction=Vector2(direction,0.)
+		w.interact()
+		advance(w,.15)
+		check(w.shell_contacts.is_empty(),"shell anticipation leaves no travel marks")
+		advance(w,.11)
+		check(w.shell_contacts.size()>=2,"shell movement leaves spaced contact marks")
+		for contact in w.shell_contacts:
+			var point: Vector2=contact.point
+			check(contact.direction==direction and is_equal_approx(point.y,w.floor_at(point.x)),"contact follows actual ground and travel direction")
+			check((w.player.x-point.x)*direction>=0.,"contact trail remains behind the shell")
+		var marks:=w.shell_contacts.duplicate()
+		w.state="paused"
+		advance(w,.3)
+		check(w.shell_contacts==marks,"pause freezes existing contacts")
+		w.state="playing"
+		advance(w,.75)
+		check(w.shell_contacts.is_empty(),"contacts expire after the roll")
+	var ledge:=clean("armadillo")
+	ledge.pits.append(Vector2(610.,780.))
+	ledge.player=Vector2(600.,0.)
+	ledge.move_axis=Vector2.DOWN
+	ledge.interact()
+	advance(ledge,.28)
+	check(not ledge.grounded(),"roll crosses the real ledge into a fall")
+	for contact in ledge.shell_contacts:
+		check(Vector2(contact.point).x<=610.,"no dust is emitted beyond the floor edge")
+	ledge.load_section("quay")
+	check(ledge.shell_contacts.is_empty() and not ledge.snapshot().has("shell_contacts"),"contacts clear on travel and do not enter saves")
+
 func _initialize() -> void:call_deferred("run")
 
 func run() -> void:
+	test_shell_contacts()
 	for hero in ["armadillo","frog"]:
 		var w:=clean(hero)
 		check(w.character==hero,"new hero begins by stable identity: "+hero)

@@ -30,7 +30,12 @@ static func body_spec(w) -> Dictionary:
  elif w.shot_flash>0.:
   frame=clampi(int((.18-w.shot_flash)/.18*6.),0,5)
  if w.rescue_time>0. or (w.melee_time>0. and absf(w.velocity.x)<=1. and w.grounded()):
-  action='crouch_fire' if crouched else 'idle_fire';frame=clampi(int((.6-w.rescue_time)/.6*6.),0,5) if w.rescue_time>0. else clampi(int((.28-w.melee_time)/.28*6.),0,5)
+  action='crouch_fire' if crouched else 'idle_fire';frame=clampi(int((CampaignRescue.CUT_SECONDS-w.rescue_time)/CampaignRescue.CUT_SECONDS*6.),0,5) if w.rescue_time>0. else clampi(int((.28-w.melee_time)/.28*6.),0,5)
+ if not crouched and w.grounded():
+  if w.rescue_time>0. and M1HeroActionArt.supports(w.character,'rescue_cut'):
+   action='rescue_cut'
+  elif w.melee_time>0. and M1HeroActionArt.supports(w.character,'melee'):
+   action='melee';frame=clampi(int((.28-w.melee_time)/.28*6.),0,5)
  var throw_value=w.get('grenade_throw')
  var throw_state: Dictionary=throw_value if throw_value is Dictionary else {}
  var throwing: bool=not throw_state.is_empty()
@@ -40,9 +45,14 @@ static func body_spec(w) -> Dictionary:
   if throwing:action='tunnel_throw'
   elif absf(w.velocity.x)>1.:action='tunnel_walk_back' if w.velocity.x*body_facing(w)<-1. else 'tunnel_walk'
   else:action='tunnel_idle'
+ elif action=='idle_fire' and w.hurt_time>0. and w.shot_flash<=0. and w.rescue_time<=0. and w.melee_time<=0. and M1HeroActionArt.supports(w.character,'hurt'):
+  action='hurt';frame=clampi(int((.3-w.hurt_time)/.3*6.),0,5)
  if w.state in ['dying','dead']:
-  action='tunnel_idle' if CampaignRoutes.low_ceiling(w) else 'crouch_fire';frame=5
- if not w.pose_motion_enabled and not throwing:frame=0
+  if CampaignRoutes.low_ceiling(w):action='tunnel_idle';frame=5
+  elif M1HeroActionArt.supports(w.character,'death'):
+   action='death';frame=5 if w.state=='dead' else clampi(int(w.death_time/.8*6.),0,5)
+  else:action='crouch_fire';frame=5
+ if not w.pose_motion_enabled and not throwing:frame=5 if action=='death' else 0
  return {'hero':w.character,'action':action,'frame':frame,'mirror':int(throw_state.direction) if throwing else body_facing(w),'key':'m1-body'}
 static func metrics(w) -> Dictionary:
  var s:=body_spec(w)

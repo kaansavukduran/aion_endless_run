@@ -8,6 +8,8 @@ const ROLL_WINDUP := .16
 const ROLL_ACTIVE := .38
 const ROLL_BRAKE := .14
 const ROLL_RECOVER := .32
+const SHELL_CONTACT_LIFE := .18
+const SHELL_CONTACT_SPACING := 22.
 const TONGUE_REACH := 240.
 const TONGUE_SPEED := 1000.
 
@@ -67,6 +69,17 @@ static func movement_speed(w,base: float) -> float:
 	if phase=="roll":return float(w.hero_skill.face)*520.
 	if phase=="brake":return float(w.hero_skill.face)*520.*maxf(0.,1.-float(w.hero_skill.clock)/ROLL_BRAKE)
 	return base*.18
+
+static func trace_shell_contact(w,started_grounded: bool,travel: float) -> void:
+	while not w.shell_contacts.is_empty() and w.time-float(w.shell_contacts[0].born)>=SHELL_CONTACT_LIFE:
+		w.shell_contacts.pop_front()
+	if not rolling(w) or not started_grounded or not w.grounded() or absf(travel)<1.:
+		return
+	if not w.shell_contacts.is_empty():
+		var last: Vector2=w.shell_contacts.back().point
+		if absf(w.player.x-last.x)<SHELL_CONTACT_SPACING:
+			return
+	w.shell_contacts.append({"point":w.player,"born":w.time,"direction":signf(travel)})
 
 static func mouth(w) -> Vector2:
 	var local:=Vector2(22.,-43. if not w.crouching() else -23.)

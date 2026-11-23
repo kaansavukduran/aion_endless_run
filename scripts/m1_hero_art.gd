@@ -24,13 +24,13 @@ static func has(hero: String) -> bool:
 
 static func clip_spec(hero: String,action: String) -> Dictionary:
 	if hero not in HEROES:return _provider().clip_spec(hero,action)
-	if action in EXTRA_ACTIONS or action in M1HeroActionArt.TUNNEL_ACTIONS:return M1HeroActionArt.clip_spec(hero,action)
+	if M1HeroActionArt.supports(hero,action):return M1HeroActionArt.clip_spec(hero,action)
 	var clip: Dictionary=DATA.data.playback[action]
 	return {'frames':int(clip.frames),'fps':float(clip.frames)/float(clip.get('seconds',.75)),'loop':bool(clip.get('loop',false))}
 
 static func metrics(hero: String, action: String, frame: int=0) -> Dictionary:
 	if hero not in HEROES:return _provider().metrics(hero,action,frame)
-	if action in EXTRA_ACTIONS or action in M1HeroActionArt.TUNNEL_ACTIONS:return M1HeroActionArt.metrics(hero,action,frame)
+	if M1HeroActionArt.supports(hero,action):return M1HeroActionArt.metrics(hero,action,frame)
 	assert(has(hero),"Unknown playable body: "+hero)
 	assert(action in ACTIONS,"Unsupported body action: "+action)
 	var spec: Array=DATA.data.runtime_rows[hero][action]
@@ -41,7 +41,7 @@ static func metrics(hero: String, action: String, frame: int=0) -> Dictionary:
 
 func pose(hero: String, action: String, frame: int=0) -> Dictionary:
 	if hero not in HEROES:return _provider().pose(hero,action,frame)
-	if action in EXTRA_ACTIONS or action in M1HeroActionArt.TUNNEL_ACTIONS:return M1HeroActionArt.pose(hero,action,frame)
+	if M1HeroActionArt.supports(hero,action):return M1HeroActionArt.pose(hero,action,frame)
 	assert(has(hero),"Unknown playable body: "+hero)
 	assert(action in ACTIONS,"Unsupported body action: "+action)
 	var spec: Array=DATA.data.runtime_rows[hero][action]
