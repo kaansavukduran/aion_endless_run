@@ -76,6 +76,7 @@ func run() -> void:
 		w=fresh();w.load_section(key)
 		w.enemies.clear();w.gates.clear();w.objects.clear();w.hazards.clear();w.zones.clear();w.platforms.clear();w.pits.clear()
 		var points: Array=CampaignGround.PROFILES[key]
+		var exit_x:=minf(float(points.back().x),w.length()-90.)
 		w.player=points.front()
 		w.move_axis=Vector2.RIGHT
 		var low:=0.
@@ -85,8 +86,8 @@ func run() -> void:
 			w.step(1./120.)
 			high=minf(high,w.player.y);low=maxf(low,w.player.y)
 			footing=footing and absf(w.player.y-w.floor_at(w.player.x))<.1
-			if w.player.x>=points.back().x:break
-		check(footing and high-low< -20. and w.player.x>=points.back().x and w.attempts_remaining==3,"Each authored profile retains real supported traversal and changes elevation: "+key)
+			if w.player.x>=exit_x:break
+		check(footing and high-low< -20. and w.player.x>=exit_x and w.attempts_remaining==3,"Each authored profile retains real supported traversal and changes elevation: "+key)
 	w=fresh();w.load_section("water");w.pits.assign([Vector2(5940.,6010.)])
 	check(not CampaignGround.fell_into_pit(w,Vector2(5960.,214.)) and CampaignGround.fell_into_pit(w,Vector2(5960.,400.)),"A real pit at the deep basin uses its local lips to measure falling")
 	w=fresh();w.load_section("water");w.enemies.clear()
@@ -94,5 +95,18 @@ func run() -> void:
 	CampaignGround.align_world(w)
 	var supported_flyer: Dictionary=w.enemies[0]
 	check(absf(float(supported_flyer.y)-w.floor_at(float(supported_flyer.x))+130.)<.01 and is_equal_approx(float(supported_flyer.home.y),float(supported_flyer.y)),"An attack flyer preserves its planned height above the playable deep basin")
+	w=fresh();w.load_section("arena");w.player=Vector2(2120.,0.)
+	w.boss.engaged=true;w.boss.phase=2;w.boss.hp=43;w.boss.x=2730.;w.boss.y=0.
+	for deck in CampaignGround.ARENA_WALKWAYS:w.platforms.erase(deck)
+	var earlier_arena:=w.snapshot();earlier_arena.ground_revision=1
+	restored=AionCampaignWorld.new()
+	check(restored.restore(earlier_arena) and restored.boss.hp==43 and restored.boss.engaged,"Arena refinement keeps an already engaged boss and its remaining health")
+	check(restored.player.y==-40. and float(restored.boss.y)==-26. and restored.platforms.has(CampaignGround.ARENA_WALKWAYS[1]),"The old arena save gains the actual hero, boss and support elevations")
+	restored.boss.attack=1;restored.boss.windup=.02
+	restored.step_boss(.025)
+	check(float(restored.platform_timers[2020.])>2. and restored.bullets.any(func(b):return b.kind=="wave"),"The phase two root wave affects the platform in the active arena")
+	restored.step_bullets(.06)
+	for wave in restored.bullets:
+		if wave.kind=="wave":check(is_equal_approx(float(wave.p.y),restored.floor_at(float(wave.p.x))-16.),"The root wave remains near the actual ground")
 	print("RESULT: %d campaign terrain checks, %d failures"%[checks,failures])
 	quit(1 if failures else 0)

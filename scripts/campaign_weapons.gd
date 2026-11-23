@@ -63,7 +63,7 @@ static func blast(w,p: Vector2,radius: float,damage: int,colour: String) -> void
 	w.blasts.append({"p":p,"age":0.,"radius":radius,"color":colour})
 	for e in w.enemies:
 		if not bool(e.defeated) and p.distance_to(Vector2(float(e.x),float(e.y)-30.))<radius:w.damage_enemy(e,damage)
-	if bool(w.boss.active) and p.distance_to(Vector2(float(w.boss.x),-70.))<radius+35.:w.damage_boss(damage)
+	if bool(w.boss.active) and p.distance_to(Vector2(float(w.boss.x),float(w.boss.y)-70.))<radius+35.:w.damage_boss(damage)
 	CampaignRescue.blast_ropes(w,p,radius)
 	w.pending_events.append("blast")
 

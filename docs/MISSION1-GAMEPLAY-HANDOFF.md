@@ -2,6 +2,13 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 23 Kasım 2026 · Yerel 0.55.0 Kök Motoru adayı
+
+- Kök Motoru arenanın içinde zeminden yükselir. Giriş 1,65 saniye sürer, atlama düğmesi ile kapanabilir ve azaltılmış harekette sabit kalır. Doğal bitiş ve atlama aynı savaş durumunu açar. Giriş boyunca saldırı saati çalışmaz.
+- Aktif alanda alçak cep ve iki gerçek basamak var. Portların çıkışları, çekirdek, dalga, ışın ve yüklü gövde hareketi yerel zemini kullanır. İkinci evrede üst platform çökmeden önce kenarı işaretlenir. Evre değişiminde eski boss mermileri temizlenir. Hasar kaynakları aynı çekirdek açıklığını ve evre sınırlarını kullanır. Zafer tek sefer sayılır ve parçaların düşüşü zamanlanır.
+- Dört hedefli kaynak grubunda 632 kontrol, iki dilde ve iki yönde menü/giriş suite'inde 961 kontrol ve gerçek Linux renderer'da üç açığa çıkış karesi geçti. Bunlar normal girdilerle tüm final rotasını bitirme kanıtı değildir. Oyuncuyla atış dengesi, üç yol ve farklı kahramanların gerçek final döngüsü henüz açık.
+- Sıradaki ilk eylem local Web adayında sıradan kontrol girdileriyle arena sonucu ve yeniden deneme akışını oynamak. Başarılı 0.52 kaydı sonrası arazi ve düşman yerel dallarıyla eşleştir, ardından doğrulanmış aday için yayın kapısını çalıştır.
+
 ## 23 Kasım 2026 · Yerel 0.54.0 kara atıcıları adayı
 
 - Fener kıyısında Fener Nöbetçisi ve Mantar Atıcısı normal bölüme bağlı. Nöbetçi okunur bir düz atış hattı gösterir. Atıcı önceden işaretlediği noktaya doğru yerçekimli bir kapsül yollar. İkisi de zeminle birlikte yürür, görünür alanda tam hazırlık yapar ve tek atıştan sonra kendi toparlanma süresini geçirir.

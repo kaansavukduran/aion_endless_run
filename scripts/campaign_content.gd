@@ -283,7 +283,6 @@ static func step(w,dt: float) -> void:
 		for p in w.pickups:
 			var point:=Vector2(float(p.x),float(p.y))
 			if point.distance_to(w.player)<250.:point=point.move_toward(w.player,320.*dt);p.x=point.x;p.y=point.y
-	# Late boss phases alter one optional platform on a readable cycle, keeping the floor safe.
 	w.disabled_platforms.clear()
 	for x in w.platform_timers:
 		w.platform_timers[x]=maxf(0.,float(w.platform_timers[x])-dt)
@@ -291,4 +290,3 @@ static func step(w,dt: float) -> void:
 	for x in w.bridge_timers:
 		w.bridge_timers[x]=maxf(0.,float(w.bridge_timers[x])-dt)
 		if float(w.bridge_timers[x])<=0.:w.disabled_platforms[x]=true
-	if w.section=="arena" and int(w.boss.phase)>=2 and fmod(float(w.boss.clock),7.)>3.5:w.disabled_platforms[690.]=true

@@ -2,7 +2,8 @@ class_name CampaignGround
 extends RefCounted
 
 const VOID_HEIGHT := 1000.
-const REVISION := 1
+const REVISION := 2
+const ARENA_WALKWAYS := [Rect2(1840.,-55.,130.,20.),Rect2(2020.,-125.,160.,20.)]
 # Heights are foot coordinates in the existing Godot world, increasing down.
 # This section lowers the approach under the lantern bridge, then rises to
 # an exposed firing shelf. The original one-way decks remain higher routes.
@@ -21,7 +22,10 @@ const PROFILES := {
 	"roots":[Vector2(7480.,0.),Vector2(7740.,76.),Vector2(7920.,76.),
 		Vector2(8180.,-36.),Vector2(8400.,-36.),Vector2(8780.,0.)],
 	"relay":[Vector2(3780.,0.),Vector2(4050.,-48.),Vector2(4230.,-48.),
-		Vector2(4480.,22.),Vector2(4660.,22.),Vector2(4860.,-42.),Vector2(5120.,0.)]
+		Vector2(4480.,22.),Vector2(4660.,22.),Vector2(4860.,-42.),Vector2(5120.,0.)],
+	"arena":[Vector2(1520.,0.),Vector2(1700.,26.),Vector2(1850.,26.),
+		Vector2(2040.,-40.),Vector2(2200.,-40.),Vector2(2370.,0.),
+		Vector2(2580.,0.),Vector2(2710.,-26.),Vector2(2850.,-26.),Vector2(2980.,0.)]
 }
 
 static func height(section: String,x: float) -> float:
@@ -113,3 +117,10 @@ static func lift_flat_save(w) -> void:
 	var saddle: float=42. if bool(w.mount.ridden) else 0.
 	if has_floor(support) and (absf(w.player.y+saddle)<.1 or w.player.y+saddle>support):
 		w.player.y=support-saddle
+
+static func restore_revision(w,revision: int) -> void:
+	if revision<1 or (revision<2 and w.section=="arena"):lift_flat_save(w)
+	if revision>=2 or w.section!="arena":return
+	for deck in ARENA_WALKWAYS:
+		if deck not in w.platforms:w.platforms.append(deck)
+	w.boss.y=w.floor_at(float(w.boss.x))
