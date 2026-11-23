@@ -27,14 +27,18 @@ with sync_playwright() as p:
  # before exercising paused → playing → paused audio. Two seconds of actual
  # play keeps this focused probe away from an unattended combat/death flow.
  page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && !(d.presentation || d.presentation_stage)}',timeout=15000)
- page.locator('canvas').focus();page.keyboard.press('Escape')
- page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"',timeout=10000)
+ def set_paused(paused):
+  # Exercise the same visible Pause/Resume actions a player can activate.
+  # Godot replaces these controls after a transition, so focus each new
+  # action explicitly instead of sending Escape to the detached control.
+  action=page.get_by_role('button',name='Pause' if paused else 'Keep going',exact=True)
+  action.press('Enter',timeout=15000)
+  page.wait_for_function('menu=>JSON.parse(document.querySelector("canvas").dataset.campaign).menu===menu',arg='paused' if paused else '',timeout=15000)
+ set_paused(True)
  cd=c.new_cdp_session(page);samples=[];start=time.monotonic();states=['paused']
  for i in range(args.seconds):
   if i in [10,12]:
-   page.keyboard.press('Escape')
-   expected='' if i==10 else 'paused'
-   page.wait_for_function('menu=>JSON.parse(document.querySelector("canvas").dataset.campaign).menu===menu',arg=expected,timeout=10000)
+   set_paused(i==12)
    states.append('playing' if i==10 else 'paused')
   sample={'wall':time.monotonic()-start,'audio':page.evaluate('window.audioProbe'),'heap':cd.send('Runtime.getHeapUsage'),'cgroup':cgroup_memory_bytes(),'menu':data()['menu'],'music_starts':data().get('music_starts')};samples.append(sample);print(json.dumps(sample),flush=True)
   if sample['cgroup'] is not None and sample['cgroup']>12*1024**3:break
