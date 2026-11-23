@@ -212,6 +212,9 @@ func draw_world() -> void:
 		if float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
 		if bool(e.defeated) and float(e.get("dead_age",0.))>1.: continue
 		var p := Vector2(float(e.x),float(e.y))
+		if CampaignGroundShooters.has(str(e.kind)):
+			CampaignGroundShooters.draw(self,e,p)
+			continue
 		var direction: int=enemy_draw_direction(str(e.kind),int(e.facing))
 		if bool(e.defeated) and not bool(e.mini) and str(e.kind) in CampaignEffectsArt.LEGACY:
 			var f: int=clampi(int(float(e.get("dead_age",0.))/.65*6.),0,5)
@@ -369,6 +372,17 @@ func draw_world() -> void:
 	draw_npcs(true) # Keep the thank-you and bag visible in front of a contacted hull.
 	for b in world.bullets:
 		var p := at(b.p)
+		if b.kind=="lob_seed":
+			draw_rect(Rect2(p-Vector2(5.,3.),Vector2(10.,6.)),Color("586644"))
+			draw_rect(Rect2(p-Vector2(3.,5.),Vector2(6.,10.)),Color("cde295"))
+			draw_rect(Rect2(p-Vector2(2.,3.),Vector2(4.,3.)),Color("fff0c2"))
+			continue
+		if b.kind=="scout_bolt":
+			var tail:=p-Vector2(b.v).normalized()*22.
+			draw_line(tail,p,Color("6c5039"),6.)
+			draw_line(tail,p,Color("f5c986"),3.)
+			draw_rect(Rect2(p-Vector2(3.,3.),Vector2(6.,6.)),Color("fff1bf"))
+			continue
 		var color := Color(str(b.get("colour","e1f5e7"))) if b.owner=="hero" else Color("eeb079")
 		if b.kind=="arc": color=Color("89dbec")
 		if b.kind=="wave":

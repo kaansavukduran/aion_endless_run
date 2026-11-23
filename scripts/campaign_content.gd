@@ -60,8 +60,8 @@ const LEAF_PLANS := {
 ## to preserve the crumbling bridge setpiece intact.
 const MAIN_PLANS := {
 	"shore": [
-		{"x":1850.,"role":"shore_priority","enemies":[["gnome",0.,0.],["seed",220.,0.],["gnome",360.,0.]],"platforms":[[110.,-70.,175.]],"crate":420.,"fruit":[130.,-112.,3],"gate":true},
-		{"x":3150.,"role":"shore_vertical","enemies":[["crow",60.,-120.],["gnome",210.,0.],["seed",390.,0.],["crow",500.,-130.]],"platforms":[[40.,-72.,165.],[240.,-135.,170.]],"prop":["bridge",180.],"fruit":[65.,-112.,3],"gate":false},
+		{"x":1850.,"role":"shore_priority","enemies":[["gnome",0.,0.],["lantern_scout",220.,0.],["gnome",360.,0.]],"platforms":[[110.,-70.,175.]],"crate":420.,"fruit":[130.,-112.,3],"gate":true},
+		{"x":3150.,"role":"shore_vertical","enemies":[["crow",60.,-120.],["gnome",210.,0.],["cap_lobber",390.,0.],["crow",500.,-130.]],"platforms":[[40.,-72.,165.],[240.,-135.,170.]],"prop":["bridge",180.],"fruit":[65.,-112.,3],"gate":false},
 		{"x":4450.,"role":"shore_pre_bridge","enemies":[["beetle",0.,0.],["seed",215.,0.],["crow",350.,-125.],["beetle",495.,0.]],"platforms":[[120.,-75.,170.],[340.,-128.,160.]],"prop":["turret",320.],"crate":560.,"fruit":[140.,-115.,3],"gate":false},
 		{"x":6680.,"role":"shore_finish","enemies":[["beetle",0.,0.],["seed",190.,0.],["crow",330.,-120.],["seed",470.,0.]],"platforms":[[90.,-75.,175.]],"crate":530.,"fruit":[115.,-115.,3],"gate":true}
 	],

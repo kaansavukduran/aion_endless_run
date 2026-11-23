@@ -2,6 +2,12 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 23 Kasım 2026 · Yerel 0.54.0 kara atıcıları adayı
+
+- Fener kıyısında Fener Nöbetçisi ve Mantar Atıcısı normal bölüme bağlı. Nöbetçi okunur bir düz atış hattı gösterir. Atıcı önceden işaretlediği noktaya doğru yerçekimli bir kapsül yollar. İkisi de zeminle birlikte yürür, görünür alanda tam hazırlık yapar ve tek atıştan sonra kendi toparlanma süresini geçirir.
+- Özgün iki pafta oyunda çiziliyor. Her düşmanda altı yürüyüş karesi, ayrı hazırlık/atış/toparlanma pozları ve üç karelik yere çökme var. Kaynak, ayak ve atış bağlantıları [varlık kaydında](../assets/CAMPAIGN-GROUND-SHOOTERS-PROVENANCE.json).
+- 24 hedefli kaynak kontrolü, iki saldırı biçimi, saha dışı güvenlik, bağımsız toparlanma, yokuşta yön ve ölüm dizisini doğruladı. Gerçek oyundan kayıt ve konsol denetimi tamamlanmadan aday yayımlanmaz. Kök Motoru’nun yeni arena dramaturjisi sonraki iş.
+
 ## 23 Kasım 2026 · Yerel 0.53.0 arazi adayı
 
 - `feat/mission1-ground` çalışma dalında Fener kıyısı, Kırık iskele, Dalların arası, Su kanalı, Bahçe terasları, Kök geçidi ve Bakır röle gerçek yükseklik profilleri kullanıyor. Ortak yüzey hesabı yürüyüşü, araçları, yürüyen düşmanları, NPC ayaklarını, ikmali, mermi engellemesini, bomba sekmesini ve yedek yaşam inişini taşıyor. Eski kaydın konumu ve bekleyen yer hediyeleri gerçek yeni yüzeye uyarlanır.

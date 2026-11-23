@@ -603,6 +603,7 @@ func step_enemies(dt: float) -> void:
 		if absf(float(e.x)-player.x)>780. and not bool(e.active): continue
 		e.active = true; e.age = float(e.age)+dt
 		e.flash=maxf(0.,float(e.get("flash",0.))-dt)
+		if CampaignGroundShooters.step(self,e,dt):continue
 		e.facing = -1 if float(e.x)>player.x else 1
 		if CampaignEnemies.step(self,e,dt):continue
 		var dx: float = player.x-float(e.x)
