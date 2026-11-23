@@ -97,8 +97,8 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           text=Path('build/terrain-render.log').read_text()
-          assert 'RESULT: 40 rendered terrain checks, 0 failures' in text
-          assert 'SCRIPT ERROR' not in text and 'FAIL:' not in text
+          assert 'RESULT: 42 rendered terrain checks, 0 failures' in text
+          assert 'SCRIPT ERROR' not in text and 'FAIL:' not in text and 'p_size <= 0' not in text
           PY
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Linux' && always()

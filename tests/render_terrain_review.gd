@@ -95,5 +95,19 @@ func run() -> void:
 		check(absf(sample_color.r-target.r)<.015 and absf(sample_color.g-target.g)<.015 and absf(sample_color.b-target.b)<.015, "The drawn rim still matches the physical floor after mobile rotation")
 	game.queue_free()
 	await process_frame
+	# A resize can draw a new touch control before it receives its final size.
+	var action:=AionCampaignTouch.new()
+	action.font=ThemeDB.fallback_font;action.caption="Ateş et";action.position=Vector2(20.,20.)
+	root.add_child(action)
+	await process_frame
+	await RenderingServer.frame_post_draw
+	check(not action.hit(action.position),"An unlaid touch button cannot intercept input")
+	action.size=Vector2(2.,2.);action.queue_redraw()
+	await process_frame
+	await RenderingServer.frame_post_draw
+	action.size=Vector2(100.,100.);action.queue_redraw()
+	await process_frame
+	await RenderingServer.frame_post_draw
+	check(action.hit(action.position+Vector2(50.,50.)),"The same button accepts normal input once laid out")
 	print("RESULT: %d rendered terrain checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)

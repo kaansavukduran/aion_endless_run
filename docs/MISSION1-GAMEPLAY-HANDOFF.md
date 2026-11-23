@@ -22,6 +22,11 @@ Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVER
 - `feat/mission1-ground` çalışma dalında Fener kıyısı, Kırık iskele, Dalların arası, Su kanalı, Bahçe terasları, Kök geçidi ve Bakır röle gerçek yükseklik profilleri kullanıyor. Ortak yüzey hesabı yürüyüşü, araçları, yürüyen düşmanları, NPC ayaklarını, ikmali, mermi engellemesini, bomba sekmesini ve yedek yaşam inişini taşıyor. Eski kaydın konumu ve bekleyen yer hediyeleri gerçek yeni yüzeye uyarlanır.
 - 54.871 kaynak kontrolü ve beş Linux görüntüleme örneği geçti. Yerel Chromium normal girişinde Fener kıyısında `y=56`, Kırık iskelede `y=38` ve Su Kanalı havzasında `y=208` seviyelerinde gerçek ayak desteği gözlemlendi. İlk ayrımda normal Aşağı + Zıpla, sonra eğilerek iskele altından Su Kanalı’na inildi. Koşu Bakır röleye ulaştı.
 - Sonraki ilk eylem, açık tarayıcı koşusunu sonuca kadar izlemek ve Dalların arası üzerinden Teras ve Kök Geçidi girişlerini doğrulamak. Aday yerel ve üç rotalı test sürüyor.
+## 23 Kasım 2026 · 0.52.1 · Dokunma düğmesi yerleşimi
+
+- 0.52.0 PR’sı geçti ve `d85ac8a` ile `main`e alındı. İlk `main` paketinde normal kurtarma akışı geçti. Konsol kapısı `TextServer` sıfır yazı boyutu hatasını yakaladı. Başarısız iş aynı `main` commit’inde yeniden çalıştırılıyor. [GitHub Actions](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45177198891)
+- Gerçek Linux çiziminde aynı hata sıfır boyutlu mobil Ateş düğmesiyle yeniden üretildi. Yığın `scripts/touch_button.gd` içindeki yazı ölçümünü gösterdi. Boyutu henüz verilmemiş düğmeler çizilmiyor. Ufak geçici boyutta yazı ölçüsü pozitif tutuluyor.
+- Yeni görsel regresyon sıfır boyutu, iki piksellik geçici boyutu ve geçerli düğme boyutunu çiziyor. Boyut verilince dokunma alanı açılıyor. Linux render sürecindeki 42 kontrol geçti. 0.52.1’in tam CI ve Pages doğrulaması bekliyor.
 
 ## 23 Kasım 2026 · 0.52.0 · Arcade yaşamı ve araçlar
 
