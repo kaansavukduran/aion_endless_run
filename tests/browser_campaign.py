@@ -256,7 +256,8 @@ with sync_playwright() as pw:
         # Keep the real key down through the bounded turn. 35 px can be reached
         # in three 50 ms physics steps, before aim has crossed to the left.
         page.keyboard.down('a');page.wait_for_function('(x)=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.player[0]<x-35 && d.facing===-1}',arg=p1,timeout=10000);page.keyboard.up('a');page.wait_for_timeout(150);check(data()['player'][0]<p1-30 and data()['facing']==-1,'A moves and faces left')
-        page.keyboard.down('d');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).facing===1',timeout=10000);page.keyboard.up('d');page.keyboard.down('f');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).shots>=2',timeout=10000);page.keyboard.up('f');page.wait_for_timeout(150);check(data()['shots']>=2,'Held fire produces real, spaced gunshots')
+        restart_mission()
+        page.keyboard.down('f');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).shots>=2',timeout=10000);page.keyboard.up('f');check(data()['shots']>=2,'Held fire produces real, spaced gunshots')
         restart_mission()
         check(data()['section']=='shore' and data()['attempts']==3,'A new run prepares the independent grenade-input probes')
         canvas.focus()
@@ -298,17 +299,22 @@ with sync_playwright() as pw:
             before=data()['grenades'];page.mouse.click(850,260,button='right')
             page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===n-1',arg=before)
             check(True,'Actual right mouse click throws one grenade')
-            # The new authored throw recovers after ammo is spent. Prepare a
-            # real fresh upward shot before the independent airborne sweep;
-            # a fixed 100 ms wall delay can still be inside throw recovery.
-            page.wait_for_function('!JSON.parse(document.querySelector("canvas").dataset.campaign).grenade_throw.phase',timeout=10000)
-            before_shots=data()['shots'];page.keyboard.down('w');page.keyboard.down('d');page.keyboard.down('f')
-            page.wait_for_function('n=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.shots>n && d.hero_projectiles.some(b=>b.age<.14 && b.v[1]<-30)}',arg=before_shots,timeout=10000)
+            # A high-angle sweep prevents the close-range attack from taking
+            # over the Fire input. Start a separate ordinary run so this aim
+            # check is independent of the preceding grenade and its enemies.
+            restart_mission()
+            canvas.focus();page.keyboard.down('w');page.keyboard.down('d')
+            page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && Math.abs(d.aim[0]-.707)<.025 && Math.abs(d.aim[1]+.707)<.025}',timeout=10000)
+            before_shots=data()['shots'];page.keyboard.down('f')
+            page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).shots>n',arg=before_shots,timeout=10000)
             page.evaluate("""window.sweepPackets=[];window.sweepTimer=setInterval(()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);sweepPackets.push({aim:d.aim,shots:d.shots,projectiles:d.hero_projectiles,grounded:d.grounded})},8)""")
-            page.keyboard.down('Space')
-            page.keyboard.up('w');page.keyboard.down('s');page.keyboard.up('Space')
-            page.wait_for_function('sweepPackets.some(q=>q.projectiles.some(b=>b.age<.14 && Math.abs(b.v[1])>30 && Math.abs(Math.abs(b.v[0])-Math.abs(b.v[1]))>30))',timeout=10000)
-            page.keyboard.up('s');page.keyboard.up('d');page.keyboard.up('f')
+            page.keyboard.down('Space');page.keyboard.up('d');page.keyboard.up('Space')
+            try:
+                original_wait('sweepPackets.some(q=>q.projectiles.some(b=>b.age<.14 && b.v[1]<-30 && b.v[0]>30 && Math.abs(Math.abs(b.v[0])-Math.abs(b.v[1]))>30))',timeout=10000)
+            except Exception:
+                (a.evidence/'sweep-packets-failure.json').write_text(json.dumps(page.evaluate('clearInterval(sweepTimer);sweepPackets'),indent=2)+'\n')
+                raise
+            page.keyboard.up('w');page.keyboard.up('f')
             packets=page.evaluate('clearInterval(sweepTimer);sweepPackets');(a.evidence/'sweep-packets.json').write_text(json.dumps(packets,indent=2)+'\n')
             mid=[b for q in packets for b in q['projectiles'] if b['age']<.14 and abs(b['v'][1])>30 and abs(abs(b['v'][0])-abs(b['v'][1]))>30]
             check(bool(mid),'Held fire emits an actual projectile between the eight primary angles')
