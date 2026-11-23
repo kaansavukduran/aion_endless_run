@@ -235,7 +235,8 @@ func build_ui() -> void:
 	pause_button.position=Vector2(view_w-72,4);pause_button.size=Vector2(64,maxf(44.,band_height-8));pause_button.pressed.connect(toggle_pause)
 	subtitle=label("",16);ui.add_child(subtitle);subtitle.position=Vector2(12,band_height+6);subtitle.size=Vector2(view_w-24,90);subtitle.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	subtitle.add_theme_color_override("font_color",Color("fff3d8"));subtitle.add_theme_color_override("font_shadow_color",Color("211c29"));subtitle.add_theme_constant_override("shadow_outline_size",4)
-	boss_health=ProgressBar.new();ui.add_child(boss_health);boss_health.show_percentage=false;boss_health.max_value=world.boss.max_hp;boss_health.position=Vector2(12,band_height+6);boss_health.size=Vector2(view_w-24,12)
+	boss_health=ProgressBar.new();ui.add_child(boss_health);boss_health.show_percentage=false;boss_health.max_value=world.boss.max_hp
+	boss_health.position=Vector2(12,band_height+6);boss_health.size=Vector2(minf(view_w-24.,340.),10.)
 	boss_health.add_theme_stylebox_override("background",options.style("surface","border",1));boss_health.add_theme_stylebox_override("fill",options.style("primary","accent",1))
 	if touch_mode: build_touch()
 	else:
@@ -971,6 +972,8 @@ func update_hud() -> void:
 	hud_panel.visible=menu_kind=="" and presentation_stage==""
 	subtitle.visible=hud_panel.visible
 	boss_health.position.y=hud_panel.strip_height+6.
+	if boss_health.position.x+boss_health.size.x>pause_button.position.x:
+		boss_health.position.y=maxf(boss_health.position.y,pause_button.position.y+pause_button.size.y+6.)
 	boss_health.visible=world.section=="arena" and bool(world.boss.active) and menu_kind=="" and presentation_stage==""
 	boss_health.value=world.boss.hp
 	if boss_health.visible:

@@ -41,6 +41,7 @@ func run() -> void:
 			for language in GameText.LANGUAGES:
 				game.language=language;game.world.load_section("arena");game.menu_kind="";game.resize();game.update_hud();await process_frame
 				check(not game.subtitle.get_global_rect().intersects(game.boss_health.get_global_rect()),"Boss health and localized mission/inventory text never overlap in rotated layouts")
+				check(not game.pause_button.get_global_rect().intersects(game.boss_health.get_global_rect()),"The boss health strip does not share the Pause hit area")
 				game.boss_announced=false;game.fade=-1.
 				game.world.player=Vector2(float(game.world.boss.x)-140.,game.world.floor_at(float(game.world.boss.x)-140.))
 				game._process(.016);await process_frame
