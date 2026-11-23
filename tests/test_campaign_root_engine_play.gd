@@ -83,5 +83,17 @@ func run() -> void:
 	check(observed_shots and phases=={1:true,2:true,3:true},"Normal aiming and Fire cross all three phases with the starter pistol")
 	check(game.world.completed and game.world.awarded.has("mission:1"),"The starter gun wins the local arena fixture through actual input")
 	print("Arena input fixture: %s, phases %s, boss HP %d, losses %d, shots %d"%[hero,phases,int(game.world.boss.hp),game.world.losses,game.world.shots])
+	var final_score:=game.world.score
+	for page in 8:
+		if game.menu_kind!="outro":break
+		game.buttons.front().pressed.emit()
+		await process_frame
+	var replay:=game.ui.find_child("CampaignReplay",true,false) as Button
+	check(game.menu_kind=="complete" and replay!=null and replay.is_visible_in_tree(),"The actual result offers a visible replay action")
+	if replay!=null:
+		replay.pressed.emit()
+		await process_frame
+		check(game.world.section=="shore" and game.world.character==hero and game.world.attempts_remaining==3 and game.world.score==0,"Playing again starts a fresh Mission 1 with the selected hero and all lives")
+		check(int(game.saved.get("best_score",-1))>=final_score,"Replay preserves the finished run record")
 	game.queue_free();await process_frame
 	print("RESULT: %d arena input checks, %d failures"%[checks,failures]);quit(1 if failures else 0)
