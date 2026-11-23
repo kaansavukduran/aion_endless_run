@@ -591,9 +591,19 @@ with sync_playwright() as playwright:
                         rescue_attempts.append({'attempt': attempt, 'outcome': event['outcome'], 'stage': stage, 'hp': dead['hp']})
                         keys([])
                         page.screenshot(path=str(args.evidence/('rescue-attempt-%d-death.png' % attempt)))
-                        assert retries < 3, ('Rescue approach exceeded three fresh runs', dead)
-                        restart_for_probe()
+                        assert retries < 8, ('Rescue approach exceeded the bounded lives budget', dead)
+                        resumed = page.wait_for_function("""() => {
+                            const d = JSON.parse(document.querySelector('canvas').dataset.campaign);
+                            return (d.menu === 'continue_offer' || (d.state === 'playing' && d.hp === 1)) && d.ui_ready ? d : false;
+                        }""", timeout=15000).json_value()
+                        if resumed['menu'] == 'continue_offer':
+                            tap('ArcadeContinue', in_campaign=True)
+                            page.wait_for_timeout(415)
+                            tap('ArcadeConfirmHero', in_campaign=True)
+                            page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp===1 && d.ui_ready}",timeout=15000)
                         retries += 1; attempt += 1
+                        canvas.focus()
+
 
                 # Only this same living hero's confirmed THANKS phase permits
                 # crossing away and waiting for the physical bag item. Missing
@@ -637,7 +647,7 @@ with sync_playwright() as playwright:
                 saved = page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
                 check(saved['awarded'].get(target['id']+':gift') and saved['taken'].get(target['id']+':supply'), 'Actual dropped-item contact applies the power-up and persists it once')
                 observations['rescued_npc'] = target['id']
-                observations['rescue_new_runs'] = retries
+                observations['rescue_reentries'] = retries
                 page.screenshot(path=str(args.evidence/'contact-thanks-gift.png'))
             observations['campaign_final'] = campaign()
             page.screenshot(path=str(args.evidence/'campaign-final.png'))

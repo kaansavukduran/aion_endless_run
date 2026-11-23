@@ -211,11 +211,20 @@ func steer_aim(target: Vector2,dt: float) -> void:
 	if target.length_squared()<.01:return
 	if dt<=0. or bool(mount.ridden):aim_direction=target.normalized();return
 	aim_sweep_gate=maxf(0.,aim_sweep_gate-dt)
-	var delta: float=wrapf(target.angle()-aim_direction.angle(),-PI,PI)
-	if fire_held and absf(delta)>.20 and aim_sweep_gate<=0. and weapon not in ["trap","nova","disc"]:
-		fire_time=minf(fire_time,.07);aim_sweep_gate=.18
-	var step: float=9.*minf(dt,.05)
-	aim_direction=target.normalized() if absf(delta)<=step else Vector2.from_angle(aim_direction.angle()+signf(delta)*step)
+	var angle:=aim_direction.angle()
+	var delta:=wrapf(target.angle()-angle,-PI,PI)
+	var step:=9.*minf(dt,.05)
+	if absf(delta)<=step:
+		aim_direction=target.normalized()
+		return
+	angle+=signf(delta)*step
+	aim_direction=Vector2.from_angle(angle)
+	# Spend the one early shot on an actual in-between angle. Scheduling it
+	# for a later frame can leave only a snapped shot at low render rates.
+	var main_angle:=snappedf(angle,PI/4.)
+	if fire_held and absf(delta)>.20 and absf(angle-main_angle)>.045 and aim_sweep_gate<=0. and weapon not in ["trap","nova","disc"]:
+		fire_time=0.;aim_sweep_gate=.18
+
 
 func player_hit_radius() -> float:
 	return 17. if crouching() else 30.
