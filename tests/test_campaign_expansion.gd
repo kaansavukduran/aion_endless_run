@@ -45,6 +45,9 @@ func run() -> void:
 		var ids: Dictionary={}
 		for npc in w.npcs:
 			check(not ids.has(npc.id),"Every rescue point has a unique stable ID");ids[npc.id]=true;roles[npc.role]=true
+			if stage=="arena":
+				check(not w.npcs.any(func(other):return other.id!=npc.id and absf(float(other.x)-float(npc.x))<140.),
+					"Final arena captives have separate silhouettes and approach space: "+str(npc.id))
 	check(total==43 and roles.size()==6,"43 distinct authored rescue opportunities cover six roles")
 	w=fresh();n=w.npcs[0];w.player=Vector2(float(n.x)-65.,0.);n.cage="test-cage";w.objects=[{"id":"test-cage","kind":"cage","x":n.x,"y":0.,"hp":2,"active":false,"secret":""}]
 	check(CampaignRescue.nearest(w).is_empty(),"A closed cage protects its actual captive")

@@ -32,6 +32,7 @@ static func populate(w) -> void:
 		var count: int=COUNTS[w.section]
 		var x: float=lerpf(550.,w.length()-900.,float(i)/maxf(1.,count-1))
 		if i==0:x=w.length()*.55 # Keep the original keeper's location and ID.
+		if w.section=="arena" and i==2:x=w.length()*.46 # Leave clear silhouettes and independent approach space.
 		var y:=0.
 		var secret: String=""
 		if w.section in ["water","terrace","roots"] and i in [count-2,count-1]:
@@ -66,16 +67,25 @@ static func populate(w) -> void:
 
 static func nearest(w) -> Dictionary:
 	if w.state!="playing" or not w.grounded() or w.crouching() or bool(w.mount.ridden):return {}
+	var closest: Dictionary={}
+	var distance:=INF
 	for n in w.npcs:
 		if bool(n.freed) or (str(n.secret)!="" and not w.discovered.has(str(n.secret))):continue
 		if w.objects.any(func(o):return str(o.id)==str(n.get("cage","")) and not bool(o.active)):continue
 		var dx: float=(float(n.x)-w.player.x)*w.facing
-		if dx>=-10. and dx<100. and absf(float(n.y)-w.player.y)<25.:return n
-	return {}
+		if dx>=-10. and dx<100. and absf(float(n.y)-w.player.y)<25. and absf(dx)<distance:
+			closest=n
+			distance=absf(dx)
+	return closest
+
+static func cut_target(w) -> Dictionary:
+	if absf(w.aim_direction.y)>=.25 or not w.close_enemy().is_empty() or MissionHeroAbilities.compact(w):
+		return {}
+	return nearest(w)
 
 static func begin(w) -> bool:
 	if w.rescue_time>0. or w.rescue_latched:return false
-	var n:=nearest(w)
+	var n:=cut_target(w)
 	if n.is_empty():return false
 	w.rescue_target=str(n.id);w.rescue_time=CUT_SECONDS;w.rescue_contact=false;w.rescue_latched=true
 	w.fire_held=false;w.shot_flash=0.;w.melee_time=0.;w.velocity.x=0.;w.fire_time=CUT_SECONDS

@@ -377,7 +377,7 @@ func close_enemy() -> Dictionary:
 
 func attack_press() -> void:
 	if state != "playing" or mount_transition!="" or MissionHeroAbilities.compact(self) or not grenade_throw.is_empty(): return
-	if not fire_held and absf(aim_direction.y)<.25 and close_enemy().is_empty() and CampaignRescue.begin(self):return
+	if not fire_held and CampaignRescue.begin(self):return
 	if rescue_time>0. or rescue_latched:return
 	fire_held = true; melee_latched = false
 	attack()

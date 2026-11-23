@@ -515,7 +515,12 @@ with sync_playwright() as pw:
                     continue
             offer=d.get('weapon_offer',{})
             if offer:
-                keys([]);before_weapon=d['weapon'];page.keyboard.press('e')
+                keys([])
+                # Held movement can carry the hero off an offer between frames.
+                page.wait_for_timeout(180)
+                settled=data();offer=settled.get('weapon_offer',{})
+                if settled['section']!=section or settled['menu'] or not offer:continue
+                before_weapon=settled['weapon'];page.keyboard.press('e')
                 page.wait_for_function('id=>JSON.parse(document.querySelector("canvas").dataset.campaign).taken[id]===true',arg=offer['id'],timeout=5000)
                 check(data()['weapon']==offer['kind'],'Actual E deliberately swaps a visible special weapon: '+before_weapon+' → '+offer['kind'])
                 with (a.evidence/'weapon-swaps.jsonl').open('a') as swap_log:swap_log.write(json.dumps({'before':before_weapon,'offer':offer,'after':data()})+'\n')
