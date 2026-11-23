@@ -37,6 +37,16 @@ func drawn_barrel(w: AionCampaignWorld,height: float) -> Dictionary:
  return {'point':pivot+local.rotated(aim.angle()+float(cannon.get("rotation",0.)))+Vector2(0,42),'pixel':pixel,'texture':texture,'pivot':pivot,'local':local,'phase':phase}
 
 func run() -> void:
+ var parked:=AionCampaignWorld.new();parked.begin('aion');parked.load_section('quay')
+ parked.enemies.clear();parked.npcs.clear()
+ parked.attack_press()
+ check(parked.shot_flash>0. and parked.vehicle_art_spec().phase==0,'On-foot fire cannot animate the first parked skimmer')
+ parked.player=Vector2(360.,0.);check(parked.interact(),'The first skimmer still accepts a normal boarding action')
+ check(parked.vehicle_art_spec().phase==0 and not CampaignVehicles.firing(parked),'Boarding clears the previous on-foot shot')
+ for tick in 85:parked.step(.01)
+ parked.attack_press()
+ check(parked.vehicle_art_spec().phase==1 and CampaignVehicles.firing(parked),'The mounted skimmer animates its own actual shot')
+ check(parked.interact() and parked.vehicle_art_spec().phase==0,'Dismounting immediately clears the vehicle firing pose')
  var view:=AionCampaignView.new()
  var height: float=view.hero_reference_height()*2.
  var directions: Array[Vector2]=[Vector2.RIGHT,Vector2(1,-1).normalized(),Vector2.UP,Vector2(-1,-1).normalized(),Vector2.LEFT,Vector2(-1,1).normalized(),Vector2.DOWN,Vector2(1,1).normalized()]
@@ -46,7 +56,7 @@ func run() -> void:
   for facing in [-1,1]:
    for aim in directions:
     for frame in 6:
-     var w:=fresh(kind,facing);w.aim_direction=aim;w.time=(frame+.1)/8.;w.shot_flash=.18*(1.-(frame+.1)/6.)
+     var w:=fresh(kind,facing);w.aim_direction=aim;w.time=(frame+.1)/8.;w.shot_flash=.18*(1.-(frame+.1)/6.);w.last_shot_mounted=true
      var spec:=w.vehicle_art_spec();var aligned: bool=absf(aim.y)<.005 and aim.x*facing>0.
      check(int(spec.phase)==(1 if aligned else 0),'Forward firing timing is used only along the hull facing')
      check(int(spec.frame)==frame,'Actual vehicle animation frame is shared between view and muzzle')

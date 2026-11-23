@@ -57,7 +57,7 @@ const LEAF_PLANS := {
 ## Handcrafted main-path encounters (0.35.0 -> 0.45.0) for shore, quay, canopy, and relay.
 ## Replaces uniform platform/crate/fruit grid wallpaper with readable sightline,
 ## flank, mechanism, and move-and-shoot encounters. Shore avoids x 5780..6490
-## to preserve the crumbling bridge setpiece intact.
+## to keep the required ravine crossing clear.
 const MAIN_PLANS := {
 	"shore": [
 		{"x":1850.,"role":"shore_priority","enemies":[["gnome",0.,0.],["lantern_scout",220.,0.],["gnome",360.,0.]],"platforms":[[110.,-70.,175.]],"crate":420.,"fruit":[130.,-112.,3],"gate":true},

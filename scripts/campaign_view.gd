@@ -283,7 +283,6 @@ func draw_world() -> void:
 				draw_rect(Rect2(core+Vector2(-15.,side*23.-2.),Vector2(30,4)),Color("f1c681"))
 	if CampaignVehicles.stunned(world) or (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and CampaignGround.has_floor(float(world.mount.get("floor_y",world.floor_at(float(world.mount.x)))))):
 		var p: Vector2=vehicle_draw_position()
-		var firing: bool=world.shot_flash>0. and bool(world.mount.ridden)
 		var spec: Dictionary=world.vehicle_art_spec()
 		var frame: int=int(spec.frame)
 		var type: String=CampaignVehicles.kind(world)
@@ -527,12 +526,10 @@ func draw_hero_weapon() -> void:
 		draw_rect(Rect2(end-Vector2(2,2),Vector2(4,4)),Color("fff0bf"))
 
 func draw_assists() -> void:
+	var animated: bool=host.motion_enabled and not host.options.reduced_motion
 	for a in world.assists:
-		var p:=Vector2(float(a.x),float(a.y))
-		var frame: int=posmod(int(float(a.age)*10.),6)
-		if a.kind=='owl':draw_pose(frames.pose('runner-owl',6,frame,true),p,int(a.facing),.8)
-		elif a.phase=='bite':draw_pose(art.melee('wolf',clampi(int(float(a.phase_age)/.24*6.),0,5)),p,int(a.facing),.8)
-		else:draw_pose(frames.pose('runner-wolf',6,frame,true),p,int(a.facing),.8)
+		if float(a.age)<18.:
+			draw_pose(CampaignAssistArt.pose(a,animated),Vector2(float(a.x),float(a.y)),int(a.facing))
 		for rock in a.stones:draw_pose(support_art.pose('owl_stone'),Vector2(float(rock.x),float(rock.y)))
 
 
@@ -546,7 +543,7 @@ func draw_vehicle_barrel(machine: Dictionary,p: Vector2) -> void:
 	draw_set_transform(at(pivot),world.aim_direction.angle()+float(turret.get("rotation",0.)),Vector2.ONE)
 	draw_texture_rect(turret.texture,Rect2(Vector2(turret.offset),Vector2(turret.size)),false)
 	draw_set_transform(Vector2.ZERO)
-	if world.shot_flash>.1:
+	if CampaignVehicles.firing(world) and world.shot_flash>.1:
 		var muzzle: Vector2=at(world.player+world.armed_muzzle())
 		draw_circle(muzzle,3.,Color("fff0bf"))
 

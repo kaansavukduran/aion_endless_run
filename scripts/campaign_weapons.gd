@@ -18,11 +18,12 @@ const SPECS := {
 const SPECIAL := ["heavy","scatter","arc","beam","disc","harpoon","seeker","spore","trap","nova"]
 
 static func fire(w) -> void:
-	if not bool(w.mount.ridden) and not w.weapons_used.has(w.weapon):w.weapons_used.append(w.weapon)
+	var riding: bool=bool(w.mount.ridden)
+	if not riding and not w.weapons_used.has(w.weapon):w.weapons_used.append(w.weapon)
+	w.last_shot_mounted=riding
 	w.shot_weapon=w.weapon
 	w.shot_flash=.18 # Use the actual firing-pose muzzle, including the first shot.
 	var spec: Dictionary=SPECS.get(w.weapon,SPECS.pistol)
-	var riding: bool=bool(w.mount.ridden)
 	if riding:spec={"interval":.18,"ammo":0,"speed":780.,"damage":1,"life":1.3,"pierce":0,"colour":"b4eee6"}
 	if riding and CampaignVehicles.kind(w)=="drill":spec={"interval":.28,"ammo":0,"speed":420.,"damage":2,"life":.4,"pierce":5,"colour":"d2b4ec"}
 	elif riding and CampaignVehicles.kind(w)=="shell":spec={"interval":.25,"ammo":0,"speed":600.,"damage":1,"life":1.5,"pierce":1,"colour":"9ce8e5"}

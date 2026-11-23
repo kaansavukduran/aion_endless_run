@@ -60,5 +60,19 @@ func run() -> void:
 		check(float(e.x)<3510. and absf(float(e.y)-w.floor_at(float(e.x)))<.01 and int(e.facing)==-1,"Approach keeps moving feet, facing and real incline in agreement: "+kind)
 		var authored:=AionCampaignWorld.new();authored.begin("aion")
 		check(authored.enemies.any(func(item):return item.kind==kind),"The normal mission spawns this authored role: "+kind)
+	var w:=actor("lantern_scout");var scout:=w.enemies[0];scout.attacks=1;scout.age=1.
+	w.step_enemies(.01)
+	check(bool(scout.burst_pending) and scout.windup>0. and w.bullets.is_empty(),"The second attack explicitly prepares its marked double shot")
+	for tick in 100:
+		if w.bullets.size()==1:break
+		w.step_enemies(.01)
+	check(w.bullets.size()==1 and bool(scout.burst_pending),"The first bolt leaves before the second")
+	for tick in 25:w.step_enemies(.01)
+	check(w.bullets.size()==2 and scout.recover>.35 and not bool(scout.burst_pending),"A spaced second bolt leaves an exposed recovery window")
+	for section in CampaignRhythm.GROUND_PATROLS:
+		w.load_section(section)
+		var patrols:=w.enemies.filter(func(e):return int(str(e.id).get_slice(":",2)) in [910,911])
+		check(patrols.size()==CampaignRhythm.GROUND_PATROLS[section].size() and patrols.all(func(e):return not CampaignContent.flying(e.kind) and float(e.y)==w.floor_at(float(e.x))),"New patrols only use supported ground roles: "+section)
+		check(CampaignRhythm.SIDE_DECKS[section].all(func(deck):return deck in w.platforms),"Side route uses real walkable platforms: "+section)
 	print("RESULT: %d ground shooter checks, %d failures"%[checks,failures])
 	quit(1 if failures else 0)
