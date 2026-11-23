@@ -99,7 +99,7 @@ func run() -> void:
 		touch.pressed=false;game._input(touch)
 		for frame in 36:game.world.step(.01)
 		check(npc.freed and game.world.rescued.has(str(npc.id)),"Touch release does not cancel the one valid knife cut: "+hero)
-		game.release_all();game.world.retry();game.world.enemies.clear();game.world.player=Vector2(float(game.world.npcs[1].x)-65.,0.);game.world.facing=1
+		game.release_all();game.world.load_section(game.world.checkpoint);game.world.enemies.clear();game.world.player=Vector2(float(game.world.npcs[1].x)-65.,0.);game.world.facing=1
 		game._input(event(game.pad.bindings.shoot));check(game.world.rescue_time>0.,"Saved gamepad fire mapping uses the same knife action: "+hero);game._input(event(game.pad.bindings.shoot,false))
 	game.audio_enabled=true;game.world.load_section("water");game.world.state="playing";game.menu_kind="";game.update_ambient()
 	check(game.ambient.playing and not game.ambient.stream_paused,"Actual regional music stream starts with audio enabled")

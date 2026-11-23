@@ -145,11 +145,11 @@ static func on_gift_collected(w,item: Dictionary) -> void:
 	var id: String=str(item.rescue_id)
 	if w.awarded.has(id+":gift"):return
 	w.award(id+":gift",0);w.gift_drops.erase(id)
-	w.grenades=mini(9,w.grenades+1);w.hp=mini(w.max_hp,w.hp+1)
+	w.supply(id+":supply",1)
 	if w.character=="sheep":w.flock=mini(3,w.flock+1)
 	w.notice="arc_maintenance" if item.get("role","")=="archivist" else "arc_thanks";w.notice_time=2.;w.pending_events.append("rescue_gift")
 	if item.get("role","")=="technician":
-		w.mount.hp=mini(CampaignVehicles.MAX_HP,int(w.mount.hp)+1)
+		w.supply(id+":technician",1)
 		for o in w.objects:
 			if o.kind=="gate" and absf(float(o.x)-float(item.x))<400.:o.active=true;w.activated[str(o.id)]=true
 

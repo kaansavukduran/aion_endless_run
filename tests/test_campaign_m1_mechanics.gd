@@ -19,12 +19,12 @@ func run() -> void:
  check(w.player.y==0. and w.player_hit_center().y==-20. and w.player_hit_radius()==17.,'Crouch roots feet and uses its smaller physical body')
  w.aim_direction=Vector2.RIGHT;w.attack_press();w.step(.05)
  check(w.shots>0 and w.player.x>start.x+5.,'Normal attack action can fire while crawling')
- w.attack_release();w.bullets.clear();w.invulnerable=0.;w.hp=3;w.bullets.append(enemy_bullet(w,-37.));w.step_bullets(.01)
- check(w.hp==3,'Chest-height projectiles pass over a crouching player')
+ w.attack_release();w.bullets.clear();w.invulnerable=0.;w.bullets.append(enemy_bullet(w,-37.));w.step_bullets(.01)
+ check(w.hp==1 and w.attempts_remaining==3,'Chest-height projectiles pass over a crouching player')
  w.bullets.clear();w.invulnerable=0.;w.bullets.append(enemy_bullet(w,-12.));w.step_bullets(.01)
- check(w.hp==2,'Low projectiles still hit crouch; it is not invulnerability')
+ check(w.hp==0 and w.attempts_remaining==2,'Low projectiles still hit crouch; it is not invulnerability')
  w=clean();w.bullets.append(enemy_bullet(w,-37.));w.step_bullets(.01)
- check(w.hp==2,'The same chest shot still hits a standing player')
+ check(w.hp==0 and w.attempts_remaining==2,'The same chest shot still hits a standing player')
  w=clean();w.platforms.append(Rect2(300,-70,300,20));w.player.y=-70.;w.move_axis=Vector2(0,1);w.jump_press()
  check(w.drop_through_time>0. and w.player.y>-70. and w.velocity.y>0.,'Down+Jump drops through a real one-way platform')
  for i in 15:w.step(.05)
@@ -34,17 +34,19 @@ func run() -> void:
  w.move_axis=Vector2(1,1);w.step(.05)
  check(w.crouching() and w.player.y==90.,'Crawl stays on the lower physical route')
  for type in CampaignVehicles.TYPES:
-  w=clean();w.mount={'available':true,'ridden':true,'x':400.,'hp':3,'type':type};w.player.y=-42.
-  check(w.mount.hp==3,'Vehicle starts with three HP: '+type)
+  w=clean();w.mount={'available':true,'ridden':true,'x':400.,'hp':1,'type':type};w.player.y=-42.
+  check(w.mount.hp==1,'Vehicle starts with one HP: '+type)
   var aim:=Vector2.from_angle(.37);w.aim_direction=aim;CampaignWeapons.fire(w)
   var at: int=1 if type=='wind' else 0
   check(Vector2(w.bullets[at].v).normalized().is_equal_approx(aim),'Vehicle fire preserves continuous surrounding aim: '+type)
-  for hp in [2,1,0]:
-   w.invulnerable=0.;w.damage_player();check(int(w.mount.hp)==hp,'Each real hit removes one vehicle HP: '+type+'/'+str(hp))
-  check(not bool(w.mount.ridden) and not bool(w.mount.available) and w.hp==3,'Third hit ejects safely without inventing player damage: '+type)
-  w.mount.hp=2;w.collect({'id':'repair:'+type,'kind':'repair'})
-  check(w.mount.hp==3,'Repair cannot exceed the three-HP capacity: '+type)
- w=clean();w.mount={'available':true,'ridden':true,'x':400.,'hp':3,'type':'skimmer'};w.player=Vector2(400,-342.)
+  w.invulnerable=0.;w.damage_player()
+  w.step(.05)
+  check(CampaignVehicles.stunned(w) and int(w.mount.hp)==0,'One hit leaves a readable impact: '+type)
+  w.step(.05)
+  check(not bool(w.mount.ridden) and not bool(w.mount.available) and w.hp==1 and w.attempts_remaining==3,'A wreck ejects the pilot and leaves all lives: '+type)
+  w.collect({'id':'repair:'+type,'kind':'repair'})
+  check(w.mount.hp==0 and w.grenades==7,'Repair supplies grenades without reviving a wreck: '+type)
+ w=clean();w.mount={'available':true,'ridden':true,'x':400.,'hp':1,'type':'skimmer'};w.player=Vector2(400,-342.)
  check(w.interact(),'Midair exit remains an actual supported interaction')
  w.step(.05)
  check(float(w.mount.floor_y)>-300. and float(w.mount.floor_y)<0.,'Unridden airborne hull falls instead of freezing or instantly snapping toY0')
@@ -53,12 +55,12 @@ func run() -> void:
  w.drop_through_time=.2
  check(CampaignVehicles.can_board(w) and w.interact(),'Landed bailed-out hull can be boarded again normally')
  check(w.drop_through_time==0.,'Boarding clears an on-foot drop-through timer rather than dropping the hull through its deck')
- w=clean();w.load_section('water');check(int(w.mount.hp)==3,'Regional rideable population also uses three HP')
- w.mount.ridden=true;w.player=Vector2(600,-42.);w.mount.hp=2;w.state='travel';w.load_section('fork_one')
- check(bool(w.mount.ridden) and int(w.mount.hp)==2,'Living vehicle survives travel into a physical route fork')
+ w=clean();w.load_section('water');check(int(w.mount.hp)==1,'Regional rideable population also uses one HP')
+ w.mount.ridden=true;w.player=Vector2(600,-42.);w.state='travel';w.load_section('fork_one')
+ check(bool(w.mount.ridden) and int(w.mount.hp)==1,'Living vehicle survives travel into a physical route fork')
  w.player=Vector2(1000,48.);w.velocity=Vector2.ZERO;CampaignVehicles.step(w,.05)
  check(is_equal_approx(w.player.y,48.) and w.grounded(),'Ridden vehicle lands on fork floor90 using its actual saddle offset')
- w.retry();check(not bool(w.mount.ridden),'Retry does not silently carry a previous damaged ridden vehicle')
+ var mounted_save:=AionCampaignWorld.new();check(mounted_save.restore(w.snapshot()) and bool(mounted_save.mount.ridden) and int(mounted_save.mount.hp)==1,'Exact save preserves the live carried hull')
  w=clean();w.weapon='trap';w.ammunition=12;w.spawn_enemy('gnome',720,0,1);w.enemies[0].wait=999.;CampaignWeapons.fire(w)
  var enemy: Dictionary=w.enemies[0];var walked:=false
  for i in 100:
@@ -91,14 +93,14 @@ func run() -> void:
  var gift_id: String=str(npc.id)+':supply';var gifts: Array=w.pickups.filter(func(p):return str(p.id)==gift_id)
  check(gifts.size()==1 and w.weapon=='pistol' and not w.awarded.has(str(npc.id)+':gift'),'Bag handover creates one visible unclaimed world item')
  check(w.gift_drops.has(str(npc.id)),'An unclaimed gift has a persistent physical record')
- var restored:=AionCampaignWorld.new();check(restored.restore(w.snapshot()),'Pending-gift checkpoint remains compatible with schema3')
+ var restored:=AionCampaignWorld.new();check(restored.restore(w.snapshot()),'Pending-gift checkpoint remains compatible with schema4')
  check(restored.pickups.filter(func(p):return str(p.id)==gift_id).size()==1,'Reopening restores exactly one unclaimed physical gift')
  w.move_axis=Vector2(1,0)
  for i in 30:
   w.step(.05)
   if w.taken.has(gift_id):break
  check(w.taken.has(gift_id) and w.awarded.has(str(npc.id)+':gift') and w.weapon=='heavy','Walking into the physical reward actually collects it')
- check(w.hp==2 and w.grenades==2 and not w.gift_drops.has(str(npc.id)),'Rescue bonuses arrive once at item contact and pending state clears')
+ check(w.hp==1 and w.attempts_remaining==3 and w.grenades==2 and not w.gift_drops.has(str(npc.id)),'Rescue bonuses arrive once at item contact and pending state clears')
  var hp: int=w.hp;var ammo: int=w.ammunition;w.move_axis=Vector2.ZERO
  for i in 25:w.step(.05)
  check(w.hp==hp and w.ammunition==ammo,'Remaining in contact does not award the same gift twice')

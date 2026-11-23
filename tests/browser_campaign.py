@@ -10,7 +10,7 @@ p=argparse.ArgumentParser();p.add_argument('--url',required=True);p.add_argument
 p.add_argument('--hero',choices=['aion','sheep','rabbit','eren','armadillo','frog'],default='aion')
 p.add_argument('--max-seconds',type=float,default=1000)
 p.add_argument('--play-only',action='store_true',help='Skip the independently checked input smoke probes; still enter and play the mission through normal UI.')
-p.add_argument('--retry-profile',action='store_true',help='Exercise five real checkpoint Retry actions and record their timing and retained progress.')
+p.add_argument('--retry-profile',action='store_true',help='Measure five genuine new runs started from Pause.')
 p.add_argument('--warm-launch',action='store_true',help='Measure a second launch after the service worker has cached the actual PCK.')
 p.add_argument('--special-probe',action='store_true',help='Use the selected new hero skill through ordinary keys before the full mission, without injecting a target.')
 p.add_argument('--pause-crouch-probe',action='store_true',help='Observe the real crouched gun pose across Pause and Resume, using ordinary keys and pointer aim.')
@@ -178,6 +178,18 @@ with sync_playwright() as pw:
         d=data();generation=d.get('ui_generation',0);key=next(k for k,v in d['buttons'].items() if (k==name if name else v[4]==text));v=d['buttons'][key];page.touchscreen.tap(*xy(v[0]+v[2]/2,v[1]+v[3]/2))
         page.wait_for_function('(old)=>{const s=document.querySelector("canvas").dataset.campaign;if(!s)return true;const d=JSON.parse(s);return d.ui_generation!==old && d.ui_ready}',arg=generation,timeout=10000)
         page.wait_for_timeout(120)
+    def restart_mission():
+        # This is intentionally a new run for isolated input probes.
+        page.wait_for_function("['playing','continue_offer','continue_pick','dead'].includes(JSON.parse(document.querySelector('canvas').dataset.campaign).state)")
+        if data()['menu'] in ['continue_offer','continue_pick']:
+            if data()['menu']=='continue_pick':button('ArcadeBackToCountdown')
+            page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
+        if data()['menu']!='dead':
+            canvas.focus();page.keyboard.press('Escape')
+            page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'")
+        button('CampaignRestart')
+        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && !d.presentation && !d.menu && d.hp===1}",timeout=15000)
+        canvas.focus()
     def fit():
         d=data()
         for name,b in d['buttons'].items():check(b[0]>=0 and b[1]>=0 and b[0]+b[2]<=d['view'][0]+1 and b[1]+b[3]<=d['view'][1]+1,'Visible reachable menu action: '+name)
@@ -212,15 +224,11 @@ with sync_playwright() as pw:
         retry_metrics=[]
         retry_cdp=context.new_cdp_session(page) if a.browser=='chromium' else None
         for attempt in range(5):
-            before=data();canvas.focus();page.keyboard.press('Escape')
-            page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
-            start=time.monotonic();button(text='Kontrol noktasından dene')
-            page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && d.menu==="" && !d.travel_active}')
-            after=data()
-            check(after['character']==a.hero and after['section']==before['section'],'Actual Retry retains the hero and section: '+str(attempt+1))
-            check(after['awarded']==before['awarded'] and after['taken']==before['taken'],'Actual Retry preserves single-award progress: '+str(attempt+1))
-            retry_metrics.append({'attempt':attempt+1,'seconds':time.monotonic()-start,'before':{'rally':before.get('rally'),'score':before['score'],'nodes':before.get('node_count')},'after':{'rally':after.get('rally'),'score':after['score'],'nodes':after.get('node_count')},'heap':retry_cdp.send('Runtime.getHeapUsage') if retry_cdp else None})
-            (a.evidence/'five-retries.json').write_text(json.dumps(retry_metrics,indent=2)+'\n')
+            start=time.monotonic();restart_mission();after=data()
+            check(after['character']==a.hero and after['section']=='shore' and after['attempts']==3,'Explicit restart opens a new run for the selected hero: '+str(attempt+1))
+            check(not after['awarded'] and not after['taken'],'New run starts with empty reward claims: '+str(attempt+1))
+            retry_metrics.append({'attempt':attempt+1,'seconds':time.monotonic()-start,'nodes':after.get('node_count'),'heap':retry_cdp.send('Runtime.getHeapUsage') if retry_cdp else None})
+            (a.evidence/'five-new-runs.json').write_text(json.dumps(retry_metrics,indent=2)+'\n')
     if a.pause_crouch_probe:
         canvas.focus();page.keyboard.down('s');page.mouse.move(*xy(data()['view'][0]*.78,data()['view'][1]*.28))
         page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.crouching && d.pose.body_action==="crouch_fire" && d.pose.gun_visible && d.aim[1]<-.1}',timeout=10000)
@@ -248,16 +256,10 @@ with sync_playwright() as pw:
         # Keep the real key down through the bounded turn. 35 px can be reached
         # in three 50 ms physics steps, before aim has crossed to the left.
         page.keyboard.down('a');page.wait_for_function('(x)=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.player[0]<x-35 && d.facing===-1}',arg=p1,timeout=10000);page.keyboard.up('a');page.wait_for_timeout(150);check(data()['player'][0]<p1-30 and data()['facing']==-1,'A moves and faces left')
-        page.keyboard.down('d');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).facing===1',timeout=10000);page.keyboard.up('d');page.keyboard.down('f');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).shots>=2',timeout=10000);page.keyboard.up('f');page.wait_for_timeout(150);check(data()['shots']>=2,'Held fire produces real, spaced gunshots')
-        # Each independent grenade probe starts through the same checkpoint UI
-        # a player uses. Earlier timing/pause probes can let the live crow reach
-        # the actor; a hurt-state rejection is not a throw-input observation.
-        check(data()['state']=='playing' and data()['hp']>0,'The actor survives the preceding movement/fire controls')
-        canvas.focus();page.keyboard.press('Escape')
-        page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
-        button(text='Kontrol noktasından dene')
-        page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && !d.menu && !d.travel_active && d.hp>0}')
-        check(abs(data()['player'][0]-data()['rally']['x'])<1,'Actual checkpoint UI prepares the independent grenade-input probes')
+        restart_mission()
+        page.keyboard.down('f');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).shots>=2',timeout=10000);page.keyboard.up('f');check(data()['shots']>=2,'Held fire produces real, spaced gunshots')
+        restart_mission()
+        check(data()['section']=='shore' and data()['attempts']==3,'A new run prepares the independent grenade-input probes')
         canvas.focus()
         count=data()['grenades'];page.keyboard.press('g')
         page.wait_for_function('count=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===count-1',arg=count,timeout=10000)
@@ -285,11 +287,8 @@ with sync_playwright() as pw:
             r=d['actions']['jump'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2));page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-10',timeout=10000);check(True,'Firefox actual touch reaches the same jump action; CDP multitouch is Chromium-only')
         page.set_viewport_size({'width':1280,'height':720});page.wait_for_timeout(700);page.screenshot(path=str(a.evidence/'landscape-playing.png'));canvas.focus()
         if a.combat_controls:
-            check(data()['state']=='playing' and data()['hp']>0,'The actor survives the preceding touch/rotation controls')
-            page.keyboard.press('Escape');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
-            button(text='Kontrol noktasından dene')
-            page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && !d.menu && !d.travel_active && d.hp>0}')
-            check(abs(data()['player'][0]-data()['rally']['x'])<1,'Actual checkpoint UI prepares the independent combat-control probes')
+            restart_mission()
+            check(data()['section']=='shore' and data()['attempts']==3,'A new run prepares the independent combat-control probes')
             canvas.focus();page.keyboard.down('d')
             page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>200')
             normal=data()['velocity'][0];page.keyboard.down('Shift')
@@ -300,32 +299,27 @@ with sync_playwright() as pw:
             before=data()['grenades'];page.mouse.click(850,260,button='right')
             page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===n-1',arg=before)
             check(True,'Actual right mouse click throws one grenade')
-            # The new authored throw recovers after ammo is spent. Prepare a
-            # real fresh upward shot before the independent airborne sweep;
-            # a fixed 100 ms wall delay can still be inside throw recovery.
-            page.wait_for_function('!JSON.parse(document.querySelector("canvas").dataset.campaign).grenade_throw.phase',timeout=10000)
-            before_shots=data()['shots'];page.keyboard.down('w');page.keyboard.down('d');page.keyboard.down('f')
-            page.wait_for_function('n=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.shots>n && d.hero_projectiles.some(b=>b.age<.14 && b.v[1]<-30)}',arg=before_shots,timeout=10000)
-            page.keyboard.press('Space');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-25')
+            # A high-angle sweep prevents the close-range attack from taking
+            # over the Fire input. Start a separate ordinary run so this aim
+            # check is independent of the preceding grenade and its enemies.
+            restart_mission()
+            canvas.focus();page.keyboard.down('w');page.keyboard.down('d')
+            page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && Math.abs(d.aim[0]-.707)<.025 && Math.abs(d.aim[1]+.707)<.025}',timeout=10000)
+            before_shots=data()['shots'];page.keyboard.down('f')
+            page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).shots>n',arg=before_shots,timeout=10000)
             page.evaluate("""window.sweepPackets=[];window.sweepTimer=setInterval(()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);sweepPackets.push({aim:d.aim,shots:d.shots,projectiles:d.hero_projectiles,grounded:d.grounded})},8)""")
-            page.keyboard.up('w');page.keyboard.down('s')
-            page.wait_for_function('sweepPackets.some(q=>q.projectiles.some(b=>b.age<.14 && Math.abs(b.v[1])>30 && Math.abs(Math.abs(b.v[0])-Math.abs(b.v[1]))>30))',timeout=10000)
-            page.keyboard.up('s');page.keyboard.up('d');page.keyboard.up('f')
+            page.keyboard.down('Space');page.keyboard.up('d');page.keyboard.up('Space')
+            try:
+                original_wait('sweepPackets.some(q=>q.projectiles.some(b=>b.age<.14 && b.v[1]<-30 && b.v[0]>30 && Math.abs(Math.abs(b.v[0])-Math.abs(b.v[1]))>30))',timeout=10000)
+            except Exception:
+                (a.evidence/'sweep-packets-failure.json').write_text(json.dumps(page.evaluate('clearInterval(sweepTimer);sweepPackets'),indent=2)+'\n')
+                raise
+            page.keyboard.up('w');page.keyboard.up('f')
             packets=page.evaluate('clearInterval(sweepTimer);sweepPackets');(a.evidence/'sweep-packets.json').write_text(json.dumps(packets,indent=2)+'\n')
             mid=[b for q in packets for b in q['projectiles'] if b['age']<.14 and abs(b['v'][1])>30 and abs(abs(b['v'][0])-abs(b['v'][1]))>30]
             check(bool(mid),'Held fire emits an actual projectile between the eight primary angles')
-            # The independent pad probe needs a live actor and room to fire.
-            # Earlier idle input checks let a crow reach contextual-strike range
-            # on a slower CI runner. Reset only through the real checkpoint UI;
-            # keep the strict projectile assertion below (do not accept a melee).
-            if data()['state']=='dying':page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).state==="dead"')
-            if data()['state']=='dead':button('CampaignRetry')
-            else:
-                canvas.focus();page.keyboard.press('Escape')
-                page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
-                button(text='Kontrol noktasından dene')
-            page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && d.menu==="" && d.hp>0}')
-            check(abs(data()['player'][0]-data()['rally']['x'])<1,'Actual checkpoint UI isolates the independent gamepad input probe')
+            restart_mission()
+            check(data()['section']=='shore' and data()['attempts']==3,'A new run isolates the independent gamepad input probe')
             canvas.focus();page.evaluate('qaPadConnect(true)');page.wait_for_timeout(150)
             page.evaluate('qaPad.axes[0]=1;qaPadButton(4,true)')
             page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>350')
@@ -450,7 +444,9 @@ with sync_playwright() as pw:
                 page.screenshot(path=str(a.evidence/'mission-complete.png'));break
             if d['menu']:
                 keys([])
-                if d['menu']=='dead':retries+=1;button('CampaignRetry',expect_menu='dead')
+                if d['menu']=='continue_offer':button('ArcadeContinue',expect_menu='continue_offer')
+                elif d['menu']=='continue_pick':button('ArcadeConfirmHero',expect_menu='continue_pick');retries+=1
+                elif d['menu']=='dead':raise AssertionError(('Continue expired during the route playthrough',d))
                 elif d['menu'] in ['fork_one','fork_two']:
                     raise AssertionError(('Gameplay must not open a text route-choice menu',d))
                 elif d['menu']=='boss':
@@ -528,7 +524,7 @@ with sync_playwright() as pw:
             if a.rhythm and float(d.get('rally',{}).get('x',140))>180 and not (a.evidence/'rally-offline.json').exists():
                 keys([]);canvas.focus();page.keyboard.press('Escape')
                 page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
-                before_save=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
+                before_save=data()
                 page.evaluate('navigator.serviceWorker.ready.then(()=>true)');context.set_offline(True);page.reload(timeout=120000)
                 page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
                 page.get_by_role('button',name='Oyna',exact=True).focus();page.keyboard.press('Enter')
@@ -537,7 +533,7 @@ with sync_playwright() as pw:
                 while data()['menu']=='help':button('CampaignGo')
                 page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).state==="playing"')
                 after_resume=data()
-                check(abs(after_resume['player'][0]-float(before_save['rally']['x']))<1 and after_resume['weapon']==before_save['rally']['weapon'] and after_resume['ammunition']==before_save['rally']['ammunition'],'Actual offline Continue restores mid-route position and checkpoint stock')
+                check(abs(after_resume['player'][0]-before_save['player'][0])<1 and after_resume['weapon']==before_save['weapon'] and after_resume['ammunition']==before_save['ammunition'] and after_resume['attempts']==before_save['attempts'],'Actual offline Continue restores exact mid-route position, inventory and remaining lives')
                 (a.evidence/'rally-offline.json').write_text(json.dumps({'before':before_save,'after':after_resume},indent=2)+'\n')
                 page.screenshot(path=str(a.evidence/'rally-offline-restored.png'));context.set_offline(False);canvas.focus();continue
             x,y=d['player'];onfloor=d.get('grounded',y==0);targets=[e for e in d['enemies'] if abs(e['x']-x)<680]

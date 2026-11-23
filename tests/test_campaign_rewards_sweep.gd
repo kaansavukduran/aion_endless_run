@@ -11,7 +11,7 @@ func advance(w: AionCampaignWorld,seconds: float) -> void:
 func _initialize():call_deferred('run')
 func run():
  for type in CampaignVehicles.TYPES:
-  var w:=fresh();w.mount={'available':true,'ridden':true,'type':type,'x':400.,'hp':2};w.player.y=-42.
+  var w:=fresh();w.mount={'available':true,'ridden':true,'type':type,'x':400.,'hp':1};w.player.y=-42.
   var n: Dictionary={'id':'gift-'+type,'x':495.,'home_x':495.,'y':0.,'freed':true,'phase':'free','free_age':.3,'thank_age':0.,'variant':7,'roam_clock':0.,'facing':-1,'gift':'heavy','role':'technician','secret':''}
   w.npcs=[n];CampaignRescue.step(w,.01)
   check(n.phase=='thanks' and w.greeted.has(n.id),'Actual mounted hull contact starts same thank-you clip '+type)
@@ -22,7 +22,7 @@ func run():
   check(not w.awarded.has(str(n.id)+':gift'),'Distant vehicle does not collect dropped item')
   w.player=Vector2(float(w.pickups[0].x),-42.);w.step(.01)
   check(w.awarded.has(str(n.id)+':gift') and w.weapon=='heavy','Vehicle overlap collects actual power-up '+type)
-  check(w.mount.hp==3,'Technician gift repairs mounted vehicle normally')
+  check(w.mount.hp==1 and w.grenades==7,'Technician gift supplies mounted rider without hidden armour')
   var grenades: int=w.grenades;w.step(.01);check(w.grenades==grenades,'Reward cannot repeat while vehicle overlaps')
   w.player=Vector2(495.,-260.);check(not w.touches_npc(n),'High airborne vehicle cannot greet ground NPC')
  var w:=fresh();var near: Dictionary={'x':470.,'y':0.};check(not w.touches_npc(near),'On-foot contact retains original reach')

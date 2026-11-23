@@ -68,7 +68,7 @@ func run() -> void:
 		check(game.world.interact() and game.world.mount_transition=="enter","Vehicle fixture begins through the actual contextual entry: "+leaf)
 		await capture(leaf+"-vehicle-entry")
 		for i in 10:game.world.step(.05)
-		check(bool(game.world.mount.ridden) and game.world.mount_transition.is_empty() and int(game.world.mount.hp)==3,"Vehicle capture is actually mounted, complete and has3HP: "+leaf)
+		check(bool(game.world.mount.ridden) and game.world.mount_transition.is_empty() and int(game.world.mount.hp)==1,"Vehicle capture is actually mounted, complete and has one HP: "+leaf)
 		await capture(leaf+"-vehicle")
 		game.world.aim_direction=Vector2(-.8,-.6)
 		await capture(leaf+"-vehicle-aim-left")

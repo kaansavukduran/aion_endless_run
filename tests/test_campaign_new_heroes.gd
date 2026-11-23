@@ -110,13 +110,7 @@ func run() -> void:
 			check(w.player.y+low_pose.offset.y+2.*float(low_pose.source_scale)>=CampaignRoutes.CRAWL_CEILING,"whole low throw silhouette stays below actual55px pier ceiling: "+hero+"/"+str(low_spec.frame))
 		w=clean(hero);w.load_section("fork_one");w.enemies.clear();w.player=Vector2(950.,90.);w.invulnerable=0.;w.move_axis=Vector2.ZERO
 		w.damage_player()
-		check(w.hp==2 and w.crouching(),"actual pier hit preserves real constrained physical posture: "+hero)
-		for i in 5:
-			var hurt_spec:=MissionHeroArt.body_spec(w);var hurt_pose:=MissionHeroArt.metrics(hero,str(hurt_spec.action),int(hurt_spec.frame))
-			check(hurt_spec.action=="crouch_fire" and w.player.y+hurt_pose.offset.y+2.*float(hurt_pose.source_scale)>=CampaignRoutes.CRAWL_CEILING,"underpier damage uses safe existing low flinch/blink adaptation: "+hero+"/"+str(i))
-			w.step(.05)
-		w.hp=1;w.invulnerable=0.;w.damage_player()
-		check(w.state=="dying","actual lethal hit enters death under pier: "+hero)
+		check(w.hp==0 and w.attempts_remaining==2 and CampaignRoutes.low_ceiling(w) and w.state=="dying","One hit enters constrained death under the real pier: "+hero)
 		var previous_death_frame: int=-1
 		for i in 14:
 			var death_spec:=MissionHeroArt.body_spec(w);var death_pose:=MissionHeroArt.metrics(hero,str(death_spec.action),int(death_spec.frame))
@@ -185,6 +179,7 @@ func run() -> void:
 	check(str(w.hero_skill.phase)==phase and float(w.hero_skill.clock)==clock,"pause freezes the same skill phase and clock")
 	w.state="playing";w.invulnerable=0.;w.damage_player();w.step(.01)
 	check(w.hero_skill.is_empty(),"damage clears active tongue safely")
+	advance(w,1.2);CampaignLives.start_entry(w,Rect2(0,-420,1152,500));advance(w,.65)
 	w.hurt_time=0.;w.interact();w.stop_inputs()
 	check(not w.hero_skill.is_empty(),"input reset preserves skill so pause can resume exact choreography")
 	w.load_section("quay")

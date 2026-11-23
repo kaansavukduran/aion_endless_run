@@ -104,10 +104,10 @@ func run() -> void:
  # a pose adaptation, not a newly authored death animation.
  for hero in M1HeroArt.HEROES:
   var w:=fresh(hero);w.load_section('fork_one');w.state='playing';w.player=Vector2(1000.,CampaignRoutes.LOWER_FLOOR)
-  w.hp=1;w.flock=1;w.shield=0;w.invulnerable=0.;w.damage_player('enemy')
+  w.hp=1;w.flock=1;w.invulnerable=0.;w.damage_player('enemy')
   check(w.state=='dying','Real fatal damage enters confined death state '+hero)
-  for state in ['dying','dead']:
-   if state=='dead':
+  for state in ['dying','respawn_pending']:
+   if state=='respawn_pending':
     for tick in 30:w.step(.05)
    check(w.state==state,'Actual death timer reaches expected state '+hero)
    var spec:=M1CombatArt.body_spec(w)

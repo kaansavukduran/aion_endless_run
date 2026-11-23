@@ -91,9 +91,7 @@ func follower_render_spec(index: int) -> Dictionary:
 	# support/crouch/stride instead of treating every negative Y as a jump.
 	if bool(world.mount.ridden):
 		return {"pose":m1_heroes.pose("sheep","idle_fire",0),"p":vehicle_draw_position()+Vector2(-vehicle_draw_facing()*(28.+index*24.),-30.),"facing":vehicle_draw_facing(),"growth":.55,"action":"idle_fire","frame":0}
-	var sample: Dictionary={"p":world.player-Vector2((index+1)*52,0),"facing":world.facing,"grounded":world.grounded(),"crouched":world.crouching(),"walk_distance":world.walk_distance,"moving":absf(world.velocity.x)>1.,"velocity_y":world.velocity.y,"air_time":world.air_time}
-	for old in world.trail:
-		if float(old.time)<=world.time-float(index+1)*.27:sample=old
+	var sample:=CampaignLives.follower_sample(world,index)
 	var action: String="idle_fire"
 	var frame:=0
 	var travel: float=float(sample.get("walk_distance",world.walk_distance))
@@ -201,7 +199,10 @@ func draw_world() -> void:
 		else:
 			# Every actual special weapon/support has its own original silhouette.
 			# This is a registered static drawing, not a fabricated animation count.
-			draw_pose(item_bank.pose(str(item.kind)),p)
+			var pickup_art: String={"heal":"grenade","repair":"grenade","shield":"power"}.get(str(item.kind),str(item.kind))
+			draw_pose(item_bank.pose(pickup_art),p)
+			if str(item.kind) in ["heal","repair"]:
+				caption("+1" if item.kind=="heal" else "+2",at(p)+Vector2(-9.,-24.),14)
 	for e in world.enemies:
 		if float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
 		if bool(e.defeated) and float(e.get("dead_age",0.))>1.: continue
@@ -265,16 +266,20 @@ func draw_world() -> void:
 			for side in [-1.,1.]:
 				draw_rect(Rect2(core+Vector2(side*23.-2.,-15.),Vector2(4,30)),Color("f1c681"))
 				draw_rect(Rect2(core+Vector2(-15.,side*23.-2.),Vector2(30,4)),Color("f1c681"))
-	if (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and float(world.mount.get("floor_y",world.floor_at(float(world.mount.x))))<180.):
+	if CampaignVehicles.stunned(world) or (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and float(world.mount.get("floor_y",world.floor_at(float(world.mount.x))))<180.):
 		var p: Vector2=vehicle_draw_position()
 		var firing: bool=world.shot_flash>0. and bool(world.mount.ridden)
 		var spec: Dictionary=world.vehicle_art_spec()
 		var frame: int=int(spec.frame)
 		var type: String=CampaignVehicles.kind(world)
-		var phase: int=3 if int(world.mount.hp)<=0 else int(spec.phase)
+		var phase: int=2 if CampaignVehicles.stunned(world) else (3 if int(world.mount.hp)<=0 else int(spec.phase))
 		var machine: Dictionary=vehicle_art.hull_pose(type,phase,frame,hero_reference_height()*2.) if bool(world.mount.ridden) else vehicle_pose(type,phase,frame)
 		draw_pose(machine,p,vehicle_draw_facing(),float(machine.vehicle_growth))
-		if bool(world.mount.ridden):draw_vehicle_barrel(machine,p)
+		if CampaignVehicles.stunned(world):
+			var spark: Vector2=at(p-Vector2(0.,70.))
+			for offset in [Vector2(-22,-21),Vector2(16,-31),Vector2(30,4)]:
+				draw_line(spark+offset*.7,spark+offset,Color("ffe0a2"),3.)
+		elif bool(world.mount.ridden):draw_vehicle_barrel(machine,p)
 		if bool(world.mount.ridden) and world.character=="sheep" and world.flock>1:
 			draw_set_transform(at(p),0.,Vector2(vehicle_draw_facing(),1.))
 			draw_rect(Rect2(-66,-30,59,5),Color("b89461"));draw_rect(Rect2(-66,-25,59,3),Color("634b3a"))
@@ -283,6 +288,10 @@ func draw_world() -> void:
 	var pose: Dictionary = hero_pose(world.character,absf(world.velocity.x)>1.,not world.grounded(),world.walk_distance)
 	var tint := Color.WHITE
 	if world.invulnerable>0.: tint=Color("ffd9ca")
+	if world.state=="respawn":
+		var landing: Vector2=at(world.entry_to)
+		draw_rect(Rect2(landing-Vector2(22.,3.),Vector2(44.,5.)),Color("211b2599"))
+		draw_rect(Rect2(landing-Vector2(28.,1.),Vector2(56.,2.)),Color("e9ba7e"))
 	if host.motion_enabled and not host.options.reduced_motion:
 		MissionHeroArt.draw_shell_contacts(self)
 	if not bool(world.mount.ridden) and world.mount_transition.is_empty():
@@ -341,6 +350,16 @@ func draw_world() -> void:
 		for i in world.flock-1:
 			var follower: Dictionary=follower_render_spec(i)
 			draw_pose(follower.pose,follower.p,int(follower.facing),float(follower.growth))
+	if world.state=="dying":
+		var key: String={"pit":"downed_pit","shot":"downed_shot","hazard":"downed_hazard","beam":"downed_hazard","explosion":"downed_hazard"}.get(world.death_cause,"downed_impact")
+		var cause: String=host.t(key)
+		var point: int=host.font_size(17)
+		var text_width:=font.get_string_size(cause,HORIZONTAL_ALIGNMENT_LEFT,-1,point).x
+		var pos:=at(world.player)+Vector2(-text_width*.5,-111.)
+		pos.x=clampf(pos.x,22.,scene_w-text_width-22.)
+		pos.y=clampf(pos.y,102.,ground+31.)
+		draw_rect(Rect2(pos+Vector2(-8.,-point),Vector2(text_width+16.,point+10.)),Color("261f2a"))
+		draw_string(font,pos,cause,HORIZONTAL_ALIGNMENT_LEFT,-1,point,Color("f3c893"))
 	if world.charging: small_health(at(world.player+Vector2(-28,-112)),56,world.charge_ratio())
 	draw_npcs(true) # Keep the thank-you and bag visible in front of a contacted hull.
 	for b in world.bullets:

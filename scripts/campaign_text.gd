@@ -39,7 +39,27 @@ const HERO_SKILL_TEXT := {
  "skill_active":["Aktif","Active"]
 }
 
+const ARCADE_LIFE_TEXT := {
+	"continue_offer":["Devam edecek misin?","Continue?"],
+	"continue_pick":["Kahramanını seç","Choose your hero"],
+	"continue_choose":["Kahraman seç","Choose hero"],
+	"continue_enter":["Mücadeleye dön","Return to action"],
+	"continue_keys":["Enter ile kahraman seç.","Press Enter to choose a hero."],
+	"continue_pad":["A / × veya Start ile kahraman seç.","Press A / × or Start to choose a hero."],
+	"continue_touch":["Kahraman seç’e dokun.","Tap Choose hero."],
+	"next_hero":["Sonraki","Next"],"previous_hero":["Önceki","Previous"],"go_back":["Geri","Back"],
+	"game_over":["Oyun bitti","Game over"],"continue_count":["Devam","Continues"],
+	"reserve_lives":["Yedek yaşam","Spare lives"],
+	"restart_mission":["Görevi baştan başlat","Restart mission"],
+	"flock_support":["Sürü · Eşya toplar","Flock · Collects items"],
+	"downed_shot":["Mermi isabeti","Shot down"],
+	"downed_impact":["Çarpışma","Collision"],
+	"downed_hazard":["Patlama","Caught in a blast"],
+	"downed_pit":["Çukura düştün","Fell into a pit"]
+}
+
 static func word(locale: String,key: String) -> String:
+	if ARCADE_LIFE_TEXT.has(key):return str(ARCADE_LIFE_TEXT[key][0 if GameText.language_for_locale(locale)=="tr" else 1])
 	if HERO_SKILL_TEXT.has(key):return str(HERO_SKILL_TEXT[key][0 if GameText.language_for_locale(locale)=="tr" else 1])
 	locale=GameText.language_for_locale(locale)
 	if RHYTHM.data.has(locale) and RHYTHM.data[locale].has(key):return str(RHYTHM.data[locale][key])

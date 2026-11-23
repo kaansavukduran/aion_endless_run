@@ -389,6 +389,19 @@ with sync_playwright() as playwright:
             page.wait_for_timeout(500)
             canvas.focus()
 
+            def restart_for_probe():
+                page.wait_for_function("['playing','continue_offer','continue_pick','dead'].includes(JSON.parse(document.querySelector('canvas').dataset.campaign).state)",timeout=15000)
+                if campaign()['menu'] in ['continue_offer','continue_pick']:
+                    if campaign()['menu']=='continue_pick':tap('ArcadeBackToCountdown',in_campaign=True)
+                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
+                if campaign()['menu']!='dead':
+                    canvas.focus();page.keyboard.press('Escape')
+                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'",timeout=10000)
+                tap('CampaignRestart',in_campaign=True)
+                presentation_done()
+                page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp===1 && d.ui_ready}",timeout=15000)
+                canvas.focus()
+
             class AimActorDied(Exception):
                 pass
             aim_retries = 0
@@ -463,33 +476,14 @@ with sync_playwright() as playwright:
                         (args.evidence/('aim-case-%d-death-%d.json'%(index,aim_retries))).write_text(json.dumps(dead,indent=2)+'\n')
                         page.screenshot(path=str(args.evidence/('aim-case-%d-death-%d.png'%(index,aim_retries))))
                         keys([]);page.keyboard.up('f')
-                        assert aim_retries<3, ('Aim cases exceeded ordinary checkpoint retries',dead)
-                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.menu==='dead' && d.ui_ready}",timeout=10000)
-                        tap('CampaignRetry',in_campaign=True);aim_retries+=1
-                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.ui_ready}",timeout=10000)
-                        canvas.focus()
-            observations['aim_checkpoint_retries']=aim_retries
+                        assert aim_retries<3, ('Aim cases exceeded three fresh runs',dead)
+                        restart_for_probe();aim_retries+=1
+            observations['aim_new_runs']=aim_retries
 
             keys([])
-            # Eight real combat aim checks leave the actor exposed to enemies.
-            # A dead actor cannot satisfy an independent posture test. Retain
-            # that state, then use the actual checkpoint action, without a
-            # world setter, immunity or a hidden debug restart.
-            precondition = campaign()
-            observations['before_crouch_checkpoint'] = precondition
-            if precondition['state'] == 'dying':
-                page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'", timeout=10000)
-            if campaign().get('menu') == 'dead':
-                tap('CampaignRetry', in_campaign=True)
-            else:
-                canvas.focus()
-                page.keyboard.press('Escape')
-                page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'", timeout=10000)
-                tap(text='Kontrol noktasından dene' if args.locale.startswith('tr') else 'Retry checkpoint', in_campaign=True)
-            presentation_done()
-            page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.grounded && d.ui_ready}", timeout=15000)
-            canvas.focus()
-            check(True, 'Actual checkpoint UI supplies a living, actionable actor before the independent crouch test')
+            observations['before_crouch_restart'] = campaign()
+            restart_for_probe()
+            check(campaign()['grounded'], 'An explicit new run starts the independent crouch test on real ground')
             before = campaign()
             keys(['s', 'd', 'f'])
             page.wait_for_function("before=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.crouching && d.player[0]>before.x+12 && d.shots>before.shots}", arg={'x': before['player'][0], 'shots': before['shots']}, timeout=10000)
@@ -534,6 +528,27 @@ with sync_playwright() as playwright:
                     if label not in checks:
                         check(condition, label)
 
+                def move_and_defend(current, direction, allow_grenade):
+                    global last_jump
+                    x, y = current['player']
+                    aim_high = [e for e in current['enemies'] if
+                                abs(e['x'] - x) < 290 and e['y'] < y - 42]
+                    nearest = min(aim_high, key=lambda e: abs(e['x'] - x), default=None)
+                    if nearest:
+                        dx = nearest['x'] - x
+                        commands = ['f', 'w'] if abs(dx) < 85 else ['f', 'w', 'd' if dx > 0 else 'a']
+                    else:
+                        commands = ['f', direction]
+                    keys(commands)
+                    gap = any(0 < pit[0] - x < 160 for pit in current['pits'])
+                    danger = any(math.hypot(b[0] - x, b[1] - (y - 37)) < 95 for b in current['bullets'])
+                    if current['grounded'] and (gap or danger) and current['time'] - last_jump > .70:
+                        page.keyboard.press('Space')
+                        last_jump = current['time']
+                    if allow_grenade and current['grenades'] and not current['grenade_throw']['phase'] and nearest and abs(nearest['x'] - x) < 125:
+                        page.keyboard.press('g')
+                    return commands
+
                 while True:
                     target = None
                     try:
@@ -545,11 +560,10 @@ with sync_playwright() as playwright:
                             current = campaign()
                             require_live(current, 'search', recover=True)
                             x, y = current['player']
-                            gap = any(0 < pit[0]-x < 160 for pit in current['pits'])
-                            danger = any(math.hypot(b[0]-x, b[1]-(y-37)) < 120 for b in current.get('bullets', []))
-                            if current.get('grounded') and (gap or danger) and time.monotonic()-last_jump > .75:
-                                page.keyboard.press('Space'); last_jump = time.monotonic()
-                            target = next((n for n in current['npcs'] if n['freed'] and n['phase'] == 'free' and not n['secret'] and not current['awarded'].get(n['id']+':gift') and abs(n['y']-y) < 25 and 95 < n['x']-x < 500), None)
+                            move_and_defend(current, 'd', allow_grenade=x<2750.)
+                            free = [n for n in current['npcs'] if n['freed'] and n['phase'] == 'free' and not n['secret']
+                                    and not current['awarded'].get(n['id']+':gift') and abs(n['y']-y) < 70 and abs(n['x']-x)<500]
+                            target = min(free, key=lambda n: abs(n['x']-x), default=None)
                             if target:
                                 keys([]); rescue_trace('free_candidate', current, target); break
                             page.wait_for_timeout(60)
@@ -573,13 +587,7 @@ with sync_playwright() as playwright:
                                 contacted = current; keys([]); break
                             assert npc['phase'] == 'free', ('Expected a newly freed, uncontacted NPC', npc)
                             x, y = current['player']
-                            wanted = ['f', 'd' if npc['x'] > x else 'a']
-                            keys(wanted)
-                            gap = any(0 < pit[0]-x < 160 for pit in current['pits'])
-                            danger = any(math.hypot(b[0]-x, b[1]-(y-37)) < 120 for b in current.get('bullets', []))
-                            flyer = any(abs(e['x']-x) < 180 and e['y'] < y-25 for e in current['enemies'])
-                            if current.get('grounded') and (gap or danger or flyer) and time.monotonic()-last_jump > .75:
-                                page.keyboard.press('Space'); last_jump = time.monotonic()
+                            wanted = move_and_defend(current, 'd' if npc['x'] > x else 'a', allow_grenade=False)
                             rescue_trace('approach_input', current, target, wanted)
                             page.wait_for_timeout(40)
                         current = campaign()
@@ -597,12 +605,19 @@ with sync_playwright() as playwright:
                         rescue_attempts.append({'attempt': attempt, 'outcome': event['outcome'], 'stage': stage, 'hp': dead['hp']})
                         keys([])
                         page.screenshot(path=str(args.evidence/('rescue-attempt-%d-death.png' % attempt)))
-                        assert retries < 3, ('Rescue approach exceeded ordinary checkpoint retries', dead)
-                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.menu==='dead' && d.ui_ready}", timeout=10000)
-                        tap('CampaignRetry', in_campaign=True)
+                        assert retries < 8, ('Rescue approach exceeded the bounded lives budget', dead)
+                        resumed = page.wait_for_function("""() => {
+                            const d = JSON.parse(document.querySelector('canvas').dataset.campaign);
+                            return (d.menu === 'continue_offer' || (d.state === 'playing' && d.hp === 1)) && d.ui_ready ? d : false;
+                        }""", timeout=15000).json_value()
+                        if resumed['menu'] == 'continue_offer':
+                            tap('ArcadeContinue', in_campaign=True)
+                            page.wait_for_timeout(415)
+                            tap('ArcadeConfirmHero', in_campaign=True)
+                            page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp===1 && d.ui_ready}",timeout=15000)
                         retries += 1; attempt += 1
-                        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp>0 && d.ui_ready}", timeout=15000)
                         canvas.focus()
+
 
                 # Only this same living hero's confirmed THANKS phase permits
                 # crossing away and waiting for the physical bag item. Missing
@@ -646,7 +661,7 @@ with sync_playwright() as playwright:
                 saved = page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
                 check(saved['awarded'].get(target['id']+':gift') and saved['taken'].get(target['id']+':supply'), 'Actual dropped-item contact applies the power-up and persists it once')
                 observations['rescued_npc'] = target['id']
-                observations['rescue_checkpoint_retries'] = retries
+                observations['rescue_reentries'] = retries
                 page.screenshot(path=str(args.evidence/'contact-thanks-gift.png'))
             observations['campaign_final'] = campaign()
             page.screenshot(path=str(args.evidence/'campaign-final.png'))

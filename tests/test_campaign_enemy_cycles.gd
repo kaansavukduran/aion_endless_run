@@ -137,7 +137,10 @@ func leap_continuity() -> void:
 		CampaignEnemies.attack(w,e)
 		w.step_enemies(.01)
 		check(float(e.y)<0. and float(e.y)>-7.,"First leap tick leaves floor continuously: "+kind)
-		check(w.hp==w.max_hp-1,"Leap contact follows actual low body at takeoff: "+kind)
+		check(w.hp==0 and w.state=="dying" and w.attempts_remaining==2,"Leap contact follows actual low body at takeoff: "+kind)
+		# The remaining isolated samples measure the enemy curve with an actor
+		# back in play; death correctly pauses the real encounter.
+		w.state="playing";w.hp=1;w.invulnerable=1.
 		var elapsed:=.01
 		while elapsed<duration*.5-.00001:
 			var dt:=minf(.01,duration*.5-elapsed);w.step_enemies(dt);elapsed+=dt
@@ -145,10 +148,11 @@ func leap_continuity() -> void:
 		w.hp=w.max_hp;w.invulnerable=0.
 		w.step_enemies(.001);elapsed+=.001
 		check(w.hp==w.max_hp,"Actual elevated leap body clears grounded player: "+kind)
+		w.player.x=1000.
 		while elapsed<duration-.01-.00001:
 			var dt:=minf(.01,duration-.01-elapsed);w.step_enemies(dt);elapsed+=dt
 		check(float(e.y)<0. and float(e.y)>-7. and active_time(e)>.009,"Last active leap tick approaches floor continuously: "+kind)
-		w.hp=w.max_hp;w.invulnerable=0.
+		w.player.x=float(e.x);w.hp=w.max_hp;w.invulnerable=0.
 		w.step_enemies(.01)
 		check(absf(float(e.y))<.001 and active_time(e)<.00001 and float(e.recover)>.49,"Landing ends leap before full recovery begins: "+kind)
 		check(w.hp==w.max_hp,"Landing recovery disables contact damage: "+kind)
