@@ -28,6 +28,7 @@ const BODY_HALF_WIDTH := 16.
 const SERVICE_WALKWAYS := [Rect2(360.,-80.,150.,20.),Rect2(540.,-140.,200.,18.),Rect2(720.,UPPER_FLOOR,1060.,22.)]
 const SERVICE_BRIDGE_X := 540.
 const SERVICE_BRIDGE_SECONDS := 2.4
+const SERVICE_SUPPORT := Rect2(538.,-98.,69.,20.)
 const HATCH_ID := "fork_two:root_lock"
 const HATCH_LOCK_X := 820.
 const HATCH_X := 900.
@@ -142,6 +143,10 @@ static func choice_at(w) -> String:
 	return ""
 
 static func step(w) -> void:
+	if str(w.section)=="fork_two" and float(w.bridge_timers.get(SERVICE_BRIDGE_X,1.))<=0. and SERVICE_SUPPORT not in w.platforms:
+		# The collapsed planks expose the near-side support. Even a regular
+		# jump can recover the upper route without a charged hero ability.
+		w.platforms.append(SERVICE_SUPPORT)
 	if str(w.section)=="fork_two" and w.grounded() and not w.bridge_timers.has(SERVICE_BRIDGE_X):
 		var contact: Vector2=foot(w)
 		var span: Rect2=SERVICE_WALKWAYS[1]
