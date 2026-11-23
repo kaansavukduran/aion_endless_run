@@ -128,7 +128,7 @@ func run() -> void:
 	for hero in game.FRIENDS:
 		var choice: Button=game.menu_layer.find_child("StartSelect_"+hero,true,false)
 		var page_limit:=0
-		while not is_instance_valid(choice) and page_limit<3:
+		while not is_instance_valid(choice) and page_limit<game.FRIENDS.size():
 			var next: Button=game.menu_layer.find_child("RosterNext",true,false)
 			if not is_instance_valid(next) or next.disabled:break
 			click(next);await settle();page_limit+=1

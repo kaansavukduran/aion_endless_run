@@ -203,3 +203,10 @@ Yerel native kontroller: charge/roll/paged UI **2908**, front presentation **172
 Görev sonu kaynak tazelik kontrolü: Drive26 betik+2 testin kimlik/boyut/değiştirilme zamanı yine28/28 aynı, ek dosya yok; iki güncel devir belgesi21 Kasım tarihleriyle aynı. GitHub main hâlâ466492f. AIONIA resmî belge metadata'sı13 Kasım2026T00:29:34.975Z ile okunanv1.7 anlık kopyayla aynı. Bu metadata kontrolü yeni bir içerik okuması veya standart sürümü uydurma değildir. Drive'a yedek/yükleme yapıldığı iddia edilmez.
 
 Sonraki kapı: bu son kaynak ağacının tam CI'sı, main birleştirmesi, başarılı main artifact'ının Pages'e taşınması, gerçek canlı0.50 açılışı, korunmuş0.29 kaydının normal güncellemesi ve canlı Ayça su/Eren teras görevleri. Başarılmayan bu uzak kapılara PASS yazılmaz. Kullanıcı sanat/oynanış kabulü ve fiziksel cihaz matrisi hâlâ ayrıdır; Mission2 yoktur.
+
+
+### Son kaynak sayfalama regresyonu
+
+CI45097856611 /71c1845 kaynak kapısında yalnız `unslop_quality` testi FAIL: büyük yazıdaki gerçek tek kartlı düzeni dolaşırken test sabit üç sayfa varsayıyordu. Oyun/pager sorunu değildir. Kontrol gerçek önceki/sonraki düğmeleriyle, en çok kahraman sayısı kadar sayfa dolaşır; altı benzersiz ve görünür/erişilebilir kart şartı aynıdır. Aynı eski `/2` varsayımı komşu Arcade roster testinde, üç adımlık sınır seçim akışında da kaldırıldı; üretim dosyası/PCK değişmedi.
+
+Yerel odaklı tekrarlar: Unslop778, charge/roll/paged UI2896, seçim108; komşu Arcade roster893 ve seçim108 PASS. Kontrol sayıları gerçek görünür eylem/font ortamına bağlıdır; sabit toplam değer kalite ölçütü yapılmaz. Test sonu altı karakter kümesi ve bütün görünür kontrol sınırı şartları korunur. Önceki kırmızı günlük ve CI bağlantısı saklıdır. Tam son CI sonucu henüz PASS ilan edilmez.
