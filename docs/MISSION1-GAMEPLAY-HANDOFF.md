@@ -15,7 +15,7 @@ Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVER
 
 - Fener kıyısında Fener Nöbetçisi ve Mantar Atıcısı normal bölüme bağlı. Nöbetçi okunur bir düz atış hattı gösterir. Atıcı önceden işaretlediği noktaya doğru yerçekimli bir kapsül yollar. İkisi de zeminle birlikte yürür, görünür alanda tam hazırlık yapar ve tek atıştan sonra kendi toparlanma süresini geçirir.
 - Özgün iki pafta oyunda çiziliyor. Her düşmanda altı yürüyüş karesi, ayrı hazırlık/atış/toparlanma pozları ve üç karelik yere çökme var. Kaynak, ayak ve atış bağlantıları [varlık kaydında](../assets/CAMPAIGN-GROUND-SHOOTERS-PROVENANCE.json).
-- 24 hedefli kaynak kontrolü ve dört Linux görüntüleme örneği geçti. Normal Chromium koşusunda Fener Nöbetçisi görünür hazırlıktan gerçek mermiye ve toparlanmaya geçti. Mantar Atıcısı için aynı tarayıcı makbuzu bekleniyor. İki rolün atış sesleri ayrıldı. Kök Motoru’nun yeni arenası ve giriş sahnesi `feat/mission1-root-engine` dalında ilerliyor.
+- 24 hedefli kaynak kontrolü ve dört Linux görüntüleme örneği geçti. Fener Nöbetçisi ve Mantar Atıcısı, 0.54.0 yerel Chromium çıktısında ayrı koşularda görünür hazırlık, gerçek atış ve toparlanma verdi. Bu makbuzlar `ordinary-4` ve `ordinary-5` doğrulama klasörlerindedir. İki farklı atış sesi daha sonra bağlandı. O sesleri içeren son derlemenin sıradan tarayıcı koşusunu tamamlamak gerekiyor.
 
 ## 23 Kasım 2026 · Yerel 0.53.0 arazi adayı
 

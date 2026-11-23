@@ -978,8 +978,12 @@ func update_hud() -> void:
 	boss_health.value=world.boss.hp
 	if boss_health.visible:
 		var boss_cue: String=""
-		if int(world.boss.phase)==3 and float(world.boss.windup)>0. and int(world.boss.attack)%3==2:boss_cue=" · "+t("boss_dash")
-		elif float(world.boss.windup)>0. or float(world.boss.get("beam_warning",0.))>0.:boss_cue=" · "+t("boss_warning")
+		var pattern:=int(world.boss.attack)%3
+		if float(world.boss.get("beam_warning",0.))>0.:boss_cue=" · "+t("boss_beam_move")
+		elif float(world.boss.windup)>0.:
+			if pattern==1:boss_cue=" · "+t("boss_wave_jump")
+			elif pattern==2 and int(world.boss.phase)==3:boss_cue=" · "+t("boss_dash")
+			else:boss_cue=" · "+t("boss_warning")
 		elif int(world.boss.phase)==2 and world.boss_vulnerable():boss_cue=" · "+t("boss_core")
 		subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+boss_cue
 	subtitle.position.y=boss_health.position.y+(20. if boss_health.visible else 0.)

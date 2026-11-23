@@ -65,6 +65,8 @@ static func word(locale: String,key: String) -> String:
 	if RHYTHM.data.has(locale) and RHYTHM.data[locale].has(key):return str(RHYTHM.data[locale][key])
 	if key=="fork_one":return "Fener Kavşağı" if locale=="tr" else "Lantern Junction"
 	if key=="fork_two":return "Asma Geçit" if locale=="tr" else "Hanging Passage"
+	if key=="boss_wave_jump":return "Kök dalgası · Zıpla" if locale=="tr" else "Root wave · Jump"
+	if key=="boss_beam_move":return "İşaretli alandan çık" if locale=="tr" else "Leave the marked spot"
 	if key=="continue_short":return "Sürdür" if locale=="tr" else "Continue"
 	if key in ["owl_feather","arc_owl_feather"]:return "Ömer’in Tüyü · İki kaya saldırısı" if locale=="tr" else "Omar’s Feather · Two stone strikes"
 	if key in ["wolf_charm","arc_wolf_charm"]:return "Melun’un Tılsımı · İki ısırık" if locale=="tr" else "Melun’s Charm · Two bites"

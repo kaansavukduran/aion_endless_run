@@ -488,15 +488,14 @@ func draw_combat_cues() -> void:
 			var rc := at(Vector2(float(world.boss.x),float(world.boss.y)-75.))
 			draw_arc(rc,34.,0.,TAU,18,Color("9fe3c8"),3.)
 		if float(world.boss.windup)>0.:
-			var is_dash: bool = int(world.boss.phase)==3 and int(world.boss.attack)%3==2
-			var warning: String="boss_dash" if is_dash else ("boss_core" if int(world.boss.phase)==2 else "arc_boss_warning")
-			caption(host.t(warning),at(Vector2(float(world.boss.x)-130.,float(world.boss.y)-215.)),16)
-			if is_dash:
-				var dir: float = -1. if world.player.x<float(world.boss.x) else 1.
-				var lane_x: float=float(world.boss.x)+dir*340.
-				var lane_from := at(Vector2(float(world.boss.x),float(world.boss.y)-10.))
-				var lane_to := at(Vector2(lane_x,world.floor_at(lane_x)-10.))
-				draw_line(lane_from,lane_to,Color("f28c6b"),4.)
+			var pattern:=int(world.boss.attack)%3
+			if pattern==1 or (pattern==2 and int(world.boss.phase)==3):
+				var dir: float=-1. if world.player.x<float(world.boss.x) else 1.
+				var steps:=11 if pattern==1 else 17
+				for step in range(2,steps):
+					var x:=float(world.boss.x)+dir*float(step*22)
+					var y:=world.floor_at(x)-7.
+					draw_rect(Rect2(at(Vector2(x,y)),Vector2(10.,3.)),Color("f28c6b"))
 
 func hero_weapon_visible() -> bool:
 	# The authored throw includes release and follow-through with an open hand.
