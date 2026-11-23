@@ -477,7 +477,7 @@ class Probe:
                 touch_session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]},{'id':2,'x':point[0],'y':point[1]}]})
                 # A visible Button normally activates on release. Complete the
                 # second finger's tap while the first still holds crouch.
-                touch_session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]}]})
+                touch_session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[{'id':2,'x':point[0],'y':point[1]}]})
                 self.wait(lambda p:bool(p['campaign'].get('hero_skill',{}).get('phase')),'a completed second-finger context tap starts the crouched skill',alive=True)
             else:self.page.touchscreen.tap(*point)
         else:self.event('key_press','e');self.page.keyboard.press('e')
@@ -547,7 +547,7 @@ class Probe:
                     r=before['context_action']['rect'];point=self.ui_xy(r[0]+r[2]/2,r[1]+r[3]/2)
                     if session:
                         session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]},{'id':2,'x':point[0],'y':point[1]}]})
-                        session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]}]})
+                        session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[{'id':2,'x':point[0],'y':point[1]}]})
                         events=self.page.evaluate('i=>sixProbe.events.slice(i)',event_mark)
                         near=lambda e,q:e.get('x') is not None and math.dist([e['x'],e['y']],q)<2.
                         self.check(any(e['type']=='pointerup' and near(e,point) for e in events) and not any(e['type']=='pointerup' and near(e,stick_point) for e in events),'The second finger completes its actual context tap while the first finger stays down',events)
@@ -602,6 +602,7 @@ def main():
     parser.add_argument('--url',required=True);parser.add_argument('--evidence',type=Path,required=True)
     parser.add_argument('--heroes',nargs='+',choices=HEROES,default=list(HEROES))
     parser.add_argument('--browser',choices=['chromium','firefox'],default='chromium')
+    parser.add_argument('--viewport',nargs=2,type=int,metavar=('WIDTH','HEIGHT'),default=[1280,720],help='Actual browser viewport in CSS pixels; default1280x720')
     parser.add_argument('--inputs',nargs='+',choices=['keyboard','touch','pad'],default=['keyboard'],help='Additional activation probes; the complete keyboard/mouse matrix runs unless --activation-only is explicitly selected')
     parser.add_argument('--expected-version',help='Reject a different actual front-menu build version')
     parser.add_argument('--activation-only',action='store_true',help='Focused normal-menu skill/touch/pad activation supplement; does not replace the default full gait matrix')
@@ -610,6 +611,7 @@ def main():
     parser.add_argument('--continue-on-failure',action='store_true',help='Continue only when independent hero failures are intentionally being compared; the default stops after the first failed case')
     args=parser.parse_args()
     if args.require_60fps and args.no_video:parser.error('--require-60fps cannot be combined with --no-video')
+    if min(args.viewport)<=0:parser.error('--viewport WIDTH HEIGHT must both be positive')
     args.heroes=list(dict.fromkeys(args.heroes))
     if args.activation_only and any(hero not in ('armadillo','frog') for hero in args.heroes):parser.error('--activation-only is a focused native-skill supplement; select --heroes armadillo frog')
     if args.activation_only and not any(mode in args.inputs for mode in ('touch','pad')):parser.error('--activation-only requires --inputs touch and/or pad')
@@ -632,14 +634,14 @@ def main():
             browser=pw.chromium.launch(executable_path=shutil.which('chromium'),headless=not args.headed,env=env,args=['--no-sandbox','--enable-unsafe-swiftshader']+(['--use-angle=gl'] if args.angle_gl else []))
         for hero_index,hero in enumerate(args.heroes):
             out=args.evidence/hero;out.mkdir(exist_ok=True)
-            context=browser.new_context(viewport={'width':1280,'height':720},locale='tr-TR',has_touch=True,reduced_motion='no-preference',accept_downloads=True)
+            context=browser.new_context(viewport={'width':args.viewport[0],'height':args.viewport[1]},locale='tr-TR',has_touch=True,reduced_motion='no-preference',accept_downloads=True)
             context.add_init_script(OBSERVER);page=context.new_page();errors=[];console=[]
             page.on('pageerror',lambda error:errors.append(str(error)))
             def message(item):
                 console.append({'wall_monotonic':time.monotonic(),'type':item.type,'text':item.text})
                 if item.type=='error' or 'SCRIPT ERROR' in item.text or 'ERROR:' in item.text:errors.append(item.text)
             page.on('console',message)
-            probe=Probe(page,hero,out,registry);report={'hero':hero,'browser':args.browser,'version':browser.version,'url':url,'status':'FAIL','video':{'status':'NOT_TESTED'},'physical_device':'NOT_TESTED','physical_gamepad':'NOT_TESTED','scope':'normal-input skill activation supplement' if args.activation_only else 'full normal-input gait/fire/grenade/skill matrix','authored_source_sha256':registry.source_hashes}
+            probe=Probe(page,hero,out,registry);report={'hero':hero,'browser':args.browser,'version':browser.version,'viewport':args.viewport,'url':url,'status':'FAIL','video':{'status':'NOT_TESTED'},'physical_device':'NOT_TESTED','physical_gamepad':'NOT_TESTED','scope':'normal-input skill activation supplement' if args.activation_only else 'full normal-input gait/fire/grenade/skill matrix','authored_source_sha256':registry.source_hashes}
             recording=False
             try:
                 page.goto(url,timeout=120000);page.wait_for_selector('canvas[data-front]',timeout=120000)
@@ -653,7 +655,7 @@ def main():
                 if args.activation_only:probe.activation_methods(args.inputs)
                 else:
                     probe.keyboard_matrix();probe.skill();probe.moving_tongue();probe.extra_inputs(args.inputs)
-                probe.check(not errors,'No browser/Godot errors during the complete hero matrix',errors)
+                probe.check(not errors,'No browser/Godot errors during '+('scoped context activation' if args.activation_only else 'the complete hero matrix'),errors)
                 report['status']='PASS'
             except Exception as error:
                 report['error']=str(error);report['failed_stage']=probe.stage
