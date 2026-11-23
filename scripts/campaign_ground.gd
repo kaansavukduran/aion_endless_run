@@ -67,18 +67,34 @@ static func touches_ground(w,from: Vector2,to: Vector2) -> bool:
 static func align_world(w) -> void:
 	if not PROFILES.has(w.section):return
 	for enemy in w.enemies:
-		if not CampaignContent.flying(str(enemy.kind)) and absf(float(enemy.y))<.01:
-			var floor: float=w.floor_at(float(enemy.x))
-			if has_floor(floor):enemy.y=floor;enemy.home=Vector2(float(enemy.x),floor)
+		var floor: float=w.floor_at(float(enemy.x))
+		if not has_floor(floor):continue
+		if CampaignContent.flying(str(enemy.kind)):
+			enemy.y=float(enemy.y)+floor
+			var home: Vector2=enemy.home
+			enemy.home=Vector2(home.x,home.y+floor)
+		elif absf(float(enemy.y))<.01:
+			enemy.y=floor;enemy.home=Vector2(float(enemy.x),floor)
+	# Lower existing walkways and their higher loot toward a deep basin.
+	# Secret rooms and the shore's original failing bridge are outside it.
+	for i in w.platforms.size():
+		var deck: Rect2=w.platforms[i]
+		if deck.position.y> -8.:continue
+		var floor: float=w.floor_at(deck.get_center().x)
+		if has_floor(floor) and floor>45.:
+			deck.position.y+=floor*.60
+			w.platforms[i]=deck
 	for list in [w.crates,w.objects]:
 		for obj in list:
 			if absf(float(obj.y))>.01:continue
 			var floor: float=w.floor_at(float(obj.x))
 			if has_floor(floor):obj.y=floor
 	for item in w.pickups:
-		if item.has("rescue_id") or float(item.y)<-56.:continue
+		if item.has("rescue_id") or item.has("secret"):continue
 		var floor: float=w.floor_at(float(item.x))
-		if has_floor(floor):item.y=float(item.y)+floor
+		if not has_floor(floor):continue
+		if float(item.y)>=-56.:item.y=float(item.y)+floor
+		elif floor>45.:item.y=float(item.y)+floor*.60
 
 static func lift_flat_save(w) -> void:
 	if not PROFILES.has(w.section):return
