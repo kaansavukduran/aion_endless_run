@@ -1,0 +1,182 @@
+{
+  "source": "Original image_gen output, 2026-11-22; no project images or third-party art uploaded.",
+  "path": "assets/m1_grenade_fx.png",
+  "sha256": "a5ff5e8e361ea8cc055cf5e50a2b2a59de1d5a60336c1546885a57883e4c499d",
+  "dimensions": [
+    1774,
+    887
+  ],
+  "layout": "4 columns x 2 rows; safe gutters; same cell center detonation pivot; first cell held/flying object",
+  "render": "Nearest filtering; one identical52px cell for held/flying shell (visible18x23px),320px explosion cell; seven separately drawn ignition/fire/smoke stages, no gameplay disc.",
+  "simulation": "release0.16s, action0.42s, fuse1.15s, effect0.72s; damage uses unchanged World.explode; pause uses game clock",
+  "status": "Original asset generated/imported and real World/View paths connected. Godot4.6.3 integrated simulation+Game+View eligibility checks:346 checks,0fail. Native staged core throw/ballistic/FX review completed on six heroes; ordinary-input browser/audio verification remains a separate QA gate.",
+  "frames": [
+    {
+      "index": 0,
+      "purpose": "grenade",
+      "region": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "alpha_bounds_cell_local": [
+        162,
+        144,
+        314,
+        339
+      ]
+    },
+    {
+      "index": 1,
+      "purpose": "ignition",
+      "region": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "alpha_bounds_cell_local": [
+        153,
+        180,
+        285,
+        306
+      ]
+    },
+    {
+      "index": 2,
+      "purpose": "core",
+      "region": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "alpha_bounds_cell_local": [
+        87,
+        127,
+        314,
+        345
+      ]
+    },
+    {
+      "index": 3,
+      "purpose": "fire_lobes",
+      "region": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "alpha_bounds_cell_local": [
+        26,
+        55,
+        372,
+        392
+      ]
+    },
+    {
+      "index": 4,
+      "purpose": "fire_smoke",
+      "region": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "alpha_bounds_cell_local": [
+        61,
+        67,
+        390,
+        377
+      ]
+    },
+    {
+      "index": 5,
+      "purpose": "smoke_embers",
+      "region": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "alpha_bounds_cell_local": [
+        85,
+        75,
+        374,
+        357
+      ]
+    },
+    {
+      "index": 6,
+      "purpose": "wisps",
+      "region": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "alpha_bounds_cell_local": [
+        102,
+        108,
+        332,
+        337
+      ]
+    },
+    {
+      "index": 7,
+      "purpose": "dissipation",
+      "region": [
+        1330,
+        444,
+        1774,
+        887
+      ],
+      "alpha_bounds_cell_local": [
+        121,
+        139,
+        285,
+        303
+      ]
+    }
+  ],
+  "bounds_threshold": "Alpha>=128 ignores generator alpha1 near-transparent background pixels",
+  "hand_contract": "Six heroes, standing/crouched hand metadata, release cel3 at0.16; M1HeroActionArt or MissionHeroArt metrics, captured throw side; embedded held grenades drawn only by body sheet.",
+  "generation_reference": "image_gen exec-f188d8bb-2907-40ef-9afe-0157c5c45422",
+  "verification": "tests/test_campaign_grenade.gd:346 checks,0fail; /workspace/work/sol62-grenade/test-rigid-grasp2.log. Six heroes,both directions,stand/crouch/air,measured palms,essential reduced-motion releasecel,pause/cancel/hurt/death/retry/board/eject,geometry contacts,coarse release+fuse interval,one damage/event,fullthrow gun suppression,fresh-run cooldown reset,rejected-held input and actual touch button feedback.",
+  "smoke_readability": "Seven cel alphas [1,0.95,0.80,0.52,0.40,0.28,0.18]; first charcoal phase starts0.18s at52%, later smoke40/28/18%; reduced-motion multiplies68%.",
+  "visual_verification": "Native real World/View via DISPLAY=:105,Mesa llvmpipe,1280x720,TR,defaultscale. 216 staged wide throw captures; each asserts inputaccepted,throwactive and gunhidden. Shared cyan shell now held throughout all emptyhand cels; fullthrow gun suppression, release size continuity and smoke readability corrected after image review. 150frames at60Hz gameclock record release\u2192real elevatedplatform contact\u2192singleblast\u2192smokeexpiry. This is a controlled scene fixture,not ordinary-input mission completion; audio driver Dummy. Tight tunnel-specific body variants are separately owned/tested. Universal lower-shell grasp registration subsequently lifted the physical and held centers together by10.0248px; tight-tunnel throw-only recapture is a separate read-only visual check.",
+  "visual_evidence": [
+    "/workspace/work/sol62-grenade/visual-current",
+    "/workspace/work/sol62-grenade/visual-current/grenade-staged-60fps.mp4",
+    "/workspace/work/sol62-grenade/visual-current/animation.json"
+  ],
+  "rigid_grasp": {
+    "coordinate_space": "First atlas cell source pixels",
+    "source_cell_extent": [
+      443.5,
+      443.5
+    ],
+    "display_cell_size": 52,
+    "physical_center_pixel": [
+      238,
+      241.5
+    ],
+    "palm_grip_pixel": [
+      238,
+      327
+    ],
+    "registered_grip_rgba": [
+      24,
+      52,
+      77,
+      252
+    ],
+    "palm_to_center_world": [
+      0,
+      -10.024802705749718
+    ],
+    "application": "Universal rigid prop registration for every hero/posture/direction, mirrored with the body. hand_offset returns physicalcenter=measuredpalm+PALM_TO_CENTER; both held image and one released object use it. No draw-only lift.",
+    "verification": "346 Godot checks pass: all six heroes, six lower-floor throw cels, both mirrors; actual shell source grasp alpha>0.9, exact palm+center vector and inverse sprite-grip registration, opaque shell bottom above actual90px lower floor, release physicalcenter identical at age0."
+  }
+}

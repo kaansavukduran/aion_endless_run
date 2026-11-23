@@ -92,7 +92,10 @@ func run():
      if following!=null:
       check(screen.grow(1).encloses(following.get_global_rect()),"Actual roster next action is inside viewport")
       if not following.disabled:following.pressed.emit();await process_frame;await process_frame;await process_frame
-    check(seen.size()==4 and seen.has("StartSelect_aion") and seen.has("StartSelect_sheep") and seen.has("StartSelect_rabbit") and seen.has("StartSelect_eren"),"All four current heroes remain separately reachable with the actual wider system font")
+    var expected_roster: Array=["StartSelect_aion","StartSelect_sheep","StartSelect_rabbit","StartSelect_eren","StartSelect_armadillo","StartSelect_frog"]
+    var actual_roster: Array=seen.keys();actual_roster.sort();expected_roster.sort()
+    check(g.FRIENDS==["aion","sheep","rabbit","eren","armadillo","frog"],"Campaign roster preserves the original four save identities followed by Armadillo and Frog")
+    check(actual_roster==expected_roster,"All six campaign heroes are individually reachable through the real roster pages with the wider system font")
     g.toggle_language_picker();await process_frame;await process_frame
     var languages: Array=g.language_picker.find_children("*","Button",true,false)
     check(languages.size()==3,"System, Turkish and English remain individually reachable")

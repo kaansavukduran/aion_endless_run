@@ -16,8 +16,9 @@ const POLISH=preload("res://assets/POLISH-PROVENANCE.json")
 const PIXEL=preload("res://assets/PIXEL-HEROES-PROVENANCE.json")
 const ORCHARD = preload("res://assets/ORCHARD-PROVENANCE.json")
 const STORY=preload("res://assets/STORY-PROVENANCE.json")
-var images := {}
-var frames := {}
+# 0.39.0: Process-wide shared caches avoid re-decompressing atlases and re-blitting crops per view/scene.
+static var images := {}
+static var frames := {}
 var forge_art := ForgeHeroArt.new()
 
 func descriptor(key: String,row: int) -> Dictionary:

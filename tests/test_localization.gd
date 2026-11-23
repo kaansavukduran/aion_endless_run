@@ -13,7 +13,7 @@ func run() -> void:
 	for pair in [["tr-TR","tr"],["TR_tr","tr"],["en-GB","en"],["cs-CZ","en"],["CS_cz","en"],["de-DE","en"],["fr","en"],["ja-JP","en"],["ko_KR","en"],["zh-Hant-TW","en"],["az-AZ","en"],["es-ES","en"],["it-IT","en"],["cz","en"],["","en"]]:
 		check(Words.language_for_locale(pair[0]) == pair[1], "Current TR/EN locale selection: " + pair[0])
 	check(Words.LANGUAGES==["tr","en"],"Only the explicitly requested Turkish and English are selectable")
-	var names := {"tr":["Aion","Kutsanmış","Ayça","Eren"],"en":["Aion","Kutsanmış","Ayça","Eren"]}
+	var names := {"tr":["Aion","Kutsanmış","Ayça","Eren","Armadillo","Kurbağa"],"en":["Aion","Kutsanmış","Ayça","Eren","Armadillo","Frog"]}
 	for lang in Words.LANGUAGES:
 		var table: Dictionary = Words.EXTRA[lang].data if Words.EXTRA.has(lang) else Words.STRINGS[lang]
 		var complete: bool = table.size() == Words.STRINGS.en.size()
@@ -21,15 +21,15 @@ func run() -> void:
 			complete = complete and table.has(key) and not Words.get_text(lang,key).is_empty() and Words.get_text(lang,key).count("%d") == Words.get_text("en",key).count("%d")
 		check(complete, "Complete localized UI with matching numeric placeholders: " + lang)
 		var actual: Array[String] = []
-		for id in ["aion","sheep","rabbit","eren"]: actual.append(Words.get_text(lang,"name_"+id))
-		check(actual == names[lang] if names.has(lang) else actual.size()==4 and actual[0]=="Aion", "Exact character names: " + lang)
+		for id in AionCampaignWorld.HEROES: actual.append(Words.get_text(lang,"name_"+id))
+		check(actual == names[lang] if names.has(lang) else actual.size()==6 and actual[0]=="Aion", "Exact character names: " + lang)
 	check(Words.get_text("xx","play") == "Start running", "Unsupported lookup falls back to English")
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
 	await process_frame
 	game.set_physics_process(false)
 	game.set_process(false)
-	check(game.ui.find_children("StartSelect_*", "Button", true, false).size() == 4, "All four current playable tiles exist before play")
+	check(game.ui.find_children("StartSelect_*", "Button", true, false).size() == 6, "All six current playable tiles exist before play")
 	game.select_character("eren")
 	game.set_language("tr")
 	check(game.character_name("rabbit") == "Ayça" and game.language_override, "Manual Turkish selection localizes the current roster and overrides the default")

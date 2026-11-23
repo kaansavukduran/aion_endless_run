@@ -7,6 +7,8 @@ var tutorial_topic := ""
 var frames := RunnerFrameBank.new()
 var clock := 0.0
 var topic_index := 0
+var rendered_source := ""
+var rendered_frame := -1
 
 func _ready() -> void:
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -33,9 +35,15 @@ func _draw() -> void:
 		draw_line(Vector2(20,size.y-10),Vector2(size.x-20,size.y-10),Color("a67e56"),3.)
 		if topic_index==0:actor_row=1
 		elif topic_index==1:actor_row=2;center.y-=absf(sin(progress*2.))*34.
-		elif topic_index in [2,3]:actor_key="gun-fire";actor_row=frames.hero_row(host.world.character)
+		elif topic_index in [2,3] and not MissionHeroArt.has(host.world.character):actor_key="gun-fire";actor_row=frames.hero_row(host.world.character)
 		elif topic_index==4:actor_row=6
-		var pose: Dictionary=frames.pose(actor_key,actor_row,frames.cycle(actor_key,actor_row,progress,1.))
+		var pose: Dictionary
+		if MissionHeroArt.has(host.world.character):
+			var action: String=["walk","air_fire","idle_fire","grenade_throw","skill"][clampi(topic_index,0,4)]
+			var clip: Dictionary=MissionHeroArt.clip_spec(host.world.character,action)
+			pose=MissionHeroArt.pose(host.world.character,action,posmod(int(progress*float(clip.fps)),int(clip.frames)))
+		else:pose=frames.pose(actor_key,actor_row,frames.cycle(actor_key,actor_row,progress,1.))
+		rendered_source=str(pose.get("source_key",""));rendered_frame=int(pose.get("source_frame",0))
 		var dimensions: Vector2=pose.get("size",pose.texture.get_size()*float(pose.get("scale",1.)))
 		var ratio:=minf(1.,(size.y-20.)/maxf(1.,dimensions.y))
 		var p:=Vector2(pose.offset)*float(pose.get("scale",1.))*ratio+center
@@ -52,8 +60,15 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO,size),Color("171320b8"))
 	var color:=Color("ffcf8c")
 	var victory: bool=stage=="victory"
-	var row:=frames.hero_row(host.world.character)
-	var pose: Dictionary=frames.pose("heroes" if victory else "gun-run",row,frames.cycle("heroes" if victory else "gun-run",row,progress,1.))
+	var pose: Dictionary
+	if MissionHeroArt.has(host.world.character):
+		var action: String="idle_fire" if victory else "walk"
+		var clip: Dictionary=MissionHeroArt.clip_spec(host.world.character,action)
+		pose=MissionHeroArt.pose(host.world.character,action,posmod(int(progress*float(clip.fps)),int(clip.frames)))
+	else:
+		var row:=frames.hero_row(host.world.character)
+		pose=frames.pose("heroes" if victory else "gun-run",row,frames.cycle("heroes" if victory else "gun-run",row,progress,1.))
+	rendered_source=str(pose.get("source_key",""));rendered_frame=int(pose.get("source_frame",0))
 	var center:=Vector2(size.x*.5,size.y*.76)
 	var dimensions: Vector2=pose.get("size",pose.texture.get_size()*float(pose.get("scale",1.)))
 	draw_texture_rect(pose.texture,Rect2(center+Vector2(pose.offset)*float(pose.get("scale",1.)),dimensions),false)

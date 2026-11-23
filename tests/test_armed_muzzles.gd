@@ -29,7 +29,7 @@ func drawn_barrel(w: AionCampaignWorld) -> Vector2:
 	return Vector2(p.grip)+(local*Vector2(1.,float(p.mirror_y))).rotated(float(p.angle))
 
 func run() -> void:
-	check(AionCampaignWorld.HEROES==["aion","sheep","rabbit","eren"],"Exactly four current playable bodies are exercised")
+	check(AionCampaignWorld.HEROES==["aion","sheep","rabbit","eren","armadillo","frog"],"Six current playable bodies preserve the original four identities and order")
 	var directions: Array[Vector2]=[Vector2.RIGHT,Vector2(1,-1).normalized(),Vector2.UP,Vector2(-1,-1).normalized(),Vector2.LEFT,Vector2(-1,1).normalized(),Vector2.DOWN,Vector2(1,1).normalized()]
 	for hero in AionCampaignWorld.HEROES:
 		for direction in directions:
@@ -42,7 +42,8 @@ func run() -> void:
 					check(w.bullets.size()==1,"Current hero fires once while idle/walking/airborne/crouching: "+hero+"/"+stance)
 					var spec:=w.armed_art_spec()
 					var pose: Dictionary=bodies.pose(hero,str(spec.action),int(spec.frame))
-					check(spec.key=="m1-body" and pose.body_only and not pose.gun_embedded,"Playable body remains distinct from weapon, including independent aim")
+					var expected_key: String="mission-hero" if hero in MissionHeroArt.HEROES else "m1-body"
+					check(spec.key==expected_key and pose.body_only and not pose.gun_embedded,"Correct authoritative hero provider keeps body distinct from weapon: "+hero)
 					check(w.armed_muzzle().distance_to(drawn_barrel(w))<.001,"Actual isolated weapon barrel equals physics muzzle: "+hero+"/"+stance)
 					check(Vector2(w.bullets[0].p).distance_to(w.player+drawn_barrel(w))<.001,"Actual bullet starts at rendered barrel after mirror/rotation/floor clearance")
 					var attachment:=M1CombatArt.placement(w)
@@ -83,8 +84,10 @@ func check_motion_contract() -> void:
 					if clip.ends_with("fire"):w.shot_flash=.18*(1.-(frame+.1)/6.)
 					view.world=w
 					var pose: Dictionary=view.hero_pose(hero,true,clip=="air_fire",w.walk_distance)
-					check(str(pose.source_key).begins_with("m1-body-"),"Actual renderer consumes current body atlas instead of archived gun sheets")
-					check(int(pose.source_frame)==(frame if enabled else 0),"Actual renderer honors the same animated/static body frame")
+					var source_prefix: String="mission-hero-" if hero in MissionHeroArt.HEROES else "m1-body-"
+					check(str(pose.source_key).begins_with(source_prefix),"Actual renderer consumes this hero's current body provider instead of archived gun sheets: "+hero)
+					var expected: Dictionary=M1HeroArt.metrics(hero,clip,frame if enabled else 0)
+					check(pose.source_key==expected.source_key and int(pose.source_row)==int(expected.source_row) and int(pose.source_frame)==int(expected.source_frame),"Actual renderer honors the same animated/static authored source, including explicit held cels: "+hero+"/"+clip)
 					check(w.armed_muzzle().distance_to(drawn_barrel(w))<.001,"Animation preference keeps physical and rendered weapon aligned")
 					check(not w.snapshot().has("pose_motion_enabled"),"Pose preference stays ephemeral and cannot overwrite checkpoint data")
 	# Historical mouth-carry sheets are archived assets, not playable owl/wolf

@@ -57,7 +57,8 @@ func run() -> void:
 			elif posture=="air":w.player.y=-150.;w.air_time=.2
 			w.aim_direction=Vector2.RIGHT
 			var body_before: Dictionary=M1CombatArt.body_spec(w)
-			check(str(body_before.hero)==hero and str(body_before.key)=="m1-body","Current authored body remains selected: "+hero+"/"+posture)
+			var expected_body_key: String="mission-hero" if hero in ["armadillo","frog"] else "m1-body"
+			check(str(body_before.hero)==hero and str(body_before.key)==expected_body_key,"Current authored hero and its exact body provider remain selected: "+hero+"/"+posture)
 			check(int(body_before.mirror)==1,"Body yaw follows independent aim while movement may face left")
 			w.attack_press()
 			check(w.bullets.size()==1 and Vector2(w.bullets[0].v).normalized().is_equal_approx(Vector2.RIGHT),"Idle/walk/crouch/air fire produces a real forward shot: "+hero+"/"+posture)

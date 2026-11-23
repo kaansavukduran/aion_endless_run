@@ -7,6 +7,10 @@ func check(ok: bool,message: String) -> void:
 func _initialize() -> void:call_deferred("run")
 func event(button: int,down: bool=true) -> InputEventJoypadButton:
 	var input:=InputEventJoypadButton.new();input.button_index=button;input.pressed=down;return input
+func advance(world: AionCampaignWorld,seconds: float) -> void:
+	# World.step caps a caller's coarse delta; advance the real game clock in
+	# ordinary physics steps rather than pretending one .17 call is .17 seconds.
+	for frame in ceili(seconds*120.):world.step(1./120.)
 func run() -> void:
 	var game:=AionCampaignGame.new();game.language="tr";root.add_child(game);await process_frame;game.set_process(false)
 	game.touch_mode=true
@@ -71,7 +75,13 @@ func run() -> void:
 	game._input(event(game.pad.bindings.shoot));game.world.step(.05)
 	check(game.world.shots>0,"Mapped shoulder input reaches real projectile creation")
 	game._input(event(game.pad.bindings.shoot,false));var shots:=game.world.shots;game.world.step(.05);check(not game.world.fire_held and game.world.shots==shots,"Controller release really stops fire")
-	var grenade:=game.world.grenades;game._input(event(game.pad.bindings.duck));check(game.world.grenades==grenade-1,"Campaign B / Circle throws grenade, no roll")
+	var grenade:=game.world.grenades;game._input(event(game.pad.bindings.duck))
+	check(game.world.grenades==grenade and game.world.bombs.is_empty() and not game.world.grenade_throw.is_empty(),"Campaign B / Circle starts the real grenade anticipation without early consumption")
+	advance(game.world,.08)
+	check(game.world.grenades==grenade and game.world.bombs.is_empty(),"Controller grenade anticipation does not create a premature projectile")
+	advance(game.world,.09)
+	check(game.world.grenades==grenade-1 and game.world.bombs.size()==1 and not MissionHeroAbilities.active(game.world),"Campaign B / Circle releases exactly one grenade, no roll")
+	game._input(event(game.pad.bindings.duck,false))
 	game.world.stop_inputs();game.touch_mode=true;game.resize();game.menu_kind="";game.build_ui()
 	var rect: Rect2=game.actions.jump.get_global_rect();var touch:=InputEventScreenTouch.new();touch.index=1;touch.position=game.screen_transform*rect.get_center();touch.pressed=true;game._input(touch)
 	check(game.world.jump_held and game.world.velocity.y<0.,"Real touch handler reaches common jump action")

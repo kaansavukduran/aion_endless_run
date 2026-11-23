@@ -6,6 +6,8 @@ func check(ok: bool,message: String) -> void:
  if not ok:failures+=1;printerr('FAIL: '+message)
 func fresh() -> AionCampaignWorld:
  var w:=AionCampaignWorld.new();w.begin('aion');w.state='playing';w.player=Vector2(400,0);w.enemies.clear();w.npcs.clear();w.objects.clear();w.gates.clear();w.crates.clear();w.pickups.clear();w.platforms.clear();w.pits.clear();w.hazards.clear();w.zones.clear();w.encounters.clear();return w
+func advance(w: AionCampaignWorld,seconds: float) -> void:
+ for frame in ceili(seconds*120.):w.step(1./120.)
 func _initialize():call_deferred('run')
 func run():
  for type in CampaignVehicles.TYPES:
@@ -43,15 +45,20 @@ func run():
   check(w.shots<=3,'Turn window is bounded; no unbounded extra firing')
  var game:=AionCampaignGame.new();root.add_child(game);await process_frame;game.set_process(false);game.menu_kind='';game.world=fresh()
  var ev:=InputEventMouseButton.new();ev.button_index=MOUSE_BUTTON_RIGHT;ev.pressed=true;game._input(ev)
- check(game.world.bombs.size()==1,'Actual right mouse event throws grenade')
- game._input(ev);check(game.world.bombs.size()==1,'Repeated held right click cannot throw a second grenade')
- ev.pressed=false;game._input(ev);game.world.grenade_time=0.;ev.pressed=true;game._input(ev);check(game.world.bombs.size()==2,'Right click works again after release and cooldown')
+ var stock: int=game.world.grenades
+ check(game.world.bombs.is_empty() and game.world.grenades==stock and not game.world.grenade_throw.is_empty(),'Actual right mouse event starts grenade anticipation without early consumption')
+ game._input(ev);advance(game.world,.17)
+ check(game.world.bombs.size()==1 and game.world.grenades==stock-1 and game.world.pending_events.count('grenade')==1,'Actual right mouse event releases exactly one grenade')
+ game._input(ev);advance(game.world,.25)
+ check(game.world.grenades==stock-1 and game.world.pending_events.count('grenade')==1,'Repeated held right click cannot release a second grenade')
+ ev.pressed=false;game._input(ev);advance(game.world,.6);ev.pressed=true;game._input(ev);advance(game.world,.17)
+ check(game.world.bombs.size()==2 and game.world.grenades==stock-2 and game.world.pending_events.count('grenade')==2,'Right click works again after real release and elapsed cooldown')
  var shift:=InputEventKey.new();shift.physical_keycode=KEY_SHIFT;shift.pressed=true;game._unhandled_input(shift)
  check(game.world.boost_held,'Actual Shift key event starts sprint')
  shift.pressed=false;game._unhandled_input(shift);check(not game.world.boost_held,'Shift release clears sprint')
  ev.pressed=false;game._input(ev) # Release the real mouse source before a distinct controller press.
- game.world.grenade_time=0.;var pad:=InputEventJoypadButton.new();pad.button_index=JOY_BUTTON_B;pad.pressed=true;game._input(pad)
- check(game.world.bombs.size()==3,'Actual Xbox B mapped action throws grenade')
+ advance(game.world,.6);var pad:=InputEventJoypadButton.new();pad.button_index=JOY_BUTTON_B;pad.pressed=true;game._input(pad);advance(game.world,.17)
+ check(game.world.grenades==stock-3 and game.world.pending_events.count('grenade')==3 and game.world.bombs.any(func(b):return float(b.age)<.02),'Actual Xbox B mapped action releases one new grenade after its anticipation')
  pad.pressed=false;game._input(pad);pad.button_index=JOY_BUTTON_LEFT_SHOULDER;pad.pressed=true;game._input(pad)
  check(game.world.boost_held,'Actual gamepad LB starts the common sprint action')
  pad.pressed=false;game._input(pad);check(not game.world.boost_held,'Gamepad LB release clears sprint')

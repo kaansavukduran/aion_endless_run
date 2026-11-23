@@ -2,8 +2,9 @@ class_name CampaignCatalog
 extends RefCounted
 const DATA=preload("res://assets/CAMPAIGN-EXPANSION-PROVENANCE.json")
 const PIRATE=preload("res://assets/PIRATE-WALK-PROVENANCE.json")
-var images: Dictionary={}
-var cache: Dictionary={}
+# 0.39.0: Process-wide shared caches prevent duplicate WebAssembly RAM/CPU spikes on retries & scene switches.
+static var images: Dictionary={}
+static var cache: Dictionary={}
 func pose(key: String,row: int,frame: int) -> Dictionary:
 	var a: Dictionary=DATA.data.atlases[key]
 	var pirate: bool=key=="rescue-npcs" and row==7 and frame>=6

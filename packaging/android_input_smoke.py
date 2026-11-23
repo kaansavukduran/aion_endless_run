@@ -1,7 +1,7 @@
 """Use real ADB gestures and passive Godot layout/state logs; no state injection."""
 import argparse,json,re,subprocess,time,os
 from android_packets import decode_packets
-from android_gestures import charged_jump_sequence, wait_for_charged_jump
+from android_gestures import charged_jump_sequence, start_grounded_gesture, wait_for_charged_jump
 from android_readiness import capture_main_frame, layout_matches_display, wait_for_main
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=Path('build'));a=p.parse_args();a.output.mkdir(exist_ok=True,parents=True)
@@ -77,11 +77,11 @@ def hold(action,duration=1200,layout=None):
 def charged_jump(character,duration,charge_message,release_message,*,minimum_ratio=None,charge_capture=None,release_capture):
  bounds=display_bounds()
  layout=latest('AION_UI ',lambda s:s['page']=='' and s['character']==character and 'jump' in s['actions'] and layout_matches_display(s,bounds) and all(0<=s['actions']['jump'][axis]<bounds[axis] for axis in [0,1]))
- latest('AION_STATE ',lambda s:s['character']==character and s['page']=='' and s['state']=='running' and not s['airborne'] and not s['charging'])
- cursor=len(packets('AION_STATE '))
+ cursor=None
  trace={'event':'charged_jump_trace','character':character,'cursor':cursor,'duration_ms':duration,'minimum_charge_ratio_exclusive':minimum_ratio,'target':layout['actions']['jump'],'display':bounds,'captures':[]}
  try:
-  gesture=hold('jump',duration,layout)
+  gesture,cursor,grounded=start_grounded_gesture(lambda:packets('AION_STATE '),character,lambda:hold('jump',duration,layout))
+  trace['cursor']=cursor;trace['grounded_precondition']=grounded
   try:
    wait_for_charged_jump(lambda:packets('AION_STATE '),cursor,character,'charge',minimum_ratio=minimum_ratio)
    check(True,charge_message)
@@ -98,8 +98,9 @@ def charged_jump(character,duration,charge_message,release_message,*,minimum_rat
   raise
  finally:
   history=packets('AION_STATE ')
-  trace['states']=[{'index':index,'state':state} for index,state in enumerate(history[cursor:],start=cursor)]
-  trace['sequence']=charged_jump_sequence(history,cursor,character,minimum_ratio)
+  start=cursor if cursor is not None else max(0,len(history)-10)
+  trace['states']=[{'index':index,'state':state} for index,state in enumerate(history[start:],start=start)]
+  trace['sequence']=charged_jump_sequence(history,cursor,character,minimum_ratio) if cursor is not None else {'charge':None,'release':None}
   (a.output/('android-'+character+'-jump-states.json')).write_text(json.dumps(trace,indent=2)+'\n')
   record_target(trace)
 def pause():

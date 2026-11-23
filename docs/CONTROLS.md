@@ -1,3 +1,11 @@
+# Güncel Arcade / Mission 1 kontrolleri · 0.50.0
+
+A/D veya oklar: yürü. S/Aşağı: eğilerek ilerle. Fare, sağ çubuk ve analog girişler serbest nişan alır; klavye sekiz hedef yönü kullanır. Eğilirken fare nişanı korunur. Space / A: zıpla; Ayça ve Eren tutup bırakınca güçlenir, Aion çift sıçrar. Sol tık/F veya RB/X: ateş, yakındaki düşmana tek yakın saldırı, bağlı bekçiye kesme. Sağ tık/G veya B: el bombası. Bomba kısa hazırlıktan sonra bir kez bırakılır; dolum yoktur. Shift/LB depar, Esc/Start duraklatır.
+
+E/Y/bağlamsal dokunma düğmesi önce araç ve yerdeki farklı özel silahı kullanır. Böyle bir bağlam yoksa Kurbağa diliyle saldırır; Armadillo **eğilmişken** aynı eylemle kabuğuna kapanıp yuvarlanır. Armadillo hücumdayken zıplama/ateş/bomba kuyruğa alınmaz; toparlandıktan sonra yeni giriş gerekir. Telefonda sol sabit joystick, sağda Zıpla/Ateş/Bomba korunur; yeni joystick eklenmez. Altı kahraman Mission 1'de seçilir, Ömer/Melun yardımcılardır; Sonsuz modu özgün dört kahramanı korur.
+
+Aşağıdaki 0.22.0 tablosu tarihsel Sonsuz modu belgesidir; Arcade kontrol şeması değildir.
+
 # Kontroller · 0.22.0
 
 Tabanca her zaman elde; sınırsız mermi, 0,32 saniyelik atış aralığı. Doldurma veya yumruk yoktur. Eski kayıtlı Attack/X/J/R bağları silinmez, aynı ateş eyleminin alternatif girişidir. Bağımsız basılı girişler ortak bekleme süresini paylaşır; aynı anda iki tetik çift atış üretmez.

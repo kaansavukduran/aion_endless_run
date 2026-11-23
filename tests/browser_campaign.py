@@ -6,9 +6,17 @@ import argparse,json,math,time,os,shutil
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-p=argparse.ArgumentParser();p.add_argument('--url',required=True);p.add_argument('--evidence',type=Path,required=True);p.add_argument('--route',choices=['water','terrace','roots'],default='water');p.add_argument('--play-through',action='store_true');p.add_argument('--browser',choices=['chromium','firefox'],default='chromium');p.add_argument('--offline',action='store_true');p.add_argument('--expanded-rescue',action='store_true');p.add_argument('--rescue-only',action='store_true');p.add_argument('--record-video',action='store_true');p.add_argument('--profile',action='store_true');p.add_argument('--debug-port',type=int);p.add_argument('--headed',action='store_true');p.add_argument('--angle-gl',action='store_true');p.add_argument('--steering-file',type=Path);p.add_argument('--combat-controls',action='store_true');p.add_argument('--rhythm',action='store_true');a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--url',required=True);p.add_argument('--evidence',type=Path,required=True);p.add_argument('--route',choices=['water','terrace','roots'],default='water');p.add_argument('--play-through',action='store_true');p.add_argument('--browser',choices=['chromium','firefox'],default='chromium');p.add_argument('--offline',action='store_true');p.add_argument('--expanded-rescue',action='store_true');p.add_argument('--rescue-only',action='store_true');p.add_argument('--record-video',action='store_true');p.add_argument('--profile',action='store_true');p.add_argument('--debug-port',type=int);p.add_argument('--headed',action='store_true');p.add_argument('--angle-gl',action='store_true');p.add_argument('--steering-file',type=Path);p.add_argument('--combat-controls',action='store_true');p.add_argument('--rhythm',action='store_true')
+p.add_argument('--hero',choices=['aion','sheep','rabbit','eren','armadillo','frog'],default='aion')
+p.add_argument('--max-seconds',type=float,default=1000)
+p.add_argument('--play-only',action='store_true',help='Skip the independently checked input smoke probes; still enter and play the mission through normal UI.')
+p.add_argument('--retry-profile',action='store_true',help='Exercise five real checkpoint Retry actions and record their timing and retained progress.')
+p.add_argument('--warm-launch',action='store_true',help='Measure a second launch after the service worker has cached the actual PCK.')
+p.add_argument('--special-probe',action='store_true',help='Use the selected new hero skill through ordinary keys before the full mission, without injecting a target.')
+a=p.parse_args();a.evidence.mkdir(parents=True,exist_ok=True)
 checks=[];errors=[];console=[]
 def check(condition,message):
+    if not condition and 'capture_failure' in globals():capture_failure(message)
     assert condition,message
     checks.append(message);print('PASS',message,flush=True)
 
@@ -35,16 +43,69 @@ with sync_playwright() as pw:
         pad.timestamp=performance.now();
       };
     })();""")
+    if a.profile:
+        context.add_init_script("""(() => {
+          window.qaMetrics={raf:[],samples:[],longtasks:[],supported:PerformanceObserver.supportedEntryTypes||[]};
+          let previous=performance.now();
+          function frame(t){qaMetrics.raf.push([t,t-previous]);previous=t;requestAnimationFrame(frame)}
+          requestAnimationFrame(frame);
+          if(qaMetrics.supported.includes('longtask'))new PerformanceObserver(list=>{
+            for(const e of list.getEntries())qaMetrics.longtasks.push({start:e.startTime,duration:e.duration});
+          }).observe({type:'longtask',buffered:true});
+          setInterval(()=>{
+            const value=document.querySelector('canvas')?.dataset.campaign;
+            if(!value)return;
+            const d=JSON.parse(value);
+            qaMetrics.samples.push({wall:performance.now(),section:d.section,state:d.state,menu:d.menu,
+              presentation:d.presentation||d.presentation_stage||'',travel:!!d.travel_active,
+              process:d.engine_process_frames,physics:d.engine_physics_frames,
+              process_seconds:d.engine_process_seconds,physics_seconds:d.engine_physics_seconds,
+              native_memory:d.native_memory,nodes:d.node_count,boss_hp:d.boss_hp});
+          },100);
+        })();""")
     page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
     def message(m):
         console.append({'time':time.monotonic(),'type':m.type,'text':m.text})
         if 'ERROR:' in m.text or 'SCRIPT ERROR' in m.text:errors.append(m.text)
     page.on('console',message)
-    page.goto(a.url,timeout=120000);page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
+    navigation_start=time.monotonic()
+    try:
+        page.goto(a.url,timeout=120000);page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
+    except Exception as error:
+        (a.evidence/'failure.json').write_text(json.dumps({'stage':'boot','url':a.url,'error':str(error),'console_errors':errors,'console':console},indent=2)+'\n')
+        page.screenshot(path=str(a.evidence/'failure.png'))
+        raise
+    launch_seconds=time.monotonic()-navigation_start
+    cached_launch_seconds=None
+    if a.warm_launch:
+        page.wait_for_function("async()=>{const m=await fetch('build.json').then(r=>r.json());const p=Object.keys(m.assets).find(n=>n.endsWith('.pck'));return !!(await caches.match(new URL(p,location.href).href))}",timeout=120000)
+        second_start=time.monotonic();page.reload(timeout=120000)
+        page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
+        cached_launch_seconds=time.monotonic()-second_start
     canvas=page.locator('canvas')
-    initial=canvas.evaluate('c=>({...c.dataset})');main_button=next(b for b in json.loads(initial['ui']) if b['name']=='StartCampaign');tr=json.loads(initial['screenTransform']);rect=canvas.bounding_box()
-    xx,yy=main_button['x']+main_button['w']/2,main_button['y']+main_button['h']/2
-    page.touchscreen.tap(rect['x']+(tr[0]*xx+tr[2]*yy+tr[4])/float(initial['rawWidth'])*rect['width'],rect['y']+(tr[1]*xx+tr[3]*yy+tr[5])/float(initial['rawHeight'])*rect['height'])
+    browser_info={'engine':a.browser,'version':browser.version,'user_agent':page.evaluate('navigator.userAgent'),'platform':page.evaluate('navigator.platform')}
+    def front_buttons():
+        return json.loads(canvas.get_attribute('data-ui') or '[]')
+    def front_tap(name):
+        page.wait_for_selector('canvas[data-ui-ready="true"]')
+        initial=canvas.evaluate('c=>({...c.dataset})')
+        item=next(b for b in json.loads(initial['ui']) if b['name']==name)
+        tr=json.loads(initial['screenTransform']);rect=canvas.bounding_box()
+        xx,yy=item['x']+item['w']/2,item['y']+item['h']/2
+        page.touchscreen.tap(rect['x']+(tr[0]*xx+tr[2]*yy+tr[4])/float(initial['rawWidth'])*rect['width'],rect['y']+(tr[1]*xx+tr[3]*yy+tr[5])/float(initial['rawHeight'])*rect['height'])
+        page.wait_for_timeout(160)
+    if a.hero!='aion':
+        front_tap('ChooseHero')
+        for _ in range(12):
+            if any(b['name']=='Select_'+a.hero for b in front_buttons()):break
+            front_tap('NextPage')
+        front_tap('Select_'+a.hero)
+        for _ in range(12):
+            if any(b['name']=='ConfirmHero' for b in front_buttons()):break
+            front_tap('NextPage')
+        front_tap('ConfirmHero')
+    check(canvas.get_attribute('data-character')==a.hero,'Actual front-end selects the requested hero: '+a.hero)
+    front_tap('StartCampaign')
     page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")',timeout=45000)
     last_observation={}
     def data():
@@ -53,12 +114,43 @@ with sync_playwright() as pw:
         return current
     import sys
     default_hook=sys.excepthook
+    def save_profile():
+        if not a.profile:return
+        metrics=page.evaluate('window.qaMetrics')
+        metrics['launch_seconds']=launch_seconds
+        metrics['cached_launch_seconds']=cached_launch_seconds
+        metrics['browser']=browser_info
+        metrics['build']=page.evaluate("fetch('build.json').then(r=>r.json())")
+        metrics['scope']='Local/browser-emulated environment. Engine counters are sampled at 10Hz; rAF measures browser scheduling, not engine FPS. Monitor durations, if present, are 10Hz observations, not a trace of every engine frame.'
+        groups={}
+        for sample_index,sample in enumerate(metrics['samples']):
+            sample['sample_index']=sample_index
+            label=sample['section']+(' / transition' if sample['travel'] else (' / '+sample['menu'] if sample['menu'] else ' / '+sample['state']))
+            groups.setdefault(label,[]).append(sample)
+        summary={}
+        for label,samples in groups.items():
+            # Exclude a return to the same section/menu after another state,
+            # but retain genuine long stalls between adjacent observations.
+            pairs=[(first,last) for first,last in zip(samples,samples[1:]) if last['sample_index']==first['sample_index']+1 and last['wall']>first['wall']]
+            seconds=sum((last['wall']-first['wall'])/1000 for first,last in pairs)
+            native_peak=max(s.get('native_memory',0) for s in samples)
+            row={'observations':len(samples),'seconds':seconds,'max_observation_gap_ms':max((last['wall']-first['wall'] for first,last in pairs),default=None),'native_memory_peak':native_peak or None,'nodes_peak':max(s.get('nodes',0) for s in samples)}
+            if seconds:
+                row.update({'engine_process_hz':sum(last['process']-first['process'] for first,last in pairs)/seconds,'engine_physics_hz':sum(last['physics']-first['physics'] for first,last in pairs)/seconds})
+            for key in ['process_seconds','physics_seconds']:
+                values=sorted(s[key]*1000 for s in samples if isinstance(s.get(key),(float,int)))
+                if values:row[key.replace('_seconds','_monitor_ms')]={'median':values[len(values)//2],'p95':values[math.ceil(len(values)*.95)-1],'max':values[-1]}
+            summary[label]=row
+        metrics['engine_summary']=summary
+        (a.evidence/'performance-session.json').write_text(json.dumps(metrics,indent=2)+'\n')
     def capture_failure(error):
         destination=a.evidence/'failure.json'
         if destination.exists():return
         try:current=data();source='live-before-context-close'
         except Exception:current=last_observation.copy();source='last-successful-read'
         destination.write_text(json.dumps({'error':str(error),'state':current,'state_source':source,'console_errors':errors},indent=2)+'\n')
+        try:save_profile()
+        except Exception:pass
         try:page.screenshot(path=str(a.evidence/'failure.png'))
         except Exception:pass
     def failure_hook(kind,value,tb):
@@ -95,79 +187,115 @@ with sync_playwright() as pw:
     page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && !(d.presentation || d.presentation_stage)}',timeout=15000)
     canvas.focus();page.wait_for_timeout(200)
     check(data()['state']=='playing','Main menu → Arcade → mission → play through normal buttons')
-    p0=data()['player'][0];page.keyboard.down('d');page.wait_for_function('(x)=>JSON.parse(document.querySelector("canvas").dataset.campaign).player[0]>x+80',arg=p0,timeout=10000);page.keyboard.up('d');page.wait_for_timeout(200);p1=data()['player'][0]
-    check(p1>p0+75,'D moves the player right; this is not automatic scrolling')
-    page.keyboard.down('a');page.wait_for_function('(x)=>JSON.parse(document.querySelector("canvas").dataset.campaign).player[0]<x-35',arg=p1,timeout=10000);page.keyboard.up('a');page.wait_for_timeout(150);check(data()['player'][0]<p1-30 and data()['facing']==-1,'A moves and faces left')
-    page.keyboard.down('d');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).facing===1',timeout=10000);page.keyboard.up('d');page.keyboard.down('f');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).shots>=2',timeout=10000);page.keyboard.up('f');page.wait_for_timeout(150);check(data()['shots']>=2,'Held fire produces real, spaced gunshots')
-    count=data()['grenades'];page.keyboard.press('g');page.wait_for_timeout(200);check(data()['grenades']==count-1,'G spends exactly one energy grenade')
-    before=data();r=before['actions']['attack'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2))
-    page.wait_for_function('(shots)=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.shots>shots || d.melee>0}',arg=before['shots'],timeout=10000)
-    check(True,'Actual right Fire touch reaches a gunshot or contextual close strike')
-    page.wait_for_timeout(600);before=data();r=before['actions']['grenade'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2))
-    page.wait_for_function('(count)=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===count-1',arg=before['grenades'],timeout=10000)
-    check(True,'Actual right Grenade touch spends one bomb without a second underlying command')
-    page.keyboard.press('Escape');page.wait_for_timeout(200);frozen=data();page.wait_for_timeout(350);check(data()['time']==frozen['time'],'Pause freezes the active mission')
-    page.set_viewport_size({'width':393,'height':873});page.wait_for_timeout(700);fit();check(data()['section']==frozen['section'] and data()['score']==frozen['score'],'Portrait rotation preserves checkpoint and score');page.screenshot(path=str(a.evidence/'portrait-paused.png'))
-    button(text='Devam et');page.wait_for_timeout(200);d=data();check(len(d['actions'])==3 and 'grenade' in d['actions'] and 'stick' in d,'Approved fixed left stick and three right actions exist')
-    for name,r in d['actions'].items():check(r[0]>=0 and r[1]>=0 and r[0]+r[2]<=d['view'][0] and r[1]+r[3]<=d['view'][1],'Touch target is inside portrait viewport: '+name)
-    if a.browser=='chromium':
-        cdp=context.new_cdp_session(page)
-        def touch(kind,points):cdp.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[{'id':i,'x':x,'y':y} for i,x,y in points]})
-        s=d['stick'];jx,jy=xy(s[0]+s[2]*.84,s[1]+s[3]*.5);j=d['actions']['jump'];bx,by=xy(j[0]+j[2]/2,j[1]+j[3]/2)
-        x0=d['player'][0];touch('touchStart',[(1,jx,jy)]);page.wait_for_timeout(250);touch('touchStart',[(1,jx,jy),(2,bx,by)]);page.wait_for_function('(x)=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.player[0]>x+35 && d.player[1]<-15}',arg=x0,timeout=10000);check(data()['player'][0]>x0+35 and data()['player'][1]<-15,'Real multitouch moves and jumps simultaneously');touch('touchCancel',[]);page.wait_for_function('Math.abs(JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0])<1',timeout=10000);x0=data()['player'][0];page.wait_for_timeout(250);check(abs(data()['player'][0]-x0)<1,'Touch cancellation releases the joystick without a stuck direction')
-    else:
-        r=d['actions']['jump'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2));page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-10',timeout=10000);check(True,'Firefox actual touch reaches the same jump action; CDP multitouch is Chromium-only')
-    page.set_viewport_size({'width':1280,'height':720});page.wait_for_timeout(700);page.screenshot(path=str(a.evidence/'landscape-playing.png'));canvas.focus()
-    if a.combat_controls:
-        canvas.focus();page.keyboard.down('d')
-        page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>200')
-        normal=data()['velocity'][0];page.keyboard.down('Shift')
-        page.wait_for_function('v=>JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>v*1.5',arg=normal)
-        check(True,'Actual Shift key increases current hero running speed')
-        page.keyboard.up('Shift');page.keyboard.up('d')
-        page.wait_for_function('Math.abs(JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0])<1')
-        before=data()['grenades'];page.mouse.click(850,260,button='right')
-        page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===n-1',arg=before)
-        check(True,'Actual right mouse click throws one grenade')
-        page.keyboard.down('w');page.keyboard.down('d');page.keyboard.down('f');page.wait_for_timeout(100)
-        page.keyboard.press('Space');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-25')
-        page.evaluate("""window.sweepPackets=[];window.sweepTimer=setInterval(()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);sweepPackets.push({aim:d.aim,shots:d.shots,projectiles:d.hero_projectiles,grounded:d.grounded})},8)""")
-        page.keyboard.up('w');page.keyboard.down('s');page.wait_for_timeout(230)
-        page.keyboard.up('s');page.keyboard.up('d');page.keyboard.up('f')
-        packets=page.evaluate('clearInterval(sweepTimer);sweepPackets');(a.evidence/'sweep-packets.json').write_text(json.dumps(packets,indent=2)+'\n')
-        mid=[b for q in packets for b in q['projectiles'] if b['age']<.14 and abs(b['v'][1])>30 and abs(abs(b['v'][0])-abs(b['v'][1]))>30]
-        check(bool(mid),'Held fire emits an actual projectile between the eight primary angles')
-        # The independent pad probe needs a live actor and room to fire.
-        # Earlier idle input checks let a crow reach contextual-strike range
-        # on a slower CI runner. Reset only through the real checkpoint UI;
-        # keep the strict projectile assertion below (do not accept a melee).
-        if data()['state']=='dying':page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).state==="dead"')
-        if data()['state']=='dead':button('CampaignRetry')
-        else:
-            canvas.focus();page.keyboard.press('Escape')
+    if a.special_probe:
+        check(a.hero in ['armadillo','frog'],'The special probe is scoped to the two new heroes')
+        stock=data()['grenades'];shot_count=data()['shots'];special_samples=[];special_seen=False
+        if a.hero=='armadillo':
+            page.keyboard.down('s')
+            page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).crouching',timeout=10000)
+            check(not data().get('hero_skill',{}).get('phase'),'Crouching alone never starts Armadillo attack')
+        page.keyboard.press('e');special_start=time.monotonic()
+        while time.monotonic()-special_start<15:
+            current=data();special_samples.append(current)
+            phase=current.get('hero_skill',{}).get('phase','')
+            special_seen=special_seen or bool(phase)
+            if special_seen and not phase:break
+            page.wait_for_timeout(40)
+        if a.hero=='armadillo':page.keyboard.up('s')
+        phases=[s.get('hero_skill',{}).get('phase','') for s in special_samples]
+        (a.evidence/'normal-entry-special.json').write_text(json.dumps({'hero':a.hero,'input':'S+E' if a.hero=='armadillo' else 'E','scope':'Ordinary mission-entry activation and completion; no target was injected and damage is not inferred.','samples':special_samples},indent=2)+'\n')
+        check(('roll' if a.hero=='armadillo' else 'extend') in phases and 'recover' in phases,'The real selected hero skill reaches its active phase and subsequent recovery')
+        check(special_seen and not data().get('hero_skill',{}).get('phase'),'The ordinary skill finishes and restores normal play before traversal')
+        check(data()['grenades']==stock and data()['shots']==shot_count,'Contextual E skill does not consume a grenade or invent a gunshot')
+    if a.retry_profile:
+        retry_metrics=[]
+        retry_cdp=context.new_cdp_session(page) if a.browser=='chromium' else None
+        for attempt in range(5):
+            before=data();canvas.focus();page.keyboard.press('Escape')
             page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
-            button(text='Kontrol noktasından dene')
-        page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && d.menu==="" && d.hp>0}')
-        check(abs(data()['player'][0]-data()['rally']['x'])<1,'Actual checkpoint UI isolates the independent gamepad input probe')
-        canvas.focus();page.evaluate('qaPadConnect(true)');page.wait_for_timeout(150)
-        page.evaluate('qaPad.axes[0]=1;qaPadButton(4,true)')
-        page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>350')
-        check(True,'Virtual Xbox left stick plus LB routes to sprint')
-        page.evaluate('qaPad.axes[0]=0;qaPadButton(4,false)');page.wait_for_timeout(150)
-        page.evaluate('qaPadButton(9,true)');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"');page.evaluate('qaPadButton(9,false)')
-        frozen=data()['time'];page.wait_for_timeout(180);check(data()['time']==frozen,'Virtual Xbox Start pauses the actual world')
-        page.evaluate('qaPadButton(0,true)');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu===""');page.evaluate('qaPadButton(0,false)')
-        check(data()['state']=='playing','Virtual Xbox A activates the real Resume button')
-        before_shots=data()['shots'];page.evaluate('qaPadButton(5,true)')
-        page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).shots>n',arg=before_shots)
-        page.evaluate('qaPadButton(5,false)');check(True,'Virtual Xbox RB fires through the real game input path')
-        page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).grounded')
-        page.evaluate('qaPadButton(0,true)');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-15');page.evaluate('qaPadButton(0,false)')
-        check(True,'Virtual Xbox A jumps during normal gameplay')
-        page.wait_for_timeout(650);before_bombs=data()['grenades'];page.evaluate('qaPadButton(1,true)')
-        page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===n-1',arg=before_bombs);page.evaluate('qaPadButton(1,false)')
-        check(True,'Virtual Xbox B throws a grenade during normal gameplay')
-        page.evaluate('qaPadConnect(false)');canvas.focus()
+            start=time.monotonic();button(text='Kontrol noktasından dene')
+            page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && d.menu==="" && !d.travel_active}')
+            after=data()
+            check(after['character']==a.hero and after['section']==before['section'],'Actual Retry retains the hero and section: '+str(attempt+1))
+            check(after['awarded']==before['awarded'] and after['taken']==before['taken'],'Actual Retry preserves single-award progress: '+str(attempt+1))
+            retry_metrics.append({'attempt':attempt+1,'seconds':time.monotonic()-start,'before':{'rally':before.get('rally'),'score':before['score'],'nodes':before.get('node_count')},'after':{'rally':after.get('rally'),'score':after['score'],'nodes':after.get('node_count')},'heap':retry_cdp.send('Runtime.getHeapUsage') if retry_cdp else None})
+            (a.evidence/'five-retries.json').write_text(json.dumps(retry_metrics,indent=2)+'\n')
+    if not a.play_only:
+        p0=data()['player'][0];page.keyboard.down('d');page.wait_for_function('(x)=>JSON.parse(document.querySelector("canvas").dataset.campaign).player[0]>x+80',arg=p0,timeout=10000);page.keyboard.up('d');page.wait_for_timeout(200);p1=data()['player'][0]
+        check(p1>p0+75,'D moves the player right; this is not automatic scrolling')
+        page.keyboard.down('a');page.wait_for_function('(x)=>JSON.parse(document.querySelector("canvas").dataset.campaign).player[0]<x-35',arg=p1,timeout=10000);page.keyboard.up('a');page.wait_for_timeout(150);check(data()['player'][0]<p1-30 and data()['facing']==-1,'A moves and faces left')
+        page.keyboard.down('d');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).facing===1',timeout=10000);page.keyboard.up('d');page.keyboard.down('f');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).shots>=2',timeout=10000);page.keyboard.up('f');page.wait_for_timeout(150);check(data()['shots']>=2,'Held fire produces real, spaced gunshots')
+        count=data()['grenades'];page.keyboard.press('g')
+        page.wait_for_function('count=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===count-1',arg=count,timeout=10000)
+        check(data()['grenades']==count-1,'G releases exactly one energy grenade and spends one unit')
+        before=data();r=before['actions']['attack'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2))
+        page.wait_for_function('(shots)=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.shots>shots || d.melee>0}',arg=before['shots'],timeout=10000)
+        check(True,'Actual right Fire touch reaches a gunshot or contextual close strike')
+        page.wait_for_timeout(600);before=data();r=before['actions']['grenade'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2))
+        page.wait_for_function('(count)=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===count-1',arg=before['grenades'],timeout=10000)
+        check(True,'Actual right Grenade touch spends one bomb without a second underlying command')
+        page.keyboard.press('Escape');page.wait_for_timeout(200);frozen=data();page.wait_for_timeout(350);check(data()['time']==frozen['time'],'Pause freezes the active mission')
+        page.set_viewport_size({'width':393,'height':873});page.wait_for_timeout(700);fit();check(data()['section']==frozen['section'] and data()['score']==frozen['score'],'Portrait rotation preserves checkpoint and score');page.screenshot(path=str(a.evidence/'portrait-paused.png'))
+        button(text='Devam et');page.wait_for_timeout(200);d=data();check(len(d['actions'])==3 and 'grenade' in d['actions'] and 'stick' in d,'Approved fixed left stick and three right actions exist')
+        for name,r in d['actions'].items():check(r[0]>=0 and r[1]>=0 and r[0]+r[2]<=d['view'][0] and r[1]+r[3]<=d['view'][1],'Touch target is inside portrait viewport: '+name)
+        if a.browser=='chromium':
+            cdp=context.new_cdp_session(page)
+            def touch(kind,points):cdp.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[{'id':i,'x':x,'y':y} for i,x,y in points]})
+            s=d['stick'];jx,jy=xy(s[0]+s[2]*.84,s[1]+s[3]*.5);j=d['actions']['jump'];bx,by=xy(j[0]+j[2]/2,j[1]+j[3]/2)
+            x0=d['player'][0];touch('touchStart',[(1,jx,jy)]);page.wait_for_timeout(250);touch('touchStart',[(1,jx,jy),(2,bx,by)]);page.wait_for_function('(x)=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.player[0]>x+35 && d.player[1]<-15}',arg=x0,timeout=10000);check(data()['player'][0]>x0+35 and data()['player'][1]<-15,'Real multitouch moves and jumps simultaneously');touch('touchCancel',[]);page.wait_for_function('Math.abs(JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0])<1',timeout=10000);x0=data()['player'][0];page.wait_for_timeout(250);check(abs(data()['player'][0]-x0)<1,'Touch cancellation releases the joystick without a stuck direction')
+        else:
+            r=d['actions']['jump'];page.touchscreen.tap(*xy(r[0]+r[2]/2,r[1]+r[3]/2));page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-10',timeout=10000);check(True,'Firefox actual touch reaches the same jump action; CDP multitouch is Chromium-only')
+        page.set_viewport_size({'width':1280,'height':720});page.wait_for_timeout(700);page.screenshot(path=str(a.evidence/'landscape-playing.png'));canvas.focus()
+        if a.combat_controls:
+            canvas.focus();page.keyboard.down('d')
+            page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>200')
+            normal=data()['velocity'][0];page.keyboard.down('Shift')
+            page.wait_for_function('v=>JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>v*1.5',arg=normal)
+            check(True,'Actual Shift key increases current hero running speed')
+            page.keyboard.up('Shift');page.keyboard.up('d')
+            page.wait_for_function('Math.abs(JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0])<1')
+            before=data()['grenades'];page.mouse.click(850,260,button='right')
+            page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===n-1',arg=before)
+            check(True,'Actual right mouse click throws one grenade')
+            page.keyboard.down('w');page.keyboard.down('d');page.keyboard.down('f');page.wait_for_timeout(100)
+            page.keyboard.press('Space');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-25')
+            page.evaluate("""window.sweepPackets=[];window.sweepTimer=setInterval(()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);sweepPackets.push({aim:d.aim,shots:d.shots,projectiles:d.hero_projectiles,grounded:d.grounded})},8)""")
+            page.keyboard.up('w');page.keyboard.down('s');page.wait_for_timeout(230)
+            page.keyboard.up('s');page.keyboard.up('d');page.keyboard.up('f')
+            packets=page.evaluate('clearInterval(sweepTimer);sweepPackets');(a.evidence/'sweep-packets.json').write_text(json.dumps(packets,indent=2)+'\n')
+            mid=[b for q in packets for b in q['projectiles'] if b['age']<.14 and abs(b['v'][1])>30 and abs(abs(b['v'][0])-abs(b['v'][1]))>30]
+            check(bool(mid),'Held fire emits an actual projectile between the eight primary angles')
+            # The independent pad probe needs a live actor and room to fire.
+            # Earlier idle input checks let a crow reach contextual-strike range
+            # on a slower CI runner. Reset only through the real checkpoint UI;
+            # keep the strict projectile assertion below (do not accept a melee).
+            if data()['state']=='dying':page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).state==="dead"')
+            if data()['state']=='dead':button('CampaignRetry')
+            else:
+                canvas.focus();page.keyboard.press('Escape')
+                page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
+                button(text='Kontrol noktasından dene')
+            page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && d.menu==="" && d.hp>0}')
+            check(abs(data()['player'][0]-data()['rally']['x'])<1,'Actual checkpoint UI isolates the independent gamepad input probe')
+            canvas.focus();page.evaluate('qaPadConnect(true)');page.wait_for_timeout(150)
+            page.evaluate('qaPad.axes[0]=1;qaPadButton(4,true)')
+            page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).velocity[0]>350')
+            check(True,'Virtual Xbox left stick plus LB routes to sprint')
+            page.evaluate('qaPad.axes[0]=0;qaPadButton(4,false)');page.wait_for_timeout(150)
+            page.evaluate('qaPadButton(9,true)');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"');page.evaluate('qaPadButton(9,false)')
+            frozen=data()['time'];page.wait_for_timeout(180);check(data()['time']==frozen,'Virtual Xbox Start pauses the actual world')
+            page.evaluate('qaPadButton(0,true)');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu===""');page.evaluate('qaPadButton(0,false)')
+            check(data()['state']=='playing','Virtual Xbox A activates the real Resume button')
+            before_shots=data()['shots'];page.evaluate('qaPadButton(5,true)')
+            page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).shots>n',arg=before_shots)
+            page.evaluate('qaPadButton(5,false)');check(True,'Virtual Xbox RB fires through the real game input path')
+            page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).grounded')
+            page.evaluate('qaPadButton(0,true)');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).player[1]<-15');page.evaluate('qaPadButton(0,false)')
+            check(True,'Virtual Xbox A jumps during normal gameplay')
+            page.wait_for_timeout(650);before_bombs=data()['grenades'];page.evaluate('qaPadButton(1,true)')
+            page.wait_for_function('n=>JSON.parse(document.querySelector("canvas").dataset.campaign).grenades===n-1',arg=before_bombs);page.evaluate('qaPadButton(1,false)')
+            check(True,'Virtual Xbox B throws a grenade during normal gameplay')
+            page.evaluate('qaPadConnect(false)');canvas.focus()
     if a.play_through or a.rescue_only:
         held=set();stages=[];retries=0;last_jump=0.;last_melee=0.;last_bomb=0.;started=time.monotonic();last_report=started;completed=False;rescues_tested=[];settle_until=0.;steering_id=None;board_attempts=set();vehicle_inputs=[];fork_inputs=[];rescue_presentations=[]
         def keys(wanted):
@@ -250,7 +378,7 @@ with sync_playwright() as pw:
             check(saved['awarded'].get(captive['id']+':gift') and saved['taken'].get(captive['id']+':supply') and captive['id'] in saved['rescued'],'Actual dropped-item contact and rescue reach persistent browser storage once')
             record_profile()
             return current
-        while time.monotonic()-started<1000:
+        while time.monotonic()-started<a.max_seconds:
             d=data();now=time.monotonic();state=d['state'];section=d['section']
             # The real fade suppresses input through its second half, even
             # after the destination world is playing. Release held keys before
@@ -285,7 +413,25 @@ with sync_playwright() as pw:
                 assert not any(name.startswith('Route_') for name in d['buttons']),('Route menu leaked into physical fork',d)
                 if not any(record['section']==section for record in fork_inputs):
                     fork_inputs.append({'section':section,'path':'upper' if upper else 'lower','entry':d['player']})
-                keys(['d','f'])
+                # The actual vehicle is taller than the physical maintenance
+                # passage. Use its real Exit command before either foot route.
+                if d['mounted']:
+                    keys([]);page.keyboard.press('e')
+                    page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return !d.mounted && !d.mount_transition}',timeout=15000)
+                    vehicle_inputs.append({'action':'exit','section':section,'x':d['player'][0],'reason':'physical foot passage'})
+                    continue
+                wanted=['d','f']
+                if not upper and section=='fork_one' and 620<d['player'][0]<1210 and d['player'][1]>35:
+                    wanted.append('s')
+                keys(wanted)
+                if section=='fork_one' and 780<d['player'][0]<1180 and d.get('crouching') and d['player'][1]>35:
+                    if not fork_inputs[-1].get('crawled_under_pier'):
+                        page.screenshot(path=str(a.evidence/(a.hero+'-pier-crawl.png')))
+                    fork_inputs[-1]['crawled_under_pier']=True
+                if section=='fork_two' and any(o.get('id')=='fork_two:root_lock' and o.get('active') for o in d.get('objects',[])):
+                    if not fork_inputs[-1].get('root_lock_broken'):
+                        page.screenshot(path=str(a.evidence/(a.hero+'-root-lock-open.png')))
+                    fork_inputs[-1]['root_lock_broken']=True
                 if upper and d.get('grounded') and d['player'][0]<1000 and now-last_jump>.25:
                     page.keyboard.press('Space');last_jump=now
                 elif not upper and d['player'][0]>1000 and d.get('grounded') and now-last_jump>.85 and any(math.hypot(b[0]-d['player'][0],b[1]-(d['player'][1]-37))<100 for b in d.get('bullets',[])):
@@ -394,6 +540,7 @@ with sync_playwright() as pw:
             if now-last_report>15:
                 (a.evidence/'latest-state.json').write_text(json.dumps(d,indent=2)+'\n')
                 if a.browser=='chromium':
+                    if 'cdp' not in globals():cdp=context.new_cdp_session(page)
                     sample={'elapsed':now-started,'heap':cdp.send('Runtime.getHeapUsage'),'dom':cdp.send('Memory.getDOMCounters')}
                     with (a.evidence/'browser-memory.jsonl').open('a') as log:log.write(json.dumps(sample)+'\n')
                 print('PLAY',section,round(x),'y',round(y),'HP',d['hp'],'boss',d['boss_hp'],'retry',retries,flush=True);last_report=now
@@ -405,6 +552,8 @@ with sync_playwright() as pw:
             check(completed,'Mission 1 is completable with actual keyboard/mouse-equivalent gameplay')
             check(a.route in data()['route'],'The chosen branch was actually recorded')
             check(len(fork_inputs)==(1 if a.route=='water' else 2),'Every required route fork was traversed through ordinary movement')
+            if a.route=='water':check(any(f.get('crawled_under_pier') for f in fork_inputs),'Water entry includes actual crouched travel beneath the pier ceiling')
+            if a.route=='roots':check(any(f.get('root_lock_broken') for f in fork_inputs),'Roots entry includes actually shooting open the root-lock hatch')
         if not a.rescue_only:
             saved=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
             check(saved['completed'] and saved['best_score']>=data()['score'],'Actual completed checkpoint and campaign best are persisted')
@@ -427,5 +576,6 @@ with sync_playwright() as pw:
         page.screenshot(path=str(a.evidence/'offline-restored.png'));context.set_offline(False)
     (a.evidence/'console.json').write_text(json.dumps(console,indent=2)+'\n')
     check(not errors,'No browser or Godot script errors during the actual flow: '+str(errors[:3]))
-    (a.evidence/'results.json').write_text(json.dumps({'checks':checks,'errors':errors,'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(x=>x.build)"),'final':data()},indent=2)+'\n')
+    (a.evidence/'results.json').write_text(json.dumps({'checks':checks,'errors':errors,'browser':browser_info,'build':page.evaluate("fetch('build.json').then(r=>r.json()).then(x=>x.build)"),'final':data()},indent=2)+'\n')
+    save_profile()
     context.close();browser.close()

@@ -6,7 +6,7 @@ Scope: Aion Endless Run at this repository only. This file records the explicit 
 
 | Area | Requested acceptance |
 | --- | --- |
-| Playable roster | Aion, Kutsanmış, Eren and Ayça. Retired playable owl/Ömer and wolf/Melun become limited assist power-ups. Existing original artwork and old save data remain preserved. |
+| Playable roster | Mission 1: Aion, Kutsanmış, Ayça, Eren, Armadillo and Frog, preserving original four save keys/order. Classic Endless retains the original four; never silently map a new hero to Aion. Retired playable owl/Ömer and wolf/Melun remain limited assist power-ups. Existing original artwork and old save data remain preserved. |
 | Ayça variant | Game-local female rabbit variant of the former playable Emre role, energetic feminine silhouette and skirt. Keep Eren visually distinct. The internal legacy rabbit save key may be retained with an explicit display/art migration. Shared universe references are not silently rewritten. |
 | Hero art | Preserve approved colors, silhouette, badges and identity, especially Aion's pink axolotl, blue eyes/gill tips, white lab coat and DNA tail. High-quality distinct poses at a constant anatomical scale. |
 | Fire/action matrix | Standing fire, walking fire, airborne fire and crouch-moving fire must genuinely work. Eight-way artwork must not alter anatomical proportions or freeze required locomotion. |
@@ -24,8 +24,16 @@ Scope: Aion Endless Run at this repository only. This file records the explicit 
 ## Evidence to retain
 
 - Reproduce reported animation/proportion/fire problems before assigning a cause. Compare actual landmark/scale/muzzle observations, not only texture dimensions.
-- Test all four playable identities, every relevant action and aim direction, both physical route forks and all resulting destinations.
+- Test all six Mission 1 identities (and the separate original-four Endless contract), every relevant action and aim direction, both physical route forks and all resulting destinations.
 - Use normal keyboard, touch and virtual gamepad paths for real play. Mark physical devices/controllers separately as NOT TESTED unless actually used.
 - Preserve old saved owl/wolf selections, language values, rewards and vehicle HP in migration fixtures. Verify the chosen compatible fallback and no duplicate reward on retry/resume.
 - Record UI/menu, gameplay, boss, victory/result and return/continue outcomes with build-specific evidence. No global “bug-free” claim.
 
+
+## Mission 1 animation regression gates
+
+- Opposed travel must use actual backstep art while preserving pointer/stick aim; grounded crouch does not steal pointer aim. Do not reverse a forward clip to label it new backward art.
+- Throw: one simulation release, one charge, measured visible hand, same held/flying prop scale; no gun in the open follow-through hand. Pause freezes, focus/death cancel unspent windup, retry clears transient cooldown.
+- Every crouch/throw/hurt/death pose must fit the actual low ceiling at one fixed hero scale. Test opaque silhouette against ceiling, not only physics root. Never hide overlap with clipping or enlarge a passage silently.
+- Enemy recovery starts after its active movement and remains visible/targetable. Timed beams fire once when the warning crosses zero; smoke must not obscure critical warning lanes.
+- Original sources and game-local candidate adaptations remain separately attributed; user art acceptance is not inferred from a passing model test.

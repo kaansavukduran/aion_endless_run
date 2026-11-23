@@ -2,10 +2,60 @@ class_name RunnerPixelInterface
 extends RefCounted
 var host
 var roster_page := 0
+var roster_previews: Dictionary = {}
+
+var launch_pending := false
+var launch_committed := false
+var launch_callback: Callable
+var launch_clock := 0.
+
+func request_launch(callback: Callable,quick: bool=false) -> void:
+	if launch_pending or launch_committed:return
+	launch_pending=true
+	launch_callback=callback
+	launch_clock=0.
+	host.clear_held_controls()
+	if quick:
+		finish_launch();return
+	# A saved selection can be on a different roster page. Show its real card
+	# before starting the transition rather than animating another identity.
+	if not is_instance_valid(roster_previews.get(host.character,null)):
+		roster_page=host.FRIENDS.find(host.character)/2
+		host.rebuild()
+	trigger_launch_preview(host.character)
+
+func trigger_launch_preview(hero_id: String) -> void:
+	var preview=roster_previews.get(hero_id,null)
+	if not launch_pending:
+		if is_instance_valid(preview):preview.set_select_state("launch")
+		return
+	if not host.decorative_motion() or not is_instance_valid(preview):
+		finish_launch()
+		return
+	preview.set_select_state("launch")
+	preview.clock=launch_clock
+	if not preview.launch_finished.is_connected(finish_launch):preview.launch_finished.connect(finish_launch,CONNECT_ONE_SHOT)
+	lock_launch_controls(host.menu_layer)
+
+func lock_launch_controls(node: Node) -> void:
+	if node is BaseButton:node.disabled=true
+	for child in node.get_children():lock_launch_controls(child)
+
+func finish_launch() -> void:
+	if not launch_pending or launch_committed:return
+	launch_pending=false
+	launch_committed=true
+	var callback:=launch_callback
+	launch_callback=Callable()
+	if callback.is_valid():callback.call()
+
+func refresh_preview_state(tile: Button,image: RunnerHeroPreview,id: String) -> void:
+	if not is_instance_valid(image):return
+	image.set_select_state("launch" if launch_pending and id==host.character else ("select" if id==host.character else ("focus" if tile.has_focus() or tile.is_hovered() else "idle")))
 
 func paged_roster() -> bool:
-	if host.page!="main" or host.interface_options.text_scale<=1.:return false
-	if host.portrait:return true
+	if host.page!="main":return false
+	if host.portrait and (host.interface_options.text_scale>1. or host.FRIENDS.size()>4):return true
 	# Measure the actual font before choosing pages; a wide system face may
 	# need more height than two rows can occupy in a short landscape window.
 	return float(roster_geometry(roster_width(),false,false).total_height)>host.view_h-80.
@@ -237,6 +287,9 @@ func chooser_height() -> float:
 
 func roster(parent: Control, at: Vector2, width: float, separate: bool=false) -> void:
 	var h=host
+	var old_preview=roster_previews.get(h.character,null)
+	if launch_pending and is_instance_valid(old_preview):launch_clock=old_preview.clock
+	roster_previews.clear()
 	var enlarged: bool=h.interface_options.text_scale>1.0
 	var geometry:=roster_geometry(width,separate)
 	var columns: int=geometry.columns
@@ -267,8 +320,14 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 		row.add_theme_constant_override("separation",6)
 		var image:=RunnerHeroPreview.new()
 		image.hero=id;image.body_art=h.menu_hero_art;image.weapon_art=h.menu_weapon_art;image.action="armed_walk";image.animate=h.decorative_motion()
+		image.set_select_state("select" if id==h.character else "idle")
 		image.custom_minimum_size=Vector2(80,96)
 		row.add_child(image)
+		roster_previews[id]=image
+		tile.focus_entered.connect(func():refresh_preview_state(tile,image,id))
+		tile.mouse_entered.connect(func():refresh_preview_state(tile,image,id))
+		tile.focus_exited.connect(func():refresh_preview_state(tile,image,id))
+		tile.mouse_exited.connect(func():refresh_preview_state(tile,image,id))
 		var title: Label=h.wrap_label(h.character_name(id),20,"fff1d5")
 		title.add_theme_font_size_override("font_size",h.ui_size(20))
 		title.add_theme_color_override("font_color",h.interface_options.color("on_primary" if id==h.character else "text"))
@@ -285,6 +344,7 @@ func roster(parent: Control, at: Vector2, width: float, separate: bool=false) ->
 
 func main(column: VBoxContainer) -> Button:
 	var h=host
+	if not launch_pending:launch_committed=false
 	var enlarged: bool=h.interface_options.text_scale>1.
 	var title: Label=h.label("AION",32,"f8d9b1")
 	title.name="ArcadeTitle";title.add_theme_font_override("font",h.FONT)
@@ -295,16 +355,22 @@ func main(column: VBoxContainer) -> Button:
 	if not enlarged:column.add_child(mission)
 	else:mission.free()
 	var modes:=HBoxContainer.new();modes.add_theme_constant_override("separation",8);column.add_child(modes)
-	var arcade: Button=h.button(AionCampaignText.word(h.language,"arcade"),h.start_campaign,true)
+	var arcade: Button=h.button(AionCampaignText.word(h.language,"arcade"),func():request_launch(h.start_campaign),true)
 	arcade.name="StartCampaign";arcade.custom_minimum_size.y=maxf(64,h.ui_size(38));arcade.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	arcade.add_theme_font_size_override("font_size",h.ui_size(20));modes.add_child(arcade)
 	if h.has_campaign_checkpoint():
-		var resume: Button=h.button(AionCampaignText.word(h.language,"continue_short"),func():h.campaign_resume_requested=true;h.start_campaign())
+		var resume: Button=h.button(AionCampaignText.word(h.language,"continue_short"),func():request_launch(func():h.campaign_resume_requested=true;h.start_campaign(),true))
 		resume.name="ContinueCampaign";resume.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		resume.add_theme_font_size_override("font_size",h.ui_size(17));modes.add_child(resume)
 	var secondary:=HBoxContainer.new();secondary.add_theme_constant_override("separation",8);column.add_child(secondary)
-	var endless: Button=h.button(AionCampaignText.word(h.language,"endless"),h.start_run)
+	var endless: Button=h.button(AionCampaignText.word(h.language,"endless"),func():request_launch(h.start_run))
 	endless.name="StartRun";endless.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	endless.disabled=h.character not in h.World.PLAYABLE_HEROES
+	if endless.disabled:
+		endless.text=RunnerFrontText.endless_limited_label(h.language)
+		endless.tooltip_text=RunnerFrontText.endless_availability(h.language)
+		endless.accessibility_name=endless.text+" · "+endless.tooltip_text
+		endless.accessibility_description=endless.tooltip_text
 	endless.custom_minimum_size.y=maxf(60,h.ui_size(34));endless.add_theme_font_size_override("font_size",h.ui_size(17));secondary.add_child(endless)
 	var help: Button=h.button(RunnerFrontText.word(h.language,"how"),func():h.open_subpage("help"))
 	help.name="HowToPlay";help.size_flags_horizontal=Control.SIZE_EXPAND_FILL;help.add_theme_font_size_override("font_size",h.ui_size(17));secondary.add_child(help)
@@ -323,6 +389,7 @@ func main(column: VBoxContainer) -> Button:
 	var roster_at: float=roster_y()
 	choose.position=Vector2(h.view_w*.5+14 if split_main() else 28,roster_at-chooser_height()-6);choose.size.y=chooser_height()
 	roster(h.menu_layer,Vector2(h.view_w*.5+14 if split_main() else 28,roster_at),roster_width())
+	if launch_pending:trigger_launch_preview(h.character)
 	fit_main.call_deferred(column,h.layout_generation)
 	return arcade
 
@@ -339,6 +406,7 @@ func fit_main(column: VBoxContainer,generation: int) -> void:
 
 func characters() -> void:
 	var h=host
+	roster_previews.clear()
 	var column: VBoxContainer=card(760)
 	column.add_child(h.wrap_label(h.text("choose"),26))
 	for id in h.FRIENDS:
@@ -348,14 +416,20 @@ func characters() -> void:
 		var preview:=RunnerHeroPreview.new()
 		preview.hero=id;preview.body_art=h.menu_hero_art;preview.weapon_art=h.menu_weapon_art;preview.animate=h.decorative_motion()
 		preview.custom_minimum_size=Vector2(160,124)
+		preview.set_select_state("select" if id==h.character else "idle")
+		roster_previews[id]=preview
 		tile.add_child(preview)
 		var info: BoxContainer=VBoxContainer.new()
 		info.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		tile.add_child(info)
 		var choice: Button=h.button(("✓ " if id==h.character else "")+h.character_name(id),func():h.select_character(id),id==h.character)
 		choice.name="Select_"+id
+		choice.focus_entered.connect(func():refresh_preview_state(choice,preview,id))
+		choice.mouse_entered.connect(func():refresh_preview_state(choice,preview,id))
+		choice.focus_exited.connect(func():refresh_preview_state(choice,preview,id))
+		choice.mouse_exited.connect(func():refresh_preview_state(choice,preview,id))
 		info.add_child(choice)
-		info.add_child(h.wrap_label(h.front_ability(id),17))
+		info.add_child(h.wrap_label(RunnerFrontText.ability_summary(h.language,id),17))
 	var confirm: Button=h.button(RunnerFrontText.word(h.language,"confirm"),func():h.show_page("main"),true)
 	confirm.name="ConfirmHero";confirm.set_meta("menu_pin",true);column.add_child(confirm)
 	h.menu_pages.prepare(column,Vector2(float(column.get_meta("page_width")),float(column.get_meta("page_height"))))

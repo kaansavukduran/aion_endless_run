@@ -1,0 +1,29 @@
+{
+  "authoring": "Original deterministic additive/noise synthesis, no external samples. Simulation emits release once, energetic contact with 90ms debounce, and existing blast once. Six-voice existing game mixer provides concurrency cap.",
+  "files": [
+    {
+      "event": "grenade-release",
+      "path": "assets/audio/grenade-release.wav",
+      "seconds": 0.14,
+      "sample_rate": 22050,
+      "peak": 0.2894,
+      "sha256": "28cd467c58b351565daea4ecbd6de57d1ea82f65bc566d9fd2c71ebb3d6a7fea"
+    },
+    {
+      "event": "grenade-bounce",
+      "path": "assets/audio/grenade-bounce.wav",
+      "seconds": 0.105,
+      "sample_rate": 22050,
+      "peak": 0.2905,
+      "sha256": "86ddd4681bc1b211d4b272ba4b5533539851debf1da8cad462f153c5c9079237"
+    },
+    {
+      "event": "grenade-blast",
+      "path": "assets/audio/grenade-blast.wav",
+      "seconds": 0.43,
+      "sample_rate": 22050,
+      "peak": 0.5761,
+      "sha256": "181d181d918cad7181320875f28a9869734be08c6841a316e59c7cc93d055611"
+    }
+  ]
+}

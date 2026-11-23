@@ -1,8 +1,9 @@
 class_name M1SupportArt
 extends RefCounted
 const DATA=preload('res://assets/M1-SUPPORT-PROVENANCE.json')
-var image: Image
-var cache: Dictionary={}
+# 0.41.0: Process-wide shared support art cache.
+static var image: Image
+static var cache: Dictionary={}
 func pose(key: String,frame: int=0) -> Dictionary:
  var id: String=key+':'+str(posmod(frame,6) if key in ['spider-walk','spider-burst'] else 0)
  assert(DATA.data.frames.has(id),'Unknown support art: '+id)

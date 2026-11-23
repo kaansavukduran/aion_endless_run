@@ -192,7 +192,8 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_physics_process(false)
-	for id in game.FRIENDS:
+	# These fixtures exercise the preserved classic Endless animation bank.
+	for id in RunnerWorld.PLAYABLE_HEROES:
 		for variant in 2:
 			game.world.adventure.attack_variant = variant
 			for frame in 6:

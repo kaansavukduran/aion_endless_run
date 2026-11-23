@@ -43,4 +43,31 @@ func run():
   check(crouch.height<stand.height*.80,'Crouch lowers visible anatomy rather than merely changing a collider')
   check(crouch.face_local.y>stand.face_local.y+12.,'Crouched head is physically lower while the face scale stays registered')
  check(not ART.has('wolf') and not ART.has('owl'),'Assist characters are not assigned playable body layers')
+ # The original four keep their precise canonical registration above. The
+ # two new animals use their own independently authored source anatomy.
+ for hero in MissionHeroArt.HEROES:
+  check(ART.has(hero),'New hero enters the shared authoritative body renderer: '+hero)
+  var neutral: Dictionary=ART.metrics(hero,'idle_fire',0)
+  for action in MissionHeroArt.actions(hero):
+   var clip: Dictionary=ART.clip_spec(hero,action)
+   var first: Dictionary=ART.metrics(hero,action,0)
+   for frame in int(clip.frames):
+    var m: Dictionary=ART.metrics(hero,action,frame)
+    var direct: Dictionary=MissionHeroArt.metrics(hero,action,frame)
+    check(m.source_key==direct.source_key and m.source_row==direct.source_row and m.source_frame==direct.source_frame,'Shared renderer resolves exact new-animal source identity: '+hero+'/'+action)
+    check(str(m.source_key).begins_with('mission-hero-'+hero),'New hero never reuses an old hero silhouette or wrong animal: '+hero)
+    check(is_equal_approx(float(m.source_scale),float(first.source_scale)),'Every cel keeps fixed authored source scale: '+hero+'/'+action)
+    var pose: Dictionary=bank.pose(hero,action,frame)
+    check(pose.offset.is_equal_approx(m.offset) and pose.size.is_equal_approx(m.size) and pose.grip_local.is_equal_approx(m.grip_local) and pose.face_local.is_equal_approx(m.face_local),'New hero rendered pixels use the exact physical hand and mouth registration: '+hero)
+    var im: Image=pose.texture.get_image();var clean:=true
+    for x in im.get_width():clean=clean and im.get_pixel(x,0).a==0. and im.get_pixel(x,im.get_height()-1).a==0.
+    for y in im.get_height():clean=clean and im.get_pixel(0,y).a==0. and im.get_pixel(im.get_width()-1,y).a==0.
+    check(clean,'New hero has independent transparent texture gutter: '+hero+'/'+action)
+    check(Vector2(im.get_size()).is_equal_approx(Vector2(m.size)/float(m.source_scale)),'New hero pixel size and rendered size use one source scale: '+hero)
+    var source: Dictionary=MissionHeroArt.DATA.data.atlases[str(m.atlas_key)].rows[int(m.source_row)][int(m.source_frame)]
+    if bool(m.ground_contact):check(absf(float(source.rect[1]+source.rect[3])-float(source.origin[1]))<.01,'New hero connected feet share grounded actor baseline: '+hero+'/'+action)
+    var grip_pixel:=Vector2i((Vector2(m.grip_local)-Vector2(m.offset))/float(m.source_scale))
+    check(grip_pixel.x>=0 and grip_pixel.y>=0 and grip_pixel.x<im.get_width() and grip_pixel.y<im.get_height() and im.get_pixelv(grip_pixel).a>.5,'New hero measured hand is an actual opaque body pixel: '+hero+'/'+action+'/'+str(frame))
+  var low: Dictionary=ART.metrics(hero,'crouch_fire',0)
+  check(low.height<neutral.height*.80 and low.face_local.y>neutral.face_local.y+12.,'New animal folds legs and lowers head in its own crouch art: '+hero)
  print('RESULT: ',checks,' M1 hero art checks, ',failures,' failures');quit(1 if failures else 0)

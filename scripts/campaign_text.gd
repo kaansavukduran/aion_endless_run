@@ -32,7 +32,15 @@ const LOCAL := {
 "es":{"arcade":"Jugar","endless":"Carrera infinita","title":"Faroles apagados","start":"Iniciar misión","continue":"Continuar desde el control","grenade":"Granada","melee":"Golpe","ride":"Subir / bajar","fork":"Elige tu ruta","shore":"Costa de los faroles","quay":"Muelle roto","canopy":"Copas de los árboles","water":"Canal inundado","terrace":"Jardines en terraza","roots":"Pasaje de raíces","relay":"Relé de cobre","arena":"Motor de raíces","won":"Misión completada","retry":"Reintentar control","mission":"Misión 1","back":"Menú principal","next":"Continuar"},
 "it":{"arcade":"Gioca","endless":"Corsa infinita","title":"Lanterne spente","start":"Inizia missione","continue":"Riprendi dal checkpoint","grenade":"Granata","melee":"Colpo","ride":"Sali / scendi","fork":"Scegli il percorso","shore":"Costa delle lanterne","quay":"Molo spezzato","canopy":"Chiome degli alberi","water":"Canale allagato","terrace":"Terrazze del giardino","roots":"Passaggio delle radici","relay":"Relè di rame","arena":"Motore delle radici","won":"Missione completata","retry":"Riprova checkpoint","mission":"Missione 1","back":"Menu principale","next":"Continua"}}
 
+const HERO_SKILL_TEXT := {
+ "skill_roll":["Yuvarlan","Roll"],"skill_tongue":["Dil","Tongue"],
+ "skill_ready":["Hazır","Ready"],"skill_crouch":["Eğil","Crouch"],
+ "skill_recover":["Toparlanıyor","Recovering"],"skill_cooldown":["Bekle","Cooldown"],
+ "skill_active":["Aktif","Active"]
+}
+
 static func word(locale: String,key: String) -> String:
+	if HERO_SKILL_TEXT.has(key):return str(HERO_SKILL_TEXT[key][0 if GameText.language_for_locale(locale)=="tr" else 1])
 	locale=GameText.language_for_locale(locale)
 	if RHYTHM.data.has(locale) and RHYTHM.data[locale].has(key):return str(RHYTHM.data[locale][key])
 	if key=="fork_one":return "Fener Kavşağı" if locale=="tr" else "Lantern Junction"

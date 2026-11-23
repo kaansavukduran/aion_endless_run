@@ -13,7 +13,7 @@ static func summon(w,kind: String) -> void:
 static func target(w,a: Dictionary) -> Dictionary:
  var best: Dictionary={};var distance:=INF
  for e in w.enemies:
-  if bool(e.defeated) or a.hit_ids.has(str(e.id)):continue
+  if bool(e.defeated) or CampaignEnemies.hidden(e) or a.hit_ids.has(str(e.id)):continue
   if str(a.kind)=='wolf' and absf(float(e.y)-w.floor_at(float(e.x)))>160.:continue
   var d: float=absf(float(e.x)-w.player.x)
   if d<distance and d<1000.:best=e;distance=d
@@ -22,12 +22,13 @@ static func target(w,a: Dictionary) -> Dictionary:
  return best
 
 static func step(w,dt: float) -> void:
+ if w.assists.is_empty():return
  for a in w.assists:
   a.age=float(a.age)+dt;a.clock=maxf(0.,float(a.clock)-dt);a.phase_age=float(a.phase_age)+dt
   for rock in a.stones:
    rock.vy=float(rock.vy)+750.*dt;rock.y=float(rock.y)+float(rock.vy)*dt;rock.age=float(rock.age)+dt
    var point:=Vector2(float(rock.x),float(rock.y))
-   var hits: bool=w.enemies.any(func(e):return not bool(e.defeated) and point.distance_to(Vector2(float(e.x),float(e.y)-25.))<30.)
+   var hits: bool=w.enemies.any(func(e):return not bool(e.defeated) and not CampaignEnemies.hidden(e) and point.distance_to(Vector2(float(e.x),float(e.y)-25.))<30.)
    if hits or float(rock.y)>=w.floor_at(float(rock.x))-6. or float(rock.age)>2.:
     CampaignWeapons.blast(w,point,145.,4,'d7c7a8');rock.age=99.;w.assist_attacks+=1
   a.stones=a.stones.filter(func(r):return float(r.age)<3.)

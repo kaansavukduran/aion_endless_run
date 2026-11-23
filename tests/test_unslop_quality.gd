@@ -64,7 +64,7 @@ func run():
      check(choice.is_visible_in_tree() and not g.language_button.get_global_rect().intersects(choice.get_global_rect()),"Compact language control never covers a visible character card at enlarged text "+str(dims)+str(scale_value)+" language="+str(g.language_button.get_global_rect())+" card="+str(choice.get_global_rect()))
     var next=g.menu_layer.find_child("RosterNext",true,false)
     if next!=null and not next.disabled:next.pressed.emit();await process_frame;await process_frame;await process_frame
-   check(shown.size()==4 and shown.has("StartSelect_rabbit") and shown.has("StartSelect_eren"),"Eren and Ayça have separate reachable cards on actual roster pages")
+   check(shown.size()==6 and shown.has("StartSelect_rabbit") and shown.has("StartSelect_eren") and shown.has("StartSelect_armadillo") and shown.has("StartSelect_frog"),"All six distinct heroes have reachable cards on actual roster pages")
    g.select_character("eren");check(g.character_name("eren")=="Eren" and g.character=="eren","Eren selection follows the real menu action")
    g.start_run();g.world.obstacle_wait=999;g.world.frontier.plant_wait=999;g.world.adventure.item_wait=999;g.world.adventure.ambient_gnome_wait=999;g.update_friend();g.update_hud()
    check(not g.action_buttons.has("attack") and not g.ammo_label.visible,"No Reload button or magazine HUD exists")
@@ -77,7 +77,7 @@ func run():
  root.size=Vector2i(393,873);await process_frame;g.touch_mode=true;g.interface_options.text_scale=1.0;g.active_input="touch"
  for lang in g.Words.LANGUAGES:
   g.set_language(lang)
-  for hero in g.FRIENDS:
+  for hero in RunnerWorld.PLAYABLE_HEROES:
    g.main_menu();g.select_character(hero);g.start_run();await process_frame;g.update_hud();g.ability_label.get_line_count()
    check(not g.ability_label.visible or (g.ability_label.get_minimum_size().y<=g.ability_label.size.y and g.ability_label.get_minimum_size().x<=g.ability_label.size.x),"Actual shaped portrait ability text fits in full: "+lang+"/"+hero)
    for id in ["jump","shoot","duck","boost"]:

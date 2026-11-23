@@ -34,10 +34,10 @@ func run() -> void:
 			var area:=Rect2i(Vector2i(point)-Vector2i(70,175),Vector2i(240,200))
 			check(Rect2i(Vector2i.ZERO,image.get_size()).encloses(area),"Complete cut/NPC cel fits the native viewport")
 			sheet.blit_rect(image,area,Vector2i(i*240,0))
-			check(game.world.player.is_equal_approx(Vector2(400,0)),"All four playable cut sequences preserve the real physics anchor: "+hero)
+			check(game.world.player.is_equal_approx(Vector2(400,0)),"All six playable cut sequences preserve the real physics anchor: "+hero)
 			var body: Dictionary=M1CombatArt.body_spec(game.world)
-			var mapping: Array=M1HeroArt.DATA.data.runtime_rows[hero][str(body.action)]
-			check(str(game.view.hero_marker.source)=="m1-body-"+str(mapping[0]) and int(game.view.hero_marker.row)==int(mapping[1]),"Cut uses the selected hero's registered M1 body, not an old six-hero source")
+			var expected: Dictionary=M1HeroArt.metrics(hero,str(body.action),int(body.frame))
+			check(str(game.view.hero_marker.source)==str(expected.source_key) and int(game.view.hero_marker.row)==int(expected.source_row) and int(game.view.hero_marker.frame)==int(expected.source_frame),"Cut uses the selected hero's exact registered body and cel")
 			game.world.step(.05);game.world.step(.05)
 		check(sheet.save_png(output+"/"+hero+"-knife.png")==OK,"Seven native cut/NPC cels were written: "+hero)
 		check(bool(n.freed),"Drawn cut actually frees captive: "+hero)

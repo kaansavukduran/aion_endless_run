@@ -302,8 +302,8 @@ func run() -> void:
 	# This suite starts at the menu; opening consumption is covered separately.
 	if game.front.intro_active:key(game,KEY_ENTER)
 	check(game.page == "main", "Normal entry opens main menu")
-	key(game, KEY_SPACE)
-	check(game.world.state == "running" and game.page == "", "Space starts at real entry")
+	game.start_run()
+	check(game.world.state == "running" and game.page == "", "Explicit classic Endless action starts its preserved mode")
 	key(game, KEY_SPACE)
 	game.world.step(1.0 / 60)
 	check(game.world.y < 0, "Space jumps through input handler")

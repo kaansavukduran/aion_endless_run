@@ -4,8 +4,9 @@ extends RefCounted
 ## Source art is immutable; each crop has its own transparent sampling gutter.
 const DATA = preload("res://assets/FORGE-HEROES-PROVENANCE.json")
 const HEROES := ["aion", "wolf", "sheep", "owl", "rabbit", "eren"]
-var images: Dictionary = {}
-var cache: Dictionary = {}
+# 0.40.0: Process-wide shared hero forge atlas & crop cache.
+static var images: Dictionary = {}
+static var cache: Dictionary = {}
 
 func pose(key: String, row: int, frame: int) -> Dictionary:
 	var atlas: Dictionary = DATA.data.atlases[key]

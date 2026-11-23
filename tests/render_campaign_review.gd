@@ -44,7 +44,18 @@ func run() -> void:
 		stage(id,900.);await capture(id)
 	for junction in CampaignRoutes.FORKS:
 		for upper in [false,true]:
-			stage(junction,980.);game.world.player.y=CampaignRoutes.UPPER_FLOOR if upper else CampaignRoutes.LOWER_FLOOR
+			if junction=="fork_two" and not upper:
+				game.world.activated.erase(CampaignRoutes.HATCH_ID)
+				stage(junction,980.)
+				check(not CampaignRoutes.hatch_open(game.world) and is_equal_approx(game.world.floor_at(980.),0.),"Locked fork_two hatch holds upper yard floor before unlock")
+				check(CampaignRoutes.clamp_horizontal(game.world,980.,CampaignRoutes.EXIT_X)<=CampaignRoutes.YARD_END_X,"Locked fork_two hatch blocks lower passage to exit")
+				for _hit in 4:
+					CampaignContent.hit_object(game.world,Vector2(CampaignRoutes.HATCH_LOCK_X,-35.),1)
+				check(CampaignRoutes.hatch_open(game.world) and is_equal_approx(game.world.floor_at(980.),CampaignRoutes.LOWER_FLOOR),"Breaking fork_two root lock opens lower channel")
+				game.world.player=Vector2(980.,game.world.floor_at(980.))
+				game.world.velocity=Vector2.ZERO
+			else:
+				stage(junction,980.);game.world.player.y=CampaignRoutes.UPPER_FLOOR if upper else CampaignRoutes.LOWER_FLOOR
 			game.view.camera_y=CampaignRoutes.camera_y(game.world,0.)
 			check(game.world.grounded(),"Rendered junction actor has real collision support: "+junction)
 			check(game.menu_kind=="" and game.buttons.is_empty(),"Physical junction renders no route menu or hidden confirm")
@@ -76,8 +87,11 @@ func run() -> void:
 				sheet.fill_rect(Rect2i(frame*180,140,180,1),Color("e87e9a"))
 				fixture_data.append({"hero":hero,"clip":clip,"runtime_action":action,"frame":frame,"guide":"physics-root","physics_anchor":[game.world.player.x,game.world.player.y],"source":game.view.hero_marker.duplicate(true)})
 				check(game.world.player.is_equal_approx(expected_anchor),"Art never changes the physics anchor: "+hero+" "+clip)
-				var mapping: Array=M1HeroArt.DATA.data.runtime_rows[hero][action]
-				check(str(game.view.hero_marker.source)=="m1-body-"+str(mapping[0]) and int(game.view.hero_marker.row)==int(mapping[1]) and int(game.view.hero_marker.frame)==frame,"Actual renderer uses the matching registered M1 hero/action/cel: "+hero+" "+clip+" "+str(frame))
+				# Each provider owns its source mapping, including authored held cels.
+				# Compare the actual rendered source/row/cel, never relabel new heroes
+				# as a legacy atlas or assume source index equals clip index.
+				var expected: Dictionary=M1HeroArt.metrics(hero,action,frame)
+				check(str(game.view.hero_marker.source)==str(expected.source_key) and int(game.view.hero_marker.row)==int(expected.source_row) and int(game.view.hero_marker.frame)==int(expected.source_frame),"Actual renderer uses the matching registered M1 hero/action/cel: "+hero+" "+clip+" "+str(frame))
 			check(sheet.save_png(output+"/"+hero+"-"+clip+"-cycle.png")==OK,"Six-cel native strip was written: "+hero+" "+clip)
 		clip_pose("air_fire",2)
 		await capture(hero+"-air-fire")
@@ -85,7 +99,7 @@ func run() -> void:
 			game.world.player.y=0.;game.world.velocity=Vector2.ZERO;game.world.charging=true;game.world.charge_time=.9;await capture(hero+"-charge")
 			game.world.charging=false;game.world.player.y=-310.;game.view.camera_y=-85.;await capture(hero+"-high-jump");game.view.camera_y=0.
 	# Removed companions remain visible as actual helper powers, not fake
-	# playable owl/wolf bodies inserted into the four-hero animation matrix.
+	# playable owl/wolf bodies inserted into the six-hero animation matrix.
 	game.world.begin("aion");stage("shore",900.);CampaignAssists.summon(game.world,"owl_feather");CampaignAssists.summon(game.world,"wolf_charm")
 	await capture("companion-powers")
 	var report:=FileAccess.open(output+"/fixtures.json",FileAccess.WRITE);report.store_string(JSON.stringify(fixture_data,"  "));report.close()

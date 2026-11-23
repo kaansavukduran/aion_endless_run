@@ -5,7 +5,7 @@ p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=Path('bu
 suites=a.suites or ['game','adventure','localization','evolution','frontier','motion','encounters','fidelity','agility','runner_ux','boss_hud','aionia','variety','visual_polish','orchard','firearm','charge_roll_ui','unslop_quality','pixel_heroes','boss_story','polish','terrain','campaign','campaign_ui','campaign_art','campaign_expansion','campaign_expansion_art','campaign_lifecycle','campaign_secret_routes','campaign_directional','campaign_forge','endless_jump_ratios','front_presentation','campaign_presentation','forge_hero_art','forge_visual','armed_muzzles','forge_vehicle_art','vehicle_muzzles','pause_actions','enemy_facing']
 results=[]
 if not a.suites:
-    suites += ['endless_companions','campaign_m1_mechanics','campaign_routes','arcade_roster_ui','m1_hero_art','vehicle_turrets','campaign_assists','held_weapon_art','m1_flock','m1_damage_art','cinematic_heroes','campaign_combat_patch','campaign_rewards_sweep','campaign_effects_art','campaign_rhythm','source_pixels','free_aim']
+    suites += ['endless_companions','campaign_m1_mechanics','campaign_routes','arcade_roster_ui','m1_hero_art','vehicle_turrets','campaign_assists','held_weapon_art','m1_flock','m1_damage_art','cinematic_heroes','campaign_combat_patch','campaign_rewards_sweep','campaign_effects_art','campaign_rhythm','source_pixels','free_aim','campaign_forge_m1','campaign_enemy_cycles','campaign_selection_flow','campaign_backwalk','campaign_grenade','campaign_new_heroes','campaign_context_actions','frog_tongue_motion']
 for name in suites:
  env=dict(os.environ);env['XDG_DATA_HOME']=tempfile.mkdtemp(prefix='aion-test-'+name+'-')
  try:
