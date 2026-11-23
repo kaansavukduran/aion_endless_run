@@ -557,19 +557,28 @@ with sync_playwright() as pw:
             closed=any(g['closed'] and 0<=g['x']-x<180 for g in d['gates'])
             if target and (closed or abs(target['x']-x)<320):
                 facing=1 if target['x']>=x else -1;direction='d' if facing==1 else 'a'
-                if target['y']<-65 and abs(target['x']-x)<280 and d['facing']==facing:direction=''
+                if target['y']<y-65 and abs(target['x']-x)<280 and d['facing']==facing:direction=''
             if section=='arena':
                 desired=float(d.get('boss_x',1400))-210
                 direction='d' if x<desired-35 else ('a' if x>desired+35 else ('d' if d['facing']<0 else ''))
                 if target and abs(target['x']-x)<450:
                     facing=1 if target['x']>=x else -1;direction='' if d['facing']==facing else ('d' if facing==1 else 'a')
                 if d.get('boss_warning',0)>0 and abs(x-d.get('boss_beam_x',-999))<95:direction='a'
-            if target and target['y']<-65 and abs((y-46)-(target['y']-30))>34:wanted=[]
+            if a.observe_terrain and target and not d['mounted']:
+                # Pointer aiming is a real player control. Terrain puts targets
+                # above and below the original zero-Y combat line.
+                sx=target['x']-d['camera']
+                sy=target['y']+d['ground']-d['camera_y']-34.
+                if 24<sx<d['view'][0]-24 and 57<sy<d['view'][1]-25:
+                    page.mouse.move(*xy(sx,sy))
+                    wanted=['f']
+            elif target and target['y']<y-65 and abs((y-46)-(target['y']-30))>34:
+                wanted=[]
             if direction:wanted.append(direction)
             if d['mounted'] and target and target['y']>=y-75 and 100<=abs(target['x']-x)<250:
                 wanted=['f','s','d' if target['x']>x else 'a']
             keys(wanted)
-            flyer=target and target['y']<-65 and abs(target['x']-x)<450
+            flyer=target and target['y']<y-65 and abs(target['x']-x)<450
             gap=any(0<p[0]-x<150 for p in d['pits'])
             object_gate=not targets and any(o['kind']=='gate' and not o['active'] and 0<o['x']-x<110 for o in d.get('objects',[]))
             danger=any(math.hypot(b[0]-x,b[1]-(y-37))<100 for b in d.get('bullets',[]))

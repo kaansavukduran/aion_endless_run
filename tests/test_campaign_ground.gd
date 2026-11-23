@@ -89,5 +89,10 @@ func run() -> void:
 		check(footing and high-low< -20. and w.player.x>=points.back().x and w.attempts_remaining==3,"Each authored profile retains real supported traversal and changes elevation: "+key)
 	w=fresh();w.load_section("water");w.pits.assign([Vector2(5940.,6010.)])
 	check(not CampaignGround.fell_into_pit(w,Vector2(5960.,214.)) and CampaignGround.fell_into_pit(w,Vector2(5960.,400.)),"A real pit at the deep basin uses its local lips to measure falling")
+	w=fresh();w.load_section("water");w.enemies.clear()
+	w.spawn_enemy("siphon",5980.,-130.,802)
+	CampaignGround.align_world(w)
+	var supported_flyer: Dictionary=w.enemies[0]
+	check(absf(float(supported_flyer.y)-w.floor_at(float(supported_flyer.x))+130.)<.01 and is_equal_approx(float(supported_flyer.home.y),float(supported_flyer.y)),"An attack flyer preserves its planned height above the playable deep basin")
 	print("RESULT: %d campaign terrain checks, %d failures"%[checks,failures])
 	quit(1 if failures else 0)
