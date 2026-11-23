@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import shutil
 from threading import Thread
+from time import monotonic
 from urllib.parse import parse_qs, urlsplit
 
 from playwright.sync_api import sync_playwright
@@ -48,6 +49,11 @@ class Files(SimpleHTTPRequestHandler):
                 if (export / name).is_file():
                     self.directory = str(export)
                     break
+        # Local archive mtimes can go backwards or tie as releases switch.
+        # These fixtures must serve the selected bytes even on revalidation.
+        for validator in ("If-Modified-Since", "If-None-Match"):
+            if validator in self.headers:
+                del self.headers[validator]
         super().do_GET()
 
 
@@ -58,6 +64,40 @@ def read_campaign(page):
 def entry_ready(page):
     page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]', timeout=150_000)
     return page.locator("canvas").evaluate("c => ({...c.dataset})")
+
+
+def choose_saved_hero(page):
+    def tap(name, entry):
+        button = next(item for item in json.loads(entry["ui"]) if item["name"] == name)
+        a, b, c, d, tx, ty = json.loads(entry["screenTransform"])
+        canvas = page.locator("canvas").bounding_box()
+        x = button["x"] + button["w"] / 2
+        y = button["y"] + button["h"] / 2
+        page.touchscreen.tap(
+            canvas["x"] + (a * x + c * y + tx) * canvas["width"] / float(entry["rawWidth"]),
+            canvas["y"] + (b * x + d * y + ty) * canvas["height"] / float(entry["rawHeight"]),
+        )
+
+    def find(name):
+        for _ in range(10):
+            entry = entry_ready(page)
+            if any(button["name"] == name for button in json.loads(entry["ui"])):
+                return entry
+            tap("NextPage", entry)
+            page.wait_for_function(
+                "old => document.querySelector('canvas').dataset.menuPage !== old",
+                arg=entry["menuPage"],
+            )
+        raise AssertionError(f"Could not reach the hero selection action {name}")
+
+    # Choosing a non-default hero exposes a reset to Aion after updating.
+    tap("ChooseHero", entry_ready(page))
+    page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
+    tap("Select_sheep", find("Select_sheep"))
+    page.wait_for_selector('canvas[data-character="sheep"][data-ui-ready="true"]')
+    tap("ConfirmHero", find("ConfirmHero"))
+    page.wait_for_selector('canvas[data-page="main"][data-character="sheep"][data-ui-ready="true"]')
+    return entry_ready(page)["character"]
 
 
 def start_campaign(page):
@@ -125,13 +165,16 @@ def continue_campaign(page, saved, hero):
 
 
 def published_worker(page, build, update):
+    page.wait_for_function("navigator.serviceWorker.controller !== null", timeout=150_000)
     if update:
         page.evaluate("navigator.serviceWorker.getRegistration().then(registration=>registration.update()).then(()=>true)")
-    page.wait_for_function(
-        """async (build) => {
-          const controller = navigator.serviceWorker.controller;
-          if (!controller) return false;
-          return await new Promise(resolve => {
+    deadline = monotonic() + 150
+    # Resolve the message reply before deciding whether this worker is active.
+    while monotonic() < deadline:
+        if page.evaluate(
+            """(build) => new Promise(resolve => {
+            const controller = navigator.serviceWorker.controller;
+            if (!controller) {resolve(false);return;}
             const expiry = setTimeout(() => finish(false), 600);
             const answer = event => {
               if (event.source === controller && event.data?.type === 'aion-version') finish(event.data.build === build);
@@ -143,10 +186,12 @@ def published_worker(page, build, update):
             };
             navigator.serviceWorker.addEventListener('message',answer);
             controller.postMessage({type:'aion-version'});
-          });
-        }""",
-        arg=build, timeout=150_000,
-    )
+          })""",
+            build,
+        ):
+            return
+        page.wait_for_timeout(150)
+    raise AssertionError(f"Active service worker never confirmed build {build}")
 
 
 def verify_context(context, site, evidence, modern):
@@ -158,7 +203,7 @@ def verify_context(context, site, evidence, modern):
     first, intermediate, final = site.builds
     try:
         page.goto(url)
-        hero = entry_ready(page)["character"]
+        hero = choose_saved_hero(page)
         published_worker(page, first["build"], update=False)
         saved = prepare_campaign(page)
         assert saved["score"] > 0 and saved["taken"] and saved["awarded"]
