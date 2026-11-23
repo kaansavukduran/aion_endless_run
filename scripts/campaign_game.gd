@@ -1089,6 +1089,7 @@ func metadata() -> void:
 	data.npcs=[]
 	for n in world.npcs:data.npcs.append({"id":n.id,"x":n.x,"y":n.y,"freed":n.freed,"age":n.free_age,"gift":n.gift,"secret":n.secret,"phase":n.get("phase","bound"),"facing":n.get("facing",-1),"thank_age":n.get("thank_age",0.)})
 	data.continue_remaining=world.continue_remaining;data.continue_hero=world.continue_hero
+	data.boss_y=world.boss.y;data.boss_engaged=world.boss.engaged
 	data.boss_warning=world.boss.get("beam_warning",0.);data.boss_beam_x=world.boss.get("beam_x",-999.);data.boss_x=world.boss.x;data.boss_phase=world.boss.phase;data.mount_type=CampaignVehicles.kind(world);data.music_starts=ambient_starts;data.native_memory=Performance.get_monitor(Performance.MEMORY_STATIC);data.node_count=Performance.get_monitor(Performance.OBJECT_NODE_COUNT);data.rescue_candidate=CampaignRescue.cut_target(world).get("id","");data.rescue_time=world.rescue_time;data.weapon=world.weapon;data.ammunition=world.ammunition;data.objects=world.objects;data.rooms=world.rooms
 	data.bullets=[]
 	for bullet in world.bullets:

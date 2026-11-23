@@ -423,6 +423,7 @@ with sync_playwright() as pw:
             record_profile()
             return current
         previously_mounted=False
+        arena_phases=set()
         while time.monotonic()-started<a.max_seconds:
             d=data();now=time.monotonic();state=d['state'];section=d['section']
             if previously_mounted and not d['mounted']:
@@ -447,6 +448,15 @@ with sync_playwright() as pw:
                     terrain_samples[section]={'player':d['player'],'floor':floor,'world_time':d['time'],'camera':d['camera']}
                     (a.evidence/'actual-terrain.json').write_text(json.dumps(terrain_samples,indent=2)+'\n')
                     page.screenshot(path=str(a.evidence/(section+'-supported-terrain.png')))
+            if d.get('presentation')=='boss_reveal':
+                keys([])
+                if not (a.evidence/'boss-in-world.png').exists():
+                    check(not d['menu'] and not d['boss_engaged'],'Actual arena entrance holds threats for the in-world reveal')
+                    page.screenshot(path=str(a.evidence/'boss-in-world.png'))
+                page.wait_for_timeout(65);continue
+            if section=='arena' and d.get('boss_engaged') and d['boss_phase'] not in arena_phases:
+                arena_phases.add(d['boss_phase'])
+                page.screenshot(path=str(a.evidence/('boss-phase-'+str(d['boss_phase'])+'.png')))
             if state=='complete':
                 keys([])
                 # The boss death and new short celebration must finish before
@@ -462,9 +472,6 @@ with sync_playwright() as pw:
                 elif d['menu']=='dead':raise AssertionError(('Continue expired during the route playthrough',d))
                 elif d['menu'] in ['fork_one','fork_two']:
                     raise AssertionError(('Gameplay must not open a text route-choice menu',d))
-                elif d['menu']=='boss':
-                    (a.evidence/'boss-entry-state.json').write_text(json.dumps(d,indent=2)+'\n')
-                    canvas.focus();page.keyboard.press('Enter');page.wait_for_timeout(350)
                 elif d['menu']=='paused':button(text='Devam et')
                 page.wait_for_timeout(120);canvas.focus();continue
             if state!='playing':keys([]);page.wait_for_timeout(80);continue
@@ -578,11 +585,12 @@ with sync_playwright() as pw:
                 if target and abs(target['x']-x)<450:
                     facing=1 if target['x']>=x else -1;direction='' if d['facing']==facing else ('d' if facing==1 else 'a')
                 if d.get('boss_warning',0)>0 and abs(x-d.get('boss_beam_x',-999))<95:direction='a'
-            if a.observe_terrain and target and not d['mounted']:
+            if a.observe_terrain and (target or section=='arena') and not d['mounted']:
                 # Pointer aiming is a real player control. Terrain puts targets
                 # above and below the original zero-Y combat line.
-                sx=target['x']-d['camera']
-                sy=target['y']+d['ground']-d['camera_y']-34.
+                target_x,target_y=(target['x'],target['y']-34.) if target else (d['boss_x'],d['boss_y']-75.)
+                sx=target_x-d['camera']
+                sy=target_y+d['ground']-d['camera_y']
                 if 24<sx<d['view'][0]-24 and 57<sy<d['view'][1]-25:
                     page.mouse.move(*xy(sx,sy))
                     wanted=['f']
@@ -647,6 +655,7 @@ with sync_playwright() as pw:
         if a.rescue_only:check(bool(rescues_tested),'An actual captive was reached, cut free and rewarded through ordinary controls')
         else:
             check(completed,'Mission 1 is completable with actual keyboard/mouse-equivalent gameplay')
+            check(arena_phases=={1,2,3},'An ordinary run reaches all three distinct boss phases')
             if a.observe_terrain:
                 check('shore' in terrain_samples and a.route in terrain_samples,'Actual controls cross non-zero supported ground on the opening route and chosen branch')
             check(a.route in data()['route'],'The chosen branch was actually recorded')
