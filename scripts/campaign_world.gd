@@ -692,8 +692,7 @@ func step_boss(dt: float) -> void:
 				bullets.append({"p":Vector2(wave_x,floor_at(wave_x)-16.),"v":Vector2(direction*320.,0.),"owner":"enemy","age":0.,"kind":"wave","damage":1,"pierce":0,"hit":[],"boss_shot":true})
 				if int(boss.phase)==2:platform_timers[2020.]=2.1
 			else:
-				pending_events.append("boss_attack")
-				for i in 2: spawn_enemy("drone",float(boss.x)-120.-i*110.,float(boss.y)-135.-i*25.,200+int(boss.attack)*2+i)
+				CampaignBossPressure.call_drones(self)
 			boss.attack = int(boss.attack)+1; boss.wait = 2.15-float(int(boss.phase)-1)*.25
 	else:
 		boss.wait = float(boss.wait)-dt
