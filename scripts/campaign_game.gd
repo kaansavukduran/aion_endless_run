@@ -1088,6 +1088,9 @@ func metadata() -> void:
 	data.ui_ready=ui_ready
 	data.raw=[get_viewport_rect().size.x,get_viewport_rect().size.y]
 	data.velocity=[world.velocity.x,world.velocity.y]
+	data.move_axis=[world.move_axis.x,world.move_axis.y]
+	data.keyboard_movement=[left_down,right_down,up_down,down_down]
+	data.vehicle_stunned=CampaignVehicles.stunned(world)
 	data.npcs=[]
 	for n in world.npcs:data.npcs.append({"id":n.id,"x":n.x,"y":n.y,"freed":n.freed,"age":n.free_age,"gift":n.gift,"secret":n.secret,"phase":n.get("phase","bound"),"facing":n.get("facing",-1),"thank_age":n.get("thank_age",0.)})
 	data.continue_remaining=world.continue_remaining;data.continue_hero=world.continue_hero

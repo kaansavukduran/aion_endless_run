@@ -638,6 +638,8 @@ with sync_playwright() as pw:
                 # action. Use a fresh physical key press in an open lane.
                 blocked=any(g['closed'] and abs(g['x']-x)<50 for g in d['gates'])
                 if not blocked:
+                    with (a.evidence/'movement-refresh.jsonl').open('a') as log:
+                        log.write(json.dumps({'section':section,'position':d['player'],'move_axis':d.get('move_axis'),'keyboard':d.get('keyboard_movement'),'stunned':d.get('vehicle_stunned'),'key':direction})+'\n')
                     page.keyboard.up(direction);page.keyboard.down(direction)
                     next_move_refresh=now+.8
             flyer=target and target['y']<y-65 and abs(target['x']-x)<450
