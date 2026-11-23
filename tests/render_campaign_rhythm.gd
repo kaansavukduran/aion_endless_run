@@ -31,9 +31,10 @@ func run() -> void:
 	CampaignLives.start_entry(w,Rect2(2350.,-420.,1152.,600.));w.step(.05)
 	await snap("rally-return")
 	check(w.state=="respawn" and w.player.x>=2350. and w.attempts_remaining==2,"Drawn entry arrives from the current view with one spent life")
-	w.load_section("shore");w.player=Vector2(5940.,-40.);w.bridge_timers[5800.]=1.;game.view.camera_x=5460.
-	await snap("failing-bridge")
-	check(w.crossing_floor(5940.,-42.,-39.,10.)== -40.,"Warning deck is still physical before collapse")
+	w.load_section("shore");w.enemies.clear();w.player=Vector2(5940.,-40.);game.view.camera_x=5460.
+	for tick in 220:w.step(1./60.)
+	await snap("shore-bridge")
+	check(w.grounded() and w.crossing_floor(6220.,-42.,-39.,10.)==-40.,"Both visible bridge decks still support the player after the old collapse delay")
 	w.load_section("arena");w.boss.active=true;w.boss.engaged=true;w.player=Vector2(2150.,0.);game.view.camera_x=1850.
 	w.boss.phase=1;w.boss.hp=90;w.boss.ports=[3,3]
 	await snap("boss-ports")

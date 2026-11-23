@@ -87,7 +87,6 @@ var chain := 0
 var chain_time := 0.
 var best_chain := 0
 var score_popups: Array[Dictionary] = []
-var bridge_warned := false
 var bridge_timers: Dictionary = {}
 var travel_target := ""
 var completed := false
@@ -883,7 +882,7 @@ func step(dt: float) -> void:
 		if item.has("rescue_id"):
 			if float(item.age)>=.25 and not taken.has(str(item.id)) and touches_pickup(item):collect(item)
 		elif not taken.has(str(item.id)) and touches_pickup(item): collect(item)
-	CampaignRhythm.step(self);CampaignRecovery.step(self)
+	CampaignRecovery.step(self)
 	trail.append({"p":player,"time":time,"facing":facing,"grounded":grounded(),"crouched":crouching(),"walk_distance":walk_distance,"moving":absf(velocity.x)>1.,"velocity_y":velocity.y,"air_time":air_time})
 	while trail.size()>1 and time-float(trail[0].time)>4.: trail.pop_front()
 	if CampaignRoutes.is_fork(section):

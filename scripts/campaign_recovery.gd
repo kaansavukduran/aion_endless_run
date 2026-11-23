@@ -35,7 +35,7 @@ static func capture(w,x: float) -> Dictionary:
 
 static func enter(w) -> void:
 	if str(w.rally.get("section",""))!=w.section:w.rally=capture(w,140.)
-	w.chain=0;w.chain_time=0.;w.score_popups.clear();w.bridge_warned=false
+	w.chain=0;w.chain_time=0.;w.score_popups.clear()
 
 static func step(w) -> void:
 	if not w.grounded() or absf(w.player.y+(42. if bool(w.mount.ridden) else 0.)-w.floor_at(w.player.x))>.1:return

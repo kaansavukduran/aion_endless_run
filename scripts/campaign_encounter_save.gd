@@ -81,3 +81,4 @@ static func apply(w,data: Dictionary,encounter: Dictionary) -> void:
 	w.aim_direction=encounter.aim_direction
 	w.pending_events.clear()
 	CampaignGround.restore_revision(w,int(data.get("ground_revision",0)))
+	CampaignRhythm.restore_shore_bridge(w)

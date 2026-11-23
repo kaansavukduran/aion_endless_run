@@ -3,6 +3,8 @@ extends RefCounted
 
 ## Authored role combinations with seeded spacing variants. All decisions
 ## remain physical play; no wave timers spawn threats behind the camera.
+const SHORE_BRIDGE := [Rect2(5800.,-40.,310.,20.),Rect2(6110.,-40.,360.,20.)]
+
 static func crate_kind(section: String,index: int) -> String:
 	var stock: Dictionary={
 		"shore":["heavy","grenade","shield","heal","arc","points","grenade","heavy","heal"],
@@ -32,11 +34,10 @@ static func populate(w) -> void:
 			var id: String=w.section+":skill-fruit:"+str(int(surface.position.x))+":"+str(j)
 			if not w.taken.has(id):w.pickups.append({"id":id,"kind":"fruit_"+str((j+3)%8),"x":surface.position.x+25.+j*45.,"y":surface.position.y-42.})
 	if w.section!="shore":return
-	# A short legible chase across two failing decks is Mission1's first
-	# signature event. Existing one-way/drop/jump/pit rules own the geometry.
+	# This crossing is required on every route. Both decks stay in place.
 	w.platforms=w.platforms.filter(func(p):return p.end.x<5800. or p.position.x>6470.)
 	w.pits.append(Vector2(5840.,6440.))
-	w.platforms.append(Rect2(5800.,-40.,310.,20.));w.platforms.append(Rect2(6110.,-40.,360.,20.))
+	w.platforms.append_array(SHORE_BRIDGE)
 	for enemy in w.enemies:
 		if not CampaignContent.flying(str(enemy.kind)) and float(enemy.x)>5780. and float(enemy.x)<6490.:
 			enemy.x=6500.+posmod(int(enemy.home.x),3)*65.;enemy.y=0.;enemy.home=Vector2(enemy.x,0.)
@@ -48,16 +49,21 @@ static func populate(w) -> void:
 		var id: String="shore:bridge-fruit:"+str(i)
 		if not w.taken.has(id):w.pickups.append({"id":id,"kind":"fruit_"+str(i),"x":5860.+i*150.,"y":-100.})
 
-static func step(w) -> void:
+static func restore_shore_bridge(w) -> void:
 	if w.section!="shore":return
-	if w.player.x>5320. and w.player.x<6480. and not w.bridge_warned:
-		w.bridge_warned=true;w.notice="arc_bridge_warning";w.notice_time=3.
-	if not w.grounded():return
-	var foot: Vector2=CampaignRoutes.foot(w)
-	for surface in w.platforms:
-		if surface.position.x not in [5800.,6110.]:continue
-		if foot.x>=surface.position.x and foot.x<=surface.end.x and absf(foot.y-surface.position.y)<.1 and not w.bridge_timers.has(surface.position.x):
-			w.bridge_timers[surface.position.x]=2.4
+	var had_collapse_state:=false
+	for deck in SHORE_BRIDGE:
+		had_collapse_state=w.bridge_timers.erase(deck.position.x) or had_collapse_state
+		had_collapse_state=w.disabled_platforms.erase(deck.position.x) or had_collapse_state
+		w.platform_timers.erase(deck.position.x)
+	# A legacy save taken during a fall may already be below the restored deck.
+	if not had_collapse_state or w.state!="playing" or CampaignGround.has_floor(w.floor_at(w.player.x)):return
+	var foot:=CampaignRoutes.foot(w)
+	for deck in SHORE_BRIDGE:
+		if foot.x>=deck.position.x and foot.x<=deck.end.x and foot.y>deck.position.y:
+			w.player.y+=deck.position.y-foot.y
+			w.velocity.y=0.;w.drop_through_time=0.
+			return
 
 static func can_auto_collect(w,item: Dictionary) -> bool:
 	var kind: String=str(item.kind)

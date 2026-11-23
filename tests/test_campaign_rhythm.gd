@@ -61,25 +61,32 @@ func run() -> void:
 		if section!="shore":check(w.encounters.size()==8,"Long routes have eight closer tactical groups: "+section)
 		for x in CampaignRecovery.points(w):check(x>0. and CampaignGround.has_floor(w.floor_at(x)),"Recovery flag has real floor support: "+section)
 	w=fresh();w.load_section("shore");w.enemies.clear();w.gates.clear();w.npcs.clear();w.objects.clear()
-	w.player=Vector2(5920.,-40.);w.velocity=Vector2.ZERO;CampaignRhythm.step(w)
-	check(w.bridge_timers.has(5800.) and not w.disabled_platforms.has(5800.),"Bridge contact starts a warning, not an immediate fall")
-	CampaignContent.step(w,1.);check(not w.disabled_platforms.has(5800.),"Bridge deck remains load-bearing during its warning")
-	CampaignContent.step(w,1.5);check(w.disabled_platforms.has(5800.),"Warned deck really collapses after the countdown")
-	w.invulnerable=0.;w.damage_player()
-	for tick in 100:w.step(.02)
-	CampaignLives.start_entry(w,Rect2(5430.,-430.,1152.,600.))
-	for tick in 32:w.step(.02)
-	check(w.grounded() and w.disabled_platforms.has(5800.),"Reserve entry finds supported ground without rebuilding the collapsed bridge")
+	w.player=Vector2(6220.,36.);w.velocity=Vector2(0.,150.)
+	w.bridge_timers[6110.]=1.;w.disabled_platforms[5800.]=true;w.disabled_platforms[6110.]=true
+	w.score=250;w.awarded["bridge-test"]=true
+	var bridge_save:=AionCampaignWorld.new()
+	check(bridge_save.restore(w.snapshot()),"Continue accepts an older save with both shore decks collapsed")
+	check(bridge_save.player==Vector2(6220.,-40.) and bridge_save.velocity.y==0. and bridge_save.grounded(),"Continue puts a falling player on the repaired bridge")
+	check(bridge_save.bridge_timers.is_empty() and bridge_save.disabled_platforms.is_empty(),"Continue clears stale bridge collapse state")
+	check(bridge_save.score==250 and bridge_save.awarded.has("bridge-test"),"Bridge repair preserves existing progress")
+	bridge_save.move_axis=Vector2.RIGHT
+	for tick in 120:bridge_save.step(1./60.)
+	check(bridge_save.player.x>6470. and bridge_save.attempts_remaining==3,"The restored encounter can be crossed")
 	for hero in AionCampaignWorld.HEROES:
 		w=fresh();w.character=hero;w.load_section("shore");w.enemies.clear();w.objects.clear();w.npcs.clear();w.gates.clear();w.pickups.clear();w.player=Vector2(5700.,0.)
-		var jumped:=false
+		w.move_axis=Vector2.RIGHT;w.jump_press();w.jump_release()
+		for tick in 140:
+			w.step(1./60.)
+			if w.player.x>5900. and w.grounded():break
+		check(w.player.x>5900. and w.player.x<6110. and w.grounded(),"Initial jump lands on the first deck: "+hero)
+		w.move_axis=Vector2.ZERO
+		for tick in 220:w.step(1./60.)
+		check(w.player.y==-40. and w.grounded() and w.bridge_timers.is_empty() and w.disabled_platforms.is_empty(),"Standing longer than the old collapse timer leaves both decks intact: "+hero)
 		for tick in 330:
 			w.move_axis=Vector2.RIGHT
-			if w.grounded() and (not jumped or (w.player.x>6090. and w.player.x<6250.)):
-				w.jump_press();w.jump_release();jumped=true
 			w.step(1./60.)
 			if w.player.x>6500.:break
-		check(w.player.x>6470. and w.hp==1 and w.attempts_remaining==3,"Actual move/jump rules cross the setpiece: "+hero)
+		check(w.player.x>6470. and w.hp==1 and w.attempts_remaining==3,"Both decks are walkable after waiting: "+hero)
 	w=fresh();w.load_section("arena");w.enemies.clear();w.boss.active=true;w.boss.engaged=true;w.boss.phase=1
 	var target:=Vector2(float(w.boss.x)-65.,-95.)
 	w.bullets=[{"p":target-Vector2(100,0),"v":Vector2(760,0),"owner":"hero","kind":"pistol","damage":1,"pierce":0,"age":0.,"life":1.,"hit":[]}]
