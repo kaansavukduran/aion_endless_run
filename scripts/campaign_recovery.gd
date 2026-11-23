@@ -22,7 +22,7 @@ static func points(w) -> Array[float]:
 static func safe_x(w,x: float) -> float:
 	for offset in [0.,40.,80.,120.,160.,240.,-40.,-80.]:
 		var candidate: float=clampf(x+offset,180.,w.length()-300.)
-		if w.floor_at(candidate)==0.:return candidate
+		if CampaignGround.has_floor(w.floor_at(candidate)):return candidate
 	return -1.
 
 static func capture(w,x: float) -> Dictionary:
@@ -38,7 +38,7 @@ static func enter(w) -> void:
 	w.chain=0;w.chain_time=0.;w.score_popups.clear();w.bridge_warned=false
 
 static func step(w) -> void:
-	if not w.grounded() or absf(w.player.y-( -42. if bool(w.mount.ridden) else 0.))>.1:return
+	if not w.grounded() or absf(w.player.y+(42. if bool(w.mount.ridden) else 0.)-w.floor_at(w.player.x))>.1:return
 	for x in points(w):
 		if x<0. or x<=float(w.rally.get("x",140.))+50. or w.player.x<x or w.player.x>x+600.:continue
 		if w.gates.any(func(g):return float(g.x)<=x and w.gate_closed(g)):continue
@@ -47,7 +47,7 @@ static func step(w) -> void:
 static func apply(w,point: Dictionary) -> void:
 	if str(point.get("section",""))!=w.section:return
 	var x: float=float(point.get("x",140.))
-	if x<35. or x>w.length()-130. or w.floor_at(x)>=180.:return
+	if x<35. or x>w.length()-130. or not CampaignGround.has_floor(w.floor_at(x)):return
 	w.player=Vector2(x,w.floor_at(x));w.velocity=Vector2.ZERO
 	w.weapon=str(point.get("weapon","pistol"));w.ammunition=int(point.get("ammunition",0))
 	w.grenades=int(point.get("grenades",3));w.flock=int(point.get("flock",1))

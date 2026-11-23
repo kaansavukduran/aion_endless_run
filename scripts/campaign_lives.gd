@@ -110,7 +110,7 @@ static func landing(w,area: Rect2) -> Vector2:
 	# Prefer a clear left pocket, with a penalty for nearby live threats.
 	for x in range(ceili(left),floori(right)+1,28):
 		var y: float=CampaignVehicles.support_below(w,float(x),top)
-		if y>=180. or y<top or not landing_clear(w,Vector2(x,y)):continue
+		if not CampaignGround.has_floor(y) or y<top or not landing_clear(w,Vector2(x,y)):continue
 		var risk:=0.
 		for e in w.enemies:
 			if not bool(e.defeated) and absf(float(e.y)-y)<100.:
@@ -127,7 +127,7 @@ static func landing(w,area: Rect2) -> Vector2:
 			var x: float=center+direction*distance
 			if x<55. or x>w.length()-105.:continue
 			var y: float=CampaignVehicles.support_below(w,x,minf(top,-270.))
-			if y<180. and landing_clear(w,Vector2(x,y)):return Vector2(x,y)
+			if CampaignGround.has_floor(y) and landing_clear(w,Vector2(x,y)):return Vector2(x,y)
 	# Each authored section provides supported floor; keep that guarantee
 	# explicit so adding an all-hazard layout fails validation visibly.
 	push_error("Mission 1 has no safe re-entry surface in "+w.section)

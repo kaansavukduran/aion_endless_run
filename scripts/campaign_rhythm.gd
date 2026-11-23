@@ -22,7 +22,7 @@ static func populate(w) -> void:
 			enemy.shot_lane="high" if i%2==0 else "low"
 			if w.section in ["shore","quay"] and i%2==0:
 				var x: float=float(enemy.x)
-				if w.floor_at(x)==0.:
+				if CampaignGround.has_floor(w.floor_at(x)):
 					w.platforms.append(Rect2(x-55.,-70.,110.,20.));enemy.y=-70.;enemy.home=Vector2(x,-70.)
 	# Optional fruit arcs teach the existing jump/platform routes. Ground
 	# fruit still supports a direct route; these are distinct one-time IDs.

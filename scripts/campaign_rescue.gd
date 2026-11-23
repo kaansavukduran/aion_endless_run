@@ -40,6 +40,7 @@ static func populate(w) -> void:
 			w.platforms.append(Rect2(x-100.,y,200.,18.));w.platforms.append(Rect2(x-220.,-70.,140.,18.))
 		for pit in w.pits:
 			if x>pit.x-45. and x<pit.y+45.:x=pit.x-65.
+		if secret.is_empty():y=w.floor_at(x)
 		var index: int=abs(w.section.hash())+i
 		var freed: bool=w.rescued.has(id)
 		var claimed: bool=w.awarded.has(id+":gift") or w.taken.has(id+":supply")
@@ -122,7 +123,7 @@ static func crosses_rect(from: Vector2,to: Vector2,rect: Rect2) -> bool:
 	return false
 
 static func has_support(w,n: Dictionary,x: float) -> bool:
-	if absf(float(n.y))<.1:return w.floor_at(x)==0.
+	if str(n.get("secret","")).is_empty():return CampaignGround.has_floor(w.floor_at(x))
 	for platform in w.platforms:
 		if w.disabled_platforms.has(platform.position.x):continue
 		if absf(platform.position.y-float(n.y))<.1 and x>=platform.position.x+4. and x<=platform.end.x-4.:return true
@@ -137,7 +138,7 @@ static func handover(w,n: Dictionary) -> void:
 	var x: float=float(n.x)+direction*100.
 	if not has_support(w,n,x):x=float(n.x)+direction*75.
 	if not has_support(w,n,x):x=float(n.x)
-	var item: Dictionary={"id":id+":supply","kind":str(n.gift),"x":x,"y":float(n.y)-25.,"rescue_id":id,"role":str(n.role),"age":0.,"from_bag":true}
+	var item: Dictionary={"id":id+":supply","kind":str(n.gift),"x":x,"y":(w.floor_at(x) if str(n.get("secret","")).is_empty() else float(n.y))-25.,"rescue_id":id,"role":str(n.role),"age":0.,"from_bag":true}
 	w.gift_drops[id]=item.duplicate(true);w.pickups.append(item)
 	w.pending_events.append("gift_drop")
 
@@ -171,7 +172,9 @@ static func step(w,dt: float) -> void:
 			var limit: bool=absf(next-float(n.get("home_x",n.x)))>90. or next<35. or next>w.length()-90.
 			if limit or not has_support(w,n,next) or float(n.roam_clock)>1.5+float(int(n.variant)%3)*.25:
 				n.facing=-facing;n.roam_clock=0.
-			else:n.x=next
+			else:
+				n.x=next
+				if str(n.get("secret","")).is_empty():n.y=w.floor_at(next)
 			if float(n.free_age)>.2 and w.touches_npc(n):
 				n.phase="thanks";n.thank_age=0.;n.facing=1 if w.player.x>float(n.x) else -1
 				w.greeted[str(n.id)]=true;w.pending_events.append("npc_contact")
@@ -181,7 +184,9 @@ static func step(w,dt: float) -> void:
 			if phase=="thanks" and float(n.thank_age)>1.7:n.phase="departed"
 			if str(n.phase)=="departed" and float(n.thank_age)<4.8:
 				var next: float=float(n.x)-60.*dt
-				if has_support(w,n,next):n.x=next;n.facing=-1
+				if has_support(w,n,next):
+					n.x=next;n.facing=-1
+					if str(n.get("secret","")).is_empty():n.y=w.floor_at(next)
 			if n.role=="courier" and w.awarded.has(str(n.id)+":gift") and float(n.thank_age)>1.3 and float(n.thank_age)<4.2:
 				if int(float(n.thank_age)*2.)!=int((float(n.thank_age)-dt)*2.):
 					var origin:=Vector2(float(n.x),float(n.y)-40.)

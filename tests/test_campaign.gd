@@ -123,10 +123,10 @@ func run() -> void:
 		check(World.STAGES[leaf].next=="relay","All three branches converge: "+leaf)
 		check(w.enemies.any(func(e):return e.kind=="warden" and e.max_hp==12),"Each leaf has a guardian: "+leaf)
 		for e in w.enemies:
-			if e.kind not in ["crow","moth","wisp","drone"]:check(w.floor_at(float(e.x))==0.,"Ground enemy starts on actual floor")
-		for crate in w.crates:check(w.floor_at(float(crate.x))==0.,"Supply crate starts on floor")
+			if e.kind not in ["crow","moth","wisp","drone"]:check(CampaignGround.has_floor(w.floor_at(float(e.x))),"Ground enemy starts over actual floor")
+		for crate in w.crates:check(absf(float(crate.y)-w.floor_at(float(crate.x)))<.01,"Supply crate starts on the shared surface")
 		for item in w.pickups:
-			if w.floor_at(float(item.x))!=0.:
+			if not CampaignGround.has_floor(w.floor_at(float(item.x))):
 				check(gap_fruit_reachable(w,item),"Gap fruit is collected by actual jump physics from a supporting platform: "+str(item.id))
 	w=fresh();w.load_section("arena");tick(w,2.);w.damage_boss(99);check(w.boss.clock==0. and w.bullets.is_empty() and w.boss.hp==90,"Offscreen boss waits for introduction and cannot be killed before it")
 	w.boss.engaged=true;w.boss.hp=90;w.boss.wait=0.;tick(w,1.1);check(w.bullets.size()>=5,"Boss actually fires fan attack")

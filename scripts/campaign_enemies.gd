@@ -111,17 +111,19 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 		e.y=float(e.home.y)+sin(float(e.age)*(3. if kind=="kite" else 1.5))*28.
 	if absf(dx)>180. and kind not in ["mirror","vine","conductor"] and not is_hidden and not recovering:
 		var candidate: float=float(e.x)+signf(dx)*float(spec.speed)*dt
-		if flying or w.floor_at(candidate)==0.:e.x=candidate
-	if kind=="hopper" and not recovering:e.y=-absf(sin(float(e.age)*3.))*85.
+		if flying or CampaignGround.has_floor(w.floor_at(candidate)):e.x=candidate
+	var support: float=w.floor_at(float(e.x))
+	if not flying and CampaignGround.PROFILES.has(w.section) and CampaignGround.has_floor(support):e.y=support
+	if kind=="hopper" and not recovering:e.y=support-absf(sin(float(e.age)*3.))*85.
 	if float(e.leap)>0.:
 		var leap_duration: float=float(e.get("leap_duration",.6 if kind=="mimic" else .8))
 		var leap_phase: float=clampf(1.-float(e.leap)/leap_duration,0.,1.)
-		e.y=float(e.home.y)-sin(leap_phase*PI)*100.
+		e.y=(support if CampaignGround.has_floor(support) else float(e.home.y))-sin(leap_phase*PI)*100.
 	if lunge_before>0.:
 		var next: float=float(e.x)+signf(dx)*(230. if kind!="borer" else 270.)*minf(active_dt,lunge_before)
-		if w.floor_at(next)==0.:e.x=next
-	if recovering and not flying:e.y=float(e.home.y)
-	if is_hidden:e.y=0.
+		if CampaignGround.has_floor(w.floor_at(next)):e.x=next
+	if recovering and not flying:e.y=support if CampaignGround.has_floor(support) else float(e.home.y)
+	if is_hidden:e.y=support if CampaignGround.has_floor(support) else float(e.home.y)
 	# Prevent instant spawn-frame contact hits and reward attacking during recovery.
 	var active_contact: bool=float(e.age)>0.45 and (not recovering or float(e.get("lunge",0.))>0. or float(e.get("leap",0.))>0.)
 	if active_contact and absf(w.player.x-float(e.x))<38. and absf(w.player.y-float(e.y))<55. and not is_hidden:

@@ -143,13 +143,15 @@ func draw_boss_port(point: Vector2,hp: int) -> void:
 	for side in [-1.,1.]:draw_rect(Rect2(point+Vector2(side*11.-1.,-1.),Vector2(2,2)),Color("bc9d68"))
 
 func draw_world() -> void:
+	terrain.draw_campaign_bank(self,world.biome(),world,camera_x)
 	# Ground props share the exact collision groundline. They are decorative,
 	# never platforms or invisible obstacles.
 	for i in range(floori(camera_x/390.)-1,ceili((camera_x+scene_w)/390.)+1):
 		var x: float = i*390.+160.
-		if world.floor_at(x)!=0.: continue
-		existing("flora",world.biome(),0 if host.options.reduced_motion or not host.motion_enabled else posmod(int(world.time/.7)+i,3),Vector2(x,0),1,.74)
-	if not CampaignRoutes.draw_floor(self):terrain.draw(self,world.biome(),world.biome(),1.,camera_x,.05)
+		var floor: float=world.floor_at(x)
+		if not CampaignGround.has_floor(floor):continue
+		existing("flora",world.biome(),0 if host.options.reduced_motion or not host.motion_enabled else posmod(int(world.time/.7)+i,3),Vector2(x,floor),1,.74)
+	if not CampaignRoutes.draw_floor(self):terrain.draw_campaign_floor(self,world.biome(),world,camera_x)
 	CampaignEnvironmentView.draw(self)
 	for pit in world.pits:
 		var rect := Rect2(pit.x-camera_x,ground,pit.y-pit.x,scene_h-ground)
@@ -169,7 +171,7 @@ func draw_world() -> void:
 	for gate in world.gates:
 		if float(gate.x)<camera_x-100. or float(gate.x)>camera_x+scene_w+100.:continue
 		if not world.gate_closed(gate): continue
-		var p := at(Vector2(float(gate.x),0))
+		var p := at(Vector2(float(gate.x),world.floor_at(float(gate.x))))
 		draw_rect(Rect2(p-Vector2(6,155),Vector2(12,155)),Color("44445f"))
 		for y in range(8,151,18): draw_rect(Rect2(p-Vector2(3,y),Vector2(6,9)),Color("f2bf77"))
 		var blockers: Array=world.enemies.filter(func(e):return str(e.id) in gate.ids and not bool(e.defeated))
@@ -213,7 +215,7 @@ func draw_world() -> void:
 			if not host.motion_enabled or host.options.reduced_motion:f=5
 			if CampaignContent.flying(str(e.kind)):
 				var support: float=world.floor_at(p.x)
-				if support<180.:p.y=minf(support,p.y+float(CampaignEffectsArt.DATA.data.references[str(e.kind)].foot)+float(e.get("dead_age",0.))*float(e.get("dead_age",0.))*700.)
+				if CampaignGround.has_floor(support):p.y=minf(support,p.y+float(CampaignEffectsArt.DATA.data.references[str(e.kind)].foot)+float(e.get("dead_age",0.))*float(e.get("dead_age",0.))*700.)
 			else:
 				p.y+=minf(0.,float(CampaignEffectsArt.DATA.data.references[str(e.kind)].foot)+float(e.get("dead_age",0.))*float(e.get("dead_age",0.))*700.)
 			var source_facing: int=CampaignEffectsArt.DATA.data.references[str(e.kind)].facing
@@ -266,7 +268,7 @@ func draw_world() -> void:
 			for side in [-1.,1.]:
 				draw_rect(Rect2(core+Vector2(side*23.-2.,-15.),Vector2(4,30)),Color("f1c681"))
 				draw_rect(Rect2(core+Vector2(-15.,side*23.-2.),Vector2(30,4)),Color("f1c681"))
-	if CampaignVehicles.stunned(world) or (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and float(world.mount.get("floor_y",world.floor_at(float(world.mount.x))))<180.):
+	if CampaignVehicles.stunned(world) or (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and CampaignGround.has_floor(float(world.mount.get("floor_y",world.floor_at(float(world.mount.x)))))):
 		var p: Vector2=vehicle_draw_position()
 		var firing: bool=world.shot_flash>0. and bool(world.mount.ridden)
 		var spec: Dictionary=world.vehicle_art_spec()

@@ -944,6 +944,7 @@ func _process(dt: float) -> void:
 			view.camera_x=lerpf(view.camera_x,desired_x,1.-exp(-minf(dt,.05)*8.))
 		else:view.camera_x=desired_x
 		var desired_y:=minf(0.,world.player.y+225.)
+		if CampaignGround.PROFILES.has(world.section):desired_y+=maxf(0.,world.player.y)*.75
 		desired_y=CampaignRoutes.camera_y(world,desired_y)
 		view.camera_y=desired_y if options.reduced_motion else lerpf(view.camera_y,desired_y,1.-exp(-minf(dt,.05)*9.))
 		world.recovery_view=Rect2(view.camera_x,view.camera_y-view.ground,view.scene_w,view.ground+60.)

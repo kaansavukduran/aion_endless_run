@@ -20,6 +20,7 @@ static func write(w,data: Dictionary) -> void:
 	var encounter: Dictionary={}
 	for key in VALUES:encounter[key]=w.get(key)
 	encounter.pickups=w.pickups.filter(func(item):return not w.taken.has(str(item.id)))
+	data.ground_revision=CampaignGround.REVISION
 	data.phase=str(w.state)
 	data.offer_remaining=w.continue_remaining
 	data.pending_hero=w.continue_hero
@@ -79,3 +80,4 @@ static func apply(w,data: Dictionary,encounter: Dictionary) -> void:
 	w.stop_inputs()
 	w.aim_direction=encounter.aim_direction
 	w.pending_events.clear()
+	if int(data.get("ground_revision",0))<CampaignGround.REVISION:CampaignGround.lift_flat_save(w)

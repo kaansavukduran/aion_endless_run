@@ -12,7 +12,7 @@ static func support_below(w,x: float,foot: float) -> float:
 
 static func can_board(w) -> bool:
 	var floor: float=float(w.mount.get("floor_y",w.floor_at(float(w.mount.x))))
-	return bool(w.mount.available) and int(w.mount.hp)>0 and absf(w.player.x-float(w.mount.x))<150. and absf(w.player.y-floor)<90. and floor<180.
+	return bool(w.mount.available) and int(w.mount.hp)>0 and absf(w.player.x-float(w.mount.x))<150. and absf(w.player.y-floor)<90. and CampaignGround.has_floor(floor)
 
 static func park(w) -> float:
 	var visual_foot: float=w.player.y+42.
@@ -29,7 +29,7 @@ static func step_parked(w,dt: float) -> void:
 		w.mount.floor_y=target;w.mount.park_velocity=0.;return
 	w.mount.park_velocity=float(w.mount.get("park_velocity",0.))+1700.*dt
 	w.mount.floor_y=minf(target,floor+float(w.mount.park_velocity)*dt)
-	if float(w.mount.floor_y)>180. and target>=180.:w.mount.available=false
+	if float(w.mount.floor_y)>180. and not CampaignGround.has_floor(target):w.mount.available=false
 
 static func stunned(w) -> bool:
 	return bool(w.mount.get("ridden",false)) and float(w.mount.get("break_time",0.))>0.
@@ -62,7 +62,7 @@ static func eject(w) -> void:
 	w.mount.ridden=false;w.mount.available=false;w.mount.wreck_age=0.
 	w.mount_transition="";w.mount_transition_time=0.;w.drop_through_time=0.;w.stop_inputs()
 	var target:=Vector2(w.player.x,support_below(w,w.player.x,foot))
-	if target.y>=180. or not CampaignLives.landing_clear(w,target):
+	if not CampaignGround.has_floor(target.y) or not CampaignLives.landing_clear(w,target):
 		var area:=Rect2(w.player.x-220.,minf(w.player.y-200.,-380.),440.,600.)
 		target=CampaignLives.landing(w,area)
 	w.eject_target_x=target.x if absf(target.x-w.player.x)>1. else -1.
@@ -84,7 +84,7 @@ static func interact(w) -> bool:
 		for offset in [-100.,100.,-180.,180.,-260.,260.]:
 			var x: float=clampf(w.player.x+offset,35.,w.length()-90.)
 			var support: float=support_below(w,x,contact_foot)
-			if support<180.:target=Vector2(x,support);found=true;break
+			if CampaignGround.has_floor(support):target=Vector2(x,support);found=true;break
 		if not found:return false
 		park(w)
 		w.mount_transition="exit";w.mount.ridden=false
