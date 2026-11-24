@@ -1349,6 +1349,15 @@ func on_web_page_hidden(_arguments: Array) -> void:
 	clear_held_controls()
 	pause_run()
 
+func canvas_accessibility_label() -> String:
+	if world.state=="ready":
+		if page=="characters":
+			return "Aion. "+RunnerFrontText.word(language,"pick_hero")+". "+character_name(character)
+		if page=="help" or (page=="main" and opening_guide):
+			return "Aion. "+RunnerFrontText.word(language,"how")
+		return "Aion. "+AionCampaignText.word(language,"title")
+	return "Aion Endless Run. "+text("hint")+". "+text("score")+" "+str(world.score)
+
 func publish_web_essentials() -> void:
 	# Screen-reader summary, language and page state at most 10 times a second,
 	# immediately when the page, run state, language or focused control changes.
@@ -1363,7 +1372,7 @@ func publish_web_essentials() -> void:
 	web_accessibility.update()
 	canvas.setAttribute("role", "application")
 	canvas.setAttribute("lang", language)
-	canvas.setAttribute("aria-label", "Aion Endless Run. " + text("hint") + ". " + text("score") + " " + str(world.score))
+	canvas.setAttribute("aria-label", canvas_accessibility_label())
 	canvas.setAttribute("data-state", world.state)
 	canvas.setAttribute("data-page", page)
 
@@ -1569,7 +1578,7 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-best", str(best))
 	canvas.setAttribute("role", "application")
 	canvas.setAttribute("lang", language)
-	canvas.setAttribute("aria-label", "Aion Endless Run. " + text("hint") + ". " + text("score") + " " + str(world.score))
+	canvas.setAttribute("aria-label", canvas_accessibility_label())
 	canvas.setAttribute("data-state", world.state)
 	canvas.setAttribute("data-page", page)
 	canvas.setAttribute("data-score", str(world.score))
