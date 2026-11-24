@@ -272,9 +272,8 @@ func load_section(id: String) -> void:
 	CampaignGrenade.cancel(self,true)
 	MissionHeroAbilities.cancel(self)
 	shell_contacts.clear()
-	var carried: Dictionary={}
-	if section!=id and id!="shore" and state not in ["dying","dead"] and bool(mount.get("ridden",false)) and int(mount.hp)>0:carried=mount.duplicate(true)
 	section = id; checkpoint = id; checkpoint_ready = true
+	travel_target=""
 	player = Vector2(140, 0); velocity = Vector2.ZERO; facing=1; stop_inputs()
 	CampaignAssists.section_changed(self)
 	mount_transition="";mount_transition_time=0.;eject_target_x=-1.
@@ -348,8 +347,6 @@ func load_section(id: String) -> void:
 		CampaignRescue.populate(self)
 	CampaignRhythm.populate(self)
 	CampaignGround.align_world(self)
-	if not carried.is_empty():
-		mount=carried;mount.x=player.x;player.y=floor_at(player.x)-42.;mount.hurt=0.
 	state = "playing"
 	CampaignRecovery.enter(self)
 	notice = "arc_checkpoint"; notice_time = 2.
@@ -358,11 +355,42 @@ func load_section(id: String) -> void:
 func choose_route(choice: String) -> bool:
 	if state == "fork_one" and choice in ["canopy", "water"]:
 		if not route.has(choice): route.append(choice)
-		travel_target = choice; state = "travel"; stop_inputs(); return true
+		begin_travel(choice);return true
 	if state == "fork_two" and choice in ["terrace", "roots"]:
 		if not route.has(choice): route.append(choice)
-		travel_target = choice; state = "travel"; stop_inputs(); return true
+		begin_travel(choice);return true
 	return false
+
+func begin_travel(destination: String) -> void:
+	travel_target=destination;state="travel";facing=1
+	stop_inputs()
+	CampaignGrenade.cancel(self,true)
+	MissionHeroAbilities.cancel(self)
+	shot_flash=0.;melee_time=0.;rescue_time=0.;hurt_time=0.
+
+func advance_exit(dt: float) -> bool:
+	dt=clampf(dt,0.,.05)
+	var end_x:=CampaignRoutes.EXIT_X+140. if CampaignRoutes.is_fork(section) else length()-12.
+	if bool(mount.ridden):
+		# The flag is on solid ground. Step out on the same lane, ahead of
+		# the vehicle, and keep space for the short walk after landing.
+		var foot:=CampaignRoutes.foot(self)
+		var x:=minf(foot.x+72.,maxf(foot.x,end_x-56.))
+		var support:=CampaignVehicles.support_below(self,x,foot.y)
+		var target:=Vector2(x,support) if CampaignGround.has_floor(support) else foot
+		facing=1;CampaignVehicles.start_exit(self,target)
+	if mount_transition!="":
+		CampaignVehicles.step_transition(self,dt)
+		return false
+	facing=1;aim_direction=Vector2.RIGHT
+	var distance:=minf(235.*dt,maxf(0.,end_x-player.x))
+	if distance<=0.:return true
+	var next_x:=player.x+distance
+	var floor:=CampaignVehicles.support_below(self,next_x,player.y)
+	if not CampaignGround.has_floor(floor):return true
+	player=Vector2(next_x,floor)
+	velocity=Vector2(235.,0.);walk_distance+=distance
+	return next_x>=end_x
 
 func finish_travel() -> void:
 	if state == "travel" and STAGES.has(travel_target): load_section(travel_target)
@@ -913,15 +941,14 @@ func step(dt: float) -> void:
 	while trail.size()>1 and time-float(trail[0].time)>4.: trail.pop_front()
 	if CampaignRoutes.is_fork(section):
 		CampaignRoutes.step(self);return
-	if player.x>=length()-130. and section != "arena":
+	if player.x>=length()-130. and section != "arena" and grounded():
 		var blocked := false
 		for npc in npcs:
 			if str(npc.get("phase",""))=="thanks" and float(npc.get("thank_age",0.))<1.7:blocked=true
 		for e in enemies:
 			if not bool(e.defeated) and (bool(e.mini) or float(e.x)>length()-650.): blocked = true
 		if not blocked:
-			var next: String = str(STAGES[section].next)
-			travel_target = next; state = "travel"; stop_inputs()
+			begin_travel(str(STAGES[section].next))
 
 func life_rescues() -> int:
 	return maxi(0,rescued.size()-rescue_life_start)

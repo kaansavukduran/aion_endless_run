@@ -1,6 +1,8 @@
 class_name AionCampaignView
 extends Node2D
 
+const NPC_HEIGHT_RATIO := 1.75
+
 var host
 var world: AionCampaignWorld
 var frames := RunnerFrameBank.new()
@@ -63,7 +65,7 @@ func draw_pose(pose: Dictionary, p: Vector2, direction: int=1, growth: float=1.,
 func npc_growth(row: int) -> float:
 	# One standing anatomical reference per identity; no per-frame renormalizing.
 	if not npc_growth_cache.has(row):
-		npc_growth_cache[row]=2.*hero_reference_height()/maxf(1.,npc_reference_height(row))
+		npc_growth_cache[row]=NPC_HEIGHT_RATIO*hero_reference_height()/maxf(1.,npc_reference_height(row))
 	return float(npc_growth_cache[row])
 
 func vehicle_pose(type: String,phase: int,frame: int) -> Dictionary:
@@ -319,7 +321,7 @@ func draw_world() -> void:
 		draw_pose(pose,world.player,int(M1CombatArt.body_spec(world).mirror),1.,tint)
 	if not world.mount_transition.is_empty():
 		draw_embark()
-	elif not bool(world.mount.ridden) and world.state in ["playing","briefing","paused"]:
+	elif not bool(world.mount.ridden) and world.state in ["playing","briefing","paused","travel"]:
 		draw_hero_weapon()
 		CampaignGrenadeArt.draw_held(self)
 	MissionHeroArt.draw_tongue(self)
@@ -342,7 +344,7 @@ func draw_world() -> void:
 		hero_marker.body_frame=int(selected.frame)
 		hero_marker.body_mirror=int(selected.mirror)
 		hero_marker.ground_contact=bool(pose.get("ground_contact",false))
-		hero_marker.hand_layers_visible=world.state in ["playing","briefing","paused"] and not bool(world.mount.ridden) and world.mount_transition.is_empty()
+		hero_marker.hand_layers_visible=world.state in ["playing","briefing","paused","travel"] and not bool(world.mount.ridden) and world.mount_transition.is_empty()
 		hero_marker.gun_visible=hero_marker.hand_layers_visible and hero_weapon_visible() and world.melee_time<=0. and world.rescue_time<=0.
 		hero_marker.weapon_visible=hero_marker.gun_visible
 		hero_marker.melee_at_draw=world.melee_time
@@ -603,7 +605,8 @@ func draw_embark() -> void:
 	var visual: Vector2=world.player+Vector2(0.,-sin(progress*PI)*hero_reference_height()*.75)
 	if progress<.5:
 		var approach: float=world.mount_transition_from.x if world.mount_transition=="enter" else world.mount_transition_to.x
-		if absf(approach-foot.x)<hero_reference_height()*1.3:approach=foot.x-world.facing*hero_reference_height()*1.6
+		if world.state!="travel" and absf(approach-foot.x)<hero_reference_height()*1.3:
+			approach=foot.x-world.facing*hero_reference_height()*1.6
 		visual.x=lerpf(approach,foot.x,progress*2.)
 	if progress>.5:visual=foot+Vector2(0.,lerpf(-100.,-28.,inverse_lerp(.5,1.,progress)))
 	draw_pose(pose,visual,world.facing)
@@ -647,7 +650,7 @@ func draw_npcs(mounted_front: bool) -> void:
 		var npc_direction: int=npc_draw_direction(int(npc.get("facing",-1))) if phase!="bound" else 1
 		draw_pose(npc_pose,Vector2(float(npc.x),float(npc.y)),npc_direction,growth)
 		if phase=="thanks":
-			var bag_at:=Vector2(float(npc.x)+float(npc.facing)*22.,float(npc.y)-52.)
+			var bag_at:=Vector2(float(npc.x),float(npc.y))+Vector2(float(npc.facing)*22.,-52.)*(NPC_HEIGHT_RATIO/2.)
 			if age>=.45 and age<.9:
 				draw_pose(item_bank.pose(str(npc.gift)),bag_at+Vector2(float(npc.facing)*10.,-(age-.45)*80.),1,.6)
 		var p := at(Vector2(float(npc.x),float(npc.y)))

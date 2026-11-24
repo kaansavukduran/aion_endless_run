@@ -110,9 +110,9 @@ func run() -> void:
 		w.attack_press();check(w.bullets.size()==1,"Vehicle has its own rapid aimed shot: "+type)
 		w.jump_press()
 		check(w.velocity.y<0.,"Every mounted vehicle performs a grounded jump")
-		w.section="water";w.load_section("relay");check(w.mount.ridden and CampaignVehicles.kind(w)==type,"A surviving route vehicle reaches the common relay")
-		w.load_section("arena");check(w.mount.ridden and CampaignVehicles.kind(w)==type,"A surviving route vehicle can reach the boss")
 		w.invulnerable=0.;w.damage_player();tick(w,.1);check(not w.mount.ridden and w.player.y<0. and w.floor_at(w.player.x)==0.,"Destroyed craft safely ejects to supported ground")
+		w.load_section("relay");check(not w.mount.ridden,"The common relay starts on foot after riding a "+type)
+		w.load_section("arena");check(not w.mount.ridden,"The boss scene starts on foot")
 	var atlas: Dictionary=CampaignCatalog.DATA.data
 	check(atlas.drawings>=500 and atlas.distinct_crop_hashes==atlas.drawings,"At least500 genuinely distinct usable crops; excluded source defects are not counted")
 	check(atlas.animation_groups>=50,"At least50 meaningful authored action rows")

@@ -9,7 +9,7 @@ func run() -> void:
 	var view:=AionCampaignView.new()
 	var reference: float=view.hero_reference_height()
 	for row in 8:
-		check(is_equal_approx(view.npc_growth(row)*view.npc_reference_height(row),reference*2.),"Actual upright girl's alpha body is twice Aion, no padding/aura: "+str(row))
+		check(is_equal_approx(view.npc_growth(row)*view.npc_reference_height(row),reference*1.75),"Actual upright NPC body is 1.75 times Aion, excluding padding: "+str(row))
 	for type in CampaignVehicles.TYPES:
 		var old_growth: float=-1.
 		for phase in (2 if type=="skimmer" else 4):
