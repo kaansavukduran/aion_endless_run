@@ -13,6 +13,12 @@ AIONIA v1.7 bu turda canlı standart belgesinden okundu. Drive’daki 21 Kasım 
 - Gerçek yerel Web paketi 0.55.0 `6a6055e881b8dd9f`. Kök Geçidi’nde Armadillo 36.625, Su Kanalı’nda Kurbağa 32.275 skorla üç evreyi geçip sonuçlarını kaydetti. İki koşu da gerçek menü ve klavye/fare girdileriyle başladı. Su Kanalı’nın sonu aynı tarayıcı oturumunda klavye/fare kumandası devralınarak doğrulandı. Eren iki fiziksel üst ayrımdan Bahçe Terasları’nı ve Bakır Röle’yi geçti, üç boss evresini bitirdi ve 35.875 skoru kaydetti. Aynı tarayıcı oturumundaki ayrı kumanda kaydı üç evreyi gösterir. İlk sürücü arenada durdurulduğu için kendi evre örnekleri kontrolü başarısız kaldı. Kukla karakter veya durum enjeksiyonu kullanılmadı.
 - Linux Firefox aynı yerel paketi açtı, klavyeyle ilerledi ve dikey geçişte kahramanı ve koşuyu korudu. Fiziksel Poco/iPhone veya Xbox kolu ve oyuncu kabulü bekliyor.
 
+### 0.57.2 · Hızlı giriş, portreler ve havada ateş
+
+- Taban `4cd108e`. İlk rehber altı portreye açılır. Sonraki **Oyna** ve seçimdeki **Başla** ilk karşılaşmayı doğrudan oynatır. **Sürdür** kayıtlı kahraman ve konumu açar. Boss tanıtımı ve zafer sahnesi kendi yerlerinde çalışır.
+- Beş kahramanda ateş parlaması uçuş karesini başa sarıyordu. Uçuş karesini altı kahramanda yerçekimi ve uçuş süresi seçer. Fare karakterin iki olası el konumu arasındaysa yönü gövde merkezi belirler.
+- Altı yeni portre kartı doldurur. Açık, yarı kapalı ve kapalı göz kareleri aynı baş ve arka plan kaydını kullanır. Uzak saldırılarda kara keşifçisinin mermi hızı 345 yerine 372 ve her üç saldırının ikisi çift atıştır. Uyarı ve toparlanma süreleri korunur.
+
 ### 0.57.1 · Canlı Continue paneli
 
 - Taban `212afe9`. Öndeki kontrol rehberi Türkçe ve İngilizce olarak kahraman seçimini adlandırır.

@@ -12,18 +12,18 @@ func run() -> void:
 	for locale in GameText.LANGUAGES:
 		for key in AionCampaignText.UI.data.en:
 			check(AionCampaignText.UI.data.has(locale) and AionCampaignText.UI.data[locale].has(key) and AionCampaignText.word(locale,key)!=key,"UI copy is present in actual locale: "+locale+"/"+key)
-	game.world.begin("aion");game.intro_pending=true;game.menu_kind="help";game.help_step=0
-	game.finish_help();check(game.presentation_stage=="intro" and game.world.state=="story","Tutorial exit enters real skippable mission presentation")
+	game.begin_new()
+	check(game.presentation_stage=="" and game.menu_kind=="" and game.world.state=="playing","New mission becomes playable without a briefing or cinematic")
+	game.world.load_section("arena");game.start_presentation("boss_reveal")
 	var hp: int=game.world.hp;var time: float=game.world.time
 	game.world.damage_player();game._process(.5)
-	check(game.world.hp==hp and game.world.time==time,"Intro freezes simulation and protects health")
+	check(game.world.hp==hp and game.world.time==time,"Boss reveal freezes simulation and protects health")
 	var intro_time: float=game.presentation_time
 	root.size=Vector2i(393,873);await process_frame;game.resize()
-	check(game.presentation_stage=="intro" and game.presentation_time==intro_time,"Rotation does not restart the presentation")
+	check(game.presentation_stage=="boss_reveal" and game.presentation_time==intro_time,"Rotation does not restart the boss presentation")
 	game._input(joy(JOY_BUTTON_A))
-	check(game.presentation_stage=="" and game.world.state=="playing","Gamepad confirmation really skips to playable mission")
-	game.begin_new();check(game.menu_kind=="" and game.presentation_stage=="intro","A learned tutorial is not forced again on a new mission")
-	game.skip_presentation()
+	check(game.presentation_stage=="" and game.world.state=="playing" and game.world.boss.engaged,"Gamepad confirmation skips into the active boss encounter")
+	game.begin_new();check(game.menu_kind=="" and game.presentation_stage=="" and game.world.section=="shore","Restart goes directly to the first encounter")
 	game.world.weapon="heavy";game.world.ammunition=7;game.world.attempts_remaining=2;game.world.rescued.append("shore:keeper")
 	game.update_hud()
 	check(game.hud_panel.summary.contains("7") and game.hud_panel.summary.contains(game.t("reserve_lives")+" 1") and game.hud_panel.summary.contains("1"),"HUD responds to actual weapon, reserve and rescue values")

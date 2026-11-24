@@ -155,7 +155,7 @@ with sync_playwright() as playwright:
         if in_campaign:
             page.wait_for_function("old=>{const value=document.querySelector('canvas')?.dataset.campaign;if(!value)return false;const d=JSON.parse(value);return d.ui_generation!==old && d.ui_ready}", arg=before_campaign_generation, timeout=15000)
         if not in_campaign:
-            destination = {'OpenSettings': 'settings', 'StartCampaign': 'characters', 'CharacterBack': 'main', 'HowToPlay': 'help', 'FrontHelpBack': 'main', 'PageBack': 'main'}.get(name)
+            destination = {'OpenSettings': 'settings', 'StartCampaign': 'characters', 'ChooseHero': 'characters', 'CharacterBack': 'main', 'HowToPlay': 'help', 'FrontHelpBack': 'main', 'PageBack': 'main'}.get(name)
             if destination:
                 page.wait_for_function("page=>{const d=document.querySelector('canvas').dataset;return d.page===page && d.uiReady==='true'}", arg=destination, timeout=15000)
             if name in ['NextPage', 'PreviousPage']:
@@ -234,7 +234,7 @@ with sync_playwright() as playwright:
                 check(raw()['textScale'] == '2.0', 'Actual settings apply 200% text without changing the selected font')
                 fit('Desktop 200% main')
             page.screenshot(path=str(args.evidence/'opening-guide.png'))
-            tap('StartCampaign')
+            tap('StartCampaign' if front().get('guide') else 'ChooseHero')
             roster = ['aion', 'sheep', 'rabbit', 'eren', 'armadillo', 'frog']
             names = {b['name'] for b in front_buttons()}
             check({b for b in names if b.startswith('Select_')} == {'Select_'+hero for hero in roster},'The first selection screen contains all six portraits together')
@@ -273,15 +273,15 @@ with sync_playwright() as playwright:
             skip_opening()
 
         if args.scenario in ['campaign', 'all']:
-            tap('StartCampaign')
+            tap('StartCampaign' if front().get('guide') else 'ChooseHero')
             tap('Select_aion')
             page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
             check(True, 'Play opens the hero picker before entering Mission 1')
             tap('ConfirmHero')
             page.wait_for_function("document.querySelector('canvas')?.dataset.campaign", timeout=45000)
             campaign_ready()
-            fit('Campaign opening', True)
-            presentation_done()
+            check(campaign()['menu'] == '' and not campaign()['presentation'],
+                  'Play opens the active mission with no intervening panel or cinematic')
             page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).state==='playing'", timeout=15000)
             check(True, 'Actual selected hero enters playable Mission 1')
             canvas.focus()

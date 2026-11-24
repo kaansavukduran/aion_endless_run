@@ -141,7 +141,8 @@ def playing(page):
 
 def prepare_campaign(page):
     start_campaign(page)
-    tap_action(page, "CampaignBegin")
+    if read_campaign(page)["menu"] == "briefing":
+        tap_action(page, "CampaignBegin")
     while read_campaign(page)["menu"] == "help":
         tap_action(page, "CampaignGo")
     playing(page)
@@ -160,8 +161,13 @@ def prepare_campaign(page):
 
 
 def continue_campaign(page, saved, hero):
-    start_campaign(page)
-    tap_action(page, "CampaignContinue")
+    resume = next((item for item in json.loads(entry_ready(page)["ui"]) if item["name"] == "ContinueCampaign"), None)
+    if resume:
+        page.get_by_role("button", name=resume["text"], exact=True).press("Enter")
+        page.wait_for_selector("canvas[data-campaign]", timeout=45_000)
+    else:
+        start_campaign(page)
+        tap_action(page, "CampaignContinue")
     playing(page)
     active = read_campaign(page)
     assert active["character"] == hero and active["section"] == saved["checkpoint"]

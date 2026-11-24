@@ -29,7 +29,8 @@ static func body_spec(w) -> Dictionary:
   action=('crouch_walk_back' if w.velocity.x*body_facing(w)<-1. else 'crouch_walk') if absf(w.velocity.x)>1. and not w.charging else 'crouch_fire'
   frame=posmod(int(w.walk_distance/(94. if action=='crouch_walk_back' else 110.)*6.),6) if action in ['crouch_walk','crouch_walk_back'] else (clampi(int((.18-w.shot_flash)/.18*6.),0,5) if w.shot_flash>0. else 0)
  elif not w.grounded():
-  action='air_fire';frame=clampi(int((.18-w.shot_flash)/.18*6.),0,5) if w.shot_flash>0. else RunnerWorld.flight_frame_for(w.velocity.y,w.air_time,6)
+  # Repeated shots animate their effects without restarting the jump pose.
+  action='air_fire';frame=RunnerWorld.flight_frame_for(w.velocity.y,w.air_time,6)
  elif absf(w.velocity.x)>1.:
   action='walk_back' if w.velocity.x*body_facing(w)<-1. else 'walk';frame=posmod(int(w.walk_distance/(132. if action=='walk_back' else 174.)*6.),6)
  elif w.shot_flash>0.:
@@ -118,7 +119,7 @@ static func runner_spec(w) -> Dictionary:
  elif w.charging:action='crouch_fire';frame=clampi(int(w.charge_ratio()*6.),0,5)
  elif w.adventure.ducking(w):action='crouch_walk';frame=posmod(int(w.time*10.),6)
  elif w.y<0.:
-  action='air_fire';frame=w.frontier.gun_frame(6) if w.frontier.shot_flash>0. else RunnerWorld.flight_frame_for(w.velocity,w.air_time,6)
+  action='air_fire';frame=RunnerWorld.flight_frame_for(w.velocity,w.air_time,6)
  if w.state in ['ice','fire','bonk','fall','over']:action='crouch_fire';frame=5
  if not w.pose_motion_enabled:frame=0
  return {'hero':w.character,'action':action,'frame':frame}

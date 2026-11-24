@@ -2,10 +2,10 @@ class_name CampaignGroundShooters
 extends RefCounted
 
 const ROLES := {
-	"lantern_scout":{"speed":78.,"ready_range":465.,"windup":.69,"recover":.69,"speed_px":345.,"gravity":0.,"colour":"f5c986","kind":"scout_bolt"},
+	"lantern_scout":{"speed":78.,"ready_range":465.,"windup":.69,"recover":.69,"speed_px":372.,"gravity":0.,"colour":"f5c986","kind":"scout_bolt"},
 	"cap_lobber":{"speed":61.,"ready_range":425.,"windup":.88,"recover":.83,"speed_px":0.,"gravity":590.,"colour":"cde295","kind":"lob_seed"}
 }
-const ARC_SECONDS := .90
+const ARC_SECONDS := .86
 const RELEASE_SECONDS := .14
 const FIRST_PREPARATION := .55
 const BURST_SPACING := .20
@@ -100,13 +100,13 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 			e.wait=.25;e.burst_pending=false
 			return true
 		release_shot(w,e,spec)
-		e.recover=float(spec.recover);e.wait=.23;e.attacks=int(e.attacks)+1
+		e.recover=float(spec.recover);e.wait=.15;e.attacks=int(e.attacks)+1
 		return true
 	e.wait=maxf(0.,float(e.wait)-dt)
 	if float(e.age)>=FIRST_PREPARATION and float(e.wait)<=0. and absf(dx)<=float(spec.ready_range) and absf(w.player.y-float(e.y))<175. and visible_threat(w,e):
 		e.windup=float(spec.windup);e.facing=face
 		e.throw_target=w.player+Vector2(0.,-31.)
-		e.burst_pending=e.kind=="lantern_scout" and int(e.attacks)%2==1
+		e.burst_pending=e.kind=="lantern_scout" and int(e.attacks)%3!=0
 	elif absf(dx)>float(spec.ready_range)*.72:
 		walk(w,e,face,dt)
 	elif absf(dx)<160. and int(e.attacks)>0:

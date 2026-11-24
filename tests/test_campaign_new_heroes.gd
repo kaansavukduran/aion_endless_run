@@ -96,13 +96,22 @@ func test_sprint_fire() -> void:
 		check(w.sprint_fire>2.9,"A fresh sprint reignites after recovery: "+hero)
 
 func test_air_fire_stability() -> void:
-	var w:=clean("armadillo");w.player.y=-150.;w.velocity=Vector2(100.,-150.);w.air_time=.24
-	var idle_frame: int=MissionHeroArt.body_spec(w).frame
-	for flash in [.18,.15,.10,.05,0.]:
-		w.shot_flash=flash
-		check(MissionHeroArt.body_spec(w).frame==idle_frame,"Arm shooting does not reset a fixed flight pose")
-	w.air_time=.5;w.velocity.y=300.
-	check(MissionHeroArt.body_spec(w).frame>idle_frame,"Armadillo body still animates through descent")
+	for hero in AionCampaignWorld.HEROES:
+		var w:=clean(hero);w.player.y=-150.;w.air_time=.24
+		for direction in [-1,1]:
+			w.facing=direction;w.aim_direction=Vector2(direction,0.)
+			var seen: Dictionary={}
+			for speed in [-625.,-150.,150.,625.]:
+				w.velocity=Vector2(100.,speed);w.shot_flash=0.
+				var still:=M1CombatArt.body_spec(w);var arm:=M1CombatArt.placement(w)
+				seen[still.frame]=true
+				w.fire_time=0.;w.attack_press();w.attack_release()
+				check(w.shot_flash>0. and not w.bullets.is_empty(),"Real airborne shot traces the actual muzzle: "+hero)
+				for flash in [.18,.15,.10,.05,0.]:
+					w.shot_flash=flash
+					check(M1CombatArt.body_spec(w)==still and M1CombatArt.placement(w).grip==arm.grip,
+						"Fire never changes the body or gun anchor at a fixed flight phase: "+hero)
+			check(seen.size()>=3,"The body still progresses through the jump: "+hero)
 
 func _initialize() -> void:call_deferred("run")
 

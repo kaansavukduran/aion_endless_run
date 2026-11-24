@@ -27,6 +27,16 @@ func click(button: Button) -> void:
 		var event:=InputEventMouseButton.new();event.position=at;event.global_position=at;event.button_index=MOUSE_BUTTON_LEFT;event.pressed=pressed
 		root.push_input(event,true)
 
+func check_centre_aim(game: AionCampaignGame) -> void:
+	game.set_process(false)
+	for hero in AionCampaignWorld.HEROES:
+		game.world.character=hero;game.world.player=Vector2(400.,-140.)
+		game.world.velocity.y=0.;game.world.air_time=.24
+		for facing in [-1,1]:
+			game.world.facing=facing;game.world.aim_direction=Vector2(facing,0.)
+			game.mouse_point=game.view.get_global_transform_with_canvas()*game.view.at(game.world.player+Vector2(4.,-83.))
+			check(game.pointer_aim().x>0.,"Pointer near the body aims toward the same side before and after mirroring: "+hero)
+
 func actual_pointer_crouch(g) -> void:
 	if g.menu_kind=="briefing":
 		click(g.ui.find_child("CampaignBegin",true,false));await settle()
@@ -141,31 +151,25 @@ func run() -> void:
 		image.set_paused(true);image.clock=.18;image.queue_redraw();await settle()
 		check(str(image.rendered_pose.get("source_key",""))=="m1-selection-portraits","Portrait uses its dedicated sprite sheet "+hero)
 		check(image.current_frame()==2,"Selected portrait renders its closed-eye cel "+hero)
+		var source: Rect2=image.rendered_pose.source_rect
+		check(is_equal_approx(source.size.aspect(),image.size.aspect()) and image.position==Vector2(2.,2.),"Portrait covers the card interior without stretching: "+hero)
 		image.set_paused(false)
 	var selected: String=game.character
 	var other: Button=game.menu_layer.find_child("Select_aion",true,false)
 	other.grab_focus();await settle()
 	pointer(other.get_global_transform_with_canvas()*(other.size*.5));await settle()
 	check(other.has_focus() and game.character==selected,"Hover and focus keep the current hero selection")
-	click(game.menu_layer.find_child("ConfirmHero",true,false));await process_frame
-	check(game.pixel_ui.launch_pending and current_scene==game,"A normal Play click leaves the selected launch visible before scene replacement")
-	var launch: RunnerHeroPreview=game.pixel_ui.roster_previews[selected]
-	var visible_frames: Dictionary={}
-	for _i in 3:key(KEY_ENTER);key(KEY_ENTER,false)
-	var launch_deadline: int=Time.get_ticks_msec()+4000
-	while is_instance_valid(game) and not game.is_queued_for_deletion() and Time.get_ticks_msec()<launch_deadline:
-		if is_instance_valid(launch):visible_frames[launch.rendered_frame]=true
-		await process_frame
-	await settle()
+	click(game.menu_layer.find_child("ConfirmHero",true,false))
+	check(current_scene!=game and current_scene.get("selected_hero")==selected,"A normal Play click changes directly to the selected hero's mission")
 	if current_scene==game:
-		check(false,"Visible launch completes within its clip deadline")
 		game.free();quit(1);return
-	check(visible_frames.size()>=3,"Actual launch renderer presents multiple frames before leaving the menu")
-	check(is_instance_valid(current_scene) and current_scene.get("selected_hero")==selected,"Completed launch opens Mission 1 with the selected hero")
+	check(current_scene.world.state=="playing" and current_scene.menu_kind=="" and current_scene.presentation_stage=="","The first mission frame is playable")
+	for _i in 3:key(KEY_ENTER);key(KEY_ENTER,false)
+	await settle()
 	var campaigns:=0
 	for child in root.get_children():
 		if child.get_script()==load("res://scripts/campaign_game.gd"):campaigns+=1
-	check(campaigns==1,"Repeated confirmation during launch creates exactly one campaign")
+	check(campaigns==1,"Repeated confirmation creates exactly one campaign")
 	await actual_pointer_crouch(current_scene)
 	var checkpoint: Dictionary=current_scene.world.snapshot()
 	current_scene.free()
@@ -183,9 +187,10 @@ func run() -> void:
 
 	game=load("res://scripts/game.gd").new();root.add_child(game);current_scene=game;await settle()
 	game.front.skip_intro();game.front.stop_demo();game.motion=false;game.rebuild();await settle()
-	start=game.menu_layer.find_child("StartCampaign",true,false);click(start);await settle()
-	click(game.menu_layer.find_child("ConfirmHero",true,false))
-	check(current_scene!=game and game.campaign_started,"Reduced motion completes Play immediately through the same transition owner")
+	start=game.menu_layer.find_child("StartCampaign",true,false);click(start)
+	check(current_scene!=game and game.campaign_started,"Main menu Play starts without opening the hero picker again")
+	check(current_scene.world.state=="playing" and current_scene.menu_kind=="" and current_scene.world.player.x==140. and current_scene.world.time==0.,
+		"Main menu Play starts a new run despite a saved checkpoint")
 	await settle();current_scene.free();await process_frame
 	game=load("res://scripts/game.gd").new();root.add_child(game);current_scene=game;await settle()
 	game.front.skip_intro();game.front.stop_demo();game.motion=false;game.character="frog";game.world.character="frog";game.rebuild();await settle()
@@ -194,12 +199,12 @@ func run() -> void:
 	await settle()
 	var focused: Control=root.gui_get_focus_owner()
 	if is_instance_valid(focused):focused.release_focus()
-	key(KEY_ENTER);key(KEY_ENTER,false);await settle()
-	check(game.page=="characters","Unfocused Enter opens the same character picker")
-	click(game.menu_layer.find_child("ConfirmHero",true,false))
+	key(KEY_ENTER)
 	check(current_scene!=game and game.campaign_started,"An ordinary Enter with no focus invokes the primary Mission 1 action")
+	key(KEY_ENTER,false)
 	await settle()
 	check(current_scene.selected_hero=="frog","The keyboard primary-action fallback preserves the chosen new hero")
+	check_centre_aim(current_scene)
 	current_scene.free();await process_frame
 	game=load("res://scripts/game.gd").new();root.add_child(game);current_scene=game;await settle()
 	game.front.skip_intro();game.motion=false;game.rebuild();await settle()

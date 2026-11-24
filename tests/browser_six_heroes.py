@@ -371,20 +371,15 @@ class Probe:
                 self.wait(lambda p:{b['name'] for b in json.loads(p['dataset'].get('ui','[]'))}!=old and p['dataset'].get('uiReady')=='true','fresh visible roster page after '+navigation)
             self.front_button('Select_'+hero)
             self.wait(lambda p:p['front'] and p['front']['selected']==hero and p['dataset'].get('uiReady')=='true','selection acknowledgment '+hero)
-        self.stage='visible-launch'
+        self.stage='direct-launch'
         self.front_button('ConfirmHero')
-        self.wait(lambda p:p['campaign'] is not None,'Mission 1 scene after actual Play',timeout=30)
+        self.wait(lambda p:p['campaign'] and p['campaign']['ui_ready'],'Mission 1 scene after actual Play',timeout=30)
         packets=self.page.evaluate('sixProbe.packets')
-        launch=[p['front']['previews'].get(self.hero,{}) for p in packets if not p.get('campaign') and p.get('front',{}).get('launch_pending')]
-        frames={p.get('frame') for p in launch if p.get('state')=='launch' and p.get('frame',-1)>=0}
-        self.check(len(frames)>=2,'Play presents multiple actual selected launch frames before the scene transition',sorted(frames))
+        intro = [p['campaign'] for p in packets if p.get('campaign')]
+        self.check(all(p['menu']=='' and not p['presentation'] for p in intro),
+                   'Play does not insert a briefing, tutorial, or intro cinematic')
         d=self.read()['campaign'];self.check(d['character']==self.hero,'The selected identity enters Mission 1')
-        if d['menu']=='briefing':self.campaign_button('CampaignBegin')
-        for _ in range(15):
-            d=self.read()['campaign']
-            if d['menu']!='help':break
-            self.campaign_button('CampaignGo')
-        self.wait(lambda p:p['campaign'] and p['campaign']['state']=='playing' and not p['campaign']['menu'] and not p['campaign'].get('presentation'), 'natural Mission Start completion',timeout=20)
+        self.check(d['state']=='playing','First ready game frame accepts ordinary input')
         self.canvas.focus()
 
     def keyboard_matrix(self):

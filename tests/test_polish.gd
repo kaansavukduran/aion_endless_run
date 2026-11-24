@@ -83,7 +83,7 @@ func run():
    for n in 6:
     g.world.charging=charge;g.world.charge_time=n/5.*g.world.CHARGE_SECONDS;g.world.y=0 if charge else -90;g.world.air_time=0 if n==0 else .2;g.world.velocity=-650+n*260.;g.world.frontier.shot_flash=.12;g.update_friend()
     var action: String="crouch_fire" if charge else "air_fire"
-    var column: int=clampi(int(g.world.charge_ratio()*6.),0,5) if charge else g.world.frontier.gun_frame(6)
+    var column: int=clampi(int(g.world.charge_ratio()*6.),0,5) if charge else RunnerWorld.flight_frame_for(g.world.velocity,g.world.air_time,6)
     var source: Array=M1HeroArt.DATA.data.runtime_rows[hero][action]
     var f: Dictionary=M1HeroArt.DATA.data.atlases[source[0]].frames[int(source[1])][column]
     var hand: Vector2=(Vector2(f.grip[0],f.grip[1])-Vector2(f.origin[0],f.origin[1]))*float(f.scale)*g.visual_size

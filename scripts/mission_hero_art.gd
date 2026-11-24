@@ -126,7 +126,7 @@ static func body_spec(w) -> Dictionary:
 			frame=posmod(int(w.walk_distance/110.*6.),6)
 		else:action="crouch_fire";frame=clampi(int((.18-w.shot_flash)/.18*6.),0,5) if w.shot_flash>0. else posmod(int(w.time*5.),6)
 	elif not w.grounded():
-		action="air_fire";frame=clampi(int((.18-w.shot_flash)/.18*6.),0,5) if w.character!="armadillo" and w.shot_flash>0. else RunnerWorld.flight_frame_for(w.velocity.y,w.air_time,6)
+		action="air_fire";frame=RunnerWorld.flight_frame_for(w.velocity.y,w.air_time,6)
 	elif absf(w.velocity.x)>1.:
 		action="walk_back" if w.velocity.x*face<0. else "walk"
 		frame=posmod(int(w.walk_distance/174.*6.),6)

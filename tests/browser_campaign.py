@@ -190,14 +190,23 @@ with sync_playwright() as pw:
         page.wait_for_timeout(120)
     def restart_mission():
         # This is intentionally a new run for isolated input probes.
-        page.wait_for_function("['playing','continue_offer','dead'].includes(JSON.parse(document.querySelector('canvas').dataset.campaign).state)")
-        if data()['menu']=='continue_offer':
-            page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
-        if data()['menu']!='dead':
+        for _ in range(5):
+            state = page.wait_for_function("""()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);
+                return d.ui_ready && !d.presentation && ['playing','paused','continue_offer','dead'].includes(d.state) && d.state
+            }""",timeout=30000).json_value()
+            if state in ('paused','dead'):
+                break
+            if state=='continue_offer':
+                page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
+                break
             canvas.focus();page.keyboard.press('Escape')
-            page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'")
+            # An enemy can hit between the playing sample and the key event.
+            page.wait_for_timeout(200)
+        assert data()['menu'] in ('paused','dead'), data()['state']
         button('CampaignRestart')
-        page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && !d.presentation && !d.menu && d.hp===1}",timeout=15000)
+        page.wait_for_function("""()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);
+            return d.state==='playing' && !d.presentation && !d.menu && d.hp===1 && d.section==='shore' && d.attempts===3
+        }""",timeout=15000)
         canvas.focus()
     def fit():
         d=data()

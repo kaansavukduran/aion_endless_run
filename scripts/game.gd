@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.57.1"
+const GAME_VERSION = "0.57.2"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -132,7 +132,6 @@ var layout_generation := 0
 var front := preload("res://scripts/front_presentation.gd").new()
 var help_step := 0
 var camera_rise := 0.0
-var campaign_resume_requested := false
 var opening_guide := true
 # Browser QA reads ~150 canvas data-* observations. Normal players only need the
 # accessible state, so the full mirror runs for automation or ?aion-qa only.
@@ -474,7 +473,7 @@ func wrap_label(value: String, size: int = 15, color: String = "a6b8d1") -> Labe
 	return item
 
 func show_page(value: String) -> void:
-	if pixel_ui.launch_pending:return
+	if campaign_started:return
 	if value!=page:menu_pages.reset(value)
 	if value == "characters" and world.state != "ready": return
 	language_picker_open = false
@@ -767,7 +766,7 @@ func start_run() -> void:
 	show_page("")
 	tone(440.0, 0.09)
 
-func start_campaign() -> void:
+func start_campaign(resume: bool=false) -> void:
 	if campaign_started:return
 	campaign_started=true
 	front.skip_intro();front.stop_demo()
@@ -776,8 +775,8 @@ func start_campaign() -> void:
 	var campaign = preload("res://scripts/campaign_game.gd").new()
 	campaign.selected_hero=character
 	campaign.language=language
-	campaign.resume_on_ready=campaign_resume_requested
-	campaign.launch_on_ready=not campaign_resume_requested
+	campaign.resume_on_ready=resume
+	campaign.launch_on_ready=not resume
 	get_tree().root.add_child(campaign)
 	get_tree().current_scene=campaign
 	queue_free()
@@ -818,7 +817,7 @@ func _notification(what: int) -> void:
 		pause_run()
 
 func select_character(id: String) -> void:
-	if pixel_ui.launch_pending:return
+	if campaign_started:return
 	if id not in FRIENDS or world.state != "ready" or page not in ["main", "characters"]: return
 	character = id
 	world.character = id
@@ -959,8 +958,7 @@ func on_wolf(point: Vector2) -> bool:
 	return character == "wolf" and Rect2(World.PLAYER_X - 65, ground + world.y - 115, 130, 130).has_point(point)
 
 func _input(event: InputEvent) -> void:
-	if pixel_ui.launch_pending:
-		get_viewport().set_input_as_handled();return
+	if campaign_started:return
 	if is_instance_valid(front) and is_instance_valid(front.host) and front.input(event):
 		get_viewport().set_input_as_handled();return
 	if event is InputEventScreenTouch and event.pressed: active_input="touch"
@@ -1050,7 +1048,7 @@ func _input(event: InputEvent) -> void:
 		elif event.keycode in [KEY_SPACE, KEY_ENTER] and page == "main" and not language_picker_open:
 			var focused := get_viewport().gui_get_focus_owner()
 			if focused == null:
-				pixel_ui.open_campaign_picker()
+				pixel_ui.play_campaign()
 				get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F11:
 			fullscreen = not fullscreen
@@ -1402,7 +1400,7 @@ func publish_web_status() -> void:
 		var preview=pixel_ui.roster_previews[id]
 		if is_instance_valid(preview) and preview.is_visible_in_tree():
 			preview_status[id]={"state":preview.select_state,"frame":preview.rendered_frame,"paused":preview.paused,"source_key":str(preview.rendered_pose.get("source_key",""))}
-	stamp+=":"+str(pixel_ui.launch_pending)+":"+str(preview_status)
+	stamp+=":"+str(preview_status)
 	if stamp == web_stamp: return
 	web_stamp = stamp
 	var document = JavaScriptBridge.get_interface("document")
@@ -1410,7 +1408,7 @@ func publish_web_status() -> void:
 	if canvas == null: return
 	web_accessibility.update()
 	canvas.setAttribute("data-ui-ready", str(ui_layout_ready))
-	canvas.setAttribute("data-front",JSON.stringify({"intro":front.intro_active,"intro_time":front.intro_time,"idle":front.idle_time,"demo":front.demo_world!=null,"demo_index":front.demo_index,"demo_time":front.demo_time,"help_step":help_step,"guide":opening_guide,"selected":character,"launch_pending":pixel_ui.launch_pending,"previews":preview_status,"demo_player":[front.demo_world.player.x,front.demo_world.player.y] if front.demo_world!=null else [],"demo_shots":front.demo_world.shots if front.demo_world!=null else 0,"demo_section":front.demo_world.section if front.demo_world!=null else ""}))
+	canvas.setAttribute("data-front",JSON.stringify({"intro":front.intro_active,"intro_time":front.intro_time,"idle":front.idle_time,"demo":front.demo_world!=null,"demo_index":front.demo_index,"demo_time":front.demo_time,"help_step":help_step,"guide":opening_guide,"selected":character,"previews":preview_status,"demo_player":[front.demo_world.player.x,front.demo_world.player.y] if front.demo_world!=null else [],"demo_shots":front.demo_world.shots if front.demo_world!=null else 0,"demo_section":front.demo_world.section if front.demo_world!=null else ""}))
 	canvas.setAttribute("data-level-elapsed",str(world.adventure.level_elapsed))
 	canvas.setAttribute("data-level-distance",str(world.adventure.level_distance(world)))
 	canvas.setAttribute("data-celebration-x",str(world.adventure.celebration_x(world,motion)))

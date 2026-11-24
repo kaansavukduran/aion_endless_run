@@ -6,7 +6,7 @@ func run() -> void:
 	if directory.is_empty():directory="res://build/route-review"
 	DirAccess.make_dir_recursive_absolute(directory)
 	game=AionCampaignGame.new();game.language="tr";root.add_child(game);await process_frame;game.set_process(false)
-	game.audio_enabled=false;game.touch_mode=true;game.options.text_scale=1.;game.presentation_stage="";game.intro_pending=false;game.menu_kind=""
+	game.audio_enabled=false;game.touch_mode=true;game.options.text_scale=1.;game.presentation_stage="";game.menu_kind=""
 	var count:=0
 	for viewport in [Vector2i(1152,648),Vector2i(393,873)]:
 		root.size=viewport;await process_frame;game.resize()

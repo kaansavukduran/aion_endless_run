@@ -35,6 +35,8 @@ func run():
       check(card.get_global_rect().encloses(child.get_global_rect()),"Name and portrait fit their rectangle "+str(card.name))
       if child is Label:
        check(child.get_theme_font("font").get_string_size(child.text,HORIZONTAL_ALIGNMENT_LEFT,-1,child.get_theme_font_size("font_size")).x<=child.size.x,"Full localized name fits "+child.text)
+      elif child is RunnerHeroPreview and viewport.x>viewport.y and scale_value==1.:
+       check(child.size.aspect()<1.4,"The landscape card shows a full portrait instead of a cropped strip: "+str(card.name))
     var confirm: Button=game.menu_layer.find_child("ConfirmHero",true,false)
     var back: Button=game.menu_layer.find_child("CharacterBack",true,false)
     check(confirm!=null and back!=null and confirm.is_visible_in_tree() and back.is_visible_in_tree(),"Confirm and Back have real valid controls")
