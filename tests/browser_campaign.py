@@ -98,32 +98,29 @@ with sync_playwright() as pw:
         xx,yy=item['x']+item['w']/2,item['y']+item['h']/2
         page.touchscreen.tap(rect['x']+(tr[0]*xx+tr[2]*yy+tr[4])/float(initial['rawWidth'])*rect['width'],rect['y']+(tr[1]*xx+tr[3]*yy+tr[5])/float(initial['rawHeight'])*rect['height'])
         page.wait_for_timeout(160)
-    if a.hero!='aion':
-        front_tap('ChooseHero')
-        for _ in range(12):
-            if any(b['name']=='Select_'+a.hero for b in front_buttons()):break
-            front_tap('NextPage')
-        front_tap('Select_'+a.hero)
-        for _ in range(12):
-            if any(b['name']=='ConfirmHero' for b in front_buttons()):break
-            front_tap('NextPage')
-        front_tap('ConfirmHero')
-    check(canvas.get_attribute('data-character')==a.hero,'Actual front-end selects the requested hero: '+a.hero)
-    def enter_campaign(semantic=False):
+    def enter_campaign(semantic=False,resume=False):
         def select(name):
             if semantic:
                 label=next(b['text'] for b in front_buttons() if b['name']==name)
                 page.get_by_role('button',name=label,exact=True).press('Enter')
             else:
                 front_tap(name)
-        select('StartCampaign')
-        page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
-        select('ConfirmHero')
+        if resume:
+            select('ContinueCampaign')
+        else:
+            select('StartCampaign')
+            page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
+            front_tap('Select_'+a.hero)
+            page.wait_for_selector('canvas[data-character="'+a.hero+'"][data-ui-ready="true"]')
+            check(canvas.get_attribute('data-character')==a.hero,'Actual portrait selects the requested hero: '+a.hero)
+            select('ConfirmHero')
         page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")',timeout=45000)
     enter_campaign()
     last_observation={}
     def data():
-        current=json.loads(canvas.get_attribute('data-campaign'))
+        observed=canvas.get_attribute('data-campaign')
+        if not observed:return last_observation.copy()
+        current=json.loads(observed)
         last_observation.clear();last_observation.update(current)
         return current
     import sys
@@ -206,8 +203,7 @@ with sync_playwright() as pw:
     def fit():
         d=data()
         for name,b in d['buttons'].items():check(b[0]>=0 and b[1]>=0 and b[0]+b[2]<=d['view'][0]+1 and b[1]+b[3]<=d['view'][1]+1,'Visible reachable menu action: '+name)
-    fit();page.screenshot(path=str(a.evidence/'briefing.png'));button('CampaignBegin');fit()
-    while data()['menu']=='help':button('CampaignGo')
+    fit();page.screenshot(path=str(a.evidence/'mission-entry.png'))
     # The authored Mission Start is a real, non-damaging presentation. Allow
     # it to finish naturally rather than treating its story state as a failure.
     page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return d.state==="playing" && !(d.presentation || d.presentation_stage)}',timeout=15000)
@@ -604,9 +600,7 @@ with sync_playwright() as pw:
                 before_save=data()
                 page.evaluate('navigator.serviceWorker.ready.then(()=>true)');context.set_offline(True);page.reload(timeout=120000)
                 page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
-                enter_campaign(semantic=True)
-                button('CampaignContinue')
-                while data()['menu']=='help':button('CampaignGo')
+                enter_campaign(semantic=True,resume=True)
                 page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).state==="playing"')
                 after_resume=data()
                 check(abs(after_resume['player'][0]-before_save['player'][0])<1 and after_resume['weapon']==before_save['weapon'] and after_resume['ammunition']==before_save['ammunition'] and after_resume['attempts']==before_save['attempts'],'Actual offline Continue restores exact mid-route position, inventory and remaining lives')
@@ -741,17 +735,16 @@ with sync_playwright() as pw:
             check(canvas.get_attribute('data-campaign') is None,'Return to the original runner clears stale campaign observations')
             check(page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1')).completed"),'Returning to main preserves the completed campaign')
             # Re-enter via the real semantic counterpart of the actual Godot button.
-            enter_campaign(semantic=True)
     if a.offline:
         if data()['state']=='playing':canvas.focus();page.keyboard.press('Escape');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
         before=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
         page.evaluate('navigator.serviceWorker.ready.then(()=>true)');context.set_offline(True);page.reload(timeout=120000);page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
-        enter_campaign(semantic=True)
+        if not before['completed']:
+            enter_campaign(semantic=True,resume=True)
         after=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
         check(after['checkpoint']==before['checkpoint'] and after['score']==before['score'],'Offline reload starts the real game and preserves its separate campaign checkpoint')
         if not before['completed']:
-            button('CampaignContinue')
-            while data()['menu']=='help':button('CampaignGo')
+            page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).state==="playing"')
             check(data()['score']==before['score'] and data()['section']==before['checkpoint'],'Actual Continue resumes saved checkpoint offline')
         page.screenshot(path=str(a.evidence/'offline-restored.png'));context.set_offline(False)
     (a.evidence/'console.json').write_text(json.dumps(console,indent=2)+'\n')

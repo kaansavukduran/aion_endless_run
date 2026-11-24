@@ -12,6 +12,9 @@ var paused := false
 var manual_frame := -1
 var show_guides := false
 const PLAYABLE_HEROES = preload("res://scripts/world.gd").PLAYABLE_HEROES
+const PORTRAITS=preload("res://assets/m1-selection-portraits.png")
+const PORTRAIT_SIZE:=Vector2(136,112)
+var portrait_art := false
 var launch_complete := false
 var rendered_frame := -1
 var rendered_pose: Dictionary = {}
@@ -36,6 +39,8 @@ func set_select_state(state: String) -> void:
 	clock=0.;manual_frame=-1;launch_complete=false;queue_redraw()
 
 func playback_spec() -> Dictionary:
+	if portrait_art:
+		return {"body_action":"portrait","frames":3,"fps":8.,"loop":select_state!="launch","start":0.}
 	var spec: Dictionary=SELECT_STATE_SPEC.get(select_state,{})
 	var body_action: String=str(spec.get("body_action",""))
 	var clip_start:=0.
@@ -79,6 +84,10 @@ func current_frame() -> int:
 	var clip:=playback_spec()
 	if manual_frame>=0:return clampi(manual_frame,0,int(clip.frames)-1)
 	if not animate:return 0
+	if portrait_art:
+		if select_state not in ["select","launch"]:return 0
+		var phase:=clock if select_state=="launch" else fmod(clock,2.6)
+		return 2 if phase>=.15 and phase<.25 else (1 if phase>=.09 and phase<.32 else 0)
 	var frame:=int(maxf(0.,clock-float(clip.start))*float(clip.fps))
 	return posmod(frame,int(clip.frames)) if clip.loop else mini(int(clip.frames)-1,frame)
 
@@ -100,14 +109,18 @@ func step_frame(delta: int=1) -> int:
 
 func _process(dt: float) -> void:
 	if not is_visible_in_tree() or not animate or paused:return
+	if portrait_art and select_state not in ["select","launch"]:return
 	clock+=minf(dt,.05)
-	queue_redraw()
+	if not portrait_art or rendered_frame!=current_frame():queue_redraw()
 	if select_state=="launch" and not launch_complete:
 		var clip:=playback_spec()
 		if clock>=float(clip.frames)/float(clip.fps):
 			launch_complete=true
 			launch_finished.emit()
 func _draw() -> void:
+	if portrait_art:
+		draw_portrait()
+		return
 	var state_spec: Dictionary=SELECT_STATE_SPEC.get(select_state,{})
 	var clip:=playback_spec()
 	var active_frame: int=current_frame()
@@ -155,3 +168,30 @@ func _draw() -> void:
 		draw_circle(Vector2(0,-40),3.,Color("ffcf8c"))
 		if has_muzzle:draw_circle(muzzle_pos,2.5,Color("9ef58e"))
 	draw_set_transform(Vector2.ZERO)
+
+
+func draw_portrait() -> void:
+	var row:=AionCampaignWorld.HEROES.find(hero)
+	if row<0:return
+	rendered_frame=current_frame()
+	rendered_pose={"source_key":"m1-selection-portraits","source_frame":rendered_frame}
+	var hue:=Color(AionCampaignWorld.COLORS[hero])
+	var selected:=select_state in ["select","launch"]
+	var field:=Rect2(Vector2.ZERO,size)
+	draw_rect(field,Color("252337") if selected else Color("25232e"))
+	var step:=11.
+	for y in range(8,int(size.y),int(step)):
+		for x in range(7+(y%2)*5,int(size.x)-4,int(step)):
+			var ink:=hue
+			ink.a=.20 if selected else .07
+			draw_rect(Rect2(x,y,2,2),ink)
+	var ratio:=minf((size.x-12.)/PORTRAIT_SIZE.x,(size.y-4.)/PORTRAIT_SIZE.y)
+	var area: Vector2=(PORTRAIT_SIZE*ratio).floor()
+	var origin: Vector2=((size-area)*.5).floor()
+	draw_texture_rect_region(PORTRAITS,Rect2(origin,area),
+		Rect2(Vector2(rendered_frame*PORTRAIT_SIZE.x,row*PORTRAIT_SIZE.y),PORTRAIT_SIZE),
+		Color.WHITE if selected else Color("c4bbc4"))
+	if selected:
+		for x in [3.,size.x-14.]:
+			draw_rect(Rect2(x,3,11,3),hue)
+			draw_rect(Rect2(x if x<10. else x+8.,6,3,8),hue)

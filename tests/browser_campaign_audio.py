@@ -19,14 +19,12 @@ with sync_playwright() as p:
  b=p.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox','--enable-unsafe-swiftshader'])
  c=b.new_context(viewport={'width':1280,'height':720},locale='en-US');c.add_init_script('''(()=>{window.audioProbe={starts:0,longStarts:0,buffers:0,longBuffers:0};const start=AudioBufferSourceNode.prototype.start;AudioBufferSourceNode.prototype.start=function(...args){audioProbe.starts++;if(this.buffer?.duration>20)audioProbe.longStarts++;return start.apply(this,args)};const make=BaseAudioContext.prototype.createBuffer;BaseAudioContext.prototype.createBuffer=function(...args){audioProbe.buffers++;if(args[1]/args[2]>20)audioProbe.longBuffers++;return make.apply(this,args)}})()''')
  page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url);page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
- page.get_by_role('button',name='Play',exact=True).press('Enter')
+ page.get_by_role('button',name='Skip',exact=True).press('Enter')
  page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
  name=next(b['text'] for b in json.loads(page.locator('canvas').get_attribute('data-ui')) if b['name']=='ConfirmHero')
  page.get_by_role('button',name=name,exact=True).press('Enter')
  page.wait_for_function('document.querySelector("canvas").dataset.campaign')
- page.get_by_role('button',name='Begin mission',exact=True).press('Enter')
  def data():return json.loads(page.locator('canvas').get_attribute('data-campaign'))
- while data()['menu']=='help':page.get_by_role('button',name=data()['buttons']['CampaignGo'][4],exact=True).press('Enter');page.wait_for_timeout(160)
  # Mission Start now consumes Escape as Skip. Finish that real presentation
  # before exercising paused → playing → paused audio. Two seconds of actual
  # play keeps this focused probe away from an unattended combat/death flow.

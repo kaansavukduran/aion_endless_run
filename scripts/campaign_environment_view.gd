@@ -33,7 +33,10 @@ static func draw(v) -> void:
 		elif o.kind in ["current","updraft"]:frame=3
 		elif o.kind=="turret" and fmod(float(o.get("clock",0.)),3.)>2.2:frame=1
 		if w.completed and o.kind=="lamp":frame=3
-		v.draw_pose(v.catalogue.pose("environment",row,frame),Vector2(float(o.x),float(o.y)))
+		if o.kind=="gate":
+			CampaignLockArt.gate(v,v.at(Vector2(float(o.x),float(o.y))),w.section,
+				clampi(1+int(float(o.get("changed",9.))*13.),1,5) if bool(o.active) else 0,.76)
+		else:v.draw_pose(v.catalogue.pose("environment",row,frame),Vector2(float(o.x),float(o.y)))
 	# 0.38.0: Distinct, readable environmental zone cues for water current, terrace updraft, and roots darkness.
 	for z in w.zones:
 		if float(z.x)+float(z.width)<v.camera_x-80. or float(z.x)>v.camera_x+v.scene_w+80.:continue
@@ -79,6 +82,7 @@ static func draw(v) -> void:
 		var surface: float=w.floor_at(float(h.x))
 		if not CampaignGround.has_floor(surface):continue
 		var p: Vector2=v.at(Vector2(float(h.x),surface))
+		if CampaignLockArt.trap(v,p,str(h.kind),float(h.phase),animated):continue
 		var active: bool=float(h.phase)>=3.5 and float(h.phase)<4.1
 		if bool(h.warn):
 			if h.kind=="crystal":

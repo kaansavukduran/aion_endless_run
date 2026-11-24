@@ -23,6 +23,10 @@ def opening_button(state, bounds):
 
 def main_layout_ready(state, bounds):
     names = {button['name'] for button in state['buttons']}
+    if 'guide' in state:
+        return (state.get('page') == 'main' and layout_matches_display(state, bounds)
+                and {'LanguageMenu', 'StartCampaign', 'OpenSettings'} <= names
+                and 'StartRun' not in names and 'PagePanel' in state.get('regions', {}))
     return (
         state.get('page') == 'main'
         and layout_matches_display(state, bounds)

@@ -33,7 +33,7 @@ const LOCAL := {
 "it":{"arcade":"Gioca","endless":"Corsa infinita","title":"Lanterne spente","start":"Inizia missione","continue":"Riprendi dal checkpoint","grenade":"Granata","melee":"Colpo","ride":"Sali / scendi","fork":"Scegli il percorso","shore":"Costa delle lanterne","quay":"Molo spezzato","canopy":"Chiome degli alberi","water":"Canale allagato","terrace":"Terrazze del giardino","roots":"Passaggio delle radici","relay":"Relè di rame","arena":"Motore delle radici","won":"Missione completata","retry":"Riprova checkpoint","mission":"Missione 1","back":"Menu principale","next":"Continua"}}
 
 const HERO_SKILL_TEXT := {
- "skill_roll":["Yuvarlan","Roll"],"skill_tongue":["Dil","Tongue"],
+ "skill_roll":["Yuvarlan","Roll"],"skill_tongue":["Dil","Tongue"],"skill_spit":["Tükür","Spit"],
  "skill_ready":["Hazır","Ready"],"skill_crouch":["Eğil","Crouch"],
  "skill_recover":["Toparlanıyor","Recovering"],"skill_cooldown":["Bekle","Cooldown"],
  "skill_active":["Aktif","Active"]

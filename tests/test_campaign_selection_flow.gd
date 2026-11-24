@@ -125,35 +125,28 @@ func run() -> void:
 	var game=load("res://scripts/game.gd").new();root.add_child(game);current_scene=game
 	await settle();game.front.skip_intro();game.front.stop_demo();game.motion=true;game.interface_options.reduced_motion=false;game.rebuild();await settle()
 	check(game.FRIENDS==["aion","sheep","rabbit","eren","armadillo","frog"],"The current roster keeps the original four identities followed by the two new heroes")
+	var start: Button=game.menu_layer.find_child("StartCampaign",true,false)
+	check(game.ui.find_child("OpeningGuide",true,false)!=null,"Fresh install exposes the guide before the six portraits")
+	check(game.ui.find_child("StartRun",true,false)==null,"Arcade entrance exposes no retired game mode")
+	click(start);await settle()
+	check(game.page=="characters","Guide skip opens character selection first")
+	check(game.menu_layer.find_children("Select_*","Button",true,false).size()==6,"All six portraits are visible at once")
 	for hero in game.FRIENDS:
-		var choice: Button=game.menu_layer.find_child("StartSelect_"+hero,true,false)
-		var page_limit:=0
-		while not is_instance_valid(choice) and page_limit<game.FRIENDS.size():
-			var next: Button=game.menu_layer.find_child("RosterNext",true,false)
-			if not is_instance_valid(next) or next.disabled:break
-			click(next);await settle();page_limit+=1
-			choice=game.menu_layer.find_child("StartSelect_"+hero,true,false)
-		check(is_instance_valid(choice) and choice.is_visible_in_tree(),hero+" is reachable through the real roster")
+		var choice: Button=game.menu_layer.find_child("Select_"+hero,true,false)
+		check(is_instance_valid(choice) and choice.is_visible_in_tree(),hero+" is reachable without paging")
 		if not is_instance_valid(choice):continue
 		click(choice);await settle()
-		check(game.character==hero and game.pixel_ui.roster_previews[hero].select_state=="select",hero+" is selected by its actual card click")
-		var endless: Button=game.menu_layer.find_child("StartRun",true,false)
-		check(endless.disabled==(hero not in game.World.PLAYABLE_HEROES),hero+" accurately exposes the original four-hero Endless scope")
-
+		var image: RunnerHeroPreview=game.pixel_ui.roster_previews[hero]
+		check(game.character==hero and image.select_state=="select",hero+" is selected by its actual portrait click")
+		image.set_paused(true);image.clock=.18;image.queue_redraw();await settle()
+		check(str(image.rendered_pose.get("source_key",""))=="m1-selection-portraits","Portrait uses its dedicated sprite sheet "+hero)
+		check(image.current_frame()==2,"Selected portrait renders its closed-eye cel "+hero)
+		image.set_paused(false)
 	var selected: String=game.character
-	var other: String=game.FRIENDS[1] if selected!=game.FRIENDS[1] else game.FRIENDS[0]
-	var tile: Button=game.menu_layer.find_child("StartSelect_"+other,true,false)
-	var image: RunnerHeroPreview=game.pixel_ui.roster_previews[other]
-	tile.grab_focus();await settle()
-	pointer(tile.get_global_transform_with_canvas()*(tile.size*.5));await settle()
-	pointer(Vector2(2,2));await settle()
-	check(tile.has_focus() and image.select_state=="focus","Mouse exit preserves active keyboard focus")
-	pointer(tile.get_global_transform_with_canvas()*(tile.size*.5));await settle();tile.release_focus();await settle()
-	check(tile.is_hovered() and image.select_state=="focus","Focus exit preserves active mouse hover")
-	check(game.character==selected,"Hover and focus never change the selected hero")
-	var start: Button=game.menu_layer.find_child("StartCampaign",true,false)
-	click(start);await settle()
-	check(game.page=="characters" and game.pixel_ui.choose_for_campaign,"Play opens character selection first")
+	var other: Button=game.menu_layer.find_child("Select_aion",true,false)
+	other.grab_focus();await settle()
+	pointer(other.get_global_transform_with_canvas()*(other.size*.5));await settle()
+	check(other.has_focus() and game.character==selected,"Hover and focus keep the current hero selection")
 	click(game.menu_layer.find_child("ConfirmHero",true,false));await process_frame
 	check(game.pixel_ui.launch_pending and current_scene==game,"A normal Play click leaves the selected launch visible before scene replacement")
 	var launch: RunnerHeroPreview=game.pixel_ui.roster_previews[selected]
@@ -202,7 +195,7 @@ func run() -> void:
 	var focused: Control=root.gui_get_focus_owner()
 	if is_instance_valid(focused):focused.release_focus()
 	key(KEY_ENTER);key(KEY_ENTER,false);await settle()
-	check(game.page=="characters" and game.pixel_ui.choose_for_campaign,"Unfocused Enter opens the same character picker")
+	check(game.page=="characters","Unfocused Enter opens the same character picker")
 	click(game.menu_layer.find_child("ConfirmHero",true,false))
 	check(current_scene!=game and game.campaign_started,"An ordinary Enter with no focus invokes the primary Mission 1 action")
 	await settle()
@@ -212,7 +205,7 @@ func run() -> void:
 	game.front.skip_intro();game.motion=false;game.rebuild();await settle()
 	var y:=InputEventJoypadButton.new();y.button_index=JOY_BUTTON_Y;y.pressed=true
 	root.push_input(y);await settle()
-	check(game.page=="characters" and game.pixel_ui.choose_for_campaign,"Xbox Y opens the same pre-mission picker")
+	check(game.page=="characters","Xbox Y opens the same pre-mission picker")
 	y.pressed=false;root.push_input(y);y.pressed=true;root.push_input(y);await settle()
 	check(current_scene!=game and is_instance_valid(current_scene),"Xbox Y confirms the pending hero picker")
 	current_scene.free();await process_frame

@@ -12,7 +12,7 @@ func point(rect: Rect2) -> Array:
 func layout() -> void:
 	if not OS.has_feature("android"):return
 	var buttons:=[];var actions:={};var regions:={}
-	for name in ["PagePanel","StartChooser"]:
+	for name in ["PagePanel","HeroSelection"]:
 		var control=host.menu_layer.get_node_or_null(name)
 		if control!=null and control.is_visible_in_tree():
 			var rect: Rect2=control.get_global_rect()
@@ -22,7 +22,7 @@ func layout() -> void:
 	for id in host.action_buttons:
 		var control=host.action_buttons[id]
 		if control.is_visible_in_tree():actions[id]=point(control.get_global_rect())
-	emit_packet("AION_UI",JSON.stringify({"page":host.page,"language":host.language,"character":host.character,"orientation":"portrait" if host.portrait else "landscape","score":host.world.score,"level":host.world.adventure.level,"buttons":buttons,"actions":actions,"regions":regions}))
+	emit_packet("AION_UI",JSON.stringify({"page":host.page,"guide":host.opening_guide,"language":host.language,"character":host.character,"orientation":"portrait" if host.portrait else "landscape","score":host.world.score,"level":host.world.adventure.level,"buttons":buttons,"actions":actions,"regions":regions}))
 func state() -> void:
 	if not OS.has_feature("android"):return
 	var w=host.world

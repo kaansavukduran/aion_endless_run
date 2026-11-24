@@ -84,6 +84,7 @@ static func cancel_picker(w) -> bool:
 
 static func confirm(w,hero: String) -> bool:
 	if w.state!="continue_pick" or hero not in w.HEROES:return false
+	if w.character!=hero:MissionHeroAbilities.reset(w)
 	w.character=hero
 	w.continue_hero=hero
 	w.continues_used+=1

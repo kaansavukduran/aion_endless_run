@@ -29,7 +29,8 @@ func run() -> void:
 	await process_frame
 	game.set_physics_process(false)
 	game.set_process(false)
-	check(game.ui.find_children("StartSelect_*", "Button", true, false).size() == 6, "All six current playable tiles exist before play")
+	game.show_page("characters")
+	check(game.ui.find_children("Select_*", "Button", true, false).size() == 6, "All six current playable tiles exist before play")
 	game.select_character("eren")
 	game.set_language("tr")
 	check(game.character_name("rabbit") == "Ayça" and game.language_override, "Manual Turkish selection localizes the current roster and overrides the default")

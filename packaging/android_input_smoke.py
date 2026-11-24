@@ -1,9 +1,7 @@
 """Use real ADB gestures and passive Godot layout/state logs; no state injection."""
 import argparse,json,re,subprocess,time,os
 from android_packets import decode_packets
-from android_gestures import charged_jump_sequence, start_grounded_gesture, wait_for_charged_jump
-from android_readiness import capture_main_frame, layout_matches_display, wait_for_main
-from android_roster import CURRENT_ROSTER, RETIRED_ROSTER, NativeRoster
+from android_readiness import capture_main_frame, layout_matches_display
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=Path('build'));a=p.parse_args();a.output.mkdir(exist_ok=True,parents=True)
 results=[]
@@ -37,34 +35,11 @@ def menu_button(name=None,text=None):
  history=packets('AION_UI ')
  if history and not layout_matches_display(history[-1],bounds):
   record_target({'event':'rejected_stale_layout','wanted':name or text,'display':bounds,'layout':history[-1]})
- if name in CURRENT_ROSTER:
-  state=native_roster.find(name)
- else:
-  state=latest('AION_UI ',lambda s:layout_matches_display(s,bounds) and any(b['name']==name or (text and re.search(text,b['text'])) for b in s['buttons']))
+ state=latest('AION_UI ',lambda s:layout_matches_display(s,bounds) and any(b['name']==name or (text and re.search(text,b['text'])) for b in s['buttons']))
  chosen=next(b for b in state['buttons'] if b['name']==name or (text and re.search(text,b['text'])))
  record={'event':'tap','name':chosen['name'],'text':chosen['text'],'point':chosen['point'],'orientation':state['orientation'],'page':state['page'],'display':bounds}
  record_target(record)
  tap(chosen['point'])
-native_roster=NativeRoster(lambda:packets('AION_UI '),display_bounds,lambda name:menu_button(name=name))
-def ready_main(cold=False):
- def skip_opening(button,state,bounds):
-  record_target({'event':'tap','name':button['name'],'text':button['text'],'point':button['point'],'orientation':state['orientation'],'page':state['page'],'display':bounds})
-  tap(button['point'])
- return wait_for_main(lambda:packets('AION_UI '),display_bounds,skip_opening,record_target,cold=cold)
-def training():
- # Training is still an actual feature, now under How to play to keep the
- # primary menu compact. Follow the real UI and its pager; never set practice.
- state=ready_main()
- if not any(b['name']=='BossTraining' for b in state['buttons']):
-  menu_button(name='HowToPlay');state=latest('AION_UI ',lambda s:s['page']=='help')
-  for _ in range(16):
-   if any(b['name']=='BossTraining' for b in state['buttons']):break
-   before=[(b['name'],b['text']) for b in state['buttons']]
-   menu_button(name='NextPage')
-   state=latest('AION_UI ',lambda s:s['page']=='help' and [(b['name'],b['text']) for b in s['buttons']]!=before)
-  assert any(b['name']=='BossTraining' for b in state['buttons']),state
- menu_button(name='BossTraining')
- latest('AION_UI ',lambda s:s['page']=='bosses')
 def capture(name):
  (a.output/('android-'+name+'.png')).write_bytes(adb('exec-out','screencap','-p'))
 def capture_main():
@@ -74,116 +49,6 @@ def capture_main():
  capture_main_frame(lambda:packets('AION_UI '),display_bounds,
   lambda:adb('exec-out','screencap','-p'),
   lambda name,png:(a.output/name).write_bytes(png),record_target)
-def hold(action,duration=1200,layout=None):
- if layout is None:layout=latest('AION_UI ',lambda s:action in s['actions'])
- x,y=layout['actions'][action]
- record_target({'event':'hold','action':action,'duration_ms':duration,'point':[x,y],'character':layout['character'],'page':layout['page'],'orientation':layout['orientation'],'issued_at_unix':time.time()})
- return subprocess.Popen(['adb','shell','input','swipe',str(x),str(y),str(x),str(y),str(duration)],stdout=subprocess.DEVNULL)
-def charged_jump(character,duration,charge_message,release_message,*,minimum_ratio=None,charge_capture=None,release_capture):
- bounds=display_bounds()
- layout=latest('AION_UI ',lambda s:s['page']=='' and s['character']==character and 'jump' in s['actions'] and layout_matches_display(s,bounds) and all(0<=s['actions']['jump'][axis]<bounds[axis] for axis in [0,1]))
- cursor=None
- trace={'event':'charged_jump_trace','character':character,'cursor':cursor,'duration_ms':duration,'minimum_charge_ratio_exclusive':minimum_ratio,'target':layout['actions']['jump'],'display':bounds,'captures':[]}
- try:
-  gesture,cursor,grounded=start_grounded_gesture(lambda:packets('AION_STATE '),character,lambda:hold('jump',duration,layout))
-  trace['cursor']=cursor;trace['grounded_precondition']=grounded
-  try:
-   wait_for_charged_jump(lambda:packets('AION_STATE '),cursor,character,'charge',minimum_ratio=minimum_ratio)
-   check(True,charge_message)
-   if charge_capture:
-    trace['captures'].append({'file':'android-'+charge_capture+'.png','latest_state':packets('AION_STATE ')[-1]})
-    capture(charge_capture)
-  finally:gesture.wait(timeout=5)
-  wait_for_charged_jump(lambda:packets('AION_STATE '),cursor,character,'release',minimum_ratio=minimum_ratio)
-  trace['captures'].append({'file':'android-'+release_capture+'.png','latest_state':packets('AION_STATE ')[-1]})
-  capture(release_capture)
-  check(True,release_message)
- except Exception as error:
-  trace['error']=repr(error)
-  raise
- finally:
-  history=packets('AION_STATE ')
-  start=cursor if cursor is not None else max(0,len(history)-10)
-  trace['states']=[{'index':index,'state':state} for index,state in enumerate(history[start:],start=start)]
-  trace['sequence']=charged_jump_sequence(history,cursor,character,minimum_ratio) if cursor is not None else {'charge':None,'release':None}
-  (a.output/('android-'+character+'-jump-states.json')).write_text(json.dumps(trace,indent=2)+'\n')
-  record_target(trace)
-def pause():
- menu_button(text=r'^(Pause|Duraklat|Pozastavit)$')
- latest('AION_STATE ',lambda s:s['page']=='paused')
- # State changes before the deferred menu rebuild. Wait for the actual
- # paused layout as well, otherwise main() can read the old Pause button.
- latest('AION_UI ',lambda s:s['page']=='paused')
-def main():
- menu_button(text=r'^(Main menu|Ana menü|Hlavní nabídka)$');ready_main()
-initial=latest('AION_UI ',lambda s:s['page']=='main',timeout=25)
-ready_main(cold=True)
-# The full-scene image validator expects the interactive game, not the
-# intentionally sparse dark opening. Keep its existing thresholds unchanged.
-capture_main()
-for code in ['tr','en']:
- menu_button(name='LanguageMenu')
- latest('AION_UI ',lambda s:any(b['name']=='Language_'+code for b in s['buttons']))
- menu_button(name='Language_'+code)
- layout=latest('AION_UI ',lambda s:s['page']=='main' and s['language']==code)
- panel=layout['regions']['PagePanel'];chooser=layout['regions']['StartChooser']
- check(panel[1]+panel[3]<=chooser[1] and chooser[3]<100, 'Native system-font menu and heading/roster stay separated: '+code)
- capture('main-'+code)
-layout=ready_main()
-roster_pages=[]
-def record_roster_page(state):
- record={'event':'native_roster_page','visible':sorted(native_roster.names(state)),'layout':state,'display':display_bounds()}
- roster_pages.append(record)
- (a.output/'android-roster-pages.json').write_text(json.dumps(roster_pages,indent=2)+'\n')
- record_target(record);capture('roster-page-'+str(len(roster_pages)))
-visible=native_roster.inspect(record_roster_page)
-check(not (RETIRED_ROSTER & visible),'Retired owl and wolf are absent across all native roster pages')
-check(set(CURRENT_ROSTER)==visible,'All six current playable characters are reachable through actual native roster pages')
-menu_button(name='StartSelect_aion');latest('AION_UI ',lambda s:s['character']=='aion' and s['page']=='main')
-menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-before_jump=len(packets('AION_STATE '));gesture=hold('jump',350)
-gesture.wait(timeout=5)
-flight=packets('AION_STATE ')[before_jump:]
-(a.output/'android-aion-jump-states.json').write_text(json.dumps(flight,indent=2)+'\n')
-check(any(state['airborne'] for state in flight),'Real native Aion Jump touch produces an airborne state')
-capture('aion-jump')
-pause();capture('paused');main()
-menu_button(name='StartSelect_aion');latest('AION_UI ',lambda s:s['character']=='aion' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-gesture=hold('shoot',700)
-try:latest('AION_STATE ',lambda s:s['shooting'] and s['shots']>0);capture('normal-fire');check(True,'Real native Fire touch emits a normal-run bullet')
-finally:gesture.wait(timeout=5)
-pause();main();training();menu_button(name='PracticeBoss_0');latest('AION_STATE ',lambda s:s['practice'] and s['boss_phase']=='fight',timeout=25)
-# A slow software-rendered emulator advances less active game time per wall
-# second. Use the real training arena (3HP, no parkour) to observe a full hold;
-# normal-run input is checked above. Never remove the six-shot assertion.
-gesture=hold('shoot',5200)
-try:latest('AION_STATE ',lambda s:s['shots']>=6);capture('held-fire');check(True,'Real native held Fire continues beyond five bullets without reload in the training arena')
-finally:gesture.wait(timeout=8)
-pause();main();menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-gesture=hold('duck',600)
-try:latest('AION_STATE ',lambda s:s['rolling']);capture('duck');check(True,'Real native Roll touch reaches the actual roll state')
-finally:gesture.wait(timeout=5)
-pause();main();menu_button(name='StartSelect_eren');latest('AION_UI ',lambda s:s['character']=='eren' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-charged_jump('eren',500,'Native Eren independently charges while grounded','Native Eren releases his own charged leap',release_capture='eren')
-pause();main();menu_button(name='StartSelect_rabbit');latest('AION_UI ',lambda s:s['character']=='rabbit' and s['page']=='main');menu_button(name='StartRun');latest('AION_UI ',lambda s:s['page']=='')
-charged_jump('rabbit',1000,'Native Ayça holds on the ground and accumulates charge','Native Ayça releases a real charged leap',minimum_ratio=.1,charge_capture='rabbit-charge',release_capture='rabbit-leap')
-pause();old=latest('AION_UI ',lambda s:s['page']=='paused');adb('shell','wm','size','2560x1440')
-try:
- rotated=latest('AION_UI ',lambda s:s['page']=='paused' and s['orientation']=='landscape');capture('landscape-paused')
- check(rotated['character']==old['character'] and rotated['score']==old['score'] and rotated['level']==old['level'],'Native landscape resize preserves the paused character, score and level')
-finally:
- adb('shell','wm','size','reset')
- # Window-manager completion is not Godot layout completion. The last record
- # was explicitly landscape; require the restored engine layout and bounded
- # physical targets before the first tap back into the portrait menu.
- restored_bounds=display_bounds()
- restored=latest('AION_UI ',lambda state:state['page']=='paused' and state['orientation']==old['orientation'] and layout_matches_display(state,restored_bounds),timeout=25)
- check(restored['character']==old['character'] and restored['score']==old['score'] and restored['level']==old['level'],'Native restored portrait layout is acknowledged before another menu tap')
-# The changed crouch/movement mechanic belongs to Arcade, whose passive native
-# records are separate from the retained Endless runner observations above.
-main();menu_button(name='StartSelect_aion');ready_main();menu_button(name='StartCampaign')
-latest('AION_UI ',lambda s:s['page']=='characters' and any(b['name']=='ConfirmHero' for b in s['buttons']))
-menu_button(name='ConfirmHero')
 def arcade_ui(predicate=lambda value:True,timeout=25):
  return latest('AION_ARCADE_UI ',lambda value:value.get('ui_ready') and predicate(value),timeout=timeout)
 def arcade_state(predicate=lambda value:True,timeout=25):
@@ -193,12 +58,85 @@ def arcade_button(name):
  chosen=next(button for button in layout['buttons'] if button['name']==name)
  generation=layout['ui_generation'];tap(chosen['point'])
  return arcade_ui(lambda value:value['ui_generation']!=generation)
-arcade_button('CampaignBegin')
-for _ in range(15):
- if arcade_ui()['menu']!='help':break
- arcade_button('CampaignGo')
+def enter(hero):
+ menu_button(name='StartCampaign')
+ picker=latest('AION_UI ',lambda state:state['page']=='characters' and layout_matches_display(state,display_bounds()))
+ roster={button['name'] for button in picker['buttons'] if button['name'].startswith('Select_')}
+ check(roster=={'Select_aion','Select_sheep','Select_rabbit','Select_eren','Select_armadillo','Select_frog'},'All six hero rectangles are reachable together')
+ menu_button(name='Select_'+hero)
+ latest('AION_UI ',lambda state:state['page']=='characters' and state['character']==hero)
+ capture('picker-'+hero)
+ menu_button(name='ConfirmHero')
+ arcade_state(lambda state:state['state']=='playing' and state['character']==hero)
+ check(True,'Native selection enters Mission 1 with '+hero)
+def hold_action(name,duration):
+ layout=arcade_ui(lambda state:name in state['actions'])
+ x,y=layout['actions'][name]
+ record_target({'event':'hold','action':name,'duration_ms':duration,'point':[x,y],'character':layout['character'],'orientation':layout['orientation']})
+ return subprocess.Popen(['adb','shell','input','swipe',str(x),str(y),str(x),str(y),str(duration)],stdout=subprocess.DEVNULL)
+def pause():
+ arcade_button('CampaignPause')
+ return arcade_ui(lambda state:state['menu']=='paused')
+def main():
+ layout=pause()
+ button=next(b for b in layout['buttons'] if b['text'] in ('Ana menü','Main menu','Geri','Back'))
+ tap(button['point'])
+ latest('AION_UI ',lambda state:state['page']=='main' and layout_matches_display(state,display_bounds()))
+
+initial=latest('AION_UI ',lambda state:state['page']=='main' and state.get('guide') and layout_matches_display(state,display_bounds()),timeout=40)
+check(not any(button['name']=='StartRun' for button in initial['buttons']),'Cold launch exposes the control guide and a single game')
+capture_main()
+for code in ['tr','en']:
+ menu_button(name='LanguageMenu')
+ menu_button(name='Language_'+code)
+ latest('AION_UI ',lambda state:state['page']=='main' and state['language']==code)
+ capture('main-'+code)
+enter('eren')
+jump=hold_action('jump',1100)
+try:
+ arcade_state(lambda state:state['charging'] and state['charge_ratio']>.1 and state['grounded'])
+finally:jump.wait(timeout=8)
+arcade_state(lambda state:not state['grounded'] and state['player'][1]<-10)
+capture('eren')
+check(True,'Native Eren charges and releases a real jump')
+main()
+enter('rabbit')
+jump=hold_action('jump',1600)
+try:
+ arcade_state(lambda state:state['charging'] and state['charge_ratio']>.1 and state['grounded'])
+ capture('rabbit-charge')
+finally:jump.wait(timeout=8)
+arcade_state(lambda state:not state['grounded'] and state['player'][1]<-10)
+capture('rabbit-leap')
+check(True,'Native Ayça charges and releases a real jump')
+main()
+enter('aion')
+jump=hold_action('jump',420)
+jump.wait(timeout=6)
+arcade_state(lambda state:not state['grounded'],timeout=10)
+capture('aion-jump')
+attack=hold_action('attack',4400)
+try:
+ arcade_state(lambda state:state['shots']>=6,timeout=12)
+ capture('held-fire')
+finally:attack.wait(timeout=8)
+check(True,'Real native held fire issues six arcade shots and stays responsive')
+old=pause()
+capture('paused')
+before=arcade_state(lambda state:state['state']=='paused')
+adb('shell','wm','size','2560x1440')
+try:
+ rotated=arcade_ui(lambda state:state['menu']=='paused' and state['orientation']=='landscape')
+ capture('landscape-paused')
+ after=arcade_state(lambda state:state['state']=='paused')
+ check(rotated['character']==old['character'] and before['score']==after['score'] and before['player']==after['player'],'Native landscape preserves the paused hero, position and score')
+finally:
+ adb('shell','wm','size','reset')
+ arcade_ui(lambda state:state['menu']=='paused' and state['orientation']==old['orientation'])
+resume=[b for b in arcade_ui()['buttons'] if b['text'] in ('Resume','Sürdür','Devam et','Continue')]
+assert resume,'Missing paused Resume action'
+tap(resume[0]['point'])
 arcade_state(lambda state:state['state']=='playing')
-check(True,'Actual native Arcade entry reaches Mission1 through briefing and help')
 # Inject two ordinary touchscreen pointers. No game handlers/state are invoked.
 sdk=Path(os.environ.get('ANDROID_HOME') or os.environ['ANDROID_SDK_ROOT'])
 android_jar=sdk/'platforms/android-35/android.jar'
@@ -219,6 +157,7 @@ try:
  active=arcade_state(lambda state:state['crouching'] and state['velocity'][0]>1 and state['player'][0]>before['player'][0]+8 and state['shots']>before['shots'],timeout=15)
  check(pair.poll() is None,'Native two-finger gesture remains held during crouch/fire observation')
  capture('crouch-fire')
+ capture('duck')
  check(True,'Real native joystick Down+Right and second-finger Fire crawl and shoot together')
 finally:
  output,_=pair.communicate(timeout=10)

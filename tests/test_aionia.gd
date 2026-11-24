@@ -72,13 +72,9 @@ func run() -> void:
 					var screen:=Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h))
 					var panel: Control=game.menu_layer.get_node("PagePanel")
 					if game.touch_mode and game.interface_options.touch_layout=="split":check(game.action_buttons.jump.position.x<game.view_w*.5 and game.action_buttons.shoot.position.x>game.view_w*.5,"Approved split-thumb layout "+str(dimensions))
-					if target=="main" and scale_value==1.0:
-						var choose: Label=game.menu_layer.get_node("StartChooser")
-						check(not panel.get_global_rect().intersects(choose.get_global_rect()),"Character heading does not overlap main actions "+lang+str(dimensions))
-						check(choose.size.x>=floorf(game.pixel_ui.roster_width()) and choose.get_minimum_size().y<=choose.size.y,"Character heading has real readable width "+lang)
-						check(choose.size.y<100 and choose.get_global_rect().end.y<=game.pixel_ui.roster_y(),"Character heading never covers its roster "+lang+str(dimensions))
-						for tile in game.menu_layer.find_children("StartSelect_*","Button",true,false):
-							check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Actual portrait/name content stays inside its character card "+lang+str(tile.name))
+					if target=="main":
+						var start: Control=game.menu_layer.find_child("StartCampaign",true,false)
+						check(panel.get_global_rect().encloses(start.get_global_rect()),"Primary start action is inside its title panel "+lang+str(dimensions))
 					check(screen.encloses(panel.get_global_rect()),"Panel fits "+str(dimensions)+lang+str(scale_value)+target)
 					var scrolls=panel.find_children("*","ScrollContainer",true,false)
 					check(scrolls.is_empty(),"All content uses explicit fitted pages: "+target)
@@ -87,7 +83,7 @@ func run() -> void:
 						check(game.menu_pages.previous.is_visible_in_tree() and screen.encloses(game.menu_pages.previous.get_global_rect()),"Last content page is reachable without a wheel "+lang+target)
 
 	root.size=Vector2i(1200,540);await process_frame
-	game.interface_options.text_scale=1;game.language="tr";game.page="main"
+	game.interface_options.text_scale=1;game.language="tr";game.world.state="ready";game.page="main"
 	for family in ["DejaVu Sans","Liberation Sans"]:
 		var alternate:=SystemFont.new();alternate.font_names=PackedStringArray([family]);alternate.fallbacks=[ThemeDB.fallback_font]
 		game.interface_options.body_font=alternate;game.ui_theme.default_font=alternate
@@ -95,11 +91,11 @@ func run() -> void:
 			game.touch_mode=dimensions!=Vector2i(600,900)
 			root.size=dimensions;await process_frame;game.rebuild();await process_frame;await process_frame
 			print("AIONIA_ALTERNATE_FONT ",alternate.get_font_name()," ",dimensions)
-			for tile in game.menu_layer.find_children("StartSelect_*","Button",true,false):
-				check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Turkish names fit measured alternate font "+family+str(dimensions)+str(tile.name))
-			var heading: Control=game.menu_layer.get_node("StartChooser")
-			check(not game.menu_layer.get_node("PagePanel").get_global_rect().intersects(heading.get_global_rect()),"Measured alternate-font roster does not overlap main actions "+family+str(dimensions))
-			check(heading.size.y<100 and heading.get_global_rect().end.y<=game.pixel_ui.roster_y(),"Translated heading uses its actual wrapped height "+family+str(dimensions))
+			game.show_page("characters");await process_frame;await process_frame
+			for tile in game.menu_layer.find_children("Select_*","Button",true,false):
+				check(tile.get_global_rect().grow(1).encloses(tile.get_child(0).get_global_rect()),"Turkish portrait fits measured alternate font "+family+str(dimensions)+str(tile.name))
+			check(game.menu_layer.find_children("Select_*","Button",true,false).size()==6,"All six cards stay in the same layout at the chosen font")
+			game.show_page("main")
 	game.interface_options.text_scale=1;game.world.reset();game.world.state="running";game.world.adventure.celebrations_enabled=true
 	game.world.adventure.collect(game.world,"fragaria")
 	var party: Array=game.evolution_view.fragaria_tableau()

@@ -106,6 +106,7 @@ var application_active := true
 var control_hint: Label
 var checkpoint_invalid := false
 var tutorial_seen := false
+var launch_on_ready := false
 var settings_ok := true
 
 # The large data-campaign QA mirror is for browser automation or ?aion-qa only.
@@ -152,6 +153,7 @@ func _ready() -> void:
 	Input.joy_connection_changed.connect(func(_id,_connected):release_all())
 	resize()
 	if resume_on_ready and not saved.is_empty() and saved_can_resume():resume_saved.call_deferred()
+	elif launch_on_ready:begin_new.call_deferred()
 
 func _exit_tree() -> void:
 	if OS.has_feature("web"):
@@ -576,7 +578,7 @@ func skip_presentation() -> void:
 
 func begin_new() -> void:
 	checkpoint_invalid=false;world.begin(selected_hero);world.state="story";menu_kind="help";help_step=0;outro_step=0;boss_announced=false;view.camera_x=0.;complete_presented=false;intro_pending=true;new_best=false;save_checkpoint();build_ui()
-	if tutorial_seen:close_menu()
+	if tutorial_seen or launch_on_ready or resume_on_ready:close_menu()
 func resume_saved() -> void:
 	if not saved_can_resume():return
 	if not world.restore(saved):checkpoint_invalid=true;build_ui();return
