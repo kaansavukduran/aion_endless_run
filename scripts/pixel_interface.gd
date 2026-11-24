@@ -344,6 +344,7 @@ func characters() -> void:
 		roster_previews[id]=portrait_art
 		var name_label: Label=h.label(h.character_name(id),18,"fff1d5")
 		name_label.name="HeroName"
+		name_label.add_theme_font_size_override("font_size",h.ui_size(21))
 		name_label.add_theme_color_override("font_color",h.interface_options.color("on_primary" if id==h.character else "text"))
 		name_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		name_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER

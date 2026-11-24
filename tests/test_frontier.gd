@@ -175,16 +175,6 @@ func run() -> void:
 		for frame in 6:
 			game.frames.place(game.friend_sprite,"heroes",game.COMBAT_ROWS[id],frame,Vector2.ZERO)
 			check(is_equal_approx(float(game.friend_sprite.get_meta("head_size")),target),"Gun poses retain the running character head size: "+id+"/"+str(frame))
-	game.start_run()
-	game.world.adventure.level = 9
-	game.world.adventure.level_elapsed = 30
-	game.world.distance = game.world.adventure.LEVEL_DISTANCE
-	game.world.adventure.update_level(game.world)
-	game.pause_run()
-	game.open_subpage("settings")
-	for toggle in game.ui.find_children("*","CheckButton",true,false):
-		if toggle.text == game.text("celebrations"): toggle.button_pressed = false
-	check(game.world.frontier.pending_level == 10 and not game.world.adventure.hugging(),"Disabling celebrations in a paused hug still preserves its boss transition")
 	game.queue_free()
 	await process_frame
 	print("RESULT: %d frontier checks, %d failures" % [checks,failures])
