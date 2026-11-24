@@ -56,10 +56,11 @@ func run() -> void:
  check(w.drop_through_time==0.,'Boarding clears an on-foot drop-through timer rather than dropping the hull through its deck')
  w=clean();w.load_section('water');check(int(w.mount.hp)==1,'Regional rideable population also uses one HP')
  w.mount.ridden=true;w.player=Vector2(600,-42.);w.state='travel';w.load_section('fork_one')
- check(bool(w.mount.ridden) and int(w.mount.hp)==1,'Living vehicle survives travel into a physical route fork')
+ check(not w.mount.ridden and w.player.y==0.,'A physical route fork starts with the hero on foot')
+ w.mount={'available':true,'ridden':true,'x':1000.,'hp':1,'type':'shell'}
  w.player=Vector2(1000,48.);w.velocity=Vector2.ZERO;CampaignVehicles.step(w,.05)
  check(is_equal_approx(w.player.y,48.) and w.grounded(),'Ridden vehicle lands on fork floor90 using its actual saddle offset')
- var mounted_save:=AionCampaignWorld.new();check(mounted_save.restore(w.snapshot()) and bool(mounted_save.mount.ridden) and int(mounted_save.mount.hp)==1,'Exact save preserves the live carried hull')
+ var mounted_save:=AionCampaignWorld.new();check(mounted_save.restore(w.snapshot()) and bool(mounted_save.mount.ridden) and int(mounted_save.mount.hp)==1,'A save made while riding still restores the live hull in its current scene')
  w=clean();w.weapon='trap';w.ammunition=12;w.spawn_enemy('gnome',720,0,1);w.enemies[0].wait=999.;CampaignWeapons.fire(w)
  var enemy: Dictionary=w.enemies[0];var walked:=false
  for i in 100:

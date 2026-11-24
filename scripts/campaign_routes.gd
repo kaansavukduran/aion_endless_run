@@ -160,7 +160,7 @@ static func step(w) -> void:
 	var destination: String=choice_at(w)
 	if destination.is_empty():return
 	if not w.route.has(destination):w.route.append(destination)
-	w.travel_target=destination;w.state="travel";w.stop_inputs()
+	w.begin_travel(destination)
 
 static func draw_floor(v) -> bool:
 	if not is_fork(str(v.world.section)):return false

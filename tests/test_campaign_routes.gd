@@ -37,7 +37,9 @@ func auto_travel(game: AionCampaignGame,source: String,destination: String,reduc
 	var gift: Dictionary={"id":"shore:keeper:supply","kind":"heavy","x":4000.,"y":-25.,"rescue_id":"shore:keeper","role":"keeper","from_bag":true}
 	game.world.gift_drops["shore:keeper"]=gift.duplicate(true)
 	game.world.mount={"available":mounted,"ridden":mounted,"x":1490.,"hp":1,"type":"skimmer"}
-	var exit_y: float=90. if CampaignRoutes.is_fork(source) else 0.
+	var exit_y:=0.
+	if CampaignRoutes.is_fork(source):
+		exit_y=CampaignRoutes.UPPER_FLOOR if destination in ["canopy","terrace"] else CampaignRoutes.LOWER_FLOOR
 	game.world.player=Vector2(1490. if CampaignRoutes.is_fork(source) else game.world.length()-120.,exit_y-(42. if mounted else 0.))
 	game.world.velocity=Vector2.ZERO
 	game.set_action("attack","route-test",true)
@@ -52,14 +54,36 @@ func auto_travel(game: AionCampaignGame,source: String,destination: String,reduc
 	game.set_action("attack","late-ui-press",true)
 	check(not game.world.fire_held and not game.world.jump_held and game.held.is_empty(),"Input during fade cannot become a held action in the next section")
 	var elapsed:=.01
-	while game.fade>=0. and elapsed<.6:
+	var exit_animation:=game.world.mount_transition=="exit"
+	if mounted:
+		var saved_exit:=AionCampaignWorld.new()
+		check(saved_exit.restore(game.world.snapshot()) and saved_exit.mount_transition=="exit","A save during the dismount restores the same animation")
+		for frame in 60:
+			if saved_exit.advance_exit(.025):break
+		saved_exit.finish_travel()
+		check(saved_exit.section==destination and not saved_exit.mount.ridden,"A restored exit finishes once, on foot")
+	var walked:=false
+	var stood_on_exit_floor:=true
+	var previous_x:=game.world.player.x
+	while game.world.section==source and game.fade<0. and elapsed<1.4:
 		game._process(.01);elapsed+=.01
+		if game.world.mount_transition=="exit":exit_animation=true
+		elif game.world.velocity.x>1.:
+			walked=walked or (game.world.player.x>previous_x and M1CombatArt.body_spec(game.world).action=="walk")
+			stood_on_exit_floor=stood_on_exit_floor and game.world.grounded() and is_equal_approx(game.world.player.y,exit_y)
+		previous_x=game.world.player.x
+	check(exit_animation==mounted and not game.world.mount.ridden,"Only a rider uses the visible vehicle exit animation: "+source)
+	check(walked and stood_on_exit_floor and game.world.facing==1,"Hero walks right on the chosen lane before the fade: "+source)
+	if mounted:check(float(game.world.mount.x)<game.world.player.x and int(game.world.mount.hp)==1,"The working vehicle is parked behind the walking hero")
+	var fade_elapsed:=game.fade
+	while game.fade>=0. and elapsed<1.8:
+		game._process(.01);elapsed+=.01;fade_elapsed+=.01
 	check(game.world.section==destination and game.world.state=="playing" and game.fade<0.,"Section actually opens automatically without a confirm press: "+destination)
-	check(absf(elapsed-(.1 if reduced else .36))<.025,"Auto travel has a short bounded duration, including reduced motion")
+	check(absf(fade_elapsed-(.1 if reduced else .36))<.025,"The fade still uses its short duration, including reduced motion")
 	check(game.world.time==clock and game.world.shots==shots,"Fade advances neither gameplay time nor queued fire")
 	check(game.world.score==1234 and game.world.weapon=="arc" and game.world.ammunition==ammunition,"Live combat inventory and score survive automatic travel")
 	check(game.world.gift_drops.get("shore:keeper",{})==gift and not game.world.awarded.has("shore:keeper:gift"),"Unclaimed bag gift is preserved without an invisible award")
-	check(game.world.mount.ridden==mounted and (not mounted or game.world.mount.hp==1),"Automatic travel carries the same live vehicle")
+	check(not game.world.mount.ridden and game.world.player.y==game.world.floor_at(game.world.player.x),"New scene starts on foot")
 	check(str(game.saved.get("checkpoint",""))==destination and Dictionary(game.saved.get("gift_drops",{})).has("shore:keeper"),"Destination checkpoint includes persistent unclaimed-drop state")
 	check(game.held.is_empty() and not game.world.fire_held and not game.world.jump_held,"No source remains latched when the fade completes")
 func route_structures() -> void:
@@ -220,13 +244,18 @@ func run() -> void:
 	check(not game.ui.find_children("Route_*","Button",true,false).size(),"No route-choice button exists in the live junction UI")
 	for pair in [["shore","quay"],["quay","fork_one"],["canopy","fork_two"],["roots","relay"],["relay","arena"]]:auto_travel(game,str(pair[0]),str(pair[1]))
 	auto_travel(game,"fork_one","water",false,true)
+	auto_travel(game,"fork_one","canopy",false,true)
+	auto_travel(game,"quay","fork_one",false,true)
 	auto_travel(game,"fork_two","roots",true)
 	game.world.load_section("fork_one");game.world.player=Vector2(1490.,90.);game.world.velocity=Vector2.ZERO;CampaignRoutes.step(game.world)
-	game.start_travel();game.application_active=false
-	game.advance_travel(.05)
-	check(game.fade==0. and game.world.section=="fork_one","Focus loss cannot silently complete travel in the background")
+	game.fade=-1.;game.application_active=false
+	var frozen_position:=game.world.player
+	game._process(.05)
+	check(game.fade<0. and game.world.section=="fork_one" and game.world.player==frozen_position,"Focus loss freezes the walk before the fade")
 	game.application_active=true
-	for tick in 12:game.advance_travel(.01)
+	for tick in 120:
+		game._process(.01)
+		if game.world.section=="water" and game.fade<0.:break
 	check(game.world.section=="water" and game.fade<0.,"Focused travel resumes safely from the same route contact")
 	game.queue_free();await process_frame
 	print("RESULT: ",checks," physical route checks, ",failures," failures");quit(1 if failures else 0)

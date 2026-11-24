@@ -90,18 +90,26 @@ static func interact(w) -> bool:
 			var support: float=support_below(w,x,contact_foot)
 			if CampaignGround.has_floor(support):target=Vector2(x,support);found=true;break
 		if not found:return false
-		park(w)
-		w.mount_transition="exit";w.mount.ridden=false
-		w.mount_transition_to=target
+		start_exit(w,target)
+		return true
 	elif can_board(w):
 		w.mount_transition="enter";w.mount.ridden=true
 		w.mount_transition_to=Vector2(float(w.mount.x),float(w.mount.get("floor_y",w.floor_at(float(w.mount.x))))-42.)
 	else:return false
+	start_transition(w)
+	return true
+
+static func start_exit(w,target: Vector2) -> void:
+	park(w)
+	w.mount_transition="exit";w.mount.ridden=false
+	w.mount_transition_to=target
+	start_transition(w)
+
+static func start_transition(w) -> void:
 	w.mount.facing=w.facing;w.drop_through_time=0.
 	w.shot_flash=0.;w.last_shot_mounted=false
 	w.mount_transition_from=w.player;w.mount_transition_time=0.
 	w.velocity=Vector2.ZERO;w.stop_inputs()
-	return true
 
 static func step_transition(w,dt: float) -> void:
 	if w.mount_transition=="exit":step_parked(w,dt)

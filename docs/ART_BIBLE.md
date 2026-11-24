@@ -6,7 +6,7 @@
 
 `forge-items.png` 20 ayrı silah/destek nesnesi içerir; bunlar statik çizimlerdir. Mevcut meyve sanatı korunur. Eski 76 PNG'nin baytları değiştirilmedi. Yeni kaynaklar kullanıcı isteğiyle AI destekli üretildi; bu üretim kanon veya nihai görsel onayı iddiası değildir.
 
-Araçlar mevcut 84 çizimi kullanır. `FORGE-VEHICLES-PROVENANCE.json` görünür gövdeyi, zemin temasını, gövde işaretini ve gerçek namlu ucunu ayrı kaydeder. Araç ve kurtarılabilir kızların ayakta referans yüksekliği, elde tabancalı nötr Aion gövdesinin (73,243 dünya pikseli) iki katıdır. Animasyon karelerine göre büyütüp küçültme yapılmaz; ayak/araç desteği zemine oturur. Gövde ölçeği efekt sınırlarından türetilmez. [Araç kayıt ölçümleri](FORGE-VEHICLE-ART.md).
+Araçlar mevcut 84 çizimi kullanır. `FORGE-VEHICLES-PROVENANCE.json` görünür gövdeyi, zemin temasını, gövde işaretini ve gerçek namlu ucunu ayrı kaydeder. Ayakta referans, elde tabancalı nötr Aion gövdesidir (73,243 dünya pikseli). Araçlar bunun iki katı, kurtarılabilir kızlar 1,75 katı yüksekliğindedir. Tüm kareler sabit ölçek kullanır ve ayaklar ya da araç desteği zemine oturur. Gövde ölçeği görünür silüetten ölçülür. [Araç kayıt ölçümleri](FORGE-VEHICLE-ART.md).
 
 Binmede araç zeminde sabit kalır; karakterin .45 saniyelik tırmanışı kapağın ön gövdesiyle maskelenir. Ana karakter içeride tamamen gizlenir. Sola/sağa inme sırasında iki gövde katmanı aynı yöne bakar. Koyun takipçilerinin görünür kargo desteği korunur. Animasyon kapatıldığında ağız pozunun statik karesi ile namlu fiziği aynı kareyi kullanır. Fizik aktörünü kare hizasını örtmek için oynatma veya farklı kaynakları her kare ayrı ölçekleme yoktur.
 

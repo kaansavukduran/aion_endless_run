@@ -166,12 +166,12 @@ func on_web_page_hidden(_arguments: Array) -> void:
 	cancel_unspent_actions();release_all()
 	if is_instance_valid(ui):
 		if world.state=="playing":toggle_pause()
-		elif world.state in CampaignLives.TRANSITIONS:save_checkpoint()
+		elif world.state in CampaignLives.TRANSITIONS or world.state=="travel":save_checkpoint()
 
 func prepare_web_update(_arguments: Array) -> bool:
 	if world.state=="playing":
 		toggle_pause()
-	elif world.state in CampaignLives.TRANSITIONS or (not save_ok and (menu_kind=="paused" or world.completed)):
+	elif world.state in CampaignLives.TRANSITIONS or world.state=="travel" or (not save_ok and (menu_kind=="paused" or world.completed)):
 		save_checkpoint()
 	return save_ok
 
@@ -940,7 +940,9 @@ func _process(dt: float) -> void:
 			var held_time: float=minf(impact_hold,simulation_dt);impact_hold-=held_time;simulation_dt-=held_time
 		else:impact_hold=0.
 		if simulation_dt>0.:world.step(simulation_dt)
-	if world.state=="travel" and fade<0.:start_travel()
+	if world.state=="travel" and fade<0. and application_active:
+		if last_state!="travel":release_all()
+		if world.advance_exit(dt):start_travel()
 	if world.state=="respawn_pending" and application_active:
 		var area:=Rect2(view.camera_x,view.camera_y-view.ground,view.scene_w,view.ground+60.)
 		CampaignLives.start_entry(world,area)

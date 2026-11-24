@@ -102,10 +102,10 @@ func run() -> void:
 	var aion_height: float=view.hero_reference_height()
 	for row in 8:
 		var npc_height: float=view.npc_reference_height(row)
-		check(is_equal_approx(npc_height*view.npc_growth(row),2.*aion_height),"Rescue girl standing pixel height is twice Aion: "+str(row))
+		check(is_equal_approx(npc_height*view.npc_growth(row),1.75*aion_height),"Rescue girl standing pixel height is 1.75 times Aion: "+str(row))
 		for frame in (12 if row==7 else 8):
 			var pose: Dictionary=view.catalogue.pose("rescue-npcs",row,frame)
-			check(is_equal_approx(view.npc_growth(row),2.*aion_height/npc_height) and pose.texture!=null,"Every real NPC frame shares its standing reference scale: "+str(row)+"/"+str(frame))
+			check(is_equal_approx(view.npc_growth(row),1.75*aion_height/npc_height) and pose.texture!=null,"Every real NPC frame shares its standing reference scale: "+str(row)+"/"+str(frame))
 			var pixels: Image=pose.texture.get_image()
 			var body: Rect2i=pixels.get_used_rect()
 			var pixel_size: float=pose.size.y/pixels.get_height()
