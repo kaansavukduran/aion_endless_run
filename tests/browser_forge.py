@@ -454,6 +454,7 @@ with sync_playwright() as playwright:
 
                 retries = 0
                 last_jump = 0.
+                last_bomb = -10.
                 attempt = 0
                 rescue_attempts = []
                 observations['rescue_attempts'] = rescue_attempts
@@ -484,25 +485,41 @@ with sync_playwright() as playwright:
                         check(condition, label)
 
                 def move_and_defend(current, direction, allow_grenade):
-                    global last_jump
+                    global last_jump, last_bomb
                     x, y = current['player']
-                    threats = [e for e in current['enemies'] if abs(e['x']-x)<290]
-                    nearest=min(threats,key=lambda e: math.hypot(e['x']-x,e['y']-y),default=None)
-                    if nearest:
-                        sx=nearest['x']-current['camera']; sy=nearest['y']+current['ground']-current['camera_y']-31
+                    time_now = current['time']
+                    forward = 1 if direction == 'd' else -1
+                    threats = [e for e in current['enemies'] if abs(e['x']-x)<395]
+                    nearest = min(threats, key=lambda e: math.hypot(e['x']-x,e['y']-y), default=None)
+                    target = nearest
+                    if target is None:
+                        candidates = [n for n in current['npcs'] if not n['freed'] and not n['secret']
+                                      and 65 < (n['x']-x)*forward < 650]
+                        target = min(candidates,key=lambda n: abs(n['x']-x),default=None)
+                    if target:
+                        sx = target['x']-current['camera']
+                        height = 31 if nearest else 33
+                        sy = target['y']+current['ground']-current['camera_y']-height
                     else:
-                        sx=x-current['camera']+140*(1 if direction=='d' else -1)
-                        sy=y+current['ground']-current['camera_y']-42
+                        sx = x-current['camera']+140*forward
+                        sy = y+current['ground']-current['camera_y']-42
                     page.mouse.move(*coords(sx,sy,True))
-                    commands=['f',direction]
-                    keys(commands)
+                    commands = ['f',direction]
+                    distance = math.hypot(nearest['x']-x,nearest['y']-y) if nearest else math.inf
+                    if nearest and (nearest['x']-x)*forward>=-20 and distance<225:
+                        # Clear the lane before walking into a charged ground
+                        # attacker. Aim is independent of the movement keys.
+                        commands = ['f']
                     gap = any(0 < pit[0] - x < 160 for pit in current['pits'])
-                    danger = any(math.hypot(b[0] - x, b[1] - (y - 37)) < 95 for b in current['bullets'])
-                    if current['grounded'] and (gap or danger) and current['time'] - last_jump > .70:
+                    danger = any(math.hypot(b[0] - x, b[1] - (y - 37)) < 105 for b in current['bullets'])
+                    lower_threat = nearest and 75<distance<245 and nearest['y']>y+30
+                    if current['grounded'] and (gap or danger or lower_threat or distance<112) and time_now-last_jump>.65:
                         page.keyboard.press('Space')
-                        last_jump = current['time']
-                    if allow_grenade and current['grenades'] and not current['grenade_throw']['phase'] and nearest and abs(nearest['x'] - x) < 125:
+                        last_jump=time_now
+                    keys(commands)
+                    if allow_grenade and current['grenades'] and not current['grenade_throw']['phase'] and nearest and 95<distance<235 and time_now-last_bomb>1.8:
                         page.keyboard.press('g')
+                        last_bomb=time_now
                     return commands
 
                 while True:
@@ -516,7 +533,7 @@ with sync_playwright() as playwright:
                             current = campaign()
                             require_live(current, 'search', recover=True)
                             x, y = current['player']
-                            move_and_defend(current, 'd', allow_grenade=x<2750.)
+                            move_and_defend(current, 'd', allow_grenade=x<3400.)
                             free = [n for n in current['npcs'] if n['freed'] and n['phase'] == 'free' and not n['secret']
                                     and not current['awarded'].get(n['id']+':gift') and abs(n['y']-y) < 70 and abs(n['x']-x)<500]
                             target = min(free, key=lambda n: abs(n['x']-x), default=None)
