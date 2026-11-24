@@ -31,7 +31,6 @@ var hud: Label
 var subtitle: Label
 var boss_health: ProgressBar
 var pause_button: Button
-var ride_button: Button
 var stick: AionCampaignStick
 var actions: Dictionary = {}
 var screen_transform := Transform2D.IDENTITY
@@ -103,7 +102,6 @@ var result_records: Dictionary = {}
 var new_best := false
 var resume_on_ready := false
 var application_active := true
-var control_hint: Label
 var checkpoint_invalid := false
 var tutorial_seen := false
 var launch_on_ready := false
@@ -244,11 +242,6 @@ func build_ui() -> void:
 	boss_health.position=Vector2(12,band_height+6);boss_health.size=Vector2(minf(view_w-24.,340.),10.)
 	boss_health.add_theme_stylebox_override("background",options.style("surface","border",1));boss_health.add_theme_stylebox_override("fill",options.style("primary","accent",1))
 	if touch_mode: build_touch()
-	else:
-		control_hint=paragraph(t("keys"),15);ui.add_child(control_hint);control_hint.position=Vector2(16,view_h-48);control_hint.size=Vector2(view_w-32,45)
-	ride_button=Button.new();ride_button.name="CampaignRide";ride_button.text=t("ride")+ (" · E" if not touch_mode else "");ride_button.add_theme_font_size_override("font_size",font_size(17));ride_button.pressed.connect(activate_context);ui.add_child(ride_button)
-	ride_button.size=Vector2(180,76) if portrait and touch_mode else Vector2(220,52)
-	ride_button.position=Vector2((view_w-ride_button.size.x)*.5,view_h-(205 if portrait and touch_mode else (190 if touch_mode else 98)))
 	fade_panel=ColorRect.new();fade_panel.color=Color(0.06,.06,.09,0);fade_panel.mouse_filter=Control.MOUSE_FILTER_IGNORE;fade_panel.size=Vector2(view_w,view_h);ui.add_child(fade_panel)
 	presentation=null;presentation_skip=null
 	if presentation_stage!="":build_presentation()
@@ -266,13 +259,13 @@ func finish_layout(generation: int) -> void:
 func build_touch() -> void:
 	stick=AionCampaignStick.new();stick.name="CampaignJoystick";stick.mouse_filter=Control.MOUSE_FILTER_IGNORE;ui.add_child(stick)
 	stick.position=Vector2(24,view_h-177);stick.size=Vector2(150,150)
-	var points := {"jump":Vector2(view_w-120,view_h-125),"attack":Vector2(view_w-175,view_h-235),"grenade":Vector2(view_w-230,view_h-125)}
+	var points := {"jump":Vector2(view_w-120,view_h-111),"attack":Vector2(view_w-230,view_h-218),"grenade":Vector2(view_w-230,view_h-111),"context":Vector2(view_w-115,view_h-213)}
 	for key in points:
 		var item:=AionCampaignTouch.new();item.name="Campaign_"+key;item.action="shoot" if key=="attack" else key
-		item.caption=old("control_jump") if key=="jump" else (old("control_shoot") if key=="attack" else t("grenade"))
+		item.caption={"jump":old("control_jump"),"attack":old("control_shoot"),"grenade":t("grenade")}.get(key,"")
 		item.font=options.font_for(FONT);item.palette=options.colors.duplicate();item.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		if key=="grenade":item.palette.accent=AionCampaignWorld.COLORS[world.character]
-		ui.add_child(item);item.position=points[key];item.size=Vector2(100,100);actions[key]=item
+		ui.add_child(item);item.position=points[key];item.size=Vector2.ONE*(90. if key=="context" else 100.);actions[key]=item
 	var hint:=label(t("boost"),14);ui.add_child(hint);hint.position=Vector2(24,view_h-206)
 
 func build_menu() -> void:
@@ -684,6 +677,9 @@ func set_action(key: String,source: String,down: bool,canceled: bool=false) -> v
 		"grenade":
 			if after:world.throw_grenade()
 		"boost":world.boost_held=after
+		"context":
+			var item: AionCampaignTouch=actions.context
+			if after and item.visible and not item.disabled:activate_context()
 
 func discard_compact_actions() -> void:
 	if not MissionHeroAbilities.compact(world):return
@@ -758,15 +754,9 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var p: Vector2=screen_transform.affine_inverse()*event.position
 		if event.pressed and not event.canceled:
-			# BaseButton's emulated mouse is owned by the first touch. Route
-			# the contextual action explicitly so another finger can hold the
-			# joystick. Consume it before GUI emulation and latch this finger
-			# until release; swapping a weapon must never also fire a skill.
+			# Each finger owns its initial action until release, even on a
+			# disabled button. Dragging across controls never fires them.
 			if touch_actions.has(event.index):
-				get_viewport().set_input_as_handled();return
-			if is_instance_valid(ride_button) and ride_button.is_visible_in_tree() and ride_button.get_global_rect().has_point(p):
-				touch_actions[event.index]="context"
-				if not ride_button.disabled:activate_context()
 				get_viewport().set_input_as_handled();return
 			for key in actions:
 				if actions[key].hit(p):touch_actions[event.index]=key;set_action(key,"touch"+str(event.index),true);get_viewport().set_input_as_handled();return
@@ -775,11 +765,11 @@ func _input(event: InputEvent) -> void:
 		else:
 			if touch_actions.has(event.index):
 				var action: String=str(touch_actions[event.index])
-				if action!="context":set_action(action,"touch"+str(event.index),false,event.canceled)
+				set_action(action,"touch"+str(event.index),false,event.canceled)
 				touch_actions.erase(event.index);get_viewport().set_input_as_handled()
 			if event.index==stick_touch:stick_touch=-1;stick.axis=Vector2.ZERO;stick.active=false;stick.queue_redraw();get_viewport().set_input_as_handled()
 	elif event is InputEventScreenDrag:
-		if touch_actions.get(event.index,"")=="context":get_viewport().set_input_as_handled();return
+		if touch_actions.has(event.index):get_viewport().set_input_as_handled();return
 		if event.index==stick_touch:stick.axis=stick.value(screen_transform.affine_inverse()*event.position);stick.queue_redraw();get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION:
 		var p: Vector2=screen_transform.affine_inverse()*event.position
@@ -1022,23 +1012,12 @@ func update_hud() -> void:
 		elif int(world.boss.phase)==2 and world.boss_vulnerable():boss_cue=" · "+t("boss_core")
 		subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+boss_cue
 	subtitle.position.y=boss_health.position.y+(20. if boss_health.visible else 0.)
-	var offer: Dictionary=CampaignRhythm.offer(world)
-	var primary_context: bool=not offer.is_empty() or bool(world.mount.ridden) or CampaignVehicles.can_board(world)
-	var skill: Dictionary=MissionHeroAbilities.context(world)
-	var skill_context: bool=not primary_context and bool(skill.visible)
-	ride_button.visible=active_controls and (primary_context or skill_context)
-	ride_button.disabled=skill_context and not bool(skill.ready)
-	ride_button.text=t("swap_weapon") if not offer.is_empty() else (t("exit_vehicle") if bool(world.mount.ridden) else t("board"))
-	if skill_context:
-		ride_button.text=t(str(skill.label_key))
-		if not bool(skill.ready):ride_button.text+="\n"+t(str(skill.status_key))
-		if str(skill.phase) in ["recover","cooldown"] and float(skill.get("remaining",0.))>0.:ride_button.text+=" %.1f s"%float(skill.remaining)
-	ride_button.tooltip_text=ride_button.text+(" · "+str(pad.NAMES[interact_binding()]) if active_input=="gamepad" else ("" if touch_mode else " · E"))
 	if is_instance_valid(stick):stick.visible=active_controls
 	for key in actions:
 		var item: AionCampaignTouch=actions[key]
 		var prev_vis:=item.visible;var prev_p:=item.pressed;var prev_act:=item.action;var prev_cap:=item.caption;var prev_dis:=item.disabled;var prev_cd:=item.cooldown
-		item.visible=active_controls;item.pressed=not Dictionary(held.get(key,{})).is_empty()
+		if key!="context":item.visible=active_controls
+		item.pressed=not Dictionary(held.get(key,{})).is_empty()
 		if key=="attack":
 			var near:=not world.close_enemy().is_empty() and not bool(world.mount.ridden)
 			var captive:=not CampaignRescue.cut_target(world).is_empty()
@@ -1048,11 +1027,32 @@ func update_hud() -> void:
 			var diving: bool=bool(world.mount.ridden) and CampaignVehicles.kind(world)=="shell"
 			item.caption=t("dive") if diving else old("control_jump");item.action="dive" if diving else "jump"
 			item.disabled=MissionHeroAbilities.compact(world)
+		if key=="context":update_touch_context(item,active_controls)
 		if item.visible and (item.visible!=prev_vis or item.pressed!=prev_p or item.action!=prev_act or item.caption!=prev_cap or item.disabled!=prev_dis or not is_equal_approx(item.cooldown,prev_cd)):
 			item.queue_redraw()
-	if is_instance_valid(control_hint):
-		control_hint.visible=active_controls
-		control_hint.text=pad_help() if active_input=="gamepad" else t("keys")
+
+func update_touch_context(item: AionCampaignTouch,active_controls: bool) -> void:
+	if not active_controls or not world.mount_transition.is_empty() or CampaignVehicles.stunned(world):
+		item.hide();return
+	var skill: Dictionary={}
+	if not CampaignRhythm.offer(world).is_empty():item.action="swap_weapon"
+	elif bool(world.mount.ridden):item.action="exit_vehicle"
+	elif CampaignVehicles.can_board(world):item.action="board"
+	else:
+		skill=MissionHeroAbilities.context(world)
+		if not bool(skill.visible):
+			item.hide();return
+		item.action=str(skill.label_key)
+	item.visible=true
+	item.disabled=not skill.is_empty() and not bool(skill.ready)
+	var status: String=str(skill.get("status_key",""))
+	item.caption=t("context_swap_short" if item.action=="swap_weapon" else (status if item.disabled and status=="skill_crouch" else item.action))
+	item.cooldown=float(skill.get("cooldown",0.))
+	var accessible_name: String=t(item.action)
+	if item.accessibility_name!=accessible_name:item.accessibility_name=accessible_name
+	var description: String=t(status) if item.disabled else ""
+	if item.disabled and float(skill.get("remaining",0.))>0.:description+=" %.1f s"%float(skill.remaining)
+	if item.accessibility_description!=description:item.accessibility_description=description
 
 func update_ambient() -> void:
 	if not audio_enabled:
@@ -1121,7 +1121,8 @@ func metadata() -> void:
 	if not web_qa:return
 	var data: Dictionary=world.snapshot(false)
 	data.merge({"state":world.state,"menu":menu_kind,"section":world.section,"player":[world.player.x,world.player.y],"facing":world.facing,"hp":world.hp,"shots":world.shots,"grenades":world.grenades,"melee":world.melee_time,"mounted":world.mount.ridden,"boss_hp":world.boss.hp,"save_ok":save_ok,"view":[view_w,view_h],"camera":view.camera_x,"pose":view.hero_marker,"actions":{},"transform":[screen_transform.x.x,screen_transform.origin.x,screen_transform.origin.y],"enemies":[],"platforms":[],"gates":[],"pits":[]})
-	for key in actions:data.actions[key]=[actions[key].position.x,actions[key].position.y,actions[key].size.x,actions[key].size.y]
+	for key in actions:
+		if key!="context" or actions[key].visible:data.actions[key]=[actions[key].position.x,actions[key].position.y,actions[key].size.x,actions[key].size.y]
 	if is_instance_valid(stick):data.stick=[stick.position.x,stick.position.y,stick.size.x,stick.size.y]
 	for e in world.enemies:
 		if not bool(e.defeated):data.enemies.append({"kind":e.kind,"x":e.x,"y":e.y,"hp":e.hp,"windup":e.windup,"recover":e.get("recover",0.),"attacks":e.attacks})
@@ -1134,8 +1135,9 @@ func metadata() -> void:
 			if is_instance_valid(b) and b.is_inside_tree() and b.is_visible_in_tree():rects[b.name]=[b.global_position.x,b.global_position.y,b.size.x,b.size.y,b.text]
 	data.buttons=rects
 	data.context_action={"visible":false}
-	if is_instance_valid(ride_button):
-		data.context_action={"rect":[ride_button.global_position.x,ride_button.global_position.y,ride_button.size.x,ride_button.size.y],"visible":ride_button.is_visible_in_tree(),"disabled":ride_button.disabled,"text":ride_button.text}
+	var context: AionCampaignTouch=actions.get("context")
+	if is_instance_valid(context) and context.is_visible_in_tree():
+		data.context_action={"rect":[context.position.x,context.position.y,context.size.x,context.size.y],"visible":true,"disabled":context.disabled,"text":context.caption,"icon":context.action}
 	data.ui_generation=ui_generation
 	data.ui_ready=ui_ready
 	data.raw=[get_viewport_rect().size.x,get_viewport_rect().size.y]

@@ -285,7 +285,7 @@ with sync_playwright() as pw:
         check(True,'Actual right Grenade touch spends one bomb without a second underlying command')
         page.keyboard.press('Escape');page.wait_for_timeout(200);frozen=data();page.wait_for_timeout(350);check(data()['time']==frozen['time'],'Pause freezes the active mission')
         page.set_viewport_size({'width':393,'height':873});page.wait_for_timeout(700);fit();check(data()['section']==frozen['section'] and data()['score']==frozen['score'],'Portrait rotation preserves checkpoint and score');page.screenshot(path=str(a.evidence/'portrait-paused.png'))
-        button(text='Devam et');page.wait_for_timeout(200);d=data();check(len(d['actions'])==3 and 'grenade' in d['actions'] and 'stick' in d,'Approved fixed left stick and three right actions exist')
+        button(text='Devam et');page.wait_for_timeout(200);d=data();check({'jump','attack','grenade'} <= d['actions'].keys() and 'stick' in d,'Fixed left stick and core right actions exist')
         for name,r in d['actions'].items():check(r[0]>=0 and r[1]>=0 and r[0]+r[2]<=d['view'][0] and r[1]+r[3]<=d['view'][1],'Touch target is inside portrait viewport: '+name)
         if a.browser=='chromium':
             cdp=context.new_cdp_session(page)

@@ -17,42 +17,56 @@ func clean(g: AionCampaignGame, hero: String) -> void:
 	g.build_ui();g.update_arcade_aim();g.update_hud()
 
 func context_routes(g: AionCampaignGame) -> void:
+	g.touch_mode=true;g.resize()
 	for hero in ["armadillo","frog"]:
 		clean(g,hero)
-		check(g.ride_button.visible,"Skill context remains discoverable: "+hero)
+		check(g.actions.context.visible,"Skill context remains discoverable: "+hero)
 		if hero=="armadillo":
-			check(g.ride_button.disabled and g.ride_button.text.contains(g.t("skill_crouch")),"Standing Armadillo explains crouch requirement")
+			check(g.actions.context.disabled and g.actions.context.caption.contains(g.t("skill_crouch")),"Standing Armadillo explains crouch requirement")
 			g.down_down=true;g.update_arcade_aim();g.update_hud()
-		check(not g.ride_button.disabled,"Ready skill context permits activation: "+hero)
+		check(not g.actions.context.disabled,"Ready skill context permits activation: "+hero)
 		for locale in ["tr","en"]:
 			g.language=locale;g.update_hud()
-			check(g.ride_button.text==g.t("skill_roll" if hero=="armadillo" else "skill_tongue"),"Context label uses selected language: "+hero+" "+locale)
-		g.ride_button.pressed.emit()
+			check(g.actions.context.caption==g.t("skill_roll" if hero=="armadillo" else "skill_tongue"),"Context label uses selected language: "+hero+" "+locale)
+		tap_context(g)
 		check(not g.world.hero_skill.is_empty(),"Visible context button starts skill: "+hero)
 		var starts: int=g.world.pending_events.count("hero_windup")
-		g.ride_button.pressed.emit()
+		tap_context(g)
 		check(g.world.pending_events.count("hero_windup")==starts,"Repeated context activation does not restart skill: "+hero)
 		g.update_hud()
 		var info: Dictionary=MissionHeroAbilities.context(g.world)
-		check(g.ride_button.disabled and float(info.remaining)>0. and g.ride_button.text.contains(g.t(str(info.status_key))),"Active skill exposes real phase and remaining time: "+hero)
+		check(g.actions.context.disabled and float(info.remaining)>0. and g.actions.context.cooldown>0. and g.actions.context.accessibility_description.contains(g.t(str(info.status_key))),"Active skill exposes real phase and remaining time: "+hero)
 		for source in ["keyboard","gamepad"]:
-			clean(g,hero);g.down_down=hero=="armadillo"
+			g.touch_mode=false;clean(g,hero);g.down_down=hero=="armadillo"
+			check(not g.actions.has("context"),"Desktop has no floating interaction control: "+source)
 			if source=="keyboard":
 				var e:=InputEventKey.new();e.physical_keycode=KEY_E;e.keycode=KEY_E;e.pressed=true;g._unhandled_input(e)
 			else:
 				var e:=InputEventJoypadButton.new();e.button_index=g.interact_binding();e.pressed=true;g._input(e)
 			check(not g.world.hero_skill.is_empty(),"Existing contextual input starts skill: "+hero+" "+source)
+		g.touch_mode=true
 	clean(g,"frog")
 	g.world.weapon="arc";g.world.ammunition=10
 	g.world.pickups.append({"id":"context-heavy","kind":"heavy","x":g.world.player.x+30.,"y":-35.})
-	g.update_hud();g.ride_button.pressed.emit()
+	g.update_hud();tap_context(g)
 	check(g.world.weapon=="heavy" and g.world.hero_skill.is_empty(),"Nearby weapon interaction takes priority over skill")
 	clean(g,"frog")
 	g.world.mount.available=true;g.world.mount.x=g.world.player.x;g.world.mount.floor_y=0.;g.world.mount.hp=3
-	g.update_hud();g.ride_button.pressed.emit()
+	g.update_hud();tap_context(g)
 	check(g.world.mount_transition=="enter" and g.world.hero_skill.is_empty(),"Boarding interaction takes priority over skill")
+	for tick in 45:g.world.step(.01)
+	g.update_hud()
+	check(g.actions.context.action=="exit_vehicle" and g.actions.context.visible,"Board becomes Exit in the same mobile slot")
+	tap_context(g)
+	check(g.world.mount_transition=="exit" and not g.world.mount.ridden,"Exit button starts real dismount")
+	clean(g,"frog");g.world.frog_meal={"id":"test-food","kind":"gnome"}
+	g.update_hud()
+	check(g.actions.context.action=="skill_spit" and not g.actions.context.disabled,"Loaded frog shows a distinct Spit action")
+	tap_context(g)
+	check(g.world.frog_meal.is_empty() and g.world.bullets.size()==1,"Spit fires from the same action slot")
+
 	clean(g,"aion");g.update_hud()
-	check(not g.ride_button.visible,"Original hero has no unrelated skill control")
+	check(not g.actions.context.visible,"Original hero has no unrelated skill control")
 
 func compact_inputs(g: AionCampaignGame) -> void:
 	clean(g,"armadillo");g.down_down=true;g.update_arcade_aim()
@@ -125,12 +139,17 @@ func finger(g: AionCampaignGame,index: int,point: Vector2,pressed: bool,canceled
 	var e:=InputEventScreenTouch.new();e.index=index;e.position=g.screen_transform*point;e.pressed=pressed;e.canceled=canceled
 	g._input(e)
 
+func tap_context(g: AionCampaignGame) -> void:
+	var point: Vector2=g.actions.context.get_global_rect().get_center()
+	finger(g,0,point,true)
+	finger(g,0,point,false)
+
 func touch_context(g: AionCampaignGame) -> void:
 	g.touch_mode=true
 	for size in [Vector2i(1152,648),Vector2i(393,873)]:
 		root.size=size;g.resize()
 		clean(g,"armadillo")
-		var disabled_point: Vector2=g.ride_button.global_position+g.ride_button.size*.5
+		var disabled_point: Vector2=g.actions.context.global_position+g.actions.context.size*.5
 		finger(g,2,disabled_point,true)
 		g.down_down=true;g.update_arcade_aim();g.update_hud();finger(g,2,disabled_point,true)
 		check(g.world.hero_skill.is_empty() and g.touch_actions.get(2,"")=="context","A finger held on a disabled context never queues activation when it becomes ready")
@@ -138,7 +157,7 @@ func touch_context(g: AionCampaignGame) -> void:
 		var down: Vector2=g.stick.position+g.stick.size*Vector2(.5,.9)
 		finger(g,7,down,true);g.update_arcade_aim();g.update_hud()
 		check(g.world.crouching() and g.stick_touch==7,"First real touch path holds crouch at "+str(size))
-		var point: Vector2=g.ride_button.global_position+g.ride_button.size*.5
+		var point: Vector2=g.actions.context.global_position+g.actions.context.size*.5
 		finger(g,23,point,true)
 		check(not g.world.hero_skill.is_empty(),"Second finger activates the visible context at "+str(size))
 		check(g.touch_actions.get(23,"")=="context" and g.stick_touch==7,"Context finger has its own one-shot owner without releasing the stick")
@@ -153,7 +172,7 @@ func touch_context(g: AionCampaignGame) -> void:
 		check(g.stick_touch==-1 and g.world.move_axis==Vector2.ZERO,"Releasing both fingers leaves no held direction")
 		clean(g,"frog");g.world.weapon="arc";g.world.ammunition=10
 		g.world.pickups.append({"id":"touch-heavy","kind":"heavy","x":g.world.player.x+30.,"y":-35.});g.update_hud()
-		point=g.ride_button.global_position+g.ride_button.size*.5
+		point=g.actions.context.global_position+g.actions.context.size*.5
 		finger(g,0,point,true);finger(g,0,point,true)
 		check(g.world.weapon=="heavy" and g.world.hero_skill.is_empty(),"One context touch swaps only once and cannot become an extra skill press")
 		finger(g,0,point,false);g.update_hud();finger(g,0,point,true)

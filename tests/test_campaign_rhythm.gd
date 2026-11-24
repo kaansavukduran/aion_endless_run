@@ -117,11 +117,13 @@ func run() -> void:
 		root.size=dimensions;await process_frame
 		for scale in [1.,1.5,2.]:
 			game.options.text_scale=scale;game.ui.theme=game.options.theme(game.FONT);game.resize();game.update_hud();await process_frame;await process_frame
-			var context_rect: Rect2=game.ride_button.get_global_rect()
+			var context_rect: Rect2=game.actions.context.get_global_rect()
 			var label: String=str(dimensions)+"/"+str(scale)
-			check(game.ride_button.visible and game.ride_button.text==game.t("swap_weapon"),"Actual gun choice is laid out after its translated text: "+label)
+			check(game.actions.context.visible and game.actions.context.caption==game.t("context_swap_short"),"Actual gun choice is laid out after its translated text: "+label)
 			check(Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h)).encloses(context_rect),"Context touch action fits: "+label)
-			for key in game.actions:
+			check(context_rect.position.x>game.view_w*.5 and context_rect.size==Vector2(90,90),"Compact context action stays on the right: "+label)
+			check(context_rect.position.y>=game.view_h-220. and game.actions.attack.position.y>=game.view_h-220.,"Upper touch row stays below the baseline floor: "+label)
+			for key in ["attack","jump","grenade"]:
 				check(not context_rect.intersects(game.actions[key].get_global_rect()),"Context action never overlaps manual touch routing: "+label+"/"+key)
 			check(not context_rect.intersects(game.stick.get_global_rect()),"Context action stays clear of the joystick: "+label)
 	game.queue_free();await process_frame

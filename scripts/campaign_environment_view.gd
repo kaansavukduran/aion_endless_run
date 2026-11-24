@@ -95,7 +95,7 @@ static func draw(v) -> void:
 				var warn_color:=Color("87d5ed") if h.kind=="electric" else Color("efbc6b")
 				for x in range(-50,51,15):v.draw_rect(Rect2(p+Vector2(x,-6),Vector2(8,5)),warn_color)
 		if active:
-			var ink:=Color("87d5ed") if h.kind in ["electric","sluice"] else (Color("bfe8d4") if h.kind=="gust" else Color("cfaa78"))
+			var ink:=Color("87d5ed") if h.kind=="electric" else (Color("bfe8d4") if h.kind=="gust" else Color("cfaa78"))
 			for x in range(-45,46,15):
 				if h.kind=="electric":v.draw_polyline(PackedVector2Array([p+Vector2(x,0),p+Vector2(x+6,-35),p+Vector2(x,-28),p+Vector2(x+8,-65)]),ink,3.)
 				elif h.kind=="gust":v.draw_line(p+Vector2(x,-38),p+Vector2(x-10,-135),ink,3.)

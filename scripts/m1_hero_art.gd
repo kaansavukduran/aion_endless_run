@@ -28,6 +28,14 @@ static func clip_spec(hero: String,action: String) -> Dictionary:
 	var clip: Dictionary=DATA.data.playback[action]
 	return {'frames':int(clip.frames),'fps':float(clip.frames)/float(clip.get('seconds',.75)),'loop':bool(clip.get('loop',false))}
 
+static func face_foreground(frame: Dictionary) -> Rect2:
+	if not frame.has("face_patch"):return Rect2()
+	var patch: Array=frame.face_patch
+	var bounds: Array=frame.bounds
+	# The tracked patch ends above the chin. Include the jaw and its outline
+	# while staying above the hand that grips the weapon on the front layer.
+	return Rect2(float(patch[0])-float(bounds[0])-2.,float(patch[1])-float(bounds[1])-1.,float(patch[2])+12.,float(patch[3])+12.)
+
 static func metrics(hero: String, action: String, frame: int=0) -> Dictionary:
 	if hero not in HEROES:return _provider().metrics(hero,action,frame)
 	if M1HeroActionArt.supports(hero,action):return M1HeroActionArt.metrics(hero,action,frame)
@@ -37,7 +45,7 @@ static func metrics(hero: String, action: String, frame: int=0) -> Dictionary:
 	var key: String=str(spec[0]);var row: int=int(spec[1]);frame=clampi(frame,0,5)
 	var f: Dictionary=DATA.data.atlases[key].frames[row][frame]
 	var scale: float=f.scale;var origin:=Vector2(float(f.origin[0]),float(f.origin[1]));var b: Array=f.bounds
-	return {"offset":(Vector2(float(b[0])-2.,float(b[1])-2.)-origin)*scale,"size":Vector2(float(b[2]-b[0])+4.,float(b[3]-b[1])+4.)*scale,"grip_local":(Vector2(float(f.grip[0]),float(f.grip[1]))-origin)*scale,"face_local":(Vector2(float(f.face_landmark[0]),float(f.face_landmark[1]))-origin)*scale,"height":float(f.body_bounds[3]-f.body_bounds[1])*scale,"source_key":"m1-body-"+key,"source_row":row,"source_frame":frame,"source_scale":scale,"ground_contact":bool(f.ground_contact),"gun_embedded":false,"body_only":true}
+	return {"offset":(Vector2(float(b[0])-2.,float(b[1])-2.)-origin)*scale,"size":Vector2(float(b[2]-b[0])+4.,float(b[3]-b[1])+4.)*scale,"grip_local":(Vector2(float(f.grip[0]),float(f.grip[1]))-origin)*scale,"face_local":(Vector2(float(f.face_landmark[0]),float(f.face_landmark[1]))-origin)*scale,"height":float(f.body_bounds[3]-f.body_bounds[1])*scale,"source_key":"m1-body-"+key,"source_row":row,"source_frame":frame,"source_scale":scale,"ground_contact":bool(f.ground_contact),"gun_embedded":false,"body_only":true,"face_foreground":face_foreground(f) if hero=="aion" else Rect2()}
 
 func pose(hero: String, action: String, frame: int=0) -> Dictionary:
 	if hero not in HEROES:return _provider().pose(hero,action,frame)

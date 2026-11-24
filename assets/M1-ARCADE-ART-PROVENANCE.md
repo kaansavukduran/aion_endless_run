@@ -6,7 +6,9 @@ The six original hero designs supply the busts in `m1-selection-portraits.png`. 
 
 `m1-locks-and-traps.png` contains three materials for the six gate poses and five poses each for electric, vine and claw traps. Gate cells are 64 × 96. Trap cells are 64 × 56 and start at atlas Y 288. The bottom of each cell anchors to the terrain. Drawn at 2×, with smaller standalone mechanism gates.
 
-Regenerate from the repository root with Godot 4.6.3 and Pillow.
+`m1-sluice-trap.png` is an original 64 × 48 pixel strip with five poses for the Flooded Channel sluice. The set shows the inset grate, pressure warning, rising water, full surge and falloff. Each frame registers its bottom edge to the floor and draws at 2×.
+
+Regenerate the portraits, spit and lock atlases from the repository root with Godot 4.6.3 and Pillow.
 
 ```sh
 godot --headless --script packaging/m1_arcade_sprite_sources.gd -- /tmp/aion-arcade-cels

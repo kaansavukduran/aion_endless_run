@@ -322,7 +322,7 @@ func draw_world() -> void:
 	if not world.mount_transition.is_empty():
 		draw_embark()
 	elif not bool(world.mount.ridden) and world.state in ["playing","briefing","paused","travel"]:
-		draw_hero_weapon()
+		draw_hero_weapon(pose,tint)
 		CampaignGrenadeArt.draw_held(self)
 	MissionHeroArt.draw_tongue(self)
 	MissionFrogSpitArt.carried(self)
@@ -537,7 +537,7 @@ func hero_weapon_visible() -> bool:
 	# Re-equipping waits for the complete action, matching World's fire gate.
 	return world.grenade_throw.is_empty() and not MissionHeroAbilities.compact(world)
 
-func draw_hero_weapon() -> void:
+func draw_hero_weapon(pose: Dictionary,tint: Color) -> void:
 	if not hero_weapon_visible():return
 	var body := M1CombatArt.body_spec(world)
 	if body.action=="melee":return # The fist/hoof is drawn in the actual cel.
@@ -560,6 +560,18 @@ func draw_hero_weapon() -> void:
 	if world.shot_flash>.09 and world.melee_time<=0. and world.rescue_time<=0.:
 		var end: Vector2=at(world.player+Vector2(transform.muzzle))
 		draw_rect(Rect2(end-Vector2(2,2),Vector2(4,4)),Color("fff0bf"))
+
+	if world.rescue_time<=0. and world.melee_time<=0.:
+		var face: Rect2=pose.get("face_foreground",Rect2())
+		if face.has_area():
+			# Restore the actual face cel over the weapon with the same pixel
+			# transform as the body. The grip and shot origin stay registered.
+			var scale: Vector2=Vector2(pose.size)/pose.texture.get_size()
+			var local:=Rect2(Vector2(pose.offset).round()+face.position*scale,face.size*scale)
+			draw_set_transform(at(world.player),0.,Vector2(int(body.mirror),1.))
+			draw_texture_rect_region(pose.texture,local,face,tint)
+			draw_set_transform(Vector2.ZERO)
+
 
 func draw_assists() -> void:
 	var animated: bool=host.motion_enabled and not host.options.reduced_motion
@@ -632,7 +644,6 @@ func small_health(p: Vector2,width: float,ratio: float) -> void:
 	draw_rect(Rect2(p+Vector2(1,1),Vector2((width-2.)*clampf(ratio,0,1),5)),Color("e9ba7e"))
 
 func draw_npcs(mounted_front: bool) -> void:
-	var cut_id: String=CampaignRescue.cut_target(world).get("id","") if not mounted_front else ""
 	for npc in world.npcs:
 		if float(npc.x)<camera_x-150. or float(npc.x)>camera_x+scene_w+150.:continue
 		if str(npc.secret)!="" and not world.discovered.has(str(npc.secret)):continue
@@ -655,12 +666,6 @@ func draw_npcs(mounted_front: bool) -> void:
 				draw_pose(item_bank.pose(str(npc.gift)),bag_at+Vector2(float(npc.facing)*10.,-(age-.45)*80.),1,.6)
 		var p := at(Vector2(float(npc.x),float(npc.y)))
 		var label_top: float=maxf(46.,p.y+minf(-90.,float(npc_pose.offset.y)*growth-12.))
-		if phase=="bound" and npc.id==cut_id and font!=null and p.x>=0. and p.x<=scene_w:
-			var hint: String=host.t("cut")
-			var width: float=font.get_string_size(hint,HORIZONTAL_ALIGNMENT_LEFT,-1,17).x
-			var label_at:=Vector2(clampf(p.x-width*.5,12.,scene_w-width-12.),label_top)
-			draw_rect(Rect2(label_at-Vector2(6.,17.),Vector2(width+12.,23.)),Color("312534"))
-			caption(hint,label_at,17)
-		elif phase=="thanks" and age<2.4:
+		if phase=="thanks" and age<2.4:
 			caption(host.t("thanks"),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top),17)
 			if age>.9:caption(host.t(str(npc.gift)),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top+20.),16)
