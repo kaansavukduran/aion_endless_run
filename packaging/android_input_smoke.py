@@ -115,11 +115,13 @@ jump=hold_action('jump',420)
 jump.wait(timeout=6)
 arcade_state(lambda state:not state['grounded'],timeout=10)
 capture('aion-jump')
-attack=hold_action('attack',4400)
+# ADB holds in wall time while the software renderer advances the actual
+# Arcade clock per frame. Give the six-shot sequence enough active game time.
+attack=hold_action('attack',9000)
 try:
- arcade_state(lambda state:state['shots']>=6,timeout=12)
+ arcade_state(lambda state:state['shots']>=6,timeout=15)
  capture('held-fire')
-finally:attack.wait(timeout=8)
+finally:attack.wait(timeout=12)
 check(True,'Real native held fire issues six arcade shots and stays responsive')
 old=pause()
 capture('paused')
