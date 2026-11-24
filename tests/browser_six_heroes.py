@@ -357,7 +357,7 @@ class Probe:
         if self.read()['front'].get('intro'):
             self.event('opening_skip_key','Enter');self.page.keyboard.press('Enter')
         self.wait(lambda p:p['front'] and not p['front']['intro'] and p['dataset'].get('uiReady')=='true', 'actionable main menu', timeout=30)
-        self.front_button('ChooseHero')
+        self.front_button('StartCampaign')
         self.wait(lambda p:p['dataset'].get('page')=='characters' and p['dataset'].get('uiReady')=='true', 'characters page')
         selected = self.read()['front']['selected']
         targets = ['sheep',self.hero] if selected==self.hero else [self.hero]
@@ -371,11 +371,7 @@ class Probe:
                 self.wait(lambda p:{b['name'] for b in json.loads(p['dataset'].get('ui','[]'))}!=old and p['dataset'].get('uiReady')=='true','fresh visible roster page after '+navigation)
             self.front_button('Select_'+hero)
             self.wait(lambda p:p['front'] and p['front']['selected']==hero and p['dataset'].get('uiReady')=='true','selection acknowledgment '+hero)
-        self.front_button('ConfirmHero')
-        self.wait(lambda p:p['dataset'].get('page')=='main' and p['dataset'].get('uiReady')=='true','confirmed main menu')
         self.stage='visible-launch'
-        self.front_button('StartCampaign')
-        self.page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
         self.front_button('ConfirmHero')
         self.wait(lambda p:p['campaign'] is not None,'Mission 1 scene after actual Play',timeout=30)
         packets=self.page.evaluate('sixProbe.packets')
@@ -383,7 +379,7 @@ class Probe:
         frames={p.get('frame') for p in launch if p.get('state')=='launch' and p.get('frame',-1)>=0}
         self.check(len(frames)>=2,'Play presents multiple actual selected launch frames before the scene transition',sorted(frames))
         d=self.read()['campaign'];self.check(d['character']==self.hero,'The selected identity enters Mission 1')
-        self.campaign_button('CampaignBegin')
+        if d['menu']=='briefing':self.campaign_button('CampaignBegin')
         for _ in range(15):
             d=self.read()['campaign']
             if d['menu']!='help':break
@@ -468,7 +464,8 @@ class Probe:
             elif method=='pad':self.page.evaluate('sixPad([0,1,1,0],[])')
             else:self.keys(['s'])
             self.wait(lambda p:p['campaign'].get('crouching'),'actual crouch requirement',alive=True)
-        self.wait(lambda p:p['campaign'].get('context_action',{}).get('visible') and not p['campaign']['context_action'].get('disabled',True),'naturally ready contextual skill control',alive=True)
+        if method=='touch':
+            self.wait(lambda p:p['campaign'].get('context_action',{}).get('visible') and not p['campaign']['context_action'].get('disabled',True),'naturally ready contextual skill control',alive=True)
         before=self.read()['campaign'];self.check(not before.get('weapon_offer') and not before['mounted'],'The contextual action is free for the native skill')
         skill_mark=self.mark()
         if method=='pad':
@@ -482,8 +479,7 @@ class Probe:
             r=context['rect'];point=self.ui_xy(r[0]+r[2]/2,r[1]+r[3]/2)
             if touch_session:
                 touch_session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]},{'id':2,'x':point[0],'y':point[1]}]})
-                # A visible Button normally activates on release. Complete the
-                # second finger's tap while the first still holds crouch.
+                # Complete the tap while the first finger still holds crouch.
                 touch_session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[{'id':2,'x':point[0],'y':point[1]}]})
                 self.wait(lambda p:bool(p['campaign'].get('hero_skill',{}).get('phase')),'a completed second-finger context tap starts the crouched skill',alive=True)
             else:self.page.touchscreen.tap(*point)
@@ -516,7 +512,7 @@ class Probe:
     def moving_tongue(self):
         if self.hero!='frog':return
         self.stage='moving-natural-tongue'
-        self.wait(lambda p:p['campaign']['grounded'] and not p['campaign'].get('hero_skill',{}).get('phase') and not p['campaign'].get('context_action',{}).get('disabled',True),'fresh moving-tongue precondition',alive=True)
+        self.wait(lambda p:p['campaign']['grounded'] and not p['campaign'].get('hero_skill',{}).get('phase'),'fresh moving-tongue precondition',alive=True)
         self.keys([]);self.aim(1)
         self.wait(lambda p:p['campaign']['aim'][0]>.8,'right target before moving tongue',alive=True)
         self.keys(['a']);mark=self.mark();self.event('key_press','e');self.page.keyboard.press('e')
@@ -547,7 +543,8 @@ class Probe:
                     session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':1,'x':stick_point[0],'y':stick_point[1]}]})
                 elif method=='pad':self.page.evaluate('axes=>sixPad(axes,[])',[0,1 if self.hero=='armadillo' else 0,1,0])
                 if self.hero=='armadillo':self.wait(lambda p:p['campaign']['crouching'],'native input actually holds crouch',alive=True)
-                self.wait(lambda p:p['campaign'].get('context_action',{}).get('visible') and not p['campaign']['context_action'].get('disabled',True),'actual visible context button is ready',alive=True)
+                if method=='touch':
+                    self.wait(lambda p:p['campaign'].get('context_action',{}).get('visible') and not p['campaign']['context_action'].get('disabled',True),'actual visible context button is ready',alive=True)
                 before=self.read()['campaign'];mark=self.mark();event_mark=self.page.evaluate('sixProbe.events.length')
                 self.check(not before.get('weapon_offer') and not before['mounted'],'The actual context is the native hero skill')
                 if method=='touch':

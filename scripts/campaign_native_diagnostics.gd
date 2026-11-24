@@ -34,7 +34,8 @@ func step(dt: float) -> void:
 	clock=0.
 	var w=host.world
 	var ui_key: String=str(host.ui_generation)+":"+str(host.ui_ready)+":"+host.menu_kind+":"+str(host.get_viewport_rect().size)
-	ui_key+=":"+str(is_instance_valid(host.ride_button) and host.ride_button.visible)+":"+str(w.mount.ridden)
+	var context: AionCampaignTouch=host.actions.get("context")
+	ui_key+=":"+str(is_instance_valid(context) and context.visible)+":"+str(w.mount.ridden)
 	if ui_key!=layout_stamp:
 		layout_stamp=ui_key
 		var controls:=[];var actions:={}

@@ -41,7 +41,7 @@ static func metrics(hero: String,action: String,frame: int=0) -> Dictionary:
  var scale: float=f.scale;var origin:=Vector2(float(f.origin[0]),float(f.origin[1]));var b: Array=f.bounds
  var hand: Vector2=(Vector2(float(f.grip[0]),float(f.grip[1]))-origin)*scale
  var face_width: float = float(f.face_reference_width) if f.has('face_reference_width') else float(f.face_patch[2])
- return {'offset':(Vector2(float(b[0])-2.,float(b[1])-2.)-origin)*scale,'size':Vector2(float(b[2]-b[0])+4.,float(b[3]-b[1])+4.)*scale,'grip_local':hand,'grenade_hand_local':hand,'grenade_embedded':bool(f.grenade_embedded),'face_local':(Vector2(float(f.face_landmark[0]),float(f.face_landmark[1]))-origin)*scale,'height':float(f.body_bounds[3]-f.body_bounds[1])*scale,'source_key':'m1-action-'+key,'source_row':row,'source_frame':frame,'source_scale':scale,'ground_contact':true,'gun_embedded':false,'body_only':true,'head_size':face_width*scale}
+ return {'offset':(Vector2(float(b[0])-2.,float(b[1])-2.)-origin)*scale,'size':Vector2(float(b[2]-b[0])+4.,float(b[3]-b[1])+4.)*scale,'grip_local':hand,'grenade_hand_local':hand,'grenade_embedded':bool(f.grenade_embedded),'face_local':(Vector2(float(f.face_landmark[0]),float(f.face_landmark[1]))-origin)*scale,'height':float(f.body_bounds[3]-f.body_bounds[1])*scale,'source_key':'m1-action-'+key,'source_row':row,'source_frame':frame,'source_scale':scale,'ground_contact':true,'gun_embedded':false,'body_only':true,'head_size':face_width*scale,'face_foreground':M1HeroArt.face_foreground(f) if hero=='aion' else Rect2()}
 
 static func pose(hero: String,action: String,frame: int=0) -> Dictionary:
  var key: String=_atlas_key(hero,action,frame)
