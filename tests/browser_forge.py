@@ -424,6 +424,11 @@ with sync_playwright() as playwright:
             aim_samples = []
             directions = [(['d'], [1, 0]), (['d', 'w'], [1, -1]), (['w'], [0, -1]), (['a', 'w'], [-1, -1]), (['a'], [-1, 0]), (['a', 's'], [-1, 1]), (['s'], [0, 1]), (['d', 's'], [1, 1])]
             for index, (inputs, target) in enumerate(directions):
+                if target[1] > 0:
+                    # Each airborne down shot starts with its own normal
+                    # run. The previous stationary direction checks leave
+                    # approaching enemies close enough to interrupt takeoff.
+                    restart_for_probe()
                 while True:
                     try:
                         current=campaign()

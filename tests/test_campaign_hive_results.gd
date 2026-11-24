@@ -38,6 +38,7 @@ func run() -> void:
 	for i in 8:
 		var last: float=-1.
 		var hashes: Dictionary={}
+		var contact_spans: Array[int]=[]
 		for j in 6:
 			var pose: Dictionary=catalog.pose("rescue-npcs",i,6+j)
 			var cell: Image=pose.texture.get_image()
@@ -45,11 +46,19 @@ func run() -> void:
 			var foot: float=pose.offset.y+float(footprint.end.y)*pose.size.y/float(cell.get_height())
 			check(absf(foot)<.01,"Keeper sole remains on the physics origin: %d/%d"%[i,j])
 			hashes[cell.get_data().hex_encode().sha256_text()]=true
-			var index:=CampaignRescue.walk_frame({"stride_distance":float(j)*8.+.1},true)
+			var min_x:=footprint.end.x
+			var max_x:=footprint.position.x
+			for y in range(footprint.end.y-10,footprint.end.y):
+				for x in range(footprint.position.x,footprint.end.x):
+					if cell.get_pixel(x,y).a>.7:
+						min_x=mini(min_x,x);max_x=maxi(max_x,x)
+			contact_spans.append(max_x-min_x)
+			var index:=CampaignRescue.walk_frame({"stride_distance":float(j)*CampaignRescue.WALK_STEP+.1},true)
 			check(float(index)>last,"Distance exposes the ordered walk frames")
 			last=index
 		check(hashes.size()==6,"Keeper has six different actual rendered textures: %d"%i)
-		check(CampaignRescue.walk_frame({"stride_distance":48.},true)==6,"Walking repeats at the original contact")
+		check(contact_spans[0]>contact_spans[1]*1.35 and contact_spans[3]>contact_spans[4]*1.35,"Passing poses visibly lift one boot off the ground: %d"%i)
+		check(CampaignRescue.walk_frame({"stride_distance":6.*CampaignRescue.WALK_STEP},true)==6,"Walking repeats at the original contact")
 	for action in ["walk_back","crouch_walk_back","tunnel_walk_back"]:
 		for frame in 6:check(M1CombatArt.backstep_frame(action,frame)==5-frame,"Backpedal runs the registered stride in reverse")
 

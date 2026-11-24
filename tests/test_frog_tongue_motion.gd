@@ -42,7 +42,8 @@ func run() -> void:
 					var gait: String=prefix+"_back" if backward else prefix
 					var expected_action: String="tongue_"+gait if phase in ["extend","retract"] else gait
 					check(str(spec.action)==expected_action,"skill retains correct forward/back stance gait in actual phase: "+phase+"/"+gait)
-					check(int(spec.frame)==posmod(int(w.walk_distance/(110. if low else 174.)*6.),6),"tongue locomotion frame follows actual travel, not fixed jaw/skill clock")
+					var forward_phase:=posmod(int(w.walk_distance/(110. if low else 174.)*6.),6)
+					check(int(spec.frame)==(5-forward_phase if backward else forward_phase),"Tongue gait follows actual travel, with backpedal stepping in reverse")
 					check(Vector2(w.hero_skill.direction)==Vector2(face,0.),"movement never changes this tongue launch direction")
 					# World reports realised dx/dt from float32 positions. At x1500,
 					# 60Hz rounding is .0025px/s; .01 still rejects any speed change.

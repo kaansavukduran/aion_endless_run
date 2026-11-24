@@ -33,7 +33,7 @@ func run() -> void:
 	CampaignLives.start_entry(w,Rect2(2350.,-430.,1152.,600.))
 	for tick in 32:w.step(.02)
 	check(w.hp==1 and w.player.x>=2350. and w.player.x<3502. and w.weapon=="pistol" and w.ammunition==0,"Death returns to the same visible encounter with the base pistol")
-	check(w.score==123 and w.awarded.has("already-paid") and w.taken.has("already-claimed"),"Recovery never rolls back one-time score or claims")
+	check(w.score==0 and w.awarded.has("already-paid") and w.taken.has("already-claimed"),"Recovery resets the life score while preserving one-time claims")
 	var saved: Dictionary=w.snapshot();var restored:=AionCampaignWorld.new()
 	check(restored.restore(saved) and restored.player==w.player and restored.weapon=="pistol" and restored.attempts_remaining==2,"Save/Continue preserves the exact position, inventory and remaining lives")
 	w.mount={"available":false,"ridden":false,"type":"skimmer","hp":0,"x":2600.};w.rally=CampaignRecovery.capture(w,2600.)
@@ -53,7 +53,7 @@ func run() -> void:
 	var earned: int=w.score;w.damage_enemy(w.enemies[0],1);check(w.score==earned and w.chain==3,"A defeated ID never extends or pays a chain twice")
 	var clock: float=w.chain_time;w.state="paused";w.step(2.);check(w.chain_time==clock,"Pause does not consume the chain window")
 	w.state="playing";CampaignStyle.step(w,4.1);check(w.chain==0 and w.score==earned,"Chain expiry keeps earned base score")
-	w.chain=4;w.chain_time=3.;w.invulnerable=0.;w.damage_player();check(w.chain==0 and w.score==earned,"Damage resets only the temporary chain")
+	w.chain=4;w.chain_time=3.;w.invulnerable=0.;w.damage_player();check(w.chain==0 and w.score==0,"A lost life resets the temporary chain and the current score")
 	for section in ["shore","water","terrace","roots"]:
 		w=AionCampaignWorld.new();w.begin("aion");w.run_seed=7719;w.load_section(section)
 		check(w.enemies.all(func(e):return bool(e.mini) or bool(e.heavy) or int(e.hp)==1),"Normal enemies retain one hit: "+section)

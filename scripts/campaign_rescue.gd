@@ -9,6 +9,7 @@ const REGIONAL_ROLES := {"shore":["keeper","technician","courier"],"quay":["tech
 const GIFTS := ["heavy","repair","beam","shield","scatter","points","arc","grenade","seeker","haste","power","reveal","magnet","disc","harpoon","spore","trap","nova"]
 const CUT_SECONDS := .6
 const CONTACT := .3
+const WALK_STEP := 13.
 ## Explicit NPC animation/state contract for runtime & Sol 6.2 art handoff.
 const NPC_ANIM_SPEC := {
 	"idle_bound":{"phase":"bound","frames":[0,1],"loop":true,"foot":[0,0],"body":[0,-40],"event":"cut_or_shot"},
@@ -156,7 +157,7 @@ static func on_gift_collected(w,item: Dictionary) -> void:
 
 static func walk_frame(n: Dictionary, animated: bool) -> int:
 	# Cadence follows physical distance, so a blocked foot never runs in place.
-	return 6+posmod(floori(float(n.get("stride_distance",0.))/8.),6) if animated else 6
+	return 6+posmod(floori(float(n.get("stride_distance",0.))/WALK_STEP),6) if animated else 6
 
 static func walk_to(w,n: Dictionary,x: float,facing: int) -> void:
 	n.stride_distance=float(n.get("stride_distance",0.))+absf(x-float(n.x))
@@ -179,7 +180,7 @@ static func step(w,dt: float) -> void:
 			if float(n.free_age)<.18:continue
 			n.roam_clock=float(n.get("roam_clock",0.))+dt
 			var facing: int=int(n.get("facing",-1))
-			var next: float=float(n.x)+float(facing)*45.*dt
+			var next: float=float(n.x)+float(facing)*62.*dt
 			var limit: bool=absf(next-float(n.get("home_x",n.x)))>90. or next<35. or next>w.length()-90.
 			if limit or not has_support(w,n,next) or float(n.roam_clock)>1.5+float(int(n.variant)%3)*.25:
 				n.facing=-facing;n.roam_clock=0.
@@ -193,7 +194,7 @@ static func step(w,dt: float) -> void:
 			if phase=="thanks" and float(n.thank_age)>=.9:handover(w,n)
 			if phase=="thanks" and float(n.thank_age)>1.7:n.phase="departed"
 			if str(n.phase)=="departed" and float(n.thank_age)<4.8:
-				var next: float=float(n.x)-60.*dt
+				var next: float=float(n.x)-84.*dt
 				if has_support(w,n,next):
 					walk_to(w,n,next,-1)
 			if n.role=="courier" and w.awarded.has(str(n.id)+":gift") and float(n.thank_age)>1.3 and float(n.thank_age)<4.2:

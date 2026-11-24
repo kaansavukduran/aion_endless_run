@@ -37,8 +37,7 @@ func run() -> void:
   w=clean();w.mount={'available':true,'ridden':true,'x':400.,'hp':1,'type':type};w.player.y=-42.
   check(w.mount.hp==1,'Vehicle starts with one HP: '+type)
   var aim:=Vector2.from_angle(.37);w.aim_direction=aim;CampaignWeapons.fire(w)
-  var at: int=1 if type=='wind' else 0
-  check(Vector2(w.bullets[at].v).normalized().is_equal_approx(aim),'Vehicle fire preserves continuous surrounding aim: '+type)
+  check(w.bullets.size()==1 and Vector2(w.bullets[0].v).normalized().is_equal_approx(aim),'One vehicle projectile preserves continuous surrounding aim: '+type)
   w.invulnerable=0.;w.damage_player()
   w.step(.05)
   check(CampaignVehicles.stunned(w) and int(w.mount.hp)==0,'One hit leaves a readable impact: '+type)
