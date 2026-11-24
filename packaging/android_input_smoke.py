@@ -182,6 +182,8 @@ finally:
 # The changed crouch/movement mechanic belongs to Arcade, whose passive native
 # records are separate from the retained Endless runner observations above.
 main();menu_button(name='StartSelect_aion');ready_main();menu_button(name='StartCampaign')
+latest('AION_UI ',lambda s:s['page']=='characters' and any(b['name']=='ConfirmHero' for b in s['buttons']))
+menu_button(name='ConfirmHero')
 def arcade_ui(predicate=lambda value:True,timeout=25):
  return latest('AION_ARCADE_UI ',lambda value:value.get('ui_ready') and predicate(value),timeout=timeout)
 def arcade_state(predicate=lambda value:True,timeout=25):
