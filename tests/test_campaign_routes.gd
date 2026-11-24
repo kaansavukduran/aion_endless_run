@@ -115,6 +115,42 @@ func route_structures() -> void:
 	recovery.jump_press();recovery.jump_release();recovery.move_axis=Vector2.RIGHT
 	for frame in 48:recovery.step(1./60.)
 	check(recovery.grounded() and absf(recovery.player.y+195.)<.1,"A second ordinary jump recovers the upper route without a charged ability")
+
+func hatch_landmarks_and_rewards() -> void:
+	var w:=fresh()
+	check(CampaignRoutes.exit_flag_positions(w).size()==2,"Both exits of the always-open coast fork stay marked")
+	check(Vector2(550.,CampaignRoutes.WALKWAYS[1].position.y) in CampaignRoutes.lantern_positions(w),"The coast lantern stays on its original step")
+	w.load_section("fork_two");w.enemies.clear()
+	var x:=CampaignRoutes.SERVICE_SUPPORT.get_center().x
+	check(Vector2(x,CampaignRoutes.SERVICE_WALKWAYS[1].position.y) in CampaignRoutes.lantern_positions(w),"The approach lantern rests on the intact service span")
+	w.bridge_timers[CampaignRoutes.SERVICE_BRIDGE_X]=0.
+	w.step(.02)
+	check(Vector2(x,CampaignRoutes.SERVICE_SUPPORT.position.y) in CampaignRoutes.lantern_positions(w),"The approach lantern follows the real support after collapse")
+	check(CampaignRoutes.exit_flag_positions(w).size()==1 and CampaignRoutes.lantern_positions(w).size()==3,"The closed hatch hides the lower flag and its lantern")
+	var fruit: Dictionary=w.pickups.filter(func(item):return item.id=="fork_two:route-fruit:8")[0]
+	var supply: Dictionary=w.pickups.filter(func(item):return item.id=="fork_two:passage-supply")[0]
+	check(not CampaignRoutes.pickup_exposed(w,fruit) and not CampaignRoutes.pickup_exposed(w,supply),"The closed hatch hides the lower fruit and supply")
+	w.player=Vector2(float(supply.x),0.)
+	check(not w.touches_pickup(supply),"The closed hatch prevents collecting its supply through solid ground")
+	w.player=Vector2(float(fruit.x),0.)
+	check(not w.touches_pickup(fruit),"The closed hatch prevents collecting its fruit through solid ground")
+	var fruit_y:=float(fruit.y)
+	w.buffs.magnet=1.
+	w.step(.02)
+	check(float(fruit.y)==fruit_y and not w.taken.has(fruit.id),"A magnet cannot pull lower fruit through the closed hatch")
+	w.buffs.clear()
+	for hit in 4:CampaignContent.hit_object(w,Vector2(CampaignRoutes.HATCH_LOCK_X,-35.),1)
+	check(Vector2(CampaignRoutes.EXIT_X,CampaignRoutes.LOWER_FLOOR) in CampaignRoutes.exit_flag_positions(w),"Opening the hatch reveals the lower flag on the actual floor")
+	check(Vector2(1530.,CampaignRoutes.LOWER_FLOOR) in CampaignRoutes.lantern_positions(w),"Opening the hatch places the lower lantern on its floor")
+	check(CampaignRoutes.pickup_exposed(w,fruit) and CampaignRoutes.pickup_exposed(w,supply),"Opening the hatch reveals the same fruit and supply")
+	var restored:=AionCampaignWorld.new()
+	check(restored.restore(w.snapshot()) and CampaignRoutes.exit_flag_positions(restored).size()==2 and CampaignRoutes.pickup_exposed(restored,fruit),"An open checkpoint restores the exposed passage markers and rewards")
+	w.player=Vector2(float(fruit.x),w.floor_at(float(fruit.x)))
+	w.step(.02)
+	check(w.taken.has(fruit.id),"The same fruit is collectible when the open hatch exposes its floor")
+	w.player=Vector2(float(supply.x),w.floor_at(float(supply.x)))
+	w.step(.02)
+	check(w.taken.has(supply.id),"The open lower passage still grants its supply")
 func run() -> void:
 	for section in CampaignRoutes.FORKS:
 		var w:=fresh();w.load_section(section)
@@ -177,6 +213,7 @@ func run() -> void:
 			for frame in 32:rider.step(1./60.)
 			check(rider.mount.ridden and absf(rider.player.y+42.-deck)<.1,"Reboarding preserves the real hull floor")
 	route_structures()
+	hatch_landmarks_and_rewards()
 	var snap:=w.snapshot();var restored:=AionCampaignWorld.new();check(restored.restore(snap) and restored.section=="fork_one" and restored.state=="playing","A junction checkpoint restores into gameplay")
 	var game:=AionCampaignGame.new();root.add_child(game);await process_frame;game.set_process(false)
 	game.world.load_section("fork_one");game.menu_kind="";game.build_ui();await process_frame;await process_frame

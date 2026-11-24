@@ -281,6 +281,7 @@ static func step(w,dt: float) -> void:
 		if z.kind=="updraft" and not w.grounded():w.velocity.y-=1100.*dt
 	if float(w.buffs.get("magnet",0.))>0.:
 		for p in w.pickups:
+			if not CampaignRoutes.pickup_exposed(w,p):continue
 			var point:=Vector2(float(p.x),float(p.y))
 			if point.distance_to(w.player)<250.:point=point.move_toward(w.player,320.*dt);p.x=point.x;p.y=point.y
 	w.disabled_platforms.clear()
