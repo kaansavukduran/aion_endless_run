@@ -207,8 +207,11 @@ func run() -> void:
 	var front:=target(w,280.);var behind:=target(w,330.)
 	check(w.interact(),"frog tongue is available from start through existing context skill")
 	advance(w,.13);w.aim_direction=Vector2.LEFT;w.move_axis=Vector2.LEFT
+	# Start the backward gait before measuring so the comparison uses the
+	# same painted jaw cel and isolates actual world movement.
+	w.step(.01)
 	var before:=MissionHeroAbilities.mouth(w);w.step(.01)
-	check(MissionHeroAbilities.mouth(w).x<before.x,"tongue mouth follows moving body")
+	check(MissionHeroAbilities.mouth(w).x<before.x,"tongue mouth follows the current moving jaw cel")
 	check(Vector2(w.hero_skill.direction)==Vector2.RIGHT,"tongue aim stays locked throughout this attack")
 	advance(w,.55)
 	check(int(front.hp)==8 and int(behind.hp)==10,"tongue hits first enemy once, without piercing or retract damage")
