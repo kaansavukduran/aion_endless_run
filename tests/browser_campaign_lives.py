@@ -73,7 +73,11 @@ with sync_playwright() as playwright:
         else:
             page.goto(args.url, timeout=120000)
         page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]', timeout=120000)
-        for name in ('StartCampaign', 'ConfirmHero'):
+        controls = json.loads(canvas.get_attribute('data-ui'))
+        if reload and not any(b['name']=='ContinueCampaign' for b in controls):
+            return False
+        actions = ('ContinueCampaign',) if reload else ('StartCampaign', 'ConfirmHero')
+        for name in actions:
             controls = canvas.evaluate("c=>({...c.dataset})")
             item = next(button for button in json.loads(controls["ui"]) if button["name"] == name)
             tr = json.loads(controls["screenTransform"])
@@ -86,7 +90,8 @@ with sync_playwright() as playwright:
             )
             if name == 'StartCampaign':
                 page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
-        observe("d.menu==='briefing' && d.ui_ready")
+        observe("d.ui_ready")
+        return True
 
     def lose_three_lives(held_enter=False):
         for expected in [2, 1, 0]:
@@ -116,13 +121,6 @@ with sync_playwright() as playwright:
 
     try:
         boot()
-        tap_campaign("CampaignBegin")
-
-        observe("d.menu!=='briefing' && d.ui_ready")
-        while observe("d.ui_ready")["menu"] == "help":
-            step = read()["help_step"]
-            tap_campaign("CampaignGo")
-            observe("d.ui_ready && (d.menu!=='help' || d.help_step!==arg)", step)
         start = observe("d.state==='playing' && d.attempts===3 && d.hp===1")
         check(start["continues"] == 0, "A new run has one active body, two reserves and zero Continues")
         offer = lose_three_lives(held_enter=True)
@@ -175,7 +173,6 @@ with sync_playwright() as playwright:
                 }
             }""")
             check(network_blocked, "The cached game loads while a fresh network request fails")
-        tap_campaign("CampaignContinue")
         reopened = observe("d.menu==='continue_offer' && d.ui_ready")
         check(0. < reopened["continue_remaining"] <= elapsed_offer + .13 and reopened["attempts"] == 0,
               "Reload preserves the unspent countdown without refilling the credit")
@@ -215,8 +212,7 @@ with sync_playwright() as playwright:
               "CampaignRestart" in game_over["buttons"] and "ArcadeContinue" not in game_over["buttons"],
               "Expiration reaches Game Over with only a genuine new run available")
         page.screenshot(path=str(args.evidence / "game-over.png"))
-        boot(reload=True)
-        check("CampaignContinue" not in read()["buttons"], "Game Over cannot be bypassed by reopening the saved run")
+        check(not boot(reload=True), "Game Over cannot be bypassed by reopening the saved run")
         check(not errors, "No uncaught browser or Godot script errors")
     except Exception:
         evidence["failure"] = read()

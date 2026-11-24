@@ -53,21 +53,11 @@ func run():
    var inset: Vector2=panel.get_theme_stylebox("panel").get_minimum_size()
    var measured: float=g.menu_pages.measure(content,panel.size.x-inset.x)
    check(panel.size.y<=measured+inset.y+2,"Main background fits real content without a blank slab "+str(dims)+str(scale_value)+" actual="+str(panel.size.y)+" content="+str(measured)+" minimum="+str(content.get_combined_minimum_size()))
-   var previous=g.menu_layer.find_child("RosterPrevious",true,false)
-   while previous!=null and not previous.disabled:
-    previous.pressed.emit();await process_frame;await process_frame;await process_frame
-    previous=g.menu_layer.find_child("RosterPrevious",true,false)
-   var shown:={}
-   # Font-width-dependent layouts may show one hero per page. Visit the real
-   # pager, bounded by the roster size, rather than assuming three pairs.
-   for roster_page in g.FRIENDS.size():
-    for choice in g.menu_layer.find_children("StartSelect_*","Button",true,false):
-     shown[str(choice.name)]=true
-     check(choice.is_visible_in_tree() and not g.language_button.get_global_rect().intersects(choice.get_global_rect()),"Compact language control never covers a visible character card at enlarged text "+str(dims)+str(scale_value)+" language="+str(g.language_button.get_global_rect())+" card="+str(choice.get_global_rect()))
-    var next=g.menu_layer.find_child("RosterNext",true,false)
-    if next==null or next.disabled:break
-    next.pressed.emit();await process_frame;await process_frame;await process_frame
-   check(shown.size()==6 and shown.has("StartSelect_rabbit") and shown.has("StartSelect_eren") and shown.has("StartSelect_armadillo") and shown.has("StartSelect_frog"),"All six distinct heroes have reachable cards on actual roster pages")
+   g.show_page("characters");await process_frame;await process_frame
+   var choices: Array=g.menu_layer.find_children("Select_*","Button",true,false)
+   check(choices.size()==6,"All six portraits fit the same picker")
+   for choice in choices:
+    check(choice.is_visible_in_tree() and not g.language_button.get_global_rect().intersects(choice.get_global_rect()),"Language control never covers a portrait at enlarged text "+str(dims)+str(scale_value))
    g.select_character("eren");check(g.character_name("eren")=="Eren" and g.character=="eren","Eren selection follows the real menu action")
    g.start_run();g.world.obstacle_wait=999;g.world.frontier.plant_wait=999;g.world.adventure.item_wait=999;g.world.adventure.ambient_gnome_wait=999;g.update_friend();g.update_hud()
    check(not g.action_buttons.has("attack") and not g.ammo_label.visible,"No Reload button or magazine HUD exists")

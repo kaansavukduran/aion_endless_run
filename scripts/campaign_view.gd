@@ -176,12 +176,15 @@ func draw_world() -> void:
 	CampaignRoutes.draw_landmarks(self)
 	for gate in world.gates:
 		if float(gate.x)<camera_x-100. or float(gate.x)>camera_x+scene_w+100.:continue
-		if not world.gate_closed(gate): continue
 		var p := at(Vector2(float(gate.x),world.floor_at(float(gate.x))))
-		draw_rect(Rect2(p-Vector2(6,155),Vector2(12,155)),Color("44445f"))
-		for y in range(8,151,18): draw_rect(Rect2(p-Vector2(3,y),Vector2(6,9)),Color("f2bf77"))
+		if not world.gate_closed(gate):
+			var frame:=clampi(1+int(float(gate.get("open_age",.4))*13.),1,5)
+			if not host.motion_enabled or host.options.reduced_motion:frame=5
+			CampaignLockArt.gate(self,p,world.section,frame)
+			continue
+		CampaignLockArt.gate(self,p,world.section,0)
 		var blockers: Array=world.enemies.filter(func(e):return str(e.id) in gate.ids and not bool(e.defeated))
-		caption(host.t("gate_remaining")%blockers.size(),p+Vector2(-100,-168),14)
+		caption(host.t("gate_remaining")%blockers.size(),p+Vector2(-74,-202),14)
 		if absf(world.player.x-float(gate.x))<180.:
 			blockers.sort_custom(func(a,b):return absf(float(a.x)-world.player.x)<absf(float(b.x)-world.player.x))
 			for enemy in blockers.slice(0,3):
@@ -213,7 +216,7 @@ func draw_world() -> void:
 				caption("+1" if item.kind=="heal" else "+2",at(p)+Vector2(-9.,-24.),14)
 	for e in world.enemies:
 		if float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
-		if bool(e.defeated) and float(e.get("dead_age",0.))>1.: continue
+		if bool(e.get("swallowed",false)) or (bool(e.defeated) and float(e.get("dead_age",0.))>1.): continue
 		var p := Vector2(float(e.x),float(e.y))
 		if e.kind==CampaignHive.KIND:
 			CampaignHive.draw_hive(self,e,p)
@@ -319,6 +322,7 @@ func draw_world() -> void:
 		draw_hero_weapon()
 		CampaignGrenadeArt.draw_held(self)
 	MissionHeroArt.draw_tongue(self)
+	MissionFrogSpitArt.carried(self)
 
 	hero_marker={"anchor":[world.player.x,world.player.y],"facing":world.facing,"source":pose.get("source_key","campaign-melee"),"row":pose.get("source_row",0),"frame":pose.get("source_frame",0),"floor":world.floor_at(world.player.x),"muzzle":[world.player.x+world.muzzle_offset().x,world.player.y+world.muzzle_offset().y]}
 	# Passive QA evidence follows the exact visible cel and drawing transform.
@@ -411,6 +415,7 @@ func draw_world() -> void:
 		elif b.kind=="beam":
 			var tail: Vector2=p-Vector2(b.v).normalized()*140.
 			draw_line(p,tail,Color("352d49"),8.);draw_line(p,tail,color,5.);draw_line(p,tail,Color("fff6d9"),2.)
+		elif b.kind=="frog_spit":MissionFrogSpitArt.projectile(self,b)
 		elif b.kind=="trap":draw_pose(support_art.pose("spider-walk",int(world.time*12.)%6),Vector2(b.p)+Vector2(0,8),int(b.get("facing",-1 if float(b.v.x)<0. else 1)))
 		else:
 			var phase: int=posmod(int(float(b.age)*18.),2) if host.motion_enabled and not host.options.reduced_motion else 0

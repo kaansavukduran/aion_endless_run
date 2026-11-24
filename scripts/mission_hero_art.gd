@@ -95,7 +95,7 @@ static func body_spec(w) -> Dictionary:
 		else:
 			match phase:
 				"windup":frame=0 if clock<.06 else 1
-				"extend":frame=2
+				"extend","spit":frame=2
 				"retract":frame=3 if float(w.hero_skill.extent)>90. else 4
 				_:frame=5
 			var gait: Dictionary=MissionFrogTongueArt.motion_spec(w,phase,face)

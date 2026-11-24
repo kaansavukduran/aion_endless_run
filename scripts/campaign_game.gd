@@ -106,6 +106,7 @@ var application_active := true
 var control_hint: Label
 var checkpoint_invalid := false
 var tutorial_seen := false
+var launch_on_ready := false
 var settings_ok := true
 
 # The large data-campaign QA mirror is for browser automation or ?aion-qa only.
@@ -152,6 +153,7 @@ func _ready() -> void:
 	Input.joy_connection_changed.connect(func(_id,_connected):release_all())
 	resize()
 	if resume_on_ready and not saved.is_empty() and saved_can_resume():resume_saved.call_deferred()
+	elif launch_on_ready:begin_new.call_deferred()
 
 func _exit_tree() -> void:
 	if OS.has_feature("web"):
@@ -319,11 +321,11 @@ func build_menu() -> void:
 				else:build_ui(),true).name="CampaignGo"
 			action(old("story_skip"),finish_help)
 		"paused":
-			action(old("resume"),close_menu,true)
+			action(old("resume"),close_menu,true).name="CampaignResume"
 			action(t("controls"),func():help_return="paused";menu_kind="help";help_step=0;build_ui())
 			action(t("settings"),func():menu_previous="paused";menu_kind="settings";settings_page=0;build_ui())
 			action(t("restart_mission"),begin_new).name="CampaignRestart"
-			action(t("back"),return_main)
+			action(t("back"),return_main).name="CampaignPauseMain"
 		"continue_offer":
 			offer_label=label("",52);offer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(offer_label)
 			offer_hint=paragraph("",16);column.add_child(offer_hint)
@@ -576,7 +578,7 @@ func skip_presentation() -> void:
 
 func begin_new() -> void:
 	checkpoint_invalid=false;world.begin(selected_hero);world.state="story";menu_kind="help";help_step=0;outro_step=0;boss_announced=false;view.camera_x=0.;complete_presented=false;intro_pending=true;new_best=false;save_checkpoint();build_ui()
-	if tutorial_seen:close_menu()
+	if tutorial_seen or launch_on_ready or resume_on_ready:close_menu()
 func resume_saved() -> void:
 	if not saved_can_resume():return
 	if not world.restore(saved):checkpoint_invalid=true;build_ui();return

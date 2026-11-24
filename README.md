@@ -1,8 +1,14 @@
 # Aion Endless Run
 
+## 0.57.0 · Mission 1
+
+Fragaria yüklemesinden sonra atlanabilir kontrol rehberi ve aynı ekrandaki altı animasyonlu portre gelir. Karakteri seçip **Başla** ile göreve girilir. Oyunun girişinde Mission 1 yer alır.
+
+Kurbağa küçük cüce, karga, böcek ve balçıkları **E / bağlamsal yetenek** ile yutar. Aynı eylem hedefi ileri fırlatır ve çarpma çevresinde hasar verir. Yutma aralığı 10 saniyedir. Armadillo eğilip yeteneğini kullanınca daha uzun ve güçlü bir kabuk hücumu yapar.
+
 ## 0.50.0 · Altı kahramanlı Mission 1 adayı
 
-Aion, Kutsanmış, Ayça ve Eren korunur; Armadillo eğilerek kabuğuna kapanıp hücum eder, Kurbağa ağzına bağlı diliyle mesafeli saldırır. Yeni yetenekler **E / Y / bağlamsal dokunma düğmesi** ile kullanılır; yakındaki araç ve bilinçli silah değişimi önceliklidir. Armadillo için önce eğil. Ömer ve Melun yardımcı güçler olarak kalır. Klasik Sonsuz modu özgün dört kahramanla ayrıdır.
+Aion, Kutsanmış, Ayça ve Eren korunur; Armadillo eğilerek kabuğuna kapanıp hücum eder, Kurbağa ağzına bağlı diliyle mesafeli saldırır. Yeni yetenekler **E / Y / bağlamsal dokunma düğmesi** ile kullanılır; yakındaki araç ve bilinçli silah değişimi önceliklidir. Armadillo için önce eğil. Ömer ve Melun yardımcı güçler olarak kalır. Bu tarihsel sürümde klasik Sonsuz modu özgün dört kahramanla ayrıydı.
 
 Gerçek geri yürüme klipleri, tek bırakma anıyla el bombası, ardışık saldırı/toparlanma, altılı seçim ve yeni fener korusu açılışı entegre edilmiştir. 0.50 GitHub Pages'te yayımlandı; kullanıcı görsel/oynanış kabulü bekliyor. Kaynak, test ve yayın durumları [tek Mission 1 devir kaydında](docs/MISSION1-GAMEPLAY-HANDOFF.md) ayrı tutulur. **Mission 2 geliştirilmez.**
 
@@ -36,7 +42,7 @@ Korsan bekçinin iki kolu görülen altı yeni yürüyüş karesi, araçlarda ge
 
 **Arcade kontrolleri:** A/D veya oklarla yürü; S/Aşağı basılı tutarak eğil ve ilerle; Space zıpla; F/sol tık ateş et; sağ tık/G bomba; Shift depar; E bin/in veya silah değiştir. Aşağı+Zıpla ile tek yönlü platformdan in. Telefonda solda sabit joystick, sağda Zıpla/Ateş/Bomba; joystick'i aşağı çekerek eğil. Kolda sol çubuk/yön tuşları, A/× zıpla, RB/R1 veya X/□ ateş, B/○ bomba, Y/△ bin/in, Start/Options duraklat; kayıtlı eşlemeler korunur. Araçta sağ çubuk veya fareyle kesintisiz nişan al. Araçlar üç can taşır.
 
-Yürüyen örümcek mayınları hedefe gider; beş saniye içinde patlar. Kurtarılan fener bekçileri çantadan fiziksel ikmal bırakır; eşyaya temas edince alınır. Menü ve oyun yalnız **Türkçe/English** sunar. Dikey/yatay telefon, klavye/fare ve gamepad desteği korunur. Eski sonsuz mod ayrı kaydıyla erişilebilirdir.
+Yürüyen örümcek mayınları hedefe gider; beş saniye içinde patlar. Kurtarılan fener bekçileri çantadan fiziksel ikmal bırakır; eşyaya temas edince alınır. Menü ve oyun yalnız **Türkçe/English** sunar. Dikey/yatay telefon, klavye/fare ve gamepad desteği korunur. Eski sonsuz mod önceki sürümlere aittir.
 
 [Oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [Teslim ve gerçek testler](docs/M1-DELIVERY.md) · [Fiziksel rotalar](docs/M1-FLOW-VALIDATION.md) · [Karakter paftaları](docs/M1-HERO-ART.md) · [Yerel Unslop kuralları ve QA](docs/M1-SKILL-QA-INVENTORY.md)
 

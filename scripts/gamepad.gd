@@ -176,7 +176,7 @@ func handle(event: InputEvent) -> bool:
 	if menu_active():
 		if b==JOY_BUTTON_Y and host.page=="main" and not host.language_picker_open:
 			host.pixel_ui.open_campaign_picker()
-		elif b==JOY_BUTTON_Y and host.page=="characters" and host.pixel_ui.choose_for_campaign:
+		elif b==JOY_BUTTON_Y and host.page=="characters":
 			host.pixel_ui.confirm_hero()
 		elif b in [JOY_BUTTON_A,JOY_BUTTON_X]: activate()
 		elif b==JOY_BUTTON_B: back()

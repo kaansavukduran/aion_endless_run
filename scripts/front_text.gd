@@ -15,7 +15,22 @@ const WORDS := {
 	"es":["Saltar","DEMO · Cualquier entrada para volver","Cómo jugar","Demostración al estar inactivo","Repetir introducción","Tu héroe","Confirmar selección","Moverse y apuntar","Saltar","Disparo e interacción cercana","Granada de energía","Subir / bajar del vehículo","Rescatar guardianas","Descubrir zonas secretas","Elegir ruta","Habilidad del héroe","Anterior","Siguiente"],
 	"it":["Salta","DEMO · Qualsiasi comando per tornare","Come giocare","Dimostrazione durante l'inattività","Rivedi introduzione","Il tuo eroe","Conferma scelta","Muoversi e mirare","Saltare","Fuoco e interazione vicina","Granata d'energia","Salire / scendere","Salvare le guardiane","Scoprire zone segrete","Scegliere il percorso","Abilità dell'eroe","Precedente","Avanti"]
 }
+static func quick_controls(language: String,input: String,touch: bool,pad) -> PackedStringArray:
+	var tr: bool=GameText.language_for_locale(language)=="tr"
+	var move: String="Yürü" if tr else "Move"
+	var fire: String="Ateş et" if tr else "Fire"
+	var skill: String="Yetenek" if tr else "Skill"
+	var bomb: String="Bomba" if tr else "Grenade"
+	if input=="gamepad":
+		return PackedStringArray(["L · "+move,pad.binding_name("jump")+" · "+word(language,"jump"),pad.binding_name("shoot")+" · "+fire,pad.binding_name("duck")+" · "+bomb+"   Y · "+skill])
+	if touch:
+		return PackedStringArray(["↔ ↕ · "+move,word(language,"jump")+" · "+fire,bomb,skill])
+	return PackedStringArray(["A / D · "+move,"Space · "+word(language,"jump"),"F · "+fire,"G · "+bomb+" / E · "+skill])
+
 static func word(language: String,key: String) -> String:
+	if key=="pick_hero":return "Kahramanını seç" if language=="tr" else "Choose your hero"
+	if key=="play_now":return "Başla" if language=="tr" else "Start"
+	if key=="selected":return "Seçili" if language=="tr" else "Selected"
 	language=GameText.language_for_locale(language)
 	var index:=KEYS.find(key)
 	return str(WORDS.get(language,WORDS.en)[index]) if index>=0 else key
@@ -35,12 +50,12 @@ const ABILITIES := {
 }
 const MISSION_ABILITIES := {
 	"armadillo":{
-		"tr":"Eğil + Yetenek: kabuğa kapan ve ileri yuvarlan. Hamleden sonra kısa toparlanma.",
-		"en":"Crouch + Skill: curl up and roll forward. Brief recovery after the rush."
+		"tr":"Eğil + Yetenek: kabuğa çekilip düşmanların arasından hızla yuvarlan.",
+		"en":"Crouch + Skill: curl up and charge through enemies."
 	},
 	"frog":{
-		"tr":"Yetenek: nişan yönünde dil saldırısı. İlk hedefte veya engelde geri çekilir.",
-		"en":"Skill: launch your tongue along your aim. Retracts at the first target or obstacle."
+		"tr":"Yetenekle küçük düşmanı yut. Tekrar basıp tükür ve etrafındakilere hasar ver. Yutma aralığı 10 saniye.",
+		"en":"Use Skill to swallow a small enemy. Press again to spit it out for area damage. Swallow cooldown: 10 seconds."
 	}
 }
 static func endless_limited_label(language: String) -> String:

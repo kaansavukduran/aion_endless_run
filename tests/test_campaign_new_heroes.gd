@@ -39,7 +39,7 @@ func test_shell_contacts() -> void:
 		advance(w,.3)
 		check(w.shell_contacts==marks,"pause freezes existing contacts")
 		w.state="playing"
-		advance(w,.75)
+		advance(w,1.5)
 		check(w.shell_contacts.is_empty(),"contacts expire after the roll")
 	var ledge:=clean("armadillo")
 	ledge.pits.append(Vector2(610.,780.))
@@ -133,10 +133,10 @@ func run() -> void:
 	check(MissionHeroAbilities.rolling(w) and w.player.x>start.x,"roll follows world movement after windup")
 	w.aim_direction=Vector2.LEFT
 	check(MissionHeroAbilities.movement_speed(w,-100.)>0.,"roll launch direction remains locked when aim changes")
-	advance(w,.38)
+	advance(w,MissionHeroAbilities.ROLL_ACTIVE)
 	check(str(w.hero_skill.phase)=="brake","active roll enters brake before recovery")
-	advance(w,.15)
-	check(str(w.hero_skill.phase)=="recover" and float(w.hero_skill.clock)<.05,"recovery starts after active and brake finish")
+	advance(w,.14)
+	check(str(w.hero_skill.phase)=="recover" and float(w.hero_skill.clock)<.09,"recovery starts after active and brake finish")
 	advance(w,.16)
 	check(str(w.hero_skill.phase)=="recover","real post-active recovery remains observable")
 	advance(w,.70)
@@ -145,7 +145,7 @@ func run() -> void:
 	w=clean("armadillo");w.move_axis=Vector2.DOWN
 	var e:=target(w,245.)
 	w.interact();advance(w,.65)
-	check(int(e.hp)==7,"roll swept contact damages one target once per rush")
+	check(int(e.hp)==10-MissionHeroAbilities.ROLL_DAMAGE,"roll swept contact damages one target once per rush")
 	check(w.invulnerable<=0.,"shell roll does not grant immunity")
 	w=clean("armadillo");w.load_section("fork_one");w.enemies.clear();w.player=Vector2(850.,90.);w.move_axis=Vector2.DOWN
 	w.interact();advance(w,.85);w.move_axis=Vector2.ZERO

@@ -19,6 +19,13 @@ AIONIA v1.7 bu turda canlı standart belgesinden okundu. Drive’daki 21 Kasım 
 - Sekiz kurtarılabilir karakterin pozları ve korsanın altı yürüyüş karesi yeniden işlendi. Kimlikler, ayak hizası ve yürüyüş yönü korunarak yeni kareler mevcut kurtarma akışına bağlandı.
 - Altı kahramanla eski çökme süresini aşan bekleyiş ve normal geçiş, eski kayıt onarımı, gerçek Linux görüntüleme ve yerel Web dışa aktarması doğrulandı. Mission 1 için oyuncu kabulü bekliyor.
 
+### 0.57.0 · Altı portre, kilitler ve özel saldırılar
+
+- Taban `ac61733680960814e3d470104b0d93d7dd3cf41b`, Godot 4.6.3. AIONIA v1.7 ve Mission 1 regresyon kaydı canlı belgelerden okundu. Başlangıçtaki boş sayfa, altı uzun kartın genel sayfalayıcıya sığmamasından geliyordu.
+- Fragaria yüklemesini atlanabilir kontrol rehberi izler. Dikeyde 2×3, yatayda 3×2 portrelerin tamamı tek ekrandadır. Üç kareli göz kırpma seçili kahramanda oynar. Başla, yeni görev açılışına girer. Eski Sonsuz modu oyuncu menüsünden kaldırıldı. Kampanya kayıtları ana ekrandan sürdürülebilir.
+- Üç kilit malzemesi ve üç zemin tuzağı için yeni pixel art kareleri yerinde çizilir. Kurbağa dört küçük düşman türünü yutar ve aynı girişle ileri atar. Etki alanı 115 dünya pikseli, yutma aralığı 10 saniye. Armadillo'nun etkin hücumu 0,78 saniye, hız 660 ve hasar 5. [Varlık kaynakları ve kare ölçüleri](../assets/M1-ARCADE-ART-PROVENANCE.md)
+- Yerel Chromium’da Türkçe masaüstü ile İngilizce dikey ve döndürülmüş dokunmatik görünüm kullanıldı. Kapalı göz karesi ve Kurbağa ile ilk oynanış açıldı. Tuzak ve kapı durumları ayrıca Linux Godot render sahnesinde görüldü. Nihai kaynak ve Pages paketi sürümün kendi GitHub kontrollerine bağlıdır.
+
 ### 0.56.0 · Kovan geçişi ve bitiriş skoru
 
 - Kırık İskele ve Bakır Röle’de birer uçan bal kovanı, işaretli bir geçişte üç ayrı petek bırakır. Petekler zemine veya tabliyeye varınca yakın oyuncuya hasar verir. Kovanın gövdesi yukarı nişanla vurulabilir.

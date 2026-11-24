@@ -52,7 +52,7 @@ func run():
    check(g.menu_layer.find_children("*","ScrollContainer",true,false).is_empty(),"Main menu needs no scroll: "+str(dims)+"/"+str(scale_value))
    for button in g.menu_layer.find_children("*","Button",true,false):check(screen.encloses(button.get_global_rect()),"Every main action/card stays visible: "+str(button.name)+str(dims)+"/"+str(scale_value))
    check(g.interface_options.text_scale==scale_value,"Requested text setting is preserved")
-   check(not g.menu_layer.get_node("StartChooser").visible or not g.menu_layer.get_node("PagePanel").get_global_rect().intersects(g.menu_layer.get_node("StartChooser").get_global_rect()),"Menu actions do not overlap character heading")
+   check(g.menu_layer.find_child("StartRun",true,false)==null,"The main menu exposes only the arcade campaign")
  g.queue_free();await process_frame
  if original.is_empty():DirAccess.remove_absolute(save_path)
  else:

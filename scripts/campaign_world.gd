@@ -111,6 +111,8 @@ var last_shot_mounted := false
 var grenade_time := 0.0
 var grenade_throw: Dictionary = {}
 var hero_skill: Dictionary = {}
+var frog_meal: Dictionary = {}
+var frog_cooldown := 0.
 var shell_contacts: Array[Dictionary] = []
 var jump_held := false
 var jumps := 0
@@ -236,6 +238,7 @@ func begin(hero: String) -> void:
 	pending_events.clear()
 	character = hero if hero in HEROES else "aion"
 	CampaignLives.reset(self)
+	MissionHeroAbilities.reset(self)
 	hp = max_hp; grenades = 5; score = 0; kills = 0; shots = 0
 	time=0.;walk_distance=0.;victory_time=0.;assists.clear();assist_attacks=0
 	var run_rng:=RandomNumberGenerator.new();run_rng.randomize();run_seed=run_rng.randi_range(1,2000000000)
@@ -497,6 +500,7 @@ func damage_enemy(e: Dictionary, amount: int, style: String="") -> void:
 	if int(e.hp) > 0: return
 	e.defeated = true; e.dead_age = 0.
 	CampaignStyle.defeat(self,e,500 if bool(e.mini) else (400 if bool(e.get("heavy",false)) else 100),style)
+	if style=="swallow":return
 	blasts.append({"p":Vector2(float(e.x),float(e.y)-25.), "age":0., "radius":40., "color":"85d7c4"})
 	pending_events.append("enemy")
 
@@ -528,6 +532,7 @@ func damage_player(cause: String="enemy") -> void:
 	if bool(mount.ridden):
 		CampaignVehicles.damage(self)
 	else:
+		frog_meal.clear()
 		pending_events.append("hurt")
 		CampaignLives.lethal(self,cause)
 
@@ -709,6 +714,9 @@ func step_boss(dt: float) -> void:
 func step_bullets(dt: float) -> void:
 	for b in bullets:
 		if float(b.age)>=float(b.get("life",3.)):continue
+		if b.kind=="frog_spit":
+			MissionHeroAbilities.spit_step(self,b,dt)
+			continue
 		if b.kind=="honeycomb":
 			CampaignHive.step_comb(self,b,dt)
 			if state!="playing":break
@@ -835,7 +843,10 @@ func step(dt: float) -> void:
 		if old_x<=left and player.x>left:player.x=left
 		elif old_x>=right and player.x<right:player.x=right
 	for gate in gates:
-		if gate_closed(gate) and old_x<=float(gate.x): player.x = minf(player.x,float(gate.x))
+		if gate_closed(gate):
+			gate.open_age=0.
+			if old_x<=float(gate.x):player.x=minf(player.x,float(gate.x))
+		else:gate.open_age=minf(.4,float(gate.get("open_age",.4))+dt)
 	# Animation and inherited throw speed follow the resolved movement, not
 	# an intent that a boundary, locked gate or solid pier has blocked.
 	velocity.x=(player.x-old_x)/dt if dt>0. else 0.
@@ -916,6 +927,9 @@ func life_rescues() -> int:
 
 func snapshot(include_encounter: bool=true) -> Dictionary:
 	var data := {"schema":4,"rally":rally,"retry_count":retry_count,"best_chain":best_chain,"rescue_roles":rescue_roles,"greeted":greeted,"gift_drops":gift_drops,"losses":losses,"weapons_used":weapons_used,"vehicles_used":vehicles_used,"run_seed":run_seed,"character":character,"checkpoint":checkpoint,"checkpoint_ready":checkpoint_ready,"score":score,"kills":kills,"rescued":rescued,"rescue_life_start":rescue_life_start,"awarded":awarded,"taken":taken,"route":route,"completed":completed,"time":time,"flock":flock,"discovered":discovered,"activated":activated,"attempts":attempts_remaining,"continues":continues_used}.duplicate(true)
+	if character=="frog" and not completed:
+		data.frog_meal=frog_meal.duplicate()
+		data.frog_cooldown=frog_cooldown
 	if include_encounter:CampaignEncounterSave.write(self,data)
 	return data
 
@@ -940,6 +954,12 @@ func restore(data: Dictionary) -> bool:
 		if typeof(number) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(number)) or absf(float(number))>1000000000.:return false
 	if not CampaignEncounterSave.valid_number(data.get("rescue_life_start",0),0,Array(data.get("rescued",[])).size()):return false
 	if data.has("completed") and not data.completed is bool:return false
+	var meal=data.get("frog_meal",{})
+	if not meal is Dictionary:return false
+	if not meal.is_empty():
+		if str(data.character)!="frog" or meal.size()!=2 or meal.get("kind") not in MissionHeroAbilities.SWALLOWABLE:return false
+		if not meal.get("id") is String or not Dictionary(data.get("awarded",{})).has(meal.id):return false
+	if not CampaignEncounterSave.valid_number(data.get("frog_cooldown",0.),0.,MissionHeroAbilities.SWALLOW_COOLDOWN):return false
 	if not CampaignRecovery.valid(data.get("rally",{}),str(data.checkpoint)):return false
 	for key in ["retry_count","best_chain"]:
 		var value=data.get(key,0)
@@ -960,7 +980,11 @@ func restore(data: Dictionary) -> bool:
 	route.assign(Array(data.get("route",[]))); completed = bool(data.get("completed",false)); time = maxf(0.,float(data.get("time",0.)))
 	flock = clampi(int(data.get("flock",1)),1,3); hp = max_hp; grenades = 5
 	CampaignLives.reset(self)
+	MissionHeroAbilities.reset(self)
 	load_section(str(data.checkpoint))
+	if character=="frog":
+		frog_meal=meal.duplicate()
+		frog_cooldown=float(data.get("frog_cooldown",0.))
 	if encounter.is_empty():
 		CampaignRecovery.apply(self,rally)
 	else:

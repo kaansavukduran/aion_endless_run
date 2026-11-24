@@ -2,16 +2,21 @@ class_name MissionHeroAbilities
 extends RefCounted
 
 ## Ephemeral skill choreography. World remains the sole movement/physics owner.
-## Candidate balance: roll 520px/s for .38s, 3 damage, no immunity; tongue
-## 240px reach, 2 damage, first target only. Recovery starts AFTER active play.
+## Roll and tongue share the normal movement, collision and damage systems.
 const ROLL_WINDUP := .16
-const ROLL_ACTIVE := .38
+const ROLL_ACTIVE := .78
+const ROLL_SPEED := 660.
+const ROLL_DAMAGE := 5
 const ROLL_BRAKE := .14
 const ROLL_RECOVER := .32
 const SHELL_CONTACT_LIFE := .18
 const SHELL_CONTACT_SPACING := 22.
 const TONGUE_REACH := 240.
 const TONGUE_SPEED := 1000.
+const SWALLOW_COOLDOWN := 10.
+const SPIT_RADIUS := 115.
+const SPIT_SPEED := 710.
+const SWALLOWABLE := ["gnome","beetle","crow","slime"]
 
 static func active(w) -> bool:
 	return not w.hero_skill.is_empty() and str(w.hero_skill.get("phase",""))!="cooldown"
@@ -26,6 +31,7 @@ static func context(w) -> Dictionary:
 	var supported: bool=w.character in ["armadillo","frog"]
 	var available: bool=supported and w.state=="playing" and not bool(w.mount.ridden) and w.mount_transition==""
 	var phase: String=str(w.hero_skill.get("phase","ready"))
+	var loaded: bool=w.character=="frog" and not w.frog_meal.is_empty()
 	var ready: bool=available and w.hero_skill.is_empty() and w.hurt_time<=0. and w.rescue_time<=0. and (w.character!="armadillo" or w.crouching())
 	var cooldown:=0.
 	var remaining:=0.
@@ -39,9 +45,14 @@ static func context(w) -> Dictionary:
 			elif include:remaining+=float(durations[name])
 		if w.character=="frog" and phase=="retract":remaining=float(w.hero_skill.extent)/1300.+.30+.40
 		cooldown=clampf(remaining/maxf(.001,total),0.,1.)
+	if w.character=="frog" and phase=="ready" and not loaded and w.frog_cooldown>0.:
+		ready=false
+		phase="cooldown"
+		remaining=w.frog_cooldown
+		cooldown=remaining/SWALLOW_COOLDOWN
 	var status: String="skill_ready" if ready else ("skill_crouch" if w.hero_skill.is_empty() and w.character=="armadillo" else "skill_active")
 	if phase in ["recover","cooldown"]:status="skill_"+phase
-	return {"visible":available,"ready":ready,"label_key":"skill_roll" if w.character=="armadillo" else "skill_tongue","phase":phase,"status_key":status,"phase_key":status,"cooldown":cooldown,"remaining":remaining}
+	return {"visible":available,"ready":ready,"label_key":"skill_roll" if w.character=="armadillo" else ("skill_spit" if loaded else "skill_tongue"),"phase":phase,"status_key":status,"phase_key":status,"cooldown":cooldown,"remaining":remaining}
 
 static func body_facing(w) -> int:
 	if active(w):return int(w.hero_skill.face)
@@ -53,6 +64,14 @@ static func press(w) -> bool:
 	if w.character=="armadillo" and (not w.grounded() or not w.crouching()):return false
 	var direction: Vector2=w.aim_direction.normalized() if w.aim_direction.length_squared()>.01 else Vector2(w.facing,0.)
 	var face: int=(-1 if direction.x<0. else 1) if absf(direction.x)>.1 else int(w.facing)
+	if w.character=="frog" and not w.frog_meal.is_empty():
+		w.hero_skill={"kind":"frog","phase":"spit","clock":0.,"direction":direction,"face":face}
+		w.bullets.append({"id":w.frog_meal.id,"p":mouth(w),"v":direction*SPIT_SPEED,
+			"kind":"frog_spit","creature":w.frog_meal.kind,"owner":"hero","age":0.,"life":.85})
+		w.frog_meal.clear()
+		w.pending_events.append("hero_tongue")
+		return true
+	if w.character=="frog" and w.frog_cooldown>0.:return false
 	w.hero_skill={"kind":w.character,"phase":"windup","clock":0.,"direction":direction,"face":face,"previous_p":Vector2(w.player),"hits":[],"extent":0.,"previous_tip":Vector2(w.player),"contact":false}
 	# A roll consumes current gun input. No deferred fire, grenade or jump event.
 	if w.character=="armadillo":w.fire_held=false;w.jump_buffer_timer=0.;w.jump_held=false
@@ -62,12 +81,47 @@ static func press(w) -> bool:
 static func cancel(w) -> void:
 	w.hero_skill.clear()
 
+static func reset(w) -> void:
+	cancel(w)
+	w.frog_meal.clear()
+	w.frog_cooldown=0.
+
+static func swallowable(enemy: Dictionary) -> bool:
+	return str(enemy.kind) in SWALLOWABLE and not bool(enemy.get("mini",false)) \
+		and not bool(enemy.get("heavy",false)) and int(enemy.get("armour",0))==0 \
+		and int(enemy.get("max_hp",1))<=2
+
+static func spit_step(w,b: Dictionary,dt: float) -> void:
+	var from: Vector2=b.p
+	var next: Vector2=from+Vector2(b.v)*dt
+	var hit:=first_contact(w,from,next)
+	b.age=float(b.age)+dt
+	b.p=next if hit.is_empty() else hit.point
+	if hit.is_empty() and float(b.age)<float(b.life):return
+	var point: Vector2=b.p
+	b.age=99.
+	# The direct hit is included; walls shield the other side of the blast.
+	for enemy in w.enemies:
+		if bool(enemy.defeated) or CampaignEnemies.hidden(enemy):continue
+		var center:=Vector2(float(enemy.x),float(enemy.y)-30.)
+		if center.distance_to(point)>=SPIT_RADIUS:continue
+		if not hit.is_empty() and hit.get("target",{})==enemy:
+			w.damage_enemy(enemy,4,"spit")
+		elif first_contact(w,point.lerp(from,.15),center,false).is_empty():
+			w.damage_enemy(enemy,3,"spit")
+	if not hit.is_empty() and hit.kind=="crate":w.open_crate(hit.target)
+	if not hit.is_empty() and hit.kind=="object":CampaignContent.hit_object(w,point,3)
+	if not hit.is_empty() and hit.kind=="boss":w.damage_boss(4)
+	w.blasts.append({"p":point,"age":0.,"radius":SPIT_RADIUS,"color":"a7dc75"})
+	w.pending_events.append("hero_contact")
+
+
 ## base is the world's already computed signed horizontal velocity.
 static func movement_speed(w,base: float) -> float:
 	if not compact(w):return base
 	var phase: String=str(w.hero_skill.phase)
-	if phase=="roll":return float(w.hero_skill.face)*520.
-	if phase=="brake":return float(w.hero_skill.face)*520.*maxf(0.,1.-float(w.hero_skill.clock)/ROLL_BRAKE)
+	if phase=="roll":return float(w.hero_skill.face)*ROLL_SPEED
+	if phase=="brake":return float(w.hero_skill.face)*ROLL_SPEED*maxf(0.,1.-float(w.hero_skill.clock)/ROLL_BRAKE)
 	return base*.18
 
 static func trace_shell_contact(w,started_grounded: bool,travel: float) -> void:
@@ -99,9 +153,9 @@ static func set_phase(w,phase: String) -> void:
 	w.hero_skill.phase=phase;w.hero_skill.clock=0.
 
 static func step(w,dt: float) -> void:
-	if w.hero_skill.is_empty() or dt<=0.:return
-	# Pause freezes choreography; transitions/death cancel it at their owner.
-	if w.state!="playing":return
+	if dt<=0. or w.state!="playing":return
+	w.frog_cooldown=maxf(0.,float(w.frog_cooldown)-dt)
+	if w.hero_skill.is_empty():return
 	if bool(w.mount.ridden) or w.mount_transition!="" or w.hurt_time>0.:
 		cancel(w);return
 	var s: Dictionary=w.hero_skill
@@ -121,23 +175,35 @@ static func step(w,dt: float) -> void:
 		elif phase=="recover" and float(s.clock)>=ROLL_RECOVER:set_phase(w,"cooldown")
 		s.previous_p=Vector2(w.player)
 		return
-	if phase=="windup":
+	if phase=="spit":
+		if float(s.clock)>=.25:cancel(w)
+	elif phase=="windup":
 		if float(s.clock)>=.12:set_phase(w,"extend");w.pending_events.append("hero_tongue")
 	elif phase in ["extend","retract"]:
 		var origin: Vector2=mouth(w)
 		var extent: float=minf(TONGUE_REACH,float(s.extent)+TONGUE_SPEED*dt) if phase=="extend" else maxf(0.,float(s.extent)-1300.*dt)
 		var end: Vector2=origin+Vector2(s.direction)*extent
-		var contact: Dictionary=first_contact(w,origin,end,phase=="extend")
+		var contact: Dictionary=first_contact(w,origin,end) if phase=="extend" else {}
 		if not contact.is_empty():
 			extent=origin.distance_to(Vector2(contact.point));s.contact=true
 			if phase=="extend":
-				apply_contact(w,contact,2)
+				if contact.kind=="enemy" and swallowable(contact.target):
+					var enemy: Dictionary=contact.target
+					s.caught={"id":enemy.id,"kind":enemy.kind}
+					w.frog_meal=s.caught.duplicate()
+					w.frog_cooldown=SWALLOW_COOLDOWN
+					enemy.swallowed=true
+					w.damage_enemy(enemy,int(enemy.hp),"swallow")
+				else:apply_contact(w,contact,2)
 				if w.hero_skill.is_empty():return
 				set_phase(w,"retract");w.pending_events.append("hero_contact")
 		s.extent=extent;s.previous_tip=origin+Vector2(s.direction)*extent
 		if phase=="extend" and extent>=TONGUE_REACH:set_phase(w,"retract")
-		elif phase=="retract" and extent<=.01:set_phase(w,"recover")
-	elif phase=="recover" and float(s.clock)>=.30:set_phase(w,"cooldown")
+		elif phase=="retract" and extent<=.01:
+			set_phase(w,"recover")
+	elif phase=="recover" and float(s.clock)>=(.17 if not w.frog_meal.is_empty() else .30):
+		if w.frog_meal.is_empty():set_phase(w,"cooldown")
+		else:cancel(w)
 
 static func roll_hits(w,from: Vector2,to: Vector2) -> void:
 	var a:=from+Vector2(0.,-22.);var b:=to+Vector2(0.,-22.)
@@ -145,13 +211,13 @@ static func roll_hits(w,from: Vector2,to: Vector2) -> void:
 		var id: String=str(enemy.id)
 		if bool(enemy.defeated) or CampaignEnemies.hidden(enemy) or id in w.hero_skill.hits:continue
 		var center:=Vector2(float(enemy.x),float(enemy.y)-30.)
-		if Geometry2D.get_closest_point_to_segment(center,a,b).distance_to(center)<50.:
-			w.hero_skill.hits.append(id);w.damage_enemy(enemy,3,"roll")
+		if Geometry2D.get_closest_point_to_segment(center,a,b).distance_to(center)<58.:
+			w.hero_skill.hits.append(id);w.damage_enemy(enemy,ROLL_DAMAGE,"roll")
 	if bool(w.boss.active) and bool(w.boss.get("engaged",false)) and not "boss" in w.hero_skill.hits:
 		var target:=Vector2(float(w.boss.x),float(w.boss.y)-60.)
 		if Geometry2D.get_closest_point_to_segment(target,a,b).distance_to(target)<113.:
 			w.hero_skill.hits.append("boss")
-			w.damage_boss(3)
+			w.damage_boss(ROLL_DAMAGE)
 			if w.state!="playing":cancel(w);return
 			if w.hero_skill.is_empty():return
 			set_phase(w,"brake")

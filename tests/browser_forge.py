@@ -12,7 +12,7 @@ from pathlib import Path
 import shutil
 import time
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeout, sync_playwright
 
 
 parser = argparse.ArgumentParser()
@@ -129,21 +129,6 @@ with sync_playwright() as playwright:
             page.wait_for_selector('canvas[data-ui-ready="true"]', timeout=30000)
             buttons = front_buttons()
         button = next((button for button in buttons if button['name'] == name), None) if name else next((button for button in buttons if button['text'] == text), None)
-        if not button and not in_campaign and name and name.startswith('StartSelect_'):
-            roster = ['aion', 'sheep', 'rabbit', 'eren', 'armadillo', 'frog']
-            target = roster.index(name[len('StartSelect_'):])
-            visited_rosters = set()
-            for _ in roster:
-                names = frozenset(b['name'] for b in buttons if b['name'].startswith('StartSelect_'))
-                if not names or names in visited_rosters:
-                    break
-                visited_rosters.add(names)
-                indices = [roster.index(value[len('StartSelect_'):]) for value in names]
-                tap('RosterPrevious' if target < min(indices) else 'RosterNext')
-                buttons = front_buttons()
-                button = next((value for value in buttons if value['name'] == name), None)
-                if button:
-                    break
         if not button and not in_campaign and name not in ['NextPage', 'PreviousPage', 'RosterNext', 'RosterPrevious']:
             # Use the real visible pager, never reveal hidden controls via JS.
             visited = set()
@@ -165,20 +150,17 @@ with sync_playwright() as playwright:
                     break
         assert button, ('Visible action not found', name, text, [button['name'] for button in buttons])
         before_page = int(raw().get('menuPage', 0)) if not in_campaign else None
-        before_roster = [b['name'] for b in buttons if b['name'].startswith('StartSelect_')]
         before_campaign_generation = campaign().get('ui_generation', 0) if in_campaign else None
         page.touchscreen.tap(*coords(button['x']+button['w']/2, button['y']+button['h']/2, in_campaign))
         if in_campaign:
             page.wait_for_function("old=>{const value=document.querySelector('canvas')?.dataset.campaign;if(!value)return false;const d=JSON.parse(value);return d.ui_generation!==old && d.ui_ready}", arg=before_campaign_generation, timeout=15000)
         if not in_campaign:
-            destination = {'OpenSettings': 'settings', 'ChooseHero': 'characters', 'HowToPlay': 'help', 'ConfirmHero': 'main', 'FrontHelpBack': 'main', 'PageBack': 'main'}.get(name)
+            destination = {'OpenSettings': 'settings', 'StartCampaign': 'characters', 'CharacterBack': 'main', 'HowToPlay': 'help', 'FrontHelpBack': 'main', 'PageBack': 'main'}.get(name)
             if destination:
                 page.wait_for_function("page=>{const d=document.querySelector('canvas').dataset;return d.page===page && d.uiReady==='true'}", arg=destination, timeout=15000)
             if name in ['NextPage', 'PreviousPage']:
                 expected = before_page+(1 if name == 'NextPage' else -1)
                 page.wait_for_function("expected=>{const d=document.querySelector('canvas').dataset;return Number(d.menuPage)===expected && d.uiReady==='true'}", arg=expected, timeout=15000)
-            if name in ['RosterNext', 'RosterPrevious']:
-                page.wait_for_function("old=>{const d=document.querySelector('canvas').dataset;const names=JSON.parse(d.ui).filter(b=>b.name.startsWith('StartSelect_')).map(b=>b.name);return d.uiReady==='true' && JSON.stringify(names)!==JSON.stringify(old)}", arg=before_roster, timeout=15000)
         page.wait_for_timeout(180)
 
     def fit(label, in_campaign=False):
@@ -239,13 +221,9 @@ with sync_playwright() as playwright:
         page.goto(args.url, timeout=150000)
         page.wait_for_function("document.querySelector('canvas')?.dataset.front", timeout=150000)
         if args.scenario in ['front', 'all']:
-            initial = front()
-            if initial.get('intro'):
-                page.screenshot(path=str(args.evidence/'opening.png'))
-                page.wait_for_function("!JSON.parse(document.querySelector('canvas').dataset.front).intro", timeout=20000)
-                check(True, 'Cold-launch opening completes naturally without a forced extra wait')
             ready()
-            fit('Desktop main')
+            check(front()['guide'] and 'StartRun' not in {b['name'] for b in front_buttons()},'The branded loader is followed by the guide and only Arcade entry')
+            fit('Desktop opening guide')
             check(raw()['theme'] == 'dark' and raw()['fontMode'] == 'system', 'Fresh UI uses dark theme and system body font')
             if args.large_text:
                 tap('OpenSettings')
@@ -255,77 +233,34 @@ with sync_playwright() as playwright:
                 ready()
                 check(raw()['textScale'] == '2.0', 'Actual settings apply 200% text without changing the selected font')
                 fit('Desktop 200% main')
-            page.screenshot(path=str(args.evidence/'main.png'))
-            for hero in ['aion', 'sheep', 'rabbit', 'eren', 'armadillo', 'frog']:
-                tap('ChooseHero')
+            page.screenshot(path=str(args.evidence/'opening-guide.png'))
+            tap('StartCampaign')
+            roster = ['aion', 'sheep', 'rabbit', 'eren', 'armadillo', 'frog']
+            names = {b['name'] for b in front_buttons()}
+            check({b for b in names if b.startswith('Select_')} == {'Select_'+hero for hero in roster},'The first selection screen contains all six portraits together')
+            check('NextPage' not in names and 'ConfirmHero' in names,'No empty or paged roster and Start is reachable')
+            for hero in roster:
                 tap('Select_'+hero)
-                check(not any(button['name'] in ['Select_owl', 'Select_wolf'] for button in front_buttons()), 'Retired owl/wolf are not offered as playable choices')
-                # Selection may rebuild and repaginate the current card.
-                tap('ConfirmHero')
+                check(raw()['character'] == hero and front()['previews'][hero]['state']=='select','Real card selects its hero: '+hero)
+                page.wait_for_function("id=>JSON.parse(document.querySelector('canvas').dataset.front).previews[id]?.frame===2",arg=hero,timeout=7000)
+                check(front()['previews'][hero]['source_key']=='m1-selection-portraits','The selected hero blinks using the portrait sheet: '+hero)
+            for size, label in [({'width': 393, 'height': 873}, 'portrait'), ({'width': 873, 'height': 393}, 'landscape')]:
+                page.set_viewport_size(size)
+                page.wait_for_timeout(500)
                 ready()
-                check(raw()['character'] == hero, 'Real character selection and confirmation: '+hero)
-                if args.large_text:page.screenshot(path=str(args.evidence/('main-200-'+hero+'.png')))
-            tap('StartSelect_aion')
+                fit('Rotated '+label+' picker')
+                check(raw()['character'] == 'frog' and len([b for b in front_buttons() if b['name'].startswith('Select_')])==6,'Rotation preserves selected hero and all six targets: '+label)
+                page.screenshot(path=str(args.evidence/('picker-'+label+'.png')))
+            page.set_viewport_size({'width': 1280, 'height': 720})
+            page.wait_for_timeout(450)
+            tap('CharacterBack')
             tap('HowToPlay')
             fit('Interactive help')
-            tap('ReplayOpening')
-            page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.front).intro")
-            canvas.focus()
-            page.keyboard.press('Enter')
-            ready()
-            check(not front()['intro'], 'Replayed opening skips through a normal Enter input')
-            tap('HowToPlay')
             tap('FrontHelpNext')
             check(front()['help_step'] > 0, 'Help Next advances a real tutorial page')
             tap('FrontHelpPrevious')
             check(front()['help_step'] == 0, 'Help Previous returns without entering live gameplay')
             tap('FrontHelpBack')
-            ready()
-            for size, label in [({'width': 393, 'height': 873}, 'portrait'), ({'width': 873, 'height': 393}, 'landscape')]:
-                page.set_viewport_size(size)
-                page.wait_for_timeout(500)
-                ready()
-                fit('Rotated '+label+' main')
-                check(raw()['character'] == 'aion', 'Rotation preserves selected hero: '+label)
-                page.screenshot(path=str(args.evidence/('main-'+label+'.png')))
-            page.set_viewport_size({'width': 1280, 'height': 720})
-            page.wait_for_timeout(450)
-            tap('HowToPlay')
-            before = storage()
-            tap('StartAttract')
-            page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.front).demo")
-            start = front()
-            page.wait_for_timeout(1800)
-            end = front()
-            check(end['demo_player'][0] != start['demo_player'][0] and end['demo_shots'] > start['demo_shots'], 'Attract scene actually moves and fires through its isolated game model')
-            check(storage() == before, 'Attract gameplay leaves campaign Continue and Endless saved data unchanged')
-            page.screenshot(path=str(args.evidence/'attract.png'))
-            canvas.focus()
-            page.keyboard.press('Escape')
-            ready()
-            check(not front()['demo'], 'An ordinary input leaves Attract Mode immediately')
-            check(storage() == before, 'Leaving Attract Mode also preserves both save stores')
-            if args.idle_attract:
-                page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.front).demo", timeout=45000)
-                check(True, 'Actual inactivity trigger starts Attract Mode')
-                canvas.focus()
-                page.keyboard.press('Enter')
-                ready()
-            tap('StartRun')
-            page.wait_for_selector('canvas[data-state="running"]', timeout=15000)
-            check(True, 'Endless starts through its actual main-menu action')
-            canvas.focus()
-            page.keyboard.press('Escape')
-            page.wait_for_selector('canvas[data-state="paused"][data-ui-ready="true"]')
-            if args.large_text:
-                fit('200% Endless pause first page')
-                names = {button['name'] for button in front_buttons()}
-                check({'PauseResume', 'PauseMainMenu'}.issubset(names), '200% pause exposes Resume and Main menu on the first page, without a pager detour')
-            # Optional explanatory/settings items may remain paginated, while
-            # the short pause panel keeps these essential actions visible.
-            tap(text='Main menu' if args.locale == 'en-US' else 'Ana menü')
-            ready()
-            check(raw()['page'] == 'main', 'Endless pause returns to the same main menu')
             if args.large_text and args.scenario == 'all':
                 # Keep the separately scoped campaign input probe readable at
                 # its normal scale; larger campaign layouts have a source suite.
@@ -338,31 +273,38 @@ with sync_playwright() as playwright:
             skip_opening()
 
         if args.scenario in ['campaign', 'all']:
-            tap('StartSelect_aion')
             tap('StartCampaign')
+            tap('Select_aion')
             page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
             check(True, 'Play opens the hero picker before entering Mission 1')
             tap('ConfirmHero')
             page.wait_for_function("document.querySelector('canvas')?.dataset.campaign", timeout=45000)
             campaign_ready()
-            fit('Campaign briefing', True)
-            tap('CampaignBegin', in_campaign=True)
-            for _ in range(15):
-                if campaign().get('menu') != 'help':
-                    break
-                tap('CampaignGo', in_campaign=True)
+            fit('Campaign opening', True)
             presentation_done()
             page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).state==='playing'", timeout=15000)
-            check(True, 'Actual Arcade briefing/help/start presentation reaches playable Mission 1')
+            check(True, 'Actual selected hero enters playable Mission 1')
             canvas.focus()
             def restart_for_probe():
-                page.wait_for_function("['playing','continue_offer','continue_pick','dead'].includes(JSON.parse(document.querySelector('canvas').dataset.campaign).state)",timeout=15000)
-                if campaign()['menu'] in ['continue_offer','continue_pick']:
-                    if campaign()['menu']=='continue_pick':tap('ArcadeBackToCountdown',in_campaign=True)
-                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
-                if campaign()['menu']!='dead':
-                    canvas.focus();page.keyboard.press('Escape')
-                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'",timeout=10000)
+                # A restart probe can race a real enemy hit between reading
+                # "playing" and sending Escape. Let the real life transition
+                # settle and try the same input again when it can be consumed.
+                for _ in range(5):
+                    state = page.wait_for_function("""()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);
+                      return d.ui_ready && !d.presentation && ['playing','paused','continue_offer','continue_pick','dead'].includes(d.state) && d.state}""",timeout=30000).json_value()
+                    if state in ['dead','paused']:
+                        break
+                    if state in ['continue_offer','continue_pick']:
+                        if state=='continue_pick':tap('ArcadeBackToCountdown',in_campaign=True)
+                        page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
+                        break
+                    canvas.focus()
+                    page.keyboard.press('Escape')
+                    try:
+                        page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).state!=='playing'",timeout=3500)
+                    except PlaywrightTimeout:
+                        continue
+                assert campaign()['menu'] in ['paused','dead'],('Could not reach the real restart action',campaign()['state'])
                 tap('CampaignRestart',in_campaign=True)
                 presentation_done()
                 page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp===1 && d.ui_ready}",timeout=15000)
@@ -512,6 +454,7 @@ with sync_playwright() as playwright:
 
                 retries = 0
                 last_jump = 0.
+                last_bomb = -10.
                 attempt = 0
                 rescue_attempts = []
                 observations['rescue_attempts'] = rescue_attempts
@@ -542,24 +485,41 @@ with sync_playwright() as playwright:
                         check(condition, label)
 
                 def move_and_defend(current, direction, allow_grenade):
-                    global last_jump
+                    global last_jump, last_bomb
                     x, y = current['player']
-                    aim_high = [e for e in current['enemies'] if
-                                abs(e['x'] - x) < 290 and e['y'] < y - 42]
-                    nearest = min(aim_high, key=lambda e: abs(e['x'] - x), default=None)
-                    if nearest:
-                        dx = nearest['x'] - x
-                        commands = ['f', 'w'] if abs(dx) < 85 else ['f', 'w', 'd' if dx > 0 else 'a']
+                    time_now = current['time']
+                    forward = 1 if direction == 'd' else -1
+                    threats = [e for e in current['enemies'] if abs(e['x']-x)<395]
+                    nearest = min(threats, key=lambda e: math.hypot(e['x']-x,e['y']-y), default=None)
+                    target = nearest
+                    if target is None:
+                        candidates = [n for n in current['npcs'] if not n['freed'] and not n['secret']
+                                      and 65 < (n['x']-x)*forward < 650]
+                        target = min(candidates,key=lambda n: abs(n['x']-x),default=None)
+                    if target:
+                        sx = target['x']-current['camera']
+                        height = 31 if nearest else 33
+                        sy = target['y']+current['ground']-current['camera_y']-height
                     else:
-                        commands = ['f', direction]
-                    keys(commands)
+                        sx = x-current['camera']+140*forward
+                        sy = y+current['ground']-current['camera_y']-42
+                    page.mouse.move(*coords(sx,sy,True))
+                    commands = ['f',direction]
+                    distance = math.hypot(nearest['x']-x,nearest['y']-y) if nearest else math.inf
+                    if nearest and (nearest['x']-x)*forward>=-20 and distance<225:
+                        # Clear the lane before walking into a charged ground
+                        # attacker. Aim is independent of the movement keys.
+                        commands = ['f']
                     gap = any(0 < pit[0] - x < 160 for pit in current['pits'])
-                    danger = any(math.hypot(b[0] - x, b[1] - (y - 37)) < 95 for b in current['bullets'])
-                    if current['grounded'] and (gap or danger) and current['time'] - last_jump > .70:
+                    danger = any(math.hypot(b[0] - x, b[1] - (y - 37)) < 105 for b in current['bullets'])
+                    lower_threat = nearest and 75<distance<245 and nearest['y']>y+30
+                    if current['grounded'] and (gap or danger or lower_threat or distance<112) and time_now-last_jump>.65:
                         page.keyboard.press('Space')
-                        last_jump = current['time']
-                    if allow_grenade and current['grenades'] and not current['grenade_throw']['phase'] and nearest and abs(nearest['x'] - x) < 125:
+                        last_jump=time_now
+                    keys(commands)
+                    if allow_grenade and current['grenades'] and not current['grenade_throw']['phase'] and nearest and 95<distance<235 and time_now-last_bomb>1.8:
                         page.keyboard.press('g')
+                        last_bomb=time_now
                     return commands
 
                 while True:
@@ -573,7 +533,7 @@ with sync_playwright() as playwright:
                             current = campaign()
                             require_live(current, 'search', recover=True)
                             x, y = current['player']
-                            move_and_defend(current, 'd', allow_grenade=x<2750.)
+                            move_and_defend(current, 'd', allow_grenade=x<3400.)
                             free = [n for n in current['npcs'] if n['freed'] and n['phase'] == 'free' and not n['secret']
                                     and not current['awarded'].get(n['id']+':gift') and abs(n['y']-y) < 70 and abs(n['x']-x)<500]
                             target = min(free, key=lambda n: abs(n['x']-x), default=None)

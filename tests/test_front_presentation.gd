@@ -16,12 +16,12 @@ func run() -> void:
 	root.add_child(game)
 	await settle()
 	game.set_physics_process(false)
-	check(game.front.intro_active,"Fresh application has the opening presentation")
-	var event:=InputEventKey.new();event.keycode=KEY_ENTER;event.pressed=true
+	check(game.opening_guide and not game.front.intro_active and game.ui.find_child("OpeningGuide",true,false)!=null,"Fresh application exposes controls directly after loading")
+	var event:=InputEventKey.new();event.keycode=KEY_Y;event.pressed=true
 	game._input(event)
 	await settle()
-	check(not game.front.intro_active and game.menu_layer.visible,"Enter skips without starting a run")
-	check(game.world.state=="ready" and game.page=="main","Skip reaches the actual main menu")
+	check(game.world.state=="ready" and game.page=="characters","Guide Skip reaches hero selection without starting the mission")
+	game.show_page("main");await settle()
 	var endless: Dictionary={"best":game.best,"score":game.world.score,"hero":game.character}
 	var original_save:=bytes("user://save.cfg");var original_campaign:=bytes("user://campaign.json")
 	game.front.start_demo(0)
@@ -43,10 +43,10 @@ func run() -> void:
 	game.front.input(event)
 	check(not game.ui_layout_ready,"Unhiding the menu invalidates stale hit-target telemetry immediately")
 	await settle()
-	var start: Control=game.menu_layer.find_child("StartRun",true,false)
+	var start: Control=game.menu_layer.find_child("StartCampaign",true,false)
 	var panel: Control=game.menu_layer.find_child("PagePanel",true,false)
 	check(game.ui_layout_ready and start.is_visible_in_tree(),"Menu readiness returns after real Godot process frames")
-	check(start.get_global_rect().position.y>panel.get_global_rect().position.y and start.get_global_rect().size.x>0.,"Ready menu publishes the sorted real StartRun rectangle")
+	check(start.get_global_rect().position.y>panel.get_global_rect().position.y and start.get_global_rect().size.x>0.,"Ready menu publishes the sorted real StartCampaign rectangle")
 	game.front.begin_intro();game.front.frozen=true;var t: float=game.front.intro_time;game.front.step(.05)
 	check(game.front.intro_time==t,"Focus pause freezes intro timing")
 	game.front.frozen=false;game.front.skip_intro()
@@ -71,13 +71,11 @@ func run() -> void:
 			for language in ["tr","en","de","ja"]:
 				game.language=language;game.interface_options.text_scale=scale_value;game.build_theme();game.ui.theme=game.ui_theme;game.show_page("characters")
 				await settle()
-				for index in game.menu_pages.pages.size():
-					game.menu_pages.select(index,false);await settle()
-					for item in game.menu_layer.find_children("*","Control",true,false):
-						if not item.is_visible_in_tree() or not (item is Button or item is Label or item is RunnerHeroPreview):continue
-						var r: Rect2=item.get_global_rect()
-						check(r.position.x>=-1. and r.position.y>=-1. and r.end.x<=game.view_w+1. and r.end.y<=game.view_h+1.,"Reachable hero card "+str(item.name)+" "+str(dimensions)+" "+str(scale_value)+" "+language+" "+str(r))
-	game.show_page("main");await settle()
+				for item in game.menu_layer.find_children("*","Control",true,false):
+					if not item.is_visible_in_tree() or not (item is Button or item is Label or item is RunnerHeroPreview):continue
+					var r: Rect2=item.get_global_rect()
+					check(r.position.x>=-1. and r.position.y>=-1. and r.end.x<=game.view_w+1. and r.end.y<=game.view_h+1.,"Reachable hero card "+str(item.name)+" "+str(dimensions)+" "+str(scale_value)+" "+language+" "+str(r))
+	game.show_page("characters");await settle()
 	for hero in game.FRIENDS:
 		game.select_character(hero)
 		check(game.character==hero and game.world.character==hero,"Six distinct main selections: "+hero)

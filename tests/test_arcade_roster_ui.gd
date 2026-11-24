@@ -24,50 +24,24 @@ func run():
   root.size=viewport;await settle();game.touch_mode=viewport.x<1000
   for scale_value in [1.,1.5,2.]:
    for locale in GameText.LANGUAGES:
-    game.interface_options.text_scale=scale_value;game.language=locale;game.build_theme();game.ui.theme=game.ui_theme;game.rebuild();await settle()
-    if viewport.y>viewport.x:
-     var panel=game.menu_layer.find_child('PagePanel',true,false)
-     var roster=game.menu_layer.find_child('StartRoster',true,false)
-     var heading=game.menu_layer.find_child('StartChooser',true,false)
-     var first_y: float=heading.get_global_rect().position.y if heading.is_visible_in_tree() else roster.get_global_rect().position.y
-     var gap: float=first_y-panel.get_global_rect().end.y
-     check(gap>=0. and gap<=24.,'Portrait actions and roster share a compact gap: '+str(viewport)+' '+str(scale_value)+' '+locale+' '+str(gap))
-    var seen=[]
-    var previous=game.menu_layer.find_child('RosterPrevious',true,false)
-    while previous!=null and not previous.disabled:
-     previous.pressed.emit();await settle();previous=game.menu_layer.find_child('RosterPrevious',true,false)
-    for page in game.FRIENDS.size():
-     for button in game.menu_layer.find_children('*','Button',true,false):
-      if not button.is_visible_in_tree():continue
-      var rect=button.get_global_rect()
-      check(rect.position.x>=-1 and rect.position.y>=-1 and rect.end.x<=game.view_w+1 and rect.end.y<=game.view_h+1,'Visible action fits: '+str(button.name)+' '+str(viewport)+' '+str(scale_value)+' '+locale+' '+str(rect))
-      if str(button.name).begins_with('StartSelect_'):seen.append(str(button.name).trim_prefix('StartSelect_'))
-     for required in ['StartCampaign','StartRun','OpenSettings','HowToPlay']:
-      var button=game.menu_layer.find_child(required,true,false)
-      check(button!=null and button.is_visible_in_tree(),'Primary menu action remains reachable: '+required)
-     var following=game.menu_layer.find_child('RosterNext',true,false)
-     if following==null or following.disabled:break
-     following.pressed.emit();await settle()
-    for hero in game.FRIENDS:check(hero in seen,'Playable hero appears through real roster pages: '+hero)
-    check(not game.menu_layer.find_child('StartSelect_owl',true,false) and not game.menu_layer.find_child('StartSelect_wolf',true,false),'Companions never appear as selectable hero cards')
- # A wide system font must not inflate a width-zero heading or hide a second card row.
- var broad=SystemFont.new();broad.font_names=PackedStringArray(['DejaVu Sans']);broad.fallbacks=game.interface_options.body_font.fallbacks
- for viewport in [Vector2i(1152,648),Vector2i(873,393),Vector2i(393,873)]:
-  root.size=viewport;await settle();game.touch_mode=true
-  for scale_value in [1.,2.]:
-   for locale in GameText.LANGUAGES:
-    game.language=locale;game.interface_options.text_scale=scale_value;game.build_theme();game.interface_options.body_font=broad;game.ui_theme.default_font=broad;game.ui.theme=game.ui_theme;game.show_page('main');await settle()
-    var heading=game.menu_layer.find_child('StartChooser',true,false)
-    if heading.is_visible_in_tree():
-     check(heading.size.y<=game.pixel_ui.chooser_height()+1.,'Actual shaped chooser stays within its measured height '+str(viewport)+' '+locale)
-    for button in game.menu_layer.find_children('*','Button',true,false):
-     if not button.is_visible_in_tree():continue
-     var rect=button.get_global_rect()
-     check(rect.position.x>=-1 and rect.position.y>=-1 and rect.end.x<=game.view_w+1 and rect.end.y<=game.view_h+1,'Wide-font action fits '+str(button.name)+' '+str(viewport)+' '+locale+' '+str(rect))
-     if heading.is_visible_in_tree() and str(button.name).begins_with('StartSelect_'):
-      check(heading.get_global_rect().end.y<=rect.position.y,'Heading never overlaps a hero card '+str(viewport)+' '+locale)
- game.interface_options.text_scale=1.;game.show_page('main');await settle()
- for hero in game.FRIENDS:game.select_character(hero);check(game.character==hero,'Normal selection updates hero: '+hero)
+    game.language=locale;game.interface_options.text_scale=scale_value;game.build_theme();game.ui.theme=game.ui_theme
+    game.show_page("characters");await settle()
+    var cards: Array=game.menu_layer.find_children("Select_*","Button",true,false)
+    check(cards.size()==6,"All six cards on one screen "+str(viewport)+locale)
+    for card in cards:
+     var viewport_rect:=Rect2(0,0,game.view_w,game.view_h)
+     check(card.is_visible_in_tree() and viewport_rect.encloses(card.get_global_rect()),"Selectable target fits "+str(card.name)+str(viewport)+locale)
+     for child in card.get_children():
+      check(card.get_global_rect().encloses(child.get_global_rect()),"Name and portrait fit their rectangle "+str(card.name))
+      if child is Label:
+       check(child.get_theme_font("font").get_string_size(child.text,HORIZONTAL_ALIGNMENT_LEFT,-1,child.get_theme_font_size("font_size")).x<=child.size.x,"Full localized name fits "+child.text)
+    var confirm: Button=game.menu_layer.find_child("ConfirmHero",true,false)
+    var back: Button=game.menu_layer.find_child("CharacterBack",true,false)
+    check(confirm!=null and back!=null and confirm.is_visible_in_tree() and back.is_visible_in_tree(),"Confirm and Back have real valid controls")
+    check(game.menu_layer.find_child("NextPage",true,false)==null,"Picker requires no pagination")
+ for hero in game.FRIENDS:
+  game.select_character(hero)
+  check(game.character==hero,"Normal selection updates hero: "+hero)
  var arcade=AionCampaignGame.new();arcade.world.begin('aion');arcade.world.state='playing';arcade.down_down=true;arcade.right_down=true;arcade.update_arcade_aim()
  check(arcade.world.move_axis.y>.55 and arcade.world.move_axis.x>0,'Keyboard Down+Right reaches crawl intent')
  check(arcade.world.aim_direction.is_equal_approx(Vector2.RIGHT),'Crawling fires horizontally rather than into the ground')
@@ -80,11 +54,10 @@ func run():
    game.language=locale;game.interface_options.text_scale=2.;game.build_theme();game.ui.theme=game.ui_theme;game.show_page('main');await settle()
    var resume=game.menu_layer.find_child('ContinueCampaign',true,false)
    check(resume!=null and resume.is_visible_in_tree(),'Existing checkpoint has a visible Continue action at200% '+locale)
-   var panel=game.menu_layer.find_child('PagePanel',true,false)
    for button in game.menu_layer.find_children('*','Button',true,false):
     if not button.is_visible_in_tree():continue
     var rect=button.get_global_rect()
     check(rect.position.x>=-1 and rect.position.y>=-1 and rect.end.x<=game.view_w+1 and rect.end.y<=game.view_h+1,'Checkpoint-menu action fits: '+str(button.name)+' '+str(viewport)+' '+locale+' '+str(rect))
-    if str(button.name).begins_with('StartSelect_'):check(not panel.get_global_rect().intersects(rect),'Operations plate never obscures a selectable hero '+str(viewport))
+   check(game.menu_layer.find_child('StartRun',true,false)==null,'The landing page only launches Arcade')
  arcade.free();game.queue_free();await settle()
  print('RESULT: ',checks,' arcade roster/UI checks, ',failures,' failures');quit(1 if failures else 0)

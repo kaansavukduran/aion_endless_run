@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.56.0"
+const GAME_VERSION = "0.57.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -133,6 +133,7 @@ var front := preload("res://scripts/front_presentation.gd").new()
 var help_step := 0
 var camera_rise := 0.0
 var campaign_resume_requested := false
+var opening_guide := true
 # Browser QA reads ~150 canvas data-* observations. Normal players only need the
 # accessible state, so the full mirror runs for automation or ?aion-qa only.
 var web_qa := false
@@ -151,6 +152,8 @@ func _ready() -> void:
 	gamepad.host = self
 	Input.joy_connection_changed.connect(on_gamepad_connection)
 	load_settings()
+	opening_guide=not get_tree().has_meta("arcade_front_seen")
+	get_tree().set_meta("arcade_front_seen",true)
 	native_diagnostics.host=self
 	web_accessibility.host=self
 	web_accessibility.setup()
@@ -210,8 +213,7 @@ func _ready() -> void:
 	rebuild()
 	front.host=self
 	ui.add_child(front)
-	front.intro_active=not get_tree().has_meta("aion_intro_seen")
-	get_tree().set_meta("aion_intro_seen",true)
+	front.intro_active=false
 	front.refresh()
 	print("AION_READY "+GAME_VERSION)
 	if "--aion-smoke-test" in OS.get_cmdline_user_args():get_tree().quit.call_deferred()
@@ -474,7 +476,6 @@ func wrap_label(value: String, size: int = 15, color: String = "a6b8d1") -> Labe
 func show_page(value: String) -> void:
 	if pixel_ui.launch_pending:return
 	if value!=page:menu_pages.reset(value)
-	if value!="characters":pixel_ui.choose_for_campaign=false
 	if value == "characters" and world.state != "ready": return
 	language_picker_open = false
 	page = value
@@ -483,10 +484,20 @@ func show_page(value: String) -> void:
 func build_page() -> void:
 	menu_pages.host=self
 	if page=="main":menu_pages.pages=[];menu_pages.current=0
-	if page not in ["main"]:
+	if page in ["main","characters"]:
+		var backdrop:=TextureRect.new()
+		backdrop.texture=RunnerFrontPresentation.OPENING_VISTA
+		backdrop.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+		backdrop.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		backdrop.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST
+		backdrop.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		menu_layer.add_child(backdrop)
+		position_control(backdrop,Vector2.ZERO,Vector2(view_w,view_h))
+	if page!="":
 		var shade := ColorRect.new()
-		shade.color = Color("17121cc4")
-		position_control(shade, Vector2(0, 64), Vector2(view_w, view_h - 64))
+		shade.color = Color("12192588" if page in ["main","characters"] else "17121cc4")
+		shade.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		position_control(shade, Vector2.ZERO, Vector2(view_w, view_h))
 		menu_layer.add_child(shade)
 	if page == "characters":
 		build_characters()
@@ -578,30 +589,6 @@ func build_page() -> void:
 		column.add_child(slider)
 		if not OS.has_feature("web") and not OS.has_feature("mobile"):
 			add_toggle(column, "fullscreen", fullscreen, func(value): fullscreen = value; apply_fullscreen(); save_settings())
-		column.add_child(wrap_label(text("gameplay"),17,"eed3b4"))
-		add_toggle(column,"celebrations",world.adventure.celebrations_enabled,func(value):
-			world.adventure.celebrations_enabled = value
-			if not value:
-				if world.adventure.hugging(): world.frontier.request_boss(world.adventure.hug_level)
-				elif not world.adventure.hug_queue.is_empty(): world.frontier.request_boss(world.adventure.hug_queue[0].level)
-				if world.adventure.hugging(): world.invulnerable = maxf(world.invulnerable,0.65)
-				world.adventure.hug_time = 0.0
-				world.adventure.hug_pending = false
-				world.adventure.hug_queue.clear()
-				world.adventure.celebration_time = 0.0
-				world.adventure.heart_time = 0.0
-			save_settings())
-		add_range_setting(column,"mushroom_chance",world.adventure.mushroom_chance*100,func(value): world.adventure.mushroom_chance = value/100.0; save_settings(),"MushroomChance")
-		column.add_child(wrap_label(text("mushroom_chance_help"),12))
-		add_range_setting(column,"prism_intensity",prism_intensity*100,func(value): prism_intensity = value/100.0; save_settings(),"PrismIntensity")
-		column.add_child(wrap_label(text("how"), 17, "eed3b4"))
-		column.add_child(wrap_label(text("help"), 13))
-		column.add_child(wrap_label(text("boss_help"),13))
-		column.add_child(wrap_label(text("motion_help"),13))
-		column.add_child(wrap_label(text("gamepad_help"),13))
-		column.add_child(wrap_label(text("discoveries") % world.adventure.discoveries.size(), 16))
-		for power in world.adventure.POWER_NAMES:
-			column.add_child(wrap_label(("✓ " if world.adventure.discoveries.has(power) else "○ ") + text("power_" + power) + " · " + text("desc_" + power), 12))
 		column.add_child(wrap_label(text("version"), 11, "c6a8a5"))
 	if page!="main":menu_pages.prepare(column,Vector2(float(column.get_meta("page_width")),float(column.get_meta("page_height"))))
 	if is_instance_valid(first):
@@ -683,9 +670,6 @@ func character_portrait(id: String) -> TextureRect:
 		mat.shader = preload("res://scripts/companion_alpha.gdshader")
 		picture.material = mat
 	return picture
-
-func build_start_roster() -> void:
-	pixel_ui.roster(menu_layer,Vector2(28,view_h-154),view_w-56)
 
 func focus_later(item: Control) -> void:
 	if is_instance_valid(item) and item.is_inside_tree() and item.is_visible_in_tree() and not item.is_queued_for_deletion():
@@ -793,6 +777,7 @@ func start_campaign() -> void:
 	campaign.selected_hero=character
 	campaign.language=language
 	campaign.resume_on_ready=campaign_resume_requested
+	campaign.launch_on_ready=not campaign_resume_requested
 	get_tree().root.add_child(campaign)
 	get_tree().current_scene=campaign
 	queue_free()
@@ -836,7 +821,6 @@ func select_character(id: String) -> void:
 	if pixel_ui.launch_pending:return
 	if id not in FRIENDS or world.state != "ready" or page not in ["main", "characters"]: return
 	character = id
-	pixel_ui.roster_page=pixel_ui.roster_page_for(id)
 	world.character = id
 	clear_held_controls()
 	save_settings()
@@ -1060,16 +1044,13 @@ func _input(event: InputEvent) -> void:
 			if page=="main":
 				pixel_ui.open_campaign_picker()
 				get_viewport().set_input_as_handled()
-			elif page=="characters" and pixel_ui.choose_for_campaign:
+			elif page=="characters":
 				pixel_ui.confirm_hero()
 				get_viewport().set_input_as_handled()
 		elif event.keycode in [KEY_SPACE, KEY_ENTER] and page == "main" and not language_picker_open:
 			var focused := get_viewport().gui_get_focus_owner()
 			if focused == null:
 				pixel_ui.open_campaign_picker()
-				get_viewport().set_input_as_handled()
-			elif str(focused.name)=="StartRun" and not focused.disabled:
-				pixel_ui.request_launch(start_run)
 				get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F11:
 			fullscreen = not fullscreen
@@ -1368,6 +1349,15 @@ func on_web_page_hidden(_arguments: Array) -> void:
 	clear_held_controls()
 	pause_run()
 
+func canvas_accessibility_label() -> String:
+	if world.state=="ready":
+		if page=="characters":
+			return "Aion. "+RunnerFrontText.word(language,"pick_hero")+". "+character_name(character)
+		if page=="help" or (page=="main" and opening_guide):
+			return "Aion. "+RunnerFrontText.word(language,"how")
+		return "Aion. "+AionCampaignText.word(language,"title")
+	return "Aion Endless Run. "+text("hint")+". "+text("score")+" "+str(world.score)
+
 func publish_web_essentials() -> void:
 	# Screen-reader summary, language and page state at most 10 times a second,
 	# immediately when the page, run state, language or focused control changes.
@@ -1382,7 +1372,7 @@ func publish_web_essentials() -> void:
 	web_accessibility.update()
 	canvas.setAttribute("role", "application")
 	canvas.setAttribute("lang", language)
-	canvas.setAttribute("aria-label", "Aion Endless Run. " + text("hint") + ". " + text("score") + " " + str(world.score))
+	canvas.setAttribute("aria-label", canvas_accessibility_label())
 	canvas.setAttribute("data-state", world.state)
 	canvas.setAttribute("data-page", page)
 
@@ -1420,7 +1410,7 @@ func publish_web_status() -> void:
 	if canvas == null: return
 	web_accessibility.update()
 	canvas.setAttribute("data-ui-ready", str(ui_layout_ready))
-	canvas.setAttribute("data-front",JSON.stringify({"intro":front.intro_active,"intro_time":front.intro_time,"idle":front.idle_time,"demo":front.demo_world!=null,"demo_index":front.demo_index,"demo_time":front.demo_time,"help_step":help_step,"selected":character,"launch_pending":pixel_ui.launch_pending,"previews":preview_status,"demo_player":[front.demo_world.player.x,front.demo_world.player.y] if front.demo_world!=null else [],"demo_shots":front.demo_world.shots if front.demo_world!=null else 0,"demo_section":front.demo_world.section if front.demo_world!=null else ""}))
+	canvas.setAttribute("data-front",JSON.stringify({"intro":front.intro_active,"intro_time":front.intro_time,"idle":front.idle_time,"demo":front.demo_world!=null,"demo_index":front.demo_index,"demo_time":front.demo_time,"help_step":help_step,"guide":opening_guide,"selected":character,"launch_pending":pixel_ui.launch_pending,"previews":preview_status,"demo_player":[front.demo_world.player.x,front.demo_world.player.y] if front.demo_world!=null else [],"demo_shots":front.demo_world.shots if front.demo_world!=null else 0,"demo_section":front.demo_world.section if front.demo_world!=null else ""}))
 	canvas.setAttribute("data-level-elapsed",str(world.adventure.level_elapsed))
 	canvas.setAttribute("data-level-distance",str(world.adventure.level_distance(world)))
 	canvas.setAttribute("data-celebration-x",str(world.adventure.celebration_x(world,motion)))
@@ -1588,7 +1578,7 @@ func publish_web_status() -> void:
 	canvas.setAttribute("data-best", str(best))
 	canvas.setAttribute("role", "application")
 	canvas.setAttribute("lang", language)
-	canvas.setAttribute("aria-label", "Aion Endless Run. " + text("hint") + ". " + text("score") + " " + str(world.score))
+	canvas.setAttribute("aria-label", canvas_accessibility_label())
 	canvas.setAttribute("data-state", world.state)
 	canvas.setAttribute("data-page", page)
 	canvas.setAttribute("data-score", str(world.score))
@@ -1634,7 +1624,7 @@ func update_friend() -> void:
 		# These bodies have their own atlas and never enter the retired runner
 		# row lookup. Campaign selection and the menu use the same body bank.
 		friend_character=character;friend_combat=-1;friend_action=false
-		friend_sprite.visible=not (world.state=="ready" and pixel_ui.split_main())
+		friend_sprite.visible=world.state!="ready"
 		gun_echo.hide();sheep_collectible.hide()
 		for follower in followers:follower.hide()
 		var cinematic: bool=world.frontier.storytelling() or world.adventure.hugging()
@@ -1656,7 +1646,7 @@ func update_friend() -> void:
 		if world.state == "running":
 			if a.attack_time > 0.0: friend_combat = COMBAT_ROWS[character]
 			elif a.ducking(world): friend_combat = COMBAT_ROWS[character] + COMBAT_ROWS.size()
-	friend_sprite.visible = not (world.state=="ready" and pixel_ui.split_main())
+	friend_sprite.visible = world.state!="ready"
 	gun_echo.visible = false
 	for item in followers: item.visible = false
 	sheep_collectible.visible = character == "sheep" and not world.sheep_pickups.is_empty() and world.sheep_count < 3
@@ -2110,9 +2100,6 @@ func build_front_help() -> void:
 	var navigation:=HBoxContainer.new();column.add_child(navigation)
 	var previous:=button(RunnerFrontText.word(language,"previous"),func():help_step=maxi(0,help_step-1);rebuild());previous.name="FrontHelpPrevious";previous.disabled=help_step==0;previous.size_flags_horizontal=Control.SIZE_EXPAND_FILL;navigation.add_child(previous)
 	var next:=button(RunnerFrontText.word(language,"next"),func():help_step=mini(keys.size()-1,help_step+1);rebuild());next.name="FrontHelpNext";next.disabled=help_step==keys.size()-1;next.size_flags_horizontal=Control.SIZE_EXPAND_FILL;navigation.add_child(next)
-	var demo:=button(RunnerFrontText.word(language,"demo"),func():show_page("main");front.start_demo());demo.name="StartAttract";column.add_child(demo)
-	var training:=button(text("boss_training"),func():show_page("bosses"));training.name="BossTraining";column.add_child(training)
-	var replay:=button(RunnerFrontText.word(language,"intro"),func():show_page("main");front.begin_intro());replay.name="ReplayOpening";column.add_child(replay)
 	var back:=button(text("back"),func():show_page(return_page));back.name="FrontHelpBack";back.set_meta("menu_pin",true);column.add_child(back)
 	menu_pages.prepare(column,Vector2(float(column.get_meta("page_width")),float(column.get_meta("page_height"))))
 	focus_later.call_deferred(next)
