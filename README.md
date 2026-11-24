@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.31.0 · Elle tasarlanmış rotalar ve Kök Motoru evreleri
+
+Alt rotalar artık rol öğreten 8 kartlık karşılaşma dizisiyle ilerliyor (tek başına, farklı zeminde, birleşik, sınav); eski aynı beşli grup ve mekanik aralıklar kaldırıldı. Kök Motoru'nun her evresi duyurulan bir sendelemeyle başlıyor; 1. evre darbe sonrası açılan çekirdeği öğretiyor, 2. evrede kırılabilir kök kolu baskıyı azaltıyor, son vuruş bütün tehlikeleri temizliyor. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
+
 ## 0.30.0 · Doğal yol ayrımları
 
 Mission 1'in iki yol ayrımı artık farklı fiziksel fikirlerle seçiliyor. Kıyıda alt su yoluna iskele binasının altındaki alçak bakım geçidinden eğilip sürünerek girilir; tavan gerçek çarpışmadır. Kanopide kökle kilitli kapağın mekanizması kırılınca kök geçidi açılır; üst hizmet yolunun orta açıklığı basıldıktan sonra çöker. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).

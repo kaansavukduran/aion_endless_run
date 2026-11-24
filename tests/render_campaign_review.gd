@@ -44,7 +44,10 @@ func run() -> void:
 		stage(id,900.);await capture(id)
 	for junction in CampaignRoutes.FORKS:
 		for upper in [false,true]:
-			stage(junction,980.);game.world.player.y=CampaignRoutes.UPPER_FLOOR if upper else CampaignRoutes.LOWER_FLOOR
+			stage(junction,980.)
+			# The roots channel exists once its root lock is broken (0.30.0 hatch).
+			if junction=="fork_two" and not upper:CampaignContent.hit_object(game.world,Vector2(CampaignRoutes.HATCH_LOCK_X,-35.),4)
+			game.world.player.y=CampaignRoutes.UPPER_FLOOR if upper else CampaignRoutes.LOWER_FLOOR
 			game.view.camera_y=CampaignRoutes.camera_y(game.world,0.)
 			check(game.world.grounded(),"Rendered junction actor has real collision support: "+junction)
 			check(game.menu_kind=="" and game.buttons.is_empty(),"Physical junction renders no route menu or hidden confirm")

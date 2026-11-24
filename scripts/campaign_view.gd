@@ -265,7 +265,22 @@ func draw_world() -> void:
 				var point: Vector2=at(Vector2(float(world.boss.x)+(-65. if i==0 else 65.),-95.))
 				if int(world.boss.get("ports",[3,3])[i])<=0:continue
 				draw_boss_port(point,int(world.boss.get("ports",[3,3])[i]))
-		elif not world.completed and int(world.boss.phase)==2 and world.boss_vulnerable():
+		if not world.completed and float(world.boss.get("core_open",0.))>0.:
+			# Phase one lesson: the core glows open right after a ground slam.
+			var open_core: Vector2=at(Vector2(float(world.boss.x),-75.))
+			draw_circle(open_core,26.,Color("ffe39a",.35));draw_arc(open_core,30.,0.,TAU,24,Color("fff2c4"),3.)
+		if not world.completed and int(world.boss.phase)==2 and int(world.boss.get("arm",0))>0:
+			# Placeholder root arm: the breakable part that adds the second slam wave.
+			var arm: Vector2=at(CampaignBossPressure.arm_point(world))
+			draw_rect(Rect2(arm+Vector2(-18,-30),Vector2(36,60)),Color("5b4a3a"))
+			draw_rect(Rect2(arm+Vector2(-12,-24),Vector2(24,48)),Color("8c6d4c"))
+			for i in int(world.boss.arm):draw_rect(Rect2(arm+Vector2(-22+i*6,-44),Vector2(4,6)),Color("f1c681"))
+		if not world.completed and float(world.boss.get("stagger",0.))>0.:
+			# Screen-anchored so a long TR/EN line never runs off the right edge.
+			var line: String=host.t("arc_boss_phase_"+str(world.boss.phase))
+			var width: float=font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,18).x if font!=null else 360.
+			caption(line,Vector2(maxf(16.,(scene_w-width)*.5),118.),18)
+		if not world.completed and int(world.boss.phase)==2 and world.boss_vulnerable():
 			var core: Vector2=at(Vector2(float(world.boss.x),-75.))
 			for side in [-1.,1.]:
 				draw_rect(Rect2(core+Vector2(side*23.-2.,-15.),Vector2(4,30)),Color("f1c681"))

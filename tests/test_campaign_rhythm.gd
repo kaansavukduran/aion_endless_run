@@ -86,6 +86,9 @@ func run() -> void:
 	var core:=Vector2(float(w.boss.x),-75.)
 	check(CampaignBossPressure.core_damage(w,{"damage":1},core-Vector2(80,0),core+Vector2(80,0))==2,"Exposed-core aim earns an actual damage advantage")
 	w.boss.hp=29;w.boss.phase=3;w.boss.attack=2;w.boss.wait=0.;w.boss.windup=0.;w.step_boss(.01)
+	# 0.31.0: entering a phase first plays its announced stagger; the dash comes after it.
+	check(float(w.boss.get("stagger",0.))>0. and float(w.boss.get("dash",0.))==0.,"Entering phase three staggers before any dash")
+	w.boss.stagger=0.;w.boss.attack=2;w.boss.wait=0.;w.boss.windup=0.;w.step_boss(.01)
 	check(float(w.boss.windup)>.9 and float(w.boss.get("dash",0.))==0.,"Final dash is telegraphed before motion or contact damage")
 	w.boss.windup=.01;w.step_boss(.02);var before_x: float=w.boss.x
 	w.player=Vector2(before_x-40.,-110.);w.invulnerable=0.;CampaignBossPressure.motion(w,.1)

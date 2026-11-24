@@ -18,6 +18,64 @@ const NEW_ENEMIES := {
 const SCENES := {"water":["moss_water","deep_channel","sunken_station"],"terrace":["hanging_gardens","wind_terraces","glass_greenhouse"],"roots":["root_corridor","crystal_hollow","drill_chamber"]}
 const OBJECTS := ["planks","gate","lamp","relay","bridge","current","updraft","rock","surprise","cage","turret","panel"]
 
+## Hand-authored leaf encounters. Each card is a small game state: the cue the
+## player sees, the decision, the counter that works, and its reward. A role is
+## taught alone, repeated on changed ground (pit, current, wind, darkness), then
+## combined with a known role; only the pincer and the exam close a gate.
+## Positions are fractions of the route length and line up with the route's
+## zone (.40), hazards (.43/.72), heavy (.62) and optional rooms (.30/.68).
+const AUTHORED := {
+	"water":[
+		{"at":.06,"members":[["leech",0.]],"cue":"leech coils before a ground lunge","decision":"hold ground or jump","counter":"jump the lunge, shoot on landing","reward":"safe first kill"},
+		{"at":.12,"members":[["hopper",0.]],"cue":"hopper bounces beside a canal pit","decision":"aim with its height","counter":"diagonal shot at the top of its hop","reward":"pit crossed"},
+		{"at":.18,"members":[["leech",0.],["hopper",260.]],"gate":true,"cue":"lunge from the front, hop from behind","decision":"which threat first","counter":"jump the leech, shoot the hopper high","reward":"gate opens"},
+		{"at":.25,"members":[["siphon",0.]],"cue":"a siphon drains the nearby lamp","decision":"notice the support role","counter":"shoot up before it drifts out of range","reward":"lamp relit, shield chance"},
+		{"at":.41,"members":[["hopper",120.],["hopper",430.]],"cue":"the current pushes you forward","decision":"fight while being carried","counter":"walk back against the current while firing","reward":"current exit"},
+		{"at":.50,"members":[["siphon",0.],["leech",220.]],"cue":"the siphon now covers a lunger","decision":"kill the support before the brawler","counter":"shoot up at the siphon, then jump the leech","reward":"breathing room"},
+		{"at":.57,"members":[["drone",0.],["slime",160.]],"cue":"light pests before the heavy","decision":"spend special ammo or keep it","counter":"pistol them, save ammo for the sweeper","reward":"ammo saved"},
+		{"at":.80,"members":[["leech",0.],["hopper",200.],["siphon",380.]],"gate":true,"cue":"all three canal roles together","decision":"priority under pressure","counter":"siphon, hopper, then leech","reward":"guardian approach"}
+	],
+	"terrace":[
+		{"at":.06,"members":[["mirror",0.]],"cue":"mirror holds a slow firing line","decision":"trade shots or move","counter":"jump its shot and fire on the way down","reward":"safe first kill"},
+		{"at":.12,"members":[["kite",0.]],"cue":"kite fans two shots from the air","decision":"where to stand","counter":"step between the fan, shoot up","reward":"high ground"},
+		{"at":.18,"members":[["mirror",0.],["kite",240.]],"gate":true,"cue":"a ground line under an air fan","decision":"which line to break","counter":"kite first from a platform, then jump the mirror's shot","reward":"gate opens"},
+		{"at":.27,"members":[["vine",0.]],"cue":"a vine sweeps the floor after a short shiver","decision":"time the crossing","counter":"stay out of its reach or cross over a platform","reward":"clear lane"},
+		{"at":.41,"members":[["kite",0.],["kite",300.]],"cue":"updraft lifts every jump","decision":"use the lift to reach them","counter":"ride the updraft and fire diagonally","reward":"aerial clear"},
+		{"at":.50,"members":[["vine",0.],["crow",150.]],"cue":"a crow dives over a vine","decision":"stay high or low","counter":"take a platform over the vine, shoot the crow","reward":"breathing room"},
+		{"at":.58,"members":[["mirror",0.],["seed",220.]],"cue":"two firing lines before the glider","decision":"spend special ammo or keep it","counter":"crouch under the high lane","reward":"ammo saved"},
+		{"at":.80,"members":[["mirror",0.],["kite",160.],["vine",380.]],"gate":true,"cue":"every garden role at once","decision":"priority under pressure","counter":"kite, mirror, then pass the vine","reward":"guardian approach"}
+	],
+	"roots":[
+		{"at":.06,"members":[["burrow",0.]],"cue":"soil trembles before a burrow surfaces","decision":"wait or run past","counter":"wait for it to surface, shoot","reward":"safe first kill"},
+		{"at":.12,"members":[["mimic",0.]],"cue":"mimic leaps and lunges fast","decision":"keep distance","counter":"back off, shoot during its landing","reward":"read the leap"},
+		{"at":.18,"members":[["burrow",0.],["mimic",240.]],"gate":true,"cue":"a burrow holds the floor while a mimic leaps in","decision":"which threat first","counter":"back off the mimic, shoot the burrow as it surfaces","reward":"gate opens"},
+		{"at":.27,"members":[["conductor",0.]],"cue":"a conductor charges and fires a slow bolt","decision":"notice the support role","counter":"close in between its bolts","reward":"energy cut"},
+		{"at":.41,"members":[["burrow",0.],["wisp",200.]],"cue":"the darkness hides the floor","decision":"advance by light","counter":"follow the wisp glow, watch the trembling soil","reward":"dark crossed"},
+		{"at":.50,"members":[["conductor",0.],["mimic",220.]],"cue":"the conductor energises a mimic","decision":"kill the support first","counter":"push to the conductor, then turn","reward":"breathing room"},
+		{"at":.58,"members":[["mimic",0.],["gnome",150.]],"cue":"fast pair before the borer","decision":"spend special ammo or keep it","counter":"jump the mimic, pistol the gnome","reward":"ammo saved"},
+		{"at":.80,"members":[["burrow",0.],["conductor",200.],["mimic",380.]],"gate":true,"cue":"every root role at once","decision":"priority under pressure","counter":"conductor, mimic, then burrow","reward":"guardian approach"}
+	]
+}
+
+static func populate_authored(w) -> void:
+	var cards: Array=AUTHORED[w.section]
+	for i in cards.size():
+		var card: Dictionary=cards[i]
+		var x: float=w.length()*float(card.at)
+		var ids: Array[String]=[]
+		for k in card.members.size():
+			var member: Array=card.members[k]
+			var kind: String=str(member[0])
+			var at: float=x+float(member[1])
+			# A ground role never starts inside a canal pit: step back to its lip.
+			if not flying(kind):
+				for pit in w.pits:
+					if at>pit.x-30. and at<pit.y+30.:at=pit.x-55.
+			w.spawn_enemy(kind,at,-120. if flying(kind) else 0.,300+i*10+k)
+			ids.append(w.section+":enemy:"+str(300+i*10+k))
+		if bool(card.get("gate",false)):w.gates.append({"x":x+float(card.members[-1][1])+380.,"ids":ids})
+		w.encounters.append({"id":w.section+":encounter:"+str(i),"x":x,"variant":mini(card.members.size()-1,2),"scene":SCENES[w.section][clampi(int(i*3/cards.size()),0,2)],"enemies":ids,"cue":card.cue,"decision":card.decision,"counter":card.counter,"reward":card.reward})
+
 static func flying(kind: String) -> bool:
 	return kind in ["crow","moth","drone","wisp","glider"] or (NEW_ENEMIES.has(kind) and bool(NEW_ENEMIES[kind].flying))
 
@@ -26,11 +84,13 @@ static func populate(w) -> void:
 	var regional: Array=REGIONS.get(w.section,[])
 	var is_leaf: bool=not regional.is_empty()
 	if not is_leaf and w.section!="arena":regional=["gnome","seed","crow"] if w.section!="quay" else ["drone","beetle","gnome"]
-	if not regional.is_empty():
-		var count: int=8 if is_leaf else (2 if w.section=="canopy" else 4)
+	if is_leaf:
+		populate_authored(w)
+	elif not regional.is_empty():
+		var count: int=2 if w.section=="canopy" else 4
 		var rhythm_rng:=RandomNumberGenerator.new();rhythm_rng.seed=w.run_seed+abs(w.section.hash())+1703
 		for i in count:
-			var x: float=lerpf(1600. if is_leaf else 2200.,w.length()-1700.,float(i)/maxf(1.,count-1))
+			var x: float=lerpf(2200.,w.length()-1700.,float(i)/maxf(1.,count-1))
 			var variant: int=rhythm_rng.randi_range(0,2)
 			if i>0 and i<count-1:x+=rhythm_rng.randf_range(-180.,180.)
 			var spacing: Array=[[0.,105.,285.,410.,570.],[0.,180.,245.,445.,550.],[0.,150.,325.,390.,610.]][variant]
@@ -39,8 +99,8 @@ static func populate(w) -> void:
 				var kind: String=regional[(k+variant)%3] if k<3 else (["gnome","beetle","slime"][i%3] if k==3 else ["crow","moth","drone"][i%3])
 				w.spawn_enemy(kind,x+float(spacing[k]),-120. if flying(kind) else 0.,300+i*10+k)
 				ids.append(w.section+":enemy:"+str(300+i*10+k))
-			if is_leaf or i==0 or i==count-1:w.gates.append({"x":x+760.,"ids":ids})
-			w.encounters.append({"id":w.section+":encounter:"+str(i),"x":x,"variant":variant,"scene":SCENES[w.section][clampi(int(i*3/count),0,2)] if is_leaf else w.section,"enemies":ids})
+			if i==0 or i==count-1:w.gates.append({"x":x+760.,"ids":ids})
+			w.encounters.append({"id":w.section+":encounter:"+str(i),"x":x,"variant":variant,"scene":w.section,"enemies":ids})
 	if is_leaf:
 		for i in 2:
 			var x: float=w.length()*(.30 if i==0 else .68)

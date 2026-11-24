@@ -285,10 +285,18 @@ with sync_playwright() as pw:
                 assert not any(name.startswith('Route_') for name in d['buttons']),('Route menu leaked into physical fork',d)
                 if not any(record['section']==section for record in fork_inputs):
                     fork_inputs.append({'section':section,'path':'upper' if upper else 'lower','entry':d['player']})
-                keys(['d','f'])
+                # The coast water path is a real low crawlway under the pier:
+                # an ordinary player crouches (S) once in the channel. The
+                # canopy roots path opens by shooting its lock while walking.
+                if section=='fork_one' and not upper and d.get('mounted') and d['player'][0]>700 and not d.get('mount_transition'):
+                    # A vehicle does not fit the crawlway: get out like a player would.
+                    keys([]);page.keyboard.press('e');page.wait_for_timeout(500);continue
+                crawl=section=='fork_one' and not upper and d['player'][1]>1 and d['player'][0]<1200 and not d.get('mounted')
+                keys(['d','s','f'] if crawl else ['d','f'])
+                if crawl and not any(r.get('crawl') for r in fork_inputs):fork_inputs[-1]['crawl']=d['player']
                 if upper and d.get('grounded') and d['player'][0]<1000 and now-last_jump>.25:
                     page.keyboard.press('Space');last_jump=now
-                elif not upper and d['player'][0]>1000 and d.get('grounded') and now-last_jump>.85 and any(math.hypot(b[0]-d['player'][0],b[1]-(d['player'][1]-37))<100 for b in d.get('bullets',[])):
+                elif not upper and d['player'][0]>1200 and d.get('grounded') and now-last_jump>.85 and any(math.hypot(b[0]-d['player'][0],b[1]-(d['player'][1]-37))<100 for b in d.get('bullets',[])):
                     page.keyboard.press('Space');last_jump=now
                 fork_inputs[-1]['latest_position']=d['player']
                 page.wait_for_timeout(50)

@@ -117,11 +117,12 @@ static func clamp_horizontal(w,from_x: float,to_x: float) -> float:
 		return YARD_END_X
 	return to_x
 
-static func blocked_entry(w) -> bool:
-	# A standing hero pressing into the crawl mouth: show the posture hint once.
-	if str(w.section)!="fork_one" or bool(w.mount.ridden) or low_ceiling(w):return false
+static func blocked_entry(w) -> String:
+	# A body pressing into the crawl mouth gets the posture or dismount hint.
+	if str(w.section)!="fork_one" or low_ceiling(w):return ""
 	var contact: Vector2=foot(w)
-	return contact.y>CRAWL_CEILING and absf(contact.x-(PIER.position.x-BODY_HALF_WIDTH))<1. and w.move_axis.x>.3
+	if contact.y<=CRAWL_CEILING or absf(w.player.x-(PIER.position.x-BODY_HALF_WIDTH))>=1. or w.move_axis.x<=.3:return ""
+	return "arc_dismount_hint" if bool(w.mount.ridden) else "arc_crawl_hint"
 
 static func solid_at(w,p: Vector2) -> bool:
 	return str(w.section)=="fork_one" and PIER.has_point(p)
@@ -147,8 +148,9 @@ static func step(w) -> void:
 		var span: Rect2=SERVICE_WALKWAYS[1]
 		if contact.x>=span.position.x and contact.x<=span.end.x and absf(contact.y-span.position.y)<.1:
 			w.bridge_timers[SERVICE_BRIDGE_X]=SERVICE_BRIDGE_SECONDS;w.notice="arc_bridge_warning";w.notice_time=2.
-	if blocked_entry(w) and not w.notice=="arc_crawl_hint":
-		w.notice="arc_crawl_hint";w.notice_time=2.2
+	var hint: String=blocked_entry(w)
+	if hint!="" and w.notice!=hint:
+		w.notice=hint;w.notice_time=2.2
 	var destination: String=choice_at(w)
 	if destination.is_empty():return
 	if not w.route.has(destination):w.route.append(destination)

@@ -98,7 +98,7 @@ func run() -> void:
 		check(World.STAGES[leaf].next=="relay","All three branches converge: "+leaf)
 		check(w.enemies.any(func(e):return e.kind=="warden" and e.max_hp==12),"Each leaf has a guardian: "+leaf)
 		for e in w.enemies:
-			if e.kind not in ["crow","moth","wisp","drone"]:check(w.floor_at(float(e.x))==0.,"Ground enemy starts on actual floor")
+			if not CampaignContent.flying(str(e.kind)):check(w.floor_at(float(e.x))==0.,"Ground enemy starts on actual floor")
 		for crate in w.crates:check(w.floor_at(float(crate.x))==0.,"Supply crate starts on floor")
 		for item in w.pickups:
 			if w.floor_at(float(item.x))!=0.:

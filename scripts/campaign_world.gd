@@ -252,23 +252,49 @@ func load_section(id: String) -> void:
 			var kind: String = str(types[spawn_index] if spawn_index<types.size() else types[layout_rng.randi_range(0,types.size()-1)])
 			spawn_enemy(kind, spawn_x, -115. if kind in ["crow","moth","wisp","drone"] else 0., spawn_index)
 			spawn_x+=layout_rng.randf_range(125.,270.);spawn_index+=1
-		for i in range(1, int(length()/650.)):
-			var x: float = float(i)*650.
-			platforms.append(Rect2(x, -70., 170., 20.))
-			if section in ["canopy","terrace"]: platforms.append(Rect2(x+190., -135., 150., 20.))
+		var leaf: bool=section in CampaignContent.REGIONS
+		if leaf:
+			# Leaf routes: seeded irregular platform rhythm at two heights,
+			# never the old fixed 650px metronome. IDs/positions are stable per run.
+			var px:=650.+layout_rng.randf_range(-120.,120.)
+			while px<length()-500.:
+				var high: bool=layout_rng.randf()<.35
+				platforms.append(Rect2(px,-115. if high else -70.,layout_rng.randf_range(130.,210.),20.))
+				if section=="terrace" and layout_rng.randf()<.5:platforms.append(Rect2(px+200.,-150.,140.,20.))
+				px+=layout_rng.randf_range(430.,980.)
+		else:
+			for i in range(1, int(length()/650.)):
+				var x: float = float(i)*650.
+				platforms.append(Rect2(x, -70., 170., 20.))
+				if section in ["canopy","terrace"]: platforms.append(Rect2(x+190., -135., 150., 20.))
 		for i in range(1, int(length()/1000.)):
 			var x: float = float(i)*1000.+80.
 			var ids: Array[String] = []
 			for e in enemies:
 				if float(e.home.x) >= x-500. and float(e.home.x) < x+300.: ids.append(str(e.id))
 			gates.append({"x":x, "ids":ids})
+		var crate_x:=875.
 		for i in range(1, int(length()/780.)):
 			var x: float = i*780.+95.
+			if leaf:x=crate_x;crate_x+=layout_rng.randf_range(560.,1050.)
+			if x>length()-300.:break
 			var id_key: String = section+":crate:"+str(i)
 			if not taken.has(id_key): crates.append({"id":id_key, "x":x, "y":0., "kind":["arc","grenade","scatter","shield","heal","repair"][(i-1)%6], "hp":1})
-		for i in range(1, int(length()/220.)):
-			var key: String = section+":fruit:"+str(i)
-			if not taken.has(key): pickups.append({"id":key, "x":i*220.+35., "y":-40., "kind":"fruit_"+str(i%8)})
+		if leaf:
+			# Fruit arcs mark a jump line or a breathing stretch instead of a
+			# fruit every 220px. Each arc is three to five one-time IDs.
+			var fx:=420.;var index:=1
+			while fx<length()-400.:
+				var count: int=layout_rng.randi_range(3,4)
+				for j in count:
+					var key: String=section+":fruit:"+str(index);index+=1
+					var lift: float=sin(PI*float(j)/maxf(1.,count-1))*55.
+					if not taken.has(key):pickups.append({"id":key,"x":fx+j*48.,"y":-40.-lift,"kind":"fruit_"+str(index%8)})
+				fx+=layout_rng.randf_range(1100.,2000.)
+		else:
+			for i in range(1, int(length()/220.)):
+				var key: String = section+":fruit:"+str(i)
+				if not taken.has(key): pickups.append({"id":key, "x":i*220.+35., "y":-40., "kind":"fruit_"+str(i%8)})
 		if section in ["quay", "water"]:
 			mount = {"available":true, "ridden":false, "x":360., "hp":3}
 			var repair_key:=section+":repair"
@@ -290,7 +316,7 @@ func load_section(id: String) -> void:
 			for crate in crates:
 				if float(crate.x)>pit.x-20. and float(crate.x)<pit.y+20.: crate.x = pit.x-55.
 			for item in pickups:
-				if float(item.x)>pit.x and float(item.x)<pit.y: item.y = -105.
+				if float(item.x)>pit.x and float(item.x)<pit.y: item.y = -105.;item.x=clampf(float(item.x),pit.x+14.,pit.x+85.)
 	else:
 		platforms.append(Rect2(690., -75., 175., 20.))
 		platforms.append(Rect2(980., -135., 150., 20.))
@@ -456,6 +482,7 @@ func damage_boss(amount: int) -> void:
 	boss.hp = maxi(0,int(boss.hp)-amount)
 	if int(boss.hp) == 0:
 		boss.active = false; completed = true; state = "victory"; victory_time = 0.; checkpoint_ready = false
+		CampaignBossPressure.clear_hazards(self)
 		award("mission:1",3000+rescued.size()*300); stop_inputs(); pending_events.append("complete")
 
 func damage_player(cause: String="enemy") -> void:
@@ -591,6 +618,10 @@ func step_boss(dt: float) -> void:
 	if not bool(boss.active) or not bool(boss.get("engaged",false)): return
 	boss.clock = float(boss.clock)+dt
 	boss.phase = 1 + int(int(boss.hp)<60) + int(int(boss.hp)<30)
+	if CampaignBossPressure.phase_change(self):return
+	boss.core_open=maxf(0.,float(boss.get("core_open",0.))-dt)
+	if float(boss.get("stagger",0.))>0.:
+		boss.stagger=maxf(0.,float(boss.stagger)-dt);return
 	if CampaignBossPressure.motion(self,dt):return
 	if int(boss.phase)<3:boss.x = length()-420.+sin(float(boss.clock)*.65)*75.
 	boss.y = 0. # A walking root machine stays on its actual collision floor.
@@ -614,6 +645,7 @@ func step_boss(dt: float) -> void:
 					bullets.append({"p":Vector2(float(boss.x)-55.,-90.),"v":aim*230.,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
 			elif attack == 1:
 				bullets.append({"p":Vector2(float(boss.x)-60.,-16.),"v":Vector2(-320.,0.),"owner":"enemy","age":0.,"kind":"wave","damage":1,"pierce":0,"hit":[]})
+				CampaignBossPressure.after_slam(self)
 			else:
 				for i in 2: spawn_enemy("drone",float(boss.x)-120.-i*110.,-135.-i*25.,200+int(boss.attack)*2+i)
 			boss.attack = int(boss.attack)+1; boss.wait = 2.15-float(int(boss.phase)-1)*.25
