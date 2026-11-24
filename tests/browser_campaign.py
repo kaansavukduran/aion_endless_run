@@ -109,10 +109,18 @@ with sync_playwright() as pw:
             front_tap('NextPage')
         front_tap('ConfirmHero')
     check(canvas.get_attribute('data-character')==a.hero,'Actual front-end selects the requested hero: '+a.hero)
-    front_tap('StartCampaign')
-    page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
-    front_tap('ConfirmHero')
-    page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")',timeout=45000)
+    def enter_campaign(semantic=False):
+        def select(name):
+            if semantic:
+                label=next(b['text'] for b in front_buttons() if b['name']==name)
+                page.get_by_role('button',name=label,exact=True).press('Enter')
+            else:
+                front_tap(name)
+        select('StartCampaign')
+        page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
+        select('ConfirmHero')
+        page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")',timeout=45000)
+    enter_campaign()
     last_observation={}
     def data():
         current=json.loads(canvas.get_attribute('data-campaign'))
@@ -596,8 +604,7 @@ with sync_playwright() as pw:
                 before_save=data()
                 page.evaluate('navigator.serviceWorker.ready.then(()=>true)');context.set_offline(True);page.reload(timeout=120000)
                 page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
-                page.get_by_role('button',name='Oyna',exact=True).focus();page.keyboard.press('Enter')
-                page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
+                enter_campaign(semantic=True)
                 button('CampaignContinue')
                 while data()['menu']=='help':button('CampaignGo')
                 page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).state==="playing"')
@@ -734,12 +741,12 @@ with sync_playwright() as pw:
             check(canvas.get_attribute('data-campaign') is None,'Return to the original runner clears stale campaign observations')
             check(page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1')).completed"),'Returning to main preserves the completed campaign')
             # Re-enter via the real semantic counterpart of the actual Godot button.
-            page.get_by_role('button',name='Oyna',exact=True).focus();page.keyboard.press('Enter');page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
+            enter_campaign(semantic=True)
     if a.offline:
         if data()['state']=='playing':canvas.focus();page.keyboard.press('Escape');page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')
         before=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
         page.evaluate('navigator.serviceWorker.ready.then(()=>true)');context.set_offline(True);page.reload(timeout=120000);page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]',timeout=120000)
-        page.get_by_role('button',name='Oyna',exact=True).focus();page.keyboard.press('Enter');page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")')
+        enter_campaign(semantic=True)
         after=page.evaluate("JSON.parse(localStorage.getItem('aion.campaign.v1'))")
         check(after['checkpoint']==before['checkpoint'] and after['score']==before['score'],'Offline reload starts the real game and preserves its separate campaign checkpoint')
         if not before['completed']:
