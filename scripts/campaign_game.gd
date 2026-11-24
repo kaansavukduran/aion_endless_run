@@ -112,11 +112,9 @@ var web_qa := false
 var web_hidden_callback: JavaScriptObject
 var web_update_callback: JavaScriptObject
 var offer_label: Label
-var offer_hint: Label
 var offered_second := -1
 var picker_preview: RunnerHeroPreview
 var picker_info: Label
-var life_menu_delay := 0.
 var confirm_buttons_down: Dictionary={}
 const HeroPreview=preload("res://scripts/hero_preview.gd")
 
@@ -179,7 +177,7 @@ func t(key: String) -> String:
 func old(key: String) -> String: return GameText.get_text(language,key)
 func font_size(size: int) -> int: return roundi(size*options.text_scale)
 func menu_title() -> String:
-	return t({"briefing":"title","help":"controls","paused":"pause","dead":"game_over","continue_offer":"continue_offer","continue_pick":"continue_pick","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
+	return t({"briefing":"title","help":"controls","paused":"pause","dead":"game_over","continue_offer":"continue_choose","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
 
 func safe_rect(raw: Vector2) -> Rect2:
 	if OS.has_feature("web"):
@@ -266,13 +264,16 @@ func build_touch() -> void:
 		item.font=options.font_for(FONT);item.palette=options.colors.duplicate();item.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		if key=="grenade":item.palette.accent=AionCampaignWorld.COLORS[world.character]
 		ui.add_child(item);item.position=points[key];item.size=Vector2.ONE*(90. if key=="context" else 100.);actions[key]=item
-	var hint:=label(t("boost"),14);ui.add_child(hint);hint.position=Vector2(24,view_h-206)
+	var hint:=label(t("boost"),14);stick.add_child(hint);hint.position=Vector2(0,-29)
 
 func build_menu() -> void:
 	release_all()
+	if menu_kind=="continue_offer":
+		build_continue_picker()
+		return
 	var shade:=ColorRect.new();shade.color=Color("12101caa");shade.size=Vector2(view_w,view_h);ui.add_child(shade)
 	menu=PanelContainer.new();menu.name="CampaignMenu";ui.add_child(menu);menu.add_theme_stylebox_override("panel",options.style("surface","border",16))
-	var life_menu:=menu_kind in ["continue_offer","continue_pick","dead"]
+	var life_menu:=menu_kind=="dead"
 	if life_menu:menu.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR
 	menu.custom_minimum_size.x=minf(view_w-32,(570. if life_menu else 840.) if not portrait else 508.)
 	menu.size.x=menu.custom_minimum_size.x
@@ -321,14 +322,6 @@ func build_menu() -> void:
 			action(t("settings"),func():menu_previous="paused";menu_kind="settings";settings_page=0;build_ui())
 			action(t("restart_mission"),begin_new).name="CampaignRestart"
 			action(t("back"),return_main).name="CampaignPauseMain"
-		"continue_offer":
-			offer_label=label("",52);offer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(offer_label)
-			offer_hint=paragraph("",16);column.add_child(offer_hint)
-			offered_second=-1;update_continue_offer()
-			action(t("continue_choose"),open_continue,true).name="ArcadeContinue"
-			action(t("back"),return_main).name="ArcadeContinueMain"
-		"continue_pick":
-			build_continue_picker()
 		"dead":
 			column.add_child(paragraph(old("score")+" %05d · " % world.score+t(world.checkpoint),20))
 			action(t("restart"),begin_new,true).name="CampaignRestart"
@@ -389,7 +382,7 @@ func fit_menu(target: PanelContainer) -> void:
 	target.reset_size()
 	var height: float=target.get_combined_minimum_size().y
 	target.size.y=height
-	target.position=Vector2(floorf((view_w-target.size.x)*.5),maxf(8.,floorf((view_h-height)*.5)))
+	target.position=Vector2(12.,12.) if menu_kind=="continue_offer" else Vector2(floorf((view_w-target.size.x)*.5),maxf(8.,floorf((view_h-height)*.5)))
 	for i in buttons.size():
 		if is_instance_valid(buttons[i]) and buttons[i].is_visible_in_tree() and not buttons[i].disabled:
 			focus_index=i;buttons[i].grab_focus();break
@@ -397,7 +390,6 @@ func fit_menu(target: PanelContainer) -> void:
 func menu_back() -> bool:
 	match menu_kind:
 		"paused":close_menu();return true
-		"continue_pick":cancel_continue();return true
 		"settings":menu_kind=menu_previous;build_ui();return true
 		"result_details":menu_kind="complete";build_ui();return true
 		"help":finish_help();return true
@@ -485,59 +477,64 @@ func build_settings() -> void:
 	action(old("resume"),func():menu_kind=menu_previous;build_ui())
 
 func saved_can_resume() -> bool:
-	return not saved.is_empty() and not bool(saved.get("completed",false)) and str(saved.get("phase","playing"))!="dead" and not (str(saved.get("phase","playing"))=="continue_offer" and float(saved.get("offer_remaining",0.))<=0.)
+	var phase: String=str(saved.get("phase","playing"))
+	return not saved.is_empty() and not bool(saved.get("completed",false)) and phase!="dead" and not (phase in ["continue_offer","continue_pick"] and float(saved.get("offer_remaining",0.))<=0.)
 
 func update_continue_offer() -> void:
 	var seconds:=ceili(world.continue_remaining)
 	if is_instance_valid(offer_label) and seconds!=offered_second:
 		offered_second=seconds
 		offer_label.text=str(seconds)
-	if is_instance_valid(offer_hint):
-		var hint:=t("continue_touch" if active_input=="touch" else ("continue_pad" if active_input=="gamepad" else "continue_keys"))
-		if offer_hint.text!=hint:offer_hint.text=hint
 
 func build_continue_picker() -> void:
-	var id:=world.continue_hero
-	var preview:=HeroPreview.new()
-	preview.hero=id;preview.body_art=view.m1_heroes;preview.weapon_art=hud_items
-	preview.animate=motion_enabled and not options.reduced_motion
-	preview.custom_minimum_size=Vector2(120.,100. if options.text_scale<=1.25 else 68.)
-	preview.set_select_state("idle")
-	column.add_child(preview)
-	picker_preview=preview
-	var info:=paragraph(old("name_"+id)+"\n"+RunnerFrontText.ability_summary(language,id),18)
-	info.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(info)
-	picker_info=info
-	action(t("continue_enter"),confirm_continue,true).name="ArcadeConfirmHero"
-	var paging:=HBoxContainer.new();column.add_child(paging)
+	menu=PanelContainer.new();menu.name="CampaignMenu";ui.add_child(menu)
+	menu.add_theme_stylebox_override("panel",options.style("surface","border",10))
+	menu.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR
+	menu.custom_minimum_size.x=minf(view_w-24.,322.+76.*maxf(0.,options.text_scale-1.))
+	menu.position=Vector2(12.,12.)
+	column=VBoxContainer.new();column.add_theme_constant_override("separation",6);menu.add_child(column)
+	var header:=HBoxContainer.new();column.add_child(header)
+	var title:=label(menu_title(),17);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;header.add_child(title)
+	offer_label=label("",26);offer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+	offer_label.custom_minimum_size.x=font_size(36)
+	offer_label.add_theme_color_override("font_color",options.color("accent"));header.add_child(offer_label)
+	offered_second=-1;update_continue_offer()
+	var paging:=HBoxContainer.new();paging.add_theme_constant_override("separation",6);column.add_child(paging)
+	var hit_size:=48.
+	if touch_mode:
+		var logical_to_screen:=screen_transform.x.x
+		if OS.has_feature("web"):
+			logical_to_screen*=float(JavaScriptBridge.eval("window.innerWidth"))/maxf(1.,get_viewport_rect().size.x)
+		else:logical_to_screen/=maxf(1.,DisplayServer.screen_get_scale())
+		hit_size=maxf(hit_size,44./maxf(.5,logical_to_screen))
+	var confirm:=action(t("continue_enter"),confirm_continue,true);confirm.name="ArcadeConfirmHero"
+	confirm.custom_minimum_size.y=maxf(confirm.custom_minimum_size.y,hit_size)
 	for direction in [-1,1]:
-		var button:=action(t("previous_hero") if direction<0 else t("next_hero"),func():page_continue_hero(direction))
+		var button:=action("‹" if direction<0 else "›",func():page_continue_hero(direction))
+		button.tooltip_text=t("previous_hero" if direction<0 else "next_hero")
+		button.custom_minimum_size=Vector2(hit_size,maxf(button.custom_minimum_size.y,hit_size))
 		button.name="ArcadePreviousHero" if direction<0 else "ArcadeNextHero"
-		button.reparent(paging,false);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	action(t("go_back"),cancel_continue).name="ArcadeBackToCountdown"
-
-func open_continue() -> void:
-	if life_menu_delay>0. or not CampaignLives.open_picker(world):return
-	life_menu_delay=.28
-	menu_kind="continue_pick";save_checkpoint();build_ui()
+		button.reparent(paging,false)
+	picker_preview=HeroPreview.new();picker_preview.portrait_art=true
+	picker_preview.hero=world.continue_hero;picker_preview.animate=motion_enabled and not options.reduced_motion
+	picker_preview.custom_minimum_size=Vector2(70.,56.);picker_preview.set_select_state("select")
+	paging.add_child(picker_preview);paging.move_child(picker_preview,1)
+	picker_info=paragraph(old("name_"+world.continue_hero),18)
+	picker_info.size_flags_horizontal=Control.SIZE_EXPAND_FILL;picker_info.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+	paging.add_child(picker_info);paging.move_child(picker_info,2)
+	fit_menu.call_deferred(menu)
 
 func page_continue_hero(direction: int) -> void:
-	if life_menu_delay>0. or world.state!="continue_pick":return
+	if world.state!="continue_offer" or world.continue_remaining<=0.:return
 	world.continue_hero=world.HEROES[posmod(world.HEROES.find(world.continue_hero)+direction,world.HEROES.size())]
 	if is_instance_valid(picker_preview) and is_instance_valid(picker_info):
 		picker_preview.hero=world.continue_hero;picker_preview.clock=0.;picker_preview.queue_redraw()
-		picker_info.text=old("name_"+world.continue_hero)+"\n"+RunnerFrontText.ability_summary(language,world.continue_hero)
+		picker_info.text=old("name_"+world.continue_hero)
 	save_checkpoint();metadata()
 
-func cancel_continue() -> void:
-	if life_menu_delay>0. or not CampaignLives.cancel_picker(world):return
-	life_menu_delay=.28
-	menu_kind="continue_offer";save_checkpoint();build_ui()
-
 func confirm_continue() -> void:
-	if life_menu_delay>0. or not CampaignLives.confirm(world,world.continue_hero):return
+	if not CampaignLives.confirm(world,world.continue_hero):return
 	selected_hero=world.character
-	life_menu_delay=.28
 	menu_kind="";save_checkpoint();build_ui()
 
 func finish_help() -> void:
@@ -577,7 +574,7 @@ func begin_new() -> void:
 func resume_saved() -> void:
 	if not saved_can_resume():return
 	if not world.restore(saved):checkpoint_invalid=true;build_ui();return
-	menu_kind=world.state if world.state in ["continue_offer","continue_pick"] else ""
+	menu_kind="continue_offer" if world.state=="continue_offer" else ""
 	help_step=0;boss_announced=bool(world.boss.get("engaged",false));intro_pending=false
 	if world.recovery_view.has_area():
 		view.camera_x=world.recovery_view.position.x
@@ -715,14 +712,14 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:active_input="touch";mouse_aim=false
 	elif event is InputEventJoypadButton or event is InputEventJoypadMotion:active_input="gamepad";mouse_aim=false
 	elif event is InputEventKey or (event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION):active_input="keyboard"
-	if event is InputEventKey and menu_kind in ["continue_offer","continue_pick","dead"] and event.echo and (event.keycode in [KEY_ENTER,KEY_KP_ENTER,KEY_SPACE] or event.is_action("ui_accept")):
+	if event is InputEventKey and menu_kind in ["continue_offer","dead"] and event.echo and (event.keycode in [KEY_ENTER,KEY_KP_ENTER,KEY_SPACE] or event.is_action("ui_accept")):
 		get_viewport().set_input_as_handled();return
 	if event is InputEventJoypadButton and event.button_index in [JOY_BUTTON_A,JOY_BUTTON_X,JOY_BUTTON_START]:
 		var identity:=Vector2i(event.device,event.button_index)
 		var was_down:=confirm_buttons_down.has(identity)
 		if event.pressed:confirm_buttons_down[identity]=true
 		else:confirm_buttons_down.erase(identity)
-		if event.pressed and was_down and menu_kind in ["continue_offer","continue_pick","dead"]:
+		if event.pressed and was_down and menu_kind in ["continue_offer","dead"]:
 			get_viewport().set_input_as_handled();return
 	if fade>=0. or world.state=="travel":
 		release_all();get_viewport().set_input_as_handled();return
@@ -733,10 +730,15 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventJoypadMotion and event.axis==JOY_AXIS_TRIGGER_RIGHT:
 		if menu_kind=="":set_action("attack","trigger",event.axis_value>.5)
 		get_viewport().set_input_as_handled();return
+	if menu_kind=="continue_offer" and event is InputEventKey and event.keycode in [KEY_LEFT,KEY_RIGHT]:
+		if event.pressed and not event.echo:page_continue_hero(-1 if event.keycode==KEY_LEFT else 1)
+		get_viewport().set_input_as_handled();return
 	if event is InputEventJoypadButton:
 		if menu_kind!="":
 			if not event.pressed:return
-			if event.button_index in [JOY_BUTTON_DPAD_DOWN,JOY_BUTTON_DPAD_RIGHT]:menu_focus(1)
+			if menu_kind=="continue_offer" and event.button_index in [JOY_BUTTON_DPAD_LEFT,JOY_BUTTON_DPAD_RIGHT]:
+				page_continue_hero(-1 if event.button_index==JOY_BUTTON_DPAD_LEFT else 1)
+			elif event.button_index in [JOY_BUTTON_DPAD_DOWN,JOY_BUTTON_DPAD_RIGHT]:menu_focus(1)
 			elif event.button_index in [JOY_BUTTON_DPAD_UP,JOY_BUTTON_DPAD_LEFT]:menu_focus(-1)
 			elif event.button_index in [JOY_BUTTON_A,JOY_BUTTON_X]:
 				var focus:=get_viewport().gui_get_focus_owner()
@@ -744,7 +746,7 @@ func _input(event: InputEvent) -> void:
 			elif event.button_index==JOY_BUTTON_B:menu_back()
 			elif event.button_index==JOY_BUTTON_START:
 				if menu_kind=="paused":close_menu()
-				elif menu_kind=="continue_offer":open_continue()
+				elif menu_kind=="continue_offer":confirm_continue()
 			get_viewport().set_input_as_handled();return
 		if event.button_index==JOY_BUTTON_START and event.pressed:toggle_pause();get_viewport().set_input_as_handled();return
 		for key in ["jump","attack","shoot","duck","boost"]:
@@ -840,6 +842,12 @@ func poll_pad() -> void:
 	if pads.is_empty():return
 	var id: int=pads[0]
 	if menu_kind!="":
+		if menu_kind=="continue_offer":
+			var horizontal:=Input.get_joy_axis(id,JOY_AXIS_LEFT_X)
+			if absf(horizontal)>.55 and pad_menu_wait<=0.:
+				page_continue_hero(1 if horizontal>0. else -1);pad_menu_wait=.3
+			if absf(horizontal)<.2:pad_menu_wait=0.
+			return
 		var vertical:=Input.get_joy_axis(id,JOY_AXIS_LEFT_Y)
 		if absf(vertical)>.55 and pad_menu_wait<=0.:menu_focus(1 if vertical>0. else -1);pad_menu_wait=.25
 		if absf(vertical)<.2:pad_menu_wait=0.
@@ -916,7 +924,6 @@ func pointer_aim() -> Vector2:
 	return toward.normalized() if toward.length()>10. else Vector2.ZERO
 
 func _process(dt: float) -> void:
-	life_menu_delay=maxf(0.,life_menu_delay-dt)
 	impact_cooldown=maxf(0.,impact_cooldown-dt);defeat_sound_wait=maxf(0.,defeat_sound_wait-dt)
 	native_diagnostics.step(dt)
 	world.pose_motion_enabled=motion_enabled and not options.reduced_motion
@@ -951,7 +958,7 @@ func _process(dt: float) -> void:
 		if OS.has_feature("web"):visible_play=visible_play and not bool(JavaScriptBridge.eval("document.hidden || !document.hasFocus()"))
 		if visible_play:
 			var before:=ceili(world.continue_remaining)
-			CampaignLives.tick_offer(world,dt)
+			world.step(dt)
 			if before!=ceili(world.continue_remaining):
 				save_checkpoint()
 				if world.continue_remaining>0.:sound("continue_tick")
@@ -1212,10 +1219,9 @@ func accessible_update() -> void:
 	if not ui_ready:return
 	var entries:=[]
 	for item in ui.find_children("*","Button",true,false):
-		if item.is_visible_in_tree():entries.append({"id":str(item.get_instance_id()),"label":item.tooltip_text if item.text=="II" else item.text,"disabled":item.disabled,"toggle":false,"pressed":false})
+		if item.is_visible_in_tree():entries.append({"id":str(item.get_instance_id()),"label":item.tooltip_text if item.text in ["II","‹","›"] else item.text,"disabled":item.disabled,"toggle":false,"pressed":false})
 	var summary: String=menu_title() if menu_kind!="" else hud_panel.summary
-	if menu_kind=="continue_offer":summary+=" · %d"%ceili(world.continue_remaining)
-	if menu_kind=="continue_pick":summary+=" · "+old("name_"+world.continue_hero)+" · "+RunnerFrontText.ability_summary(language,world.continue_hero)
+	if menu_kind=="continue_offer":summary+=" · %d · "%ceili(world.continue_remaining)+old("name_"+world.continue_hero)
 	if menu_kind=="" and world.section=="arena" and bool(world.boss.active):summary+=" · "+t("arena")+" %d/%d"%[world.boss.hp,world.boss.max_hp]+" · "+t("phase")+" "+str(world.boss.phase)
 	if presentation_stage=="boss_reveal":summary=t("arena")
 	elif presentation_stage!="":summary=t("won")+" · "+t("lights_restored") if presentation_stage=="victory" else t("mission")+" · "+t("title")+" · "+t("intro_objective")

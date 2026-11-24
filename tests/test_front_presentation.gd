@@ -20,7 +20,7 @@ func run() -> void:
 	var event:=InputEventKey.new();event.keycode=KEY_Y;event.pressed=true
 	game._input(event)
 	await settle()
-	check(game.world.state=="ready" and game.page=="characters","Guide Skip reaches hero selection without starting the mission")
+	check(game.world.state=="ready" and game.page=="characters","The guide shortcut reaches hero selection without starting the mission")
 	game.show_page("main");await settle()
 	var endless: Dictionary={"best":game.best,"score":game.world.score,"hero":game.character}
 	var original_save:=bytes("user://save.cfg");var original_campaign:=bytes("user://campaign.json")

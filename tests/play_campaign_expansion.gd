@@ -15,7 +15,7 @@ func run_case(hero: String,leaf: String) -> Dictionary:
   if w.state=="continue_offer":
    retries+=1
    if retries>8:break
-   CampaignLives.open_picker(w);CampaignLives.confirm(w,hero)
+   CampaignLives.confirm(w,hero)
   if w.state=="respawn_pending":
    CampaignLives.start_entry(w,Rect2(maxf(0.,w.player.x-400.),-420.,1152.,600.));fire=false;settled_until=0.;last_jump=-10.
   if w.state=="respawn":w.step(.02);continue

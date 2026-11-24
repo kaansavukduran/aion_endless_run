@@ -190,9 +190,8 @@ with sync_playwright() as pw:
         page.wait_for_timeout(120)
     def restart_mission():
         # This is intentionally a new run for isolated input probes.
-        page.wait_for_function("['playing','continue_offer','continue_pick','dead'].includes(JSON.parse(document.querySelector('canvas').dataset.campaign).state)")
-        if data()['menu'] in ['continue_offer','continue_pick']:
-            if data()['menu']=='continue_pick':button('ArcadeBackToCountdown')
+        page.wait_for_function("['playing','continue_offer','dead'].includes(JSON.parse(document.querySelector('canvas').dataset.campaign).state)")
+        if data()['menu']=='continue_offer':
             page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
         if data()['menu']!='dead':
             canvas.focus();page.keyboard.press('Escape')
@@ -481,8 +480,7 @@ with sync_playwright() as pw:
                 page.screenshot(path=str(a.evidence/'mission-complete.png'));break
             if d['menu']:
                 keys([])
-                if d['menu']=='continue_offer':button('ArcadeContinue',expect_menu='continue_offer')
-                elif d['menu']=='continue_pick':button('ArcadeConfirmHero',expect_menu='continue_pick');retries+=1
+                if d['menu']=='continue_offer':button('ArcadeConfirmHero',expect_menu='continue_offer');retries+=1
                 elif d['menu']=='dead':raise AssertionError(('Continue expired during the route playthrough',d))
                 elif d['menu'] in ['fork_one','fork_two']:
                     raise AssertionError(('Gameplay must not open a text route-choice menu',d))

@@ -17,6 +17,10 @@ const NEW_ENEMIES := {
 }
 const SCENES := {"water":["moss_water","deep_channel","sunken_station"],"terrace":["hanging_gardens","wind_terraces","glass_greenhouse"],"roots":["root_corridor","crystal_hollow","drill_chamber"]}
 const OBJECTS := ["planks","gate","lamp","relay","bridge","current","updraft","rock","surprise","cage","turret","panel"]
+const TURRET_CYCLE := 3.
+const TURRET_WARNING := .8
+const TURRET_SAFE_RANGE := 140.
+const TURRET_RANGE := 500.
 
 ## Handcrafted 8-encounter arcs per leaf route (0.31.0).
 ## Each beat pairs a clear cue -> player decision -> counterplay -> reward,
@@ -241,24 +245,39 @@ static func hit_object(w,p: Vector2,damage: int,from: Vector2=Vector2.INF) -> bo
 		return true
 	return false
 
+static func turret_warning(o: Dictionary) -> bool:
+	return fposmod(float(o.get("clock",0.)),TURRET_CYCLE)>=TURRET_CYCLE-TURRET_WARNING
+
+static func turret_muzzle(o: Dictionary) -> Vector2:
+	# Barrel opening in the cannon's resting atlas cel, relative to its base.
+	return Vector2(float(o.x)+float(o.get("facing",1))*39.,float(o.y)-60.)
+
 static func step(w,dt: float) -> void:
+	var active: bool=w.state=="playing"
 	for key in w.buffs:w.buffs[key]=maxf(0.,float(w.buffs[key])-dt)
 	w.mount.hurt=maxf(0.,float(w.mount.get("hurt",0.))-dt)
 	for o in w.objects:
 		if bool(o.active):o.changed=float(o.get("changed",9.))+dt
-		if o.kind=="gate" and not bool(o.active) and w.player.y>float(o.y)-80. and w.player.x>float(o.x)-40. and w.player.x<float(o.x)+45.:w.player.x=float(o.x)-40.
-		if o.kind=="turret" and not bool(o.active) and absf(w.player.x-float(o.x))<500.:
-			o.clock=float(o.get("clock",0.))+dt
-			if fmod(float(o.clock),3.)<dt:
-				var origin:=Vector2(float(o.x),float(o.y)-45.);var velocity: Vector2=(w.player+Vector2(0,-38.)-origin).normalized()*200.
-				w.bullets.append({"p":origin,"v":velocity,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
-		if o.kind in ["current","updraft"] and absf(w.player.x-float(o.x))<110.:
+		if active and o.kind=="gate" and not bool(o.active) and w.player.y>float(o.y)-80. and w.player.x>float(o.x)-40. and w.player.x<float(o.x)+45.:w.player.x=float(o.x)-40.
+		if o.kind=="turret" and not bool(o.active):
+			var dx: float=w.player.x-float(o.x)
+			if absf(dx)<TURRET_SAFE_RANGE or absf(dx)>=TURRET_RANGE:
+				o.clock=0.
+			else:
+				o.facing=-1 if dx<0. else 1
+				var clock:=fposmod(float(o.get("clock",0.)),TURRET_CYCLE)+dt
+				o.clock=fposmod(clock,TURRET_CYCLE)
+				if clock>=TURRET_CYCLE:
+					var origin:=turret_muzzle(o)
+					w.bullets.append({"p":origin,"v":Vector2(float(o.facing)*200.,0.),"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
+					w.pending_events.append("enemy_shot")
+		if active and o.kind in ["current","updraft"] and absf(w.player.x-float(o.x))<110.:
 			if o.kind=="current" and w.grounded():w.player.x+=32.*dt
 			elif o.kind=="updraft" and not w.grounded():w.velocity.y-=1000.*dt
 	if not bool(w.mount.available):w.mount.wreck_age=float(w.mount.get("wreck_age",0.))+dt
 	for room in w.rooms:
 		if w.discovered.has(str(room.id)):room.opened=true
-		if not bool(room.opened) and absf(w.player.x-float(room.x))<100. and w.player.y < -90.:
+		if active and not bool(room.opened) and absf(w.player.x-float(room.x))<100. and w.player.y < -90.:
 			w.discovered[str(room.id)]=true;room.opened=true;w.award(str(room.id),250);w.notice="arc_secret";w.notice_time=2.;w.pending_events.append("secret")
 	for h in w.hazards:
 		h.clock=float(h.clock)+dt;h.phase=fmod(float(h.clock),4.8);h.warn=float(h.phase)>2.6 and float(h.phase)<3.5
@@ -268,7 +287,7 @@ static func step(w,dt: float) -> void:
 			if not CampaignGround.has_floor(surface):continue
 			if h.kind=="crystal":
 				for direction in [-1.,1.]:w.bullets.append({"p":Vector2(float(h.x),surface-115.),"v":Vector2(direction*220.,0.),"owner":"enemy","age":0.,"kind":"crystal","damage":1,"pierce":0,"hit":[]})
-			if absf(w.player.x-float(h.x))<50.:
+			if active and absf(w.player.x-float(h.x))<50.:
 				var above: float=surface-w.player.y
 				if h.kind=="gust" and above>40.:w.player.x-=70.;w.velocity.y=-180.
 				elif h.kind=="sluice" and above<60.:w.player.x-=60.;w.velocity.y=-200.
@@ -276,7 +295,7 @@ static func step(w,dt: float) -> void:
 					if not (h.kind=="electric" and bool(w.mount.ridden) and float(w.mount.get("dive",0.))>0.):w.damage_player("hazard")
 	if not w.hazards.is_empty():w.hazards=w.hazards.filter(func(h):return not bool(h.get("once",false)) or float(h.clock)<4.2)
 	for z in w.zones:
-		if w.player.x<float(z.x) or w.player.x>float(z.x)+float(z.width):continue
+		if not active or w.player.x<float(z.x) or w.player.x>float(z.x)+float(z.width):continue
 		if z.kind=="current" and w.grounded() and not bool(w.mount.ridden):w.player.x+=36.*dt
 		if z.kind=="updraft" and not w.grounded():w.velocity.y-=1100.*dt
 	if float(w.buffs.get("magnet",0.))>0.:

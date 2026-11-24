@@ -5,7 +5,7 @@ const ATTEMPTS := 3
 const OFFER_SECONDS := 10.
 const ENTRY_SECONDS := .62
 const ENTRY_PROTECTION := 1.25
-const TRANSITIONS := ["dying","respawn_pending","respawn","continue_offer","continue_pick","dead"]
+const TRANSITIONS := ["dying","respawn_pending","respawn","continue_offer","dead"]
 
 static func reset(w) -> void:
 	w.attempts_remaining=ATTEMPTS
@@ -57,33 +57,19 @@ static func finish_death(w) -> void:
 		w.state="respawn_pending"
 	else:
 		w.continue_remaining=OFFER_SECONDS
+		w.continue_hero=w.character
 		w.state="continue_offer"
 	w.pending_events.append("life_changed")
 
 static func tick_offer(w,dt: float) -> void:
 	if w.state!="continue_offer":return
-	# Zero is visible for one frame and cannot be confirmed.
+	w.continue_remaining=maxf(0.,w.continue_remaining-maxf(0.,dt))
 	if w.continue_remaining<=0.:
 		w.state="dead"
 		w.pending_events.append("life_changed")
-	else:
-		w.continue_remaining=maxf(0.,w.continue_remaining-maxf(0.,dt))
-
-static func open_picker(w) -> bool:
-	if w.state!="continue_offer" or w.continue_remaining<=0.:return false
-	w.continue_hero=w.character
-	w.state="continue_pick"
-	w.pending_events.append("life_changed")
-	return true
-
-static func cancel_picker(w) -> bool:
-	if w.state!="continue_pick":return false
-	w.state="continue_offer"
-	w.pending_events.append("life_changed")
-	return true
 
 static func confirm(w,hero: String) -> bool:
-	if w.state!="continue_pick" or hero not in w.HEROES:return false
+	if w.state!="continue_offer" or w.continue_remaining<=0. or hero not in w.HEROES:return false
 	if w.character!=hero:MissionHeroAbilities.reset(w)
 	w.character=hero
 	w.continue_hero=hero

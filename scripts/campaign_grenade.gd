@@ -57,7 +57,7 @@ static func hand_offset(w) -> Vector2:
  return (offset+PALM_TO_CENTER)*Vector2(facing,1.)
 
 static func step(w,dt: float) -> void:
- if dt<=0. or w.state!='playing':return
+ if dt<=0. or w.state not in ['playing','continue_offer']:return
  # Existing bombs get this entire tick; a newly released one gets only the
  # portion after release. A coarse update cannot advance its fuse too early.
  for bomb in w.bombs.duplicate():_advance_bomb(w,bomb,dt)

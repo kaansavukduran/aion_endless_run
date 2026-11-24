@@ -129,7 +129,7 @@ func run() -> void:
 	check(game.ui.find_child("OpeningGuide",true,false)!=null,"Fresh install exposes the guide before the six portraits")
 	check(game.ui.find_child("StartRun",true,false)==null,"Arcade entrance exposes no retired game mode")
 	click(start);await settle()
-	check(game.page=="characters","Guide skip opens character selection first")
+	check(game.page=="characters","The guide action opens character selection first")
 	check(game.menu_layer.find_children("Select_*","Button",true,false).size()==6,"All six portraits are visible at once")
 	for hero in game.FRIENDS:
 		var choice: Button=game.menu_layer.find_child("Select_"+hero,true,false)

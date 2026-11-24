@@ -74,7 +74,7 @@ static func body_spec(w) -> Dictionary:
 	var action: String="idle";var frame: int=posmod(int(w.time*5.),6)
 	var face: int=MissionHeroAbilities.body_facing(w)
 	var confined: bool=CampaignRoutes.low_ceiling(w)
-	if w.state in ["dying","dead","respawn_pending","continue_offer","continue_pick"]:
+	if w.state in ["dying","dead","respawn_pending","continue_offer"]:
 		action="death";frame=CampaignLives.collapse_frame(w)
 		if not confined and w.state=="dying" and w.death_time<CampaignLives.impact_duration(w.death_cause):
 			action="hurt";frame=clampi(int(w.death_time/CampaignLives.impact_duration(w.death_cause)*4.),0,3)

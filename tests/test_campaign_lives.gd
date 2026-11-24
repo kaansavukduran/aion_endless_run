@@ -49,18 +49,21 @@ func test_lives() -> void:
 	CampaignLives.tick_offer(w,3.4)
 	w=roundtrip(w)
 	check(is_equal_approx(w.continue_remaining,6.6),"Reload keeps unspent time")
-	check(CampaignLives.open_picker(w),"One fresh confirmation enters hero selection")
-	w.continue_hero="frog";w=roundtrip(w);CampaignLives.tick_offer(w,6.)
-	check(w.continue_hero=="frog" and is_equal_approx(w.continue_remaining,6.6) and w.attempts_remaining==0,"Saved picker keeps its hero and freezes the offer")
-	check(CampaignLives.cancel_picker(w) and is_equal_approx(w.continue_remaining,6.6),"Back returns to the same remaining time")
-	CampaignLives.open_picker(w)
+	w.continue_hero="frog"
+	var legacy_picker:=w.snapshot();legacy_picker.phase="continue_pick"
+	check(w.restore(legacy_picker) and w.state=="continue_offer","Previous picker save loads into the live Continue")
+	w=roundtrip(w)
+	var old_clock: float=w.boss.clock
+	var old_position:=w.player
+	clock(w,1.)
+	check(w.continue_hero=="frog" and is_equal_approx(w.continue_remaining,5.6) and w.attempts_remaining==0,"Browsing keeps the hero without stopping the countdown")
+	check(float(w.boss.clock)>old_clock+.9 and w.boss.hp==41 and w.player==old_position and w.hp==0 and w.score==0,"The same boss battle runs behind the selection while the fallen hero cannot act or be hit")
 	check(CampaignLives.confirm(w,"frog") and not CampaignLives.confirm(w,"eren"),"A confirmation spends exactly one Continue and changes hero once")
 	w=roundtrip(w)
 	check(w.character=="frog" and w.continues_used==1 and w.attempts_remaining==3 and w.grenades==5 and w.boss.hp==41,"New credit is durable, with one starter loadout and preserved battle")
 	w.attempts_remaining=0;w.state="continue_offer";w.continue_remaining=.1
 	CampaignLives.tick_offer(w,.12)
-	check(w.continue_remaining==0. and not CampaignLives.open_picker(w),"Zero is shown without leaving an accept window")
-	CampaignLives.tick_offer(w,.01)
+	check(w.continue_remaining==0. and not CampaignLives.confirm(w,"aion"),"An expired Continue cannot be purchased")
 	check(w.state=="dead" and roundtrip(w).state=="dead","Expired run cannot respawn through a saved checkpoint")
 
 func test_legacy() -> void:
@@ -80,7 +83,7 @@ func test_arena_reentry() -> void:
 			var previous_camera:=maxf(0.,w.player.x-width*.34)
 			w.invulnerable=0.;w.damage_player("shot");clock(w,.9)
 			if w.state=="continue_offer":
-				CampaignLives.open_picker(w);CampaignLives.confirm(w,"eren")
+				CampaignLives.confirm(w,"eren")
 			CampaignLives.start_entry(w,Rect2(previous_camera,-420.,width,500.))
 			check(is_equal_approx(w.entry_from.x,w.recovery_view.position.x+36.),"Arena entry still starts left of its actual camera")
 			clock(w,.65)
@@ -97,6 +100,26 @@ func test_arena_drones() -> void:
 	w.damage_enemy(drone,100)
 	w.boss.attack=11;w.boss.windup=.01;w.step_boss(.02)
 	check(w.enemies.filter(func(e):return e.kind=="drone" and not e.defeated).size()==2,"The next wave replaces only the defeated drone")
+
+func test_turret() -> void:
+	var w:=AionCampaignWorld.new();w.begin("aion");w.load_section("shore")
+	w.enemies.clear();w.pickups.clear();w.hazards.clear();w.objects.clear();w.platforms.clear()
+	var x:=400.
+	var cannon: Dictionary={"kind":"turret","id":"test-cannon","x":x,"y":w.floor_at(x),"active":false,"clock":2.99}
+	w.objects.append(cannon)
+	w.player=Vector2(x,w.floor_at(x));w.invulnerable=0.
+	clock(w,3.5)
+	check(w.hp==1 and w.bullets.is_empty() and not CampaignContent.turret_warning(cannon),"Standing on an armed cannon cancels the shot and cannot spend a life")
+	w.player=Vector2(x+235.,w.floor_at(x+235.))
+	clock(w,2.5)
+	check(CampaignContent.turret_warning(cannon) and w.bullets.is_empty(),"The rearmed cannon shows its windup before shooting")
+	clock(w,.52)
+	check(w.bullets.size()==1 and Vector2(w.bullets[0].p).distance_to(CampaignContent.turret_muzzle(cannon))<12. and w.hp==1,"The round leaves the visible muzzle with travel time")
+	clock(w,1.)
+	check(w.hp==0 and w.death_cause=="shot","The visible cannon round still hits a standing player in its lane")
+	w.state="playing";w.hp=1;w.invulnerable=0.;w.bullets.clear();cannon.clock=2.99
+	w.player=Vector2(x-235.,w.floor_at(x-235.));w.step(.02)
+	check(int(cannon.facing)==-1 and w.bullets.size()==1 and float(w.bullets[0].v.x)<0. and float(w.bullets[0].p.x)<x-38.,"Left-facing cannon fires from its mirrored muzzle")
 
 func test_vehicles() -> void:
 	for type in CampaignVehicles.TYPES:
@@ -143,6 +166,7 @@ func run() -> void:
 	test_legacy()
 	test_arena_reentry()
 	test_arena_drones()
+	test_turret()
 	test_vehicles()
 	test_clearance_and_support()
 	print("RESULT: %d arcade life and vehicle checks, %d failures"%[checks,failures])

@@ -13,6 +13,12 @@ AIONIA v1.7 bu turda canlı standart belgesinden okundu. Drive’daki 21 Kasım 
 - Gerçek yerel Web paketi 0.55.0 `6a6055e881b8dd9f`. Kök Geçidi’nde Armadillo 36.625, Su Kanalı’nda Kurbağa 32.275 skorla üç evreyi geçip sonuçlarını kaydetti. İki koşu da gerçek menü ve klavye/fare girdileriyle başladı. Su Kanalı’nın sonu aynı tarayıcı oturumunda klavye/fare kumandası devralınarak doğrulandı. Eren iki fiziksel üst ayrımdan Bahçe Terasları’nı ve Bakır Röle’yi geçti, üç boss evresini bitirdi ve 35.875 skoru kaydetti. Aynı tarayıcı oturumundaki ayrı kumanda kaydı üç evreyi gösterir. İlk sürücü arenada durdurulduğu için kendi evre örnekleri kontrolü başarısız kaldı. Kukla karakter veya durum enjeksiyonu kullanılmadı.
 - Linux Firefox aynı yerel paketi açtı, klavyeyle ilerledi ve dikey geçişte kahramanı ve koşuyu korudu. Fiziksel Poco/iPhone veya Xbox kolu ve oyuncu kabulü bekliyor.
 
+### 0.57.1 · Canlı Continue paneli
+
+- Taban `212afe9`. Öndeki kontrol rehberi Türkçe ve İngilizce olarak kahraman seçimini adlandırır.
+- Son can sonrası seçim sol üstte aynı on saniyelik sayaçla açılır. Düşmanlar, boss, mermiler ve çevre hareketleri devam eder. Geri dönüş onayla aynı karşılaşmada gerçekleşir. Eski seçim kayıtlarındaki kahraman ve kalan süre korunur. Pencere odak dışındayken sayaç durur.
+- Sabit topun atışı 140 birimlik yakın alanda kurulur kurulmaz iptal olur. Dışarıda namlu animasyonu ve yönüne göre atış yapılır. Gövde temasından hasar alanı oluşmaz.
+
 ### Mission 1 · Kahraman yetenekleri
 
 Kurbağa zıplama tuşunu tutup bırakarak Ayça ve Eren gibi yükseğe sıçrar. Dilin ağız bağlantısı açık çene karelerine hizalı. Yutma aralığı 5 saniye ve halka kalan süreyi gösterir. Armadillo ayaktayken özel yetenekle yuvarlanır ve iki yeni basışla atılışı zincirleyebilir. Üç atılışın ardından dolum 3 saniye sürer. Havada gövde karesini zıplama evresi belirler. Ayça ve Eren deparın ilk 3 saniyesinde temasla düşmanları yener. Ateş söndükten sonra temas can kaybettirir. Yeni ateş için deparı bırakıp en az 3 saniyelik dolumu beklemek gerekir. Aion üç zıplama hakkına, Kutsanmış bir yedek koyuna sahip. Eski Mission 1 kayıtları bu sınırlara uyarlanır.

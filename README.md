@@ -1,5 +1,11 @@
 # Aion Endless Run
 
+## 0.57.1 · Göreve dönüş
+
+İlk kontrol rehberindeki **Kahraman seç** düğmesi altı portreyi açar. Son can kaybedildiğinde sol üstte 10 saniyelik kahraman seçimi görünür. Düşmanlar ve atışlar sahnede hareket etmeye devam eder. Sol ve sağ oklarla, kumandanın yön tuşlarıyla veya ekrandaki oklarla kahraman değiştirilir. **Mücadeleye dön** seçilen kahramanı aynı karşılaşmaya getirir.
+
+Sabit topların dibinde durmak veya gövdelerinden geçmek güvenlidir. Uzaklaşınca önce namlu ışığı görünür, ardından top mermisi çıkar.
+
 ## 0.57.0 · Mission 1
 
 Fragaria yüklemesinden sonra atlanabilir kontrol rehberi ve aynı ekrandaki altı animasyonlu portre gelir. Karakteri seçip **Başla** ile göreve girilir. Oyunun girişinde Mission 1 yer alır.

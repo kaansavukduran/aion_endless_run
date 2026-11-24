@@ -26,7 +26,9 @@ static func write(w,data: Dictionary) -> void:
 	data.pending_hero=w.continue_hero
 	if w.state in ["dying","respawn"]:
 		data.phase="respawn_pending" if w.attempts_remaining>0 else "continue_offer"
-		if w.state=="dying" and w.attempts_remaining==0:data.offer_remaining=CampaignLives.OFFER_SECONDS
+		if w.state=="dying" and w.attempts_remaining==0:
+			data.offer_remaining=CampaignLives.OFFER_SECONDS
+			data.pending_hero=w.character
 	if w.state in ["briefing","paused","story"]:data.phase="playing"
 	if w.completed:data.phase="complete"
 	var bytes:=var_to_bytes(encounter)
@@ -78,8 +80,8 @@ static func apply(w,data: Dictionary,encounter: Dictionary) -> void:
 	w.continues_used=int(data.continues)
 	w.continue_remaining=float(data.offer_remaining)
 	w.continue_hero=str(data.pending_hero)
-	w.state=str(data.phase)
-	if w.state in ["continue_offer","continue_pick","respawn_pending","dead"]:w.hp=0
+	w.state="continue_offer" if data.phase=="continue_pick" else str(data.phase)
+	if w.state in ["continue_offer","respawn_pending","dead"]:w.hp=0
 	if w.state=="continue_offer" and w.continue_remaining<=0.:w.state="dead"
 	w.stop_inputs()
 	w.aim_direction=encounter.aim_direction

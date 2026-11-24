@@ -52,7 +52,7 @@ static func body_spec(w) -> Dictionary:
   else:action='tunnel_idle'
  elif action=='idle_fire' and w.hurt_time>0. and w.shot_flash<=0. and w.rescue_time<=0. and w.melee_time<=0. and M1HeroActionArt.supports(w.character,'hurt'):
   action='hurt';frame=clampi(int((.3-w.hurt_time)/.3*6.),0,5)
- if w.state in ['dying','dead','respawn_pending','continue_offer','continue_pick']:
+ if w.state in ['dying','dead','respawn_pending','continue_offer']:
   if CampaignRoutes.low_ceiling(w):action='tunnel_idle';frame=5
   elif w.state=='dying' and w.death_time<CampaignLives.impact_duration(w.death_cause) and M1HeroActionArt.supports(w.character,'hurt'):
    action='hurt';frame=clampi(int(w.death_time/CampaignLives.impact_duration(w.death_cause)*4.),0,3)
