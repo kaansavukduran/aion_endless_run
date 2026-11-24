@@ -321,11 +321,11 @@ func build_menu() -> void:
 				else:build_ui(),true).name="CampaignGo"
 			action(old("story_skip"),finish_help)
 		"paused":
-			action(old("resume"),close_menu,true)
+			action(old("resume"),close_menu,true).name="CampaignResume"
 			action(t("controls"),func():help_return="paused";menu_kind="help";help_step=0;build_ui())
 			action(t("settings"),func():menu_previous="paused";menu_kind="settings";settings_page=0;build_ui())
 			action(t("restart_mission"),begin_new).name="CampaignRestart"
-			action(t("back"),return_main)
+			action(t("back"),return_main).name="CampaignPauseMain"
 		"continue_offer":
 			offer_label=label("",52);offer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(offer_label)
 			offer_hint=paragraph("",16);column.add_child(offer_hint)

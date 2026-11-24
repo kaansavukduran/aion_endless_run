@@ -79,7 +79,7 @@ def pause():
  return arcade_ui(lambda state:state['menu']=='paused')
 def main():
  layout=pause()
- button=next(b for b in layout['buttons'] if b['text'] in ('Ana menü','Main menu','Geri','Back'))
+ button=next(b for b in layout['buttons'] if b['name']=='CampaignPauseMain')
  tap(button['point'])
  latest('AION_UI ',lambda state:state['page']=='main' and layout_matches_display(state,display_bounds()))
 
@@ -135,9 +135,7 @@ try:
 finally:
  adb('shell','wm','size','reset')
  arcade_ui(lambda state:state['menu']=='paused' and state['orientation']==old['orientation'])
-resume=[b for b in arcade_ui()['buttons'] if b['text'] in ('Resume','Sürdür','Devam et','Continue')]
-assert resume,'Missing paused Resume action'
-tap(resume[0]['point'])
+arcade_button('CampaignResume')
 arcade_state(lambda state:state['state']=='playing')
 # Inject two ordinary touchscreen pointers. No game handlers/state are invoked.
 sdk=Path(os.environ.get('ANDROID_HOME') or os.environ['ANDROID_SDK_ROOT'])
