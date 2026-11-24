@@ -70,6 +70,9 @@ var score := 0
 var kills := 0
 var shots := 0
 var rescued: Array[String] = []
+var rescue_life_start := 0
+const CLEAR_BONUS := 3000
+const KEEPER_BONUS := 300
 var greeted: Dictionary = {}
 var gift_drops: Dictionary = {} # Unclaimed physical gifts, keyed by stable NPC ID.
 var rescue_roles: Dictionary = {}
@@ -158,10 +161,10 @@ func floor_at(x: float,y: float=1e9) -> float:
 	for pit in pits:
 		if x > pit.x and x < pit.y:return CampaignGround.VOID_HEIGHT
 	return CampaignGround.height(section,x)
-func crossing_floor(x: float,old_y: float,new_y: float,falling_speed: float) -> float:
+func crossing_floor(x: float,old_y: float,new_y: float,falling_speed: float,hero_drop: bool=true) -> float:
 	var support:=floor_at(x,old_y)
 	for platform in platforms:
-		if drop_through_time>0. or disabled_platforms.has(platform.position.x):continue
+		if (hero_drop and drop_through_time>0.) or disabled_platforms.has(platform.position.x):continue
 		if x>=platform.position.x-9. and x<=platform.end.x+9. and old_y<=platform.position.y+.01 and new_y>=platform.position.y and falling_speed>=0.:support=minf(support,platform.position.y)
 	return support
 func grounded() -> bool:
@@ -236,7 +239,7 @@ func begin(hero: String) -> void:
 	hp = max_hp; grenades = 5; score = 0; kills = 0; shots = 0
 	time=0.;walk_distance=0.;victory_time=0.;assists.clear();assist_attacks=0
 	var run_rng:=RandomNumberGenerator.new();run_rng.randomize();run_seed=run_rng.randi_range(1,2000000000)
-	rescued.clear(); greeted.clear(); gift_drops.clear(); rescue_roles.clear(); awarded.clear(); taken.clear(); route.clear()
+	rescued.clear(); rescue_life_start=0; greeted.clear(); gift_drops.clear(); rescue_roles.clear(); awarded.clear(); taken.clear(); route.clear()
 	losses=0;weapons_used.clear();vehicles_used.clear()
 	discovered.clear();activated.clear();buffs.clear()
 	completed = false; flock = 1; weapon = "pistol"; ammunition = 0
@@ -256,6 +259,7 @@ func spawn_enemy(kind: String, x: float, y: float, index: int, mini: bool = fals
 		for pit in pits:
 			if x>pit.x-30. and x<pit.y+30.:x=pit.x-55.
 	var health:=12 if mini else (8 if kind in CampaignContent.HEAVIES else 1)
+	if kind==CampaignHive.KIND:health=CampaignHive.HP
 	enemies.append({"id":section+":enemy:"+str(index), "kind":kind, "x":x, "y":y, "home":Vector2(x,y), "hp":health, "max_hp":health, "mini":mini,"heavy":kind in CampaignContent.HEAVIES,"armour":2 if kind in CampaignContent.HEAVIES else 0, "age":0., "wait":1.1+float(index%4)*.23, "windup":0., "attacks":0, "facing":-1, "active":false, "defeated":false})
 
 func load_section(id: String) -> void:
@@ -508,7 +512,7 @@ func damage_boss(amount: int) -> void:
 		for e in enemies:
 			if not bool(e.defeated): e.defeated = true; e.dead_age = 0.
 		blasts.append({"p":Vector2(float(boss.x),float(boss.y)-80.), "age":0., "radius":130., "color":"ffcf8c"})
-		award("mission:1",3000+rescued.size()*300); stop_inputs(); pending_events.append("complete")
+		award("mission:1",CLEAR_BONUS+life_rescues()*KEEPER_BONUS); stop_inputs(); pending_events.append("complete")
 	else:
 		var phase:=1+int(int(boss.hp)<60)+int(int(boss.hp)<30)
 		if phase>int(boss.phase):
@@ -548,6 +552,7 @@ func rescue(npc: Dictionary) -> void:
 	if bool(npc.freed): return
 	npc.freed = true
 	npc.free_age=0.;npc.phase="free";npc.thank_age=0.;npc.facing=-1 if player.x<float(npc.x) else 1
+	npc.clip=CampaignRescue.clip_name(npc)
 	var id: String = str(npc.id)
 	if not rescued.has(id):
 		rescued.append(id); rescue_roles[id]=str(npc.get("role","keeper")); award(id,300)
@@ -612,6 +617,9 @@ func step_enemies(dt: float) -> void:
 		e.flash=maxf(0.,float(e.get("flash",0.))-dt)
 		if CampaignGroundShooters.step(self,e,dt):continue
 		e.facing = -1 if float(e.x)>player.x else 1
+		if e.kind==CampaignHive.KIND:
+			CampaignHive.step(self,e,dt)
+			continue
 		if CampaignEnemies.step(self,e,dt):continue
 		var dx: float = player.x-float(e.x)
 		var flying: bool = e.kind in ["crow","moth","drone","wisp"]
@@ -701,6 +709,10 @@ func step_boss(dt: float) -> void:
 func step_bullets(dt: float) -> void:
 	for b in bullets:
 		if float(b.age)>=float(b.get("life",3.)):continue
+		if b.kind=="honeycomb":
+			CampaignHive.step_comb(self,b,dt)
+			if state!="playing":break
+			continue
 		if CampaignWeapons.step(self,b,dt):continue
 		var previous: Vector2=b.get("start",b.p)
 		b.erase("start")
@@ -725,6 +737,7 @@ func step_bullets(dt: float) -> void:
 			if bool(e.defeated) or float(e.x) < seg_min_x or float(e.x) > seg_max_x or str(e.id) in b.hit: continue
 			if CampaignEnemies.hidden(e):continue
 			var radius: float = 58. if bool(e.mini) or bool(e.get("heavy",false)) else float(CampaignContent.NEW_ENEMIES.get(str(e.kind),{}).get("radius",34.))
+			if e.kind==CampaignHive.KIND:radius=46.
 			var target:=Vector2(float(e.x),float(e.y)-30.)
 			if Geometry2D.get_closest_point_to_segment(target,previous,b.p).distance_to(target)<radius+float(b.get("hit_radius",0.)):
 				if bool(e.mini) and float(e.windup)<=.3 and float(e.get("flash",0.))<=0. and (float(e.get("recover",0.))<=0. or CampaignEnemies.active_time(e)>0.) and int(e.hp)>5:b.age=99.;break
@@ -898,8 +911,11 @@ func step(dt: float) -> void:
 			var next: String = str(STAGES[section].next)
 			travel_target = next; state = "travel"; stop_inputs()
 
+func life_rescues() -> int:
+	return maxi(0,rescued.size()-rescue_life_start)
+
 func snapshot(include_encounter: bool=true) -> Dictionary:
-	var data := {"schema":4,"rally":rally,"retry_count":retry_count,"best_chain":best_chain,"rescue_roles":rescue_roles,"greeted":greeted,"gift_drops":gift_drops,"losses":losses,"weapons_used":weapons_used,"vehicles_used":vehicles_used,"run_seed":run_seed,"character":character,"checkpoint":checkpoint,"checkpoint_ready":checkpoint_ready,"score":score,"kills":kills,"rescued":rescued,"awarded":awarded,"taken":taken,"route":route,"completed":completed,"time":time,"flock":flock,"discovered":discovered,"activated":activated,"attempts":attempts_remaining,"continues":continues_used}.duplicate(true)
+	var data := {"schema":4,"rally":rally,"retry_count":retry_count,"best_chain":best_chain,"rescue_roles":rescue_roles,"greeted":greeted,"gift_drops":gift_drops,"losses":losses,"weapons_used":weapons_used,"vehicles_used":vehicles_used,"run_seed":run_seed,"character":character,"checkpoint":checkpoint,"checkpoint_ready":checkpoint_ready,"score":score,"kills":kills,"rescued":rescued,"rescue_life_start":rescue_life_start,"awarded":awarded,"taken":taken,"route":route,"completed":completed,"time":time,"flock":flock,"discovered":discovered,"activated":activated,"attempts":attempts_remaining,"continues":continues_used}.duplicate(true)
 	if include_encounter:CampaignEncounterSave.write(self,data)
 	return data
 
@@ -922,6 +938,7 @@ func restore(data: Dictionary) -> bool:
 	for key in ["score","kills","time","flock","losses"]:
 		var number=data.get(key,0)
 		if typeof(number) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(number)) or absf(float(number))>1000000000.:return false
+	if not CampaignEncounterSave.valid_number(data.get("rescue_life_start",0),0,Array(data.get("rescued",[])).size()):return false
 	if data.has("completed") and not data.completed is bool:return false
 	if not CampaignRecovery.valid(data.get("rally",{}),str(data.checkpoint)):return false
 	for key in ["retry_count","best_chain"]:
@@ -936,7 +953,7 @@ func restore(data: Dictionary) -> bool:
 	losses=maxi(0,int(data.get("losses",0)));weapons_used.assign(Array(data.get("weapons_used",[])));vehicles_used.assign(Array(data.get("vehicles_used",[])))
 	greeted=Dictionary(data.get("greeted",{}));gift_drops=Dictionary(data.get("gift_drops",{}));rescue_roles=Dictionary(data.get("rescue_roles",{}))
 	run_seed=clampi(int(data.get("run_seed",7719)),1,2000000000)
-	rescued.assign(Array(data.get("rescued",[]))); awarded = Dictionary(data.get("awarded",{})); taken = Dictionary(data.get("taken",{}))
+	rescued.assign(Array(data.get("rescued",[]))); rescue_life_start=int(data.get("rescue_life_start",rescued.size() if losses>0 and not bool(data.get("completed",false)) else 0)); awarded = Dictionary(data.get("awarded",{})); taken = Dictionary(data.get("taken",{}))
 	discovered=Dictionary(data.get("discovered",{}));activated=Dictionary(data.get("activated",{}))
 	if int(data.schema)==1:
 		for id in rescued:awarded[str(id)+":gift"]=true # Old rescues must not manufacture new supplies.

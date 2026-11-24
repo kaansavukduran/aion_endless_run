@@ -16,10 +16,16 @@ func run() -> void:
    var vy: float=w.velocity.y;w.jump_release();w.jump_press();check(w.velocity.y==vy,'Airborne mounted jump cannot borrow Aion double jump')
    for i in 100:w.step(1./60.)
    check(w.grounded() and absf(w.player.y+42.)<.01,'Vehicle returns its actual feet to ground '+type)
-   w.enemies.clear();w.spawn_enemy('gnome',400.+facing*210.,0.,0);w.attack_press()
-   check(w.bullets.size()==3,'Each vehicle fires three source-muzzle projectiles')
+   w.enemies.clear();w.spawn_enemy('gnome',400.+facing*210.,0.,0)
+   if type=='skimmer':
+    # The higher visible skimmer barrel requires downward aim for a low gnome.
+    var target:=Vector2(float(w.enemies[0].x),-29.)
+    var from:=w.player+w.armed_muzzle()
+    w.aim_direction=(target-from).normalized()
+   w.attack_press()
+   check(w.bullets.size()==1,'Each vehicle fires one source-muzzle projectile')
    for i in 35:w.step_bullets(1./120.)
-   check(w.enemies[0].defeated,'Actual level volley reaches small ground enemy '+type+'/'+str(facing))
+   check(w.enemies[0].defeated,'A single aimed shot reaches a small ground enemy '+type+'/'+str(facing))
  var w:=fresh();w.npcs=[{'id':'rope-test','x':620.,'y':0.,'freed':false,'secret':'','role':'keeper'}];w.weapon='trap';w.ammunition=4;w.attack_press()
  for i in 600:
   w.step_bullets(1./120.)

@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.55.3"
+const GAME_VERSION = "0.56.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -474,6 +474,7 @@ func wrap_label(value: String, size: int = 15, color: String = "a6b8d1") -> Labe
 func show_page(value: String) -> void:
 	if pixel_ui.launch_pending:return
 	if value!=page:menu_pages.reset(value)
+	if value!="characters":pixel_ui.choose_for_campaign=false
 	if value == "characters" and world.state != "ready": return
 	language_picker_open = false
 	page = value
@@ -1055,10 +1056,17 @@ func _input(event: InputEvent) -> void:
 		elif event.keycode == KEY_SHIFT and page == "":
 			press_boost("shift")
 			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_Y and not language_picker_open:
+			if page=="main":
+				pixel_ui.open_campaign_picker()
+				get_viewport().set_input_as_handled()
+			elif page=="characters" and pixel_ui.choose_for_campaign:
+				pixel_ui.confirm_hero()
+				get_viewport().set_input_as_handled()
 		elif event.keycode in [KEY_SPACE, KEY_ENTER] and page == "main" and not language_picker_open:
 			var focused := get_viewport().gui_get_focus_owner()
 			if focused == null:
-				pixel_ui.request_launch(start_campaign)
+				pixel_ui.open_campaign_picker()
 				get_viewport().set_input_as_handled()
 			elif str(focused.name)=="StartRun" and not focused.disabled:
 				pixel_ui.request_launch(start_run)

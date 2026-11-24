@@ -103,7 +103,7 @@ func run() -> void:
 	w.player=Vector2(float(keeper_gifts[0].x),float(keeper_gifts[0].y)+25.);tick(w,.3)
 	check(w.flock==2 and w.awarded.has(str(keeper.id)+":gift"),"Actual gift contact grants the extra sheep once")
 	score=w.score
-	w.invulnerable=0.;w.damage_player();tick(w,1.2);CampaignLives.start_entry(w,Rect2(0,-420,1152,500));tick(w,.65);w.rescue(w.npcs[0]);check(w.rescued.size()==1 and w.score==score,"Reserve entry does not farm rescue rewards")
+	w.invulnerable=0.;w.damage_player();tick(w,1.2);CampaignLives.start_entry(w,Rect2(0,-420,1152,500));tick(w,.65);w.rescue(w.npcs[0]);check(w.rescued.size()==1 and w.life_rescues()==0 and w.score==0,"Reserve entry resets score and rescue tally without farming rescue rewards")
 	w.load_section("quay");w.player.x=360.;check(w.interact() and w.mount.ridden,"Skimmer begins boarding")
 	tick(w,.46);check(w.mount_transition=="" and w.mount.ridden,"Skimmer boarding finishes before player controls resume")
 	w.jump_press();tick(w,.1);check(w.player.y< -42.,"Mounted jump really leaves the saddle floor")

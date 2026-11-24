@@ -24,12 +24,14 @@ static func fire(w) -> void:
 	w.shot_weapon=w.weapon
 	w.shot_flash=.18 # Use the actual firing-pose muzzle, including the first shot.
 	var spec: Dictionary=SPECS.get(w.weapon,SPECS.pistol)
-	if riding:spec={"interval":.18,"ammo":0,"speed":780.,"damage":1,"life":1.3,"pierce":0,"colour":"b4eee6"}
-	if riding and CampaignVehicles.kind(w)=="drill":spec={"interval":.28,"ammo":0,"speed":420.,"damage":2,"life":.4,"pierce":5,"colour":"d2b4ec"}
-	elif riding and CampaignVehicles.kind(w)=="shell":spec={"interval":.25,"ammo":0,"speed":600.,"damage":1,"life":1.5,"pierce":1,"colour":"9ce8e5"}
+	if riding:
+		spec={"interval":.13,"speed":920.,"damage":1,"life":1.35,"pierce":0,"colour":"b4eee6"}
+		match CampaignVehicles.kind(w):
+			"drill":spec.merge({"interval":.16,"speed":790.,"pierce":2,"colour":"d2b4ec"},true)
+			"shell":spec.merge({"interval":.15,"pierce":1,"colour":"9ce8e5"},true)
 	var angles: Array=[-.17,0.,.17] if w.weapon=="scatter" else ([-.4,-.2,0.,.2,.4] if w.weapon=="spore" else [0.])
 	if w.weapon=="seeker":angles=[-.15,0.,.15]
-	if riding:angles=[-.2,0.,.2] if CampaignVehicles.kind(w)=="wind" else [0.,-.30,.30]
+	if riding:angles=[0.]
 	var aim: Vector2=Vector2(w.aim_direction)
 	if aim.length_squared()<.01:aim=Vector2(w.facing,0.)
 	aim=aim.normalized()
@@ -49,7 +51,7 @@ static func fire(w) -> void:
 	for angle in angles:
 		var target: String=""
 		if not eligible.is_empty():target=str(eligible[mini(index,eligible.size()-1)].id)
-		var b: Dictionary={"p":origin,"v":aim.rotated(angle)*float(spec.speed),"owner":"hero","age":0.,"kind":"vehicle" if riding else w.weapon,"damage":int(spec.damage)+int(riding)+int(float(w.buffs.get("power",0.))>0.),"pierce":int(spec.pierce),"hit":[],"life":float(spec.life),"colour":str(spec.colour),"target":target,"bounces":0}
+		var b: Dictionary={"p":origin,"v":aim.rotated(angle)*float(spec.speed),"owner":"hero","age":0.,"kind":"vehicle" if riding else w.weapon,"damage":int(spec.damage)+int(float(w.buffs.get("power",0.))>0.),"pierce":int(spec.pierce),"hit":[],"life":float(spec.life),"colour":str(spec.colour),"target":target,"bounces":0}
 		b.start=origin-aim*(maxf(32.,absf(offset.x)) if absf(aim.y)<.15 else 32.)
 		if w.weapon=="trap" and not riding:b.gravity=550.;b.spider=true;b.walking=false;b.facing=w.facing
 		if riding:b.hit_radius=12.

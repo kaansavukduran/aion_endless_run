@@ -24,6 +24,8 @@ func refresh() -> void:
 	font=host.view.font
 	point_size=host.font_size(17)
 	var w: AionCampaignWorld=host.world
+	point_size=maxi(1,point_size)
+	var life_rescued:=w.life_rescues()
 	var active_weapon: String=host.t(CampaignVehicles.kind(w))+" ∞" if bool(w.mount.ridden) else host.t(w.weapon)+(": %d"%w.ammunition if w.weapon!="pistol" else "")
 	if last_health>=0 and w.hp<last_health:damage_flash=.45
 	var dt: float=maxf(0.,w.time-last_clock)
@@ -36,7 +38,7 @@ func refresh() -> void:
 	for key in w.buffs:
 		if float(w.buffs[key])>0.:buff_parts.append(host.t(str(key))+" %ds"%ceili(float(w.buffs[key])))
 	var sig: String="%s|%d|%d|%d|%d|%s|%d|%d|%d|%d|%s|%s|%.0f|%d|%s"%[
-		w.character,w.score,w.attempts_remaining,w.hp,w.grenades,active_weapon,w.rescued.size(),w.flock,
+		w.character,w.score,w.attempts_remaining,w.hp,w.grenades,active_weapon,life_rescued,w.flock,
 		1 if bool(w.mount.ridden) else 0,int(w.mount.hp),
 		",".join(assist_parts),",".join(buff_parts),host.view_w,point_size,host.language]
 	if sig==last_signature and damage_flash<=0. and prev_flash<=0. and not rows.is_empty():
@@ -50,7 +52,7 @@ func refresh() -> void:
 		host.t("grenade")+" %d"%w.grenades]
 	fields.append(host.old("name_"+w.character))
 	fields.append(host.old("score")+" %05d"%w.score)
-	fields.append(host.t("keepers")+" %d"%w.rescued.size())
+	fields.append(host.t("life_rescues")+" %d"%life_rescued)
 	if bool(w.mount.ridden):fields.append(host.t(CampaignVehicles.kind(w))+" %d/%d"%[int(w.mount.hp),CampaignVehicles.MAX_HP])
 	if w.character=="sheep" and w.flock>1:fields.append(host.t("flock_support"))
 	for a in assist_parts:fields.append(a)
@@ -61,6 +63,7 @@ func refresh() -> void:
 	for value in fields:
 		var width: float=font.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,point_size).x+26.
 		if value.begins_with(host.t("weapon")+":"):width+=20.
+		if value.begins_with(host.t("life_rescues")+" "):width+=mini(3,life_rescued)*19.
 		if used+width>available and not rows[-1].is_empty():rows.append([]);used=12.
 		rows[-1].append(value);used+=width
 	strip_height=12.+rows.size()*(font.get_height(point_size)+5.)
@@ -97,6 +100,13 @@ func _draw() -> void:
 					draw_texture_rect(icon.texture,Rect2(Vector2(x-1,y-16)+(Vector2(19,19)-icon_size)*.5,icon_size),false)
 				x+=20.
 				if not bool(w.mount.ridden) and w.weapon!="pistol" and w.ammunition<=5:tint=Color(colors.danger)
+			elif s.begins_with(host.t("life_rescues")+" "):
+				for i in mini(3,w.life_rescues()):
+					var npc: Dictionary=host.view.catalogue.pose("rescue-npcs",7,3)
+					var shape: Vector2=npc.texture.get_size()
+					var face:=Rect2(Vector2(shape.x*.15,0.),shape*Vector2(.72,.61))
+					draw_texture_rect_region(npc.texture,Rect2(x,y-16.,17.,17.),face)
+					x+=19.
 			elif not s.begins_with(grenade_prefix):
 				tint=muted_color
 			draw_string(font,Vector2(x,y),s,HORIZONTAL_ALIGNMENT_LEFT,-1,point_size,tint)

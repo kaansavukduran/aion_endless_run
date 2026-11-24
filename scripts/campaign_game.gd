@@ -92,6 +92,9 @@ var presentation: CampaignPresentation
 var presentation_skip: Button
 var intro_pending := false
 var complete_presented := false
+var result_elapsed:=2.
+var result_score: Label
+var result_tick:=-1
 var help_return := ""
 var detail_page := 0
 var settings_page := 0
@@ -334,14 +337,26 @@ func build_menu() -> void:
 			action(t("restart"),begin_new,true).name="CampaignRestart"
 			action(t("back"),return_main)
 		"complete":
-			column.add_child(paragraph(old("name_"+world.character)+" · "+old("score")+" %05d"%world.score,22))
-			column.add_child(paragraph(t("keepers")+" %d · "%world.rescued.size()+t("elapsed")+" "+elapsed_time(world.time)+" · "+t("continue_count")+" %d"%world.continues_used,18))
+			result_score=paragraph("",28)
+			result_score.name="CampaignResultScore";column.add_child(result_score)
+			update_result_score(0.)
+			var rescues:=world.life_rescues()
+			var rescue_points:=rescues*AionCampaignWorld.KEEPER_BONUS
+			var tally_bonus:=AionCampaignWorld.CLEAR_BONUS+rescue_points
+			if world.awarded.has("mission:1") and world.score>=tally_bonus:
+				column.add_child(paragraph(t("field_points")+" %d · "%(world.score-tally_bonus)+t("clear_bonus")+" %d · "%AionCampaignWorld.CLEAR_BONUS+t("rescue_bonus")+" %d"%rescue_points,16))
+			if world.losses==0 and rescues>=3:column.add_child(paragraph(t("rank_perfect" if rescues>=6 else "rank_great"),21))
+			column.add_child(paragraph(t("life_rescues")+" %d · "%world.life_rescues()+t("elapsed")+" "+elapsed_time(world.time)+" · "+t("continue_count")+" %d"%world.continues_used,18))
 			if not world.route.is_empty() and options.text_scale<=1.5:
 				column.add_child(paragraph(t("route")+": "+" → ".join(world.route.map(func(s):return t(s))),16))
 			if new_best:column.add_child(paragraph(t("new_best"),17))
-			action(t("restart"),begin_new,true).name="CampaignReplay"
-			action(t("details"),func():detail_page=0;menu_kind="result_details";build_ui()).name="CampaignReportDetails"
-			action(t("back"),return_main).name="CampaignReportMain"
+			var replay:=action(t("restart"),begin_new,true);replay.name="CampaignReplay"
+			var details:=action(t("details"),func():detail_page=0;menu_kind="result_details";build_ui());details.name="CampaignReportDetails"
+			var back:=action(t("back"),return_main);back.name="CampaignReportMain"
+			if not portrait and view_w>=960.:
+				var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);column.add_child(controls)
+				for button in [replay,details,back]:
+					button.reparent(controls);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		"result_details":build_report_details()
 		"settings":build_settings()
 		"outro":
@@ -350,7 +365,8 @@ func build_menu() -> void:
 			column.add_child(paragraph(message))
 			action(t("next"),func():
 				outro_step+=1
-				if outro_step>=sentences.size():menu_kind="complete"
+				if outro_step>=sentences.size():
+					menu_kind="complete";result_elapsed=0.;result_tick=-1
 				build_ui(),true)
 			action(t("back"),return_main)
 	if not save_ok:
@@ -358,7 +374,20 @@ func build_menu() -> void:
 		action(t("save_retry"),func():save_checkpoint();build_ui())
 	fit_menu.call_deferred(menu)
 
+func update_result_score(dt: float) -> void:
+	if menu_kind!="complete" or not is_instance_valid(result_score):return
+	var motion: bool=motion_enabled and not options.reduced_motion
+	result_elapsed=minf(1.85,result_elapsed+dt) if motion else 1.85
+	var ratio:=clampf(result_elapsed/1.85,0.,1.)
+	var value:=roundi(float(world.score)*smoothstep(0.,1.,ratio))
+	var caption:=old("score")+" %05d"%value
+	if result_score.text!=caption:result_score.text=caption
+	var tick:=floori(result_elapsed/.135)
+	if dt>0. and ratio<1. and tick!=result_tick:sound("tally_tick")
+	result_tick=tick
+
 func fit_menu(target: PanelContainer) -> void:
+	if menu_kind=="complete":await get_tree().process_frame
 	if not is_instance_valid(target) or not target.is_inside_tree() or not target.is_visible_in_tree(): return
 	target.reset_size()
 	var height: float=target.get_combined_minimum_size().y
@@ -600,7 +629,7 @@ func save_checkpoint() -> void:
 			new_best=new_best or world.score>int(record.get("score",-1))
 			record.score=maxi(world.score,int(record.get("score",0)))
 			record.time=minf(world.time,float(record.get("time",world.time)))
-			record.rescues=maxi(world.rescued.size(),int(record.get("rescues",0)))
+			record.rescues=maxi(world.life_rescues(),int(record.get("rescues",0)))
 			record.losses=mini(world.losses,int(record.get("losses",world.losses)))
 			records[key]=record
 	data.performance=records
@@ -897,6 +926,7 @@ func _process(dt: float) -> void:
 		var duration: float={"intro":2.,"boss_reveal":1.65,"victory":1.8}[presentation_stage]
 		if presentation_time>=duration:skip_presentation()
 	update_ambient()
+	update_result_score(dt)
 	pad_menu_wait=maxf(0.,pad_menu_wait-dt)
 	poll_pad()
 	if world.state=="playing" and menu_kind=="" and fade<0.:
@@ -940,7 +970,7 @@ func _process(dt: float) -> void:
 		if event in ["vehicle_impact","vehicle_wreck"]:
 			if event=="vehicle_impact":release_all()
 			sound("hurt" if event=="vehicle_impact" else "blast")
-		if event in ["shot","melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","guardian","boss_attack","boss_port","boss_wave","boss_beam","complete","checkpoint","enemy","armour_hit"]:sound(event)
+		if event in ["shot","melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","hive_drop","hive_splash","guardian","boss_attack","boss_port","boss_wave","boss_beam","complete","checkpoint","enemy","armour_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	if world.state not in CampaignLives.TRANSITIONS:
@@ -1025,17 +1055,24 @@ func update_ambient() -> void:
 		if ambient_started and is_instance_valid(ambient):ambient.stop()
 		ambient_started=false
 		return
-	var key: String=world.section if world.section in ["water","roots"] else ("garden" if world.section in ["canopy","terrace"] else ("boss" if world.section=="arena" else "shore"))
+	var key: String=world.section if world.section in ["water","roots"] else "forest"
+	if world.section=="arena" and bool(world.boss.get("engaged",false)):key="boss-battle"
 	if not is_instance_valid(ambient):
 		ambient=AudioStreamPlayer.new();ambient.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(ambient)
 	if ambient_key!=key:
 		ambient.stop();ambient_started=false
 		if not ambient_cache.has(key):
-			var loaded: AudioStreamWAV=load("res://assets/audio/campaign-"+key+".wav").duplicate()
-			loaded.loop_mode=AudioStreamWAV.LOOP_FORWARD;loaded.loop_begin=0;loaded.loop_end=int(loaded.get_length()*loaded.mix_rate)
-			ambient_cache[key]=loaded
+			if key in ["forest","boss-battle"]:
+				var track: AudioStreamOggVorbis=load("res://assets/audio/mission1-"+key+".ogg").duplicate()
+				track.loop=true
+				ambient_cache[key]=track
+			else:
+				var track: AudioStreamWAV=load("res://assets/audio/campaign-"+key+".wav").duplicate()
+				track.loop_mode=AudioStreamWAV.LOOP_FORWARD
+				track.loop_end=int(track.get_length()*track.mix_rate)
+				ambient_cache[key]=track
 		ambient.stream=ambient_cache[key];ambient_key=key
-	ambient.volume_db=linear_to_db(maxf(.001,audio_volume*.28))
+	ambient.volume_db=linear_to_db(maxf(.001,audio_volume*.20))
 	# Web sample playback does not provide a reliable frame-by-frame playing
 	# signal for a paused/looping source. Start once at a track/unmute boundary.
 	if not ambient_started:ambient.play();ambient_started=true;ambient_starts+=1
@@ -1059,6 +1096,9 @@ func sound(event: String) -> void:
 			elif event=="armour_hit":pitch=1140.
 			elif event=="scout_shot":pitch=410.;count=1400
 			elif event=="lob_throw":pitch=155.;count=2800
+			elif event=="hive_drop":pitch=195.;count=2100
+			elif event=="hive_splash":pitch=95.;count=3500
+			elif event=="tally_tick":pitch=990.;count=850
 			for i in count:
 				var phase: float=float(i)/22050.;var envelope: float=pow(1.-float(i)/count,2.)
 				var sample:=sin(phase*pitch*TAU*(1.-float(i)/count*.4))*envelope*.22

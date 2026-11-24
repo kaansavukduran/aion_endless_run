@@ -340,6 +340,9 @@ with sync_playwright() as playwright:
         if args.scenario in ['campaign', 'all']:
             tap('StartSelect_aion')
             tap('StartCampaign')
+            page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
+            check(True, 'Play opens the hero picker before entering Mission 1')
+            tap('ConfirmHero')
             page.wait_for_function("document.querySelector('canvas')?.dataset.campaign", timeout=45000)
             campaign_ready()
             fit('Campaign briefing', True)

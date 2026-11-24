@@ -215,6 +215,9 @@ func draw_world() -> void:
 		if float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
 		if bool(e.defeated) and float(e.get("dead_age",0.))>1.: continue
 		var p := Vector2(float(e.x),float(e.y))
+		if e.kind==CampaignHive.KIND:
+			CampaignHive.draw_hive(self,e,p)
+			continue
 		if CampaignGroundShooters.has(str(e.kind)):
 			CampaignGroundShooters.draw(self,e,p)
 			continue
@@ -378,6 +381,12 @@ func draw_world() -> void:
 	draw_npcs(true) # Keep the thank-you and bag visible in front of a contacted hull.
 	for b in world.bullets:
 		var p := at(b.p)
+		if b.kind=="honeycomb":
+			var outline:=PackedVector2Array([p+Vector2(-10,-5),p+Vector2(0,-11),p+Vector2(10,-5),p+Vector2(10,5),p+Vector2(0,11),p+Vector2(-10,5)])
+			draw_colored_polygon(outline,Color("603b2a"))
+			draw_colored_polygon(PackedVector2Array(Array(outline).map(func(v):return p+(v-p)*.76)),Color("e8a239"))
+			draw_rect(Rect2(p-Vector2(4,5),Vector2(7,5)),Color("ffdc7a"))
+			continue
 		if b.kind=="lob_seed":
 			draw_rect(Rect2(p-Vector2(5.,3.),Vector2(10.,6.)),Color("586644"))
 			draw_rect(Rect2(p-Vector2(3.,5.),Vector2(6.,10.)),Color("cde295"))
@@ -415,6 +424,9 @@ func draw_world() -> void:
 		if str(blast.get("kind",""))=="grenade":
 			CampaignGrenadeArt.draw_blast(self,blast)
 			continue
+		if str(blast.get("kind",""))=="honeycomb":
+			draw_honey_splash(blast)
+			continue
 		var phase: float=float(blast.age)/.5
 		if str(blast.get("kind",""))=="spider":draw_pose(support_art.pose("spider-burst",clampi(int(phase*6.),0,5)),Vector2(blast.p))
 		var color := Color(str(blast.color));color.a=(1.-phase)*.8
@@ -427,6 +439,19 @@ func draw_world() -> void:
 	if world.section!="arena" and not CampaignRoutes.is_fork(world.section):
 		var p := at(Vector2(world.length()-140.,0))
 		draw_flag(Vector2(world.length()-140.,0))
+
+func draw_honey_splash(blast: Dictionary) -> void:
+	var p:=at(blast.p)
+	var phase:=clampf(float(blast.age)/float(blast.life),0.,1.)
+	var spread: float=float(blast.radius)*smoothstep(0.,.35,phase)
+	var honey:=Color("e88b2c");honey.a=1.-phase
+	var bright:=Color("ffdc7a");bright.a=honey.a
+	draw_rect(Rect2(p.x-spread,p.y-5.,spread*2.,7.),honey)
+	draw_rect(Rect2(p.x-spread*.72,p.y-7.,spread*1.44,3.),bright)
+	for i in 7:
+		var x: float=float(i-3)*spread/3.5
+		var y: float=-sin(phase*PI)*float(19+i%3*11)
+		draw_rect(Rect2(p+Vector2(x,y),Vector2(5,4)),bright if i%2==0 else honey)
 
 func draw_root_reveal(drawing: Dictionary,pivot: Vector2) -> void:
 	var entering: bool=host.presentation_stage=="boss_reveal"
@@ -463,6 +488,9 @@ func draw_combat_cues() -> void:
 		if bool(e.defeated) or float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
 		var p:=Vector2(float(e.x),float(e.y))
 		var attack: bool=enemy_attacking(e)
+		if e.kind==CampaignHive.KIND:
+			if float(e.windup)>0.:CampaignHive.draw_warning(self,e)
+			continue
 		if not bool(e.defeated) and bool(e.get("emerge_warn",false)):
 			var gp := at(Vector2(float(e.x),0.))
 			var r: float = 16. if host.options.reduced_motion else 12.+absf(sin(world.time*14.))*10.
@@ -605,15 +633,15 @@ func draw_npcs(mounted_front: bool) -> void:
 		if phase=="departed" and age>4.8:continue
 		var animated: bool=host.motion_enabled and not host.options.reduced_motion
 		var frame: int=posmod(int(world.time*2.),2) if animated else 0
-		if phase in ["free","departed"]:frame=6+posmod(int(world.time*6.),6 if int(npc.variant)==7 else 2) if animated else 6
-		elif phase=="thanks":frame=2 if age<.45 else 3
+		if phase in ["free","departed"]:
+			frame=2 if CampaignRescue.clip_name(npc)=="rescue_react" else CampaignRescue.walk_frame(npc,animated)
+		elif phase=="thanks":frame=4 if age<.45 else 5
 		var npc_pose: Dictionary=catalogue.pose("rescue-npcs",int(npc.variant),frame)
 		var growth: float=npc_growth(int(npc.variant))
 		var npc_direction: int=npc_draw_direction(int(npc.get("facing",-1))) if phase!="bound" else 1
 		draw_pose(npc_pose,Vector2(float(npc.x),float(npc.y)),npc_direction,growth)
 		if phase=="thanks":
 			var bag_at:=Vector2(float(npc.x)+float(npc.facing)*22.,float(npc.y)-52.)
-			draw_pose(support_art.pose("satchel"),bag_at)
 			if age>=.45 and age<.9:
 				draw_pose(item_bank.pose(str(npc.gift)),bag_at+Vector2(float(npc.facing)*10.,-(age-.45)*80.),1,.6)
 		var p := at(Vector2(float(npc.x),float(npc.y)))

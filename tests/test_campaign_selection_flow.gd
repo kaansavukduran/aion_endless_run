@@ -152,7 +152,9 @@ func run() -> void:
 	check(tile.is_hovered() and image.select_state=="focus","Focus exit preserves active mouse hover")
 	check(game.character==selected,"Hover and focus never change the selected hero")
 	var start: Button=game.menu_layer.find_child("StartCampaign",true,false)
-	click(start);await process_frame
+	click(start);await settle()
+	check(game.page=="characters" and game.pixel_ui.choose_for_campaign,"Play opens character selection first")
+	click(game.menu_layer.find_child("ConfirmHero",true,false));await process_frame
 	check(game.pixel_ui.launch_pending and current_scene==game,"A normal Play click leaves the selected launch visible before scene replacement")
 	var launch: RunnerHeroPreview=game.pixel_ui.roster_previews[selected]
 	var visible_frames: Dictionary={}
@@ -188,7 +190,8 @@ func run() -> void:
 
 	game=load("res://scripts/game.gd").new();root.add_child(game);current_scene=game;await settle()
 	game.front.skip_intro();game.front.stop_demo();game.motion=false;game.rebuild();await settle()
-	start=game.menu_layer.find_child("StartCampaign",true,false);click(start)
+	start=game.menu_layer.find_child("StartCampaign",true,false);click(start);await settle()
+	click(game.menu_layer.find_child("ConfirmHero",true,false))
 	check(current_scene!=game and game.campaign_started,"Reduced motion completes Play immediately through the same transition owner")
 	await settle();current_scene.free();await process_frame
 	game=load("res://scripts/game.gd").new();root.add_child(game);current_scene=game;await settle()
@@ -198,10 +201,20 @@ func run() -> void:
 	await settle()
 	var focused: Control=root.gui_get_focus_owner()
 	if is_instance_valid(focused):focused.release_focus()
-	key(KEY_ENTER);key(KEY_ENTER,false)
+	key(KEY_ENTER);key(KEY_ENTER,false);await settle()
+	check(game.page=="characters" and game.pixel_ui.choose_for_campaign,"Unfocused Enter opens the same character picker")
+	click(game.menu_layer.find_child("ConfirmHero",true,false))
 	check(current_scene!=game and game.campaign_started,"An ordinary Enter with no focus invokes the primary Mission 1 action")
 	await settle()
 	check(current_scene.selected_hero=="frog","The keyboard primary-action fallback preserves the chosen new hero")
+	current_scene.free();await process_frame
+	game=load("res://scripts/game.gd").new();root.add_child(game);current_scene=game;await settle()
+	game.front.skip_intro();game.motion=false;game.rebuild();await settle()
+	var y:=InputEventJoypadButton.new();y.button_index=JOY_BUTTON_Y;y.pressed=true
+	root.push_input(y);await settle()
+	check(game.page=="characters" and game.pixel_ui.choose_for_campaign,"Xbox Y opens the same pre-mission picker")
+	y.pressed=false;root.push_input(y);y.pressed=true;root.push_input(y);await settle()
+	check(current_scene!=game and is_instance_valid(current_scene),"Xbox Y confirms the pending hero picker")
 	current_scene.free();await process_frame
 	print("RESULT: ",checks," campaign selection flow checks, ",failures," failures")
 	quit(1 if failures else 0)

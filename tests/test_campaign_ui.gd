@@ -124,5 +124,21 @@ func run() -> void:
 	game.audio_enabled=true;game.menu_kind="";game.update_ambient();check(game.ambient_starts==starts+1,"Unmuting starts exactly one music stream")
 	for frame in 200:game.update_ambient()
 	check(game.ambient_starts==starts+1,"Ordinary music updates do not restart a running track")
+	game.world.load_section("arena");game.world.boss.engaged=true;game.update_ambient()
+	check(game.ambient_key=="boss-battle" and game.ambient.stream is AudioStreamOggVorbis and game.ambient.stream.loop,"New boss soundtrack activates as a looping Vorbis stream")
+	game.world.completed=true;game.world.state="complete";game.world.score=12345
+	game.world.rescued.assign(["a","b","c","d","e","f"]);game.world.rescue_life_start=0
+	game.world.awarded["mission:1"]=true
+	game.motion_enabled=true;game.options.reduced_motion=false
+	game.options.text_scale=2.;game.menu_kind="complete";game.result_elapsed=0.;game.resize()
+	await process_frame;await process_frame
+	check(game.result_score.text.ends_with("00000"),"Tally starts at zero on the real result label")
+	game.update_result_score(.8)
+	check(not game.result_score.text.ends_with("00000") and not game.result_score.text.ends_with("12345"),"Tally has a visible intermediate value")
+	game.update_result_score(1.1)
+	check(game.result_score.text.ends_with("12345"),"Tally ends on the exact recorded score")
+	check(Rect2(0,0,game.view_w,game.view_h).encloses(game.menu.get_global_rect()),"Large text fits the real result with bonus and rating")
+	game.options.reduced_motion=true;game.result_elapsed=0.;game.update_result_score(0.)
+	check(game.result_score.text.ends_with("12345"),"Reduced motion reveals the same result immediately")
 	game.queue_free();await process_frame
 	print("RESULT: %d campaign UI checks, %d failures" % [checks,failures]);quit(1 if failures else 0)

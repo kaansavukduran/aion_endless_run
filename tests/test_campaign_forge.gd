@@ -82,7 +82,7 @@ func run() -> void:
 		check(w.mount_transition=="enter" and not w.throw_grenade(),"Boarding blocks combat until the hatch transition finishes")
 		w.attack_press();check(w.bullets.is_empty(),"Boarding cannot fire a hidden extra shot")
 		tick(w,.46);w.aim_direction=direction;w.attack_press()
-		check(w.mount.ridden and w.bullets.size()==3,"Mounted wind craft uses real directional fan")
+		check(w.mount.ridden and w.bullets.size()==1,"Mounted wind craft emits one shot along its continuous aim")
 		check(w.vehicles_used==["wind"],"Vehicle report records one completed board")
 		for b in w.bullets:check(Vector2(b.v).normalized().dot(direction)>.95,"Vehicle barrel follows aim rather than character facing")
 		w.attack_release();check(w.interact(),"Vehicle exit accepted")
@@ -111,8 +111,8 @@ func run() -> void:
 	if not supplies.is_empty():
 		resumed.player=Vector2(float(supplies[0].x),float(supplies[0].y)+25.);resumed.velocity=Vector2.ZERO;tick(resumed,.3)
 	check(resumed.awarded.has(str(npc.id)+":gift") and resumed.weapon=="heavy","Only actual dropped-item contact claims the resumed handover")
-	var earned := resumed.score;resumed.invulnerable=0.;resumed.damage_player();tick(resumed,1.);CampaignLives.start_entry(resumed,Rect2(0,-420,1152,500));tick(resumed,.65)
-	check(resumed.score==earned and resumed.weapon=="pistol","Reserve entry cannot pay an already-claimed NPC twice")
+	resumed.invulnerable=0.;resumed.damage_player();tick(resumed,1.);CampaignLives.start_entry(resumed,Rect2(0,-420,1152,500));tick(resumed,.65)
+	check(resumed.score==0 and resumed.life_rescues()==0 and resumed.awarded.has(str(npc.id)+":gift") and resumed.weapon=="pistol","Reserve entry cannot pay an already-claimed NPC twice")
 	check(resumed.rescue_roles.has(str(npc.id)),"Actual rescued role survives checkpoint reports")
 	# A flying/angled beam still intersects ropes across a large timestep.
 	w=fresh();CampaignRescue.populate(w);npc=w.npcs[0];w.player=Vector2(float(npc.x)-500.,0.)

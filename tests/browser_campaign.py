@@ -110,6 +110,8 @@ with sync_playwright() as pw:
         front_tap('ConfirmHero')
     check(canvas.get_attribute('data-character')==a.hero,'Actual front-end selects the requested hero: '+a.hero)
     front_tap('StartCampaign')
+    page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
+    front_tap('ConfirmHero')
     page.wait_for_function('document.querySelector("canvas").hasAttribute("data-campaign")',timeout=45000)
     last_observation={}
     def data():
