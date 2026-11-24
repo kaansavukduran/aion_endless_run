@@ -195,6 +195,13 @@ with sync_playwright() as playwright:
         observe("d.ui_ready && d.view[1]>d.view[0]")
         canvas.focus()
         picker = observe("d.menu==='continue_offer' && d.ui_ready")
+        rect = canvas.bounding_box()
+        for name in ("ArcadePreviousHero", "ArcadeNextHero", "ArcadeConfirmHero"):
+            _, _, width, height, _ = picker["buttons"][name]
+            scale = picker["transform"][0]
+            check(min(width * scale * rect["width"] / picker["raw"][0],
+                      height * scale * rect["height"] / picker["raw"][1]) >= 43.5,
+                  f"{name} has a finger-sized target in portrait")
         original_hero = picker["continue_hero"]
         page.keyboard.press("ArrowRight")
         observe("d.menu==='continue_offer' && d.continue_hero!==arg", original_hero)

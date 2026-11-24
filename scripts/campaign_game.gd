@@ -264,7 +264,7 @@ func build_touch() -> void:
 		item.font=options.font_for(FONT);item.palette=options.colors.duplicate();item.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		if key=="grenade":item.palette.accent=AionCampaignWorld.COLORS[world.character]
 		ui.add_child(item);item.position=points[key];item.size=Vector2.ONE*(90. if key=="context" else 100.);actions[key]=item
-	var hint:=label(t("boost"),14);ui.add_child(hint);hint.position=Vector2(24,view_h-206)
+	var hint:=label(t("boost"),14);stick.add_child(hint);hint.position=Vector2(0,-29)
 
 func build_menu() -> void:
 	release_all()
@@ -500,11 +500,19 @@ func build_continue_picker() -> void:
 	offer_label.add_theme_color_override("font_color",options.color("accent"));header.add_child(offer_label)
 	offered_second=-1;update_continue_offer()
 	var paging:=HBoxContainer.new();paging.add_theme_constant_override("separation",6);column.add_child(paging)
+	var hit_size:=48.
+	if touch_mode:
+		var logical_to_screen:=screen_transform.x.x
+		if OS.has_feature("web"):
+			logical_to_screen*=float(JavaScriptBridge.eval("window.innerWidth"))/maxf(1.,get_viewport_rect().size.x)
+		else:logical_to_screen/=maxf(1.,DisplayServer.screen_get_scale())
+		hit_size=maxf(hit_size,44./maxf(.5,logical_to_screen))
 	var confirm:=action(t("continue_enter"),confirm_continue,true);confirm.name="ArcadeConfirmHero"
+	confirm.custom_minimum_size.y=maxf(confirm.custom_minimum_size.y,hit_size)
 	for direction in [-1,1]:
 		var button:=action("‹" if direction<0 else "›",func():page_continue_hero(direction))
 		button.tooltip_text=t("previous_hero" if direction<0 else "next_hero")
-		button.custom_minimum_size.x=48.
+		button.custom_minimum_size=Vector2(hit_size,maxf(button.custom_minimum_size.y,hit_size))
 		button.name="ArcadePreviousHero" if direction<0 else "ArcadeNextHero"
 		button.reparent(paging,false)
 	picker_preview=HeroPreview.new();picker_preview.portrait_art=true
