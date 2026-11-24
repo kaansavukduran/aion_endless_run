@@ -12,7 +12,7 @@ from pathlib import Path
 import shutil
 import time
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeout, sync_playwright
 
 
 parser = argparse.ArgumentParser()
@@ -286,13 +286,25 @@ with sync_playwright() as playwright:
             check(True, 'Actual selected hero enters playable Mission 1')
             canvas.focus()
             def restart_for_probe():
-                page.wait_for_function("['playing','continue_offer','continue_pick','dead'].includes(JSON.parse(document.querySelector('canvas').dataset.campaign).state)",timeout=15000)
-                if campaign()['menu'] in ['continue_offer','continue_pick']:
-                    if campaign()['menu']=='continue_pick':tap('ArcadeBackToCountdown',in_campaign=True)
-                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
-                if campaign()['menu']!='dead':
-                    canvas.focus();page.keyboard.press('Escape')
-                    page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='paused'",timeout=10000)
+                # A restart probe can race a real enemy hit between reading
+                # "playing" and sending Escape. Let the real life transition
+                # settle and try the same input again when it can be consumed.
+                for _ in range(5):
+                    state = page.wait_for_function("""()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);
+                      return d.ui_ready && !d.presentation && ['playing','paused','continue_offer','continue_pick','dead'].includes(d.state) && d.state}""",timeout=30000).json_value()
+                    if state in ['dead','paused']:
+                        break
+                    if state in ['continue_offer','continue_pick']:
+                        if state=='continue_pick':tap('ArcadeBackToCountdown',in_campaign=True)
+                        page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
+                        break
+                    canvas.focus()
+                    page.keyboard.press('Escape')
+                    try:
+                        page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).state!=='playing'",timeout=3500)
+                    except PlaywrightTimeout:
+                        continue
+                assert campaign()['menu'] in ['paused','dead'],('Could not reach the real restart action',campaign()['state'])
                 tap('CampaignRestart',in_campaign=True)
                 presentation_done()
                 page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp===1 && d.ui_ready}",timeout=15000)
