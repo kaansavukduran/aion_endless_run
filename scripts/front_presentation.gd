@@ -85,7 +85,7 @@ func step(dt: float) -> void:
 		intro_time+=elapsed
 		if intro_time>=6.5:skip_intro()
 	elif demo_world==null:
-		if host.interface_options.attract_enabled and not host.language_picker_open:idle_time+=elapsed
+		if host.interface_options.attract_enabled and not host.opening_guide and not host.language_picker_open:idle_time+=elapsed
 		if idle_time>=30.:start_demo()
 	else:
 		demo_time+=elapsed
