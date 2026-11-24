@@ -274,10 +274,14 @@ func characters() -> void:
 	heading.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	stage.add_child(heading)
 	var head: float=ceilf(heading.get_minimum_size().y)+12.
-	h.position_control(heading,Vector2.ZERO,Vector2(width,head-12.))
 	var col_count: int=2 if h.portrait else 3
-	var row_count: int=3 if h.portrait else 2
 	var gap:=10.
+	if not h.portrait:
+		var name_width:=0.
+		for id in h.FRIENDS:
+			name_width=maxf(name_width,h.ui_theme.default_font.get_string_size(h.character_name(id),HORIZONTAL_ALIGNMENT_LEFT,-1,h.ui_size(21)).x)
+		if name_width+8.<=floorf((width-5.*gap)/6.):col_count=6
+	var row_count:=ceili(float(h.FRIENDS.size())/col_count)
 	var tile_w:=floorf((width-(col_count-1)*gap)/col_count)
 	var confirm: Button=h.button(RunnerFrontText.word(h.language,"play_now"),confirm_hero,true)
 	confirm.name="ConfirmHero"
@@ -288,6 +292,10 @@ func characters() -> void:
 		stage.add_child(control)
 	var footer_h: float=maxf(confirm.get_combined_minimum_size().y,back.get_combined_minimum_size().y)+8.
 	var tile_h:=floorf((height-head-footer_h-row_count*gap)/row_count)
+	if col_count==6:tile_h=minf(tile_h,tile_w+float(h.ui_size(34)))
+	var group_top:=floorf(maxf(0.,height-head-footer_h-row_count*(tile_h+gap))*.5)
+	var footer_y:=group_top+head+row_count*(tile_h+gap)
+	h.position_control(heading,Vector2(0.,group_top),Vector2(width,head-12.))
 	var selected: Button
 	for index in h.FRIENDS.size():
 		var id: String=h.FRIENDS[index]
@@ -297,7 +305,7 @@ func characters() -> void:
 		tile.accessibility_description=RunnerFrontText.ability_summary(h.language,id)
 		tile.accessibility_name+=" · "+RunnerFrontText.word(h.language,"selected") if id==h.character else ""
 		stage.add_child(tile)
-		h.position_control(tile,Vector2((index%col_count)*(tile_w+gap),head+floori(float(index)/col_count)*(tile_h+gap)),Vector2(tile_w,tile_h))
+		h.position_control(tile,Vector2((index%col_count)*(tile_w+gap),group_top+head+floori(float(index)/col_count)*(tile_h+gap)),Vector2(tile_w,tile_h))
 		var portrait_art:=RunnerHeroPreview.new()
 		portrait_art.name="Portrait"
 		portrait_art.hero=id
@@ -321,8 +329,8 @@ func characters() -> void:
 	var back_w: float=maxf(112.,back.get_combined_minimum_size().x+12.)
 	stage.move_child(back,-1)
 	stage.move_child(confirm,-1)
-	h.position_control(back,Vector2(0.,height-footer_h),Vector2(back_w,footer_h))
-	h.position_control(confirm,Vector2(back_w+gap,height-footer_h),Vector2(width-back_w-gap,footer_h))
+	h.position_control(back,Vector2(0.,footer_y),Vector2(back_w,footer_h))
+	h.position_control(confirm,Vector2(back_w+gap,footer_y),Vector2(width-back_w-gap,footer_h))
 	h.focus_later.call_deferred(selected)
 
 func tutorial() -> void:
