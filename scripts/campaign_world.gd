@@ -370,12 +370,12 @@ func begin_travel(destination: String) -> void:
 
 func advance_exit(dt: float) -> bool:
 	dt=clampf(dt,0.,.05)
-	var end_x:=CampaignRoutes.EXIT_X+140. if CampaignRoutes.is_fork(section) else length()-38.
+	var end_x:=CampaignRoutes.EXIT_X+140. if CampaignRoutes.is_fork(section) else length()-12.
 	if bool(mount.ridden):
 		# The flag is on solid ground. Step out on the same lane, ahead of
 		# the vehicle, and keep space for the short walk after landing.
 		var foot:=CampaignRoutes.foot(self)
-		var x:=minf(foot.x+72.,maxf(foot.x,end_x-32.))
+		var x:=minf(foot.x+72.,maxf(foot.x,end_x-56.))
 		var support:=CampaignVehicles.support_below(self,x,foot.y)
 		var target:=Vector2(x,support) if CampaignGround.has_floor(support) else foot
 		facing=1;CampaignVehicles.start_exit(self,target)
