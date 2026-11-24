@@ -87,7 +87,7 @@ func current_frame() -> int:
 	if portrait_art:
 		if select_state not in ["select","launch"]:return 0
 		var phase:=clock if select_state=="launch" else fmod(clock,2.6)
-		return 2 if phase>=.15 and phase<.25 else (1 if phase>=.09 and phase<.32 else 0)
+		return 2 if phase>=.15 and phase<.32 else (1 if phase>=.08 and phase<.40 else 0)
 	var frame:=int(maxf(0.,clock-float(clip.start))*float(clip.fps))
 	return posmod(frame,int(clip.frames)) if clip.loop else mini(int(clip.frames)-1,frame)
 
@@ -110,8 +110,8 @@ func step_frame(delta: int=1) -> int:
 func _process(dt: float) -> void:
 	if not is_visible_in_tree() or not animate or paused:return
 	if portrait_art and select_state not in ["select","launch"]:return
-	clock+=minf(dt,.05)
-	if not portrait_art or rendered_frame!=current_frame():queue_redraw()
+	clock+=minf(dt,.10 if portrait_art else .05)
+	queue_redraw()
 	if select_state=="launch" and not launch_complete:
 		var clip:=playback_spec()
 		if clock>=float(clip.frames)/float(clip.fps):
