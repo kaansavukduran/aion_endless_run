@@ -18,6 +18,8 @@ AIONIA v1.7 bu turda canlı standart belgesinden okundu. Drive’daki 21 Kasım 
 - Taban `212afe9`. Öndeki kontrol rehberi Türkçe ve İngilizce olarak kahraman seçimini adlandırır.
 - Son can sonrası seçim sol üstte aynı on saniyelik sayaçla açılır. Düşmanlar, boss, mermiler ve çevre hareketleri devam eder. Geri dönüş onayla aynı karşılaşmada gerçekleşir. Eski seçim kayıtlarındaki kahraman ve kalan süre korunur. Pencere odak dışındayken sayaç durur.
 - Sabit topun atışı 140 birimlik yakın alanda kurulur kurulmaz iptal olur. Dışarıda namlu animasyonu ve yönüne göre atış yapılır. Gövde temasından hasar alanı oluşmaz.
+- Oyun değişiklikleri [PR 25](https://github.com/kaansavukduran/aion_endless_run/pull/25) ile `bf6c14e` commit’inde ana dala birleşti. Godot’ta 72 kaynak paketi ve 51.300 kontrol geçti. Gerçek Chromium girdileriyle yatay ve dikey seçim, devam süresi, çevrimdışı yükleme ve zaman aşımı doğrulandı. İngilizce giriş ve altı portre Firefox’ta açıldı. Windows ve macOS paketleri, Linux tarayıcı denetimi ve Android emülatörü [PR doğrulamasında](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45493825380) geçti. Fiziksel cihaz testi yapılmadı.
+- Birleşme sonrası ana dal derlemesi görünmedi. Bu devir güncellemesi normal ana dal gönderimini yeniden tetikler. Canlı Pages sürümü, dağıtım ve tarayıcı açılışı doğrulandığında belirlenir.
 
 ### Mission 1 · Kahraman yetenekleri
 
