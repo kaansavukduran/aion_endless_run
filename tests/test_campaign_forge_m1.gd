@@ -71,7 +71,7 @@ func run() -> void:
 	w.jump_press()
 	check(w.velocity.y<0. and w.jumps==1,"Coyote time grants a reliable grounded jump just after leaving a ledge")
 
-	w=clean("aion");w.player=Vector2(400.,-25.);w.velocity=Vector2(0.,450.);w.jumps=2
+	w=clean("aion");w.player=Vector2(400.,-25.);w.velocity=Vector2(0.,450.);w.jumps=AionCampaignWorld.AION_JUMPS
 	w.jump_press() # Buffer jump right before landing
 	check(w.jump_buffer_timer>0.,"Pre-landing jump press arms jump_buffer_timer")
 	w.step(.05);w.step(.05)

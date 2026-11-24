@@ -127,7 +127,7 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 	# Prevent instant spawn-frame contact hits and reward attacking during recovery.
 	var active_contact: bool=float(e.age)>0.45 and (not recovering or float(e.get("lunge",0.))>0. or float(e.get("leap",0.))>0.)
 	if active_contact and absf(w.player.x-float(e.x))<38. and absf(w.player.y-float(e.y))<55. and not is_hidden:
-		w.damage_player()
+		w.enemy_body_hit(e)
 		if kind=="leech":w.buffs.slow=2.
 	# The attack and punish interval own their full ticks, including the
 	# final recovery tick. Reposition/windup cannot run concurrently.

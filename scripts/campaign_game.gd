@@ -304,7 +304,9 @@ func build_menu() -> void:
 			pages.append(t("touch") if touch_mode else pad_help() if not Input.get_connected_joypads().is_empty() else t("keys"))
 			pages.append(t("help_rescue"))
 			pages.append(t("help_route"))
-			if world.character in ["rabbit","eren","owl"]:pages.append(t("owl" if world.character=="owl" else "special"))
+			if world.character in world.CHARGE_HEROES:pages.append(t("special"))
+			if world.character in ["aion","sheep","rabbit","eren","frog","armadillo"]:pages.append(RunnerFrontText.mission_ability(language,world.character))
+			if world.character=="owl":pages.append(t("owl"))
 			column.add_child(paragraph(pages[clampi(help_step,0,pages.size()-1)]))
 			if options.text_scale<=1.5:
 				var example:=CampaignPresentation.new();example.host=self;example.tutorial_topic="help";example.topic_index=mini(help_step,4);example.custom_minimum_size=Vector2(180,68);example.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(example)
@@ -887,7 +889,10 @@ func update_arcade_aim(dt: float=0.) -> void:
 	# A grounded Down press is a low firing stance, not accidental floor aim.
 	if vertical>.55 and world.grounded() and not bool(world.mount.ridden):raw.y=0.
 	if pad_look.length_squared()>.25:raw=pad_look;analog=true
-	world.move_axis=Vector2(axis,vertical)
+	var move_y:=vertical
+	if world.character=="armadillo" and analog and not down_down and vertical>0. and absf(axis)>=vertical:
+		move_y=0.
+	world.move_axis=Vector2(axis,move_y)
 	# Mouse aim: any angle toward the pointer, unless a stick, pad or W/S aim is in use.
 	if mouse_aim and not analog and not up_down and (not down_down or world.grounded()) and is_instance_valid(view):
 		var direction:=pointer_aim()
@@ -903,7 +908,10 @@ func update_arcade_aim(dt: float=0.) -> void:
 
 func pointer_aim() -> Vector2:
 	# Direction from the hand (or vehicle saddle) to the pointer, in screen space.
-	var hand: Vector2=world.player+(Vector2(0.,-42.) if bool(world.mount.ridden) else Vector2(M1CombatArt.placement(world).grip))
+	var offset: Vector2=Vector2(0.,-42.) if bool(world.mount.ridden) else Vector2(M1CombatArt.placement(world).grip)
+	# A mirrored hand must not move across the cursor and flip aim back again.
+	if world.character=="armadillo":offset.x=0.
+	var hand: Vector2=world.player+offset
 	var toward: Vector2=mouse_point-view.get_global_transform_with_canvas()*view.at(hand)
 	return toward.normalized() if toward.length()>10. else Vector2.ZERO
 
@@ -1046,7 +1054,7 @@ func update_touch_context(item: AionCampaignTouch,active_controls: bool) -> void
 	item.visible=true
 	item.disabled=not skill.is_empty() and not bool(skill.ready)
 	var status: String=str(skill.get("status_key",""))
-	item.caption=t("context_swap_short" if item.action=="swap_weapon" else (status if item.disabled and status=="skill_crouch" else item.action))
+	item.caption=t("context_swap_short" if item.action=="swap_weapon" else (status if item.disabled and status=="skill_land" else item.action))
 	item.cooldown=float(skill.get("cooldown",0.))
 	var accessible_name: String=t(item.action)
 	if item.accessibility_name!=accessible_name:item.accessibility_name=accessible_name
@@ -1161,6 +1169,9 @@ func metadata() -> void:
 	data.engine_process_frames=Engine.get_process_frames();data.engine_physics_frames=Engine.get_physics_frames()
 	data.engine_process_seconds=Performance.get_monitor(Performance.TIME_PROCESS);data.engine_physics_seconds=Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)
 	data.crouching=world.crouching()
+	data.charging=world.charging;data.charge_ratio=world.charge_ratio();data.jumps=world.jumps
+	data.sprint_fire=world.sprint_fire;data.sprint_recovery=world.sprint_recovery
+	data.roll_charges=world.roll_charges;data.roll_cooldown=world.roll_cooldown
 	data.rally=world.rally;data.retry_count=world.retry_count;data.chain=world.chain;data.chain_time=world.chain_time;data.best_chain=world.best_chain
 	data.weapon_offer=CampaignRhythm.offer(world);data.bridge_timers=world.bridge_timers;data.boss_ports=world.boss.get("ports",[]);data.boss_dash=world.boss.get("dash",0.)
 	var hit: Vector2=world.player_hit_center()

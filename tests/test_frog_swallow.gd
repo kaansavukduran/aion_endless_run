@@ -35,9 +35,9 @@ func _initialize() -> void:
 		advance(w,.7)
 		check(e.defeated and bool(e.get("swallowed",false)) and w.frog_meal.get("kind")==kind,"Small enemy swallowed by the tongue "+kind)
 		check(w.awarded.has(str(e.id)) and w.kills==1,"Captured enemy resolves its reward once "+kind)
-		check(w.frog_cooldown>9. and MissionHeroAbilities.context(w).ready and MissionHeroAbilities.context(w).label_key=="skill_spit","Spit is ready during the swallow cooldown")
+		check(w.frog_cooldown>4. and MissionHeroAbilities.context(w).ready and MissionHeroAbilities.context(w).label_key=="skill_spit","Spit is ready during the swallow cooldown")
 		var resume:=AionCampaignWorld.new()
-		check(resume.restore(w.snapshot()) and resume.frog_meal==w.frog_meal and is_equal_approx(resume.frog_cooldown,w.frog_cooldown),"Loaded target and ten-second clock survive saving")
+		check(resume.restore(w.snapshot()) and resume.frog_meal==w.frog_meal and is_equal_approx(resume.frog_cooldown,w.frog_cooldown),"Loaded target and five-second clock survive saving")
 		var front:=spawn(w,"seed",440.)
 		var neighbor:=spawn(w,"seed",521.)
 		var far:=spawn(w,"seed",730.)
@@ -48,7 +48,7 @@ func _initialize() -> void:
 		check(not w.interact(),"Cooldown blocks another tongue after spitting")
 		var remaining:=w.frog_cooldown
 		w.state="paused";advance(w,.5);w.state="playing"
-		check(w.frog_cooldown==remaining,"Paused time does not run down the ten-second cooldown")
+		check(w.frog_cooldown==remaining,"Paused time does not run down the five-second cooldown")
 		advance(w,remaining+.04)
 		check(w.interact(),"Tongue is available again after the ten seconds")
 	var heavy_world:=make_world()

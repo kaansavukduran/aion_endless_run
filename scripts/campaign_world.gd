@@ -3,6 +3,9 @@ extends RefCounted
 
 ## Finite arcade rules in world coordinates. Terrain supplies the foot support.
 ## The old RunnerWorld, its saves and its automatic-run rules are independent.
+const CHARGE_HEROES := ["rabbit", "eren", "frog"]
+const MAX_FLOCK := 2
+const AION_JUMPS := 3
 const HEROES := ["aion", "sheep", "rabbit", "eren", "armadillo", "frog"]
 const COLORS := {"aion":"ef86b7", "sheep":"f5d6a6", "wolf":"aa84d2", "owl":"e8a34f", "rabbit":"f08d55", "eren":"58c4bb", "armadillo":"c49268", "frog":"80bd64"}
 const HERO_ART=preload("res://assets/PIXEL-HEROES-PROVENANCE.json")
@@ -113,6 +116,11 @@ var grenade_throw: Dictionary = {}
 var hero_skill: Dictionary = {}
 var frog_meal: Dictionary = {}
 var frog_cooldown := 0.
+var roll_charges := MissionHeroAbilities.ROLL_CHARGES
+var roll_cooldown := 0.
+var sprint_fire := 0.
+var sprint_recovery := 0.
+var sprint_ignition := true
 var shell_contacts: Array[Dictionary] = []
 var jump_held := false
 var jumps := 0
@@ -404,15 +412,15 @@ func jump_press() -> void:
 	if move_axis.y>.55 and not bool(mount.ridden) and grounded() and player.y<floor_at(player.x,player.y)-1.:
 		drop_through_time=.25;player.y+=3.;velocity.y=70.;jumps=1;return
 	if CampaignVehicles.jump(self):return
-	if grounded() and character in ["rabbit","eren"] and not bool(mount.ridden):
+	if grounded() and character in CHARGE_HEROES and not bool(mount.ridden):
 		charging = true; charge_time = 0.; return
-	if grounded() or (coyote_timer > 0. and jumps == 0 and not bool(mount.ridden) and character not in ["rabbit","eren"]):
+	if grounded() or (coyote_timer > 0. and jumps == 0 and not bool(mount.ridden) and character not in CHARGE_HEROES):
 		velocity.y = -650.; jumps = 1; air_time = 0.; coyote_timer = 0.; jump_buffer_timer = 0.; return
-	if character == "aion" and jumps < 2:
+	if character == "aion" and jumps < AION_JUMPS:
 		velocity.y = -620.; jumps += 1; air_time = 0.; return
 	elif character == "owl" and flap_count < 3:
 		velocity.y = minf(velocity.y,-650.*sqrt(1.5)); flap_count += 1; flap_time = .3; air_time=0.; return
-	if not bool(mount.ridden) and character not in ["rabbit","eren"]:
+	if not bool(mount.ridden) and character not in CHARGE_HEROES:
 		jump_buffer_timer = JUMP_BUFFER
 
 func jump_release(launch: bool = true) -> void:
@@ -524,7 +532,7 @@ func award(id: String, points: int) -> void:
 
 func damage_enemy(e: Dictionary, amount: int, style: String="") -> void:
 	if bool(e.defeated): return
-	if int(e.get("armour",0))>0:e.armour=int(e.armour)-1;e.flash=.25;pending_events.append("armour_hit");return
+	if int(e.get("armour",0))>0 and style!="flame_dash":e.armour=int(e.armour)-1;e.flash=.25;pending_events.append("armour_hit");return
 	e.hp = int(e.hp)-amount
 	if int(e.hp) > 0: return
 	e.defeated = true; e.dead_age = 0.
@@ -551,6 +559,10 @@ func damage_boss(amount: int) -> void:
 		if phase>int(boss.phase):
 			CampaignBossPressure.on_phase_change(self,int(boss.phase),phase)
 			boss.phase=phase
+
+func enemy_body_hit(enemy: Dictionary) -> void:
+	if MissionHeroAbilities.sprinting(self) and sprint_fire>0. and MissionHeroAbilities.sprint_enemy(self,enemy,player_hit_center(),player_hit_center()):return
+	damage_player()
 
 func damage_player(cause: String="enemy") -> void:
 	if state != "playing" or invulnerable > 0. or mount_transition!="" or CampaignVehicles.stunned(self): return
@@ -672,7 +684,7 @@ func step_enemies(dt: float) -> void:
 			var next_x: float=float(e.x)+float(e.dash_direction)*(260. if e.kind=="beetle" else 220.)*dt
 			if CampaignGround.has_floor(floor_at(next_x)):e.x=next_x
 			if absf(player.x-float(e.x))<34. and absf(player.y-float(e.y))<55.:
-				damage_player()
+				enemy_body_hit(e)
 				if state!="playing":break
 		if float(e.get("dive",0.))>0.:
 			e.dive=maxf(0.,float(e.dive)-dt)
@@ -680,7 +692,7 @@ func step_enemies(dt: float) -> void:
 			var p: Vector2=Vector2(e.dive_start).lerp(Vector2(e.dive_target),minf(1.,phase*2.)) if phase<.5 else Vector2(e.dive_target).lerp(Vector2(float(e.dive_target.x)-65.,float(e.home.y)),(phase-.5)*2.)
 			e.x=p.x;e.y=p.y
 			if p.distance_to(player+Vector2(0,-25.))<35.:
-				damage_player()
+				enemy_body_hit(e)
 				if state!="playing":break
 		if not flying and e.kind!="slime" and CampaignGround.has_floor(floor_at(float(e.x))) and str(e.kind)!="seed":e.y=floor_at(float(e.x))
 		if float(e.windup)>0.:
@@ -693,7 +705,7 @@ func step_enemies(dt: float) -> void:
 			e.wait = float(e.wait)-dt
 			if float(e.wait)<=0. and absf(dx)<(150. if e.kind=="gnome" else 600.):
 				e.windup = .85 if bool(e.mini) else .65
-		if float(e.age)>.35 and absf(dx)<35. and absf(float(e.y)-player.y)<55. and float(e.windup)>.03 and float(e.windup)<.27: damage_player()
+		if float(e.age)>.35 and absf(dx)<35. and absf(float(e.y)-player.y)<55. and float(e.windup)>.03 and float(e.windup)<.27: enemy_body_hit(e)
 
 func step_boss(dt: float) -> void:
 	if not bool(boss.active) or not bool(boss.get("engaged",false)): return
@@ -861,7 +873,8 @@ func step(dt: float) -> void:
 		velocity.x=clampf((eject_target_x-player.x)/maxf(dt,.001),-980.,980.)
 		if absf(eject_target_x-player.x)<1.:eject_target_x=-1.
 	if absf(aim_direction.x)>.15: facing = 1 if aim_direction.x>0. else -1
-	var old_x: float = player.x
+	var before_movement := player
+	var old_x: float = before_movement.x
 	player.x = clampf(player.x+velocity.x*dt,35.,length()-90.)
 	player.x = CampaignRoutes.clamp_horizontal(self,old_x,player.x)
 	# Solid object gates must block a fast roll on the crossing tick too.
@@ -901,12 +914,14 @@ func step(dt: float) -> void:
 		var support: float = crossing_floor(player.x,old_y,player.y,velocity.y)
 		if player.y>=support and velocity.y>=0.:
 			player.y = support; velocity.y = 0.; jumps = 0; flap_count = 0; flap_time = 0.; gliding = false; air_time = 0.
-			if jump_buffer_timer > 0. and not CampaignRoutes.low_ceiling(self) and character not in ["rabbit","eren"]:
+			if jump_buffer_timer > 0. and not CampaignRoutes.low_ceiling(self) and character not in CHARGE_HEROES:
 				velocity.y = -650.; jumps = 1; jump_buffer_timer = 0.; coyote_timer = 0.
 		else: air_time += dt
 	if CampaignGround.fell_into_pit(self,player):
 		damage_player("pit")
 		if state!="playing":return
+	MissionHeroAbilities.sprint_contacts(self,before_movement,on_floor,dt)
+	if state!="playing":return
 	if velocity.y>0.:
 		for enemy in enemies:
 			if bool(enemy.defeated) or CampaignEnemies.hidden(enemy):continue
@@ -919,6 +934,9 @@ func step(dt: float) -> void:
 	if fire_held: attack()
 	step_enemies(dt)
 	if state!="playing":return
+	if MissionHeroAbilities.sprinting(self):
+		MissionHeroAbilities.sprint_hit(self,player_hit_center(),player_hit_center())
+		if state!="playing":return
 	CampaignAssists.step(self,dt);step_boss(dt)
 	if state!="playing":return
 	step_bullets(dt)
@@ -958,6 +976,9 @@ func snapshot(include_encounter: bool=true) -> Dictionary:
 	if character=="frog" and not completed:
 		data.frog_meal=frog_meal.duplicate()
 		data.frog_cooldown=frog_cooldown
+	if character=="armadillo" and not completed:
+		data.roll_charges=roll_charges
+		data.roll_cooldown=roll_cooldown if roll_cooldown>0. or roll_charges>0 else MissionHeroAbilities.ROLL_COOLDOWN
 	if include_encounter:CampaignEncounterSave.write(self,data)
 	return data
 
@@ -987,7 +1008,9 @@ func restore(data: Dictionary) -> bool:
 	if not meal.is_empty():
 		if str(data.character)!="frog" or meal.size()!=2 or meal.get("kind") not in MissionHeroAbilities.SWALLOWABLE:return false
 		if not meal.get("id") is String or not Dictionary(data.get("awarded",{})).has(meal.id):return false
-	if not CampaignEncounterSave.valid_number(data.get("frog_cooldown",0.),0.,MissionHeroAbilities.SWALLOW_COOLDOWN):return false
+	if not CampaignEncounterSave.valid_number(data.get("frog_cooldown",0.),0.,MissionHeroAbilities.LEGACY_SWALLOW_COOLDOWN):return false
+	if not CampaignEncounterSave.valid_number(data.get("roll_charges",MissionHeroAbilities.ROLL_CHARGES),0,MissionHeroAbilities.ROLL_CHARGES):return false
+	if not CampaignEncounterSave.valid_number(data.get("roll_cooldown",0.),0.,MissionHeroAbilities.ROLL_COOLDOWN):return false
 	if not CampaignRecovery.valid(data.get("rally",{}),str(data.checkpoint)):return false
 	for key in ["retry_count","best_chain"]:
 		var value=data.get(key,0)
@@ -1006,13 +1029,17 @@ func restore(data: Dictionary) -> bool:
 	if int(data.schema)==1:
 		for id in rescued:awarded[str(id)+":gift"]=true # Old rescues must not manufacture new supplies.
 	route.assign(Array(data.get("route",[]))); completed = bool(data.get("completed",false)); time = maxf(0.,float(data.get("time",0.)))
-	flock = clampi(int(data.get("flock",1)),1,3); hp = max_hp; grenades = 5
+	flock = clampi(int(data.get("flock",1)),1,MAX_FLOCK); hp = max_hp; grenades = 5
 	CampaignLives.reset(self)
 	MissionHeroAbilities.reset(self)
 	load_section(str(data.checkpoint))
 	if character=="frog":
 		frog_meal=meal.duplicate()
-		frog_cooldown=float(data.get("frog_cooldown",0.))
+		frog_cooldown=minf(float(data.get("frog_cooldown",0.)),MissionHeroAbilities.SWALLOW_COOLDOWN)
+	if character=="armadillo":
+		roll_charges=int(data.get("roll_charges",MissionHeroAbilities.ROLL_CHARGES))
+		roll_cooldown=clampf(float(data.get("roll_cooldown",0.)),0.,MissionHeroAbilities.ROLL_COOLDOWN)
+		if roll_charges==0 and roll_cooldown<=0.:roll_charges=MissionHeroAbilities.ROLL_CHARGES
 	if encounter.is_empty():
 		CampaignRecovery.apply(self,rally)
 	else:

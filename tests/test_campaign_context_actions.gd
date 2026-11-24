@@ -21,9 +21,6 @@ func context_routes(g: AionCampaignGame) -> void:
 	for hero in ["armadillo","frog"]:
 		clean(g,hero)
 		check(g.actions.context.visible,"Skill context remains discoverable: "+hero)
-		if hero=="armadillo":
-			check(g.actions.context.disabled and g.actions.context.caption.contains(g.t("skill_crouch")),"Standing Armadillo explains crouch requirement")
-			g.down_down=true;g.update_arcade_aim();g.update_hud()
 		check(not g.actions.context.disabled,"Ready skill context permits activation: "+hero)
 		for locale in ["tr","en"]:
 			g.language=locale;g.update_hud()
@@ -37,7 +34,7 @@ func context_routes(g: AionCampaignGame) -> void:
 		var info: Dictionary=MissionHeroAbilities.context(g.world)
 		check(g.actions.context.disabled and float(info.remaining)>0. and g.actions.context.cooldown>0. and g.actions.context.accessibility_description.contains(g.t(str(info.status_key))),"Active skill exposes real phase and remaining time: "+hero)
 		for source in ["keyboard","gamepad"]:
-			g.touch_mode=false;clean(g,hero);g.down_down=hero=="armadillo"
+			g.touch_mode=false;clean(g,hero)
 			check(not g.actions.has("context"),"Desktop has no floating interaction control: "+source)
 			if source=="keyboard":
 				var e:=InputEventKey.new();e.physical_keycode=KEY_E;e.keycode=KEY_E;e.pressed=true;g._unhandled_input(e)
@@ -67,6 +64,15 @@ func context_routes(g: AionCampaignGame) -> void:
 
 	clean(g,"aion");g.update_hud()
 	check(not g.actions.context.visible,"Original hero has no unrelated skill control")
+
+func stable_armadillo_aim(g: AionCampaignGame) -> void:
+	clean(g,"armadillo");g.world.player.y=-100.
+	g.mouse_point=g.view.get_global_transform_with_canvas()*g.view.at(g.world.player+Vector2(8.,-130.))
+	g.world.aim_direction=Vector2.LEFT;g.world.facing=-1
+	var facing_left:=g.pointer_aim()
+	g.world.aim_direction=Vector2.RIGHT;g.world.facing=1
+	var facing_right:=g.pointer_aim()
+	check(facing_left.x>0. and facing_right.x>0. and facing_left.is_equal_approx(facing_right),"Airborne aim stays on the same side when the registered hand mirrors")
 
 func compact_inputs(g: AionCampaignGame) -> void:
 	clean(g,"armadillo");g.down_down=true;g.update_arcade_aim()
@@ -149,14 +155,16 @@ func touch_context(g: AionCampaignGame) -> void:
 	for size in [Vector2i(1152,648),Vector2i(393,873)]:
 		root.size=size;g.resize()
 		clean(g,"armadillo")
+		g.world.player.y=-80.;g.update_hud()
+		check(g.actions.context.disabled and g.actions.context.caption==g.t("skill_land"),"Airborne Armadillo shows a disabled land state")
 		var disabled_point: Vector2=g.actions.context.global_position+g.actions.context.size*.5
 		finger(g,2,disabled_point,true)
-		g.down_down=true;g.update_arcade_aim();g.update_hud();finger(g,2,disabled_point,true)
+		g.world.player.y=0.;g.update_hud();finger(g,2,disabled_point,true)
 		check(g.world.hero_skill.is_empty() and g.touch_actions.get(2,"")=="context","A finger held on a disabled context never queues activation when it becomes ready")
 		finger(g,2,disabled_point,false);clean(g,"armadillo")
-		var down: Vector2=g.stick.position+g.stick.size*Vector2(.5,.9)
+		var down: Vector2=g.stick.position+g.stick.size*Vector2(.86,.73)
 		finger(g,7,down,true);g.update_arcade_aim();g.update_hud()
-		check(g.world.crouching() and g.stick_touch==7,"First real touch path holds crouch at "+str(size))
+		check(not g.world.crouching() and g.stick_touch==7 and g.world.move_axis.x>.4,"Shallow touch diagonal keeps Armadillo upright at "+str(size))
 		var point: Vector2=g.actions.context.global_position+g.actions.context.size*.5
 		finger(g,23,point,true)
 		check(not g.world.hero_skill.is_empty(),"Second finger activates the visible context at "+str(size))
@@ -167,7 +175,7 @@ func touch_context(g: AionCampaignGame) -> void:
 		var drag:=InputEventScreenDrag.new();drag.index=23;drag.position=g.screen_transform*(g.actions.attack.position+g.actions.attack.size*.5);g._input(drag)
 		check(g.world.shots==0 and not g.world.fire_held,"Dragging the context finger over Fire cannot create another action")
 		finger(g,23,point,false,true);g.update_arcade_aim()
-		check(not g.touch_actions.has(23) and g.stick_touch==7 and g.world.crouching(),"Canceled context releases only its own finger")
+		check(not g.touch_actions.has(23) and g.stick_touch==7 and g.world.move_axis.x>.4,"Canceled context releases only its own finger")
 		finger(g,7,down,false);g.update_arcade_aim()
 		check(g.stick_touch==-1 and g.world.move_axis==Vector2.ZERO,"Releasing both fingers leaves no held direction")
 		clean(g,"frog");g.world.weapon="arc";g.world.ammunition=10
@@ -185,7 +193,7 @@ func _initialize() -> void:call_deferred("run")
 
 func run() -> void:
 	var g:=AionCampaignGame.new();root.add_child(g);await process_frame;g.set_process(false)
-	context_routes(g);compact_inputs(g);rescue_context(g);interruptions(g);audio_events(g);touch_context(g)
+	context_routes(g);stable_armadillo_aim(g);compact_inputs(g);rescue_context(g);interruptions(g);audio_events(g);touch_context(g)
 	g.queue_free();await process_frame
 	print("RESULT: %d campaign context checks, %d failures"%[checks,failures])
 	quit(1 if failures else 0)

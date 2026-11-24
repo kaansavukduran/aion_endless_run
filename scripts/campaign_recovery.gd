@@ -50,7 +50,7 @@ static func apply(w,point: Dictionary) -> void:
 	if x<35. or x>w.length()-130. or not CampaignGround.has_floor(w.floor_at(x)):return
 	w.player=Vector2(x,w.floor_at(x));w.velocity=Vector2.ZERO
 	w.weapon=str(point.get("weapon","pistol"));w.ammunition=int(point.get("ammunition",0))
-	w.grenades=int(point.get("grenades",3));w.flock=int(point.get("flock",1))
+	w.grenades=int(point.get("grenades",3));w.flock=clampi(int(point.get("flock",1)),1,AionCampaignWorld.MAX_FLOCK)
 	var machine: Dictionary=point.get("mount",{})
 	if not machine.is_empty():
 		w.mount=machine.duplicate(true)

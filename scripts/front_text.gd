@@ -50,12 +50,12 @@ const ABILITIES := {
 }
 const MISSION_ABILITIES := {
 	"armadillo":{
-		"tr":"Eğil + Yetenek: kabuğa çekilip düşmanların arasından hızla yuvarlan.",
-		"en":"Crouch + Skill: curl up and charge through enemies."
+		"tr":"Yetenek tuşuyla yuvarlan. Üç atılıştan sonra 3 saniye bekle.",
+		"en":"Press Skill to roll. After three bursts, recharge for 3 seconds."
 	},
 	"frog":{
-		"tr":"Yetenekle küçük düşmanı yut. Tekrar basıp tükür ve etrafındakilere hasar ver. Yutma aralığı 10 saniye.",
-		"en":"Use Skill to swallow a small enemy. Press again to spit it out for area damage. Swallow cooldown: 10 seconds."
+		"tr":"Yetenekle küçük düşmanı yut. Tekrar basıp tükür. Yutma aralığı 5 saniye.",
+		"en":"Use Skill to swallow a small enemy. Press again to spit it out. Swallow cooldown: 5 seconds."
 	}
 }
 static func endless_limited_label(language: String) -> String:
@@ -64,11 +64,21 @@ static func endless_limited_label(language: String) -> String:
 static func endless_availability(language: String) -> String:
 	return "Sonsuz: ilk dört kahramanla." if GameText.language_for_locale(language)=="tr" else "Endless: original four heroes."
 
-static func ability_summary(language: String,hero: String) -> String:
-	language=GameText.language_for_locale(language)
-	if hero=="armadillo":return "Eğil + Yuvarlan" if language=="tr" else "Crouch + Roll"
-	if hero=="frog":return "Dil saldırısı" if language=="tr" else "Tongue attack"
+static func mission_ability(language: String,hero: String) -> String:
+	var tr:=GameText.language_for_locale(language)=="tr"
+	match hero:
+		"aion":return "Üç kez zıpla." if tr else "Jump up to three times."
+		"sheep":return "Yanına en çok bir koyun al." if tr else "Recruit up to one sheep companion."
+		"rabbit","eren":return "Depara başlarken 3 saniye ateşle korunursun. Yeniden yakmak için 3 saniye bekle ve tekrar depara bas." if tr else "Sprint to ignite for 3 seconds. Wait 3 seconds and sprint again to reignite."
 	return ability(language,hero)
+
+static func ability_summary(language: String,hero: String) -> String:
+	var tr:=GameText.language_for_locale(language)=="tr"
+	match hero:
+		"armadillo":return "Üç atılış" if tr else "Three roll bursts"
+		"frog":return "Güçlü sıçrama ve dil" if tr else "Charged jump and tongue"
+		"rabbit","eren":return "Güçlü sıçrama ve ateşli depar" if tr else "Charged jump and flame sprint"
+	return mission_ability(language,hero)
 
 static func ability(language: String,hero: String) -> String:
 	language=GameText.language_for_locale(language)

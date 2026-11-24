@@ -41,7 +41,8 @@ func run() -> void:
 	w.move_axis.x=-1.;w.steer_aim(Vector2.LEFT,0.);tick(w,.25);check(w.facing==-1 and w.player.x<start.x+90.,"Player moves/faces left")
 	w.move_axis=Vector2.ZERO;w.jump_press();tick(w,.12);w.jump_release();w.jump_press()
 	check(w.jumps==2 and w.velocity.y<0.,"Aion retains second airborne jump")
-	w.jump_release();w.jump_press();check(w.jumps==2,"No third Aion jump")
+	w.jump_release();w.jump_press();check(w.jumps==3 and w.velocity.y<0.,"Aion can jump a third time in Mission 1")
+	w.jump_release();w.jump_press();check(w.jumps==3,"The fourth press grants no jump")
 	for hero in ["rabbit","eren"]:
 		var short:=fresh(hero);short.jump_press();tick(short,.05);check(short.grounded(),hero+" stays planted while charging");short.jump_release();var low:=short.velocity.y
 		var long:=fresh(hero);long.jump_press();tick(long,1.2);long.jump_release();check(long.velocity.y<low-400.,hero+" release launches proportionally to charge")

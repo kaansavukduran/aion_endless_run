@@ -77,7 +77,9 @@ func check_motion_contract() -> void:
 				for enabled in [true,false]:
 					var w:=fresh(hero);w.aim_direction=Vector2.RIGHT;w.pose_motion_enabled=enabled;w.walk_distance=174.*(frame+.1)/6.
 					if clip=="walk":w.velocity.x=235.
-					if clip=="air_fire":w.player.y=-100.;w.air_time=.15
+					if clip=="air_fire":
+						w.player.y=-100.;w.air_time=.15
+						if hero=="armadillo":w.velocity.y=lerpf(-650.,650.,float(frame)/5.)
 					if clip.begins_with("crouch_"):
 						w.move_axis.y=1.
 						if clip=="crouch_walk":w.velocity.x=100.;w.walk_distance=110.*(frame+.1)/6.
@@ -86,7 +88,9 @@ func check_motion_contract() -> void:
 					var pose: Dictionary=view.hero_pose(hero,true,clip=="air_fire",w.walk_distance)
 					var source_prefix: String="mission-hero-" if hero in MissionHeroArt.HEROES else "m1-body-"
 					check(str(pose.source_key).begins_with(source_prefix),"Actual renderer consumes this hero's current body provider instead of archived gun sheets: "+hero)
-					var expected: Dictionary=M1HeroArt.metrics(hero,clip,frame if enabled else 0)
+					var expected_frame:=frame if enabled else 0
+					if enabled and hero=="armadillo" and clip=="air_fire":expected_frame=RunnerWorld.flight_frame_for(w.velocity.y,w.air_time,6)
+					var expected: Dictionary=M1HeroArt.metrics(hero,clip,expected_frame)
 					check(pose.source_key==expected.source_key and int(pose.source_row)==int(expected.source_row) and int(pose.source_frame)==int(expected.source_frame),"Actual renderer honors the same animated/static authored source, including explicit held cels: "+hero+"/"+clip)
 					check(w.armed_muzzle().distance_to(drawn_barrel(w))<.001,"Animation preference keeps physical and rendered weapon aligned")
 					check(not w.snapshot().has("pose_motion_enabled"),"Pose preference stays ephemeral and cannot overwrite checkpoint data")

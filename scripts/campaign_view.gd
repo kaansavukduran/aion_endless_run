@@ -317,6 +317,7 @@ func draw_world() -> void:
 		draw_rect(Rect2(landing-Vector2(28.,1.),Vector2(56.,2.)),Color("e9ba7e"))
 	if host.motion_enabled and not host.options.reduced_motion:
 		MissionHeroArt.draw_shell_contacts(self)
+	MissionHeroArt.draw_sprint_fire(self,false)
 	if not bool(world.mount.ridden) and world.mount_transition.is_empty():
 		draw_pose(pose,world.player,int(M1CombatArt.body_spec(world).mirror),1.,tint)
 	if not world.mount_transition.is_empty():
@@ -324,6 +325,7 @@ func draw_world() -> void:
 	elif not bool(world.mount.ridden) and world.state in ["playing","briefing","paused","travel"]:
 		draw_hero_weapon(pose,tint)
 		CampaignGrenadeArt.draw_held(self)
+	MissionHeroArt.draw_sprint_fire(self,true)
 	MissionHeroArt.draw_tongue(self)
 	MissionFrogSpitArt.carried(self)
 
@@ -385,6 +387,7 @@ func draw_world() -> void:
 		draw_rect(Rect2(pos+Vector2(-8.,-point),Vector2(text_width+16.,point+10.)),Color("261f2a"))
 		draw_string(font,pos,cause,HORIZONTAL_ALIGNMENT_LEFT,-1,point,Color("f3c893"))
 	if world.charging: small_health(at(world.player+Vector2(-28,-112)),56,world.charge_ratio())
+	MissionHeroArt.draw_skill_status(self)
 	draw_npcs(true) # Keep the thank-you and bag visible in front of a contacted hull.
 	for b in world.bullets:
 		var p := at(b.p)
@@ -535,6 +538,7 @@ func draw_combat_cues() -> void:
 func hero_weapon_visible() -> bool:
 	# The authored throw includes release and follow-through with an open hand.
 	# Re-equipping waits for the complete action, matching World's fire gate.
+	if world.character=="frog" and MissionHeroAbilities.active(world) and not world.fire_held and world.shot_flash<=0.:return false
 	return world.grenade_throw.is_empty() and not MissionHeroAbilities.compact(world)
 
 func draw_hero_weapon(pose: Dictionary,tint: Color) -> void:
