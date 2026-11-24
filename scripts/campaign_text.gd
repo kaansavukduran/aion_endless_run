@@ -35,7 +35,7 @@ const LOCAL := {
 const HERO_SKILL_TEXT := {
  "context_swap_short":["Değiştir","Swap"],
  "skill_roll":["Yuvarlan","Roll"],"skill_tongue":["Dil at","Tongue"],"skill_spit":["Tükür","Spit"],
- "skill_ready":["Hazır","Ready"],"skill_crouch":["Eğil","Crouch"],
+ "skill_ready":["Hazır","Ready"],"skill_land":["Yere in","Land"],
  "skill_recover":["Toparlanıyor","Recovering"],"skill_cooldown":["Bekle","Cooldown"],
  "skill_active":["Aktif","Active"]
 }

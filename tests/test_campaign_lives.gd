@@ -20,7 +20,7 @@ func roundtrip(w: AionCampaignWorld) -> AionCampaignWorld:
 func test_lives() -> void:
 	var w:=AionCampaignWorld.new();w.begin("sheep");w.load_section("arena")
 	w.boss.engaged=true;w.boss.hp=41;w.boss.phase=2;w.boss.ports=[0,3]
-	w.player=Vector2(2240.,0.);w.flock=3;w.grenades=2;w.weapon="heavy";w.ammunition=6
+	w.player=Vector2(2240.,0.);w.flock=AionCampaignWorld.MAX_FLOCK;w.grenades=2;w.weapon="heavy";w.ammunition=6
 	w.spawn_enemy("gnome",2100.,0.,1337);w.enemies.back().defeated=true
 	w.activated["arena:gate"]=true;w.taken["arena:reward"]=true;w.awarded["arena:reward"]=true;w.rescued.append("arena:keeper")
 	var area:=Rect2(1728.,-420.,1152.,500.)
@@ -29,7 +29,7 @@ func test_lives() -> void:
 		w.invulnerable=0.
 		w.damage_player("shot");w.damage_player("pit");w.damage_player("impact")
 		check(w.hp==0 and w.attempts_remaining==2-death and w.losses==death+1,"Concurrent damage spends exactly one body and one life")
-		check(w.flock==3 and w.death_cause=="shot","The flock never absorbs a hit or changes the chosen cause")
+		check(w.flock==AionCampaignWorld.MAX_FLOCK and w.death_cause=="shot","The flock never absorbs a hit or changes the chosen cause")
 		check(w.grenades==2 and w.weapon=="pistol","Reserve spawn drops the current weapon without refilling grenades")
 		w=roundtrip(w)
 		check(w.boss.hp==41 and w.boss.phase==2 and w.boss.ports==[0,3] and w.enemies.back().defeated,"Save preserves boss and defeated enemies")

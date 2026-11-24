@@ -148,7 +148,7 @@ static func on_gift_collected(w,item: Dictionary) -> void:
 	if w.awarded.has(id+":gift"):return
 	w.award(id+":gift",0);w.gift_drops.erase(id)
 	w.supply(id+":supply",1)
-	if w.character=="sheep":w.flock=mini(3,w.flock+1)
+	if w.character=="sheep":w.flock=mini(AionCampaignWorld.MAX_FLOCK,w.flock+1)
 	w.notice="arc_maintenance" if item.get("role","")=="archivist" else "arc_thanks";w.notice_time=2.;w.pending_events.append("rescue_gift")
 	if item.get("role","")=="technician":
 		w.supply(id+":technician",1)

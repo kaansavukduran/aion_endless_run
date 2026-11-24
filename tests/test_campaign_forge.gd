@@ -31,7 +31,7 @@ func run() -> void:
 	for hz in [60,120,240]:
 		var a := fresh();a.jump_press();a.jump_release()
 		var reference := apex(a,hz)
-		for hero in ["rabbit","eren"]:
+		for hero in ["rabbit","eren","frog"]:
 			var low := fresh(hero);low.jump_press();low.jump_release()
 			var tap := apex(low,hz)
 			check(absf(tap/reference-1.75)<.04,"Actual tap apex is1.75 Aion: %s/%d" % [hero,hz])
@@ -50,6 +50,30 @@ func run() -> void:
 		owl.jump_release();owl.jump_press();check(owl.flap_count==3,"Fourth fresh press cannot flap")
 		tick(owl,.3,hz);check(owl.gliding and owl.velocity.y<=85.,"Held glide resumes after powered ascent")
 		owl.jump_release();tick(owl,4.,hz);check(owl.grounded() and owl.flap_count==0,"Landing safely refills all three wingbeats")
+	var aion:=fresh()
+	for jump_index in 3:
+		aion.jump_press();aion.jump_release();tick(aion,.05)
+		check(aion.jumps==jump_index+1,"Aion spends a distinct jump on press %d"%(jump_index+1))
+	tick(aion,.06)
+	var falling_speed:=aion.velocity.y
+	aion.jump_press();aion.jump_release()
+	check(aion.jumps==3 and aion.velocity.y==falling_speed,"There is no fourth jump boost")
+	tick(aion,3.)
+	check(aion.grounded() and aion.jumps==0,"Landing restores Aion's whole jump allowance")
+
+	var sheep:=fresh("sheep")
+	for i in 3:CampaignRescue.on_gift_collected(sheep,{"rescue_id":"test-"+str(i)})
+	check(sheep.flock==2,"New recruits stop at the leader plus one sheep")
+	var old_sheep:=sheep.snapshot(false)
+	old_sheep.schema=3;old_sheep.flock=3
+	old_sheep.rally=CampaignRecovery.capture(sheep,140.);old_sheep.rally.flock=3
+	var restored_sheep:=AionCampaignWorld.new()
+	check(restored_sheep.restore(old_sheep) and restored_sheep.flock==2,"Legacy saves with two companions reopen with one")
+
+	var frog:=fresh("frog")
+	var old_frog:=frog.snapshot();old_frog.frog_cooldown=9.4
+	var restored_frog:=AionCampaignWorld.new()
+	check(restored_frog.restore(old_frog) and restored_frog.frog_cooldown==5.,"Legacy tongue cooldown migrates without rejecting the save")
 	var dirs: Array[Vector2]=[Vector2.RIGHT,Vector2(1,-1).normalized(),Vector2.UP,Vector2(-1,-1).normalized(),Vector2.LEFT,Vector2(-1,1).normalized(),Vector2.DOWN,Vector2(1,1).normalized()]
 	for hero in AionCampaignWorld.HEROES:
 		for direction in dirs:

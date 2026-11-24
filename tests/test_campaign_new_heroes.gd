@@ -53,10 +53,64 @@ func test_shell_contacts() -> void:
 	ledge.load_section("quay")
 	check(ledge.shell_contacts.is_empty() and not ledge.snapshot().has("shell_contacts"),"contacts clear on travel and do not enter saves")
 
+func test_roll_chain() -> void:
+	var w:=clean("armadillo")
+	w.player=Vector2(700.,0.);w.move_axis=Vector2.RIGHT
+	advance(w,.10)
+	check(MissionHeroArt.body_spec(w).action=="walk","Horizontal input leaves Armadillo upright")
+	check(w.interact() and w.roll_charges==2,"Grounded E-equivalent input starts the first roll while standing")
+	advance(w,.20)
+	var first:=w.player.x
+	check(MissionHeroAbilities.rolling(w) and w.interact() and w.roll_charges==1,"A second press extends the rush without uncurling")
+	advance(w,.20)
+	check(w.player.x>first and w.interact() and w.roll_charges==0,"A third press starts a distinct rush")
+	check(not w.interact(),"A fourth press cannot restart the exhausted shell")
+	advance(w,1.30)
+	check(w.roll_cooldown>2.8 and not w.interact(),"The recharge starts after the third rush")
+	var resumed:=AionCampaignWorld.new()
+	check(resumed.restore(w.snapshot()) and resumed.roll_charges==0 and resumed.roll_cooldown>2.8,"Exhausted charges survive reopening the checkpoint")
+	w.state="paused";var remaining:=w.roll_cooldown;advance(w,1.)
+	check(is_equal_approx(w.roll_cooldown,remaining),"Paused time freezes shell recharge")
+	w.state="playing";advance(w,remaining+.05)
+	check(w.roll_charges==3 and w.interact(),"One recharge restores all three charges")
+
+func test_sprint_fire() -> void:
+	for hero in ["rabbit","eren"]:
+		var w:=clean(hero);w.player=Vector2(700.,0.)
+		w.move_axis=Vector2.RIGHT;w.boost_held=true
+		var first:=target(w,778.)
+		first.armour=2
+		advance(w,.15)
+		check(first.defeated and w.hp==1 and w.sprint_fire>2.8,"Sprint fire defeats a contact enemy with armour: "+hero)
+		w.state="paused";var remaining:=w.sprint_fire;advance(w,1.)
+		check(is_equal_approx(w.sprint_fire,remaining),"Pause freezes the visible fire duration")
+		w.state="playing";advance(w,3.)
+		check(w.sprint_fire==0. and w.sprint_recovery>0.,"Holding sprint exhausts the three-second fire")
+		var second:=target(w,w.player.x+80.)
+		advance(w,.33)
+		check(w.hp==0 and not second.defeated,"The same sprint contact damages the rabbit after the fire: "+hero)
+		w=clean(hero);w.player=Vector2(700.,0.);w.move_axis=Vector2.RIGHT;w.boost_held=true
+		advance(w,.15)
+		w.boost_held=false;advance(w,3.1)
+		w.boost_held=true;advance(w,.05)
+		check(w.sprint_fire>2.9,"A fresh sprint reignites after recovery: "+hero)
+
+func test_air_fire_stability() -> void:
+	var w:=clean("armadillo");w.player.y=-150.;w.velocity=Vector2(100.,-150.);w.air_time=.24
+	var idle_frame: int=MissionHeroArt.body_spec(w).frame
+	for flash in [.18,.15,.10,.05,0.]:
+		w.shot_flash=flash
+		check(MissionHeroArt.body_spec(w).frame==idle_frame,"Arm shooting does not reset a fixed flight pose")
+	w.air_time=.5;w.velocity.y=300.
+	check(MissionHeroArt.body_spec(w).frame>idle_frame,"Armadillo body still animates through descent")
+
 func _initialize() -> void:call_deferred("run")
 
 func run() -> void:
 	test_shell_contacts()
+	test_roll_chain()
+	test_sprint_fire()
+	test_air_fire_stability()
 	for hero in ["armadillo","frog"]:
 		var w:=clean(hero)
 		check(w.character==hero,"new hero begins by stable identity: "+hero)
@@ -124,9 +178,7 @@ func run() -> void:
 	w.attack_press();advance(w,.10);w.attack_release()
 	check(w.hero_skill.is_empty() and w.shots>0,"crouch+Fire shoots and never rolls")
 	w.move_axis=Vector2.ZERO
-	check(not w.interact() and w.hero_skill.is_empty(),"standing skill does not unexpectedly launch roll")
-	w.move_axis=Vector2.DOWN
-	check(w.interact() and str(w.hero_skill.phase)=="windup","crouch+context skill begins visible shell windup")
+	check(w.interact() and str(w.hero_skill.phase)=="windup","standing skill alone begins visible shell windup")
 	check(not w.interact(),"held/repeated skill cannot restart an active roll")
 	var start:=w.player
 	advance(w,.18)
