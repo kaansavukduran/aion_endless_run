@@ -89,7 +89,6 @@ var presentation_stage := ""
 var presentation_time := 0.0
 var presentation: CampaignPresentation
 var presentation_skip: Button
-var intro_pending := false
 var complete_presented := false
 var result_elapsed:=2.
 var result_score: Label
@@ -103,7 +102,6 @@ var new_best := false
 var resume_on_ready := false
 var application_active := true
 var checkpoint_invalid := false
-var tutorial_seen := false
 var launch_on_ready := false
 var settings_ok := true
 
@@ -124,11 +122,9 @@ func _ready() -> void:
 	RunnerBrowserSave.restore(cfg)
 	options.load_from(cfg); pad.load_from(cfg)
 	audio_enabled=bool(cfg.get_value("prefs","audio",true));audio_volume=float(cfg.get_value("prefs","volume",.45))
-	tutorial_seen=bool(cfg.get_value("prefs","campaign_help_seen",false))
 	motion_enabled=bool(cfg.get_value("prefs","motion",true))
 	touch_mode=OS.has_feature("mobile")
 	if OS.has_feature("web"): touch_mode=bool(JavaScriptBridge.eval("matchMedia('(pointer:coarse)').matches"))
-	world.begin(selected_hero)
 	load_checkpoint()
 	view=AionCampaignView.new();view.host=self;view.world=world;view.font=options.font_for(FONT);add_child(view)
 	layer=CanvasLayer.new();add_child(layer)
@@ -147,9 +143,12 @@ func _ready() -> void:
 		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');if(!c)return;['data-state','data-page','data-ui-ready','data-ui'].forEach(k=>c.removeAttribute(k));c.dataset.mode='campaign'})()")
 	get_viewport().size_changed.connect(resize)
 	Input.joy_connection_changed.connect(func(_id,_connected):release_all())
-	resize()
-	if resume_on_ready and not saved.is_empty() and saved_can_resume():resume_saved.call_deferred()
-	elif launch_on_ready:begin_new.call_deferred()
+	resize(false)
+	if launch_on_ready:begin_new()
+	elif resume_on_ready and saved_can_resume():resume_saved()
+	else:
+		world.begin(selected_hero)
+		build_ui()
 
 func _exit_tree() -> void:
 	if OS.has_feature("web"):
@@ -189,7 +188,7 @@ func safe_rect(raw: Vector2) -> Rect2:
 	if OS.has_feature("mobile"):return options.native_safe_layout(raw)
 	return Rect2(Vector2.ZERO,raw)
 
-func resize() -> void:
+func resize(rebuild: bool=true) -> void:
 	if not is_instance_valid(ui):return
 	release_all()
 	var raw:=get_viewport_rect().size
@@ -206,7 +205,7 @@ func resize() -> void:
 	view.scene_w=view_w/zoom;view.scene_h=view_h/zoom
 	view.ground=(view_h-(220. if touch_mode else 92.))/zoom
 	ui.size=Vector2(view_w,view_h)
-	build_ui()
+	if rebuild:build_ui()
 
 func label(value: String,size: int=20) -> Label:
 	var item:=Label.new();item.text=value;item.add_theme_font_size_override("font_size",font_size(size));item.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -539,9 +538,6 @@ func confirm_continue() -> void:
 
 func finish_help() -> void:
 	if help_return!="":menu_kind=help_return;help_return="";build_ui();return
-	if not tutorial_seen:
-		tutorial_seen=true
-		var cfg:=ConfigFile.new();cfg.load("user://save.cfg");RunnerBrowserSave.restore(cfg);cfg.set_value("prefs","campaign_help_seen",true);settings_ok=persist_preferences(cfg)
 	close_menu()
 
 func build_presentation() -> void:
@@ -556,26 +552,31 @@ func build_presentation() -> void:
 
 func start_presentation(stage: String) -> void:
 	release_all();presentation_stage=stage;presentation_time=0.;menu_kind="";world.state="complete" if stage=="victory" else "story"
-	sound({"intro":"mission_start","boss_reveal":"boss_attack","victory":"victory"}[stage]);build_ui()
+	sound("boss_attack" if stage=="boss_reveal" else "victory");build_ui()
 
 func skip_presentation() -> void:
 	var stage:=presentation_stage
 	if stage=="":return
 	presentation_stage="";presentation_time=0.;release_all()
-	if stage=="intro":world.state="playing";save_checkpoint()
-	elif stage=="boss_reveal":
+	if stage=="boss_reveal":
 		world.boss.engaged=true;world.state="playing";save_checkpoint()
 	else:menu_kind="outro";outro_step=0;save_checkpoint()
 	build_ui()
 
 func begin_new() -> void:
-	checkpoint_invalid=false;world.begin(selected_hero);world.state="story";menu_kind="help";help_step=0;outro_step=0;boss_announced=false;view.camera_x=0.;complete_presented=false;intro_pending=true;new_best=false;save_checkpoint();build_ui()
-	if tutorial_seen or launch_on_ready or resume_on_ready:close_menu()
+	release_all()
+	checkpoint_invalid=false;world.begin(selected_hero);world.state="playing";menu_kind=""
+	presentation_stage="";presentation_time=0.
+	help_step=0;help_return="";outro_step=0;boss_announced=false
+	view.camera_x=0.;view.camera_y=0.;impact_hold=0.;complete_presented=false;new_best=false
+	save_checkpoint();sound("mission_start");build_ui()
+
 func resume_saved() -> void:
 	if not saved_can_resume():return
-	if not world.restore(saved):checkpoint_invalid=true;build_ui();return
+	if not world.restore(saved):checkpoint_invalid=true;world.begin(selected_hero);build_ui();return
+	selected_hero=world.character
 	menu_kind="continue_offer" if world.state=="continue_offer" else ""
-	help_step=0;boss_announced=bool(world.boss.get("engaged",false));intro_pending=false
+	help_step=0;boss_announced=bool(world.boss.get("engaged",false))
 	if world.recovery_view.has_area():
 		view.camera_x=world.recovery_view.position.x
 		view.camera_y=world.recovery_view.position.y+view.ground
@@ -583,7 +584,6 @@ func resume_saved() -> void:
 	save_checkpoint();build_ui()
 func close_menu() -> void:
 	release_all();menu_kind="";world.paused_crouch=false;world.state="playing";build_ui()
-	if intro_pending:intro_pending=false;start_presentation("intro")
 func toggle_pause() -> void:
 	if world.state=="playing":
 		world.paused_crouch=world.crouching();world.state="paused"
@@ -917,10 +917,12 @@ func update_arcade_aim(dt: float=0.) -> void:
 func pointer_aim() -> Vector2:
 	# Direction from the hand (or vehicle saddle) to the pointer, in screen space.
 	var offset: Vector2=Vector2(0.,-42.) if bool(world.mount.ridden) else Vector2(M1CombatArt.placement(world).grip)
-	# A mirrored hand must not move across the cursor and flip aim back again.
-	if world.character=="armadillo":offset.x=0.
-	var hand: Vector2=world.player+offset
-	var toward: Vector2=mouse_point-view.get_global_transform_with_canvas()*view.at(hand)
+	var transform:=view.get_global_transform_with_canvas()
+	# Between the two possible hand positions, a mirrored hand would cross
+	# the pointer and reverse aim again next frame. Use the body centre there.
+	var local_point:=transform.affine_inverse()*mouse_point
+	if absf(local_point.x-view.at(world.player).x)<=absf(offset.x):offset.x=0.
+	var toward:=mouse_point-transform*view.at(world.player+offset)
 	return toward.normalized() if toward.length()>10. else Vector2.ZERO
 
 func _process(dt: float) -> void:
@@ -930,7 +932,7 @@ func _process(dt: float) -> void:
 	if not is_instance_valid(view):return
 	if presentation_stage!="" and application_active:
 		presentation_time+=clampf(dt,0.,.05)
-		var duration: float={"intro":2.,"boss_reveal":1.65,"victory":1.8}[presentation_stage]
+		var duration:=1.65 if presentation_stage=="boss_reveal" else 1.8
 		if presentation_time>=duration:skip_presentation()
 	update_ambient()
 	update_result_score(dt)
@@ -1224,7 +1226,7 @@ func accessible_update() -> void:
 	if menu_kind=="continue_offer":summary+=" · %d · "%ceili(world.continue_remaining)+old("name_"+world.continue_hero)
 	if menu_kind=="" and world.section=="arena" and bool(world.boss.active):summary+=" · "+t("arena")+" %d/%d"%[world.boss.hp,world.boss.max_hp]+" · "+t("phase")+" "+str(world.boss.phase)
 	if presentation_stage=="boss_reveal":summary=t("arena")
-	elif presentation_stage!="":summary=t("won")+" · "+t("lights_restored") if presentation_stage=="victory" else t("mission")+" · "+t("title")+" · "+t("intro_objective")
+	elif presentation_stage=="victory":summary=t("won")+" · "+t("lights_restored")
 	var payload:=JSON.stringify({"items":entries,"language":language,"page":menu_kind,"summary":summary})
 	if payload==accessibility_stamp:return
 	accessibility_stamp=payload

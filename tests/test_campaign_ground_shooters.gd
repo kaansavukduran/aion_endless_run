@@ -69,6 +69,10 @@ func run() -> void:
 	check(w.bullets.size()==1 and bool(scout.burst_pending),"The first bolt leaves before the second")
 	for tick in 25:w.step_enemies(.01)
 	check(w.bullets.size()==2 and scout.recover>.35 and not bool(scout.burst_pending),"A spaced second bolt leaves an exposed recovery window")
+	for tick in 100:
+		if scout.windup>0.:break
+		w.step_enemies(.01)
+	check(int(scout.attacks)==2 and scout.windup>0. and bool(scout.burst_pending),"The third telegraph also visibly warns of a second bolt")
 	for section in CampaignRhythm.GROUND_PATROLS:
 		w.load_section(section)
 		var patrols:=w.enemies.filter(func(e):return int(str(e.id).get_slice(":",2)) in [910,911])

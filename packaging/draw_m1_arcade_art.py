@@ -1,7 +1,8 @@
-"""Draw the Mission 1 selection, flying enemy and terrain mechanism sheets.
+"""Pack the Mission 1 portraits, flying enemies and terrain mechanisms.
 
-On the project root, extract the source cels with m1_arcade_sprite_sources.gd
-and pass that staging directory to this script. Only original game art is used.
+The staging directory holds cels extracted by m1_arcade_sprite_sources.gd.
+To rebuild the portraits, also pass the three 2×3 portrait source illustrations
+(open, half, closed) with --portraits. Only the registered eye windows move.
 """
 import argparse
 from pathlib import Path
@@ -11,38 +12,20 @@ from PIL import Image, ImageDraw
 
 # Face patches are in original cel pixels. Each eye has its own shape and
 # palette so adjacent highlights, brow, hair and silhouette stay registered.
-HEROES = {
-    "aion": ((22, 0, 193, 140), [
-        ((104, 54, 133, 80), "#f89cb7", "#ffd0dc", "#7a4155"),
-        ((157, 55, 171, 76), "#f5a4bf", "#ffd0dc", "#7a4155"),
-    ]),
-    "sheep": ((0, 0, 157, 154), [
-        ((71, 70, 106, 103), "#f8c9ac", "#ffe2c8", "#7b4c3a"),
-        ((120, 72, 133, 96), "#f3c2a2", "#ffe2c8", "#724637"),
-    ]),
-    "rabbit": ((0, 0, 120, 135), [
-        ((70, 62, 94, 86), "#d7956b", "#efbc8d", "#58392d"),
-        ((105, 65, 115, 85), "#ca8a5e", "#e6ac82", "#58392d"),
-    ]),
-    "eren": ((0, 0, 143, 126), [
-        ((83, 47, 106, 70), "#cc8960", "#e9ac7a", "#62392c"),
-        ((119, 49, 132, 69), "#cd8960", "#ebaa7d", "#60372a"),
-    ]),
-    "armadillo": ((6, 0, 135, 104), [
-        ((77, 30, 98, 49), "#d98648", "#f1ad67", "#643525"),
-    ]),
-    "frog": ((0, 0, 134, 109), [
-        ((60, 10, 90, 35), "#76a53b", "#a7d454", "#33491d"),
-        ((109, 9, 123, 30), "#709636", "#99bd50", "#344b24"),
-    ]),
-}
+PORTRAIT_EYES = (
+    ((151, 197, 293, 310), (341, 263, 445, 355)),  # Aion
+    ((675, 239, 813, 333), (851, 205, 925, 302)),  # Kutsanmış
+    ((190, 722, 335, 839), (379, 724, 457, 839)),  # Ayça
+    ((737, 718, 862, 826), (896, 778, 982, 866)),  # Eren
+    ((181, 1195, 325, 1300),),                  # Armadillo
+    ((604, 1064, 800, 1239), (835, 1072, 970, 1224)),  # Kurbağa
+)
 FOES = {
     "gnome": ((31, 58, 50, 73), "#e6ac80", "#f9d0a4", "#644235"),
     "beetle": ((51, 88, 86, 114), "#81506a", "#a16c79", "#3b293d"),
     "crow": ((26, 98, 52, 121), "#454c69", "#5a6382", "#24283d"),
     "slime": ((47, 87, 83, 117), "#7da04c", "#a3b76a", "#455b30"),
 }
-BAYER = ((0, 8, 2, 10), (12, 4, 14, 6), (3, 11, 1, 9), (15, 7, 13, 5))
 
 
 def eyelid(image, spec, narrow=False):
@@ -70,29 +53,23 @@ def eyelid(image, spec, narrow=False):
     image.alpha_composite(Image.composite(patch, Image.new("RGBA", image.size), image.getchannel("A")))
 
 
-def portraits(source):
-    cell = (136, 112)
-    sheet = Image.new("RGBA", (cell[0]*3, cell[1]*len(HEROES)))
-    for row, (name, (crop, eyes)) in enumerate(HEROES.items()):
-        base = Image.open(source / f"body-{name}.png").convert("RGBA")
-        for frame in range(3):
-            pose = base.copy()
+def portraits(sources):
+    cell = 256
+    open_eyes, half, closed = [Image.open(path).convert("RGB") for path in sources]
+    assert all(image.size == (1024, 1536) for image in (open_eyes, half, closed))
+    sheet = Image.new("RGB", (cell * 3, cell * len(PORTRAIT_EYES)))
+    for row, eyes in enumerate(PORTRAIT_EYES):
+        x, y = (row % 2) * 512, (row // 2) * 512
+        tile = (x, y, x + 512, y + 512)
+        original = open_eyes.crop(tile)
+        for frame, image in enumerate((open_eyes, half, closed)):
+            pose = original.copy()
             if frame:
-                for eye in eyes:
-                    eyelid(pose, eye, narrow=frame == 1)
-            pose = pose.crop(crop)
-            # Consistent body scale through a blink. Fit faces optically,
-            # keeping each pair of eyes in identical coordinates in all cels.
-            pose.thumbnail((cell[0]-8, cell[1]-5), Image.Resampling.NEAREST)
-            alpha = pose.getchannel("A")
-            for y in range(max(0, pose.height-10), pose.height):
-                keep = (pose.height-y-1)*1.6
-                for x in range(pose.width):
-                    if BAYER[y%4][x%4] >= keep:
-                        alpha.putpixel((x, y), 0)
-            pose.putalpha(alpha)
-            sheet.alpha_composite(pose, (frame*cell[0]+(cell[0]-pose.width)//2,
-                                         row*cell[1]+2))
+                for left, top, right, bottom in eyes:
+                    region = (left, top, right, bottom)
+                    pose.paste(image.crop(region), (left - x, top - y))
+            sheet.paste(pose.resize((cell, cell), Image.Resampling.NEAREST),
+                        (frame * cell, row * cell))
     return sheet
 
 
@@ -219,7 +196,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("staging", type=Path)
     parser.add_argument("--output", type=Path, default=Path("assets"))
+    parser.add_argument("--portraits", nargs=3, type=Path, metavar=("OPEN", "HALF", "CLOSED"))
     args = parser.parse_args()
-    portraits(args.staging).save(args.output / "m1-selection-portraits.png", optimize=True)
+    if args.portraits:
+        portraits(args.portraits).save(args.output / "m1-selection-portraits.png", optimize=True)
     spit_cels(args.staging).save(args.output / "m1-frog-spit.png", optimize=True)
     terrain_sheet().save(args.output / "m1-locks-and-traps.png", optimize=True)

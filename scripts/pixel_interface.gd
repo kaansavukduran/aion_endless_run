@@ -3,58 +3,21 @@ extends RefCounted
 var host
 var roster_previews: Dictionary = {}
 
-var launch_pending := false
-var launch_committed := false
-var launch_callback: Callable
-var launch_clock := 0.
-
 func open_campaign_picker() -> void:
-	if launch_pending or launch_committed:return
+	if host.campaign_started:return
 	host.opening_guide=false
 	host.open_subpage("characters")
 
+func play_campaign() -> void:
+	if host.opening_guide:open_campaign_picker()
+	else:host.start_campaign()
+
 func confirm_hero() -> void:
-	if host.page!="characters":return
-	request_launch(host.start_campaign)
-
-func request_launch(callback: Callable,quick: bool=false) -> void:
-	if launch_pending or launch_committed:return
-	launch_pending=true
-	launch_callback=callback
-	launch_clock=0.
-	host.clear_held_controls()
-	if quick:
-		finish_launch();return
-	trigger_launch_preview(host.character)
-
-func trigger_launch_preview(hero_id: String) -> void:
-	var preview=roster_previews.get(hero_id,null)
-	if not launch_pending:
-		if is_instance_valid(preview):preview.set_select_state("launch")
-		return
-	if not host.decorative_motion() or not is_instance_valid(preview):
-		finish_launch()
-		return
-	preview.set_select_state("launch")
-	preview.clock=launch_clock
-	if not preview.launch_finished.is_connected(finish_launch):preview.launch_finished.connect(finish_launch,CONNECT_ONE_SHOT)
-	lock_launch_controls(host.menu_layer)
-
-func lock_launch_controls(node: Node) -> void:
-	if node is BaseButton:node.disabled=true
-	for child in node.get_children():lock_launch_controls(child)
-
-func finish_launch() -> void:
-	if not launch_pending or launch_committed:return
-	launch_pending=false
-	launch_committed=true
-	var callback:=launch_callback
-	launch_callback=Callable()
-	if callback.is_valid():callback.call()
+	if host.page=="characters":host.start_campaign()
 
 func refresh_preview_state(tile: Button,image: RunnerHeroPreview,id: String) -> void:
 	if not is_instance_valid(image):return
-	image.set_select_state("launch" if launch_pending and id==host.character else ("select" if id==host.character else ("focus" if tile.has_focus() or tile.is_hovered() else "idle")))
+	image.set_select_state("select" if id==host.character else ("focus" if tile.has_focus() or tile.is_hovered() else "idle"))
 
 func stage_y() -> float:
 	return host.view_h*.74
@@ -224,7 +187,6 @@ func card(width: float) -> VBoxContainer:
 
 func main(column: VBoxContainer) -> Button:
 	var h=host
-	if not launch_pending:launch_committed=false
 	var header: BoxContainer=VBoxContainer.new() if h.portrait else HBoxContainer.new()
 	header.alignment=BoxContainer.ALIGNMENT_CENTER
 	header.add_theme_constant_override("separation",10)
@@ -255,24 +217,28 @@ func main(column: VBoxContainer) -> Button:
 			hint.add_theme_font_size_override("font_size",h.ui_size(19))
 			hint.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 			controls.add_child(hint)
-	var utilities: BoxContainer=VBoxContainer.new() if h.portrait else HBoxContainer.new()
-	utilities.add_theme_constant_override("separation",8)
-	column.add_child(utilities)
-	var arcade: Button=h.button(AionCampaignText.word(h.language,"continue_choose" if h.opening_guide else "arcade"),open_campaign_picker,true)
+	var start_row: BoxContainer=VBoxContainer.new() if h.portrait else HBoxContainer.new()
+	start_row.add_theme_constant_override("separation",8);column.add_child(start_row)
+	var arcade: Button=h.button(AionCampaignText.word(h.language,"continue_choose" if h.opening_guide else "arcade"),play_campaign,true)
 	arcade.name="StartCampaign"
-	utilities.add_child(arcade)
+	start_row.add_child(arcade)
 	if h.has_campaign_checkpoint():
-		var resume: Button=h.button(AionCampaignText.word(h.language,"continue_short"),func():request_launch(func():h.campaign_resume_requested=true;h.start_campaign(),true))
+		var resume: Button=h.button(AionCampaignText.word(h.language,"continue_short"),func():h.start_campaign(true))
 		resume.name="ContinueCampaign"
-		utilities.add_child(resume)
+		start_row.add_child(resume)
+	var utilities:=start_row
 	if not h.opening_guide:
+		utilities=VBoxContainer.new() if h.portrait else HBoxContainer.new()
+		utilities.add_theme_constant_override("separation",8);column.add_child(utilities)
+		var choose: Button=h.button(AionCampaignText.word(h.language,"continue_choose"),open_campaign_picker)
+		choose.name="ChooseHero";utilities.add_child(choose)
 		var help: Button=h.button(RunnerFrontText.word(h.language,"how"),func():h.open_subpage("help"))
 		help.name="HowToPlay"
 		utilities.add_child(help)
 	var settings: Button=h.button(h.text("settings"),func():h.open_subpage("settings"))
 	settings.name="OpenSettings"
 	utilities.add_child(settings)
-	for control in utilities.get_children():
+	for control in start_row.get_children()+(utilities.get_children() if utilities!=start_row else []):
 		control.autowrap_mode=TextServer.AUTOWRAP_OFF
 		control.add_theme_font_size_override("font_size",h.ui_size(20))
 		control.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -290,8 +256,6 @@ func center_main(column: VBoxContainer,generation: int) -> void:
 
 func characters() -> void:
 	var h=host
-	var old_preview=roster_previews.get(h.character,null)
-	if launch_pending and is_instance_valid(old_preview):launch_clock=old_preview.clock
 	roster_previews.clear()
 	var stage:=Control.new()
 	stage.name="HeroSelection"
@@ -351,7 +315,7 @@ func characters() -> void:
 		name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tile.add_child(name_label)
 		var name_h: float=ceilf(name_label.get_minimum_size().y)+8.
-		h.position_control(portrait_art,Vector2(6.,5.),Vector2(tile_w-12.,tile_h-name_h-8.))
+		h.position_control(portrait_art,Vector2(2.,2.),Vector2(tile_w-4.,tile_h-name_h-2.))
 		h.position_control(name_label,Vector2(4.,tile_h-name_h-2.),Vector2(tile_w-8.,name_h))
 		if id==h.character:selected=tile
 	var back_w: float=maxf(112.,back.get_combined_minimum_size().x+12.)
@@ -360,7 +324,6 @@ func characters() -> void:
 	h.position_control(back,Vector2(0.,height-footer_h),Vector2(back_w,footer_h))
 	h.position_control(confirm,Vector2(back_w+gap,height-footer_h),Vector2(width-back_w-gap,footer_h))
 	h.focus_later.call_deferred(selected)
-	if launch_pending:trigger_launch_preview(h.character)
 
 func tutorial() -> void:
 	var h=host

@@ -13,7 +13,8 @@ var manual_frame := -1
 var show_guides := false
 const PLAYABLE_HEROES = preload("res://scripts/world.gd").PLAYABLE_HEROES
 const PORTRAITS=preload("res://assets/m1-selection-portraits.png")
-const PORTRAIT_SIZE:=Vector2(136,112)
+const PORTRAIT_SIZE:=Vector2(256,256)
+const PORTRAIT_FOCUS_Y:=[.52,.38,.56,.54,.48,.45]
 var portrait_art := false
 var launch_complete := false
 var rendered_frame := -1
@@ -172,26 +173,12 @@ func _draw() -> void:
 
 func draw_portrait() -> void:
 	var row:=AionCampaignWorld.HEROES.find(hero)
-	if row<0:return
+	if row<0 or size.x<=0. or size.y<=0.:return
 	rendered_frame=current_frame()
-	rendered_pose={"source_key":"m1-selection-portraits","source_frame":rendered_frame}
-	var hue:=Color(AionCampaignWorld.COLORS[hero])
-	var selected:=select_state in ["select","launch"]
-	var field:=Rect2(Vector2.ZERO,size)
-	draw_rect(field,Color("252337") if selected else Color("25232e"))
-	var step:=11.
-	for y in range(8,int(size.y),int(step)):
-		for x in range(7+(y%2)*5,int(size.x)-4,int(step)):
-			var ink:=hue
-			ink.a=.20 if selected else .07
-			draw_rect(Rect2(x,y,2,2),ink)
-	var ratio:=minf((size.x-12.)/PORTRAIT_SIZE.x,(size.y-4.)/PORTRAIT_SIZE.y)
-	var area: Vector2=(PORTRAIT_SIZE*ratio).floor()
-	var origin: Vector2=((size-area)*.5).floor()
-	draw_texture_rect_region(PORTRAITS,Rect2(origin,area),
-		Rect2(Vector2(rendered_frame*PORTRAIT_SIZE.x,row*PORTRAIT_SIZE.y),PORTRAIT_SIZE),
-		Color.WHITE if selected else Color("c4bbc4"))
-	if selected:
-		for x in [3.,size.x-14.]:
-			draw_rect(Rect2(x,3,11,3),hue)
-			draw_rect(Rect2(x if x<10. else x+8.,6,3,8),hue)
+	var crop_size:=size/maxf(size.x/PORTRAIT_SIZE.x,size.y/PORTRAIT_SIZE.y)
+	var focus:=Vector2(.52,float(PORTRAIT_FOCUS_Y[row]))*PORTRAIT_SIZE
+	var crop_start: Vector2=(focus-crop_size*.5).clamp(Vector2.ZERO,PORTRAIT_SIZE-crop_size)
+	var cell_origin:=Vector2(rendered_frame,row)*PORTRAIT_SIZE
+	var source:=Rect2(cell_origin+crop_start,crop_size)
+	rendered_pose={"source_key":"m1-selection-portraits","source_frame":rendered_frame,"source_rect":source}
+	draw_texture_rect_region(PORTRAITS,Rect2(Vector2.ZERO,size),source)

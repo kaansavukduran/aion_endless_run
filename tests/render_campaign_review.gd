@@ -29,9 +29,9 @@ func clip_pose(clip: String,frame: int) -> String:
 		"crouch_walk":game.world.move_axis=Vector2(1,1);game.world.velocity.x=235.*.42;game.world.walk_distance=(float(frame)+.1)/6.*110.
 		"crouch_fire":game.world.move_axis=Vector2.DOWN;game.world.shot_flash=.18*(1.-(float(frame)+.1)/6.)
 		"air_fire":
-			game.world.player.y=-110.;game.world.velocity.y=-150.;game.world.air_time=.3
+			game.world.player.y=-110.;game.world.air_time=.3
 			game.world.shot_flash=.18*(1.-(float(frame)+.1)/6.)
-			if game.world.character=="armadillo":game.world.velocity.y=lerpf(-650.,650.,float(frame)/5.)
+			game.world.velocity.y=lerpf(-650.,650.,float(frame)/5.)
 		"melee":game.world.melee_time=.28*(1.-(float(frame)+.1)/6.)
 		_:game.world.shot_flash=.18*(1.-(float(frame)+.1)/6.)
 	if clip=="melee" and game.world.character not in ["aion","sheep"]:
@@ -96,7 +96,7 @@ func run() -> void:
 				# Compare the actual rendered source/row/cel, never relabel new heroes
 				# as a legacy atlas or assume source index equals clip index.
 				var expected_frame:=frame
-				if hero=="armadillo" and clip=="air_fire":
+				if clip=="air_fire":
 					expected_frame=RunnerWorld.flight_frame_for(game.world.velocity.y,game.world.air_time,6)
 				var expected: Dictionary=M1HeroArt.metrics(hero,action,expected_frame)
 				check(str(game.view.hero_marker.source)==str(expected.source_key) and int(game.view.hero_marker.row)==int(expected.source_row) and int(game.view.hero_marker.frame)==int(expected.source_frame),"Actual renderer uses the matching registered M1 hero/action/cel: "+hero+" "+clip+" "+str(frame))

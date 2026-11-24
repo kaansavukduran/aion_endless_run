@@ -59,7 +59,8 @@ def arcade_button(name):
  generation=layout['ui_generation'];tap(chosen['point'])
  return arcade_ui(lambda value:value['ui_generation']!=generation)
 def enter(hero):
- menu_button(name='StartCampaign')
+ main_layout=latest('AION_UI ',lambda state:state['page']=='main' and layout_matches_display(state,display_bounds()))
+ menu_button(name='StartCampaign' if main_layout.get('guide') else 'ChooseHero')
  picker=latest('AION_UI ',lambda state:state['page']=='characters' and layout_matches_display(state,display_bounds()))
  roster={button['name'] for button in picker['buttons'] if button['name'].startswith('Select_')}
  check(roster=={'Select_aion','Select_sheep','Select_rabbit','Select_eren','Select_armadillo','Select_frog'},'All six hero rectangles are reachable together')

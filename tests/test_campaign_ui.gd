@@ -52,16 +52,17 @@ func run() -> void:
 				else:
 					for i in 35:game._process(.05)
 				check(game.presentation_stage=="" and game.world.state=="playing" and game.world.boss.engaged and game.world.boss.attack==0,"Natural and skipped reveals both enter the same fresh boss fight")
-	# Reproduce a first-time player after the layout matrix has intentionally
-	# completed the tutorial. Repeat-run tutorial suppression has its own test.
-	game.saved.clear() # A previous test run's Continue action is not a first visit.
-	game.tutorial_seen=false
+	game.saved.clear()
 	game.options.text_scale=1.;game.language="tr";game.menu_kind="briefing";game.build_ui();await process_frame;await process_frame
 	game._input(event(JOY_BUTTON_A));await process_frame
-	check(game.menu_kind=="help","Xbox A / PS Cross activates actual briefing button")
+	check(game.menu_kind=="" and game.world.state=="playing","Xbox A / PS Cross starts a fresh run immediately even from the fallback briefing")
+	game.toggle_pause();await process_frame;await process_frame
+	game.buttons[1].grab_focus()
+	game._input(event(JOY_BUTTON_A));await process_frame;await process_frame
+	check(game.menu_kind=="help","Controls are still available from the real Pause menu")
 	game._input(event(JOY_BUTTON_X));await process_frame
 	check(game.help_step==1,"Xbox X / PS Square activates actual tutorial next button")
-	game.close_menu();game.skip_presentation() # Dedicated presentation suite verifies the new skippable intro.
+	game.finish_help();game.close_menu()
 	game._input(event(JOY_BUTTON_START));await process_frame
 	check(game.menu_kind=="paused" and game.world.state=="paused","Controller Start pauses actual mission")
 	game._input(event(JOY_BUTTON_A));await process_frame

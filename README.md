@@ -1,5 +1,11 @@
 # Aion Endless Run
 
+## 0.57.2 · Doğrudan başlangıç
+
+**Başla** ve **Oyna** seçili kahramanla görevi yeniden başlatır ve ilk karede kumandayı oyuncuya verir. **Sürdür** kayıtlı karşılaşmayı açar. Altı kahramanın kartlarında yeni yakın portreler ve göz kırpma kareleri var.
+
+Havada ateş etmek artık zıplama animasyonunu başa almaz. Kara keşifçileri daha sık çift atış yapar ve mantar mermileri biraz daha hızlı ulaşır.
+
 ## 0.57.1 · Göreve dönüş
 
 İlk kontrol rehberindeki **Kahraman seç** düğmesi altı portreyi açar. Son can kaybedildiğinde sol üstte 10 saniyelik kahraman seçimi görünür. Düşmanlar ve atışlar sahnede hareket etmeye devam eder. Sol ve sağ oklarla, kumandanın yön tuşlarıyla veya ekrandaki oklarla kahraman değiştirilir. **Mücadeleye dön** seçilen kahramanı aynı karşılaşmaya getirir.
