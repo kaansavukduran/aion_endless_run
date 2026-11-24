@@ -31,11 +31,13 @@ static func draw(v) -> void:
 		var frame:=0
 		if bool(o.active):frame=clampi(int(float(o.get("changed",9.))/.18),1,3) if animated else 3
 		elif o.kind in ["current","updraft"]:frame=3
-		elif o.kind=="turret" and fmod(float(o.get("clock",0.)),3.)>2.2:frame=1
+		elif o.kind=="turret" and CampaignContent.turret_warning(o):frame=1
 		if w.completed and o.kind=="lamp":frame=3
 		if o.kind=="gate":
 			CampaignLockArt.gate(v,v.at(Vector2(float(o.x),float(o.y))),w.section,
 				clampi(1+int(float(o.get("changed",9.))*13.),1,5) if bool(o.active) else 0,.76)
+		elif o.kind=="turret":
+			v.draw_pose(v.catalogue.pose("environment",row,frame),Vector2(float(o.x),float(o.y)),int(o.get("facing",1)))
 		else:v.draw_pose(v.catalogue.pose("environment",row,frame),Vector2(float(o.x),float(o.y)))
 	# 0.38.0: Distinct, readable environmental zone cues for water current, terrace updraft, and roots darkness.
 	for z in w.zones:

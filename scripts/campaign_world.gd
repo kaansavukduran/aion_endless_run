@@ -561,6 +561,7 @@ func damage_boss(amount: int) -> void:
 			boss.phase=phase
 
 func enemy_body_hit(enemy: Dictionary) -> void:
+	if state!="playing":return
 	if MissionHeroAbilities.sprinting(self) and sprint_fire>0. and MissionHeroAbilities.sprint_enemy(self,enemy,player_hit_center(),player_hit_center()):return
 	damage_player()
 
@@ -580,6 +581,9 @@ func damage_player(cause: String="enemy") -> void:
 func explode(bomb: Dictionary) -> void:
 	var p: Vector2 = bomb.p
 	blasts.append({"p":p, "age":0., "radius":135., "color":bomb.color})
+	if state=="continue_offer":
+		pending_events.append("blast")
+		return
 	for e in enemies:
 		if not bool(e.defeated) and p.distance_to(Vector2(float(e.x),float(e.y)-30.))<150.: damage_enemy(e,5)
 	if bool(boss.active) and p.distance_to(Vector2(float(boss.x),float(boss.y)-70.))<200.: damage_boss(8)
@@ -683,7 +687,7 @@ func step_enemies(dt: float) -> void:
 			e.dash=maxf(0.,float(e.dash)-dt)
 			var next_x: float=float(e.x)+float(e.dash_direction)*(260. if e.kind=="beetle" else 220.)*dt
 			if CampaignGround.has_floor(floor_at(next_x)):e.x=next_x
-			if absf(player.x-float(e.x))<34. and absf(player.y-float(e.y))<55.:
+			if state=="playing" and absf(player.x-float(e.x))<34. and absf(player.y-float(e.y))<55.:
 				enemy_body_hit(e)
 				if state!="playing":break
 		if float(e.get("dive",0.))>0.:
@@ -691,7 +695,7 @@ func step_enemies(dt: float) -> void:
 			var phase: float=1.-float(e.dive)/float(e.get("dive_duration",.7/.9))
 			var p: Vector2=Vector2(e.dive_start).lerp(Vector2(e.dive_target),minf(1.,phase*2.)) if phase<.5 else Vector2(e.dive_target).lerp(Vector2(float(e.dive_target.x)-65.,float(e.home.y)),(phase-.5)*2.)
 			e.x=p.x;e.y=p.y
-			if p.distance_to(player+Vector2(0,-25.))<35.:
+			if state=="playing" and p.distance_to(player+Vector2(0,-25.))<35.:
 				enemy_body_hit(e)
 				if state!="playing":break
 		if not flying and e.kind!="slime" and CampaignGround.has_floor(floor_at(float(e.x))) and str(e.kind)!="seed":e.y=floor_at(float(e.x))
@@ -753,14 +757,16 @@ func step_boss(dt: float) -> void:
 		if float(boss.wait)<=0.: boss.windup = .95
 
 func step_bullets(dt: float) -> void:
+	var continuing:=state=="continue_offer"
 	for b in bullets:
 		if float(b.age)>=float(b.get("life",3.)):continue
+		if continuing and b.owner!="enemy":b.age=99.;continue
 		if b.kind=="frog_spit":
 			MissionHeroAbilities.spit_step(self,b,dt)
 			continue
 		if b.kind=="honeycomb":
 			CampaignHive.step_comb(self,b,dt)
-			if state!="playing":break
+			if not continuing and state!="playing":break
 			continue
 		if CampaignWeapons.step(self,b,dt):continue
 		var previous: Vector2=b.get("start",b.p)
@@ -775,7 +781,7 @@ func step_bullets(dt: float) -> void:
 		if b.owner == "enemy":
 			var floor:=floor_at(float(b.p.x))
 			if CampaignGround.has_floor(floor) and float(b.p.y)>floor:b.age=99.;continue
-			if Vector2(b.p).distance_to(player_hit_center())<player_hit_radius():
+			if not continuing and Vector2(b.p).distance_to(player_hit_center())<player_hit_radius():
 				damage_player("shot")
 				b.age=99.
 				if state!="playing":break
@@ -815,6 +821,11 @@ func boss_vulnerable() -> bool:
 	# dealing no damage; the visible opening now spans the same real window.
 	return int(boss.phase)!=2 or float(boss.windup)>.15 or float(boss.wait)>.8
 
+func age_blasts(dt: float) -> void:
+	if blasts.is_empty():return
+	for blast in blasts:blast.age=float(blast.age)+dt
+	blasts=blasts.filter(func(b):return float(b.age)<float(b.get("life",.5)))
+
 func step(dt: float) -> void:
 	if state=="respawn":
 		CampaignLives.step_entry(self,clampf(dt,0.,.05))
@@ -827,13 +838,26 @@ func step(dt: float) -> void:
 		if player.y>=support and velocity.y>=0.:player.y=support;velocity.y=0.
 		if death_time>=.8 and (grounded() or CampaignGround.fell_into_pit(self,player) or death_time>1.8):CampaignLives.finish_death(self)
 		return
+	if state=="continue_offer":
+		CampaignLives.tick_offer(self,dt)
+		if state!="continue_offer":return
+		dt=clampf(dt,0.,.05)
+		time+=dt
+		CampaignContent.step(self,dt)
+		CampaignRescue.step(self,dt)
+		CampaignVehicles.step_parked(self,dt)
+		step_enemies(dt)
+		step_boss(dt)
+		step_bullets(dt)
+		age_blasts(dt)
+		CampaignGrenade.step(self,dt)
+		return
 	if state=="victory":
 		dt=clampf(dt,0.,.05)
 		CampaignRescue.step(self,dt)
 		var earlier:=victory_time
 		victory_time+=dt;boss.clock=float(boss.clock)+dt
-		for blast in blasts:blast.age=float(blast.age)+dt
-		blasts=blasts.filter(func(b):return float(b.age)<float(b.get("life",.5)))
+		age_blasts(dt)
 		for moment in [.25,.62]:
 			if earlier<moment and victory_time>=moment:
 				var side:=-1. if moment<.4 else 1.
@@ -942,9 +966,7 @@ func step(dt: float) -> void:
 	step_bullets(dt)
 	if state!="playing":return
 	# Age existing effects first: a new blast must retain its ignition cel.
-	if not blasts.is_empty():
-		for blast in blasts: blast.age = float(blast.age)+dt
-		blasts = blasts.filter(func(b):return float(b.age)<float(b.get("life",.5)))
+	age_blasts(dt)
 	CampaignGrenade.step(self,dt)
 	if CampaignVehicles.stunned(self):return
 	for item in pickups:

@@ -36,10 +36,12 @@ func run() -> void:
 			game.options.text_scale=text_scale
 			for locale in GameText.LANGUAGES:
 				game.language=locale;game.resize();game.world.state="paused"
-				for kind in ["paused","settings","complete","result_details","help","continue_offer","continue_pick","dead"]:
+				for kind in ["paused","settings","complete","result_details","help","continue_offer","dead"]:
 					game.menu_kind=kind;game.build_ui();await process_frame;await process_frame
 					var area:=Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h))
 					check(area.encloses(game.menu.get_global_rect()),"Complete menu fits: "+str(viewport)+" "+str(text_scale)+" "+locale+" "+kind)
+					if kind=="continue_offer":
+						check(game.menu.position==Vector2(12.,12.) and game.menu.size.x<game.view_w*.8 and game.menu.size.y<game.view_h*.5,"Continue stays compact in the top-left")
 					for button in game.buttons:check(area.encloses(button.get_global_rect()),"Actual action fits: "+button.text)
 	# Junctions share the real HUD rather than presenting a choice dialog.
 	for section in CampaignRoutes.FORKS:
@@ -76,20 +78,10 @@ func run() -> void:
 	game._notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
 	game._process(.5)
 	check(is_equal_approx(game.world.continue_remaining,5.5),"The offer resumes from its existing value on focus return")
-	game._input(joy(JOY_BUTTON_START))
-	check(game.menu_kind=="continue_pick" and game.world.attempts_remaining==0,"Start opens the real picker without applying a credit")
-	game._input(joy(JOY_BUTTON_START))
-	check(game.world.continues_used==0,"Repeated Start cannot also confirm the picker")
-	game.life_menu_delay=0.
-	await process_frame;await process_frame
-	game._input(joy(JOY_BUTTON_DPAD_RIGHT));game._input(joy(JOY_BUTTON_DPAD_RIGHT))
+	game._input(joy(JOY_BUTTON_DPAD_RIGHT))
+	check(game.world.continue_hero=="sheep" and game.world.continues_used==0,"D-pad browses directly while the countdown is active")
 	game._input(joy(JOY_BUTTON_A))
-	check(game.world.continue_hero=="sheep" and game.world.continues_used==0,"D-pad navigates to the next hero and one A press browses")
 	game._input(joy(JOY_BUTTON_A))
-	check(game.world.continue_hero=="sheep","Held gamepad confirmation cannot repeat hero selection")
-	var released:=joy(JOY_BUTTON_A);released.pressed=false;game._input(released)
-	game._input(joy(JOY_BUTTON_DPAD_LEFT));game._input(joy(JOY_BUTTON_DPAD_LEFT))
-	game._input(joy(JOY_BUTTON_A))
-	check(game.world.continues_used==1 and game.world.character=="sheep","Fresh gamepad confirmation consumes one credit for the chosen hero")
+	check(game.world.continues_used==1 and game.world.character=="sheep","Fresh gamepad confirmation consumes one credit for the chosen hero, even with a repeated press")
 	game.queue_free();await process_frame
 	print("RESULT: %d campaign presentation checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

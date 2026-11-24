@@ -258,7 +258,7 @@ func main(column: VBoxContainer) -> Button:
 	var utilities: BoxContainer=VBoxContainer.new() if h.portrait else HBoxContainer.new()
 	utilities.add_theme_constant_override("separation",8)
 	column.add_child(utilities)
-	var arcade: Button=h.button(RunnerFrontText.word(h.language,"skip") if h.opening_guide else AionCampaignText.word(h.language,"arcade"),open_campaign_picker,true)
+	var arcade: Button=h.button(AionCampaignText.word(h.language,"continue_choose" if h.opening_guide else "arcade"),open_campaign_picker,true)
 	arcade.name="StartCampaign"
 	utilities.add_child(arcade)
 	if h.has_campaign_checkpoint():

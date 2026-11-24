@@ -75,8 +75,7 @@ func run() -> void:
 		else:
 			for code in held.keys():key(code,false)
 		game._process(1./120.)
-		if game.menu_kind=="continue_offer":game.open_continue()
-		if game.menu_kind=="continue_pick" and game.life_menu_delay<=0.:game.confirm_continue()
+		if game.menu_kind=="continue_offer":game.confirm_continue()
 		if game.menu_kind in ["outro","complete","dead"]:break
 		if frame%12==0:await process_frame
 	check(observed_reveal,"Actual arena scene starts its world reveal")

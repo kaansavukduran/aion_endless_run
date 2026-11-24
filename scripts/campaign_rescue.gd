@@ -186,7 +186,7 @@ static func step(w,dt: float) -> void:
 				n.facing=-facing;n.roam_clock=0.
 			else:
 				walk_to(w,n,next,facing)
-			if float(n.free_age)>.2 and w.touches_npc(n):
+			if w.state=="playing" and float(n.free_age)>.2 and w.touches_npc(n):
 				n.phase="thanks";n.thank_age=0.;n.facing=1 if w.player.x>float(n.x) else -1
 				w.greeted[str(n.id)]=true;w.pending_events.append("npc_contact")
 		elif phase in ["thanks","departed"]:

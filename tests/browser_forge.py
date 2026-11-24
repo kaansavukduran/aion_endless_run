@@ -291,11 +291,10 @@ with sync_playwright() as playwright:
                 # settle and try the same input again when it can be consumed.
                 for _ in range(5):
                     state = page.wait_for_function("""()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);
-                      return d.ui_ready && !d.presentation && ['playing','paused','continue_offer','continue_pick','dead'].includes(d.state) && d.state}""",timeout=30000).json_value()
+                      return d.ui_ready && !d.presentation && ['playing','paused','continue_offer','dead'].includes(d.state) && d.state}""",timeout=30000).json_value()
                     if state in ['dead','paused']:
                         break
-                    if state in ['continue_offer','continue_pick']:
-                        if state=='continue_pick':tap('ArcadeBackToCountdown',in_campaign=True)
+                    if state=='continue_offer':
                         page.wait_for_function("JSON.parse(document.querySelector('canvas').dataset.campaign).menu==='dead'",timeout=30000)
                         break
                     canvas.focus()
@@ -584,8 +583,6 @@ with sync_playwright() as playwright:
                             return (d.menu === 'continue_offer' || (d.state === 'playing' && d.hp === 1)) && d.ui_ready ? d : false;
                         }""", timeout=15000).json_value()
                         if resumed['menu'] == 'continue_offer':
-                            tap('ArcadeContinue', in_campaign=True)
-                            page.wait_for_timeout(415)
                             tap('ArcadeConfirmHero', in_campaign=True)
                             page.wait_for_function("()=>{const d=JSON.parse(document.querySelector('canvas').dataset.campaign);return d.state==='playing' && d.hp===1 && d.ui_ready}",timeout=15000)
                         retries += 1; attempt += 1

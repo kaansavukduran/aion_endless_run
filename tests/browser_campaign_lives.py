@@ -74,6 +74,11 @@ with sync_playwright() as playwright:
             page.goto(args.url, timeout=120000)
         page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]', timeout=120000)
         controls = json.loads(canvas.get_attribute('data-ui'))
+        if not reload:
+            start = next(button for button in controls if button["name"] == "StartCampaign")
+            check(start["text"] == ("Kahraman seç" if args.locale == "tr-TR" else "Choose hero"),
+                  "The first screen names the actual hero selection destination")
+            page.screenshot(path=str(args.evidence / "opening-guide.png"))
         if reload and not any(b['name']=='ContinueCampaign' for b in controls):
             return False
         actions = ('ContinueCampaign',) if reload else ('StartCampaign', 'ConfirmHero')
@@ -125,8 +130,16 @@ with sync_playwright() as playwright:
         check(start["continues"] == 0, "A new run has one active body, two reserves and zero Continues")
         offer = lose_three_lives(held_enter=True)
         check(offer["continue_remaining"] > 9., "Last death opens the ten-second Continue offer")
+        buttons = offer["buttons"]
+        check("ArcadeConfirmHero" in buttons and "ArcadeNextHero" in buttons and
+              buttons["ArcadeConfirmHero"][0] < 40 and buttons["ArcadeConfirmHero"][1] < offer["view"][1] / 3,
+              "The live field stays visible with an immediate upper-left hero selector")
         page.screenshot(path=str(args.evidence / "continue-landscape.png"))
-        elapsed_offer = observe("d.continue_remaining<8.")["continue_remaining"]
+        later_offer = observe("d.state==='continue_offer' && d.continue_remaining<8.")
+        elapsed_offer = later_offer["continue_remaining"]
+        check(later_offer["time"] > offer["time"] + 1. and later_offer["enemies"] != offer["enemies"] and
+              later_offer["losses"] == offer["losses"] and later_offer["shots"] == offer["shots"],
+              "Enemies keep moving and attacking while the fallen hero cannot lose another life or fire")
         with page.expect_popup() as popup:
             page.evaluate("window.open(new URL('build.json', location.href), '_blank')")
         other_tab = popup.value
@@ -181,12 +194,14 @@ with sync_playwright() as playwright:
         page.set_viewport_size({"width": 393, "height": 873})
         observe("d.ui_ready && d.view[1]>d.view[0]")
         canvas.focus()
-        page.keyboard.press("Enter")
-        picker = observe("d.menu==='continue_pick' && d.ui_ready")
-        check(picker["continues"] == 0 and picker["attempts"] == 0, "Opening the real picker does not also confirm it")
-        page.wait_for_timeout(420)
+        picker = observe("d.menu==='continue_offer' && d.ui_ready")
+        original_hero = picker["continue_hero"]
+        page.keyboard.press("ArrowRight")
+        observe("d.menu==='continue_offer' && d.continue_hero!==arg", original_hero)
+        page.keyboard.press("ArrowLeft")
+        observe("d.menu==='continue_offer' && d.continue_hero===arg", original_hero)
         for _ in range(6):
-            state = observe("d.ui_ready && d.menu==='continue_pick'")
+            state = observe("d.ui_ready && d.menu==='continue_offer'")
             hero = state["continue_hero"]
             evidence["picker"].append(hero)
             tap_campaign("ArcadeNextHero")
@@ -195,8 +210,8 @@ with sync_playwright() as playwright:
               "All six playable heroes can be browsed on a portrait viewport")
         tap_campaign("ArcadePreviousHero")
         selected = observe("d.continue_hero==='frog' && d.ui_ready")
-        check(abs(selected["continue_remaining"] - picker["continue_remaining"]) < .015,
-              "The hero picker does not consume countdown time")
+        check(0. < selected["continue_remaining"] < picker["continue_remaining"] and selected["continues"] == 0,
+              "Browsing takes place inside the original countdown without spending a credit")
         page.screenshot(path=str(args.evidence / "hero-picker-portrait.png"))
         tap_campaign("ArcadeConfirmHero")
         recovered = observe("d.state==='playing' && d.character==='frog' && d.attempts===3")
@@ -209,7 +224,7 @@ with sync_playwright() as playwright:
         lose_three_lives()
         game_over = observe("d.menu==='dead' && d.ui_ready", timeout=35000)
         check(game_over["attempts"] == 0 and game_over["continues"] == 1 and
-              "CampaignRestart" in game_over["buttons"] and "ArcadeContinue" not in game_over["buttons"],
+              "CampaignRestart" in game_over["buttons"] and "ArcadeConfirmHero" not in game_over["buttons"],
               "Expiration reaches Game Over with only a genuine new run available")
         page.screenshot(path=str(args.evidence / "game-over.png"))
         check(not boot(reload=True), "Game Over cannot be bypassed by reopening the saved run")
