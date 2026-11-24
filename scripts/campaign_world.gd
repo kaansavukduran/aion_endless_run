@@ -201,6 +201,7 @@ func touches_npc(n: Dictionary) -> bool:
 	return absf(player.x-float(n.x))<48. and absf(player.y-float(n.y))<30.
 
 func touches_pickup(item: Dictionary) -> bool:
+	if not CampaignRoutes.pickup_exposed(self,item):return false
 	var point:=Vector2(float(item.x),float(item.y))
 	if bool(mount.ridden):return mounted_contact_rect().grow(10.).has_point(point)
 	if item.has("rescue_id"):return player_hit_center().distance_to(point)<48.

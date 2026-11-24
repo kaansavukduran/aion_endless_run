@@ -40,6 +40,9 @@ static func is_fork(section: String) -> bool:
 static func hatch_open(w) -> bool:
 	return w.activated.has(HATCH_ID)
 
+static func pickup_exposed(w,item: Dictionary) -> bool:
+	return w.section!="fork_two" or hatch_open(w) or float(item.y)<=floor_height(w,float(item.x))
+
 static func lower_start(w) -> float:
 	return HATCH_X if str(w.section)=="fork_two" else DROP_X
 
@@ -296,11 +299,28 @@ static func draw_hatch(v) -> void:
 		v.draw_rect(Rect2(opened+Vector2(8,-4),Vector2(30,6)),Color("8a6a45"))
 		v.draw_rect(Rect2(opened+Vector2(14,2),Vector2(6,26)),Color("5f7a3c"))
 
+static func lantern_positions(w) -> Array[Vector2]:
+	var positions: Array[Vector2]=[Vector2(1060.,UPPER_FLOOR),Vector2(1530.,UPPER_FLOOR)]
+	var x: float=SERVICE_SUPPORT.get_center().x if w.section=="fork_two" else 550.
+	# The same approach lantern sits on the service span and its exposed
+	# replacement. A disabled span cannot support scenery.
+	for deck in w.platforms:
+		if deck.position.x<=x and x<=deck.end.x and not w.disabled_platforms.has(deck.position.x):
+			positions.push_front(Vector2(x,deck.position.y))
+			break
+	var lower_y:=floor_height(w,1530.)
+	if lower_y>0.:positions.append(Vector2(1530.,lower_y))
+	return positions
+
+static func exit_flag_positions(w) -> Array[Vector2]:
+	var positions: Array[Vector2]=[Vector2(EXIT_X,UPPER_FLOOR)]
+	var lower_y:=floor_height(w,EXIT_X)
+	if lower_y>0.:positions.append(Vector2(EXIT_X,lower_y))
+	return positions
+
 static func draw_landmarks(v) -> void:
 	if not is_fork(str(v.world.section)):return
-	# Existing lantern and foliage art supplies destination atmosphere. Route
-	# entrances are read from the pier crawlway and the hatch, not from arrows.
-	for p in [Vector2(550.,-130.),Vector2(1060.,UPPER_FLOOR),Vector2(1530.,UPPER_FLOOR),Vector2(1530.,LOWER_FLOOR)]:
+	for p in lantern_positions(v.world):
 		v.draw_pose(v.catalogue.pose("environment",2,3),p)
-	for floor_y in [UPPER_FLOOR,LOWER_FLOOR]:
-		v.draw_flag(Vector2(EXIT_X,floor_y),.84)
+	for p in exit_flag_positions(v.world):
+		v.draw_flag(p,.84)

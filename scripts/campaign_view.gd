@@ -201,6 +201,7 @@ func draw_world() -> void:
 		if float(item.x)<camera_x-80. or float(item.x)>camera_x+scene_w+80.:continue
 		if world.taken.has(str(item.id)): continue
 		if item.has("secret") and not world.discovered.has(str(item.secret)):continue
+		if not CampaignRoutes.pickup_exposed(world,item):continue
 		var p := Vector2(float(item.x),float(item.y))
 		if str(item.kind).begins_with("fruit_"):
 			var fruit: int=int(str(item.kind).trim_prefix("fruit_"))%8
