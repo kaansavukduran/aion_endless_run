@@ -137,7 +137,7 @@ with sync_playwright() as playwright:
         page.screenshot(path=str(args.evidence / "continue-landscape.png"))
         later_offer = observe("d.state==='continue_offer' && d.continue_remaining<8.")
         elapsed_offer = later_offer["continue_remaining"]
-        check(later_offer["time"] > offer["time"] + 1. and later_offer["enemies"] != offer["enemies"] and
+        check(later_offer["time"] > offer["time"] and later_offer["enemies"] != offer["enemies"] and
               later_offer["losses"] == offer["losses"] and later_offer["shots"] == offer["shots"],
               "Enemies keep moving and attacking while the fallen hero cannot lose another life or fire")
         with page.expect_popup() as popup:

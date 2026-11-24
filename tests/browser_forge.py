@@ -503,7 +503,7 @@ with sync_playwright() as playwright:
                         sx = x-current['camera']+140*forward
                         sy = y+current['ground']-current['camera_y']-42
                     page.mouse.move(*coords(sx,sy,True))
-                    commands = ['f',direction]
+                    commands = ['f', direction] if direction else ['f']
                     distance = math.hypot(nearest['x']-x,nearest['y']-y) if nearest else math.inf
                     if nearest and (nearest['x']-x)*forward>=-20 and distance<225:
                         # Clear the lane before walking into a charged ground
@@ -595,7 +595,6 @@ with sync_playwright() as playwright:
                 npc = next(n for n in contacted['npcs'] if n['id'] == target['id'])
                 cross = 'd' if int(npc['facing']) < 0 else 'a'
                 side = 1 if cross == 'd' else -1
-                keys([cross])
                 deadline = time.monotonic()+8
                 crossed = False
                 while time.monotonic() < deadline:
@@ -604,6 +603,7 @@ with sync_playwright() as playwright:
                     assert npc['phase'] in ['thanks', 'departed'] and current['greeted'].get(target['id']), ('Contact acknowledgment was lost', npc)
                     if (current['player'][0]-npc['x'])*side > 75:
                         crossed = True; break
+                    move_and_defend(current, cross, allow_grenade=False)
                     page.wait_for_timeout(40)
                 assert crossed, 'Live hero did not cross away from the acknowledged NPC'
                 keys([])
@@ -613,6 +613,7 @@ with sync_playwright() as playwright:
                     current = campaign(); require_live(current, 'await_actual_bag', target)
                     dropped = next((item for item in current['pickups'] if item.get('rescue_id') == target['id'] and item.get('from_bag')), None)
                     if dropped: break
+                    move_and_defend(current, '', allow_grenade=False)
                     page.wait_for_timeout(50)
                 assert dropped, ('Alive, contacted NPC did not produce its actual bag item', current)
                 check(not current['awarded'].get(target['id']+':gift'), 'The bag produces a visible world item without remotely granting its power-up')
@@ -624,7 +625,7 @@ with sync_playwright() as playwright:
                     item = next(item for item in current['pickups'] if item.get('rescue_id') == target['id'])
                     if current.get('weapon_offer',{}).get('id') == item['id']:
                         keys([]);page.keyboard.press('e');page.wait_for_timeout(150);continue
-                    keys(['d'] if item['x'] > current['player'][0] else ['a'])
+                    move_and_defend(current, 'd' if item['x'] > current['player'][0] else 'a', allow_grenade=False)
                     page.wait_for_timeout(40)
                 keys([])
                 page.wait_for_function("id=>JSON.parse(document.querySelector('canvas').dataset.campaign).awarded[id+':gift']===true", arg=target['id'], timeout=5000)
