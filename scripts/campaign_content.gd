@@ -84,7 +84,7 @@ const MAIN_PLANS := {
 }
 
 static func flying(kind: String) -> bool:
-	return kind in ["crow","moth","drone","wisp","glider"] or (NEW_ENEMIES.has(kind) and bool(NEW_ENEMIES[kind].flying))
+	return kind in ["crow","moth","drone","wisp","glider",CampaignHive.KIND] or (NEW_ENEMIES.has(kind) and bool(NEW_ENEMIES[kind].flying))
 
 static func populate(w) -> void:
 	w.encounters.clear();w.objects.clear();w.zones.clear();w.rooms.clear();w.hazards.clear()

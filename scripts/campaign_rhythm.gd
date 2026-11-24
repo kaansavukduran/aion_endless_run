@@ -67,6 +67,9 @@ static func populate(w) -> void:
 		var id: String=w.section+":high-lane:fruit"
 		if not w.taken.has(id):
 			w.pickups.append({"id":id,"kind":"fruit_4","x":deck.get_center().x,"y":deck.position.y-35.})
+	if CampaignHive.SECTIONS.has(w.section):
+		var x: float=CampaignHive.SECTIONS[w.section]
+		w.spawn_enemy(CampaignHive.KIND,x,-250.,960)
 	if w.section!="shore":return
 	# This crossing is required on every route. Both decks stay in place.
 	w.platforms=w.platforms.filter(func(p):return p.end.x<5800. or p.position.x>6470.)

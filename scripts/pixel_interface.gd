@@ -5,10 +5,21 @@ var roster_page := 0
 var roster_previews: Dictionary = {}
 var last_roster_capacity := 0
 
+var choose_for_campaign := false
 var launch_pending := false
 var launch_committed := false
 var launch_callback: Callable
 var launch_clock := 0.
+
+func open_campaign_picker() -> void:
+	if launch_pending or launch_committed:return
+	choose_for_campaign=true
+	host.open_subpage("characters")
+
+func confirm_hero() -> void:
+	var start_campaign:=choose_for_campaign
+	host.show_page("main")
+	if start_campaign:request_launch(host.start_campaign)
 
 func request_launch(callback: Callable,quick: bool=false) -> void:
 	if launch_pending or launch_committed:return
@@ -386,7 +397,7 @@ func main(column: VBoxContainer) -> Button:
 	if not enlarged:column.add_child(mission)
 	else:mission.free()
 	var modes:=HBoxContainer.new();modes.add_theme_constant_override("separation",8);column.add_child(modes)
-	var arcade: Button=h.button(AionCampaignText.word(h.language,"arcade"),func():request_launch(h.start_campaign),true)
+	var arcade: Button=h.button(AionCampaignText.word(h.language,"arcade"),open_campaign_picker,true)
 	arcade.name="StartCampaign";arcade.custom_minimum_size.y=maxf(64,h.ui_size(38));arcade.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	arcade.add_theme_font_size_override("font_size",h.ui_size(20));modes.add_child(arcade)
 	if h.has_campaign_checkpoint():
@@ -472,7 +483,7 @@ func characters() -> void:
 		choice.mouse_exited.connect(func():refresh_preview_state(choice,preview,id))
 		info.add_child(choice)
 		info.add_child(h.wrap_label(RunnerFrontText.ability_summary(h.language,id),17))
-	var confirm: Button=h.button(RunnerFrontText.word(h.language,"confirm"),func():h.show_page("main"),true)
+	var confirm: Button=h.button(RunnerFrontText.word(h.language,"confirm"),confirm_hero,true)
 	confirm.name="ConfirmHero";confirm.set_meta("menu_pin",true);column.add_child(confirm)
 	h.menu_pages.prepare(column,Vector2(float(column.get_meta("page_width")),float(column.get_meta("page_height"))))
 

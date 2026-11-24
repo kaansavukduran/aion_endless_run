@@ -66,10 +66,14 @@ static func read(data: Dictionary) -> Dictionary:
 	return result
 
 static func apply(w,data: Dictionary,encounter: Dictionary) -> void:
+	var new_threats: Array=w.enemies.filter(func(e):
+		return (e.kind==CampaignHive.KIND and float(e.x)>encounter.player.x+450.
+			and not Array(encounter.enemies).any(func(saved):return saved is Dictionary and saved.get("id")==e.id)))
 	for key in VALUES:
 		var target=w.get(key)
 		if target is Array:target.assign(encounter[key])
 		else:w.set(key,encounter[key])
+	w.enemies.append_array(new_threats)
 	w.attempts_remaining=int(data.attempts)
 	w.continues_used=int(data.continues)
 	w.continue_remaining=float(data.offer_remaining)

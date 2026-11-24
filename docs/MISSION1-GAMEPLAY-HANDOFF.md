@@ -19,6 +19,13 @@ AIONIA v1.7 bu turda canlı standart belgesinden okundu. Drive’daki 21 Kasım 
 - Sekiz kurtarılabilir karakterin pozları ve korsanın altı yürüyüş karesi yeniden işlendi. Kimlikler, ayak hizası ve yürüyüş yönü korunarak yeni kareler mevcut kurtarma akışına bağlandı.
 - Altı kahramanla eski çökme süresini aşan bekleyiş ve normal geçiş, eski kayıt onarımı, gerçek Linux görüntüleme ve yerel Web dışa aktarması doğrulandı. Mission 1 için oyuncu kabulü bekliyor.
 
+### 0.56.0 · Kovan geçişi ve bitiriş skoru
+
+- Kırık İskele ve Bakır Röle’de birer uçan bal kovanı, işaretli bir geçişte üç ayrı petek bırakır. Petekler zemine veya tabliyeye varınca yakın oyuncuya hasar verir. Kovanın gövdesi yukarı nişanla vurulabilir.
+- Sekiz bekçinin altışar gerçek yürüyüş karesi ayak hizasına kaydedildi. Yürüyüş fiziksel mesafeyle ilerler. Altı oyuncu kahramanının geri adım klibi ters çevrildi ve nişan yönünü korur. Araçlar tek namludan daha sık ateş eder. Skimmer’ın yüksek namlusu için yere doğru nişan gerekir.
+- Oyuncu öldüğünde anlık skor ve bekçi simgeleri temizlenir. Görevdeki kurtarma ve ödül geçmişi kayıtlı kalır. Bitirme kartı son canlı puanı, bitirme ve kurtarma bonusunu sayar. Y ve Oyna, yeni görev öncesi kahraman seçimini açar. Sürdür aynı kayıttan devam eder.
+- [MintoDog’un iki CC0 parçası](../assets/audio/MISSION1-MUSIC.md) orman rotaları ve Root Engine savaşı için deneme olarak eklendi.
+
 ### 0.55.3 · Yaya karşılaşmaları ve yardımcı animasyonları
 
 - Yedi yürüyüş bölümündeki seçili karşılaşmalara 13 yer düşmanı ve 15 isteğe bağlı tırmanma yüzeyi eklendi. Fener Nöbetçisi dönüşümlü tek ve işaretli çift atış yapar. Mantar Atıcısı ve sabit makineler daha kısa arayla hazırlanır. Uçan düşmanların saldırı ayarları bu geçişte kapsam dışı.

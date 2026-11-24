@@ -174,7 +174,11 @@ func handle(event: InputEvent) -> bool:
 		elif host.page=="main": activate()
 		return true
 	if menu_active():
-		if b in [JOY_BUTTON_A,JOY_BUTTON_X]: activate()
+		if b==JOY_BUTTON_Y and host.page=="main" and not host.language_picker_open:
+			host.pixel_ui.open_campaign_picker()
+		elif b==JOY_BUTTON_Y and host.page=="characters" and host.pixel_ui.choose_for_campaign:
+			host.pixel_ui.confirm_hero()
+		elif b in [JOY_BUTTON_A,JOY_BUTTON_X]: activate()
 		elif b==JOY_BUTTON_B: back()
 		elif b==JOY_BUTTON_DPAD_UP: navigate(SIDE_TOP)
 		elif b==JOY_BUTTON_DPAD_DOWN: navigate(SIDE_BOTTOM)

@@ -73,16 +73,19 @@ with sync_playwright() as playwright:
         else:
             page.goto(args.url, timeout=120000)
         page.wait_for_selector('canvas[data-state="ready"][data-ui-ready="true"]', timeout=120000)
-        controls = canvas.evaluate("c=>({...c.dataset})")
-        item = next(button for button in json.loads(controls["ui"]) if button["name"] == "StartCampaign")
-        tr = json.loads(controls["screenTransform"])
-        rect = canvas.bounding_box()
-        x = item["x"] + item["w"] / 2
-        y = item["y"] + item["h"] / 2
-        page.touchscreen.tap(
-            rect["x"] + (tr[0] * x + tr[2] * y + tr[4]) / float(controls["rawWidth"]) * rect["width"],
-            rect["y"] + (tr[1] * x + tr[3] * y + tr[5]) / float(controls["rawHeight"]) * rect["height"],
-        )
+        for name in ('StartCampaign', 'ConfirmHero'):
+            controls = canvas.evaluate("c=>({...c.dataset})")
+            item = next(button for button in json.loads(controls["ui"]) if button["name"] == name)
+            tr = json.loads(controls["screenTransform"])
+            rect = canvas.bounding_box()
+            x = item["x"] + item["w"] / 2
+            y = item["y"] + item["h"] / 2
+            page.touchscreen.tap(
+                rect["x"] + (tr[0] * x + tr[2] * y + tr[4]) / float(controls["rawWidth"]) * rect["width"],
+                rect["y"] + (tr[1] * x + tr[3] * y + tr[5]) / float(controls["rawHeight"]) * rect["height"],
+            )
+            if name == 'StartCampaign':
+                page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
         observe("d.menu==='briefing' && d.ui_ready")
 
     def lose_three_lives(held_enter=False):

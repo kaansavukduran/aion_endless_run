@@ -375,6 +375,8 @@ class Probe:
         self.wait(lambda p:p['dataset'].get('page')=='main' and p['dataset'].get('uiReady')=='true','confirmed main menu')
         self.stage='visible-launch'
         self.front_button('StartCampaign')
+        self.page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
+        self.front_button('ConfirmHero')
         self.wait(lambda p:p['campaign'] is not None,'Mission 1 scene after actual Play',timeout=30)
         packets=self.page.evaluate('sixProbe.packets')
         launch=[p['front']['previews'].get(self.hero,{}) for p in packets if not p.get('campaign') and p.get('front',{}).get('launch_pending')]

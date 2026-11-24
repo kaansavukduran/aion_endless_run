@@ -69,10 +69,11 @@ func run() -> void:
      check((Vector2(actual.point)-Vector2(0,42)-Vector2(actual.pivot)).normalized().distance_to(aim)<.001,'Actual barrel has the true continuous surrounding direction')
      w.attack_press()
      var fired:=drawn_barrel(w,height);var fired_end: Vector2=w.player+Vector2(fired.point)
-     check(w.bullets.size()==3,'Mounted attack produces the actual weapon volley')
+     check(w.bullets.size()==1,'Mounted attack emits one aimed projectile')
      for b in w.bullets:
       check(Vector2(b.p).distance_to(fired_end)<.001,'Actual emitted projectile begins at current visible source barrel end')
-      check(absf(Vector2(b.v).length()-float(420. if kind=='drill' else (600. if kind=='shell' else 780.)))<.001,'Art correction preserves vehicle weapon speed')
+      check(Vector2(b.v).normalized().is_equal_approx(aim) and w.fire_time<.17,'Rapid shot follows the chosen aim without spread')
+      check(absf(Vector2(b.v).length()-float(790. if kind=='drill' else 920.))<.001,'Mounted projectile uses the documented speed')
      if aligned and kind=='shell' and frame==0:
       check(absf(fired_end.y+50.)<20.,'Shell emits near the visible ground-enemy height instead of guessed136px')
   for hurt in [0.,.2]:

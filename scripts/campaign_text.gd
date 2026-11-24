@@ -40,6 +40,12 @@ const HERO_SKILL_TEXT := {
 }
 
 const ARCADE_LIFE_TEXT := {
+	"life_rescues":["Bu canda kurtarılan","Rescued this life"],
+	"field_points":["Saha puanı","Field score"],
+	"clear_bonus":["Bitirme bonusu","Clear bonus"],
+	"rescue_bonus":["Kurtarma bonusu","Rescue bonus"],
+	"rank_perfect":["Kusursuz!","Perfect!"],
+	"rank_great":["Harika!","Great!"],
 	"continue_offer":["Devam edecek misin?","Continue?"],
 	"continue_pick":["Kahramanını seç","Choose your hero"],
 	"continue_choose":["Kahraman seç","Choose hero"],

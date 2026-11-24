@@ -104,6 +104,11 @@ def start_campaign(page):
     entry = entry_ready(page)
     start = next(button for button in json.loads(entry["ui"]) if button["name"] == "StartCampaign")
     page.get_by_role("button", name=start["text"], exact=True).press("Enter")
+    page.wait_for_selector('canvas[data-campaign], canvas[data-page="characters"][data-ui-ready="true"]', timeout=45_000)
+    if page.locator('canvas[data-page="characters"]').count():
+        entry = entry_ready(page)
+        confirm = next(button for button in json.loads(entry["ui"]) if button["name"] == "ConfirmHero")
+        page.get_by_role("button", name=confirm["text"], exact=True).press("Enter")
     page.wait_for_selector("canvas[data-campaign]", timeout=45_000)
 
 

@@ -42,13 +42,13 @@ func run():
  for variant in 8:
   npc.variant=variant
   for semantic in [-1,1]:
-   npc.x=600.;npc.home_x=600.;npc.y=0.;npc.phase='free';npc.free_age=0.;npc.facing=semantic;npc.roam_clock=0.;people.pits.clear()
+   npc.x=600.;npc.home_x=600.;npc.y=0.;npc.phase='free';npc.free_age=.2;npc.facing=semantic;npc.roam_clock=0.;people.pits.clear()
    var old_x: float=npc.x
    people.step(.05)
    var delta: float=float(npc.x)-old_x
    check(delta*semantic>0.,'Freed NPC actually roams in its semantic direction: '+str(variant)+'/'+str(semantic))
    check(-AionCampaignView.npc_draw_direction(int(npc.facing))==int(signf(delta)),'Left-authored NPC nose follows its real stride: '+str(variant)+'/'+str(semantic))
-   var frame: int=6+posmod(int(people.time*6.),2)
+   var frame: int=CampaignRescue.walk_frame(npc,true)
    var pose: Dictionary=catalogue.pose('rescue-npcs',variant,frame)
    check(pose.source_key=='rescue-npcs' and int(pose.source_row)==variant and int(pose.source_frame)==frame and pose.texture!=null,'Roaming uses its real registered walk frame, preserving NPC identity')
    check(not people.awarded.has(str(npc.id)+':gift'),'Roaming away from the hero cannot grant a remote gift')
@@ -73,8 +73,8 @@ func run():
   var old_x: float=npc.x;people.step(.05)
   check(float(npc.x)<old_x and int(npc.facing)==-1,'Departing NPC really walks left, not backwards')
   check(-AionCampaignView.npc_draw_direction(int(npc.facing))==-1,'Departing NPC original left face stays aligned to its actual movement')
-  var frame: int=6+posmod(int(people.time*6.),2)
+  var frame: int=CampaignRescue.walk_frame(npc,true)
   var pose: Dictionary=catalogue.pose('rescue-npcs',int(npc.variant),frame)
-  check(pose.source_key=='rescue-npcs' and int(pose.source_frame)==frame,'Departure reuses the same actual two walking frames')
+  check(pose.source_key=='rescue-npcs' and int(pose.source_frame)==frame,'Departure reuses the same actual distance-driven walking cels')
  check(not people.awarded.has(str(npc.id)+':gift'),'Departure cannot silently collect the unclaimed bag item')
  print('RESULT: ',checks,' enemy facing checks, ',failures,' failures');quit(1 if failures else 0)

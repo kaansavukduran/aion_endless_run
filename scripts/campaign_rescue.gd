@@ -9,20 +9,21 @@ const REGIONAL_ROLES := {"shore":["keeper","technician","courier"],"quay":["tech
 const GIFTS := ["heavy","repair","beam","shield","scatter","points","arc","grenade","seeker","haste","power","reveal","magnet","disc","harpoon","spore","trap","nova"]
 const CUT_SECONDS := .6
 const CONTACT := .3
+const WALK_STEP := 13.
 ## Explicit NPC animation/state contract for runtime & Sol 6.2 art handoff.
 const NPC_ANIM_SPEC := {
 	"idle_bound":{"phase":"bound","frames":[0,1],"loop":true,"foot":[0,0],"body":[0,-40],"event":"cut_or_shot"},
-	"rescue_react":{"phase":"free","frames":[6,7],"loop":false,"until":0.35,"foot":[0,0],"body":[0,-40],"event":"rescue"},
-	"free_roam":{"phase":"free","frames":[6,7],"loop":true,"foot":[0,0],"body":[0,-40],"event":"npc_contact"},
-	"salute_thanks":{"phase":"thanks","frames":[2],"loop":false,"until":0.45,"foot":[0,0],"body":[0,-40],"satchel":[22,-52],"event":"npc_contact"},
-	"drop_gift":{"phase":"thanks","frames":[3],"loop":false,"from":0.45,"until":1.7,"foot":[0,0],"body":[0,-40],"satchel":[22,-52],"event":"gift_drop"},
-	"depart_run":{"phase":"departed","frames":[6,7],"loop":true,"until":4.8,"foot":[0,0],"body":[0,-40],"event":"courier_cover"}
+	"rescue_react":{"phase":"free","frames":[2],"loop":false,"until":0.18,"foot":[0,0],"body":[0,-40],"event":"rescue"},
+	"free_roam":{"phase":"free","frames":[6,7,8,9,10,11],"loop":true,"foot":[0,0],"body":[0,-40],"event":"npc_contact"},
+	"salute_thanks":{"phase":"thanks","frames":[4],"loop":false,"until":0.45,"foot":[0,0],"body":[0,-40],"satchel":[22,-52],"event":"npc_contact"},
+	"drop_gift":{"phase":"thanks","frames":[5],"loop":false,"from":0.45,"until":1.7,"foot":[0,0],"body":[0,-40],"satchel":[22,-52],"event":"gift_drop"},
+	"depart_run":{"phase":"departed","frames":[6,7,8,9,10,11],"loop":true,"until":4.8,"foot":[0,0],"body":[0,-40],"event":"courier_cover"}
 }
 
 static func clip_name(n: Dictionary) -> String:
 	var phase: String=str(n.get("phase","free" if bool(n.get("freed",false)) else "bound"))
 	if phase=="bound":return "idle_bound"
-	if phase=="free":return "rescue_react" if float(n.get("free_age",0.))<.35 else "free_roam"
+	if phase=="free":return "rescue_react" if float(n.get("free_age",0.))<.18 else "free_roam"
 	if phase=="thanks":return "salute_thanks" if float(n.get("thank_age",0.))<.45 else "drop_gift"
 	return "depart_run"
 
@@ -154,6 +155,16 @@ static func on_gift_collected(w,item: Dictionary) -> void:
 		for o in w.objects:
 			if o.kind=="gate" and absf(float(o.x)-float(item.x))<400.:o.active=true;w.activated[str(o.id)]=true
 
+static func walk_frame(n: Dictionary, animated: bool) -> int:
+	# Cadence follows physical distance, so a blocked foot never runs in place.
+	return 6+posmod(floori(float(n.get("stride_distance",0.))/WALK_STEP),6) if animated else 6
+
+static func walk_to(w,n: Dictionary,x: float,facing: int) -> void:
+	n.stride_distance=float(n.get("stride_distance",0.))+absf(x-float(n.x))
+	n.x=x
+	n.facing=facing
+	if str(n.get("secret","")).is_empty():n.y=w.floor_at(x)
+
 static func step(w,dt: float) -> void:
 	if w.rescue_time>0.:
 		w.rescue_time=maxf(0.,w.rescue_time-dt)
@@ -166,15 +177,15 @@ static func step(w,dt: float) -> void:
 		n.free_age=float(n.free_age)+dt
 		var phase: String=str(n.get("phase","free"))
 		if phase=="free":
+			if float(n.free_age)<.18:continue
 			n.roam_clock=float(n.get("roam_clock",0.))+dt
 			var facing: int=int(n.get("facing",-1))
-			var next: float=float(n.x)+float(facing)*45.*dt
+			var next: float=float(n.x)+float(facing)*62.*dt
 			var limit: bool=absf(next-float(n.get("home_x",n.x)))>90. or next<35. or next>w.length()-90.
 			if limit or not has_support(w,n,next) or float(n.roam_clock)>1.5+float(int(n.variant)%3)*.25:
 				n.facing=-facing;n.roam_clock=0.
 			else:
-				n.x=next
-				if str(n.get("secret","")).is_empty():n.y=w.floor_at(next)
+				walk_to(w,n,next,facing)
 			if float(n.free_age)>.2 and w.touches_npc(n):
 				n.phase="thanks";n.thank_age=0.;n.facing=1 if w.player.x>float(n.x) else -1
 				w.greeted[str(n.id)]=true;w.pending_events.append("npc_contact")
@@ -183,10 +194,9 @@ static func step(w,dt: float) -> void:
 			if phase=="thanks" and float(n.thank_age)>=.9:handover(w,n)
 			if phase=="thanks" and float(n.thank_age)>1.7:n.phase="departed"
 			if str(n.phase)=="departed" and float(n.thank_age)<4.8:
-				var next: float=float(n.x)-60.*dt
+				var next: float=float(n.x)-84.*dt
 				if has_support(w,n,next):
-					n.x=next;n.facing=-1
-					if str(n.get("secret","")).is_empty():n.y=w.floor_at(next)
+					walk_to(w,n,next,-1)
 			if n.role=="courier" and w.awarded.has(str(n.id)+":gift") and float(n.thank_age)>1.3 and float(n.thank_age)<4.2:
 				if int(float(n.thank_age)*2.)!=int((float(n.thank_age)-dt)*2.):
 					var origin:=Vector2(float(n.x),float(n.y)-40.)

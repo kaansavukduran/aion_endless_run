@@ -16,6 +16,11 @@ static func display_source(kind: String) -> String:
  return M1HeldWeaponBank.display_source(kind)
 static func body_facing(w) -> int:
  return (-1 if w.aim_direction.x<0. else 1) if absf(w.aim_direction.x)>.1 else int(w.facing)
+static func backstep_frame(action: String,frame: int) -> int:
+ # A planted foot travels toward the aim side while the body retreats.
+ # The registered stride cels run in the opposite order on contact.
+ return 5-frame if action in ["walk_back","crouch_walk_back","tunnel_walk_back","tongue_walk_back","tongue_crouch_walk_back"] else frame
+
 static func body_spec(w) -> Dictionary:
  if w.character not in M1HeroArt.HEROES and M1HeroArt.has(w.character):return M1HeroArt._provider().body_spec(w)
  var action: String='idle_fire';var frame:=0
@@ -55,6 +60,7 @@ static func body_spec(w) -> Dictionary:
    action='death';frame=CampaignLives.collapse_frame(w)
   else:action='crouch_fire';frame=5
  if not w.pose_motion_enabled and not throwing:frame=5 if action=='death' else 0
+ else:frame=backstep_frame(action,frame)
  return {'hero':w.character,'action':action,'frame':frame,'mirror':int(throw_state.direction) if throwing else body_facing(w),'key':'m1-body'}
 static func metrics(w) -> Dictionary:
  var s:=body_spec(w)

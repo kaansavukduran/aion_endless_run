@@ -122,6 +122,7 @@ static func body_spec(w) -> Dictionary:
 	elif w.shot_flash>0.:
 		action="idle_fire";frame=clampi(int((.18-w.shot_flash)/.18*6.),0,5)
 	if not w.pose_motion_enabled and w.grenade_throw.is_empty():frame=0
+	else:frame=M1CombatArt.backstep_frame(action,frame)
 	return {"hero":w.character,"action":action,"frame":frame,"mirror":face,"key":"mission-hero"}
 
 static func preview_spec(hero: String,action: String,clock: float) -> Dictionary:

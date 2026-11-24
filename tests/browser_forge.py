@@ -340,6 +340,9 @@ with sync_playwright() as playwright:
         if args.scenario in ['campaign', 'all']:
             tap('StartSelect_aion')
             tap('StartCampaign')
+            page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
+            check(True, 'Play opens the hero picker before entering Mission 1')
+            tap('ConfirmHero')
             page.wait_for_function("document.querySelector('canvas')?.dataset.campaign", timeout=45000)
             campaign_ready()
             fit('Campaign briefing', True)
@@ -421,6 +424,11 @@ with sync_playwright() as playwright:
             aim_samples = []
             directions = [(['d'], [1, 0]), (['d', 'w'], [1, -1]), (['w'], [0, -1]), (['a', 'w'], [-1, -1]), (['a'], [-1, 0]), (['a', 's'], [-1, 1]), (['s'], [0, 1]), (['d', 's'], [1, 1])]
             for index, (inputs, target) in enumerate(directions):
+                if target[1] > 0:
+                    # Each airborne down shot starts with its own normal
+                    # run. The previous stationary direction checks leave
+                    # approaching enemies close enough to interrupt takeoff.
+                    restart_for_probe()
                 while True:
                     try:
                         current=campaign()

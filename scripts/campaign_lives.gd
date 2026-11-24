@@ -20,6 +20,9 @@ static func lethal(w,cause: String) -> void:
 	w.hp=0
 	w.attempts_remaining=maxi(0,w.attempts_remaining-1)
 	w.losses+=1
+	w.score=0
+	w.rescue_life_start=w.rescued.size()
+	w.chain=0;w.chain_time=0.;w.score_popups.clear()
 	w.retry_count+=1
 	w.death_cause=cause
 	w.death_time=0.
