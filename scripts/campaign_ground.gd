@@ -15,6 +15,10 @@ const PROFILES := {
 		Vector2(4560.,38.),Vector2(4790.,38.),Vector2(5110.,0.)],
 	"canopy":[Vector2(1840.,0.),Vector2(2080.,-56.),Vector2(2280.,-56.),
 		Vector2(2460.,-96.),Vector2(2660.,-96.),Vector2(2970.,0.)],
+	"causeway":[Vector2(625.,0.),Vector2(800.,70.),Vector2(1000.,70.),
+		Vector2(1260.,-20.),Vector2(1410.,-20.),Vector2(1610.,0.),
+		Vector2(2100.,0.),Vector2(2250.,-54.),Vector2(2480.,-54.),
+		Vector2(2600.,-16.),Vector2(2840.,50.),Vector2(3000.,50.),Vector2(3250.,0.)],
 	"water":[Vector2(5020.,0.),Vector2(5520.,88.),Vector2(5840.,208.),
 		Vector2(6100.,208.),Vector2(6350.,132.),Vector2(6600.,0.)],
 	"terrace":[Vector2(7250.,0.),Vector2(7530.,-58.),Vector2(7810.,-58.),
@@ -83,7 +87,7 @@ static func align_world(w) -> void:
 	# Secret rooms and the shore's original failing bridge are outside it.
 	for i in w.platforms.size():
 		var deck: Rect2=w.platforms[i]
-		if deck.position.y> -8.:continue
+		if deck.position.y> -8. or CampaignRoutes.is_shelter(w.section,deck):continue
 		var floor: float=w.floor_at(deck.get_center().x)
 		if has_floor(floor) and floor>45.:
 			deck.position.y+=floor*.60

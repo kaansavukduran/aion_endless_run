@@ -7,6 +7,7 @@ const ENTRY_SECONDS := .62
 const ENTRY_PROTECTION := 3.
 const SHIELD_CHARGE_SECONDS := 4.
 const SHIELD_RECOVERY := .45
+const CROW_DIVE_CLEARANCE := 150.
 const TRANSITIONS := ["dying","respawn_pending","respawn","continue_offer","dead"]
 
 static func reset(w) -> void:
@@ -32,8 +33,7 @@ static func lethal(w,cause: String) -> void:
 	w.entry_guard=false
 	w.shield_charge=0.
 	w.state="dying"
-	w.weapon="pistol"
-	w.ammunition=0
+	CampaignWeapons.switch_to_sidearm(w)
 	w.buffs.clear()
 	w.assists.clear()
 	w.melee_hit_done=true
@@ -50,7 +50,7 @@ static func step_protection(w,dt: float) -> void:
 	if is_zero_approx(float(w.invulnerable)):
 		w.invulnerable=0.
 		w.entry_guard=false
-	w.shield_charge=minf(SHIELD_CHARGE_SECONDS,float(w.shield_charge)+dt-protected_time)
+		w.shield_charge=minf(SHIELD_CHARGE_SECONDS,float(w.shield_charge)+(dt-protected_time)*CampaignUpgrades.shield_scale(w))
 
 static func absorb_hit(w) -> bool:
 	if not w.shield_ready():return false
@@ -96,6 +96,7 @@ static func confirm(w,hero: String) -> bool:
 	w.attempts_remaining=ATTEMPTS
 	w.continue_remaining=0.
 	w.grenades=5
+	w.weapon="pistol";w.ammunition=CampaignWeapons.PISTOL_START;w.pistol_reserve=0
 	w.flock=1
 	w.state="respawn_pending"
 	w.pending_events.append("life_changed")
@@ -110,12 +111,30 @@ static func follower_sample(w,index: int) -> Dictionary:
 static func follower_position(w,index: int) -> Vector2:
 	return Vector2(follower_sample(w,index).p)
 
+static func crow_danger(w,foot: Vector2) -> bool:
+	if CampaignRoutes.crow_sheltered(w,foot):return false
+	var center:=foot-Vector2(0.,30.)
+	for e in w.enemies:
+		if str(e.kind)!="crow" or bool(e.defeated):continue
+		var bird:=Vector2(float(e.x),float(e.y))
+		if float(e.get("dive",0.))>0.:
+			var target:=Vector2(e.get("dive_target",bird))
+			var escape:=Vector2(target.x-65.,float(e.home.y))
+			var nearest:=Geometry2D.get_closest_point_to_segment(center,bird,target)
+			var following:=Geometry2D.get_closest_point_to_segment(center,target,escape)
+			if minf(center.distance_to(nearest),center.distance_to(following))<CROW_DIVE_CLEARANCE:return true
+		elif absf(bird.x-foot.x)<(260. if float(e.windup)>0. else 175.) and absf(bird.y-foot.y)<270.:
+			return true
+	return false
+
 static func landing(w,area: Rect2) -> Vector2:
 	var left:=maxf(55.,area.position.x+62.)
 	var right:=minf(float(w.length())-105.,area.end.x-42.)
 	var top:=area.position.y+88.
 	var best:=Vector2.INF
 	var cost:=INF
+	var exposed:=Vector2.INF
+	var exposed_cost:=INF
 	# Prefer a clear left pocket, with a penalty for nearby live threats.
 	for x in range(ceili(left),floori(right)+1,28):
 		var y: float=CampaignVehicles.support_below(w,float(x),top)
@@ -124,6 +143,11 @@ static func landing(w,area: Rect2) -> Vector2:
 		for e in w.enemies:
 			if not bool(e.defeated) and absf(float(e.y)-y)<100.:
 				risk+=maxf(0.,120.-absf(float(e.x)-x))*8.
+		if crow_danger(w,Vector2(x,y)):
+			if x-left+risk<exposed_cost:
+				exposed_cost=x-left+risk
+				exposed=Vector2(x,y)
+			continue
 		if x-left+risk<cost:
 			cost=x-left+risk
 			best=Vector2(x,y)
@@ -136,7 +160,11 @@ static func landing(w,area: Rect2) -> Vector2:
 			var x: float=center+direction*distance
 			if x<55. or x>w.length()-105.:continue
 			var y: float=CampaignVehicles.support_below(w,x,minf(top,-270.))
-			if CampaignGround.has_floor(y) and landing_clear(w,Vector2(x,y)):return Vector2(x,y)
+			var point:=Vector2(x,y)
+			if not CampaignGround.has_floor(y) or not landing_clear(w,point):continue
+			if not crow_danger(w,point):return point
+			if not exposed.is_finite():exposed=point
+	if exposed.is_finite():return exposed
 	# Each authored section provides supported floor; keep that guarantee
 	# explicit so adding an all-hazard layout fails validation visibly.
 	push_error("Mission 1 has no safe re-entry surface in "+w.section)
@@ -144,8 +172,10 @@ static func landing(w,area: Rect2) -> Vector2:
 
 static func landing_clear(w,foot: Vector2) -> bool:
 	if bool(w.boss.active) and absf(float(w.boss.x)-foot.x)<145.:return false
-	if w.gates.any(func(g):return absf(float(g.x)-foot.x)<52. and w.gate_closed(g)):return false
-	if w.objects.any(func(o):return str(o.kind)=="gate" and not bool(o.active) and absf(float(o.x)-foot.x)<62.):return false
+	var front:=maxf(w.player.x,foot.x)
+	var back:=minf(w.player.x,foot.x)
+	if w.gates.any(func(g):return w.gate_closed(g) and (absf(float(g.x)-foot.x)<52. or (float(g.x)>back and float(g.x)<front))):return false
+	if w.objects.any(func(o):return str(o.kind)=="gate" and not bool(o.active) and (absf(float(o.x)-foot.x)<62. or (float(o.x)>back and float(o.x)<front))):return false
 	if w.hazards.any(func(h):return absf(float(h.x)-foot.x)<60. and foot.y>-90.):return false
 	for offset in [-22.,0.,22.]:
 		if CampaignRoutes.solid_at(w,foot+Vector2(offset,-56.)):return false
@@ -159,8 +189,10 @@ static func start_entry(w,area: Rect2) -> void:
 		# fight. Keep the entry on the left side of the active boss encounter.
 		var approach:=clampf(float(w.boss.x)-area.size.x*.75,0.,maxf(0.,float(w.length())-area.size.x))
 		area.position.x=maxf(area.position.x,approach)
-	w.recovery_view=area
 	w.entry_to=landing(w,area)
+	if w.entry_to.x<area.position.x+45. or w.entry_to.x>area.end.x-42.:
+		area.position.x=clampf(w.entry_to.x-110.,0.,maxf(0.,float(w.length())-area.size.x))
+	w.recovery_view=area
 	w.entry_from=Vector2(area.position.x+36.,area.position.y+60.)
 	w.player=w.entry_from
 	w.velocity=Vector2.ZERO

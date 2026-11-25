@@ -35,12 +35,14 @@ func run() -> void:
 	for tick in 220:w.step(1./60.)
 	await snap("shore-bridge")
 	check(w.grounded() and w.crossing_floor(6220.,-42.,-39.,10.)==-40.,"Both visible bridge decks still support the player after the old collapse delay")
-	w.load_section("arena");w.boss.active=true;w.boss.engaged=true;w.player=Vector2(2150.,0.);game.view.camera_x=1850.
-	w.boss.phase=1;w.boss.hp=90;w.boss.ports=[3,3]
+	w.begin("aion");w.load_section("arena");w.boss.engaged=true
+	w.player=Vector2(1810.,w.floor_at(1810.));game.view.camera_x=1600.
+	w.boss.y=w.floor_at(float(w.boss.x));w.boss.ports=[3,3];w.ammunition=8
 	await snap("boss-ports")
-	w.boss.phase=2;w.boss.hp=55;w.boss.windup=.5;w.boss.wait=1.5
+	w.player=Vector2(2150.,w.floor_at(2150.));game.view.camera_x=1850.
+	w.boss.phase=2;w.boss.hp=165;w.boss.windup=0.;w.boss.wait=1.5
 	await snap("boss-core")
-	w.boss.phase=3;w.boss.hp=29;w.boss.attack=2;w.boss.windup=.7
+	w.boss.phase=3;w.boss.hp=87;w.boss.attack=2;w.boss.windup=.7
 	await snap("boss-charge-warning")
 	root.size=Vector2i(393,873);await process_frame
 	w.load_section("shore");w.weapon="heavy";w.ammunition=45;w.player=Vector2(900.,0.);game.view.camera_x=600.;w.pickups.append({"id":"offer-review","kind":"arc","x":920.,"y":-35.})

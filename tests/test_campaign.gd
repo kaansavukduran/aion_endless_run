@@ -44,14 +44,20 @@ func run() -> void:
 	w.jump_release();w.jump_press();check(w.jumps==3 and w.velocity.y<0.,"Aion can jump a third time in Mission 1")
 	w.jump_release();w.jump_press();check(w.jumps==3,"The fourth press grants no jump")
 	for hero in ["rabbit","eren"]:
-		var short:=fresh(hero);short.jump_press();tick(short,.05);check(short.grounded(),hero+" stays planted while charging");short.jump_release();var low:=short.velocity.y
-		var long:=fresh(hero);long.jump_press();tick(long,1.2);long.jump_release();check(long.velocity.y<low-400.,hero+" release launches proportionally to charge")
+		var short:=fresh(hero);short.move_axis=Vector2.RIGHT;short.jump_press();tick(short,.05)
+		check(short.grounded() and not short.charging and short.velocity.x>230.,hero+" a tap holds the normal movement and pose before release")
+		short.jump_release();var low:=short.velocity.y
+		check(low<0. and short.jumps==1,hero+" launches immediately on a short release")
+		var poised:=fresh(hero);poised.jump_press();tick(poised,.99)
+		check(not poised.charging,hero+" stands until a full second of continuous input")
+		poised.step(1./120.)
+		check(poised.charging and poised.grounded(),hero+" enters the authored charging pose at one second")
 		var peaks:=[]
-		for hold in [.9,1.2]:
+		for hold in [.9,1.25,1.73]:
 			var charged:=fresh(hero);charged.jump_press();tick(charged,hold);charged.jump_release();var peak:=0.
 			for step in 220:charged.step(.01);peak=minf(peak,charged.player.y)
 			peaks.append(peak)
-		check(float(peaks[1])<float(peaks[0])-50.,hero+" full charge actually travels higher, without an invisible low ceiling")
+		check(float(peaks[0])-float(peaks[1])>50. and float(peaks[1])-float(peaks[2])>50.,hero+" partial and full charges each raise the actual jump apex")
 	for retired in ["owl","wolf"]:
 		w=fresh(retired);check(w.character=="aion" and retired not in World.HEROES,"Retired helper is no longer a selectable mission hero: "+retired)
 	for hero in World.HEROES:
@@ -129,16 +135,16 @@ func run() -> void:
 		for item in w.pickups:
 			if not CampaignGround.has_floor(w.floor_at(float(item.x))):
 				check(gap_fruit_reachable(w,item),"Gap fruit is collected by actual jump physics from a supporting platform: "+str(item.id))
-	w=fresh();w.load_section("arena");tick(w,2.);w.damage_boss(99);check(w.boss.clock==0. and w.bullets.is_empty() and w.boss.hp==90,"Offscreen boss waits for introduction and cannot be killed before it")
-	w.boss.engaged=true;w.boss.hp=90;w.boss.wait=0.;tick(w,1.1);check(w.bullets.size()>=5,"Boss actually fires fan attack")
+	w=fresh();w.load_section("arena");tick(w,2.);w.damage_boss(300);check(w.boss.clock==0. and w.bullets.is_empty() and w.boss.hp==270 and w.boss.max_hp==270,"Offscreen boss waits with the new max health and cannot be damaged before introduction")
+	w.boss.engaged=true;w.boss.wait=0.;tick(w,1.1);check(w.bullets.size()>=5,"Boss actually fires fan attack")
 	w.boss.windup=0.;w.boss.wait=0.;w.boss.attack=1;w.bullets.clear();tick(w,1.1);check(w.bullets.any(func(b):return b.kind=="wave"),"Boss fires jumpable root wave")
 	w.boss.windup=0.;w.boss.wait=0.;w.boss.attack=2;tick(w,1.1);check(w.enemies.size()>=2,"Boss deploys drones")
-	w.damage_boss(70);check(w.boss.phase==2 and w.boss.hp==59,"A strong hit reaches the next boss phase without crossing two")
-	w.damage_boss(70);check(w.boss.hp==59,"Fresh hits cannot cut through the visible phase transition")
-	w.boss.shift_pause=0.;w.boss.wait=.2;w.damage_boss(70)
-	check(w.boss.hp==59,"All hits respect the closed core")
-	w.boss.windup=.5;w.damage_boss(70);check(w.boss.phase==3 and w.boss.hp==29,"Opening the core allows the next phase")
-	w.boss.shift_pause=0.;w.damage_boss(29);check(w.completed and w.state=="victory","Boss defeat settles before the result screen")
+	w.damage_boss(240);check(w.boss.phase==2 and w.boss.hp==179,"A strong hit reaches the next boss phase without crossing two")
+	w.damage_boss(240);check(w.boss.hp==179,"Fresh hits cannot cut through the visible phase transition")
+	w.boss.shift_pause=0.;w.boss.wait=.2;w.damage_boss(240)
+	check(w.boss.hp==179,"All hits respect the closed core")
+	w.boss.windup=.5;w.damage_boss(240);check(w.boss.phase==3 and w.boss.hp==89,"Opening the core allows the next phase")
+	w.boss.shift_pause=0.;w.damage_boss(89);check(w.completed and w.state=="victory","Boss defeat settles before the result screen")
 	tick(w,1.25);check(w.state=="complete","Finite mission actually ends after victory transition")
 	var final_score:=w.score;w.damage_boss(90);check(w.score==final_score,"Boss cannot grant completion reward twice")
 	var restore:=World.new();check(restore.restore(w.snapshot()) and restore.completed and restore.state=="complete","Completed campaign survives save/load")

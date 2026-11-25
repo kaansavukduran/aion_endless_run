@@ -31,7 +31,7 @@ static func capture(w,x: float) -> Dictionary:
 	# mid-route flag can explicitly preserve a rider and its recorded hull.
 	if x<=180. and bool(machine.get("ridden",false)):
 		machine.ridden=false;machine.x=x+100.;machine.floor_y=0.
-	return {"section":w.section,"x":x,"weapon":w.weapon,"ammunition":w.ammunition,"grenades":w.grenades,"shield":0,"flock":w.flock,"mount":machine}
+	return {"section":w.section,"x":x,"weapon":w.weapon,"ammunition":w.ammunition,"pistol_reserve":w.pistol_reserve,"grenades":w.grenades,"shield":0,"flock":w.flock,"mount":machine}
 
 static func enter(w) -> void:
 	if str(w.rally.get("section",""))!=w.section:w.rally=capture(w,140.)
@@ -49,7 +49,9 @@ static func apply(w,point: Dictionary) -> void:
 	var x: float=float(point.get("x",140.))
 	if x<35. or x>w.length()-130. or not CampaignGround.has_floor(w.floor_at(x)):return
 	w.player=Vector2(x,w.floor_at(x));w.velocity=Vector2.ZERO
-	w.weapon=str(point.get("weapon","pistol"));w.ammunition=int(point.get("ammunition",0))
+	var stock:=point.duplicate()
+	CampaignWeapons.migrate_stock(stock)
+	w.weapon=str(stock.weapon);w.ammunition=int(stock.ammunition);w.pistol_reserve=int(stock.pistol_reserve)
 	w.grenades=int(point.get("grenades",3));w.flock=clampi(int(point.get("flock",1)),1,AionCampaignWorld.MAX_FLOCK)
 	var machine: Dictionary=point.get("mount",{})
 	if not machine.is_empty():
@@ -68,7 +70,8 @@ static func valid(point: Variant,section: String) -> bool:
 		var value=point.get(key,null)
 		if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)):return false
 	if float(point.x)<35. or float(point.x)>float(AionCampaignWorld.STAGES[section].length)-130.:return false
-	if str(point.get("weapon","")) not in CampaignWeapons.SPECS:return false
+	if CampaignWeapons.canonical_kind(str(point.get("weapon",""))) not in CampaignWeapons.SPECS:return false
+	if point.has("pistol_reserve") and not CampaignEncounterSave.valid_number(point.pistol_reserve,0,CampaignWeapons.PISTOL_LIMIT):return false
 	if float(point.ammunition)<0. or float(point.ammunition)>1000. or float(point.grenades)<0. or float(point.grenades)>9. or float(point.shield)<0. or float(point.shield)>3. or float(point.flock)<1. or float(point.flock)>3.:return false
 	var machine=point.get("mount",{})
 	if not machine is Dictionary or machine.size()>24:return false

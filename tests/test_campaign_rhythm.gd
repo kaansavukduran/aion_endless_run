@@ -89,13 +89,13 @@ func run() -> void:
 		check(w.player.x>6470. and w.hp==1 and w.attempts_remaining==3,"Both decks are walkable after waiting: "+hero)
 	w=fresh();w.load_section("arena");w.enemies.clear();w.boss.active=true;w.boss.engaged=true;w.boss.phase=1
 	var target:=Vector2(float(w.boss.x)-65.,-95.)
-	w.bullets=[{"p":target-Vector2(100,0),"v":Vector2(760,0),"owner":"hero","kind":"pistol","damage":1,"pierce":0,"age":0.,"life":1.,"hit":[]}]
-	w.step_bullets(.2)
-	check(w.boss.hp==88 and int(w.boss.ports[0])==2,"Real projectile can damage a visible destructible boss port")
-	w.boss.hp=50;w.boss.phase=2;w.boss.windup=.5;w.boss.wait=1.5
+	w.bullets=[{"p":target-Vector2(160,0),"v":Vector2(760,0),"owner":"hero","kind":"pistol","damage":1,"pierce":0,"age":0.,"life":1.,"hit":[]}]
+	for frame in 35:w.step_bullets(1./120.)
+	check(w.boss.hp==268 and int(w.boss.ports[0])==2,"Real projectile can damage a visible destructible boss port")
+	w.boss.hp=150;w.boss.phase=2;w.boss.windup=.5;w.boss.wait=1.5
 	var core:=Vector2(float(w.boss.x),-75.)
 	check(CampaignBossPressure.core_damage(w,{"damage":1},core-Vector2(80,0),core+Vector2(80,0))==2,"Exposed-core aim earns an actual damage advantage")
-	w.boss.hp=29;w.boss.phase=3;w.boss.attack=2;w.boss.wait=0.;w.boss.windup=0.;w.step_boss(.01)
+	w.boss.hp=87;w.boss.phase=3;w.boss.attack=2;w.boss.wait=0.;w.boss.windup=0.;w.step_boss(.01)
 	check(float(w.boss.windup)>.9 and float(w.boss.get("dash",0.))==0.,"Final dash is telegraphed before motion or contact damage")
 	w.boss.windup=.01;w.step_boss(.02);var before_x: float=w.boss.x
 	w.player=Vector2(before_x-40.,-110.);w.invulnerable=0.;CampaignBossPressure.motion(w,.1)

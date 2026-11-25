@@ -8,8 +8,13 @@
 			"res://assets/campaign-environment.png",
 			"res://assets/woodland-creatures.png"
 		],
+		"causeway": [
+			"res://assets/campaign-environment.png"
+		],
 		"fork_one": [
 			"res://assets/campaign-environment.png",
+			"res://assets/campaign-rescue-npcs.png",
+			"res://assets/forge-items.png",
 			"res://assets/polish-pickups.png"
 		],
 		"fork_two": [
@@ -35,7 +40,6 @@
 		"shore": [
 			"res://assets/campaign-environment.png",
 			"res://assets/campaign-rescue-npcs.png",
-			"res://assets/forge-items.png",
 			"res://assets/polish-enemies.png",
 			"res://assets/polish-pickups.png",
 			"res://assets/woodland-creatures.png"

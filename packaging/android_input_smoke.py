@@ -93,7 +93,7 @@ for code in ['tr','en']:
  latest('AION_UI ',lambda state:state['page']=='main' and state['language']==code)
  capture('main-'+code)
 enter('eren')
-jump=hold_action('jump',1100)
+jump=hold_action('jump',2300)
 try:
  arcade_state(lambda state:state['charging'] and state['charge_ratio']>.1 and state['grounded'])
 finally:jump.wait(timeout=8)
@@ -102,7 +102,7 @@ capture('eren')
 check(True,'Native Eren charges and releases a real jump')
 main()
 enter('rabbit')
-jump=hold_action('jump',1600)
+jump=hold_action('jump',2400)
 try:
  arcade_state(lambda state:state['charging'] and state['charge_ratio']>.1 and state['grounded'])
  capture('rabbit-charge')

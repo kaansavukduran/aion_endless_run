@@ -5,7 +5,7 @@ extends RefCounted
 ## projectile vectors, numeric bridge keys). The surrounding JSON still holds
 ## the readable campaign index and the legacy migration fields.
 const VALUES := [
-	"player","velocity","facing","aim_direction","hp","grenades","weapon","ammunition",
+	"player","velocity","facing","aim_direction","hp","grenades","weapon","ammunition","pistol_reserve",
 	"boss","mount","enemies","bullets","bombs","npcs","objects","pickups","crates","gates",
 	"platforms","pits","rooms","zones","hazards","disabled_platforms","platform_timers",
 	"bridge_timers","buffs","assists","assist_attacks","chain","chain_time",
@@ -51,10 +51,12 @@ static func read(data: Dictionary) -> Dictionary:
 	var encoded=data.get("encounter")
 	if not encoded is String or encoded.length()>MAX_PAYLOAD or encoded.sha256_text()!=data.get("encounter_sha"):return {}
 	var result=bytes_to_var(Marshalls.base64_to_raw(encoded))
-	if not result is Dictionary or result.size()!=VALUES.size():return {}
+	if not result is Dictionary:return {}
+	var legacy_stock: bool=not result.has("pistol_reserve")
+	if result.size()!=VALUES.size()-int(legacy_stock):return {}
 	# All keys are checked before applying any to the active world.
 	for key in VALUES:
-		if not result.has(key):return {}
+		if not result.has(key) and key!="pistol_reserve":return {}
 	for key in ["player","velocity","aim_direction","entry_to","mount_transition_to","mount_transition_from"]:
 		if not result[key] is Vector2 or not result[key].is_finite():return {}
 	for key in ["enemies","bullets","bombs","npcs","objects","pickups","crates","gates","platforms","pits","rooms","zones","hazards","assists"]:
@@ -63,8 +65,17 @@ static func read(data: Dictionary) -> Dictionary:
 		if not result[key] is Dictionary:return {}
 	if not result.recovery_view is Rect2 or not result.recovery_view.is_finite():return {}
 	if not valid_number(result.hp,0,1) or not valid_number(result.grenades,0,9):return {}
-	if result.weapon not in CampaignWeapons.SPECS:return {}
+	if not result.weapon is String or CampaignWeapons.canonical_kind(result.weapon) not in CampaignWeapons.SPECS:return {}
+	if not valid_number(result.ammunition,0.,1000.) or int(result.ammunition)!=float(result.ammunition):return {}
+	if not legacy_stock and (not valid_number(result.pistol_reserve,0.,CampaignWeapons.PISTOL_LIMIT) or int(result.pistol_reserve)!=float(result.pistol_reserve)):return {}
 	if data.phase=="travel" and not AionCampaignWorld.STAGES.has(str(result.travel_target)):return {}
+	CampaignWeapons.migrate_stock(result)
+	for key in ["pickups","crates"]:
+		for item in result[key]:
+			if item is Dictionary and item.get("kind")=="trap":item.kind="rocket"
+	for npc in result.npcs:
+		if npc is Dictionary and npc.get("gift")=="trap":npc.gift="rocket"
+	result.bullets=result.bullets.filter(func(b):return b is Dictionary and b.get("kind")!="trap")
 	return result
 
 static func apply(w,data: Dictionary,encounter: Dictionary) -> void:

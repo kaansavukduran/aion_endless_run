@@ -8,6 +8,9 @@ const FUSE := 1.15
 const RADIUS := 9.
 const GRAVITY := 780.
 const PHYSICS_SLICE := 1. / 120.
+const THROW_SPEED := 310.
+const THROW_INHERITANCE := .075
+const THROW_INHERITANCE_LIMIT := 25.
 # First atlas cell source pixels: the palm grasps the lower opaque shell.
 # One rigid registration feeds held rendering and the released physics center.
 const PROP_SOURCE_CELL := 443.5
@@ -76,7 +79,8 @@ static func step(w,dt: float) -> void:
   var saved: float=float(action.elapsed);action.elapsed=WINDUP
   var origin: Vector2=Vector2(w.player)+hand_offset(w);action.elapsed=saved
   var direction: int=int(action.direction)
-  var bomb: Dictionary={'kind':'grenade','p':origin,'v':Vector2(direction*330.+w.velocity.x*.2,-430.),'age':0.,'color':w.COLORS[w.character],'angle':0.,'spin':direction*7.,'contacts':[],'contact_wait':0.,'exploded':false}
+  var inherited_x:=clampf(w.velocity.x*THROW_INHERITANCE,-THROW_INHERITANCE_LIMIT,THROW_INHERITANCE_LIMIT)
+  var bomb: Dictionary={'kind':'grenade','p':origin,'v':Vector2(direction*THROW_SPEED+inherited_x,-430.),'age':0.,'color':w.COLORS[w.character],'angle':0.,'spin':direction*7.,'contacts':[],'contact_wait':0.,'exploded':false}
   w.grenades-=1;w.grenade_time=.55;w.bombs.append(bomb);w.pending_events.append('grenade')
   _advance_bomb(w,bomb,maxf(0.,float(action.elapsed)-maxf(old_elapsed,WINDUP)))
   if bool(bomb.exploded):w.bombs.erase(bomb)

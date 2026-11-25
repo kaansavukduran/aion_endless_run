@@ -28,6 +28,19 @@ func travel(w,upper: bool) -> Dictionary:
 		if CampaignRoutes.low_ceiling(w):crawled=true
 	return {"frames":count,"state":w.state,"target":w.travel_target,"foot":CampaignRoutes.foot(w),"crawled":crawled}
 
+func middle_travel(w: AionCampaignWorld,drained: bool) -> void:
+	# Isolated geometry fixture. Every jump and crawl uses the existing world
+	# input methods and movement tick, not a forced destination or menu.
+	w.enemies.clear()
+	if drained:w.activated[CampaignRoutes.PUMP_ID]=true
+	for frame in 1800:
+		if w.state!="playing":return
+		var foot:=CampaignRoutes.foot(w)
+		w.move_axis=Vector2(1.,1. if foot.y>1. and foot.x<1204. else 0.)
+		if w.grounded() and foot.x>=1204. and foot.x<1450. and foot.y>CampaignRoutes.MIDDLE_FLOOR:
+			w.jump_press();w.jump_release()
+		w.step(1./60.)
+
 func auto_travel(game: AionCampaignGame,source: String,destination: String,reduced: bool=false,mounted: bool=false) -> void:
 	game.presentation_stage="";game.menu_kind="";game.fade=-1.;game.application_active=true
 	game.options.reduced_motion=reduced;game.world.load_section(source)
@@ -39,7 +52,7 @@ func auto_travel(game: AionCampaignGame,source: String,destination: String,reduc
 	game.world.mount={"available":mounted,"ridden":mounted,"x":1490.,"hp":1,"type":"skimmer"}
 	var exit_y:=0.
 	if CampaignRoutes.is_fork(source):
-		exit_y=CampaignRoutes.UPPER_FLOOR if destination in ["canopy","terrace"] else CampaignRoutes.LOWER_FLOOR
+		exit_y=CampaignRoutes.UPPER_FLOOR if destination in ["canopy","terrace"] else (CampaignRoutes.MIDDLE_FLOOR if destination=="causeway" else CampaignRoutes.LOWER_FLOOR)
 	game.world.player=Vector2(1490. if CampaignRoutes.is_fork(source) else game.world.length()-120.,exit_y-(42. if mounted else 0.))
 	game.world.velocity=Vector2.ZERO
 	game.set_action("attack","route-test",true)
@@ -142,7 +155,7 @@ func route_structures() -> void:
 
 func hatch_landmarks_and_rewards() -> void:
 	var w:=fresh()
-	check(CampaignRoutes.exit_flag_positions(w).size()==2,"Both exits of the always-open coast fork stay marked")
+	check(CampaignRoutes.exit_flag_positions(w).size()==3 and Vector2(CampaignRoutes.EXIT_X,0.) in CampaignRoutes.exit_flag_positions(w),"All three physical coast exits have a flag on their actual elevation")
 	check(Vector2(550.,CampaignRoutes.WALKWAYS[1].position.y) in CampaignRoutes.lantern_positions(w),"The coast lantern stays on its original step")
 	w.load_section("fork_two");w.enemies.clear()
 	var x:=CampaignRoutes.SERVICE_SUPPORT.get_center().x
@@ -175,13 +188,74 @@ func hatch_landmarks_and_rewards() -> void:
 	w.player=Vector2(float(supply.x),w.floor_at(float(supply.x)))
 	w.step(.02)
 	check(w.taken.has(supply.id),"The open lower passage still grants its supply")
+
+func pump_and_cage() -> void:
+	var w:=fresh()
+	w.enemies.clear()
+	var cage: Dictionary=w.objects.filter(func(o):return str(o.id)==CampaignRoutes.TECHNICIAN_CAGE_ID)[0]
+	var keeper: Dictionary=w.npcs.filter(func(n):return str(n.id)==CampaignRoutes.TECHNICIAN_ID)[0]
+	w.player=Vector2(1224.,90.)
+	check(not w.interact() and not bool(cage.active),"The occupied closed cage cannot be mistaken for a trap")
+	w.attack_press();w.attack_release()
+	for frame in 32:w.step(1./60.)
+	check(bool(cage.active),"An ordinary gun press opens the technician's cage")
+	w.attack_press()
+	check(w.rescue_target==CampaignRoutes.TECHNICIAN_ID,"Normal close rescue action reaches the technician behind the open cage")
+	w.attack_release()
+	for frame in 45:w.step(1./60.)
+	check(bool(keeper.freed),"The technician is freed after the normal rescue timing")
+	for frame in 160:w.step(1./60.)
+	var gift: Dictionary=w.gift_drops.get(CampaignRoutes.TECHNICIAN_ID,{})
+	check(w.activated.has(CampaignRoutes.PUMP_PART_ID) or (not gift.is_empty() and gift.kind=="relay_part"),"The ordinary bag handover produces a real relay part")
+	if not gift.is_empty():
+		w.player=Vector2(float(gift.x),w.floor_at(float(gift.x)))
+		w.step(.05)
+	check(w.activated.has(CampaignRoutes.PUMP_PART_ID) and w.taken.has(CampaignRoutes.TECHNICIAN_ID+":supply"),"Touching the named gift records its part and one-time collection")
+	w.player=Vector2(CampaignRoutes.PUMP_X,90.)
+	check(CampaignRoutes.context_action(w)=="arc_run_pump" and w.interact() and CampaignRoutes.pump_open(w),"The context action activates the lower pump after collecting its part")
+	check(w.floor_at(CampaignRoutes.DRY_START+5.)==CampaignRoutes.DRY_FLOOR,"The open pump reveals the deeper supported dry floor")
+	check(Vector2(CampaignRoutes.EXIT_X,CampaignRoutes.DRY_FLOOR) in CampaignRoutes.exit_flag_positions(w),"The lower route flag follows the drained floor")
+	check(not w.interact(),"An already running pump cannot award a second interaction")
+	w.player=Vector2(float(cage.x)+35.,90.)
+	check(CampaignRoutes.context_action(w)=="arc_arm_cage" and w.interact(),"The freed cage accepts one visible trap setup")
+	w.spawn_enemy("gnome",float(cage.x)+29.,90.,910)
+	w.spawn_enemy("gnome",float(cage.x)+30.,90.,911)
+	w.step(.02)
+	check(w.enemies[0].defeated and not w.enemies[1].defeated and w.activated.has(CampaignRoutes.TECHNICIAN_CAGE_ID+":trap-spent"),"The cage catches one eligible ground enemy and is spent")
+	var restored:=AionCampaignWorld.new()
+	check(restored.restore(w.snapshot()) and CampaignRoutes.pump_open(restored) and restored.activated.has(CampaignRoutes.TECHNICIAN_CAGE_ID+":trap-spent"),"Pump and spent cage survive actual snapshot restore")
+	var old:=fresh()
+	for deck in CampaignRoutes.MIDDLE_WALKWAYS:old.platforms.erase(deck)
+	old.npcs.clear()
+	old.objects.erase(old.objects.filter(func(o):return str(o.id)==CampaignRoutes.TECHNICIAN_CAGE_ID)[0])
+	check(restored.restore(old.snapshot()) and CampaignRoutes.MIDDLE_WALKWAYS.all(func(deck):return deck in restored.platforms) and restored.npcs.size()==1,"An exact older fork encounter restores the new walkways and single named technician")
+	var causeway:=fresh();causeway.load_section("causeway")
+	var vacant: Dictionary=causeway.objects.filter(func(o):return o.id=="causeway:tactic:0")[0]
+	check(bool(vacant.active) and vacant.x==990. and causeway.npcs.all(func(n):return n.get("cage","")!=vacant.id),"An authored empty cage stays beside its Causeway approach and holds no NPC")
+	causeway.player=Vector2(958.,causeway.floor_at(958.))
+	check(causeway.interact() and causeway.activated.has(vacant.id+":trap-set"),"The empty Causeway cage can be set by the ordinary action while grounded in the basin")
+
+func shelter_route() -> void:
+	var w:=fresh();w.load_section("shore")
+	w.enemies.clear()
+	w.player=Vector2(1074.,w.floor_at(1074.))
+	w.invulnerable=0.
+	w.spawn_enemy("crow",1074.,-185.,941)
+	var crow: Dictionary=w.enemies.front()
+	var roof: Rect2=CampaignRoutes.SHELTERS.shore[0]
+	check(w.platforms.has(roof) and CampaignRoutes.crow_sheltered(w,w.player),"The cover art is anchored to a real shore platform and protects the standing lane")
+	check(CampaignRoutes.crow_roof_hit(w,Vector2(1074.,-185.),Vector2(1074.,-25.)),"A fast descending segment intersects the cover roof before it reaches the player")
+	check(not CampaignRoutes.crow_roof_hit(w,Vector2(1210.,-185.),Vector2(1210.,-25.)) and not CampaignRoutes.crow_sheltered(w,Vector2(1210.,0.)),"The physical cover leaves the adjacent exposed lane vulnerable")
+	w.enemy_shot(crow)
+	for frame in 35:w.step_enemies(1./60.)
+	check(w.hp==1 and is_zero_approx(float(crow.dive)) and float(crow.y)<roof.position.y,"An actual shore crow attack stops its dive above the roof")
 func run() -> void:
 	for section in CampaignRoutes.FORKS:
 		var w:=fresh();w.load_section(section)
 		check(w.state=="playing","Fork starts as live physics, not a choice state: "+section)
-		check(w.platforms.size()==3 and w.pits.is_empty(),"Junction has authored reachable stairs and a real lower floor")
+		check(w.platforms.size()==(5 if section=="fork_one" else 3) and w.pits.is_empty(),"Junction has authored reachable stairs and a real lower floor")
 		for surface in w.platforms:
-			check(surface.size.x>=140. and surface.size.y>0.,"Upper route is actual one-way collision geometry")
+			check(surface.size.x>=130. and surface.size.y>0.,"Route decks are actual one-way collision geometry")
 		if section=="fork_one":check(w.floor_at(500.)==0. and w.floor_at(900.)==90.,"Material step matches actual floor heights")
 		else:check(w.floor_at(500.)==0. and w.floor_at(1000.)==0.,"The canopy yard floor is closed until its hatch opens")
 		for high in [false,true]:
@@ -194,6 +268,9 @@ func run() -> void:
 			check(w.route.has(expected),"Crossing exit records the real route once")
 			w.finish_travel();check(w.section==expected and w.state=="playing","Physical route loads its actual destination")
 	for hero in AionCampaignWorld.HEROES:
+		for drained in [false,true]:
+			var middle:=fresh(hero);middle_travel(middle,drained)
+			check(middle.travel_target=="causeway","A sequence of normal jumps reaches the middle causeway for "+hero+" / drained "+str(drained))
 		for section in CampaignRoutes.FORKS:
 			for high in [true,false]:
 				var w:=fresh(hero);w.load_section(section);var result:=travel(w,high)
@@ -207,9 +284,16 @@ func run() -> void:
 	dropper.step(.05);check(absf(dropper.player.y+195.)<.1 and dropper.crouching(),"Down alone crawls on the upper deck without silently choosing the lower path")
 	dropper.move_axis=Vector2(0,1);dropper.jump_press();dropper.jump_release()
 	for frame in 90:dropper.step(1./60.)
-	check(dropper.grounded() and absf(dropper.player.y-90.)<.1,"Down+Jump physically drops from the bridge to the lower channel")
+	check(dropper.grounded() and absf(dropper.player.y-44.)<.1,"Down+Jump drops from the upper bridge to the real middle step")
+	dropper.jump_press();dropper.jump_release()
+	for frame in 55:dropper.step(1./60.)
+	check(dropper.grounded() and absf(dropper.player.y-90.)<.1,"A second Down+Jump descends from the middle step to the lower channel")
 	check(dropper.state=="playing" and CampaignRoutes.choice_at(dropper)=="","Dropping between lanes does not secretly select a route before its exit")
 	check(CampaignRoutes.camera_y(w,0.)==90.,"Lower channel camera follows its real foot height instead of hiding the hero under controls")
+	var high_camera:=fresh();high_camera.player=Vector2(1300.,CampaignRoutes.UPPER_FLOOR)
+	check(CampaignRoutes.camera_y(high_camera,0.)< -130.,"Camera climbs to frame the actual upper passage")
+	var lip_camera:=fresh();lip_camera.player=Vector2(635.,0.)
+	check(CampaignRoutes.camera_y(lip_camera,0.)>10.,"Camera starts showing the lower landing before the entry ledge")
 	w.mount.ridden=true;w.player.y=48.;check(CampaignRoutes.camera_y(w,0.)==90.,"Rider camera follows vehicle contact feet, not a different mounted offset")
 	w.mount.ridden=false;w.player.y=90.
 	for mounted in [false,true]:
@@ -238,11 +322,13 @@ func run() -> void:
 			check(rider.mount.ridden and absf(rider.player.y+42.-deck)<.1,"Reboarding preserves the real hull floor")
 	route_structures()
 	hatch_landmarks_and_rewards()
+	pump_and_cage()
+	shelter_route()
 	var snap:=w.snapshot();var restored:=AionCampaignWorld.new();check(restored.restore(snap) and restored.section=="fork_one" and restored.state=="playing","A junction checkpoint restores into gameplay")
 	var game:=AionCampaignGame.new();root.add_child(game);await process_frame;game.set_process(false)
 	game.world.load_section("fork_one");game.menu_kind="";game.build_ui();await process_frame;await process_frame
 	check(not game.ui.find_children("Route_*","Button",true,false).size(),"No route-choice button exists in the live junction UI")
-	for pair in [["shore","quay"],["quay","fork_one"],["canopy","fork_two"],["roots","relay"],["relay","arena"]]:auto_travel(game,str(pair[0]),str(pair[1]))
+	for pair in [["shore","quay"],["quay","fork_one"],["fork_one","causeway"],["causeway","relay"],["canopy","fork_two"],["roots","relay"],["relay","arena"]]:auto_travel(game,str(pair[0]),str(pair[1]))
 	auto_travel(game,"fork_one","water",false,true)
 	auto_travel(game,"fork_one","canopy",false,true)
 	auto_travel(game,"quay","fork_one",false,true)

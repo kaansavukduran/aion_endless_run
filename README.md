@@ -1,5 +1,11 @@
 # Aion Endless Run
 
+## 0.58.0 · Sönen Fenerler genişlemesi
+
+Fener Kıyısı’ndan çıkan üç fiziksel yol Bakır Röle’de birleşir. Kıyı Altı’ndaki pompa servis kanalının derinliğini değiştirir. Duraklatma menüsündeki **Harita** bulunduğun bölgeyi, **Ekipman** silahı, cephaneyi ve toplanan yükseltmeleri gösterir. Otomatik yürüyüş, ayarlarda açabileceğin isteğe bağlı bir destektir.
+
+Tabanca ve özel silahların mermisi sınırlı. Cephanen biterse yakın dövüşle devam edebilirsin. Kök Motoru üç evrede savaşır ve arena düşük tabanca stoğu için ikmal sağlar. Final “Devam edecek…” ile kapanır. [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md)
+
 ## 0.57.8 · Mission 1 finali
 
 Yeniden doğan kahraman üç saniye korunur. Koruma bittikten sonra kişisel kalkan dört hasarsız oyun saniyesinde bir darbe için dolar. Kök Motoru’nun son evresi, silah sesleri, geçitler ve tavşanların depar alevleri güncellendi. Park halindeki araçlar sabit durur. Mission 1 sonuç ekranı “Devam edecek…” kartıyla kapanır.
@@ -74,7 +80,7 @@ Korsan bekçinin iki kolu görülen altı yeni yürüyüş karesi, araçlarda ge
 
 **Arcade kontrolleri:** A/D veya oklarla yürü; S/Aşağı basılı tutarak eğil ve ilerle; Space zıpla; F/sol tık ateş et; sağ tık/G bomba; Shift depar; E bin/in veya silah değiştir. Aşağı+Zıpla ile tek yönlü platformdan in. Telefonda solda sabit joystick, sağda Zıpla/Ateş/Bomba; joystick'i aşağı çekerek eğil. Kolda sol çubuk/yön tuşları, A/× zıpla, RB/R1 veya X/□ ateş, B/○ bomba, Y/△ bin/in, Start/Options duraklat; kayıtlı eşlemeler korunur. Araçta sağ çubuk veya fareyle kesintisiz nişan al. Araçlar üç can taşır.
 
-Yürüyen örümcek mayınları hedefe gider; beş saniye içinde patlar. Kurtarılan fener bekçileri çantadan fiziksel ikmal bırakır; eşyaya temas edince alınır. Menü ve oyun yalnız **Türkçe/English** sunar. Dikey/yatay telefon, klavye/fare ve gamepad desteği korunur. Eski sonsuz mod önceki sürümlere aittir.
+Yürüyen mekanik böcekler geçitte arka arkaya geçer. Özel silahlardan biri etki alanına hasar veren röketatardır. Kurtarılan fener bekçileri çantadan fiziksel ikmal bırakır. Eşyaya temas edince alınır. Menü ve oyun **Türkçe/English** sunar. Dikey/yatay telefon, klavye/fare ve gamepad desteği korunur.
 
 [Oyunu oyna](https://kaansavukduran.github.io/aion_endless_run/) · [Teslim ve gerçek testler](docs/M1-DELIVERY.md) · [Fiziksel rotalar](docs/M1-FLOW-VALIDATION.md) · [Karakter paftaları](docs/M1-HERO-ART.md) · [Yerel Unslop kuralları ve QA](docs/M1-SKILL-QA-INVENTORY.md)
 

@@ -180,7 +180,7 @@ func draw_world() -> void:
 	for platform in world.platforms:
 		if platform.end.x<camera_x-50. or platform.position.x>camera_x+scene_w+50.:continue
 		if world.disabled_platforms.has(platform.position.x):continue
-		CampaignTimberArt.walkway(self,platform)
+		if not CampaignRoutes.draw_platform(self,platform):CampaignTimberArt.walkway(self,platform)
 		if world.section=="arena" and platform.position.x==2020. and int(world.boss.phase)==2 and int(world.boss.attack)%3==1 and float(world.boss.windup)>0.:
 			for x in range(6,int(platform.size.x),14):
 				draw_rect(Rect2(at(platform.position+Vector2(x,0.)),Vector2(7.,3.)),Color("ffb36b"))
@@ -213,6 +213,9 @@ func draw_world() -> void:
 				target.x=clampf(target.x,16.,scene_w-24.);target.y=maxf(target.y,host.hud_panel.strip_height+55.)
 				caption(arrow,target+Vector2(-5,0),16)
 	draw_npcs(false)
+	CampaignRoutes.draw_cage_front(self)
+	CampaignWeapons.draw_spider_parade(self)
+	CampaignBossPressure.draw_supply(self)
 	for crate in world.crates:
 		if float(crate.x)<camera_x-80. or float(crate.x)>camera_x+scene_w+80.:continue
 		if int(crate.hp)<=0: continue
@@ -228,6 +231,8 @@ func draw_world() -> void:
 			existing("pickups",int(fruit/6),fruit%6,p)
 		elif str(item.kind) in ["owl_feather","wolf_charm"]:
 			draw_pose(support_art.pose(str(item.kind)),p)
+		elif str(item.kind)=="relay_part":
+			CampaignRoutes.draw_part(self,p)
 		else:
 			# Every actual special weapon/support has its own original silhouette.
 			# This is a registered static drawing, not a fabricated animation count.
@@ -280,6 +285,7 @@ func draw_world() -> void:
 		else:
 			var row: int = {"moth":0,"slime":1,"beetle":2,"wisp":3}.get(str(e.kind),0)
 			existing("creatures",row,frame,p,direction,1.,tint)
+			if e.kind=="beetle":CampaignProjectileArt.draw_beetle_shell(self,e)
 		if (bool(e.mini) or bool(e.get("heavy",false))) and not bool(e.defeated):small_health(at(p+Vector2(-35,-130)),70,float(e.hp)/float(e.max_hp))
 	if bool(world.boss.active) or world.completed:
 		var phase: int=2 if world.completed else clampi(int(world.boss.phase)-1,0,2)
@@ -301,7 +307,7 @@ func draw_world() -> void:
 			for i in 2:
 				if int(world.boss.get("ports",[3,3])[i])<=0:continue
 				draw_boss_port(at(CampaignBossPressure.port_point(world,i)),int(world.boss.get("ports",[3,3])[i]))
-		elif not world.completed and int(world.boss.phase)==2 and world.boss_vulnerable():
+		elif not world.completed and CampaignBossPressure.core_exposed(world):
 			var core: Vector2=at(pivot+Vector2(0.,-75.))
 			for side in [-1.,1.]:
 				draw_rect(Rect2(core+Vector2(side*23.-2.,-15.),Vector2(4,30)),Color("f1c681"))
@@ -441,8 +447,8 @@ func draw_world() -> void:
 			var tail: Vector2=p-Vector2(b.v).normalized()*140.
 			draw_line(p,tail,Color("352d49"),8.);draw_line(p,tail,color,5.);draw_line(p,tail,Color("fff6d9"),2.)
 		elif b.kind=="frog_spit":MissionFrogSpitArt.projectile(self,b)
-		elif b.kind=="trap":draw_pose(support_art.pose("spider-walk",int(world.time*12.)%6),Vector2(b.p)+Vector2(0,8),int(b.get("facing",-1 if float(b.v.x)<0. else 1)))
 		else:
+			CampaignProjectileArt.draw_flight(self,b,p)
 			var phase: int=posmod(int(float(b.age)*18.),2) if host.motion_enabled and not host.options.reduced_motion else 0
 			var shot: Dictionary=projectile_art.pose(str(b.kind),str(b.get("colour","e1f5e7")),phase)
 			draw_set_transform(p,Vector2(b.v).angle(),Vector2.ONE)
@@ -458,7 +464,12 @@ func draw_world() -> void:
 			draw_honey_splash(blast)
 			continue
 		var phase: float=float(blast.age)/.5
-		if str(blast.get("kind",""))=="spider":draw_pose(support_art.pose("spider-burst",clampi(int(phase*6.),0,5)),Vector2(blast.p))
+		if str(blast.get("kind",""))=="rocket":
+			CampaignProjectileArt.draw_rocket_blast(self,blast)
+			continue
+		if str(blast.get("kind",""))=="armour_chip":
+			CampaignProjectileArt.draw_armour_chip(self,blast)
+			continue
 		var color := Color(str(blast.color));color.a=(1.-phase)*.8
 		draw_arc(at(blast.p),float(blast.radius)*phase,0,TAU,24,color,6.)
 		for i in 8: draw_rect(Rect2(at(blast.p)+Vector2.from_angle(i*TAU/8.)*float(blast.radius)*phase-Vector2(3,3),Vector2(6,6)),color)
@@ -467,8 +478,8 @@ func draw_world() -> void:
 	draw_assists()
 	draw_combat_cues()
 	if world.section!="arena" and not CampaignRoutes.is_fork(world.section):
-		var p := at(Vector2(world.length()-140.,0))
-		draw_flag(Vector2(world.length()-140.,0))
+		var flag_x:=world.length()-140.
+		draw_flag(Vector2(flag_x,world.floor_at(flag_x)))
 
 func draw_honey_splash(blast: Dictionary) -> void:
 	var p:=at(blast.p)
@@ -612,14 +623,14 @@ func draw_hero_weapon(pose: Dictionary,tint: Color) -> void:
 		draw_polygon(PackedVector2Array([Vector2(1,-2),Vector2(20,-2),Vector2(24,0),Vector2(1,2)]),PackedColorArray([Color("d7e9e8")]))
 	elif world.melee_time>0.:
 		draw_rect(Rect2(0,-4,9,8),Color("f5d0bd"));draw_rect(Rect2(6,-3,4,6),Color("d99791"))
-	else:
+	elif CampaignWeapons.has_rounds(world) or world.muzzle_flashing():
 		var weapon: Dictionary=transform.weapon
 		draw_texture_rect(M1CombatArt.weapon_texture(item_bank,str(weapon.kind)),Rect2(Vector2(weapon.offset),Vector2(weapon.size)),false)
 	draw_set_transform(Vector2.ZERO)
 	if world.muzzle_flashing() and world.melee_time<=0. and world.rescue_time<=0.:
 		var end: Vector2=at(world.player+Vector2(transform.muzzle))
 		var spec: Dictionary=CampaignWeapons.SPECS.get(world.shot_weapon,CampaignWeapons.SPECS.pistol)
-		draw_muzzle_flash(end,Vector2(transform.aim),Color(str(spec.colour)))
+		CampaignProjectileArt.draw_muzzle(self,end,Vector2(transform.aim),world.shot_weapon,Color(str(spec.colour)))
 
 	if world.rescue_time<=0. and world.melee_time<=0.:
 		var face: Rect2=pose.get("face_foreground",Rect2())
@@ -653,14 +664,7 @@ func draw_vehicle_barrel(machine: Dictionary,p: Vector2) -> void:
 	draw_set_transform(Vector2.ZERO)
 	if CampaignVehicles.firing(world) and world.muzzle_flashing():
 		var muzzle: Vector2=at(world.player+world.armed_muzzle())
-		draw_muzzle_flash(muzzle,world.aim_direction,Color("b4eee6"))
-
-func draw_muzzle_flash(p: Vector2,aim: Vector2,color: Color) -> void:
-	draw_set_transform(p,aim.angle(),Vector2.ONE)
-	draw_rect(Rect2(0.,-2.,9.,4.),color)
-	draw_rect(Rect2(1.,-4.,4.,8.),color)
-	draw_rect(Rect2(0.,-1.,6.,2.),Color("fff3d2"))
-	draw_set_transform(Vector2.ZERO)
+		CampaignProjectileArt.draw_muzzle(self,muzzle,world.aim_direction,type,Color("b4eee6"))
 
 func draw_special_weapon() -> void:
 	# A modular weapon attachment uses the same measured muzzle as hit physics.
@@ -725,6 +729,7 @@ func draw_npcs(mounted_front: bool) -> void:
 		elif phase=="thanks":frame=4 if age<CampaignRescue.PRESENT_GIFT else 5
 		var npc_pose: Dictionary=catalogue.pose("rescue-npcs",int(npc.variant),frame)
 		var growth: float=npc_growth(int(npc.variant))
+		if str(npc.gift)=="relay_part":growth*=1.6/NPC_HEIGHT_RATIO
 		var npc_direction: int=npc_draw_direction(int(npc.get("facing",-1))) if phase!="bound" else 1
 		draw_pose(npc_pose,Vector2(float(npc.x),float(npc.y)),npc_direction,growth)
 		if phase=="thanks" and animated and age>=CampaignRescue.PRESENT_GIFT and age<CampaignRescue.DROP_GIFT:

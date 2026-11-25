@@ -62,7 +62,29 @@ const ARCADE_LIFE_TEXT := {
 	"downed_pit":["Çukura düştün","Fell into a pit"]
 }
 
+const FIELD_TEXT := {
+	"pistol":["Tabanca","Pistol"],
+	"fists":["Yumruk","Fists"],
+	"rocket":["Röle Roketatarı","Relay Launcher"],
+	"pistol_ammo":["Tabanca mermisi","Pistol rounds"],
+	"causeway":["Bakım yolu","Maintenance causeway"],
+	"rabbit_jump_help":["Kısa basıp bırak: zıpla. Bir saniye tutunca güç toplamaya başla.","Tap and release to jump. Hold for one second to begin charging."],
+	"arm_cage":["Mandalı kur","Set latch"],
+	"run_pump":["Pompayı çalıştır","Start pump"],
+	"inspect_pump":["Pompayı incele","Inspect pump"],
+	"relay_part":["Röle parçası","Relay coupler"],
+	"route_pump_open":["Su çekildi. Kuru bakım yolu açıldı.","The water receded. The dry service path is open."],
+	"route_pump_hint":["Pompa için teknisyenin röle parçasını bul.","Find the technician's relay coupler for the pump."],
+	"route_cage_armed":["Kafes kuruldu.","Cage set."],
+	"route_cage_caught":["Kafes saldırganı yakaladı.","The cage caught the attacker."],
+	"route_part_found":["Röle parçası alındı. Aşağıdaki pompa artık çalışabilir.","Coupler acquired. The pump below can now run."],
+	"boss_core":["Çekirdek açık · Vur!","Core exposed · Fire!"],
+	"boss_supply_ready":["Tabanca ikmali","Pistol resupply"],
+	"boss_supply_taken":["Tabanca ikmali alındı","Pistol rounds refilled"]
+}
+
 static func word(locale: String,key: String) -> String:
+	if FIELD_TEXT.has(key):return str(FIELD_TEXT[key][0 if GameText.language_for_locale(locale)=="tr" else 1])
 	if ARCADE_LIFE_TEXT.has(key):return str(ARCADE_LIFE_TEXT[key][0 if GameText.language_for_locale(locale)=="tr" else 1])
 	if HERO_SKILL_TEXT.has(key):return str(HERO_SKILL_TEXT[key][0 if GameText.language_for_locale(locale)=="tr" else 1])
 	locale=GameText.language_for_locale(locale)

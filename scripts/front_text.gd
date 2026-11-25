@@ -58,6 +58,21 @@ const MISSION_ABILITIES := {
 		"en":"Use Skill to swallow a small enemy. Press again to spit it out. Swallow cooldown: 5 seconds."
 	}
 }
+const MISSION_MOTIVATIONS := {
+	"aion": ["Kesik fener hattını izler.", "Traces the cut lantern wire."],
+	"sheep": ["Sürüsünü güvene taşır.", "Guides the flock to safety."],
+	"rabbit": ["İskele bekçilerine yardıma gelir.", "Comes to help the keepers."],
+	"eren": ["Yarım kalan imdat çağrısını izler.", "Follows a broken distress call."],
+	"armadillo": ["Bakım geçitlerini yeniden açar.", "Reopens the service passages."],
+	"frog": ["Su kanalında kalanları arar.", "Looks for survivors in the canal."]
+}
+
+static func motivation(language: String, hero: String) -> String:
+	var options: Array = MISSION_MOTIVATIONS.get(hero, [])
+	if options.is_empty():
+		return ""
+	return str(options[0 if GameText.language_for_locale(language) == "tr" else 1])
+
 static func endless_limited_label(language: String) -> String:
 	return "Sonsuz · 4" if GameText.language_for_locale(language)=="tr" else "Endless · 4"
 

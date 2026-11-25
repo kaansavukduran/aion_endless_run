@@ -96,11 +96,11 @@ func run() -> void:
 	var supported_flyer: Dictionary=w.enemies[0]
 	check(absf(float(supported_flyer.y)-w.floor_at(float(supported_flyer.x))+130.)<.01 and is_equal_approx(float(supported_flyer.home.y),float(supported_flyer.y)),"An attack flyer preserves its planned height above the playable deep basin")
 	w=fresh();w.load_section("arena");w.player=Vector2(2120.,0.)
-	w.boss.engaged=true;w.boss.phase=2;w.boss.hp=43;w.boss.x=2730.;w.boss.y=0.
+	w.boss.engaged=true;w.boss.phase=2;w.boss.max_hp=90;w.boss.hp=43;w.boss.x=2730.;w.boss.y=0.
 	for deck in CampaignGround.ARENA_WALKWAYS:w.platforms.erase(deck)
 	var earlier_arena:=w.snapshot();earlier_arena.ground_revision=1
 	restored=AionCampaignWorld.new()
-	check(restored.restore(earlier_arena) and restored.boss.hp==43 and restored.boss.engaged,"Arena refinement keeps an already engaged boss and its remaining health")
+	check(restored.restore(earlier_arena) and restored.boss.max_hp==270 and restored.boss.hp==129 and restored.boss.phase==2 and restored.boss.engaged,"Arena refinement keeps an already engaged boss and scales old health without changing its phase")
 	check(restored.player.y==-40. and float(restored.boss.y)==-26. and restored.platforms.has(CampaignGround.ARENA_WALKWAYS[1]),"The old arena save gains the actual hero, boss and support elevations")
 	restored.boss.attack=1;restored.boss.windup=.02
 	restored.step_boss(.025)

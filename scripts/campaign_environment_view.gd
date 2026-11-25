@@ -39,6 +39,7 @@ static func draw(v) -> void:
 		elif o.kind=="turret":
 			v.draw_pose(v.catalogue.pose("environment",row,frame),Vector2(float(o.x),float(o.y)),int(o.get("facing",1)))
 		else:v.draw_pose(v.catalogue.pose("environment",row,frame),Vector2(float(o.x),float(o.y)))
+	CampaignStory.draw(v)
 	# 0.38.0: Distinct, readable environmental zone cues for water current, terrace updraft, and roots darkness.
 	for z in w.zones:
 		if float(z.x)+float(z.width)<v.camera_x-80. or float(z.x)>v.camera_x+v.scene_w+80.:continue

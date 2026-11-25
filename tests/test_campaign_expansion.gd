@@ -40,7 +40,9 @@ func run() -> void:
 	var pending:=w.snapshot();var resume:=AionCampaignWorld.new();check(resume.restore(pending),"Save between cut and thanks remains valid");resume.state="playing";resume.player=Vector2(float(resume.npcs[0].x),float(resume.npcs[0].y));tick(resume,1.2);check(resume.weapon=="pistol" and claim_gift(resume,resume.npcs[0]) and resume.weapon=="heavy","Pending supply survives save and needs actual gift contact after handover")
 	var legacy:=pending.duplicate(true);legacy.schema=1;legacy.erase("discovered");legacy.erase("activated");var old:=AionCampaignWorld.new();check(old.restore(legacy),"0.23 schema1 saves migrate safely");old.state="playing";tick(old,1.1);check(old.weapon=="pistol","Legacy rescues do not create retroactive free weapons")
 	var total:=0;var roles: Dictionary={}
-	for stage in CampaignRescue.COUNTS:
+	var rescue_stages: Array=CampaignRescue.COUNTS.keys()
+	rescue_stages.append("fork_one")
+	for stage in rescue_stages:
 		w=fresh();w.load_section(stage);total+=w.npcs.size()
 		var ids: Dictionary={}
 		for npc in w.npcs:
@@ -48,7 +50,7 @@ func run() -> void:
 			if stage=="arena":
 				check(not w.npcs.any(func(other):return other.id!=npc.id and absf(float(other.x)-float(npc.x))<140.),
 					"Final arena captives have separate silhouettes and approach space: "+str(npc.id))
-	check(total==43 and roles.size()==6,"43 distinct authored rescue opportunities cover six roles")
+	check(total==45 and roles.size()==6,"45 distinct authored rescue opportunities cover six roles including the pump technician")
 	w=fresh();n=w.npcs[0];w.player=Vector2(float(n.x)-65.,0.);n.cage="test-cage";w.objects=[{"id":"test-cage","kind":"cage","x":n.x,"y":0.,"hp":2,"active":false,"secret":""}]
 	check(CampaignRescue.nearest(w).is_empty(),"A closed cage protects its actual captive")
 	w.attack_press();tick(w,.4);w.attack_release()
@@ -88,9 +90,9 @@ func run() -> void:
 		w=fresh();w.collect({"id":"supply","kind":weapon});var ammo:=w.ammunition
 		w.attack_press();check(w.bullets.size()>0 and w.ammunition==ammo-1,"Special weapon really fires and spends ammunition: "+weapon)
 		check(str(w.bullets[0].kind)==weapon,"Projectile carries the actual weapon behaviour")
-		w.spawn_enemy("seed",240. if weapon=="trap" else 280.,0.,0);tick(w,2.)
+		w.spawn_enemy("seed",280.,0.,0);tick(w,2.)
 		check(w.enemies[0].defeated,"Special weapon's real collision defeats an ordinary target: "+weapon)
-		w.ammunition=1;w.fire_time=0.;w.attack_release();w.attack_press();check(w.weapon=="pistol","Empty special returns to infinite pistol without reload")
+		w.ammunition=1;w.fire_time=0.;w.attack_release();w.attack_press();check(w.weapon=="pistol" and w.ammunition==CampaignWeapons.PISTOL_START,"Empty special returns to the stored finite pistol stock")
 	w=fresh();w.objects=[{"id":"near-gate","kind":"gate","x":180.,"y":0.,"hp":1,"active":false,"secret":""}];w.attack_press();tick(w,.05)
 	check(w.objects[0].active,"A muzzle beyond a close gate cannot skip the object collision")
 	w=fresh();w.objects=[{"id":"saved-bridge","kind":"bridge","x":400.,"y":0.,"hp":1,"active":false,"secret":""}]
@@ -98,10 +100,12 @@ func run() -> void:
 	check(w.platforms.has(bridge),"Opening a bridge creates its real one-way surface")
 	CampaignContent.apply_surface(w,w.objects[0]);check(w.platforms.count(bridge)==1,"Restoring an activated bridge never duplicates the collision surface")
 	w=fresh();w.spawn_enemy("gnome",280.,0.,0);w.collect({"id":"beam","kind":"beam"});w.attack_press();w.step(.05);check(w.enemies[0].defeated,"Fast beam uses segment collision instead of tunnelling past a target")
-	w=fresh();w.boss={"active":true,"engaged":true,"hp":90,"x":230.,"y":0.,"phase":1};var trap: Dictionary={"kind":"trap","owner":"hero","p":Vector2(175,-8),"v":Vector2.ZERO,"damage":3,"colour":"ffffff","age":.2}
-	check(CampaignWeapons.step(w,trap,.01) and w.boss.hp==87,"A placed trap can actually trigger against the main boss")
+	w=fresh();w.boss=CampaignBossPressure.initial_state(230.);w.boss.active=true;w.boss.engaged=true
+	var rocket: Dictionary={"kind":"rocket","owner":"hero","p":Vector2(175,-35),"v":Vector2.RIGHT,"damage":6,"colour":"ffffff","age":.2}
+	check(CampaignWeapons.rocket_impact(w,rocket,rocket.p) and w.boss.hp==CampaignBossPressure.MAX_HP-6,"Rocket area impacts can damage the active boss when exposed")
+	check(not CampaignWeapons.rocket_impact(w,rocket,rocket.p) and w.boss.hp==CampaignBossPressure.MAX_HP-6,"A spent rocket cannot apply splash twice")
 	var nova: Dictionary={"kind":"nova","owner":"hero","p":Vector2(200,-40),"v":Vector2.RIGHT,"damage":3,"colour":"ffffff","age":1.19,"life":1.2}
-	check(CampaignWeapons.step(w,nova,.02) and w.boss.hp==84 and nova.age==99.,"Timed nova consumes itself after exactly one area burst")
+	check(CampaignWeapons.step(w,nova,.02) and w.boss.hp==CampaignBossPressure.MAX_HP-9 and nova.age==99.,"Timed nova consumes itself after exactly one area burst")
 	w=fresh();w.collect({"id":"haste","kind":"haste"});w.move_axis.x=1.;var x:=w.player.x;tick(w,.2);check(w.player.x-x>56.,"Haste changes actual movement speed")
 	w=fresh();w.collect({"id":"magnet","kind":"magnet"});w.pickups=[{"id":"apple","x":300.,"y":-30.,"kind":"fruit_0"}];tick(w,.7);check(w.taken.has("apple"),"Magnet pulls and collects reachable loot")
 	w=fresh();w.collect({"id":"power","kind":"power"});w.attack_press();check(w.bullets[0].damage==2,"Power buff changes real projectile damage")

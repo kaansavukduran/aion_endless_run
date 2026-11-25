@@ -7,11 +7,11 @@ const SOCKETS := {
  'scatter':[.32,.48,.95,.22], 'arc':[.27,.70,.96,.35],
  'beam':[.22,.72,.95,.38], 'disc':[.30,.67,.69,.43],
  'harpoon':[.13,.73,.98,.30], 'seeker':[.39,.76,.975,.245],
- 'spore':[.11,.83,.695,.45], 'trap':[.39,.76,.975,.245], 'nova':[.26,.80,.97,.46]
+ 'spore':[.11,.83,.695,.45], 'rocket':[], 'nova':[.26,.80,.97,.46]
 }
 # Source-local pixel/atlas coordinates, semantic grip notes and held-only masks
-# are recorded in assets/M1-HELD-WEAPONS.json. A trap is a launcher mode; its
-# pickup illustration is a puck, so held art uses the existing seeker chassis.
+# are recorded in assets/M1-HELD-WEAPONS.json. The launcher uses its own
+# registered drawing and grip/bore pixels from CampaignRocketArt.
 static func display_source(kind: String) -> String:
  return M1HeldWeaponBank.display_source(kind)
 static func body_facing(w) -> int:
@@ -67,6 +67,7 @@ static func metrics(w) -> Dictionary:
  var s:=body_spec(w)
  return M1HeroArt.metrics(str(s.hero),str(s.action),int(s.frame))
 static func weapon_metrics(kind: String,crouched: bool=false) -> Dictionary:
+ if kind=='rocket':return CampaignRocketArt.weapon_metrics()
  if not SOCKETS.has(kind):kind='pistol'
  var source_kind:=display_source(kind)
  var registration: Dictionary=M1HeldWeaponBank.registration(kind)

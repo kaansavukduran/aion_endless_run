@@ -35,13 +35,14 @@ static func crate_kind(section: String,index: int) -> String:
 		"quay":["scatter","repair","grenade","shield","scatter","seeker","heal","grenade","heavy","repair","points"],
 		"water":["arc","shield","grenade","harpoon","heal","repair","spore","points"],
 		"terrace":["seeker","shield","grenade","disc","heal","repair","heavy","points"],
-		"roots":["trap","shield","grenade","nova","heal","repair","beam","points"]}
+		"roots":["rocket","shield","grenade","nova","heal","repair","beam","points"]}
 	var options: Array=stock.get(section,["heavy","grenade","heal","beam","shield","points"])
 	return str(options[posmod(index,options.size())])
 
 static func populate(w) -> void:
 	if CampaignRoutes.is_fork(w.section) or w.section=="arena":return
-	for i in w.crates.size():w.crates[i].kind=crate_kind(w.section,i)
+	for i in w.crates.size():
+		if w.crates[i].kind not in ["pistol_ammo","rocket"]:w.crates[i].kind=crate_kind(w.section,i)
 	for i in w.enemies.size():
 		var enemy: Dictionary=w.enemies[i]
 		if enemy.kind=="seed":

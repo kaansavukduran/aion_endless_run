@@ -64,7 +64,7 @@ func run() -> void:
 		check(point.x>=0 and point.y>=0 and point.x<pixels.get_width() and point.y<pixels.get_height(),"Actual weapon muzzle pixel is within isolated texture: "+kind)
 		check(pixels.get_pixelv(point).a>.5,"Registered barrel is an opaque canonical held-source pixel, not transparent background: "+kind)
 		check(pixels.get_pixelv(Vector2i(metrics.grip_pixel)).a>.5,"Registered grip is on the actual held weapon instead of empty canvas: "+kind)
-		check(Vector2(metrics.size).is_equal_approx(Vector2(texture.get_size())*float(metrics.factor)),"Actual held canvas agrees with drawing size, including trap launcher substitution: "+kind)
+		check(Vector2(metrics.size).is_equal_approx(Vector2(texture.get_size())*float(metrics.factor)),"Actual held canvas agrees with its measured drawing size: "+kind)
 	check_last_special_shot()
 	check_motion_contract()
 	print("RESULT: %d actual pose/muzzle checks, %d failures" % [checks,failures]);quit(1 if failures else 0)
@@ -107,12 +107,12 @@ func check_motion_contract() -> void:
 func check_last_special_shot() -> void:
 	for kind in CampaignWeapons.SPECIAL:
 		for stance in ["idle","walk","air","crouch"]:
-			var w:=fresh("aion");w.weapon=kind;w.ammunition=1
+			var w:=fresh("aion");CampaignWeapons.equip(w,kind);w.ammunition=1
 			if stance=="walk":w.move_axis.x=1.;w.velocity.x=235.;w.walk_distance=75.
 			if stance=="air":w.player.y=-125.;w.jumps=1;w.aim_direction=Vector2(1.,-1.).normalized()
 			if stance=="crouch":w.move_axis=Vector2(1.,1.);w.velocity.x=90.;w.walk_distance=45.
 			w.attack_press();w.attack_release()
-			check(w.shots==1 and w.weapon=="pistol" and w.ammunition==0,"Final special ammunition is consumed once and logical inventory falls back: "+kind+"/"+stance)
+			check(w.shots==1 and w.weapon=="pistol" and w.ammunition==CampaignWeapons.PISTOL_START,"Final special round uses one shot and returns to the stored pistol stock: "+kind+"/"+stance)
 			var pose:=M1CombatArt.placement(w)
 			check(str(pose.weapon.kind)==kind,"First visible flash keeps the actual last-fired weapon: "+kind+"/"+stance)
 			check(not w.bullets.is_empty() and Vector2(w.bullets[0].p).distance_to(w.player+drawn_barrel(w))<.001,"Last-ammunition projectile matches the actually displayed special barrel")
@@ -123,7 +123,7 @@ func check_last_special_shot() -> void:
 			check(not w.snapshot().has("shot_weapon"),"Last-shot presentation latch cannot become stale checkpoint inventory")
 			for i in 80:w.step(.01)
 			var shots: int=w.shots;w.attack_press();w.attack_release()
-			check(w.shots==shots+1 and str(M1CombatArt.placement(w).weapon.kind)=="pistol","Next ordinary fire actually emits and displays the fallback pistol")
+			check(w.shots==shots+1 and w.ammunition==CampaignWeapons.PISTOL_START-1 and str(M1CombatArt.placement(w).weapon.kind)=="pistol","Next ordinary fire spends a stored round and displays the fallback pistol")
 
 	var restarted:=fresh("aion");restarted.weapon="beam";restarted.ammunition=1
 	restarted.attack_press();restarted.begin("sheep");restarted.state="playing"

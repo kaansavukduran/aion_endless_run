@@ -7,6 +7,9 @@ static var cache: Dictionary={}
 
 func pose(kind: String) -> Dictionary:
 	if cache.has(kind):return cache[kind]
+	if kind in ["rocket","pistol_ammo"]:
+		cache[kind]=CampaignRocketArt.pickup(kind)
+		return cache[kind]
 	if SUPPLY_CELLS.has(kind):
 		var cel:=AtlasTexture.new()
 		cel.atlas=SUPPLIES

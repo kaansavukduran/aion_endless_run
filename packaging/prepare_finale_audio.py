@@ -77,6 +77,27 @@ def render_sprint():
     pcm(AUDIO / "sprint-ignite.wav", swell * (.56*broad + .09*sparks + body))
 
 
+def render_rocket():
+    rng = np.random.default_rng(611)
+    launch_time = .36
+    t = np.arange(round(RATE * launch_time)) / RATE
+    noise = rng.uniform(-1., 1., len(t))
+    jet = np.convolve(noise, np.ones(7) / 7, mode="same")
+    ignition = np.exp(-58. * t) * (.31 * chirp(t, 148, -195) + .31 * noise)
+    thrust = np.exp(-8. * t) * (.55 * jet + .14 * chirp(t, 510, -925))
+    envelope = np.minimum(1., t / .003) * np.minimum(1., (launch_time - t) / .035)
+    pcm(AUDIO / "fire-rocket.wav", np.tanh((ignition + thrust) * 1.44) * envelope * .75)
+
+    impact_time = .46
+    t = np.arange(round(RATE * impact_time)) / RATE
+    noise = rng.uniform(-1., 1., len(t))
+    debris = np.convolve(noise, np.ones(11) / 11, mode="same")
+    crack = (.50 * noise + .11 * chirp(t, 2400, -8400)) * np.exp(-43. * t)
+    blast = (.59 * chirp(t, 103, -156) + .23 * chirp(t, 176, -260) + .29 * debris) * np.exp(-10. * t)
+    envelope = np.minimum(1., t / .0025) * np.minimum(1., (impact_time - t) / .045)
+    pcm(AUDIO / "rocket-impact.wav", np.tanh((crack + blast) * 1.28) * envelope * .72)
+
+
 def render_theme():
     # 16 bars at 124 BPM. The half-time B section opens into a denser reprise.
     beat = 60 / 124
@@ -162,4 +183,5 @@ def render_theme():
 if __name__ == "__main__":
     render_effects()
     render_sprint()
+    render_rocket()
     render_theme()

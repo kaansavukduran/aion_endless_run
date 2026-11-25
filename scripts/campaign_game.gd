@@ -9,6 +9,7 @@ const GRENADE_SOUNDS := {
 	"grenade":preload("res://assets/audio/grenade-release.wav"),
 	"grenade_bounce":preload("res://assets/audio/grenade-bounce.wav"),
 	"grenade_blast":preload("res://assets/audio/grenade-blast.wav"),
+	"rocket_impact":preload("res://assets/audio/rocket-impact.wav"),
 	"hero_roll":preload("res://assets/audio/hero-roll.wav"),
 	"hero_tongue":preload("res://assets/audio/hero-tongue.wav"),
 	"hero_contact":preload("res://assets/audio/hero-contact.wav"),
@@ -25,7 +26,7 @@ const WEAPON_SOUNDS := {
 	"harpoon":preload("res://assets/audio/fire-harpoon.wav"),
 	"seeker":preload("res://assets/audio/fire-seeker.wav"),
 	"spore":preload("res://assets/audio/fire-spore.wav"),
-	"trap":preload("res://assets/audio/fire-trap.wav"),
+	"rocket":preload("res://assets/audio/fire-rocket.wav"),
 	"nova":preload("res://assets/audio/fire-nova.wav"),
 	"skimmer":preload("res://assets/audio/fire-skimmer.wav"),
 	"wind":preload("res://assets/audio/fire-wind.wav"),
@@ -127,7 +128,10 @@ var settings_ok := true
 # The large data-campaign QA mirror is for browser automation or ?aion-qa only.
 var web_qa := false
 var web_hidden_callback: JavaScriptObject
+var web_visible_callback: JavaScriptObject
 var web_update_callback: JavaScriptObject
+var auto_walk := false
+var auto_walk_moving := false
 var offer_label: Label
 var offered_second := -1
 var picker_preview: RunnerHeroPreview
@@ -140,6 +144,7 @@ func _ready() -> void:
 	var cfg := ConfigFile.new(); cfg.load("user://save.cfg")
 	RunnerBrowserSave.restore(cfg)
 	options.load_from(cfg); pad.load_from(cfg)
+	auto_walk=bool(cfg.get_value("prefs","campaign_auto_walk",false))
 	audio_enabled=bool(cfg.get_value("prefs","audio",true));audio_volume=float(cfg.get_value("prefs","volume",.45))
 	motion_enabled=bool(cfg.get_value("prefs","motion",true))
 	touch_mode=OS.has_feature("mobile")
@@ -155,9 +160,11 @@ func _ready() -> void:
 		# Godot's Web platform reports no focus loss for a hidden tab.
 		web_hidden_callback=JavaScriptBridge.create_callback(on_web_page_hidden)
 		JavaScriptBridge.get_interface("window").aionPageHidden=web_hidden_callback
+		web_visible_callback=JavaScriptBridge.create_callback(on_web_page_visible)
+		JavaScriptBridge.get_interface("window").aionPageVisible=web_visible_callback
 		web_update_callback=JavaScriptBridge.create_callback(prepare_web_update)
 		JavaScriptBridge.get_interface("window").aionSaveForUpdate=web_update_callback
-		JavaScriptBridge.eval("if(!window.aionVisibilityInstalled){window.aionVisibilityInstalled=true;document.addEventListener('visibilitychange',()=>{if(document.hidden)window.aionPageHidden?.()})}")
+		JavaScriptBridge.eval("if(!window.aionVisibilityInstalled){window.aionVisibilityInstalled=true;document.addEventListener('visibilitychange',()=>{if(document.hidden)window.aionPageHidden?.();else window.aionPageVisible?.()})}")
 		JavaScriptBridge.eval("if(!window.aionPageHideInstalled){window.aionPageHideInstalled=true;window.addEventListener('pagehide',()=>window.aionPageHidden?.())}")
 		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');if(!c)return;['data-state','data-page','data-ui-ready','data-ui'].forEach(k=>c.removeAttribute(k));c.dataset.mode='campaign'})()")
 	get_viewport().size_changed.connect(resize)
@@ -171,16 +178,20 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	if OS.has_feature("web"):
-		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');c?.removeAttribute('data-campaign');c?.removeAttribute('data-mode');window.aionAccessibleAction=null;window.aionPageHidden=null;window.aionSaveForUpdate=null})()")
+		JavaScriptBridge.eval("(()=>{const c=document.getElementById('canvas');c?.removeAttribute('data-campaign');c?.removeAttribute('data-mode');window.aionAccessibleAction=null;window.aionPageHidden=null;window.aionPageVisible=null;window.aionSaveForUpdate=null})()")
 
 func on_web_page_hidden(_arguments: Array) -> void:
 	if not is_inside_tree():return
-	# Release inputs and pause an active run, as on focus loss. A hidden tab runs
-	# no frames, so application_active stays untouched and cannot remain stuck.
+	application_active=false
 	cancel_unspent_actions();release_all()
 	if is_instance_valid(ui):
 		if world.state=="playing":toggle_pause()
 		elif world.state in CampaignLives.TRANSITIONS or world.state=="travel":save_checkpoint()
+
+func on_web_page_visible(_arguments: Array) -> void:
+	if not is_inside_tree():return
+	application_active=true
+	confirm_buttons_down.clear()
 
 func prepare_web_update(_arguments: Array) -> bool:
 	if world.state=="playing":
@@ -191,10 +202,13 @@ func prepare_web_update(_arguments: Array) -> bool:
 
 func t(key: String) -> String:
 	if key.begins_with("arc_"):key=key.trim_prefix("arc_")
+	var clue:=CampaignStory.line(language,key)
+	if not clue.is_empty():return clue
 	return Words.word(language,key)
 func old(key: String) -> String: return GameText.get_text(language,key)
 func font_size(size: int) -> int: return roundi(size*options.text_scale)
 func menu_title() -> String:
+	if menu_kind in ["map","equipment"]:return CampaignFieldUI.text(self,menu_kind)
 	return t({"briefing":"title","help":"controls","paused":"pause","dead":"game_over","continue_offer":"continue_choose","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
 
 func safe_rect(raw: Vector2) -> Rect2:
@@ -252,8 +266,14 @@ func build_ui() -> void:
 	var band_height: float=hud_panel.strip_height
 	pause_button=Button.new();pause_button.name="CampaignPause";pause_button.text="II";pause_button.tooltip_text=old("pause");pause_button.add_theme_font_size_override("font_size",font_size(20));ui.add_child(pause_button)
 	pause_button.position=Vector2(view_w-72,4);pause_button.size=Vector2(64,maxf(44.,band_height-8));pause_button.pressed.connect(toggle_pause)
-	subtitle=label("",16);ui.add_child(subtitle);subtitle.position=Vector2(12,band_height+6);subtitle.size=Vector2(view_w-24,90);subtitle.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	subtitle.add_theme_color_override("font_color",Color("fff3d8"));subtitle.add_theme_color_override("font_shadow_color",Color("211c29"));subtitle.add_theme_constant_override("shadow_outline_size",4)
+	subtitle=paragraph("",19);ui.add_child(subtitle);subtitle.position=Vector2(12,band_height+6)
+	var objective_backing:=StyleBoxFlat.new()
+	objective_backing.bg_color=options.color("background")
+	objective_backing.bg_color.a=.89
+	objective_backing.set_content_margin_all(5.)
+	objective_backing.content_margin_left=8.
+	objective_backing.content_margin_right=8.
+	subtitle.add_theme_stylebox_override("normal",objective_backing)
 	boss_health=ProgressBar.new();ui.add_child(boss_health);boss_health.show_percentage=false;boss_health.max_value=world.boss.max_hp
 	boss_health.position=Vector2(12,band_height+6);boss_health.size=Vector2(minf(view_w-24.,340.),10.)
 	boss_health.add_theme_stylebox_override("background",options.style("surface","border",1));boss_health.add_theme_stylebox_override("fill",options.style("primary","accent",1))
@@ -304,6 +324,9 @@ func build_menu() -> void:
 	menu.custom_minimum_size.x=minf(view_w-32,(570. if life_menu else 840.) if not portrait else 508.)
 	menu.size.x=menu.custom_minimum_size.x
 	column=VBoxContainer.new();column.add_theme_constant_override("separation",10);menu.add_child(column)
+	if menu_kind in ["paused","map","equipment"] and options.text_scale>1.5 and view_h<760.:
+		column.add_theme_constant_override("separation",6)
+		menu.add_theme_stylebox_override("panel",options.style("surface","border",12))
 	var title:=label(menu_title(),24)
 	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(title)
 	match menu_kind:
@@ -331,7 +354,7 @@ func build_menu() -> void:
 			pages.append(t("touch") if touch_mode else pad_help() if not Input.get_connected_joypads().is_empty() else t("keys"))
 			pages.append(t("help_rescue"))
 			pages.append(t("help_route"))
-			if world.character in world.CHARGE_HEROES:pages.append(t("special"))
+			if world.character in world.CHARGE_HEROES:pages.append(t("rabbit_jump_help" if world.character in world.RABBITS else "special"))
 			if world.character in ["aion","sheep","rabbit","eren","frog","armadillo"]:pages.append(RunnerFrontText.mission_ability(language,world.character))
 			if world.character=="owl":pages.append(t("owl"))
 			column.add_child(paragraph(pages[clampi(help_step,0,pages.size()-1)]))
@@ -344,10 +367,17 @@ func build_menu() -> void:
 			action(old("story_skip"),finish_help)
 		"paused":
 			action(old("resume"),close_menu,true).name="CampaignResume"
-			action(t("controls"),func():help_return="paused";menu_kind="help";help_step=0;build_ui())
-			action(t("settings"),func():menu_previous="paused";menu_kind="settings";settings_page=0;build_ui())
-			action(t("restart_mission"),begin_new).name="CampaignRestart"
-			action(t("back"),return_main).name="CampaignPauseMain"
+			CampaignFieldUI.add_pause_actions(self)
+			var controls:=action(t("controls"),func():help_return="paused";menu_kind="help";help_step=0;build_ui())
+			var settings:=action(t("settings"),func():menu_previous="paused";menu_kind="settings";settings_page=0;build_ui())
+			controls.name="CampaignControls";settings.name="CampaignSettings"
+			var restart:=action(t("restart_mission"),begin_new);restart.name="CampaignRestart"
+			var main:=action(t("back"),return_main);main.name="CampaignPauseMain"
+			if view_h<620. and options.text_scale>=1.5:
+				CampaignFieldUI.pair(self,controls,settings)
+				CampaignFieldUI.pair(self,restart,main)
+		"map":CampaignFieldUI.build_map(self)
+		"equipment":CampaignFieldUI.build_equipment(self)
 		"dead":
 			column.add_child(paragraph(old("score")+" %05d · " % world.score+t(world.checkpoint),20))
 			action(t("restart"),begin_new,true).name="CampaignRestart"
@@ -407,7 +437,7 @@ func update_result_score(dt: float) -> void:
 	result_tick=tick
 
 func fit_menu(target: PanelContainer) -> void:
-	if menu_kind=="complete":await get_tree().process_frame
+	if menu_kind in ["complete","paused","map","equipment"]:await get_tree().process_frame
 	if not is_instance_valid(target) or not target.is_inside_tree() or not target.is_visible_in_tree(): return
 	target.reset_size()
 	var height: float=target.get_combined_minimum_size().y
@@ -420,6 +450,7 @@ func fit_menu(target: PanelContainer) -> void:
 func menu_back() -> bool:
 	match menu_kind:
 		"paused":close_menu();return true
+		"map","equipment":menu_kind="paused";build_ui();return true
 		"settings":menu_kind=menu_previous;build_ui();return true
 		"result_details":menu_kind="complete";build_ui();return true
 		"help":finish_help();return true
@@ -447,7 +478,7 @@ func report_lines() -> Array[String]:
 	var record: Dictionary=Dictionary(Dictionary(saved.get("performance",{})).get("hero:"+world.character,{}))
 	var values: Array[String]=[t("route")+": "+" → ".join(world.route.map(func(s):return t(s))),
 		t("elapsed")+": "+elapsed_time(world.time)+" · "+t("defeated")+": "+str(world.kills)+" · "+t("best_chain")+": "+str(world.best_chain),
-		t("damage_taken")+": "+str(world.losses)+" · "+t("secrets_found")+": "+str(world.discovered.size()),
+		t("damage_taken")+": "+str(world.losses)+" · "+t("secrets_found")+": "+str(CampaignStory.secret_count(world)),
 		t("keepers")+": "+str(world.rescued.size())+" · "+t("arena")+": "+t("won"),
 		old("best")+": %05d"%int(saved.get("best_score",world.score)),
 		t("fastest")+": "+elapsed_time(float(record.get("time",world.time)))+" · "+t("best_rescues")+": "+str(record.get("rescues",world.rescued.size()))]
@@ -483,11 +514,13 @@ func settings_change(key: String) -> void:
 		"text":options.text_scale=1. if options.text_scale>=2. else options.text_scale+.5
 		"motion":options.reduced_motion=not options.reduced_motion
 		"audio":audio_enabled=not audio_enabled
+		"auto_walk":auto_walk=not auto_walk
 		"language":
 			var locales: Array=GameText.LANGUAGES
 			language=str(locales[(locales.find(language)+1)%locales.size()])
 	var cfg:=ConfigFile.new();cfg.load("user://save.cfg");RunnerBrowserSave.restore(cfg);options.save_to(cfg)
 	cfg.set_value("prefs","audio",audio_enabled)
+	cfg.set_value("prefs","campaign_auto_walk",auto_walk)
 	cfg.set_value("prefs","language",language)
 	if key=="language":cfg.set_value("prefs","language_override",true);cfg.set_value("prefs","language_mode_revision",2)
 	settings_ok=persist_preferences(cfg)
@@ -509,12 +542,14 @@ func build_settings() -> void:
 	var groups: Array= [
 		[["language",str(GameText.LANGUAGE_NAMES.get(language,language))],["theme",old("theme_"+options.theme_mode)],["font",old("font_"+options.font_mode)]],
 		[["text",str(roundi(options.text_scale*100.))+"%"],["motion",old("on") if options.reduced_motion else old("off")]],
-		[["audio",old("on") if audio_enabled else old("off")]]]
+		[["audio",old("on") if audio_enabled else old("off")],["auto_walk",old("on") if auto_walk else old("off")]]]
 	for item in groups[settings_page]:
 		var key: String=item[0]
-		action((old("language") if key=="language" else t("setting_"+key))+": "+str(item[1]),func():settings_change(key),false)
-	action(t("next")+" %d/3"%[settings_page+1],func():settings_page=(settings_page+1)%3;build_ui())
-	action(old("resume"),func():menu_kind=menu_previous;build_ui())
+		var setting_label:=old("language") if key=="language" else t("setting_"+key)
+		if key=="auto_walk":setting_label=CampaignFieldUI.text(self,"setting_auto_walk")
+		action(setting_label+": "+str(item[1]),func():settings_change(key),false).name="CampaignSetting_"+key
+	action(t("next")+" %d/3"%[settings_page+1],func():settings_page=(settings_page+1)%3;build_ui()).name="CampaignSettingsNext"
+	action(old("resume"),func():menu_kind=menu_previous;build_ui()).name="CampaignSettingsBack"
 
 func saved_can_resume() -> bool:
 	var phase: String=str(saved.get("phase","playing"))
@@ -687,6 +722,7 @@ func release_all() -> void:
 	var keep_paused_aim: bool=world.state=="paused"
 	var frozen_aim: Vector2=world.aim_direction
 	held.clear();touch_actions.clear();stick_touch=-1;left_down=false;right_down=false;up_down=false;down_down=false;mouse_stick=false;mouse_axis=Vector2.ZERO;pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
+	mouse_aim=false;auto_walk_moving=false
 	world.stop_inputs()
 	if keep_paused_aim:world.aim_direction=frozen_aim
 	if is_instance_valid(stick):stick.axis=Vector2.ZERO;stick.active=false;stick.queue_redraw()
@@ -831,7 +867,8 @@ func _input(event: InputEvent) -> void:
 					if actions[key].hit(p):set_action(key,"mouse-touch",true);get_viewport().set_input_as_handled();return
 				if is_instance_valid(stick) and Rect2(stick.position,stick.size).has_point(p):mouse_stick=true;mouse_axis=stick.value(p);stick.axis=mouse_axis;stick.active=true;stick.queue_redraw();get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and not mouse_stick and event.device!=InputEvent.DEVICE_ID_EMULATION:
-		mouse_aim=true;mouse_point=event.position
+		if event.relative.length_squared()>=1.:
+			active_input="keyboard";mouse_aim=true;mouse_point=event.position
 	elif event is InputEventMouseMotion and mouse_stick:
 		mouse_axis=stick.value(screen_transform.affine_inverse()*event.position);stick.axis=mouse_axis;stick.queue_redraw();get_viewport().set_input_as_handled()
 
@@ -845,6 +882,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			else:toggle_pause()
 			get_viewport().set_input_as_handled();return
 		if menu_kind!="":return
+		if event.pressed and event.physical_keycode in [KEY_A,KEY_D,KEY_LEFT,KEY_RIGHT] and not world.fire_held:
+			mouse_aim=false
 		match event.physical_keycode:
 			KEY_A,KEY_LEFT:left_down=event.pressed
 			KEY_D,KEY_RIGHT:right_down=event.pressed
@@ -858,6 +897,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				if event.pressed:activate_context()
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton and event.device!=InputEvent.DEVICE_ID_EMULATION and menu_kind=="" and event.button_index==MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			mouse_aim=true;mouse_point=event.position
 		set_action("attack","mouse",event.pressed);get_viewport().set_input_as_handled()
 
 func menu_focus(delta: int) -> void:
@@ -922,6 +963,31 @@ func advance_travel(dt: float) -> void:
 	if fade>=duration:
 		release_all();fade=-1.;fade_panel.color.a=0.
 
+func can_assist_walk() -> bool:
+	if not auto_walk or not application_active or world.section=="arena" or CampaignRoutes.is_fork(world.section):
+		return false
+	if bool(world.mount.ridden) or world.entry_guard or world.rescue_time>0. or CampaignVehicles.stunned(world) or MissionHeroAbilities.compact(world):
+		return false
+	if not world.grounded() and not auto_walk_moving:
+		return false
+	var foot:=CampaignRoutes.foot(world)
+	var ahead_x:=foot.x+75.
+	if ahead_x>=world.length()-120. or CampaignRoutes.clamp_horizontal(world,foot.x,ahead_x)<ahead_x-.1:
+		return false
+	for gate in world.gates:
+		if absf(float(gate.x)-ahead_x)<75. and world.gate_closed(gate):return false
+	for object in world.objects:
+		if str(object.kind)=="gate" and not bool(object.active) and absf(float(object.x)-ahead_x)<110.:
+			return false
+	for x in [foot.x+24.,ahead_x]:
+		var next_floor:=CampaignVehicles.support_below(world,x,foot.y-14.)
+		if not CampaignGround.has_floor(next_floor) or next_floor-foot.y>25. or next_floor-foot.y< -26.:
+			return false
+	for hazard in world.hazards:
+		var x:=float(hazard.x)
+		if x>=foot.x-14. and x<=ahead_x+24.:return false
+	return true
+
 func update_arcade_aim(dt: float=0.) -> void:
 	# Left stick controls movement in X and 8-way aiming in XY. Right stick,
 	# when active, overrides aiming without changing movement (twin-stick).
@@ -941,12 +1007,16 @@ func update_arcade_aim(dt: float=0.) -> void:
 	var move_y:=vertical
 	if world.character=="armadillo" and analog and not down_down and vertical>0. and absf(axis)>=vertical:
 		move_y=0.
-	world.move_axis=Vector2(axis,move_y)
+	auto_walk_moving=absf(axis)<.05 and absf(move_y)<.1 and can_assist_walk()
+	world.move_axis=Vector2(.66 if auto_walk_moving else axis,move_y)
 	# Mouse aim: any angle toward the pointer, unless a stick, pad or W/S aim is in use.
 	if mouse_aim and not analog and not up_down and (not down_down or world.grounded()) and is_instance_valid(view):
 		var direction:=pointer_aim()
 		if direction!=Vector2.ZERO:world.steer_aim(direction,0.);return
-	if raw.length_squared()<.04:raw=Vector2(world.facing,0.)
+	if raw.length_squared()<.04:raw=Vector2(1 if auto_walk_moving else world.facing,0.)
+	if not world.fire_held and absf(axis)>.25 and absf(raw.y)<.12 and pad_look==Vector2.ZERO:
+		world.steer_aim(Vector2(signf(axis),0.),0.)
+		return
 	if analog and not bool(world.mount.ridden):
 		# Sticks aim freely through 360 degrees; a nearly level push stays level.
 		if absf(raw.y)<.12*raw.length():raw.y=0.
@@ -982,7 +1052,7 @@ func _process(dt: float) -> void:
 	update_result_score(dt)
 	pad_menu_wait=maxf(0.,pad_menu_wait-dt)
 	poll_pad()
-	if world.state=="playing" and menu_kind=="" and fade<0.:
+	if world.state=="playing" and menu_kind=="" and fade<0. and application_active:
 		update_arcade_aim(clampf(dt,0.,.05))
 		discard_compact_actions()
 		if (stick_touch>=0 or mouse_stick):world.boost_held=absf(world.move_axis.x)>.85 or not Dictionary(held.get("boost",{})).is_empty()
@@ -990,7 +1060,7 @@ func _process(dt: float) -> void:
 		if impact_hold>0. and motion_enabled and not options.reduced_motion:
 			var held_time: float=minf(impact_hold,simulation_dt);impact_hold-=held_time;simulation_dt-=held_time
 		else:impact_hold=0.
-		if simulation_dt>0.:world.step(simulation_dt)
+		if simulation_dt>0.:world.step(simulation_dt,dt)
 	if world.state=="travel" and fade<0. and application_active:
 		if last_state!="travel":release_all()
 		if world.advance_exit(dt):start_travel()
@@ -1019,14 +1089,19 @@ func _process(dt: float) -> void:
 		else:
 			if world.state=="complete":menu_kind="outro";save_checkpoint()
 			build_ui()
+	if menu_kind=="" and fade<0.:CampaignStory.step(world)
+	var checkpoint_dirty:=false
 	for event in world.pending_events:
-		if event in ["checkpoint","rescue","rescue_gift","secret","mechanism","life_changed","vehicle_impact","vehicle_wreck","shield_hit"] and menu_kind!="briefing":save_checkpoint()
+		if event in ["checkpoint","rescue","rescue_gift","secret","story_clue","mechanism","life_changed","vehicle_impact","vehicle_wreck","shield_hit","boss_supply"]:
+			checkpoint_dirty=true
 		if event=="enemy" and impact_cooldown<=0. and motion_enabled and not options.reduced_motion and world.state=="playing":impact_hold=.035;impact_cooldown=.18
 		if event in ["vehicle_impact","vehicle_wreck"]:
 			if event=="vehicle_impact":release_all()
 			sound("hurt" if event=="vehicle_impact" else "blast")
 		if event.begins_with("shot:"):sound_weapon(event.trim_prefix("shot:"))
+		elif event=="rocket_impact":sound(event)
 		elif event in ["melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","sprint_ignite","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","hive_drop","hive_splash","guardian","boss_attack","boss_port","boss_wave","boss_beam","boss_charge_warning","complete","checkpoint","enemy","armour_hit","shield_hit"]:sound(event)
+	if checkpoint_dirty and menu_kind!="briefing":save_checkpoint()
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	var old_camera:=Vector2(view.camera_x,view.camera_y)
@@ -1035,7 +1110,7 @@ func _process(dt: float) -> void:
 		if world.entry_guard and not options.reduced_motion:
 			view.camera_x=lerpf(view.camera_x,desired_x,1.-exp(-minf(dt,.05)*8.))
 		else:view.camera_x=desired_x
-		var desired_y:=minf(0.,world.player.y+225.)
+		var desired_y:=minf(0.,world.player.y+clampf(view.scene_h*.27,136.,220.))
 		if CampaignGround.PROFILES.has(world.section):desired_y+=maxf(0.,world.player.y)*.95
 		desired_y=CampaignRoutes.camera_y(world,desired_y)
 		view.camera_y=desired_y if options.reduced_motion else lerpf(view.camera_y,desired_y,1.-exp(-minf(dt,.05)*9.))
@@ -1050,14 +1125,14 @@ func _process(dt: float) -> void:
 func update_hud() -> void:
 	if not is_instance_valid(hud_panel):return
 	hud_panel.refresh()
-	var region: String=world.section
-	if CampaignContent.SCENES.has(region):region=str(CampaignContent.SCENES[region][clampi(int(world.player.x/world.length()*3.),0,2)])
-	subtitle.text=t("mission")+" · "+t(region)
-	if world.weapon!="pistol" and world.ammunition<=5:subtitle.text+=" · "+t("low_ammo")
-	if world.notice_time>0. and world.notice!="" and (save_ok or world.notice!="arc_checkpoint"):subtitle.text+="\n"+t(world.notice)
-	if not save_ok:subtitle.text+="\n"+t("save_failed")
+	var objective:=CampaignFieldUI.objective(self)
+	if not bool(world.mount.ridden) and world.ammunition in [1,2,3]:objective+=" · "+t("low_ammo")
+	if world.notice_time>0. and world.notice!="" and (save_ok or world.notice!="arc_checkpoint"):objective+="\n"+t(world.notice)
+	if not save_ok:objective+="\n"+t("save_failed")
 	var active_controls: bool=menu_kind=="" and fade<0. and world.state=="playing" and presentation_stage==""
 	pause_button.visible=active_controls
+	var pause_height:=maxf(44.,hud_panel.strip_height-8.)
+	if not is_equal_approx(pause_button.size.y,pause_height):pause_button.size.y=pause_height
 	hud_panel.visible=menu_kind=="" and presentation_stage==""
 	subtitle.visible=hud_panel.visible
 	boss_health.position.y=hud_panel.strip_height+6.
@@ -1074,9 +1149,21 @@ func update_hud() -> void:
 			if pattern==1:boss_cue=" · "+t("boss_wave_jump")
 			elif pattern==2 and int(world.boss.phase)==3:boss_cue=" · "+t("boss_dash")
 			else:boss_cue=" · "+t("boss_warning")
-		elif int(world.boss.phase)==2 and world.boss_vulnerable():boss_cue=" · "+t("boss_core")
-		subtitle.text=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+boss_cue
+		elif CampaignBossPressure.core_exposed(world):boss_cue=" · "+t("boss_core")
+		objective=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+boss_cue
+		if world.notice=="boss_supply_taken" and world.notice_time>0.:objective+="\n"+t(world.notice)
+	if subtitle.text!=objective:
+		var objective_width:=0.
+		var objective_font:=subtitle.get_theme_font("font")
+		var objective_size:=subtitle.get_theme_font_size("font_size")
+		for line in objective.split("\n"):
+			objective_width=maxf(objective_width,objective_font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,objective_size).x)
+		subtitle.size.x=minf(view_w-24.,ceilf(objective_width)+18.)
+		subtitle.text=objective
+		subtitle.size.y=0.
 	subtitle.position.y=boss_health.position.y+(20. if boss_health.visible else 0.)
+	if pause_button.visible and subtitle.position.x+subtitle.size.x>pause_button.position.x:
+		subtitle.position.y=maxf(subtitle.position.y,pause_button.position.y+pause_button.size.y+6.)
 	if is_instance_valid(stick):stick.visible=active_controls
 	for key in actions:
 		var item: AionCampaignTouch=actions[key]
@@ -1086,7 +1173,10 @@ func update_hud() -> void:
 		if key=="attack":
 			var near:=not world.close_enemy().is_empty() and not bool(world.mount.ridden)
 			var captive:=not CampaignRescue.cut_target(world).is_empty()
-			item.action="cut" if captive else ("melee" if near else "shoot");item.caption=t("cut") if captive else (t("melee") if near else old("control_shoot"));item.cooldown=world.fire_time/.32;item.disabled=MissionHeroAbilities.compact(world)
+			var fists:=not CampaignWeapons.has_rounds(world)
+			item.action="cut" if captive else ("melee" if near or fists else "shoot")
+			item.caption=t("cut") if captive else (t("fists") if fists else (t("melee") if near else old("control_shoot")))
+			item.cooldown=world.fire_time/.32;item.disabled=MissionHeroAbilities.compact(world)
 		if key=="grenade":item.disabled=not CampaignGrenade.can_press(world);item.cooldown=world.grenade_time/.55
 		if key=="jump":
 			var diving: bool=bool(world.mount.ridden) and CampaignVehicles.kind(world)=="shell"
@@ -1100,7 +1190,9 @@ func update_touch_context(item: AionCampaignTouch,active_controls: bool) -> void
 	if not active_controls or not world.mount_transition.is_empty() or CampaignVehicles.stunned(world):
 		item.hide();return
 	var skill: Dictionary={}
-	if not CampaignRhythm.offer(world).is_empty():item.action="swap_weapon"
+	var route_action:=CampaignRoutes.context_action(world)
+	if not route_action.is_empty():item.action=route_action
+	elif not CampaignRhythm.offer(world).is_empty():item.action="swap_weapon"
 	elif bool(world.mount.ridden):item.action="exit_vehicle"
 	elif CampaignVehicles.can_board(world):item.action="board"
 	else:
@@ -1243,6 +1335,9 @@ func metadata() -> void:
 	data.engine_process_seconds=Performance.get_monitor(Performance.TIME_PROCESS);data.engine_physics_seconds=Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)
 	data.crouching=world.crouching()
 	data.charging=world.charging;data.charge_ratio=world.charge_ratio();data.jumps=world.jumps
+	data.waiting_to_charge=world.waiting_to_charge
+	data.auto_walk=auto_walk;data.auto_walk_moving=auto_walk_moving
+	data.ammunition=world.ammunition;data.pistol_reserve=world.pistol_reserve
 	data.sprint_fire=world.sprint_fire;data.sprint_recovery=world.sprint_recovery
 	data.roll_charges=world.roll_charges;data.roll_cooldown=world.roll_cooldown
 	data.rally=world.rally;data.retry_count=world.retry_count;data.chain=world.chain;data.chain_time=world.chain_time;data.best_chain=world.best_chain
@@ -1269,9 +1364,7 @@ func metadata() -> void:
 		if str(blast.get("kind",""))=="grenade":data.grenade_blasts.append({"p":[blast.p.x,blast.p.y],"age":blast.age})
 	for bullet in world.bullets:
 		if bullet.owner=="hero":data.hero_projectiles.append({"p":[bullet.p.x,bullet.p.y],"v":[bullet.v.x,bullet.v.y],"kind":bullet.kind,"age":bullet.age})
-	data.spiders=[]
-	for bullet in world.bullets:
-		if str(bullet.kind)=="trap":data.spiders.append({"p":[bullet.p.x,bullet.p.y],"age":bullet.age,"target":bullet.get("target","")})
+	data.spiders=CampaignWeapons.spider_snapshot(world)
 	JavaScriptBridge.eval("document.getElementById('canvas')?.setAttribute('data-campaign',"+JSON.stringify(JSON.stringify(data))+");")
 
 func accessible_action(args: Array) -> void:
@@ -1287,6 +1380,8 @@ func accessible_update() -> void:
 	for item in ui.find_children("*","Button",true,false):
 		if item.is_visible_in_tree():entries.append({"id":str(item.get_instance_id()),"label":item.tooltip_text if item.text in ["II","‹","›"] else item.text,"disabled":item.disabled,"toggle":false,"pressed":false})
 	var summary: String=menu_title() if menu_kind!="" else hud_panel.summary
+	if menu_kind in ["map","equipment"]:summary+=" · "+CampaignFieldUI.screen_summary(self)
+	if menu_kind=="" and presentation_stage=="":summary+=" · "+CampaignFieldUI.objective(self)
 	if menu_kind=="continue_offer":summary+=" · %d · "%ceili(world.continue_remaining)+old("name_"+world.continue_hero)
 	if menu_kind=="" and world.section=="arena" and bool(world.boss.active):summary+=" · "+t("arena")+" %d/%d"%[world.boss.hp,world.boss.max_hp]+" · "+t("phase")+" "+str(world.boss.phase)
 	if presentation_stage=="boss_reveal":summary=t("arena")

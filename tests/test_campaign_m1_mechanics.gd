@@ -10,8 +10,68 @@ func clean() -> AionCampaignWorld:
  return w
 func enemy_bullet(w,y: float) -> Dictionary:
  return {'p':Vector2(w.player.x,y),'v':Vector2.ZERO,'owner':'enemy','age':0.,'kind':'seed','damage':1,'pierce':0,'hit':[]}
+func encode_encounter(save: Dictionary, encounter: Dictionary) -> void:
+ save.encounter=Marshalls.raw_to_base64(var_to_bytes(encounter))
+ save.encounter_sha=save.encounter.sha256_text()
+func check_weapon_stock() -> void:
+ var w:=clean()
+ check(w.ammunition==CampaignWeapons.PISTOL_START,'Fresh Mission 1 starts with finite pistol stock')
+ w.ammunition=1;w.attack_press()
+ check(w.ammunition==0 and w.bullets.size()==1 and w.shots==1,'The last pistol round leaves the actual muzzle and changes the stock to zero')
+ var empty:=w.snapshot();var reopened:=AionCampaignWorld.new()
+ check(reopened.restore(empty) and reopened.ammunition==0,'A modern checkpoint preserves an empty pistol')
+ w.attack_release();w.fire_time=0.;w.attack_press()
+ check(w.melee_time>0. and w.shots==1 and w.bullets.size()==1,'Pressing attack on an empty pistol throws a fist even without a target')
+ w.attack_release();w.fire_time=0.;w.spawn_enemy('gnome',458.,0.,999);w.attack_press()
+ for i in 4:w.step(.05)
+ check(w.enemies[0].defeated and w.shots==1 and w.ammunition==0,'Empty-pistol melee damages an actual contact target at the attack frame')
+ w.collect({'id':'rocket-slot','kind':'rocket'});var rocket_stock:=w.ammunition
+ w.collect({'id':'field-ammo','kind':'pistol_ammo'});w.collect({'id':'field-ammo','kind':'pistol_ammo'})
+ check(w.ammunition==rocket_stock and w.pistol_reserve==CampaignWeapons.PISTOL_REFILL,'Collecting one box stores only one sidearm refill under an equipped launcher')
+ w.ammunition=1;w.fire_time=0.;w.attack_release();w.attack_press()
+ check(w.weapon=='pistol' and w.ammunition==CampaignWeapons.PISTOL_REFILL and w.pistol_reserve==0,'The last rocket re-equips the stored pistol reserve')
+ var legacy: Dictionary=bytes_to_var(Marshalls.base64_to_raw(empty.encounter))
+ legacy.erase('pistol_reserve');encode_encounter(empty,legacy)
+ check(reopened.restore(empty) and reopened.ammunition==CampaignWeapons.PISTOL_START,'A legacy unlimited pistol checkpoint receives the finite starter stock once')
+ legacy.weapon='trap';legacy.ammunition=12
+ legacy.crates=[{'id':'old-trap-box','x':730.,'y':0.,'hp':1,'kind':'trap'}]
+ legacy.bullets=[{'p':Vector2(720.,-10.),'v':Vector2.RIGHT,'kind':'trap','owner':'hero','age':0.}]
+ encode_encounter(empty,legacy)
+ check(reopened.restore(empty) and reopened.weapon=='rocket' and reopened.ammunition==6 and reopened.pistol_reserve==CampaignWeapons.PISTOL_START,'Legacy equipment converts launcher stock and restores its fallback sidearm')
+ check(reopened.bullets.is_empty() and reopened.blasts.is_empty() and reopened.crates[0].kind=='rocket','Legacy mine is removed without damage and the original unopened box ID stays playable')
+ var restore_again:=AionCampaignWorld.new()
+ check(restore_again.restore(reopened.snapshot()) and restore_again.ammunition==6,'Migrated launcher stock does not shrink again on another load')
+ var stock_ids:=reopened.pickups.filter(func(p):return p.kind=='pistol_ammo')
+ CampaignWeapons.populate_sidearm(reopened)
+ check(not stock_ids.is_empty() and reopened.pickups.filter(func(p):return p.kind=='pistol_ammo').size()==stock_ids.size(),'Older checkpoints gain one copy of each authored field stock box')
+ w=clean();w.ammunition=0;w.crates=[{'id':'emergency-stock','x':467.,'y':0.,'hp':1,'kind':'pistol_ammo'}]
+ w.attack_press();w.step(.05)
+ check(w.crates[0].hp==1 and w.pickups.is_empty(),'Empty-pistol punch cannot break a supply box before its contact cel')
+ for i in 3:w.step(.05)
+ check(w.crates[0].hp==0 and w.pickups.any(func(p):return p.id=='emergency-stock') and w.shots==0,'The punch contact cel can open an actual supply box without ammunition')
+ w.attack_release();w.move_axis=Vector2.RIGHT
+ for i in 8:w.step(.05)
+ check(w.taken.has('emergency-stock') and w.ammunition==CampaignWeapons.PISTOL_REFILL,'Walking into the newly opened box restocks an empty sidearm through normal overlap')
+ w=clean();w.ammunition=0;w.objects=[{'id':'breakable-gate','kind':'gate','x':451.,'y':0.,'hp':1,'active':false,'secret':''}]
+ w.attack_press()
+ for i in 4:w.step(.05)
+ check(w.objects[0].active and w.shots==0,'An empty sidearm can still pass an ordinary breakable gate by punching it')
+func check_guarded_beetle() -> void:
+ var w:=clean();w.invulnerable=99.;w.spawn_enemy('beetle',650.,0.,911)
+ var beetle: Dictionary=w.enemies[0];beetle.wait=40.
+ w.attack_press()
+ for i in 10:w.step_bullets(.05)
+ check(not beetle.defeated and w.blasts.any(func(b):return b.get('kind')=='armour_chip'),'A frontal shot visibly deflects from closed shell plating')
+ w.attack_release();w.enemy_shot(beetle)
+ for i in 14:w.step_enemies(.05)
+ check(CampaignWeapons.shell_open(beetle),'A completed charge opens a real recovery window')
+ w.player.x=float(beetle.x)-140.;w.fire_time=0.;w.attack_press()
+ for i in 8:w.step_bullets(.05)
+ check(beetle.defeated,'The same frontal shot can punish the recovering beetle')
 func _initialize() -> void:call_deferred('run')
 func run() -> void:
+ check_weapon_stock()
+ check_guarded_beetle()
  var w:=clean();w.move_axis=Vector2(1,1)
  check(w.crouching(),'Down on solid floor crouches')
  var start:=w.player;w.step(.05)
@@ -61,23 +121,23 @@ func run() -> void:
  w.player=Vector2(1000,48.);w.velocity=Vector2.ZERO;CampaignVehicles.step(w,.05)
  check(is_equal_approx(w.player.y,48.) and w.grounded(),'Ridden vehicle lands on fork floor90 using its actual saddle offset')
  var mounted_save:=AionCampaignWorld.new();check(mounted_save.restore(w.snapshot()) and bool(mounted_save.mount.ridden) and int(mounted_save.mount.hp)==1,'A save made while riding still restores the live hull in its current scene')
- w=clean();w.weapon='trap';w.ammunition=12;w.spawn_enemy('gnome',720,0,1);w.enemies[0].wait=999.;CampaignWeapons.fire(w)
- var enemy: Dictionary=w.enemies[0];var walked:=false
- for i in 100:
-  w.step_bullets(.05)
-  for b in w.bullets:
-   if b.kind=='trap' and bool(b.get('walking',false)) and absf(float(b.v.x))>0.:walked=true
-  if bool(enemy.defeated):break
- check(walked,'Deployed spider actually walks toward a live enemy')
- check(bool(enemy.defeated) and w.bullets.is_empty(),'Spider detonates on reaching its target and expires')
- var explosions: int=w.blasts.filter(func(b):return float(b.radius)==145.).size()
+ w=clean();w.spawn_enemy('gnome',720,0,1);w.spawn_enemy('beetle',790,0,2)
+ w.collect({'id':'rocket-stock','kind':'rocket','x':w.player.x,'y':0.});w.attack_press()
+ check(w.bullets.size()==1 and w.bullets.front().kind=='rocket' and w.ammunition==5,'One launch spends exactly one round and creates a forward rocket')
+ for i in 25:w.step_bullets(.05)
+ check(w.enemies.all(func(e):return bool(e.defeated)) and w.bullets.is_empty(),'Rocket contact affects the impact target and a nearby enemy once')
+ var explosions: int=w.blasts.filter(func(b):return b.get('kind')=='rocket').size()
  for i in 10:w.step_bullets(.05)
- check(explosions==1 and w.blasts.filter(func(b):return float(b.radius)==145.).size()==1,'Spider blast occurs only once')
- w=clean();w.weapon='trap';w.ammunition=12;CampaignWeapons.fire(w)
- for i in 99:w.step_bullets(.05)
- check(not w.bullets.is_empty() and w.blasts.is_empty(),'A targetless spider remains available before its five-second fuse')
- w.step_bullets(.05)
- check(w.bullets.is_empty() and w.blasts.size()==1,'A targetless spider explodes by five seconds without waiting indefinitely')
+ check(explosions==1 and w.blasts.filter(func(b):return b.get('kind')=='rocket').size()==1,'Rocket blast occurs exactly once')
+ w=clean();w.crates=[{'id':'visible-rocket','kind':'rocket','x':620.,'y':0.,'hp':1}];w.step(.05)
+ check(w.spider_parade.has('started') and w.weapon=='pistol' and w.blasts.is_empty() and w.bullets.is_empty(),'Approaching the old supply location starts ambient spiders without collecting or firing')
+ var earlier:=CampaignWeapons.spider_position(w,0)
+ w.time+=.67
+ check(earlier.is_finite() and CampaignWeapons.spider_position(w,0).x>CampaignWeapons.spider_position(w,1).x and CampaignWeapons.spider_position(w,1).x>earlier.x,'Staggered spiders walk in order to the right on the authored floor')
+ var spider_report:=CampaignWeapons.spider_snapshot(w)
+ check(spider_report.size()==3 and spider_report.all(func(s):return bool(s.ambient) and not s.has('target')),'Native and browser observation expose ambient positions without combat target data')
+ w.time+=CampaignWeapons.SPIDER_DISPLAY_TIME+2.
+ check(not CampaignWeapons.spider_position(w,0).is_finite() and w.bullets.is_empty() and w.blasts.is_empty(),'Decorative procession ends silently and independently of combat')
  w=clean();w.spawn_enemy('crow',800,-115,1);var crow: Dictionary=w.enemies[0];w.enemy_shot(crow);w.step_enemies(.05)
  var old_forward_delta:=400.*(.05/.7)*2.
  check(absf((800.-float(crow.x))-old_forward_delta*.9)<.01,'Crow forward dive movement is exactly ten percent slower')
