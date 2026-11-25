@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.57.7 · Daha hızlı açılış
+
+Oynanış değişmedi. Kare silüet verileri (sprite'ların piksel aralıkları, JSON verisinin %92'si) dışa aktarımda `addons/aion_runs_pack` eklentisiyle ikili bloklara paketleniyor; kaynak JSON dosyaları aynı kalıyor. Açılıştaki JSON yükleme süresi yerel ölçümde ~450 ms'den ~50 ms'ye, web paketi 115,1 MB'tan 110,5 MB'a indi. Kurtarma tarayıcı testinin botu artık saniyede ~8 kez tepki veriyor (önce ~2), karga dalışından kaçıyor ve atılan gnomların üstünden zıplıyor: 6/6 koşu geçti (önce 4'te 2). Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
+
 ## 0.57.6 · İlk ziyarette takılmasız bölümler
 
 Oynanış değişmedi. Her bölümün çizdiği dünya sayfaları (`assets/SECTION-SHEETS.json`, `tests/gen_section_sheets.gd` ile üretilir) bölüm kararmış geçişte yüklenirken önceden çözülür. Görev boyunca ilk kez görülen düşman/nesne sayfası yüzünden oyun içinde yapılan çözme 19'dan 2'ye indi; ortak sayfa önbelleği sınırı 8'den 12'ye çıktı (tepe 75,5 MB), çünkü kıyıda kahraman ve dünya sayfaları 8'e sığmıyordu. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
