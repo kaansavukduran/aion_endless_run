@@ -4,6 +4,7 @@ extends RefCounted
 const TEXT := {
 	"map":["Harita","Map"],
 	"equipment":["Ekipman","Equipment"],
+	"kit":["Ekipman","Kit"],
 	"upgrades":["Gelişim","Upgrades"],
 	"passages":["Geçitler","Passages"],
 	"notes":["Notlar","Notes"],
@@ -53,15 +54,15 @@ const TEXT := {
 	"spark":["Büyü","Magic"],
 	"guard":["Direnç","Resistance"],
 	"insight_effect":["Onarım ipucunu gösterir","Reveals repair clues"],
-	"insight_effect_short":["Onarım izi","Repair clues"],
+	"insight_effect_short":["Onarım izi","Repair clue"],
 	"spark_effect":["Özel yetenek toparlanması hızlanır","Faster skill recovery"],
 	"spark_effect_short":["Hızlı yetenek","Faster skills"],
 	"spark_aion":["Havadaki sıçramalar yükselir","Higher air jumps"],
-	"spark_aion_short":["Yüksek sıçrama","Higher air jump"],
+	"spark_aion_short":["Yüksek sıçrama","High air jump"],
 	"spark_sheep":["Yardımcı daha uzaktan meyve toplar","Companion gathers from farther away"],
-	"spark_sheep_short":["Yardımcı menzili","Companion reach"],
+	"spark_sheep_short":["Yardımcı menzili","Longer reach"],
 	"guard_effect":["Kalkan daha hızlı dolar","Faster shield recharge"],
-	"guard_effect_short":["Hızlı kalkan","Faster shield"],
+	"guard_effect_short":["Hızlı kalkan","Fast shield"],
 	"setting_auto_walk":["Yürüme yardımı","Walk assist"],
 }
 const MAP_POSITIONS := {
@@ -335,7 +336,7 @@ static func build_equipment(host) -> void:
 	if current_page==0 and not compact or current_page==1 and compact:
 		detail(host,effects_summary(host))
 	var next_page: int=(current_page+1)%(3 if compact else 2)
-	var page_keys: Array=["equipment","effects","upgrades"] if compact else ["equipment","upgrades"]
+	var page_keys: Array=["kit","effects","upgrades"] if compact else ["equipment","upgrades"]
 	var pane: Button=host.action(text(host,page_keys[next_page]),func():page(host,next_page))
 	var back: Button=host.action(text(host,"back"),func():open(host,"paused"))
 	pane.name="CampaignEquipmentPage";back.name="CampaignEquipmentBack"

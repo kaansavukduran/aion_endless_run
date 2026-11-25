@@ -32,6 +32,28 @@ func check_layout(game: AionCampaignGame, description: String) -> void:
 	for button in game.buttons:
 		check(area.encloses(button.get_global_rect()),description+" button "+button.name+" "+str(button.get_global_rect()))
 
+func check_compact_upgrade_fonts(game: AionCampaignGame) -> void:
+	const UBUNTU_FONT:="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+	var body: Font=preload("res://assets/fonts/NotoSans-Game.ttf")
+	if FileAccess.file_exists(UBUNTU_FONT):
+		var dejavu:=FontFile.new()
+		if dejavu.load_dynamic_font(UBUNTU_FONT)==OK:body=dejavu
+	game.ui.theme.default_font=body
+	root.size=Vector2i(700,701)
+	await process_frame
+	game.options.text_scale=2.
+	game.resize(false)
+	game.menu_kind="equipment"
+	game.set_meta("field_page",2)
+	for locale in ["tr","en"]:
+		game.language=locale
+		for hero in ["aion","sheep","frog"]:
+			game.world.character=hero
+			game.build_ui()
+			await process_frame
+			await process_frame
+			check_layout(game,"%s %s at 200%% with %s"%[locale,hero,body.get_font_name()])
+
 func run() -> void:
 	var game:=AionCampaignGame.new()
 	root.add_child(game)
@@ -128,6 +150,7 @@ func run() -> void:
 						await process_frame
 						await process_frame
 						check_layout(game,"%s %s %.1f %s %d"%[viewport,locale,scale,kind,index])
+	await check_compact_upgrade_fonts(game)
 	game.queue_free()
 	await process_frame
 	print("RESULT: %d campaign field UI checks, %d failures"%[checks,failures])
