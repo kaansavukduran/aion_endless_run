@@ -634,10 +634,22 @@ func supply(id: String,amount: int) -> void:
 	if grenades>=9:award(id,amount*100)
 	else:grenades=mini(9,grenades+amount)
 
-func gate_closed(gate: Dictionary) -> bool:
+## alive: optional set from alive_enemy_ids() built at the same moment, so a
+## loop over every gate scans the enemies once instead of once per gate.
+func gate_closed(gate: Dictionary,alive: Dictionary={}) -> bool:
+	if not alive.is_empty() or enemies.is_empty():
+		for id in gate.ids:
+			if alive.has(str(id)):return true
+		return false
 	for e in enemies:
 		if str(e.id) in gate.ids and not bool(e.defeated): return true
 	return false
+
+func alive_enemy_ids() -> Dictionary:
+	var alive:={}
+	for e in enemies:
+		if not bool(e.defeated):alive[str(e.id)]=true
+	return alive
 
 func enemy_shot(e: Dictionary, fan: bool = false) -> void:
 	pending_events.append("enemy_shot")
@@ -908,8 +920,9 @@ func step(dt: float) -> void:
 		var right: float=float(object.x)+45.
 		if old_x<=left and player.x>left:player.x=left
 		elif old_x>=right and player.x<right:player.x=right
+	var alive:=alive_enemy_ids() if not gates.is_empty() else {}
 	for gate in gates:
-		if gate_closed(gate):
+		if gate_closed(gate,alive) if not alive.is_empty() else false:
 			gate.open_age=0.
 			if old_x<=float(gate.x):player.x=minf(player.x,float(gate.x))
 		else:gate.open_age=minf(.4,float(gate.get("open_age",.4))+dt)
@@ -971,6 +984,8 @@ func step(dt: float) -> void:
 	if CampaignVehicles.stunned(self):return
 	for item in pickups:
 		item.age=float(item.get("age",0.))+dt
+		# No contact rule reaches beyond 160px horizontally (rider rect 92, foot 63).
+		if absf(float(item.x)-player.x)>160.:continue
 		if item.has("secret") and not discovered.has(str(item.secret)):continue
 		if not CampaignRhythm.can_auto_collect(self,item):continue
 		if item.has("rescue_id"):

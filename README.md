@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.57.3 · Daha hafif oyun döngüsü
+
+Oynanış değişmedi. Görev karesindeki üç sık işlem ölçülerek hafifletildi: mermi başına ip vuruş testi önce ucuz geometriyle eler (37,9 → 4,8 µs), kapı kontrolü düşmanları her kapı için değil karede bir kez tarar, uzak ödüller temas kontrolüne girmez. Su rotası yoğun karesinde oyun mantığı yaklaşık %30 hafifledi. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
+
 ## 0.57.2 · Doğrudan başlangıç
 
 **Başla** ve **Oyna** seçili kahramanla görevi yeniden başlatır ve ilk karede kumandayı oyuncuya verir. **Sürdür** kayıtlı karşılaşmayı açar. Altı kahramanın kartlarında yeni yakın portreler ve göz kırpma kareleri var.
