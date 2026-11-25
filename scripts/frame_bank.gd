@@ -118,7 +118,7 @@ func pose(key: String, row: int, column: int, original_source: bool=false) -> Di
 	# Copy only registered silhouette spans. Source files stay unchanged. The
 	# two transparent pixels around each independent texture prevent ANY atlas
 	# sampling, wrapping or foreign fragments, including in custom shaders.
-	for run in f.runs:
+	for run in RunnerSourcePixels.runs(f):
 		isolated.blit_rect(source,Rect2i(int(f.rect[0]+run[1]),int(f.rect[1]+run[0]),int(run[2]),1),Vector2i(int(run[1]-b[0])+2,int(run[0]-b[1])+2))
 	var factor: float = d.scale[row] if not d.scale.is_empty() else 1.0
 	if key in ["rolls","motion-rolls"]:

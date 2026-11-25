@@ -483,6 +483,23 @@ with sync_playwright() as playwright:
                     if label not in checks:
                         check(condition, label)
 
+                GRAVITY = {'lob_seed': 590., 'spore': 180.}
+
+                def incoming(current, x, y, horizon=.5):
+                    # Earliest time an enemy projectile passes through the
+                    # hero's body, from its real position and velocity.
+                    soonest = math.inf
+                    for b in current['bullets']:
+                        bx, by, vx, vy = b[0], b[1], b[2], b[3]
+                        g = GRAVITY.get(b[4], 0.) if len(b) > 4 else 0.
+                        t = 0.
+                        while t <= horizon:
+                            px, py = bx+vx*t, by+vy*t+.5*g*t*t
+                            if abs(px-x) < 26 and -78 < py-y < 6:
+                                soonest = min(soonest, t); break
+                            t += .03
+                    return soonest
+
                 def move_and_defend(current, direction, allow_grenade):
                     global last_jump, last_bomb
                     x, y = current['player']
@@ -490,7 +507,13 @@ with sync_playwright() as playwright:
                     forward = 1 if direction == 'd' else -1
                     threats = [e for e in current['enemies'] if abs(e['x']-x)<395]
                     nearest = min(threats, key=lambda e: math.hypot(e['x']-x,e['y']-y), default=None)
-                    target = nearest
+                    # A crow that is winding up dives at the hero's current
+                    # spot; a shooter that is winding up is about to fire.
+                    # Those are shot first, then the nearest body.
+                    diving = [e for e in threats if e['kind'] == 'crow' and 0 < e['windup'] < .5 and abs(e['x']-x) < 300]
+                    charging = [e for e in threats if e['kind'] in ('lantern_scout', 'cap_lobber', 'seed') and e['windup'] > 0]
+                    urgent = min(diving+charging, key=lambda e: abs(e['x']-x), default=None)
+                    target = urgent or nearest
                     if target is None:
                         candidates = [n for n in current['npcs'] if not n['freed'] and not n['secret']
                                       and 65 < (n['x']-x)*forward < 650]
@@ -509,8 +532,14 @@ with sync_playwright() as playwright:
                         # Clear the lane before walking into a charged ground
                         # attacker. Aim is independent of the movement keys.
                         commands = ['f']
+                    ahead_dive = next((e for e in diving if (e['x']-x)*forward > -40), None)
+                    if ahead_dive and direction:
+                        # Step back out of a forward crow's dive line; its
+                        # target is fixed when the windup ends.
+                        commands = ['f', 'a' if direction == 'd' else 'd']
                     gap = any(0 < pit[0] - x < 160 for pit in current['pits'])
-                    danger = any(math.hypot(b[0] - x, b[1] - (y - 37)) < 105 for b in current['bullets'])
+                    hit_in = incoming(current, x, y)
+                    danger = hit_in < .42 or any(math.hypot(b[0] - x, b[1] - (y - 37)) < 70 for b in current['bullets'])
                     lower_threat = nearest and 75<distance<245 and nearest['y']>y+30
                     if current['grounded'] and (gap or danger or lower_threat or distance<112) and time_now-last_jump>.65:
                         page.keyboard.press('Space')

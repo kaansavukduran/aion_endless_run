@@ -91,3 +91,55 @@ static func resident_bytes() -> int:
 	var total:=0
 	for decoded in sheets.values():total+=decoded.get_data_size()
 	return total
+
+## Silhouette runs. In the source tree every frame stores its runs as a JSON
+## list of [y, x, length] triples (the registered, reviewable form). Exported
+## builds store them packed: the export plugin (addons/aion_runs_pack) moves
+## every list into one little-endian uint16 blob per JSON file and leaves a
+## short "FILE.json:offset:count" reference, so startup parses ~9x less JSON.
+## Banks call runs() at the moment a frame is first cut, in either form.
+const RUNS_DIR := "res://assets/"
+const RUNS_SUFFIX := ".runs"
+static var run_blobs: Dictionary = {}
+
+static func runs(frame: Dictionary) -> Array:
+	var value=frame.runs
+	if value is Array:return value
+	var parts: PackedStringArray=str(value).split(":")
+	var file: String=parts[0]
+	if not run_blobs.has(file):run_blobs[file]=FileAccess.get_file_as_bytes(RUNS_DIR+file+RUNS_SUFFIX)
+	var blob: PackedByteArray=run_blobs[file]
+	var at:=int(parts[1]);var result: Array=[];result.resize(int(parts[2]))
+	for i in result.size():
+		var o:=at+i*6;result[i]=[blob.decode_u16(o),blob.decode_u16(o+2),blob.decode_u16(o+4)]
+	return result
+
+## Export-time packing shared by the export plugin and the exactness test.
+## Works on the source text: each "runs" list is cut out and replaced by its
+## reference, every other byte of the file is kept exactly as registered.
+## Returns {"text": shipped JSON text, "blob": PackedByteArray}.
+static func pack_runs(text: String, file: String) -> Dictionary:
+	var blob:=PackedByteArray();var parts:=PackedStringArray();var from:=0
+	while true:
+		var key:=text.find("\"runs\"",from)
+		if key<0:break
+		var open:=key+6
+		while open<text.length() and text[open] in [" ",":","\n","\r","\t"]:open+=1
+		if open>=text.length() or text[open]!="[":
+			parts.append(text.substr(from,open-from));from=open;continue
+		var depth:=0;var close:=open
+		while close<text.length():
+			var c:=text[close]
+			if c=="[":depth+=1
+			elif c=="]":
+				depth-=1
+				if depth==0:break
+			close+=1
+		var list=JSON.parse_string(text.substr(open,close-open+1))
+		var at:=blob.size();blob.resize(at+list.size()*6)
+		for i in list.size():
+			for j in 3:blob.encode_u16(at+i*6+j*2,int(list[i][j]))
+		parts.append(text.substr(from,open-from));parts.append("\"%s:%d:%d\""%[file,at,list.size()])
+		from=close+1
+	parts.append(text.substr(from))
+	return {"text":"".join(parts),"blob":blob}
