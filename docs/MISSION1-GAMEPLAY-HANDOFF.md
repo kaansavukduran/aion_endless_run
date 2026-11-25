@@ -409,3 +409,10 @@ Ortam: bulut Linux, Godot 4.6.3 headless, yerel CPU (web/WASM için kabaca 2–3
 - Reddedilen: JSON'u ikili kaynağa çevirmek, yükleme süresini 427 → 1.290 ms'ye çıkarıp boyutu 2,6 katına getirdi. JSON'un %92'si kare silüet aralıkları (`runs`); gerçek çözüm export'ta paketleme ve tembel okuma (büyük değişiklik, öneri).
 - Çözülmedi: `browser_forge --rescue` oynaklığı. Bot geri çekilmesi ve can bütçesi 12 denendi, 7 denemenin 3'ünde yine düştü (13 ölüm; yeni 90 s arama zaman aşımı). Değişiklikler geri alındı. Ölüm nedenleri: karga dalışı, yürüyen düşman teması, x≈1756'daki yer nişancısı mermisi. Önerilen çözüm: QA modunda sabit tohum veya daha akıllı bot.
 
+## 0.57.6 · İlk ziyaret ısınması (25 Kasım 2026)
+
+- GPT'nin 0.57.5 değişikliği (mobilde Ateş Zıpla'nın üstünde, Bağlam Bomba'nın üstünde, yerleşim testi) denetlendi: doğru, performans etkisi yok; kare ölçümü 0.57.4 ile aynı aralıkta (su sınavı 368 µs, gürültü ±40 µs).
+- `assets/SECTION-SHEETS.json`: bölüm başına kahramandan bağımsız dünya sayfaları. Yeniden üretme: `xvfb-run -a godot --audio-driver Dummy --script tests/gen_section_sheets.gd`. Kahraman sayfaları her kare çizildiği için listede yoktur (`RunnerSourcePixels.hero_sheet`).
+- `RunnerSourcePixels.enter_section`: liste ∪ oturum geçmişi, en fazla `SHEET_LIMIT` (12). Ölçüm (Xvfb, kıyı→rıhtım→çatal→su→çatal→kökler→röle→arena, ilk ziyaret): oyun içi sayfa çözme 19 → 2; geçişlerde toplam 515 ms yerel çözme (kararmış ekranda); tepe çözülmüş sayfa belleği 75,5 MB.
+- Reddedilen: `browser_forge` oynaklığı için sabit QA tohumu. Ölümler her koşuda aynı x konumlarında; tohum değil, yazılımsal GPU altında duvar saatiyle tepki veren bot zamanlaması belirleyici.
+

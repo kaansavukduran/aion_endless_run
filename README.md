@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.57.6 · İlk ziyarette takılmasız bölümler
+
+Oynanış değişmedi. Her bölümün çizdiği dünya sayfaları (`assets/SECTION-SHEETS.json`, `tests/gen_section_sheets.gd` ile üretilir) bölüm kararmış geçişte yüklenirken önceden çözülür. Görev boyunca ilk kez görülen düşman/nesne sayfası yüzünden oyun içinde yapılan çözme 19'dan 2'ye indi; ortak sayfa önbelleği sınırı 8'den 12'ye çıktı (tepe 75,5 MB), çünkü kıyıda kahraman ve dünya sayfaları 8'e sığmıyordu. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
+
 ## 0.57.4 · Yarı boyutta indirme, daha az bellek
 
 Oynanış değişmedi. Web paketi 212,4 MB'tan 115,1 MB'a indi: 136 sprite sayfası yüksek kaliteli kayıplı WebP ile saklanıyor (ortanca PSNR 41,8 dB); en çok fark edilecek 6 sayfa (seçim portreleri, panorama, iki fırlatma sayfası, kilit/tuzak, bekçi yürüyüşü) kayıpsız kaldı. Kaynak PNG'ler değişmedi. Sanat bankaları çözülmüş sayfaları artık tek, sınırlı (8 sayfa) ortak önbellekte tutuyor: aynı akışta çözülmüş sayfa belleği 107 MB'tan 69 MB'a indi. Bölüm yeniden yüklenirken (ölüm sonrası, devam, tekrar) o bölümde kullanılmış sayfalar kararmış geçişte önceden çözülür; oyun içinde çözme takılması olmaz. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
