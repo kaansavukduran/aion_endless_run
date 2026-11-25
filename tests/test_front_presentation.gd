@@ -11,6 +11,53 @@ func settle() -> void:
 func bytes(path: String) -> PackedByteArray:
 	return FileAccess.get_file_as_bytes(path) if FileAccess.file_exists(path) else PackedByteArray()
 func _initialize() -> void:call_deferred("run")
+
+func verify_field_story() -> void:
+	var world:=AionCampaignWorld.new()
+	world.begin("aion")
+	world.state="playing"
+	world.pending_events.clear()
+	CampaignStory.step(world)
+	check(CampaignStory.latest_note(world,"en").is_empty(),"Story discovery is tied to the physical first lantern")
+	check(world.notice=="arc_checkpoint" and world.notice_time>0.,"Opening uses the existing checkpoint notice slot")
+	world.player.x=610.
+	CampaignStory.step(world)
+	check(world.state=="playing" and world.notice=="story_lantern","Approaching the cut lantern delivers a non-blocking clue")
+	CampaignStory.step(world)
+	check(world.pending_events.count("story_clue")==1,"Lantern discovery emits its save event only once")
+	var crow: Dictionary=world.enemies.filter(func(enemy):return enemy.kind=="crow" and absf(float(enemy.home.x)-CampaignStory.SIGNAL_X)<=390.).front()
+	world.player.x=850.
+	CampaignStory.step(world)
+	check(world.notice=="story_lantern","An idle crow does not publish the signal clue")
+	crow.active=true
+	crow.windup=.54
+	CampaignStory.step(world)
+	check(world.notice=="story_signal" and world.discovered.has(CampaignStory.clue_id("story_signal")),"A real attacking crow can reveal the relay clue over the opening caption")
+	var keeper: Dictionary=world.npcs.front()
+	world.player=Vector2(float(keeper.x),float(keeper.y))
+	world.rescue(keeper)
+	CampaignRescue.step(world,.21)
+	CampaignStory.step(world)
+	check(keeper.phase=="thanks" and world.notice=="story_keeper","Meeting the freed keeper explains the supply during its thanks animation")
+	check(keeper.thank_age==0. and not world.gift_drops.has(keeper.id),"Story cue leaves the real gift animation and timing intact")
+	world.discovered["map:section:shore"]=true
+	world.discovered["shore:secret:fixture"]=true
+	check(CampaignStory.secret_count(world)==1,"Narrative and map markers do not inflate the secret score")
+	var restored:=AionCampaignWorld.new()
+	check(restored.restore(world.snapshot()) and CampaignStory.latest_note(restored,"tr")==CampaignStory.line("tr","story_keeper"),"The witnessed story survives the existing checkpoint format")
+	for section: String in CampaignStory.ROUTE_CLUES:
+		var route:=AionCampaignWorld.new()
+		route.begin("aion")
+		route.load_section(section)
+		route.state="playing"
+		route.notice_time=0.
+		var floor:=route.floor_at(CampaignStory.PLATE_X)
+		check(CampaignGround.has_floor(floor),"Field plate is grounded in "+section)
+		route.player=Vector2(CampaignStory.PLATE_X,floor)
+		CampaignStory.step(route)
+		var key: String=CampaignStory.ROUTE_CLUES[section]
+		check(route.notice==key and CampaignStory.latest_note(route,"en")==CampaignStory.line("en",key),"Grounded route plate writes the correct map clue for "+section)
+
 func run() -> void:
 	var game=load("res://scripts/game.gd").new()
 	root.add_child(game)
@@ -71,6 +118,13 @@ func run() -> void:
 			for language in ["tr","en","de","ja"]:
 				game.language=language;game.interface_options.text_scale=scale_value;game.build_theme();game.ui.theme=game.ui_theme;game.show_page("characters")
 				await settle()
+				var selection: Control=game.menu_layer.find_child("HeroSelection",true,false)
+				var written: Array=selection.find_children("HeroMotivation","Label",true,false)
+				var selected_story:=RunnerFrontText.motivation(game.language,game.character)
+				check(written.size() in [1,game.FRIENDS.size()] and written.any(func(item):return item.text==selected_story),"Selected hero motivation is visible at the requested text scale")
+				for item: Label in written:
+					check(item.get_minimum_size().y<=item.size.y+1.,"Motivation has room for all shaped lines "+str(dimensions)+" "+str(scale_value)+" "+language)
+					check(item.get_visible_line_count()==item.get_line_count(),"Motivation does not lose a line during render "+str(dimensions)+" "+str(scale_value)+" "+language)
 				for item in game.menu_layer.find_children("*","Control",true,false):
 					if not item.is_visible_in_tree() or not (item is Button or item is Label or item is RunnerHeroPreview):continue
 					var r: Rect2=item.get_global_rect()
@@ -83,6 +137,7 @@ func run() -> void:
 	check(game.page=="help" and game.world.state=="ready","Help freezes gameplay")
 	game.gamepad.back();await settle()
 	check(game.page=="main","Gamepad Back returns from help")
+	verify_field_story()
 	game.queue_free();await settle()
 	print("RESULT: ",checks," front presentation checks, ",failures," failures")
 	quit(1 if failures else 0)

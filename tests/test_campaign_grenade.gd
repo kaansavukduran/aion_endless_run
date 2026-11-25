@@ -16,6 +16,12 @@ func bomb_at(w,p: Vector2,v: Vector2) -> Dictionary:
  var b: Dictionary={'kind':'grenade','p':p,'v':v,'age':0.,'color':'ef86b7','angle':0.,'spin':7.,'contacts':[],'contact_wait':0.,'exploded':false}
  w.bombs.append(b);return b
 func event_count(w,key: String) -> int:return w.pending_events.count(key)
+func throw_range(speed: float,direction: int) -> float:
+ var w:=fresh();w.player.x=1100.;w.facing=direction;w.aim_direction=Vector2(direction,0.);w.velocity.x=speed
+ w.throw_grenade();CampaignGrenade.step(w,CampaignGrenade.WINDUP)
+ var origin: Vector2=w.bombs[0].p
+ CampaignGrenade.step(w,CampaignGrenade.FUSE)
+ return (float(w.blasts[0].p.x)-origin.x)*direction if w.blasts.size()==1 else INF
 func run() -> void:
  # Ordinary public input and World.step prove the animation isn't the owner.
  var w:=fresh()
@@ -50,6 +56,9 @@ func run() -> void:
  # Facing is captured; walking the opposite way cannot mirror the release.
  w=fresh();w.aim_direction=Vector2.LEFT;w.facing=1;w.throw_grenade();w.aim_direction=Vector2.RIGHT;w.move_axis=Vector2.RIGHT;advance(w,.17)
  check(w.bombs.size()==1 and w.bombs[0].v.x<0. and w.bombs[0].p.x<w.player.x,'Backwalking and aim change preserve the accepted throw side')
+ var standing:=throw_range(0.,1);var running:=throw_range(380.,1);var running_left:=throw_range(-380.,-1)
+ check(standing>280. and running>standing and running-standing<30.,'Full sprint adds less than 30px to the real grenade detonation distance')
+ check(absf(running-running_left)<.05,'Directional sprint inheritance mirrors the actual detonation distance to within one pixel: '+str(running)+' / '+str(running_left))
  # Simulation collision fixtures isolate actual geometry, not a rendered ring.
  w=fresh();w.platforms=[Rect2(450,-100,200,20)];var b:=bomb_at(w,Vector2(500,-145),Vector2(0,310));advance(w,.12)
  check(b.p.y<=-109. and b.v.y<0. and event_count(w,'grenade_bounce')==1,'Falling grenade bounces on real elevated support with one contact sound')
@@ -69,11 +78,11 @@ func run() -> void:
  w=fresh();w.throw_grenade();advance(w,.2);w.invulnerable=0.;w.damage_player();var age:=float(w.bombs[0].age);advance(w,1.)
  check(w.grenade_throw.is_empty() and w.bombs.size()==1 and float(w.bombs[0].age)==age,'A released grenade freezes in place while the body is absent')
  # Damage is still the existing single World.explode result, independently of drawing.
- w=fresh();w.boss.active=true;w.boss.engaged=true;w.boss.x=600.;w.boss.y=0.;w.boss.hp=90
+ w=fresh();w.boss=CampaignBossPressure.initial_state(600.);w.boss.active=true;w.boss.engaged=true
  b=bomb_at(w,Vector2(600,-70),Vector2.ZERO);b.age=1.14;CampaignGrenade.step(w,.02)
- check(int(w.boss.hp)==82 and w.blasts.size()==1 and w.blasts[0].kind=='grenade','Detonation preserves exactly the existing eight boss damage and tags one effect')
+ check(int(w.boss.hp)==CampaignBossPressure.MAX_HP-8 and w.blasts.size()==1 and w.blasts[0].kind=='grenade','Detonation preserves exactly the existing eight boss damage and tags one effect')
  CampaignGrenade.step(w,.3)
- check(int(w.boss.hp)==82 and event_count(w,'grenade_blast')==1,'Subsequent simulation cannot damage the target twice')
+ check(int(w.boss.hp)==CampaignBossPressure.MAX_HP-8 and event_count(w,'grenade_blast')==1,'Subsequent simulation cannot damage the target twice')
  w=fresh();w.throw_grenade();advance(w,.08);w.invulnerable=0.;w.damage_player()
  check(w.hp==0 and w.grenades==5 and w.grenade_throw.is_empty(),'A lethal hit interrupts an unspent throw without losing ammo')
  w=fresh();w.throw_grenade();advance(w,.2);w.invulnerable=0.;w.damage_player();advance(w,1.2);CampaignLives.start_entry(w,Rect2(0,-420,1152,500));advance(w,1.8)

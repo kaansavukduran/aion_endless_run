@@ -34,7 +34,10 @@ func run():
      for child in card.get_children():
       check(card.get_global_rect().encloses(child.get_global_rect()),"Name and portrait fit their rectangle "+str(card.name))
       if child is Label:
-       check(child.get_theme_font("font").get_string_size(child.text,HORIZONTAL_ALIGNMENT_LEFT,-1,child.get_theme_font_size("font_size")).x<=child.size.x,"Full localized name fits "+child.text)
+       if child.name=="HeroMotivation":
+        check(child.get_minimum_size().y<=child.size.y+.01 and child.get_visible_line_count()==child.get_line_count(),"Full wrapped motivation fits "+child.text)
+       else:
+        check(child.get_theme_font("font").get_string_size(child.text,HORIZONTAL_ALIGNMENT_LEFT,-1,child.get_theme_font_size("font_size")).x<=child.size.x,"Full localized name fits "+child.text)
       elif child is RunnerHeroPreview and viewport.x>viewport.y and scale_value==1.:
        check(child.size.aspect()<1.4,"The landscape card shows a full portrait instead of a cropped strip: "+str(card.name))
     var confirm: Button=game.menu_layer.find_child("ConfirmHero",true,false)

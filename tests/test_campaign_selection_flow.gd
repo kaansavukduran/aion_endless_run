@@ -2,6 +2,7 @@ extends SceneTree
 
 var checks := 0
 var failures := 0
+var last_pointer := Vector2.ZERO
 
 func check(ok: bool,message: String) -> void:
 	checks+=1
@@ -18,6 +19,7 @@ func key(code: Key,pressed: bool=true) -> void:
 
 func pointer(at: Vector2) -> void:
 	var event:=InputEventMouseMotion.new();event.position=at;event.global_position=at
+	event.relative=at-last_pointer;last_pointer=at
 	root.push_input(event,true)
 
 func click(button: Button) -> void:
@@ -152,7 +154,8 @@ func run() -> void:
 		check(str(image.rendered_pose.get("source_key",""))=="m1-selection-portraits","Portrait uses its dedicated sprite sheet "+hero)
 		check(image.current_frame()==2,"Selected portrait renders its closed-eye cel "+hero)
 		var source: Rect2=image.rendered_pose.source_rect
-		check(is_equal_approx(source.size.aspect(),image.size.aspect()) and image.position==Vector2(2.,2.),"Portrait covers the card interior without stretching: "+hero)
+		var card: Control=image.get_parent()
+		check(is_equal_approx(source.size.aspect(),image.size.aspect()) and absf(image.position.x+image.size.x*.5-card.size.x*.5)<=1. and image.position.y==2.,"Portrait is centered in the card without stretching: "+hero)
 		image.set_paused(false)
 	var selected: String=game.character
 	var other: Button=game.menu_layer.find_child("Select_aion",true,false)

@@ -6,14 +6,17 @@ const VARIANTS=preload('res://assets/M1-HELD-VARIANTS.json')
 static var cache: Dictionary={}
 
 static func registration(kind: String) -> Dictionary:
+ if kind=='rocket':return {'display_source':'rocket','source_facing':1}
  if VARIANTS.data.weapons.has(kind):return VARIANTS.data.weapons[kind]
  return DATA.data.weapons.get(kind,DATA.data.weapons.pistol)
 
 static func display_source(kind: String) -> String:
+ if kind=='rocket':return kind
  if not DATA.data.weapons.has(kind):kind='pistol'
  return str(DATA.data.weapons[kind].display_source)
 
 static func texture(items: ForgeItemBank,kind: String) -> Texture2D:
+ if kind=='rocket':return CampaignRocketArt.texture(kind)
  if not DATA.data.weapons.has(kind):kind='pistol'
  if cache.has(kind):return cache[kind]
  var registration: Dictionary=M1HeldWeaponBank.registration(kind)

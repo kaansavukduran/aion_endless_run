@@ -55,8 +55,5 @@ func step(dt: float) -> void:
 		if bool(w.taken.get(str(item.id),false)):continue
 		if bool(item.get("from_bag",false)) or str(item.kind) in ["owl_feather","wolf_charm"]:
 			drops.append({"id":item.id,"kind":item.kind,"x":item.x,"y":item.y,"rescue_id":item.get("rescue_id","")})
-	var spiders:=[]
-	for bullet in w.bullets:
-		if str(bullet.kind)=="trap":spiders.append({"age":bullet.age,"p":[bullet.p.x,bullet.p.y],"target":bullet.get("target","")})
-	var payload:=JSON.stringify({"menu":host.menu_kind,"state":w.state,"section":w.section,"character":w.character,"player":[snappedf(w.player.x,2.),snappedf(w.player.y,2.)],"velocity":[w.velocity.x,w.velocity.y],"hp":w.hp,"score":w.score,"shots":w.shots,"grounded":w.grounded(),"crouching":w.crouching(),"charging":w.charging,"charge_ratio":w.charge_ratio(),"aim":[w.aim_direction.x,w.aim_direction.y],"mounted":w.mount.ridden,"vehicle_hp":w.mount.hp,"assists":assists,"assist_attacks":w.assist_attacks,"pickups":drops,"spiders":spiders})
+	var payload:=JSON.stringify({"menu":host.menu_kind,"state":w.state,"section":w.section,"character":w.character,"player":[snappedf(w.player.x,2.),snappedf(w.player.y,2.)],"velocity":[w.velocity.x,w.velocity.y],"hp":w.hp,"score":w.score,"shots":w.shots,"weapon":w.weapon,"ammunition":w.ammunition,"pistol_reserve":w.pistol_reserve,"grounded":w.grounded(),"crouching":w.crouching(),"charging":w.charging,"charge_ratio":w.charge_ratio(),"aim":[w.aim_direction.x,w.aim_direction.y],"mounted":w.mount.ridden,"vehicle_hp":w.mount.hp,"assists":assists,"assist_attacks":w.assist_attacks,"pickups":drops,"spiders":CampaignWeapons.spider_snapshot(w)})
 	if payload!=state_stamp:state_stamp=payload;emit("AION_ARCADE_STATE",payload)

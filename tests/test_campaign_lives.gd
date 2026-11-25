@@ -19,20 +19,22 @@ func roundtrip(w: AionCampaignWorld) -> AionCampaignWorld:
 
 func test_lives() -> void:
 	var w:=AionCampaignWorld.new();w.begin("sheep");w.load_section("arena")
-	w.boss.engaged=true;w.boss.hp=41;w.boss.phase=2;w.boss.ports=[0,3]
-	w.player=Vector2(2240.,0.);w.flock=AionCampaignWorld.MAX_FLOCK;w.grenades=2;w.weapon="heavy";w.ammunition=6
+	w.boss.engaged=true;w.boss.hp=123;w.boss.phase=2;w.boss.ports=[0,3]
+	w.player=Vector2(2240.,0.);w.flock=AionCampaignWorld.MAX_FLOCK;w.grenades=2
+	CampaignWeapons.equip(w,"heavy");w.ammunition=6
 	w.spawn_enemy("gnome",2100.,0.,1337);w.enemies.back().defeated=true
 	w.activated["arena:gate"]=true;w.taken["arena:reward"]=true;w.awarded["arena:reward"]=true;w.rescued.append("arena:keeper")
 	var area:=Rect2(1728.,-420.,1152.,500.)
 	check(w.hp==1 and w.attempts_remaining==3,"One active body and two reserve lives")
 	for death in 3:
+		var sidearm_before:=CampaignWeapons.sidearm_stock(w)
 		w.invulnerable=0.
 		w.damage_player("shot");w.damage_player("pit");w.damage_player("impact")
 		check(w.hp==0 and w.attempts_remaining==2-death and w.losses==death+1,"Concurrent damage spends exactly one body and one life")
 		check(w.flock==AionCampaignWorld.MAX_FLOCK and w.death_cause=="shot","The flock never absorbs a hit or changes the chosen cause")
-		check(w.grenades==2 and w.weapon=="pistol","Reserve spawn drops the current weapon without refilling grenades")
+		check(w.grenades==2 and w.weapon=="pistol" and w.ammunition==sidearm_before,"Reserve spawn returns to the stored sidearm without refilling spent rounds or grenades")
 		w=roundtrip(w)
-		check(w.boss.hp==41 and w.boss.phase==2 and w.boss.ports==[0,3] and w.enemies.back().defeated,"Save preserves boss and defeated enemies")
+		check(w.boss.hp==123 and w.boss.phase==2 and w.boss.ports==[0,3] and w.enemies.back().defeated,"Save preserves boss and defeated enemies")
 		check(w.activated.has("arena:gate") and w.rescued.has("arena:keeper") and w.awarded.has("arena:reward") and w.taken.has("arena:reward"),"Gates, rescues and unique claims survive death")
 		if death<2:
 			check(w.state=="respawn_pending","Reopening on a death with reserve lives schedules the same hero")
@@ -57,10 +59,10 @@ func test_lives() -> void:
 	var old_position:=w.player
 	clock(w,1.)
 	check(w.continue_hero=="frog" and is_equal_approx(w.continue_remaining,5.6) and w.attempts_remaining==0,"Browsing keeps the hero without stopping the countdown")
-	check(float(w.boss.clock)>old_clock+.9 and w.boss.hp==41 and w.player==old_position and w.hp==0 and w.score==0,"The same boss battle runs behind the selection while the fallen hero cannot act or be hit")
+	check(float(w.boss.clock)>old_clock+.9 and w.boss.hp==123 and w.player==old_position and w.hp==0 and w.score==0,"The same boss battle runs behind the selection while the fallen hero cannot act or be hit")
 	check(CampaignLives.confirm(w,"frog") and not CampaignLives.confirm(w,"eren"),"A confirmation spends exactly one Continue and changes hero once")
 	w=roundtrip(w)
-	check(w.character=="frog" and w.continues_used==1 and w.attempts_remaining==3 and w.grenades==5 and w.boss.hp==41,"New credit is durable, with one starter loadout and preserved battle")
+	check(w.character=="frog" and w.continues_used==1 and w.attempts_remaining==3 and w.grenades==5 and w.ammunition==CampaignWeapons.PISTOL_START and w.boss.hp==123,"New credit is durable, with one starter loadout and preserved battle")
 	w.attempts_remaining=0;w.state="continue_offer";w.continue_remaining=.1
 	CampaignLives.tick_offer(w,.12)
 	check(w.continue_remaining==0. and not CampaignLives.confirm(w,"aion"),"An expired Continue cannot be purchased")
@@ -134,7 +136,7 @@ func test_protection() -> void:
 func test_arena_reentry() -> void:
 	for width in [520.,1152.]:
 		var w:=AionCampaignWorld.new();w.begin("eren");w.load_section("arena")
-		w.boss.engaged=true;w.boss.hp=67;w.boss.ports=[0,3];w.player=Vector2(2115.,-40.)
+		w.boss.engaged=true;w.boss.hp=201;w.boss.ports=[0,3];w.player=Vector2(2115.,-40.)
 		for death in 6:
 			var previous_camera:=maxf(0.,w.player.x-width*.34)
 			w.invulnerable=0.;w.damage_player("shot");clock(w,.9)
@@ -144,7 +146,22 @@ func test_arena_reentry() -> void:
 			check(is_equal_approx(w.entry_from.x,w.recovery_view.position.x+36.),"Arena entry still starts left of its actual camera")
 			clock(w,.65)
 			check(w.player.x>float(w.boss.x)-width*.75 and w.grounded(),"Consecutive boss deaths cannot drift out of the fight")
-			check(w.boss.hp==67 and w.boss.ports==[0,3],"Boss pressure and broken ports persist across the same encounter")
+			check(w.boss.hp==201 and w.boss.ports==[0,3],"Boss pressure and broken ports persist across the same encounter")
+
+func test_crow_reentry() -> void:
+	var w:=AionCampaignWorld.new();w.begin("aion");w.load_section("shore");w.state="playing"
+	w.enemies.clear();w.gates.clear();w.hazards.clear();w.objects.clear();w.platforms.clear();w.pits.clear()
+	w.player=Vector2(850.,w.floor_at(850.));w.invulnerable=0.
+	w.spawn_enemy("crow",945.,-155.,1)
+	w.enemy_shot(w.enemies[0])
+	var death_point:=w.player
+	check(CampaignLives.crow_danger(w,death_point),"A crow's actual dive corridor marks the exposed position")
+	w.damage_player("impact");clock(w,.9)
+	CampaignLives.start_entry(w,Rect2(700.,-370.,410.,460.))
+	check(CampaignLives.landing_clear(w,w.entry_to) and not CampaignLives.crow_danger(w,w.entry_to),"Respawn selects supported land outside the active dive")
+	check(w.entry_to.distance_to(death_point)>150. and w.recovery_view.has_point(w.entry_to),"Narrow camera follows the safer re-entry rather than dropping onto the crow")
+	clock(w,.65)
+	check(w.hp==1 and w.entry_guard and w.grounded(),"A live crow encounter leaves a grounded, guarded hero")
 
 func test_arena_drones() -> void:
 	var w:=AionCampaignWorld.new();w.begin("aion");w.load_section("arena")
@@ -224,6 +241,7 @@ func run() -> void:
 	test_legacy()
 	test_protection()
 	test_arena_reentry()
+	test_crow_reentry()
 	test_arena_drones()
 	test_turret()
 	test_vehicles()

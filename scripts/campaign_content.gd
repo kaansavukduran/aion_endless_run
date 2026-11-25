@@ -79,9 +79,14 @@ const MAIN_PLANS := {
 		{"x":1250.,"role":"canopy_high_entry","enemies":[["crow",0.,-120.],["seed",210.,0.],["crow",380.,-130.]],"platforms":[[70.,-74.,165.],[265.,-136.,165.]],"crate":440.,"fruit":[90.,-114.,3],"gate":true},
 		{"x":2350.,"role":"canopy_gauntlet","enemies":[["moth",0.,-125.],["drone",195.,-125.],["seed",365.,0.],["crow",515.,-120.]],"platforms":[[80.,-76.,165.],[285.,-138.,175.]],"prop":["updraft",160.],"crate":575.,"fruit":[300.,-178.,3],"gate":true}
 	],
+	"causeway": [
+		{"x":900.,"role":"causeway_low_approach","enemies":[["beetle",120.,0.],["gnome",340.,0.]],"platforms":[[40.,-45.,130.],[205.,-92.,140.]],"prop":["cage",90.],"vacant_cage":true,"crate":410.,"fruit":[55.,-84.,3]},
+		{"x":1550.,"role":"causeway_cover","enemies":[["lantern_scout",180.,0.],["beetle",390.,0.]],"platforms":[[75.,-74.,152.],[249.,-116.,178.]],"prop":["turret",410.],"crate":-75.,"fruit":[265.,-155.,3]},
+		{"x":2330.,"role":"causeway_relay_approach","enemies":[["gnome",95.,0.],["seed",280.,0.],["beetle",510.,0.]],"platforms":[[35.,-128.,150.],[232.,-89.,164.],[426.,-48.,153.]],"crate":640.,"fruit":[255.,-128.,3],"gate":true}
+	],
 	"relay": [
 		{"x":2050.,"role":"relay_rejoin","enemies":[["drone",0.,-120.],["beetle",195.,0.],["seed",375.,0.],["drone",520.,-125.]],"platforms":[[110.,-76.,170.],[320.,-132.,165.]],"crate":585.,"fruit":[130.,-116.,3],"gate":true},
-		{"x":4150.,"role":"relay_lanes","enemies":[["seed",0.,0.],["gnome",180.,0.],["drone",330.,-125.],["seed",480.,0.],["gnome",610.,0.]],"platforms":[[380.,-132.,175.]],"prop":["planks",220.],"fruit":[395.,-172.,3],"gate":false},
+		{"x":4150.,"role":"relay_lanes","enemies":[["seed",0.,0.],["gnome",180.,0.],["drone",330.,-125.],["seed",480.,0.],["gnome",610.,0.]],"platforms":[[64.,-102.,145.],[380.,-145.,175.]],"prop":["planks",220.],"fruit":[395.,-184.,3],"gate":false},
 		{"x":6250.,"role":"relay_patrol_support","enemies":[["beetle",0.,0.],["drone",210.,-125.],["beetle",390.,0.],["drone",540.,-120.]],"platforms":[[95.,-78.,170.],[310.,-132.,170.]],"crate":590.,"fruit":[115.,-118.,3],"gate":false},
 		{"x":8200.,"role":"relay_breach","enemies":[["drone",0.,-125.],["beetle",175.,0.],["seed",335.,0.],["beetle",490.,0.],["drone",615.,-125.]],"platforms":[[105.,-78.,175.],[330.,-134.,175.]],"prop":["turret",310.],"crate":-130.,"fruit":[125.,-118.,3],"gate":true}
 	]
@@ -151,7 +156,8 @@ static func populate(w) -> void:
 				var pkind: String=str(pspec[0]);var px: float=x+float(pspec[1])
 				if CampaignGround.has_floor(w.floor_at(px)):
 					var pid: String=w.section+":tactic:"+str(i)
-					w.objects.append({"id":pid,"kind":pkind,"x":px,"y":0.,"hp":2,"active":w.activated.has(pid),"secret":""})
+					var vacant: bool=bool(plan.get("vacant_cage",false))
+					w.objects.append({"id":pid,"kind":pkind,"x":px,"y":0.,"hp":2,"active":vacant or w.activated.has(pid),"secret":"","vacant":vacant})
 					if pkind=="planks":w.platforms.append(Rect2(px-80.,-55.,160.,18.))
 			var ids: Array[String]=[]
 			var roster: Array=plan.get("enemies",[])
@@ -217,6 +223,7 @@ static func populate(w) -> void:
 		if p.kind=="repair" and w.section not in ["water","quay","terrace","roots"]:p.kind="grenade"
 	for o in w.objects:
 		if bool(o.active):apply_surface(w,o)
+	CampaignRoutes.install_shelters(w)
 
 static func apply_surface(w,o: Dictionary) -> void:
 	# Persistent machinery must restore its collision geometry, too.
@@ -261,6 +268,7 @@ static func step(w,dt: float) -> void:
 	w.mount.hurt=maxf(0.,float(w.mount.get("hurt",0.))-dt)
 	for o in w.objects:
 		if bool(o.active):o.changed=float(o.get("changed",9.))+dt
+		if active and o.kind=="cage":CampaignRoutes.step_cage(w,o)
 		if active and o.kind=="gate" and not bool(o.active) and w.player.y>float(o.y)-80. and w.player.x>float(o.x)-40. and w.player.x<float(o.x)+45.:w.player.x=float(o.x)-40.
 		if o.kind=="turret" and not bool(o.active):
 			var dx: float=w.player.x-float(o.x)

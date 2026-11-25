@@ -56,8 +56,9 @@ with sync_playwright() as playwright:
         )
         return result.json_value()
 
-    def tap_campaign(name):
-        state = observe("d.ui_ready && d.buttons[arg]", name)
+    def tap_campaign(name, state=None):
+        if state is None:
+            state = observe("d.ui_ready && d.buttons[arg]", name)
         x, y, width, height, _ = state["buttons"][name]
         transform = state["transform"]
         rect = canvas.bounding_box()
@@ -65,6 +66,18 @@ with sync_playwright() as playwright:
         page.touchscreen.tap(
             rect["x"] + (transform[0] * (x + width / 2) + transform[1]) / raw[0] * rect["width"],
             rect["y"] + (transform[0] * (y + height / 2) + transform[2]) / raw[1] * rect["height"],
+        )
+
+    def tap_front(name):
+        controls = canvas.evaluate("c=>({...c.dataset})")
+        item = next(button for button in json.loads(controls["ui"]) if button["name"] == name)
+        tr = json.loads(controls["screenTransform"])
+        rect = canvas.bounding_box()
+        x = item["x"] + item["w"] / 2
+        y = item["y"] + item["h"] / 2
+        page.touchscreen.tap(
+            rect["x"] + (tr[0] * x + tr[2] * y + tr[4]) / float(controls["rawWidth"]) * rect["width"],
+            rect["y"] + (tr[1] * x + tr[3] * y + tr[5]) / float(controls["rawHeight"]) * rect["height"],
         )
 
     def boot(reload=False):
@@ -79,20 +92,18 @@ with sync_playwright() as playwright:
             check(start["text"] == ("Kahraman seç" if args.locale == "tr-TR" else "Choose hero"),
                   "The first screen names the actual hero selection destination")
             page.screenshot(path=str(args.evidence / "opening-guide.png"))
+            if args.offline:
+                # Verify the real offline cache before the timed offer.
+                page.wait_for_function("""async () => {
+                    const manifest = await fetch('build.json').then(response => response.json());
+                    const pack = Object.keys(manifest.assets).find(name => name.endsWith('.pck'));
+                    return !!navigator.serviceWorker.controller && !!(await caches.match(new URL(pack, location.href)));
+                }""", timeout=120000)
         if reload and not any(b['name']=='ContinueCampaign' for b in controls):
             return False
         actions = ('ContinueCampaign',) if reload else ('StartCampaign', 'ConfirmHero')
         for name in actions:
-            controls = canvas.evaluate("c=>({...c.dataset})")
-            item = next(button for button in json.loads(controls["ui"]) if button["name"] == name)
-            tr = json.loads(controls["screenTransform"])
-            rect = canvas.bounding_box()
-            x = item["x"] + item["w"] / 2
-            y = item["y"] + item["h"] / 2
-            page.touchscreen.tap(
-                rect["x"] + (tr[0] * x + tr[2] * y + tr[4]) / float(controls["rawWidth"]) * rect["width"],
-                rect["y"] + (tr[1] * x + tr[3] * y + tr[5]) / float(controls["rawHeight"]) * rect["height"],
-            )
+            tap_front(name)
             if name == 'StartCampaign':
                 page.wait_for_selector('canvas[data-page="characters"][data-ui-ready="true"]')
         observe("d.ui_ready")
@@ -134,8 +145,13 @@ with sync_playwright() as playwright:
         check("ArcadeConfirmHero" in buttons and "ArcadeNextHero" in buttons and
               buttons["ArcadeConfirmHero"][0] < 40 and buttons["ArcadeConfirmHero"][1] < offer["view"][1] / 3,
               "The live field stays visible with an immediate upper-left hero selector")
+        original_hero = offer["continue_hero"]
+        page.keyboard.press("ArrowRight")
+        observe("d.menu==='continue_offer' && d.continue_hero!==arg", original_hero)
+        page.keyboard.press("ArrowLeft")
+        observe("d.menu==='continue_offer' && d.continue_hero===arg", original_hero)
         page.screenshot(path=str(args.evidence / "continue-landscape.png"))
-        later_offer = observe("d.state==='continue_offer' && d.continue_remaining<8.")
+        later_offer = observe("d.state==='continue_offer' && d.continue_remaining<arg", offer["continue_remaining"] - .75)
         elapsed_offer = later_offer["continue_remaining"]
         check(later_offer["time"] > offer["time"] and later_offer["enemies"] != offer["enemies"] and
               later_offer["losses"] == offer["losses"] and later_offer["shots"] == offer["shots"],
@@ -154,8 +170,8 @@ with sync_playwright() as playwright:
             time.sleep(.1)
         evidence["tab_focus_samples"] = focus_samples
         before_blur = read()["continue_remaining"]
-        time.sleep(1.15)
         if focus["hidden"] or not focus["focused"]:
+            time.sleep(1.15)
             check(abs(read()["continue_remaining"] - before_blur) < .13, "An unfocused page pauses the countdown")
         else:
             # Some headless remote sessions keep all top-level targets focused.
@@ -167,11 +183,6 @@ with sync_playwright() as playwright:
         observe("d.continue_remaining<arg", before_blur)
         # Open the saved offer through a fresh page, with the same origin data.
         if args.offline:
-            page.wait_for_function("""async () => {
-                const manifest = await fetch('build.json').then(response => response.json());
-                const pack = Object.keys(manifest.assets).find(name => name.endsWith('.pck'));
-                return !!navigator.serviceWorker.controller && !!(await caches.match(new URL(pack, location.href)));
-            }""", timeout=120000)
             context.set_offline(True)
         boot(reload=True)
         if args.offline:
@@ -191,10 +202,25 @@ with sync_playwright() as playwright:
               "Reload preserves the unspent countdown without refilling the credit")
         if args.offline:
             context.set_offline(False)
+
         page.set_viewport_size({"width": 393, "height": 873})
         observe("d.ui_ready && d.view[1]>d.view[0]")
-        canvas.focus()
-        picker = observe("d.menu==='continue_offer' && d.ui_ready")
+        game_over = observe("d.menu==='dead' && d.ui_ready", timeout=35000)
+        check(game_over["attempts"] == 0 and game_over["continues"] == 0 and
+              "CampaignRestart" in game_over["buttons"] and "ArcadeConfirmHero" not in game_over["buttons"],
+              "Expiration reaches Game Over with only a genuine new run available")
+        page.screenshot(path=str(args.evidence / "game-over.png"))
+        check(not boot(reload=True), "Game Over cannot be bypassed by reopening the saved run")
+
+        # Give the real six-hero touch flow its own fresh offer. The offline
+        # reload, focus and timeout observations above consumed the first one.
+        page.wait_for_selector('canvas[data-orientation="portrait"][data-ui-ready="true"]')
+        tap_front("StartCampaign")
+        entry = page.wait_for_selector('canvas[data-campaign], canvas[data-page="characters"][data-ui-ready="true"]')
+        if entry.get_attribute("data-page") == "characters":
+            tap_front("ConfirmHero")
+        observe("d.ui_ready && d.state==='playing' && d.view[1]>d.view[0]")
+        picker = lose_three_lives()
         rect = canvas.bounding_box()
         for name in ("ArcadePreviousHero", "ArcadeNextHero", "ArcadeConfirmHero"):
             _, _, width, height, _ = picker["buttons"][name]
@@ -202,25 +228,20 @@ with sync_playwright() as playwright:
             check(min(width * scale * rect["width"] / picker["raw"][0],
                       height * scale * rect["height"] / picker["raw"][1]) >= 43.5,
                   f"{name} has a finger-sized target in portrait")
-        original_hero = picker["continue_hero"]
-        page.keyboard.press("ArrowRight")
-        observe("d.menu==='continue_offer' && d.continue_hero!==arg", original_hero)
-        page.keyboard.press("ArrowLeft")
-        observe("d.menu==='continue_offer' && d.continue_hero===arg", original_hero)
+        state = picker
         for _ in range(6):
-            state = observe("d.ui_ready && d.menu==='continue_offer'")
             hero = state["continue_hero"]
             evidence["picker"].append(hero)
-            tap_campaign("ArcadeNextHero")
-            observe("d.continue_hero!==arg && d.ui_ready", hero)
+            tap_campaign("ArcadeNextHero", state)
+            state = observe("d.menu==='continue_offer' && d.continue_hero!==arg && d.ui_ready", hero)
         check(set(evidence["picker"]) == {"aion", "sheep", "rabbit", "eren", "armadillo", "frog"},
               "All six playable heroes can be browsed on a portrait viewport")
-        tap_campaign("ArcadePreviousHero")
+        tap_campaign("ArcadePreviousHero", state)
         selected = observe("d.continue_hero==='frog' && d.ui_ready")
         check(0. < selected["continue_remaining"] < picker["continue_remaining"] and selected["continues"] == 0,
               "Browsing takes place inside the original countdown without spending a credit")
         page.screenshot(path=str(args.evidence / "hero-picker-portrait.png"))
-        tap_campaign("ArcadeConfirmHero")
+        tap_campaign("ArcadeConfirmHero", selected)
         recovered = observe("d.state==='playing' && d.character==='frog' && d.attempts===3")
         check(recovered["continues"] == 1 and recovered["shots"] == picker["shots"] and recovered["grenades"] == 5,
               "One touch buys exactly one Continue with the selected hero and no leaked attack")
@@ -229,12 +250,11 @@ with sync_playwright() as playwright:
         page.set_viewport_size({"width": 1280, "height": 720})
         observe("d.ui_ready && d.view[0]>d.view[1]")
         lose_three_lives()
-        game_over = observe("d.menu==='dead' && d.ui_ready", timeout=35000)
-        check(game_over["attempts"] == 0 and game_over["continues"] == 1 and
-              "CampaignRestart" in game_over["buttons"] and "ArcadeConfirmHero" not in game_over["buttons"],
-              "Expiration reaches Game Over with only a genuine new run available")
-        page.screenshot(path=str(args.evidence / "game-over.png"))
-        check(not boot(reload=True), "Game Over cannot be bypassed by reopening the saved run")
+        used_credit = observe("d.menu==='dead' && d.ui_ready", timeout=35000)
+        check(used_credit["attempts"] == 0 and used_credit["continues"] == 1 and
+              "ArcadeConfirmHero" not in used_credit["buttons"],
+              "The used credit record persists when the next offer expires")
+        check(not boot(reload=True), "A used credit cannot be recovered by reopening Game Over")
         check(not errors, "No uncaught browser or Godot script errors")
     except Exception:
         evidence["failure"] = read()

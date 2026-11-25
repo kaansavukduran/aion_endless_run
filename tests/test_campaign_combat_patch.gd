@@ -26,12 +26,18 @@ func run() -> void:
    check(w.bullets.size()==1,'Each vehicle fires one source-muzzle projectile')
    for i in 35:w.step_bullets(1./120.)
    check(w.enemies[0].defeated,'A single aimed shot reaches a small ground enemy '+type+'/'+str(facing))
- var w:=fresh();w.npcs=[{'id':'rope-test','x':620.,'y':0.,'freed':false,'secret':'','role':'keeper'}];w.weapon='trap';w.ammunition=4;w.attack_press()
+ var w:=fresh();w.npcs=[{'id':'rope-test','x':620.,'y':0.,'freed':false,'secret':'','role':'keeper'}];w.weapon='rocket';w.ammunition=4;w.attack_press()
  for i in 600:
   w.step_bullets(1./120.)
   if w.npcs[0].freed:break
- check(w.npcs[0].freed,'Real launched walking spider frees rope through its explosion')
+ check(w.npcs[0].freed and w.blasts.any(func(b):return b.get('kind')=='rocket'),'Rope contact frees the captive and plays the same rocket impact')
  check(w.greeted.is_empty() and not w.awarded.has('rope-test:gift'),'Explosion rescue does not grant contact reward')
+ w=fresh();CampaignWeapons.equip(w,'rocket');w.player.y=-125.;w.aim_direction=Vector2.DOWN;w.attack_press()
+ for i in 9:w.step_bullets(.05)
+ check(w.pending_events.count('rocket_impact')==1 and w.blasts.size()==1 and is_equal_approx(float(w.blasts[0].p.y),0.),'A real airborne downward rocket detonates on flat terrain at the contact height')
+ w=fresh();CampaignWeapons.equip(w,'rocket');w.player.y=-125.;w.aim_direction=Vector2.DOWN;w.platforms=[Rect2(350.,-62.,115.,10.)];w.attack_press()
+ for i in 9:w.step_bullets(.05)
+ check(w.pending_events.count('rocket_impact')==1 and w.blasts.size()==1 and absf(float(w.blasts[0].p.y)+62.)<7.,'A downward rocket cannot tunnel through an elevated plank to the floor below')
  w=fresh();w.npcs=[{'id':'protected','x':420.,'y':0.,'freed':false,'secret':'hidden','role':'keeper'}];CampaignWeapons.blast(w,Vector2(420,-30),145,3,'ffffff');check(not w.npcs[0].freed,'Blast cannot bypass undiscovered secret')
  w.npcs[0].secret='';w.npcs[0].cage='locked';w.objects=[{'id':'locked','active':false}];CampaignWeapons.blast(w,Vector2(420,-30),145,3,'ffffff');check(not w.npcs[0].freed,'Blast respects closed cage')
  for gun in ['scatter','seeker','spore']:

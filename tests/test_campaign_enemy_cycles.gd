@@ -160,7 +160,7 @@ func leap_continuity() -> void:
 func beam_expiration() -> void:
 	for sample in [{"warning":.01,"steps":[.05]},{"warning":.01,"steps":[.004,.006,.05]},{"warning":.9,"steps":[.2,.2,.2,.2,.2]}]:
 		var w:=fresh();w.load_section("arena")
-		w.boss.active=true;w.boss.engaged=true;w.boss.hp=55;w.boss.phase=2
+		w.boss.active=true;w.boss.engaged=true;w.boss.hp=165;w.boss.phase=2
 		w.boss.windup=0.;w.boss.wait=2.;w.boss.beam_x=2180.;w.boss.beam_warning=sample.warning
 		w.player=Vector2(2180.,0.);w.invulnerable=0.
 		var elapsed:=0.

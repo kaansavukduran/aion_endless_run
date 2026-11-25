@@ -6,6 +6,9 @@ extends RefCounted
 const CHARGE_HEROES := ["rabbit", "eren", "frog"]
 const MAX_FLOCK := 2
 const AION_JUMPS := 3
+const RABBIT_JUMP_HOLD := 1.0
+const RABBIT_CHARGE_SECONDS := .72
+const RABBITS := ["rabbit", "eren"]
 const HEROES := ["aion", "sheep", "rabbit", "eren", "armadillo", "frog"]
 const COLORS := {"aion":"ef86b7", "sheep":"f5d6a6", "wolf":"aa84d2", "owl":"e8a34f", "rabbit":"f08d55", "eren":"58c4bb", "armadillo":"c49268", "frog":"80bd64"}
 const HERO_ART=preload("res://assets/PIXEL-HEROES-PROVENANCE.json")
@@ -19,6 +22,7 @@ const STAGES := {
 	"canopy": {"length":3600., "biome":4, "title":"arc_canopy", "next":"fork_two"},
 	"fork_one": {"length":1800., "biome":4, "title":"arc_quay", "next":"water"},
 	"fork_two": {"length":1800., "biome":4, "title":"arc_canopy", "next":"roots"},
+	"causeway": {"length":3400., "biome":4, "title":"arc_causeway", "next":"relay"},
 	"water": {"length":15600., "biome":2, "title":"arc_water", "next":"relay"},
 	"terrace": {"length":14800., "biome":4, "title":"arc_terrace", "next":"relay"},
 	"roots": {"length":15200., "biome":2, "title":"arc_roots", "next":"relay"},
@@ -132,6 +136,8 @@ var flap_time := 0.0
 var gliding := false
 var charging := false
 var charge_time := 0.0
+var jump_hold_before_charge := 0.0
+var waiting_to_charge := false
 var boost_held := false
 const COYOTE_TIME := 0.09
 const JUMP_BUFFER := 0.10
@@ -140,7 +146,9 @@ var coyote_timer := 0.0
 var jump_buffer_timer := 0.0
 var drop_through_time := 0.0
 var weapon := "pistol"
-var ammunition := 0
+var ammunition := CampaignWeapons.PISTOL_START
+var pistol_reserve := 0
+var spider_parade: Dictionary = {}
 var enemies: Array[Dictionary] = []
 var bullets: Array[Dictionary] = []
 var bombs: Array[Dictionary] = []
@@ -160,14 +168,15 @@ var mount_transition_from := Vector2.ZERO
 var mount_transition_to := Vector2.ZERO
 var trail: Array[Dictionary] = []
 var flock := 1
-var boss := {"active":false, "hp":90, "max_hp":90, "x":1300., "y":0., "clock":0., "attack":0, "windup":0., "wait":1.4, "phase":1}
+var boss := CampaignBossPressure.initial_state(1300.)
 var notice := ""
 var notice_time := 0.0
 var pending_events: Array[String] = []
 
 func biome() -> int: return int(STAGES[section].biome)
 func length() -> float: return float(STAGES[section].length)
-func charge_ratio() -> float: return clampf(charge_time / 1.2, 0., 1.)
+func charge_duration() -> float: return RABBIT_CHARGE_SECONDS if character in RABBITS else 1.2
+func charge_ratio() -> float: return clampf(charge_time / charge_duration(), 0., 1.)
 ## y is the support query height; the default asks for the lowest floor.
 func floor_at(x: float,y: float=1e9) -> float:
 	if CampaignRoutes.is_fork(section):return CampaignRoutes.floor_height(self,x,y)
@@ -219,7 +228,7 @@ func touches_pickup(item: Dictionary) -> bool:
 	if player.distance_to(point)<63.:return true
 	if character=="sheep" and flock>1 and str(item.kind).begins_with("fruit_"):
 		for companion in flock-1:
-			if CampaignLives.follower_position(self,companion).distance_to(point)<44.:return true
+			if CampaignLives.follower_position(self,companion).distance_to(point)<44.*CampaignUpgrades.recovery_scale(self):return true
 	return false
 
 ## Eight input targets, a bounded shortest-arc turn, and one controlled early
@@ -239,7 +248,7 @@ func steer_aim(target: Vector2,dt: float) -> void:
 	# Spend the one early shot on an actual in-between angle. Scheduling it
 	# for a later frame can leave only a snapped shot at low render rates.
 	var main_angle:=snappedf(angle,PI/4.)
-	if fire_held and absf(delta)>.20 and absf(angle-main_angle)>.045 and aim_sweep_gate<=0. and weapon not in ["trap","nova","disc"]:
+	if fire_held and absf(delta)>.20 and absf(angle-main_angle)>.045 and aim_sweep_gate<=0. and weapon not in ["rocket","nova","disc"]:
 		fire_time=0.;aim_sweep_gate=.18
 
 
@@ -257,14 +266,15 @@ func begin(hero: String) -> void:
 	rescued.clear(); rescue_life_start=0; greeted.clear(); gift_drops.clear(); rescue_roles.clear(); awarded.clear(); taken.clear(); route.clear()
 	losses=0;weapons_used.clear();vehicles_used.clear()
 	discovered.clear();activated.clear();buffs.clear()
-	completed = false; flock = 1; weapon = "pistol"; ammunition = 0
+	completed = false; flock = 1; weapon = "pistol"; ammunition = CampaignWeapons.PISTOL_START; pistol_reserve = 0
 	rally.clear();retry_count=0;chain=0;chain_time=0.;best_chain=0;score_popups.clear()
 	load_section("shore")
 	state = "briefing"
 
 func stop_inputs() -> void:
 	move_axis = Vector2.ZERO; aim_direction = Vector2(facing,0.); aim_sweep_gate=0.; fire_held = false; jump_held = false
-	charging = false; charge_time = 0.; boost_held = false; gliding = false
+	charging = false; charge_time = 0.; waiting_to_charge = false; jump_hold_before_charge = 0.
+	boost_held = false; gliding = false
 	melee_latched = false
 	rescue_latched=false
 	coyote_timer = 0.; jump_buffer_timer = 0.
@@ -286,6 +296,8 @@ func load_section(id: String) -> void:
 	MissionHeroAbilities.cancel(self)
 	shell_contacts.clear()
 	section = id; checkpoint = id; checkpoint_ready = true
+	discovered["map:section:"+id]=true
+	spider_parade.clear()
 	travel_target=""
 	player = Vector2(140, 0); velocity = Vector2.ZERO; facing=1; stop_inputs()
 	CampaignAssists.section_changed(self)
@@ -301,7 +313,7 @@ func load_section(id: String) -> void:
 	platform_timers.clear();disabled_platforms.clear()
 	bridge_timers.clear()
 	mount = {"available":false, "ridden":false, "x":0., "hp":CampaignVehicles.MAX_HP}
-	boss = {"active":false, "engaged":false, "hp":90, "max_hp":90, "x":length()-420., "y":0., "clock":0., "attack":0, "windup":0., "wait":1.4, "phase":1}
+	boss = CampaignBossPressure.initial_state(length()-420.)
 	var types: Array = ["gnome", "beetle", "seed", "crow"]
 	if section in ["quay", "relay"]: types = ["seed", "gnome", "drone", "beetle"]
 	elif section in ["canopy", "terrace"]: types = ["crow", "moth", "drone", "seed"]
@@ -361,13 +373,14 @@ func load_section(id: String) -> void:
 		CampaignRescue.populate(self)
 	CampaignRhythm.populate(self)
 	CampaignGround.align_world(self)
+	CampaignWeapons.populate_sidearm(self)
 	state = "playing"
 	CampaignRecovery.enter(self)
 	notice = "arc_checkpoint"; notice_time = 2.
 	pending_events.append("checkpoint")
 
 func choose_route(choice: String) -> bool:
-	if state == "fork_one" and choice in ["canopy", "water"]:
+	if state == "fork_one" and choice in ["canopy", "causeway", "water"]:
 		if not route.has(choice): route.append(choice)
 		begin_travel(choice);return true
 	if state == "fork_two" and choice in ["terrace", "roots"]:
@@ -419,11 +432,16 @@ func jump_press() -> void:
 		drop_through_time=.25;player.y+=3.;velocity.y=70.;jumps=1;return
 	if CampaignVehicles.jump(self):return
 	if grounded() and character in CHARGE_HEROES and not bool(mount.ridden):
-		charging = true; charge_time = 0.; return
+		waiting_to_charge = character in RABBITS
+		jump_hold_before_charge = 0.
+		charging = not waiting_to_charge
+		charge_time = 0.
+		return
 	if grounded() or (coyote_timer > 0. and jumps == 0 and not bool(mount.ridden) and character not in CHARGE_HEROES):
 		velocity.y = -650.; jumps = 1; air_time = 0.; coyote_timer = 0.; jump_buffer_timer = 0.; return
 	if character == "aion" and jumps < AION_JUMPS:
-		velocity.y = -620.; jumps += 1; air_time = 0.; return
+		velocity.y = -620. * (1.12 if CampaignUpgrades.selected(self,"spark") else 1.)
+		jumps += 1; air_time = 0.; return
 	elif character == "owl" and flap_count < 3:
 		velocity.y = minf(velocity.y,-650.*sqrt(1.5)); flap_count += 1; flap_time = .3; air_time=0.; return
 	if not bool(mount.ridden) and character not in CHARGE_HEROES:
@@ -431,10 +449,28 @@ func jump_press() -> void:
 
 func jump_release(launch: bool = true) -> void:
 	jump_held = false; gliding = false
-	if charging:
-		if launch and state == "playing":
+	if charging or waiting_to_charge:
+		if launch and state == "playing" and (grounded() or coyote_timer > 0.):
 			velocity.y = -650.*sqrt(lerpf(1.75,4.0,charge_ratio())); jumps = 1; air_time = 0.
-		charging = false; charge_time = 0.
+			coyote_timer = 0.; jump_buffer_timer = 0.
+		charging = false; charge_time = 0.; waiting_to_charge = false; jump_hold_before_charge = 0.
+
+func step_jump_charge(dt: float, on_floor: bool) -> void:
+	if waiting_to_charge:
+		if not on_floor or CampaignRoutes.low_ceiling(self):
+			waiting_to_charge = false
+			return
+		jump_hold_before_charge += dt
+		if jump_hold_before_charge+0.000001 < RABBIT_JUMP_HOLD:return
+		waiting_to_charge = false
+		charging = true
+		dt = maxf(0.,jump_hold_before_charge-RABBIT_JUMP_HOLD)
+	if charging:
+		if on_floor and not CampaignRoutes.low_ceiling(self):
+			charge_time = minf(charge_duration(),charge_time+dt)
+		else:
+			charging = false
+			charge_time = 0.
 
 func close_enemy() -> Dictionary:
 	# Up/down aiming is ranged fire, never an accidental knife/rescue.
@@ -503,11 +539,11 @@ func legacy_muzzle_offset() -> Vector2:
 func attack() -> void:
 	if fire_time > 0. or state != "playing" or CampaignVehicles.stunned(self) or rescue_time>0. or mount_transition!="" or MissionHeroAbilities.compact(self) or not grenade_throw.is_empty(): return
 	var close: Dictionary = close_enemy()
-	if not close.is_empty() and not bool(mount.ridden):
+	if not bool(mount.ridden) and (not close.is_empty() or not CampaignWeapons.has_rounds(self)):
 		if melee_latched: return
 		melee_latched = true; melee_variant = 1-melee_variant
 		melee_time = .28; fire_time = .32
-		melee_target="boss" if close==boss else str(close.id);melee_hit_done=false
+		melee_target="boss" if close==boss else str(close.get("id",""));melee_hit_done=false
 		pending_events.append("melee")
 		return
 	melee_latched = false
@@ -518,6 +554,7 @@ func throw_grenade() -> bool:
 
 func interact() -> bool:
 	if state != "playing" or mount_transition!="" or CampaignVehicles.stunned(self): return false
+	if CampaignRoutes.use_context(self):return true
 	var offer: Dictionary=CampaignRhythm.offer(self)
 	if not offer.is_empty():collect(offer);return true
 	if CampaignVehicles.interact(self):
@@ -556,7 +593,7 @@ func damage_boss(amount: int) -> void:
 		blasts.append({"p":Vector2(float(boss.x),float(boss.y)-80.), "age":0., "radius":130., "color":"ffcf8c"})
 		award("mission:1",CLEAR_BONUS+life_rescues()*KEEPER_BONUS); stop_inputs(); pending_events.append("complete")
 	else:
-		var phase:=1+int(int(boss.hp)<60)+int(int(boss.hp)<30)
+		var phase:=CampaignBossPressure.phase_for(int(boss.hp))
 		if phase>int(boss.phase):
 			CampaignBossPressure.on_phase_change(self,int(boss.phase),phase)
 			boss.phase=phase
@@ -617,13 +654,17 @@ func collect(item: Dictionary) -> void:
 	var id: String = str(item.id)
 	if taken.has(id): return
 	taken[id] = true
-	var kind: String = str(item.kind)
+	var kind:=CampaignWeapons.canonical_kind(str(item.kind))
 	if kind.begins_with("fruit_"): award(id,25)
 	elif kind in CampaignWeapons.SPECIAL:
-		var stock: int=int(CampaignWeapons.SPECS[kind].ammo)
-		ammunition=mini(stock*2,ammunition+stock) if weapon==kind else stock
-		weapon = kind
-		if not weapons_used.has(kind):weapons_used.append(kind)
+		CampaignWeapons.equip(self,kind)
+		if kind=="rocket":CampaignWeapons.start_spider_parade(self,item)
+	elif kind == "pistol_ammo": CampaignWeapons.grant_sidearm(self,CampaignWeapons.PISTOL_REFILL)
+	elif kind == "relay_part":
+		if item.has("rescue_id"):CampaignRescue.on_gift_collected(self,item)
+		CampaignRoutes.collect_item(self,item)
+		pending_events.append("pickup")
+		return
 	elif kind == "grenade": grenades = mini(9,grenades+3)
 	elif kind == "shield": buffs["power"]=maxf(8.,float(buffs.get("power",0.)))
 	elif kind == "heal": supply(id,1)
@@ -684,7 +725,8 @@ func step_enemies(dt: float) -> void:
 		e.active = true; e.age = float(e.age)+dt
 		e.flash=maxf(0.,float(e.get("flash",0.))-dt)
 		if CampaignGroundShooters.step(self,e,dt):continue
-		e.facing = -1 if float(e.x)>player.x else 1
+		CampaignWeapons.step_shell(e,dt)
+		e.facing = CampaignWeapons.beetle_facing(e,-1 if float(e.x)>player.x else 1)
 		if e.kind==CampaignHive.KIND:
 			CampaignHive.step(self,e,dt)
 			continue
@@ -712,8 +754,14 @@ func step_enemies(dt: float) -> void:
 			e.dive=maxf(0.,float(e.dive)-dt)
 			var phase: float=1.-float(e.dive)/float(e.get("dive_duration",.7/.9))
 			var p: Vector2=Vector2(e.dive_start).lerp(Vector2(e.dive_target),minf(1.,phase*2.)) if phase<.5 else Vector2(e.dive_target).lerp(Vector2(float(e.dive_target.x)-65.,float(e.home.y)),(phase-.5)*2.)
+			if str(e.kind)=="crow" and CampaignRoutes.crow_roof_hit(self,Vector2(e.get("dive_last",e.dive_start)),p):
+				e.dive=0.;e.wait=maxf(float(e.wait),1.35)
+				e.erase("dive_last")
+				continue
 			e.x=p.x;e.y=p.y
-			if state=="playing" and p.distance_to(player+Vector2(0,-25.))<35.:
+			if e.dive>0.:e.dive_last=p
+			else:e.erase("dive_last")
+			if state=="playing" and p.distance_to(player+Vector2(0,-25.))<35. and not (str(e.kind)=="crow" and CampaignRoutes.crow_sheltered(self,player)):
 				enemy_body_hit(e)
 				if state!="playing":break
 		if not flying and e.kind!="slime" and CampaignGround.has_floor(floor_at(float(e.x))) and str(e.kind)!="seed":e.y=floor_at(float(e.x))
@@ -731,9 +779,10 @@ func step_enemies(dt: float) -> void:
 
 func step_boss(dt: float) -> void:
 	if not bool(boss.active) or not bool(boss.get("engaged",false)): return
+	CampaignBossPressure.step_supply(self,dt)
 	boss.clock = float(boss.clock)+dt
 	var old_phase: int = int(boss.phase)
-	boss.phase = 1 + int(int(boss.hp)<60) + int(int(boss.hp)<30)
+	boss.phase = CampaignBossPressure.phase_for(int(boss.hp))
 	if int(boss.phase) > old_phase and float(boss.clock) > 0.05:
 		CampaignBossPressure.on_phase_change(self, old_phase, int(boss.phase))
 	if CampaignBossPressure.motion(self,dt):return
@@ -790,6 +839,12 @@ func step_bullets(dt: float) -> void:
 		b.erase("start")
 		if b.has("gravity"):b.v=Vector2(b.v)+Vector2(0,float(b.gravity)*dt)
 		b.age = float(b.age)+dt; b.p = Vector2(b.p)+Vector2(b.v)*dt
+		var rocket: bool=b.kind=="rocket" and b.owner=="hero"
+		if rocket:
+			var contact:=CampaignWeapons.rocket_contact(self,previous,b.p)
+			if contact.is_finite():
+				CampaignWeapons.rocket_impact(self,b,contact)
+				continue
 		if b.kind=="wave" and section=="arena":
 			b.p.y=floor_at(float(b.p.x))-16.
 			previous.y=floor_at(previous.x)-16.
@@ -811,7 +866,14 @@ func step_bullets(dt: float) -> void:
 			var radius: float = 58. if bool(e.mini) or bool(e.get("heavy",false)) else float(CampaignContent.NEW_ENEMIES.get(str(e.kind),{}).get("radius",34.))
 			if e.kind==CampaignHive.KIND:radius=46.
 			var target:=Vector2(float(e.x),float(e.y)-30.)
-			if Geometry2D.get_closest_point_to_segment(target,previous,b.p).distance_to(target)<radius+float(b.get("hit_radius",0.)):
+			var contact:=Geometry2D.get_closest_point_to_segment(target,previous,b.p)
+			if contact.distance_to(target)<radius+float(b.get("hit_radius",0.)):
+				if rocket:
+					CampaignWeapons.rocket_impact(self,b,contact)
+					break
+				if CampaignWeapons.beetle_blocks(self,e,b,contact):
+					b.age=99.
+					break
 				if bool(e.mini) and float(e.windup)<=.3 and float(e.get("flash",0.))<=0. and (float(e.get("recover",0.))<=0. or CampaignEnemies.active_time(e)>0.) and int(e.hp)>5:b.age=99.;break
 				if str(e.kind)=="mirror" and float(e.windup)>0.:
 					b.owner="enemy";b.v=-Vector2(b.v);b.age=0.;break
@@ -819,31 +881,39 @@ func step_bullets(dt: float) -> void:
 				damage_enemy(e,int(b.damage)); b.hit.append(str(e.id)); b.pierce = int(b.pierce)-1
 				if int(b.pierce)<0: b.age = 99.; break
 		if float(b.age)>=float(b.get("life",3.)):continue
-		if bool(boss.active) and bool(boss.get("engaged",false)) and CampaignBossPressure.hit(self,b,previous,b.p):b.age=99.;continue
+		if bool(boss.active) and bool(boss.get("engaged",false)) and CampaignBossPressure.hit(self,b,previous,b.p):
+			if rocket:CampaignWeapons.rocket_impact(self,b,b.p,false)
+			b.age=99.
+			continue
 		if bool(boss.active) and Geometry2D.get_closest_point_to_segment(Vector2(float(boss.x),float(boss.y)-75.),previous,b.p).distance_to(Vector2(float(boss.x),float(boss.y)-75.))<105. and not "boss" in b.hit:
 			damage_boss(CampaignBossPressure.core_damage(self,b,previous,b.p))
+			if rocket:CampaignWeapons.rocket_impact(self,b,b.p,false)
 			b.hit.append("boss"); b.age = 99.
 		if float(b.age)>=float(b.get("life",3.)):continue
 		for crate in crates:
-			if int(crate.hp)>0 and Geometry2D.get_closest_point_to_segment(Vector2(float(crate.x),float(crate.y)-24.),previous,b.p).distance_to(Vector2(float(crate.x),float(crate.y)-24.))<30.: open_crate(crate); b.age = 99.;break
+			var center:=Vector2(float(crate.x),float(crate.y)-24.)
+			var hit:=Geometry2D.get_closest_point_to_segment(center,previous,b.p)
+			if int(crate.hp)>0 and hit.distance_to(center)<30.:
+				open_crate(crate)
+				if rocket:CampaignWeapons.rocket_impact(self,b,hit)
+				b.age=99.
+				break
 		if float(b.age)>=float(b.get("life",3.)):continue
-		if CampaignContent.hit_object(self,b.p,int(b.damage),previous):b.age=99.
-		if float(b.age)<float(b.get("life",3.)) and CampaignRescue.hit_rope(self,previous,b.p):b.age=99.
+		if CampaignContent.hit_object(self,b.p,int(b.damage),previous) or CampaignRescue.hit_rope(self,previous,b.p):
+			if rocket:CampaignWeapons.rocket_impact(self,b,b.p)
+			b.age=99.
 		if float(b.p.y)>=floor_at(float(b.p.x)) and float(b.v.y)>0.:b.age=99. # Downward shots collide with solid ground.
 	bullets = bullets.filter(func(b):return float(b.age)<float(b.get("life",3.)) and float(b.p.x)>-80. and float(b.p.x)<length()+100.)
 
 func boss_vulnerable() -> bool:
-	# Phase two exposes the core during its charge and recovery. A long
-	# closed shield made ordinary-pistol attempts spend most of the fight
-	# dealing no damage; the visible opening now spans the same real window.
-	return int(boss.phase)!=2 or float(boss.windup)>.15 or float(boss.wait)>.8
+	return CampaignBossPressure.vulnerable(self)
 
 func age_blasts(dt: float) -> void:
 	if blasts.is_empty():return
 	for blast in blasts:blast.age=float(blast.age)+dt
 	blasts=blasts.filter(func(b):return float(b.age)<float(b.get("life",.5)))
 
-func step(dt: float) -> void:
+func step(dt: float,input_dt: float=-1.) -> void:
 	if state=="respawn":
 		CampaignLives.step_entry(self,clampf(dt,0.,.05))
 		return
@@ -899,6 +969,7 @@ func step(dt: float) -> void:
 		melee_hit_done=true
 		if melee_target=="boss":
 			if absf(float(boss.x)-player.x)<150.:damage_boss(2)
+		elif melee_target.is_empty():CampaignWeapons.melee_environment(self)
 		else:
 			for enemy in enemies:
 				if str(enemy.id)==melee_target and absf(float(enemy.x)-player.x)<125. and absf(float(enemy.y)-player.y)<85.:damage_enemy(enemy,2,"melee")
@@ -906,7 +977,10 @@ func step(dt: float) -> void:
 	if on_floor and not CampaignRoutes.low_ceiling(self): coyote_timer = COYOTE_TIME
 	else: coyote_timer = maxf(0., coyote_timer - dt)
 	jump_buffer_timer = maxf(0., jump_buffer_timer - dt)
-	if charging: charge_time = minf(1.2,charge_time+dt)
+	if waiting_to_charge or charging:
+		# The visible hold uses the active input clock even on a slow frame.
+		# Physics remains bounded and blur/pause cancels the unspent input.
+		step_jump_charge(dt if input_dt<0. else clampf(input_dt,0.,.5),on_floor)
 	var speed: float = 235.*(1.55 if boost_held else 1.)*(1.35 if bool(mount.ridden) else 1.)*(1.25 if float(buffs.get("haste",0.))>0. else 1.)*(.65 if float(buffs.get("slow",0.))>0. else 1.)
 	velocity.x = MissionHeroAbilities.movement_speed(self,move_axis.x*speed*(.3 if charging else (.42 if crouching() else 1.)))
 	if rescue_time>0. or CampaignVehicles.stunned(self):velocity.x=0.
@@ -987,6 +1061,7 @@ func step(dt: float) -> void:
 	age_blasts(dt)
 	CampaignGrenade.step(self,dt)
 	if CampaignVehicles.stunned(self):return
+	CampaignWeapons.step_spider_parade(self)
 	for item in pickups:
 		item.age=float(item.get("age",0.))+dt
 		# No contact rule reaches beyond 160px horizontally (rider rect 92, foot 63).
@@ -1039,7 +1114,7 @@ func restore(data: Dictionary) -> bool:
 		var item=Dictionary(data.get("gift_drops",{}))[id]
 		if not id is String or not item is Dictionary:return false
 		if str(item.get("id",""))!=str(id)+":supply" or str(item.get("rescue_id",""))!=str(id):return false
-		if str(item.get("kind","")) not in CampaignRescue.GIFTS or str(item.get("role","")) not in CampaignRescue.ROLES:return false
+		if not CampaignRescue.valid_gift(CampaignWeapons.canonical_kind(str(item.get("kind","")))) or str(item.get("role","")) not in CampaignRescue.ROLES:return false
 		for key in ["x","y"]:
 			if typeof(item.get(key,null)) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(item[key])) or absf(float(item[key]))>10000000.:return false
 	for key in ["score","kills","time","flock","losses"]:
@@ -1065,9 +1140,15 @@ func restore(data: Dictionary) -> bool:
 		encounter=CampaignEncounterSave.read(data)
 		if encounter.is_empty():return false
 	rally=Dictionary(data.get("rally",{})).duplicate(true);retry_count=int(data.get("retry_count",0));best_chain=int(data.get("best_chain",0))
+	if not rally.is_empty():CampaignWeapons.migrate_stock(rally)
 	character = str(data.character) if str(data.character) in HEROES else "aion"; score = maxi(0,int(data.get("score",0))); kills = maxi(0,int(data.get("kills",0)))
-	losses=maxi(0,int(data.get("losses",0)));weapons_used.assign(Array(data.get("weapons_used",[])));vehicles_used.assign(Array(data.get("vehicles_used",[])))
-	greeted=Dictionary(data.get("greeted",{}));gift_drops=Dictionary(data.get("gift_drops",{}));rescue_roles=Dictionary(data.get("rescue_roles",{}))
+	losses=maxi(0,int(data.get("losses",0)));vehicles_used.assign(Array(data.get("vehicles_used",[])))
+	weapons_used.clear()
+	for name in data.get("weapons_used",[]):
+		var kind:=CampaignWeapons.canonical_kind(str(name))
+		if not weapons_used.has(kind):weapons_used.append(kind)
+	greeted=Dictionary(data.get("greeted",{}));gift_drops=Dictionary(data.get("gift_drops",{})).duplicate(true);rescue_roles=Dictionary(data.get("rescue_roles",{}))
+	for item in gift_drops.values():item.kind=CampaignWeapons.canonical_kind(str(item.kind))
 	run_seed=clampi(int(data.get("run_seed",7719)),1,2000000000)
 	rescued.assign(Array(data.get("rescued",[]))); rescue_life_start=int(data.get("rescue_life_start",rescued.size() if losses>0 and not bool(data.get("completed",false)) else 0)); awarded = Dictionary(data.get("awarded",{})); taken = Dictionary(data.get("taken",{}))
 	discovered=Dictionary(data.get("discovered",{}));activated=Dictionary(data.get("activated",{}))
@@ -1075,6 +1156,7 @@ func restore(data: Dictionary) -> bool:
 		for id in rescued:awarded[str(id)+":gift"]=true # Old rescues must not manufacture new supplies.
 	route.assign(Array(data.get("route",[]))); completed = bool(data.get("completed",false)); time = maxf(0.,float(data.get("time",0.)))
 	flock = clampi(int(data.get("flock",1)),1,MAX_FLOCK); hp = max_hp; grenades = 5
+	weapon="pistol";ammunition=CampaignWeapons.PISTOL_START;pistol_reserve=0
 	CampaignLives.reset(self)
 	MissionHeroAbilities.reset(self)
 	load_section(str(data.checkpoint))
@@ -1089,6 +1171,9 @@ func restore(data: Dictionary) -> bool:
 		CampaignRecovery.apply(self,rally)
 	else:
 		CampaignEncounterSave.apply(self,data,encounter)
+		CampaignBossPressure.migrate_saved_state(boss)
+		CampaignRoutes.after_restore(self)
+		CampaignWeapons.populate_sidearm(self)
 		if hp>0:shield_charge=minf(float(data.get("shield_charge",0.)),CampaignLives.SHIELD_CHARGE_SECONDS)
 	if completed: state = "complete"; checkpoint_ready = false; boss.active = false
 	return true

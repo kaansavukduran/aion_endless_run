@@ -3,10 +3,10 @@ extends RefCounted
 
 ## The gun action becomes a short, non-combat knife interaction near a captive.
 ## Authored coordinates and stable reward IDs survive retry and save/resume.
-const COUNTS := {"shore":3,"quay":2,"canopy":0,"water":9,"terrace":10,"roots":11,"relay":4,"arena":4}
+const COUNTS := {"shore":3,"quay":2,"canopy":0,"causeway":1,"water":9,"terrace":10,"roots":11,"relay":4,"arena":4}
 const ROLES := ["keeper","technician","courier","gardener","observer","archivist"]
-const REGIONAL_ROLES := {"shore":["keeper","technician","courier"],"quay":["technician","keeper"],"water":["observer","keeper","technician","courier"],"terrace":["gardener","keeper","courier","technician"],"roots":["archivist","technician","keeper","courier"],"relay":["technician","archivist","keeper","courier"],"arena":["keeper","technician","courier","archivist"]}
-const GIFTS := ["heavy","repair","beam","shield","scatter","points","arc","grenade","seeker","haste","power","reveal","magnet","disc","harpoon","spore","trap","nova"]
+const REGIONAL_ROLES := {"shore":["keeper","technician","courier"],"quay":["technician","keeper"],"causeway":["keeper"],"water":["observer","keeper","technician","courier"],"terrace":["gardener","keeper","courier","technician"],"roots":["archivist","technician","keeper","courier"],"relay":["technician","archivist","keeper","courier"],"arena":["keeper","technician","courier","archivist"]}
+const GIFTS := ["heavy","repair","beam","shield","scatter","points","arc","grenade","seeker","haste","power","reveal","magnet","disc","harpoon","spore","rocket","nova"]
 const CUT_SECONDS := .6
 const CONTACT := .3
 const WALK_STEP := 13.
@@ -30,7 +30,7 @@ static func clip_name(n: Dictionary) -> String:
 	return "depart_run"
 
 static func populate(w) -> void:
-	for i in int(COUNTS[w.section]):
+	for i in int(COUNTS.get(w.section,0)):
 		var id: String = w.section+":keeper"+("" if i==0 else ":"+str(i))
 		var count: int=COUNTS[w.section]
 		var x: float=lerpf(550.,w.length()-900.,float(i)/maxf(1.,count-1))
@@ -58,12 +58,13 @@ static func populate(w) -> void:
 		var id: String=str(n.id)
 		if w.gift_drops.has(id) and not w.taken.has(id+":supply"):
 			var item: Dictionary=Dictionary(w.gift_drops[id]).duplicate(true)
+			item.kind=CampaignWeapons.canonical_kind(str(item.kind))
 			item.age=0. # A resumed gift remains visible before contact can claim it.
 			w.pickups.append(item)
 	# A cage protects an actual captive, rather than being an unrelated prop.
 	for o in w.objects:
-		if o.kind!="cage" or w.npcs.is_empty():continue
-		var candidates: Array=w.npcs.filter(func(n):return str(n.secret)=="")
+		if o.kind!="cage" or bool(o.get("vacant",false)) or w.npcs.is_empty():continue
+		var candidates: Array=w.npcs.filter(func(n):return str(n.secret)=="" and not n.has("cage"))
 		candidates.sort_custom(func(a,b):return absf(float(a.x)-float(o.x))<absf(float(b.x)-float(o.x)))
 		if not candidates.is_empty():
 			var n: Dictionary=candidates[0];o.x=n.x;o.y=n.y;n.cage=str(o.id)
@@ -163,11 +164,18 @@ static func on_gift_collected(w,item: Dictionary) -> void:
 	w.award(id+":gift",0);w.gift_drops.erase(id)
 	w.supply(id+":supply",1)
 	if w.character=="sheep":w.flock=mini(AionCampaignWorld.MAX_FLOCK,w.flock+1)
-	w.notice="arc_maintenance" if item.get("role","")=="archivist" else "arc_thanks";w.notice_time=2.;w.pending_events.append("rescue_gift")
+	var route_part: bool=item.get("kind")=="relay_part"
+	if not route_part and (not str(w.notice).begins_with("story_") or w.notice_time<=0.):
+		w.notice="arc_maintenance" if item.get("role","")=="archivist" else "arc_thanks";w.notice_time=2.
+	w.pending_events.append("rescue_gift")
 	if item.get("role","")=="technician":
 		w.supply(id+":technician",1)
-		for o in w.objects:
-			if o.kind=="gate" and absf(float(o.x)-float(item.x))<400.:o.active=true;w.activated[str(o.id)]=true
+		if not route_part:
+			for o in w.objects:
+				if o.kind=="gate" and absf(float(o.x)-float(item.x))<400.:o.active=true;w.activated[str(o.id)]=true
+
+static func valid_gift(kind: String) -> bool:
+	return CampaignWeapons.canonical_kind(kind) in GIFTS or kind=="relay_part"
 
 static func walk_frame(n: Dictionary, animated: bool) -> int:
 	# Cadence follows physical distance, so a blocked foot never runs in place.

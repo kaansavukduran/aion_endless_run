@@ -49,7 +49,7 @@ func run() -> void:
 	check(float(l.get("recover",0.))>0.,"Enemy attack enters an explicit recovery punish window")
 
 	# 4. Kok Motoru phase shift, Phase 3 post-dash recovery, and victory cleanup
-	w=clean();w.load_section("arena");w.boss.active=true;w.boss.engaged=true;w.boss.clock=1.0;w.boss.hp=55;w.boss.phase=1;w.boss.beam_warning=0.8
+	w=clean();w.load_section("arena");w.boss.active=true;w.boss.engaged=true;w.boss.clock=1.0;w.boss.hp=165;w.boss.phase=1;w.boss.beam_warning=0.8
 	w.step_boss(.05)
 	check(int(w.boss.phase)==2 and float(w.boss.get("shift_pause",0.))>0. and float(w.boss.beam_warning)==0.,"Boss phase shift triggers shift_pause and clears stale beam warning")
 
@@ -77,8 +77,17 @@ func run() -> void:
 	w.player.x=origin+120.
 	w.boss.windup=.01;w.step_boss(.02)
 	check(float(w.boss.dash_direction)==-1.,"Charge commits to the warning direction even if the player crosses the boss")
+	check(CampaignBossPressure.damage_allowed(w,3)==0 and not CampaignBossPressure.core_exposed(w),"The charge protects the core before the recovery opening")
 	for tick in 20:w.step_boss(.05)
 	check(is_equal_approx(float(w.boss.x),finish) and float(w.boss.get("recover",0.))>0.,"Charge reaches the marked endpoint and exposes the counterattack window")
+	var exposed_point:=Vector2(float(w.boss.x),float(w.boss.y)-75.)
+	check(CampaignBossPressure.core_exposed(w) and CampaignBossPressure.core_damage(w,{"damage":1},exposed_point-Vector2(60.,0.),exposed_point+Vector2(60.,0.))==3,"An accurately aimed pistol shot earns triple damage after the final charge")
+	var away:=exposed_point+Vector2(0.,54.)
+	check(CampaignBossPressure.core_damage(w,{"damage":1},away-Vector2(60.,0.),away+Vector2(60.,0.))==1,"An off-core shot earns only normal damage during the opening")
+	var hp_before:=int(w.boss.hp)
+	w.bullets=[{"p":exposed_point-Vector2(190.,0.),"v":Vector2(760.,0.),"owner":"hero","kind":"pistol","damage":1,"pierce":0,"age":0.,"life":1.,"hit":[]}]
+	for frame in 25:w.step_bullets(1./120.)
+	check(w.boss.hp==hp_before-3 and w.bullets.is_empty(),"A real bullet hitting the hull across short frames keeps its exposed-core aim bonus")
 
 	w.boss.phase=3;w.boss.hp=20;w.boss.shift_pause=0.;w.boss.dash=0.04;w.boss.dash_direction=-1.
 	w.boss.recover=0.
@@ -91,6 +100,26 @@ func run() -> void:
 	w.boss.echo_wait=.3
 	w.damage_boss(50)
 	check(w.state=="victory" and w.completed and w.hazards.is_empty() and w.bullets.is_empty() and w.enemies[0].defeated and float(w.boss.echo_wait)==0.,"Boss defeat clears enemy bullets, hazards, pending waves and drones cleanly")
+
+	w=clean();w.load_section("arena");w.boss.engaged=true;w.weapon="pistol";w.ammunition=0
+	w.player=CampaignBossPressure.supply_point(w)+Vector2(-130.,0.)
+	CampaignBossPressure.step_supply(w,.05)
+	check(w.ammunition==0 and CampaignBossPressure.supply_ready(w),"Ready supply requires walking within reach of the dispenser")
+	w.player=CampaignBossPressure.supply_point(w)
+	var before_score:=w.score
+	CampaignBossPressure.step_supply(w,.05)
+	check(w.ammunition==CampaignBossPressure.SUPPLY_ROUNDS and not CampaignBossPressure.supply_ready(w) and w.score==before_score,"Contact refills exactly one bounded sidearm allowance without scoring")
+	var supply_save:=AionCampaignWorld.new()
+	check(supply_save.restore(w.snapshot()) and is_equal_approx(float(supply_save.boss.supply_cooldown),float(w.boss.supply_cooldown)) and supply_save.ammunition==w.ammunition,"Save and restore preserve both ammo and the already used dispenser")
+	supply_save.ammunition=0
+	CampaignBossPressure.step_supply(supply_save,.05)
+	check(supply_save.ammunition==0,"Reopening cannot duplicate an immediately spent allowance")
+	var cooling:=float(supply_save.boss.supply_cooldown)
+	supply_save.state="paused";CampaignBossPressure.step_supply(supply_save,1.)
+	check(is_equal_approx(float(supply_save.boss.supply_cooldown),cooling),"Pause does not recharge the dispenser")
+	supply_save.state="playing"
+	for tick in 60:CampaignBossPressure.step_supply(supply_save,.05)
+	check(supply_save.ammunition==CampaignBossPressure.SUPPLY_ROUNDS,"A depleted sidearm can earn another limited allowance in active play")
 
 	# 5. Coyote time & jump buffer (and strict low_ceiling guard)
 	w=clean("aion");w.platforms.append(Rect2(100.,-80.,200.,20.));w.player=Vector2(298.,-80.);w.velocity=Vector2.ZERO
@@ -113,11 +142,11 @@ func run() -> void:
 	# 6. HUD combat-priority order & dirty-state caching
 	var game:=AionCampaignGame.new();game.language="en";root.add_child(game);await process_frame;game.set_process(false)
 	game.world.begin("aion");game.world.state="playing";game.hud_panel.refresh()
-	var sig1: String=game.hud_panel.last_signature
-	check(game.hud_panel.summary.begins_with(game.t("reserve_lives")),"HUD places combat-critical reserve first in hierarchy")
+	var sig1: Array=game.hud_panel.last_signature
+	check(game.hud_panel.summary.begins_with(CampaignFieldUI.text(game,"life")+" 1/1") and game.hud_panel.summary.contains(game.t("reserve_lives")),"HUD distinguishes the active life from reserves")
 	game.hud_panel.refresh()
 	check(game.hud_panel.last_signature==sig1,"HUD dirty-state cache stays stable when world state is unchanged")
-	game.world.hp=2;game.hud_panel.refresh()
+	game.world.hp=0;game.hud_panel.refresh()
 	check(game.hud_panel.last_signature!=sig1,"HUD dirty-state cache invalidates immediately on HP change")
 	game.queue_free();await process_frame
 

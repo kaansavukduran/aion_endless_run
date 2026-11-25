@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.57.8"
+const GAME_VERSION = "0.58.0"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -188,7 +188,7 @@ func _ready() -> void:
 		# the tab is hidden; pause the run exactly like a native focus loss.
 		web_hidden_callback = JavaScriptBridge.create_callback(on_web_page_hidden)
 		JavaScriptBridge.get_interface("window").aionPageHidden = web_hidden_callback
-		JavaScriptBridge.eval("if(!window.aionVisibilityInstalled){window.aionVisibilityInstalled=true;document.addEventListener('visibilitychange',()=>{if(document.hidden)window.aionPageHidden?.()})}")
+		JavaScriptBridge.eval("if(!window.aionVisibilityInstalled){window.aionVisibilityInstalled=true;document.addEventListener('visibilitychange',()=>{if(document.hidden)window.aionPageHidden?.();else window.aionPageVisible?.()})}")
 	for i in 2:
 		followers.append(make_companion_sprite())
 	sheep_collectible = make_companion_sprite()
@@ -1311,7 +1311,7 @@ func update_hud() -> void:
 		var ability: String = text(("touch_ability_" if touch_mode else "ability_") + character)
 		if active_input=="gamepad":
 			ability=text("pad_ability_"+character)
-			if character!="sheep":ability=ability % gamepad.binding_name("boost" if character=="wolf" else "jump")
+			if ability.contains("%s"):ability=ability % gamepad.binding_name("boost" if character=="wolf" else "jump")
 		if portrait and character in World.CHARGE_HEROES and active_input=="gamepad":ability=gamepad.binding_name("jump")+" ↑"
 		if world.frontier.active(): ability = text("boss_hearts") % world.frontier.player_hp
 		elif character == "sheep": ability = text("flock") % world.sheep_count
@@ -1350,7 +1350,7 @@ func on_web_page_hidden(_arguments: Array) -> void:
 func canvas_accessibility_label() -> String:
 	if world.state=="ready":
 		if page=="characters":
-			return "Aion. "+RunnerFrontText.word(language,"pick_hero")+". "+character_name(character)
+			return "Aion. "+RunnerFrontText.word(language,"pick_hero")+". "+character_name(character)+". "+RunnerFrontText.motivation(language,character)
 		if page=="help" or (page=="main" and opening_guide):
 			return "Aion. "+RunnerFrontText.word(language,"how")
 		return "Aion. "+AionCampaignText.word(language,"title")

@@ -2,6 +2,18 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 0.58.0 · Sönen Fenerler genişlemesi
+
+Temel `main` kaydı `0e98f3ca7612c2beacb355a76578d3475c0a7794`. Çalışma dalı `forge/mission1-field-expansion`. Başlangıçta GitHub Pages 0.57.8 `b5b1c5e4098fe2e9` sunuyordu. Godot 4.6.3 ile geliştirildi.
+
+- Birinci kavşakta üst iskele, bakım yolu ve su kanalı gerçek yüksekliklerde ayrılıyor. Kamera ayağı takip ediyor. Geçit pompası su düzeyini düşürüyor ve kısa bir kuru bakım yolu açıyor. Ahşap sundurmalar karganın dalış hattını kesiyor. Açık kafesin tek kullanımlık mandalı var. Fener Kıyısı’nın zorunlu köprüsü kırılmaz.
+- Kör nokta hesabı karganın dalış ve çıkış koridorunu dikkate alıyor. Doğuşta üç saniyelik koruma ve ardından dört hasarsız saniyede biriken kalkan var. Yürüme yardımı ayarlardan açılıyor. Uçurum, tuzak, kapı, kavşak ve arena önünde duruyor. Hareket tuşu öncelikli. Sekmeye dönünce Devam et aynı tercihi kullanıyor. Ayça ve Eren kısa basışta normal zıplıyor, bir saniyelik tutuşla şarj pozuna geçiyor.
+- Tabanca cephanesi sınırlı. Özel silah tükendiğinde yedek tabancaya geçilebiliyor. Stok tamamen tükendiğinde yumruk, kırılabilir ikmal sandığı ve geçitlere de vuruyor. Röle Roketatarı ve alan patlaması oyun içi özgün piksel çizimleri kullanıyor. Ateş ve isabet için üretilen WAV’ların kaynağı `packaging/prepare_finale_audio.py`. Eski örümcek eşyaları roketatara uyarlanıyor ve aynı yerde dekoratif yürüyüş kalıyor.
+- Duraklatma haritası bulunduğun bölgeyi ve keşfedilen bağlantıları gösteriyor. Ekipman kısıtlı cephaneyi, bombayı, aracı ve yardımcıyı açıklıyor. İlk kurtarmadan sonra Zekâ, Büyü ya da Direnç seçilebiliyor. Fener telinden Bakır Röle’ye uzanan ipuçları oyuncu hareketini kesmeden çıkıyor. Zafer, donmuş gözlemevi ipucu ve “Devam edecek…” ile bitiyor.
+- Kök Motoru 270 can, üç evre ve kısa çekirdek açılışlarıyla çalışıyor. Arena ikmali tabanca stokunun tükendiği koşuları açık tutuyor. Altı kahraman arena girişinden gerçek klavye ve fareyle üç evreyi tamamladı. Bu arena denemesi başlangıçtan bütün görevi oynama kanıtından ayrı tutuldu.
+
+Duraklatma ve HUD denetimi 492 kontrol, fiziksel rota denetimi 310 kontrol ve rota çizicisi 16 kontrol geçti. Aynı girdilerle yapılan yedi HUD mikro ölçümünde sabit durum yenileme ortancası 52,12 → 5,95 µs, aralıklı skor güncellemesi 76,86 → 17,71 µs idi. Bu ölçüm HUD işlemi için geçerli. Aynı karedeki birden fazla kayıt olayı artık tek kontrol noktası yazımı yapıyor. Firefox’ta dikey ve yatay dokunmatik girişler, Chromium’da klavye, dokunmatik, sanal Xbox ve çevrimdışı Sürdür doğrulandı. Görünürlük olayları tarayıcıda simüle edilerek Devam et ve kayıtlı yürüme tercihinin birleşimi sınandı. Gerçek tarayıcı girdileriyle Su Kanalı ve Bakım Yolu ayrı koşularda açıldı. Bakım Yolu koşusu normal girişten Kök Motoru’nun sıfır canına ve “Devam edecek…” kartına ulaştı. Koşu betiği son kartta eski düğme etiketini beklediği için rapor adımı ayrıca yerel arena ve arayüz testlerinde doğrulandı. Fiziksel telefon, fiziksel gamepad ve kullanıcı kabulü bekliyor. [Birleştirme isteği](https://github.com/kaansavukduran/aion_endless_run/pull/33)
+
 ### Park pozları, geçitler ve depar alevi · Yerel aday
 
 Çalışma dalı `perf/mission1-visual-motion`. Yerel kalkan ve final değişiklikleri ile güncel `main` `e5dae9669ee22d64e7dfd4fdfdf8247b543045fd` birleştirildi. Birleşim tabanı `5b60d53`. Godot 4.6.3. İnceleme Kod Optimizasyonu ve Yazılım Denetle becerileriyle yapıldı.

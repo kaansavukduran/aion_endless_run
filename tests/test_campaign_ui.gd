@@ -7,6 +7,8 @@ func check(ok: bool,message: String) -> void:
 func _initialize() -> void:call_deferred("run")
 func event(button: int,down: bool=true) -> InputEventJoypadButton:
 	var input:=InputEventJoypadButton.new();input.button_index=button;input.pressed=down;return input
+func key(code: Key,down: bool=true) -> InputEventKey:
+	var input:=InputEventKey.new();input.keycode=code;input.physical_keycode=code;input.pressed=down;return input
 func advance(world: AionCampaignWorld,seconds: float) -> void:
 	# World.step caps a caller's coarse delta; advance the real game clock in
 	# ordinary physics steps rather than pretending one .17 call is .17 seconds.
@@ -57,13 +59,13 @@ func run() -> void:
 	game._input(event(JOY_BUTTON_A));await process_frame
 	check(game.menu_kind=="" and game.world.state=="playing","Xbox A / PS Cross starts a fresh run immediately even from the fallback briefing")
 	game.toggle_pause();await process_frame;await process_frame
-	game.buttons[1].grab_focus()
+	game.ui.find_child("CampaignControls",true,false).grab_focus()
 	game._input(event(JOY_BUTTON_A));await process_frame;await process_frame
 	check(game.menu_kind=="help","Controls are still available from the real Pause menu")
 	game._input(event(JOY_BUTTON_X));await process_frame
 	check(game.help_step==1,"Xbox X / PS Square activates actual tutorial next button")
 	game.finish_help();game.close_menu()
-	game._input(event(JOY_BUTTON_START));await process_frame
+	game._input(event(JOY_BUTTON_START));await process_frame;await process_frame;await process_frame
 	check(game.menu_kind=="paused" and game.world.state=="paused","Controller Start pauses actual mission")
 	game._input(event(JOY_BUTTON_A));await process_frame
 	check(game.menu_kind=="" and game.world.state=="playing","Controller confirm really resumes actual mission")
@@ -99,8 +101,35 @@ func run() -> void:
 	check(game.world.jump_held and game.world.velocity.y<0.,"Real touch handler reaches common jump action")
 	touch.pressed=false;touch.canceled=true;game._input(touch);check(not game.world.jump_held and game.touch_actions.is_empty(),"Touch cancellation releases captured action")
 	game.world.begin("eren");game.world.state="playing";touch.index=2;touch.pressed=true;touch.canceled=false;game._input(touch);game.world.step(.05)
-	check(game.world.charging,"Rabbit touch really starts a charge")
+	check(game.world.waiting_to_charge and not game.world.charging,"Rabbit initially waits without showing a charge pose")
 	touch.pressed=false;touch.canceled=true;game._input(touch);check(not game.world.charging and game.world.velocity.y==0.,"Canceled rabbit touch discards charge without launching an unintended jump")
+	touch.pressed=true;touch.canceled=false;game._input(touch)
+	advance(game.world,1.2)
+	check(game.world.charging and game.world.charge_ratio()>0.,"The same real touch begins charging after a full second")
+	touch.pressed=false;game._input(touch)
+	check(game.world.velocity.y< -900. and not game.world.charging,"Releasing the charged touch launches exactly one higher jump")
+	game.world.begin("aion");game.world.state="playing";game.world.invulnerable=0.;game.application_active=true
+	game.world.enemies.clear();game.world.gates.clear();game.world.objects.clear();game.world.hazards.clear()
+	game.auto_walk=true;game.touch_mode=false;game.release_all();game.close_menu()
+	var start:=game.world.player.x
+	game._process(.016)
+	check(game.auto_walk_moving and game.world.player.x>start,"Enabled assist walks through a supported straight section")
+	game.on_web_page_hidden([])
+	start=game.world.player.x;game._process(.016)
+	check(game.auto_walk and not game.application_active and not game.auto_walk_moving and game.world.player.x==start,"Hiding the tab releases movement without erasing the saved preference")
+	game.on_web_page_visible([])
+	game._unhandled_input(key(KEY_ESCAPE));game._process(.016)
+	check(game.application_active and game.menu_kind=="" and game.auto_walk_moving and game.world.player.x>start,"Returning and resuming restores the existing walk preference")
+	game._unhandled_input(key(KEY_A));game._process(.016)
+	check(not game.auto_walk_moving and game.world.velocity.x<0. and game.world.facing==-1,"Fresh left input overrides assist and turns immediately")
+	game._unhandled_input(key(KEY_A,false));game.auto_walk=false
+	game.world.aim_direction=Vector2.RIGHT;game.world.facing=1;game.pad_look=Vector2.RIGHT;game.pad_axis=Vector2.LEFT
+	game._input(event(game.pad.bindings.shoot));game.update_arcade_aim(.016);game.world.step(.016)
+	check(game.world.velocity.x<0. and game.world.facing==1 and game.world.aim_direction.x>.9,"Independent gamepad aim remains locked during actual backwalking fire")
+	game._input(event(game.pad.bindings.shoot,false));game.release_all();game.auto_walk=true
+	game.world.pits.assign([Vector2(game.world.player.x+53.,game.world.player.x+123.)]);game._process(.016)
+	check(not game.auto_walk_moving,"Assist stops at a real gap before walking over the edge")
+	game.auto_walk=false;game.touch_mode=true
 	for hero in AionCampaignWorld.HEROES:
 		game.world.begin(hero);game.world.state="playing";game.world.enemies.clear();game.world.gates.clear();game.world.objects.clear();game.world.hazards.clear();game.world.pickups.clear();game.world.crates.clear()
 		var npc: Dictionary=game.world.npcs[0];game.world.player=Vector2(float(npc.x)-65.,float(npc.y));game.world.velocity=Vector2.ZERO;game.world.facing=1

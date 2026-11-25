@@ -57,13 +57,13 @@ static func context(w) -> Dictionary:
 		cooldown=clampf(remaining/maxf(.001,total),0.,1.)
 	if w.character=="armadillo" and w.roll_cooldown>0.:
 		phase="cooldown"
-		remaining=w.roll_cooldown
-		cooldown=remaining/ROLL_COOLDOWN
+		remaining=w.roll_cooldown/CampaignUpgrades.recovery_scale(w)
+		cooldown=w.roll_cooldown/ROLL_COOLDOWN
 	if w.character=="frog" and not loaded and w.frog_cooldown>0.:
 		ready=false
 		if w.hero_skill.is_empty():phase="cooldown"
-		remaining=maxf(remaining,w.frog_cooldown)
-		cooldown=remaining/SWALLOW_COOLDOWN
+		remaining=maxf(remaining,w.frog_cooldown/CampaignUpgrades.recovery_scale(w))
+		cooldown=w.frog_cooldown/SWALLOW_COOLDOWN
 	var status: String="skill_ready" if ready else "skill_active"
 	if w.character=="armadillo" and w.hero_skill.is_empty() and not w.grounded():status="skill_land"
 	if phase in ["recover","cooldown"]:status="skill_"+phase
@@ -124,7 +124,7 @@ static func sprinting(w) -> bool:
 static func sprint_contacts(w,previous: Vector2,was_grounded: bool,dt: float) -> void:
 	if w.character not in ["rabbit","eren"] or dt<=0.:return
 	var running:=sprinting(w)
-	w.sprint_recovery=maxf(0.,w.sprint_recovery-dt)
+	w.sprint_recovery=maxf(0.,w.sprint_recovery-dt*CampaignUpgrades.recovery_scale(w))
 	if not w.boost_held:w.sprint_ignition=true
 	if w.sprint_fire>0.:
 		w.sprint_fire=maxf(0.,w.sprint_fire-dt) if running else 0.
@@ -221,9 +221,10 @@ static func set_phase(w,phase: String) -> void:
 
 static func step(w,dt: float) -> void:
 	if dt<=0. or w.state!="playing":return
-	w.frog_cooldown=maxf(0.,float(w.frog_cooldown)-dt)
+	var cooldown_step:=dt*CampaignUpgrades.recovery_scale(w)
+	w.frog_cooldown=maxf(0.,float(w.frog_cooldown)-cooldown_step)
 	if w.roll_cooldown>0.:
-		w.roll_cooldown=maxf(0.,w.roll_cooldown-dt)
+		w.roll_cooldown=maxf(0.,w.roll_cooldown-cooldown_step)
 		if w.roll_cooldown<=0.:w.roll_charges=ROLL_CHARGES
 	if w.hero_skill.is_empty():return
 	if bool(w.mount.ridden) or w.mount_transition!="" or w.hurt_time>0.:
