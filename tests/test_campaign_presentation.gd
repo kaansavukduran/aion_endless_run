@@ -61,12 +61,16 @@ func run() -> void:
 	game.options.text_scale=2.;game.new_best=true;game.world.completed=true
 	game.world.rescued.assign(["a","b","c","d","e","f"])
 	game.world.score=99999;game.world.awarded["mission:1"]=true;game.menu_kind="complete"
-	for locale in GameText.LANGUAGES:
-		game.language=locale;game.build_ui();await process_frame;await process_frame;await process_frame
-		var area:=Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h))
-		check(area.encloses(game.menu.get_global_rect()),"Full clear fits at 200% in a near-square viewport: "+locale)
-		check(game.report_lines().has(game.result_breakdown()),"Compact summary still exposes the full score breakdown in Details")
-		for button in game.buttons:check(area.encloses(button.get_global_rect()),"Final action fits without scroll: "+button.text)
+	var system_font: Font=game.ui.theme.default_font
+	for report_font: Font in [system_font,preload("res://assets/fonts/NotoSans-Game.ttf")]:
+		game.ui.theme.default_font=report_font
+		for locale in GameText.LANGUAGES:
+			game.language=locale;game.build_ui();await process_frame;await process_frame;await process_frame
+			var area:=Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h))
+			check(area.encloses(game.menu.get_global_rect()),"Full clear fits at 200% in a near-square viewport: "+locale+" / "+report_font.get_font_name())
+			check(game.report_lines().has(game.result_breakdown()),"Compact summary still exposes the full score breakdown in Details")
+			for button in game.buttons:check(area.encloses(button.get_global_rect()),"Final action fits without scroll: "+button.text)
+	game.ui.theme.default_font=system_font
 	game.world.completed=false;game.world.rescued.clear();game.world.awarded.clear();game.new_best=false
 	# Junctions share the real HUD rather than presenting a choice dialog.
 	for section in CampaignRoutes.FORKS:

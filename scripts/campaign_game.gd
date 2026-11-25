@@ -354,6 +354,9 @@ func build_menu() -> void:
 			action(t("back"),return_main)
 		"complete":
 			var compact: bool=options.text_scale>1.5 and view_h<760.
+			if compact:
+				column.add_theme_constant_override("separation",6)
+				menu.add_theme_stylebox_override("panel",options.style("surface","border",12))
 			result_score=paragraph("",28)
 			result_score.name="CampaignResultScore";column.add_child(result_score)
 			update_result_score(0.)
