@@ -99,21 +99,25 @@ static func begin(w) -> bool:
 ## knife. The contact test uses the whole travelled segment, including beams.
 static func hit_rope(w,from: Vector2,to: Vector2) -> bool:
 	for n in w.npcs:
-		if bool(n.freed) or (str(n.secret)!="" and not w.discovered.has(str(n.secret))):continue
-		if w.objects.any(func(o):return str(o.id)==str(n.get("cage","")) and not bool(o.active)):continue
+		if bool(n.freed):continue
+		# Cheap swept-segment test first; secrecy/cage lookups only for a real crossing.
 		var rope:=Rect2(float(n.x)-25.,float(n.y)-120.,50.,100.)
-		if crosses_rect(from,to,rope):
-			w.rescue(n)
-			return true
+		if not crosses_rect(from,to,rope):continue
+		if str(n.secret)!="" and not w.discovered.has(str(n.secret)):continue
+		if w.objects.any(func(o):return str(o.id)==str(n.get("cage","")) and not bool(o.active)):continue
+		w.rescue(n)
+		return true
 	return false
 
 ## Area attacks use the same secrecy/cage protection as travelling bullets.
 static func blast_ropes(w,centre: Vector2,radius: float) -> void:
 	for n in w.npcs:
-		if bool(n.freed) or (str(n.secret)!="" and not w.discovered.has(str(n.secret))):continue
-		if w.objects.any(func(o):return str(o.id)==str(n.get("cage","")) and not bool(o.active)):continue
+		if bool(n.freed):continue
 		var nearest:=Vector2(clampf(centre.x,float(n.x)-25.,float(n.x)+25.),clampf(centre.y,float(n.y)-120.,float(n.y)-20.))
-		if centre.distance_to(nearest)<=radius:w.rescue(n)
+		if centre.distance_to(nearest)>radius:continue
+		if str(n.secret)!="" and not w.discovered.has(str(n.secret)):continue
+		if w.objects.any(func(o):return str(o.id)==str(n.get("cage","")) and not bool(o.active)):continue
+		w.rescue(n)
 
 static func crosses_rect(from: Vector2,to: Vector2,rect: Rect2) -> bool:
 	if maxf(from.x,to.x)<rect.position.x or minf(from.x,to.x)>rect.end.x or maxf(from.y,to.y)<rect.position.y or minf(from.y,to.y)>rect.end.y:return false

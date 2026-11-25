@@ -375,3 +375,22 @@ Son ürün commit’i `8983722`, tam kaynak kopyasından dışa aktarım `aae78e
 - Açık eski sekmedeki düğme ilk ara sürümün adresini koruyabiliyordu. Chromium'da üç gerçek Web paketi ve olağan oyuncu girdileriyle yeniden üretildi. Güncel worker, kasıtlı kurtarma ve yeniden deneme adresleri dışındaki sürümlü girişleri kendi doğrulanmış paketinden açıyor. Yeni düğme, worker ile ağdaki güncel paketin kimliğinin eşleşmesini bekliyor.
 - Arcade güncelleme öncesinde aktif koşuyu normal duraklatma yoluyla kaydediyor. Çevrimiçi ve çevrimdışı Continue için aynı tarayıcı profiliyle programatik kayıt yazımı kullanmadan doğrulama komutu: `python3 tests/browser_update_offer.py --exports ESKI ARA ADAY --evidence KANIT`. Önceki güncelleyici yüklüyken de senaryo çalışır. Yeni düğme etiketinin ikinci worker geldiğinde değişmesini de ölçmek için `--modern` kullanılır.
 - “Kes” ipucu yalnızca aynı saldırı girdisinin gerçekten kesebildiği en yakın ipte görünüyor. Arena'da üst üste binen iki rehber ayrıldı ve sabit kayıt kimlikleri, hediyeler ve sayıları korundu. Altı kahramanın Mission 1 hareket paftaları gerçek çizicide kontrol edildi. Kullanıcı oynayarak görsel ve oynanış kabulünü verecek.
+
+## 0.57.3 · Ölçümlü yazılım optimizasyonu (25 Kasım 2026)
+
+Ortam: bulut Linux, Godot 4.6.3 headless, yerel CPU (web/WASM için kabaca 2–3 kat yavaş varsayılır, ASSUMED). Ölçüm betiği: 5 tekrar × 600 kare, ortalamaların medyanı.
+
+| Sahne (oyun mantığı/kare) | 0.57.2 | 0.57.3 |
+| --- | --- | --- |
+| Su rotası sınav karesi | 451 µs | 308–328 µs |
+| Kökler orta | 370 µs | 287–302 µs |
+| Kıyı başlangıcı | 272 µs | 199–245 µs |
+| Kök Motoru | 112 µs | 111–163 µs (gürültü aralığında) |
+
+- `CampaignRescue.hit_rope`/`blast_ropes`: ucuz geometrik test, gizlilik ve kafes aramasından önce. Mermi başına 37,9 → 4,8 µs. Koşullar VE ile bağlı; sonuç aynıdır.
+- `CampaignContent.hit_object`: 45 px x-aralığı dışındaki nesneler erken elenir.
+- `AionCampaignWorld.gate_closed(gate, alive)`: kapı döngüsü karede bir kez kurulan yaşayan düşman kümesini kullanır (32,5 → 16,3 µs). Tek argümanlı çağrı eski davranıştadır.
+- Ödül döngüsü: yatayda 160 px'ten uzak ödüller (en geniş temas: araç dikdörtgeni 92 px) temas kontrolüne girmez; yaş sayacı her ödülde ilerler.
+- Regresyon kalkanı: `tests/test_perf_paths.gd` (davranış denkliği + gevşek 2,5 ms kare bütçesi).
+- Ertelenen (Katman 2, ayrı tur): sheet ısınması ve çözülmüş sheet bellek sınırı (önceki ölçüm 15 sheet, 94 MB RAM; ilk görünüşte 27–45 ms çözme).
+- `browser_forge --rescue` kurtarma yaklaşması rastgele çatışmada can bütçesini (8) aşabiliyor; değişikliksiz 0.57.2'de de 5 denemenin 2'sinde düştü. Oynak test olarak kayıtlı.

@@ -228,6 +228,9 @@ static func apply_surface(w,o: Dictionary) -> void:
 static func hit_object(w,p: Vector2,damage: int,from: Vector2=Vector2.INF) -> bool:
 	for o in w.objects:
 		if bool(o.active) or str(o.kind) in ["current","updraft"]:continue
+		var low: float=minf(p.x,from.x) if from.is_finite() else p.x
+		var high: float=maxf(p.x,from.x) if from.is_finite() else p.x
+		if float(o.x)<low-45. or float(o.x)>high+45.:continue
 		var target:=Vector2(float(o.x),float(o.y)-35.)
 		var nearest: Vector2=p if not from.is_finite() else Geometry2D.get_closest_point_to_segment(target,from,p)
 		if nearest.distance_to(target)>45.:continue
