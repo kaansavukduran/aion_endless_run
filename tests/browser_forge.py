@@ -532,16 +532,21 @@ with sync_playwright() as playwright:
                         # Clear the lane before walking into a charged ground
                         # attacker. Aim is independent of the movement keys.
                         commands = ['f']
-                    ahead_dive = next((e for e in diving if (e['x']-x)*forward > -40), None)
-                    if ahead_dive and direction:
-                        # Step back out of a forward crow's dive line; its
-                        # target is fixed when the windup ends.
-                        commands = ['f', 'a' if direction == 'd' else 'd']
+                    dive = min(diving, key=lambda e: abs(e['x']-x), default=None)
+                    if dive:
+                        # A dive locks onto the spot the hero holds when the
+                        # windup ends: never stand still under one, walk
+                        # away from the crow (forward when it is overhead).
+                        away = 'd' if (x-dive['x'] > 0 if abs(dive['x']-x) > 20 else forward > 0) else 'a'
+                        commands = ['f', away]
                     gap = any(0 < pit[0] - x < 160 for pit in current['pits'])
                     hit_in = incoming(current, x, y)
                     danger = hit_in < .42 or any(math.hypot(b[0] - x, b[1] - (y - 37)) < 70 for b in current['bullets'])
                     lower_threat = nearest and 75<distance<245 and nearest['y']>y+30
-                    if current['grounded'] and (gap or danger or lower_threat or distance<112) and time_now-last_jump>.65:
+                    # Gnomes and beetles dash along the ground when their
+                    # windup ends; be airborne as the dash arrives.
+                    dash = any(e['kind'] in ('gnome', 'beetle', 'slime') and 0 < e['windup'] < .3 and abs(e['x']-x) < 190 for e in threats)
+                    if current['grounded'] and (gap or danger or dash or lower_threat or distance<112) and time_now-last_jump>.65:
                         page.keyboard.press('Space')
                         last_jump=time_now
                     keys(commands)
