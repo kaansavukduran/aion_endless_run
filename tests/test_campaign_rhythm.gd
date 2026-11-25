@@ -108,6 +108,37 @@ func run() -> void:
 	check(game.impact_hold==0.,"Reduced motion disables hit-stop while the world remains playable")
 	game.audio_enabled=false;game.sound_cache.erase("armour_hit");game.sound("armour_hit")
 	check(not game.sound_cache.has("armour_hit"),"Audio-off also suppresses the new armour feedback")
+	game.world.begin("aion");game.world.state="playing"
+	game.world.enemies.clear();game.world.npcs.clear();game.world.objects.clear()
+	game.audio_enabled=true
+	var heard: Dictionary={}
+	var fire:=InputEventKey.new();fire.physical_keycode=KEY_F;fire.keycode=KEY_F;fire.pressed=true
+	var release:=fire.duplicate() as InputEventKey;release.pressed=false
+	for kind in ["pistol"]+CampaignWeapons.SPECIAL+CampaignVehicles.TYPES:
+		var mounted: bool=kind in CampaignVehicles.TYPES
+		game.world.weapon="pistol" if mounted else kind
+		game.world.ammunition=1
+		game.world.mount.ridden=mounted;game.world.mount.type=kind
+		game.world.fire_time=0.;game.world.bullets.clear();game.world.pending_events.clear()
+		game._unhandled_input(fire)
+		check(game.world.pending_events.count("shot:"+kind)==1 and game.world.muzzle_flashing() and not game.world.bullets.is_empty(),"A real Fire press emits one matching release cue, muzzle flash and projectile: "+kind)
+		game._process(.001)
+		var stream: AudioStreamWAV=game.weapon_voice.stream if is_instance_valid(game.weapon_voice) else null
+		check(stream!=null and stream==game.WEAPON_SOUNDS[kind] and not heard.has(hash(stream.data)) and not game.world.pending_events.has("shot:"+kind),"Release plays the unique sound once, including last-round fallback: "+kind)
+		if stream!=null:heard[hash(stream.data)]=true
+		game._unhandled_input(release)
+	game.world.mount.ridden=false
+	game.world.shot_flash=.18-.075
+	check(not game.world.muzzle_flashing() and game.world.shot_flash>0.,"Flash extinguishes between heavy shots while the body finishes recoil")
+	game.audio_enabled=false;game.update_ambient();await process_frame
+	check(is_instance_valid(game.weapon_voice) and not game.weapon_voice.playing and not game.ambient_started,"Mute stops the dedicated shot and soundtrack")
+	game.audio_enabled=true;game.world.load_section("arena");game.world.boss.engaged=true;game.update_ambient()
+	var starts:=game.ambient_starts
+	check(game.ambient_key=="boss-battle" and game.ambient.stream is AudioStreamOggVorbis and game.ambient.stream.loop,"Real boss engagement starts the looping Root Engine theme")
+	game.menu_kind="paused";game.update_ambient();game.menu_kind="";game.update_ambient()
+	check(game.ambient_starts==starts and not game.ambient.stream_paused,"Pause resumes the same boss track")
+	game.world.completed=true;game.world.victory_time=1.2;game.update_ambient()
+	check(game.ambient.volume_db<=-59.,"Boss music fades out for the ending")
 	for locale in ["tr","en"]:
 		for key in ["rally","bridge_warning","swap_weapon","gate_remaining","chain_bonus","boss_core","boss_dash"]:
 			check(AionCampaignText.word(locale,key)!=key,"New gameplay feedback is translated: "+locale+"/"+key)

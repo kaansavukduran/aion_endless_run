@@ -481,6 +481,9 @@ func armed_muzzle() -> Vector2:
 func muzzle_offset() -> Vector2:
 	return armed_muzzle()
 
+func muzzle_flashing() -> bool:
+	return shot_flash>.122
+
 func legacy_muzzle_offset() -> Vector2:
 	if character=="eren" and (charging or not grounded()):
 		var atlas: Dictionary=ABILITY_ART.data.atlases["polish-abilities"]
@@ -550,6 +553,7 @@ func damage_boss(amount: int) -> void:
 	boss.hp = maxi(0,int(boss.hp)-amount)
 	if int(boss.hp) == 0:
 		boss.active = false; boss.beam_warning = 0.; boss.windup = 0.; completed = true; state = "victory"; victory_time = 0.; checkpoint_ready = false
+		boss.echo_wait=0.;boss.dash=0.;boss.recover=0.
 		bullets = bullets.filter(func(b): return str(b.owner) != "enemy")
 		hazards.clear()
 		for e in enemies:
@@ -670,7 +674,8 @@ func enemy_shot(e: Dictionary, fan: bool = false) -> void:
 	var direction: Vector2 = (player+Vector2(0,-36)-origin).normalized()
 	if direction.length_squared()<.5: direction = Vector2.LEFT
 	var angles: Array = [-.22,0.,.22] if fan else ([-.12,.12] if e.kind=="drone" else [0.])
-	for angle in angles: bullets.append({"p":origin,"v":direction.rotated(angle)*210.,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
+	var speed:=228. if e.kind=="seed" and (section!="shore" or float(e.home.x)>=1850.) else 210.
+	for angle in angles: bullets.append({"p":origin,"v":direction.rotated(angle)*speed,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
 
 func step_enemies(dt: float) -> void:
 	for e in enemies:
@@ -735,6 +740,7 @@ func step_boss(dt: float) -> void:
 	if CampaignBossPressure.motion(self,dt):return
 	if int(boss.phase)<3:boss.x = length()-420.+sin(float(boss.clock)*.65)*75.
 	boss.y = floor_at(float(boss.x))
+	CampaignBossPressure.step_echo(self,dt)
 	var old_beam_warning: float=float(boss.get("beam_warning",0.))
 	boss.beam_warning=maxf(0.,old_beam_warning-dt)
 	if old_beam_warning>0. and float(boss.beam_warning)<=0.:
@@ -753,22 +759,20 @@ func step_boss(dt: float) -> void:
 				for offset in [-.32,-.16,0.,.16,.32]:
 					var ports: Array=boss.get("ports",[3,3])
 					var port_index:=0 if offset<=0. else 1
-					if int(ports[port_index])<=0:continue
-					var port:=CampaignBossPressure.port_point(self,port_index)
+					var late: bool=int(boss.phase)==3
+					if not late and int(ports[port_index])<=0:continue
+					var port:=Vector2(float(boss.x),float(boss.y)-75.) if late else CampaignBossPressure.port_point(self,port_index)
 					var aim := (player+Vector2(0,-42)-port).normalized().rotated(offset)
-					bullets.append({"p":port,"v":aim*230.,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[],"boss_shot":true})
+					bullets.append({"p":port,"v":aim*(265. if late else 230.),"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[],"boss_shot":true})
 			elif attack == 1:
-				pending_events.append("boss_wave")
-				var direction: float=-1. if player.x<=float(boss.x) else 1.
-				var wave_x:=float(boss.x)+direction*60.
-				bullets.append({"p":Vector2(wave_x,floor_at(wave_x)-16.),"v":Vector2(direction*320.,0.),"owner":"enemy","age":0.,"kind":"wave","damage":1,"pierce":0,"hit":[],"boss_shot":true})
+				CampaignBossPressure.fire_wave(self)
 				if int(boss.phase)==2:platform_timers[2020.]=2.1
 			else:
 				CampaignBossPressure.call_drones(self)
 			boss.attack = int(boss.attack)+1; boss.wait = 2.15-float(int(boss.phase)-1)*.25
 	else:
 		boss.wait = float(boss.wait)-dt
-		if float(boss.wait)<=0.: boss.windup = .95
+		if float(boss.wait)<=0.:CampaignBossPressure.arm_warning(self)
 
 func step_bullets(dt: float) -> void:
 	var continuing:=state=="continue_offer"

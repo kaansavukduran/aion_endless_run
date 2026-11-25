@@ -52,6 +52,15 @@ func run():
  var catalogue:=CampaignCatalog.new()
  for variant in 8:
   npc.variant=variant
+  var registered: Array=CampaignCatalog.KEEPERS_WALK.data.frames[variant]
+  var face_x:=float(registered[0].face[0])-float(registered[0].origin[0])
+  for frame in 6:
+   var cel: Dictionary=registered[frame]
+   var pose: Dictionary=catalogue.pose("rescue-npcs",variant,frame+6)
+   var height: float=pose.texture.get_height()
+   var bottom: float=pose.texture.get_image().get_used_rect().end.y
+   check(absf(float(pose.offset.y)+bottom*float(pose.size.y)/height)<.02,"Keeper walk cel keeps its visible foot on the ground")
+   check(is_equal_approx(float(cel.face[0])-float(cel.origin[0]),face_x),"Keeper walk cel keeps the face stable relative to its foot pivot")
   for semantic in [-1,1]:
    npc.x=600.;npc.home_x=600.;npc.y=0.;npc.phase='free';npc.free_age=.2;npc.facing=semantic;npc.roam_clock=0.;people.pits.clear()
    var old_x: float=npc.x
@@ -77,9 +86,14 @@ func run():
  people.player=Vector2(600,0);people.step(.05)
  check(str(npc.phase)=='thanks','Real freed-NPC contact enters thanks before departure')
  check(-AionCampaignView.npc_draw_direction(int(npc.facing))==int(npc.facing),'Thanks faces the contacted hero using the same authored source convention')
+ var gift_landing:=CampaignRescue.gift_landing(people,npc)
+ var bag:=Vector2(float(npc.x)-25.,float(npc.y)-48.)
+ check(CampaignRescue.gift_arc(bag,gift_landing,0.)==bag and CampaignRescue.gift_arc(bag,gift_landing,1.)==gift_landing,"The drawn gift travels continuously from the bag to the exact collection point")
  people.player.x=200.
  for i in 42:people.step(.05)
  check(str(npc.phase)=='departed' and people.pickups.any(func(item):return str(item.id)==str(npc.id)+':supply'),'Bag item stays in the world when the thanked NPC starts leaving')
+ var gift: Dictionary=people.gift_drops[npc.id]
+ check(Vector2(float(gift.x),float(gift.y))==gift_landing,"The pickup spawns at the shown destination and does not jump on handover")
  for i in 3:
   var old_x: float=npc.x;people.step(.05)
   check(float(npc.x)<old_x and int(npc.facing)==-1,'Departing NPC really walks left, not backwards')

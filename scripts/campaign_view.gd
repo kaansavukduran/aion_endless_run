@@ -2,6 +2,7 @@ class_name AionCampaignView
 extends Node2D
 
 const NPC_HEIGHT_RATIO := 1.75
+const NPC_SATCHELS := [Vector2(28,99),Vector2(30,87),Vector2(28,80),Vector2(32,82),Vector2(29,85),Vector2(30,79),Vector2(28,76),Vector2(32,87)]
 
 var host
 var world: AionCampaignWorld
@@ -226,8 +227,7 @@ func draw_world() -> void:
 		else:
 			# Every actual special weapon/support has its own original silhouette.
 			# This is a registered static drawing, not a fabricated animation count.
-			var pickup_art: String={"heal":"grenade","repair":"grenade","shield":"power"}.get(str(item.kind),str(item.kind))
-			draw_pose(item_bank.pose(pickup_art),p)
+			draw_pose(item_bank.pose(str(item.kind)),p)
 			if str(item.kind) in ["heal","repair"]:
 				caption("+1" if item.kind=="heal" else "+2",at(p)+Vector2(-9.,-24.),14)
 	for e in world.enemies:
@@ -279,7 +279,9 @@ func draw_world() -> void:
 		if (bool(e.mini) or bool(e.get("heavy",false))) and not bool(e.defeated):small_health(at(p+Vector2(-35,-130)),70,float(e.hp)/float(e.max_hp))
 	if bool(world.boss.active) or world.completed:
 		var phase: int=2 if world.completed else clampi(int(world.boss.phase)-1,0,2)
-		var row: int=phase*4+(3 if world.completed else (1 if float(world.boss.windup)>0. else (2 if float(world.boss.wait)>.8 else 0)))
+		var attacking: bool=float(world.boss.windup)>0. or float(world.boss.get("dash",0.))>0. or float(world.boss.get("echo_wait",0.))>0.
+		var recovering: bool=float(world.boss.get("recover",0.))>0. or float(world.boss.wait)>.8
+		var row: int=phase*4+(3 if world.completed else (1 if attacking else (2 if recovering else 0)))
 		var frame: int=clampi(int(world.victory_time/1.2*6),0,5) if world.completed else posmod(int(float(world.boss.clock)*8),6)
 		if not host.motion_enabled or host.options.reduced_motion:frame=3
 		var pivot:=Vector2(float(world.boss.x),float(world.boss.y))
@@ -300,6 +302,8 @@ func draw_world() -> void:
 			for side in [-1.,1.]:
 				draw_rect(Rect2(core+Vector2(side*23.-2.,-15.),Vector2(4,30)),Color("f1c681"))
 				draw_rect(Rect2(core+Vector2(-15.,side*23.-2.),Vector2(30,4)),Color("f1c681"))
+		elif not world.completed and phase==2 and attacking:
+			draw_root_core_light(pivot)
 	if CampaignVehicles.stunned(world) or (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and CampaignGround.has_floor(float(world.mount.get("floor_y",world.floor_at(float(world.mount.x)))))):
 		var p: Vector2=vehicle_draw_position()
 		var spec: Dictionary=world.vehicle_art_spec()
@@ -484,7 +488,7 @@ func draw_root_reveal(drawing: Dictionary,pivot: Vector2) -> void:
 	var source: Vector2=drawing.texture.get_size()
 	var foot:=at(pivot)
 	var tint:=Color("938987").lerp(Color.WHITE,progress)
-	draw_texture_rect_region(drawing.texture,Rect2(foot+Vector2(offset.x,-shown),Vector2(size.x,shown)),Rect2(Vector2.ZERO,Vector2(source.x,source.y*shown/size.y)),tint)
+	draw_texture_rect_region(drawing.texture,Rect2(foot+offset+Vector2(0.,size.y-shown),Vector2(size.x,shown)),Rect2(Vector2.ZERO,Vector2(source.x,source.y*shown/size.y)),tint)
 	if entering:
 		caption(host.t("arena"),Vector2(scene_w*.12,scene_h*.22),24)
 		if not host.options.reduced_motion and host.motion_enabled:
@@ -497,6 +501,25 @@ func draw_root_reveal(drawing: Dictionary,pivot: Vector2) -> void:
 func enemy_attacking(e: Dictionary) -> bool:
 	var recovering: bool=float(e.get("recover",0.))>0. and CampaignEnemies.active_time(e)<=0.
 	return float(e.windup)>0. or (not recovering and (float(e.get("flash",0.))>0. or CampaignEnemies.active_time(e)>0. or float(e.get("dash",0.))>0. or float(e.get("dive",0.))>0.))
+
+func draw_root_core_light(pivot: Vector2) -> void:
+	var core:=at(pivot+Vector2(0.,-75.))
+	var sparks: Array[Vector2]=[Vector2(-22.,8.),Vector2(-15.,-14.),Vector2(7.,-18.),Vector2(22.,-8.),Vector2(19.,17.)]
+	for socket in sparks:
+		var p:=core+socket
+		draw_rect(Rect2(p-Vector2(2.,1.),Vector2(5.,2.)),Color("f49d62"))
+		draw_rect(Rect2(p-Vector2(1.,2.),Vector2(2.,5.)),Color("ffe5a1"))
+	if host.motion_enabled and not host.options.reduced_motion:
+		for i in 5:
+			var rise:=fposmod(float(world.boss.clock)*74.+float(i*13),52.)/52.
+			var ember:=core+sparks[i]+Vector2(float(i-2)*12.,-42.)*rise
+			draw_rect(Rect2(ember.round(),Vector2(3.,4.)),Color(0.97,.57,.31,(1.-rise)*.8))
+		if float(world.boss.get("dash",0.))>0.:
+			var direction: float=world.boss.get("dash_direction",-1.)
+			for i in 5:
+				var x:=pivot.x-direction*float(82+i*18)
+				var p:=at(Vector2(x,world.floor_at(x)-5.-i*3.))
+				draw_rect(Rect2(p,Vector2(18.-i*2.,5.)),Color(.88,.46,.26,.56-i*.09))
 
 func draw_combat_cues() -> void:
 	# Critical intent stays above smoke and impacts; FX never owns attack timing.
@@ -535,15 +558,32 @@ func draw_combat_cues() -> void:
 		if not world.completed and float(world.boss.get("recover",0.))>0.:
 			var rc := at(Vector2(float(world.boss.x),float(world.boss.y)-75.))
 			draw_arc(rc,34.,0.,TAU,18,Color("9fe3c8"),3.)
-		if float(world.boss.windup)>0.:
-			var pattern:=int(world.boss.attack)%3
-			if pattern==1 or (pattern==2 and int(world.boss.phase)==3):
-				var dir: float=-1. if world.player.x<float(world.boss.x) else 1.
-				var steps:=11 if pattern==1 else 17
-				for step in range(2,steps):
-					var x:=float(world.boss.x)+dir*float(step*22)
-					var y:=world.floor_at(x)-7.
-					draw_rect(Rect2(at(Vector2(x,y)),Vector2(10.,3.)),Color("f28c6b"))
+		var echo: bool=float(world.boss.get("echo_wait",0.))>0.
+		var pattern:=int(world.boss.attack)%3
+		var winding: bool=float(world.boss.windup)>0.
+		var dash_warning: bool=winding and pattern==2 and int(world.boss.phase)==3
+		if echo or dash_warning or (winding and pattern==1):
+			var direction: float=world.boss.get("echo_direction",-1.) if echo else CampaignBossPressure.lane_direction(world)
+			var start: float=float(world.boss.x)
+			start+=direction*CampaignBossPressure.WAVE_OFFSET
+			var finish:=clampf(start+direction*CampaignBossPressure.WAVE_SPEED*CampaignBossPressure.WAVE_LIFE,0.,world.length())
+			if dash_warning:
+				finish=CampaignBossPressure.dash_destination(world,direction)+direction*CampaignBossPressure.DASH_RADIUS
+				start=float(world.boss.x)-direction*CampaignBossPressure.DASH_RADIUS
+			draw_boss_lane(start,finish,Color("fbc976") if echo else Color("f28c6b"),dash_warning)
+
+func draw_boss_lane(start: float,finish: float,colour: Color,is_charge: bool) -> void:
+	var left:=maxf(minf(start,finish),camera_x)
+	var right:=minf(maxf(start,finish),camera_x+scene_w)
+	var first:=ceili(left/18.)
+	var last:=floori(right/18.)
+	for i in range(first,last+1):
+		var x:=float(i*18)
+		var y:=world.floor_at(x)-7.
+		var p:=at(Vector2(x,y)).round()
+		if is_charge:
+			draw_rect(Rect2(p,Vector2(18.,5.)),Color(colour,.30))
+		draw_rect(Rect2(p,Vector2(10.,3.)),colour)
 
 func hero_weapon_visible() -> bool:
 	# The authored throw includes release and follow-through with an open hand.
@@ -571,9 +611,10 @@ func draw_hero_weapon(pose: Dictionary,tint: Color) -> void:
 		var weapon: Dictionary=transform.weapon
 		draw_texture_rect(M1CombatArt.weapon_texture(item_bank,str(weapon.kind)),Rect2(Vector2(weapon.offset),Vector2(weapon.size)),false)
 	draw_set_transform(Vector2.ZERO)
-	if world.shot_flash>.09 and world.melee_time<=0. and world.rescue_time<=0.:
+	if world.muzzle_flashing() and world.melee_time<=0. and world.rescue_time<=0.:
 		var end: Vector2=at(world.player+Vector2(transform.muzzle))
-		draw_rect(Rect2(end-Vector2(2,2),Vector2(4,4)),Color("fff0bf"))
+		var spec: Dictionary=CampaignWeapons.SPECS.get(world.shot_weapon,CampaignWeapons.SPECS.pistol)
+		draw_muzzle_flash(end,Vector2(transform.aim),Color(str(spec.colour)))
 
 	if world.rescue_time<=0. and world.melee_time<=0.:
 		var face: Rect2=pose.get("face_foreground",Rect2())
@@ -605,9 +646,16 @@ func draw_vehicle_barrel(machine: Dictionary,p: Vector2) -> void:
 	draw_set_transform(at(pivot),world.aim_direction.angle()+float(turret.get("rotation",0.)),Vector2.ONE)
 	draw_texture_rect(turret.texture,Rect2(Vector2(turret.offset),Vector2(turret.size)),false)
 	draw_set_transform(Vector2.ZERO)
-	if CampaignVehicles.firing(world) and world.shot_flash>.1:
+	if CampaignVehicles.firing(world) and world.muzzle_flashing():
 		var muzzle: Vector2=at(world.player+world.armed_muzzle())
-		draw_circle(muzzle,3.,Color("fff0bf"))
+		draw_muzzle_flash(muzzle,world.aim_direction,Color("b4eee6"))
+
+func draw_muzzle_flash(p: Vector2,aim: Vector2,color: Color) -> void:
+	draw_set_transform(p,aim.angle(),Vector2.ONE)
+	draw_rect(Rect2(0.,-2.,9.,4.),color)
+	draw_rect(Rect2(1.,-4.,4.,8.),color)
+	draw_rect(Rect2(0.,-1.,6.,2.),Color("fff3d2"))
+	draw_set_transform(Vector2.ZERO)
 
 func draw_special_weapon() -> void:
 	# A modular weapon attachment uses the same measured muzzle as hit physics.
@@ -669,17 +717,24 @@ func draw_npcs(mounted_front: bool) -> void:
 		var frame: int=posmod(int(world.time*2.),2) if animated else 0
 		if phase in ["free","departed"]:
 			frame=2 if CampaignRescue.clip_name(npc)=="rescue_react" else CampaignRescue.walk_frame(npc,animated)
-		elif phase=="thanks":frame=4 if age<.45 else 5
+		elif phase=="thanks":frame=4 if age<CampaignRescue.PRESENT_GIFT else 5
 		var npc_pose: Dictionary=catalogue.pose("rescue-npcs",int(npc.variant),frame)
 		var growth: float=npc_growth(int(npc.variant))
 		var npc_direction: int=npc_draw_direction(int(npc.get("facing",-1))) if phase!="bound" else 1
 		draw_pose(npc_pose,Vector2(float(npc.x),float(npc.y)),npc_direction,growth)
-		if phase=="thanks":
-			var bag_at:=Vector2(float(npc.x),float(npc.y))+Vector2(float(npc.facing)*22.,-52.)*(NPC_HEIGHT_RATIO/2.)
-			if age>=.45 and age<.9:
-				draw_pose(item_bank.pose(str(npc.gift)),bag_at+Vector2(float(npc.facing)*10.,-(age-.45)*80.),1,.6)
+		if phase=="thanks" and animated and age>=CampaignRescue.PRESENT_GIFT and age<CampaignRescue.DROP_GIFT:
+			var row:=int(npc.variant)
+			var atlas: Dictionary=CampaignCatalog.DATA.data.atlases["rescue-npcs"]
+			var coords: Array=atlas.frames[row][5].origin
+			var socket: Vector2=(NPC_SATCHELS[row]-Vector2(coords[0],coords[1]))*float(atlas.scales[row])*growth
+			var bag_at:=Vector2(float(npc.x),float(npc.y))+socket*Vector2(npc_direction,1.)
+			var progress:=inverse_lerp(CampaignRescue.PRESENT_GIFT,CampaignRescue.DROP_GIFT,age)
+			var gift:=CampaignRescue.gift_arc(bag_at,CampaignRescue.gift_landing(world,npc),progress)
+			draw_pose(item_bank.pose(str(npc.gift)),gift,1,lerpf(.6,1.,progress))
 		var p := at(Vector2(float(npc.x),float(npc.y)))
 		var label_top: float=maxf(46.,p.y+minf(-90.,float(npc_pose.offset.y)*growth-12.))
 		if phase=="thanks" and age<2.4:
 			caption(host.t("thanks"),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top),17)
-			if age>.9:caption(host.t(str(npc.gift)),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top+20.),16)
+			if age>CampaignRescue.DROP_GIFT:
+				var gift_key: String="power" if npc.gift=="shield" else str(npc.gift)
+				caption(host.t(gift_key),Vector2(clampf(p.x-48.,8.,scene_w-200.),label_top+20.),16)

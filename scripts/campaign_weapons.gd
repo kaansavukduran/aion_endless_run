@@ -57,7 +57,9 @@ static func fire(w) -> void:
 		if riding:b.hit_radius=12.
 		b.aim=aim
 		w.bullets.append(b);index+=1
-	w.shots+=1;w.fire_time=float(spec.interval);w.shot_flash=.18;w.pending_events.append("shot")
+	w.shots+=1
+	w.fire_time=float(spec.interval)
+	w.pending_events.append("shot:"+CampaignVehicles.kind(w) if riding else "shot:"+str(w.shot_weapon))
 	if w.weapon!="pistol" and not riding:
 		w.ammunition-=1
 		if w.ammunition<=0:w.weapon="pistol";w.ammunition=0

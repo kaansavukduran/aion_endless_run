@@ -53,15 +53,44 @@ func run() -> void:
 	w.step_boss(.05)
 	check(int(w.boss.phase)==2 and float(w.boss.get("shift_pause",0.))>0. and float(w.boss.beam_warning)==0.,"Boss phase shift triggers shift_pause and clears stale beam warning")
 
+	w.boss.phase=3;w.boss.hp=20;w.boss.shift_pause=0.;w.boss.attack=0;w.boss.windup=.01;w.boss.ports=[0,0]
+	w.step_boss(.02)
+	check(w.bullets.size()==5 and w.bullets.all(func(shot):return Vector2(shot.v).length()>260.),"Final-phase core fires a real salvo after both earlier ports were destroyed")
+	w.bullets.clear()
+	var origin: float=w.boss.x
+	w.player.x=origin-200.
+	w.boss.attack=1;w.boss.wait=0.
+	w.step_boss(.05)
+	w.player.x=origin+90.
+	w.boss.windup=.01;w.step_boss(.02)
+	check(float(w.boss.echo_wait)>0. and w.bullets.size()==1 and w.bullets[0].v.x<0.,"First wave follows the fixed warning lane and schedules a second")
+	var resumed:=AionCampaignWorld.new()
+	check(resumed.restore(w.snapshot()) and is_equal_approx(float(resumed.boss.get("echo_wait",0.)),float(w.boss.echo_wait)) and float(resumed.boss.get("echo_direction",0.))==-1.,"Continue preserves the remaining second-wave warning and its committed direction")
+	for tick in 12:w.step_boss(.05)
+	check(w.bullets.size()==1 and float(w.boss.echo_wait)>0.,"Echo gives a readable delay between the two evasions")
+	w.step_boss(.05)
+	check(w.bullets.size()==2 and w.bullets[1].v.x<0. and float(w.boss.echo_wait)==0.,"Second root wave fires once along the same marked lane")
+	w.bullets.clear()
+	w.player.x=origin-220.;w.boss.attack=2;w.boss.wait=0.
+	w.step_boss(.05)
+	var finish:=CampaignBossPressure.dash_destination(w,-1.)
+	w.player.x=origin+120.
+	w.boss.windup=.01;w.step_boss(.02)
+	check(float(w.boss.dash_direction)==-1.,"Charge commits to the warning direction even if the player crosses the boss")
+	for tick in 20:w.step_boss(.05)
+	check(is_equal_approx(float(w.boss.x),finish) and float(w.boss.get("recover",0.))>0.,"Charge reaches the marked endpoint and exposes the counterattack window")
+
 	w.boss.phase=3;w.boss.hp=20;w.boss.shift_pause=0.;w.boss.dash=0.04;w.boss.dash_direction=-1.
+	w.boss.recover=0.
 	CampaignBossPressure.motion(w,.05)
 	check(float(w.boss.get("recover",0.))>0.,"Phase 3 dash ends with a clear recovery punish window")
 
 	w.bullets.append({"p":Vector2(300.,-30.),"v":Vector2(-100.,0.),"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
 	w.hazards.append({"id":"arena:haz","kind":"vines","x":400.,"clock":1.,"phase":1.,"warn":false})
 	w.spawn_enemy("drone",600.,-120.,50)
+	w.boss.echo_wait=.3
 	w.damage_boss(50)
-	check(w.state=="victory" and w.completed and w.hazards.is_empty() and w.bullets.is_empty() and w.enemies[0].defeated,"Boss defeat clears enemy bullets, hazards and summoned drones cleanly")
+	check(w.state=="victory" and w.completed and w.hazards.is_empty() and w.bullets.is_empty() and w.enemies[0].defeated and float(w.boss.echo_wait)==0.,"Boss defeat clears enemy bullets, hazards, pending waves and drones cleanly")
 
 	# 5. Coyote time & jump buffer (and strict low_ceiling guard)
 	w=clean("aion");w.platforms.append(Rect2(100.,-80.,200.,20.));w.player=Vector2(298.,-80.);w.velocity=Vector2.ZERO

@@ -2,6 +2,16 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+### Kök Motoru finali · Yerel aday
+
+Taban `8bac305`, çalışma dalı `feat/mission1-finale-polish`, Godot 4.6.3. Kök Motoru’nun üçüncü evresinde kırılmış yuvalardan bağımsız çekirdek salvosu, iki uyarılı dalga ve yönü önceden belirlenen hücum var. Hücum sonrası karşılık verme süresi korunuyor. Geç kısımlardaki yer tohumu mermileri 210’dan 228’e çıktı.
+
+Silahlar ve araçlar kendi atış seslerini mermi ve namlu parlamasıyla aynı olaydan başlatıyor. Kök Motoru teması savaşta açılıyor ve zaferde sönüyor. Üç ikmal eşyası için özgün çizimler var ve bekçi hediyesi çantadan gerçek iniş konumuna gidiyor. Son sahne “Devam edecek…” kartını açıyor. Kısa ekranda %200 yazıyla puan dökümüne Ayrıntılar’dan ulaşılabiliyor. [Ses kaynakları](../assets/audio/MISSION1-MUSIC.md) · [Görsel kaynaklar](../assets/M1-ARCADE-ART-PROVENANCE.md)
+
+73 Godot test grubunda 51.954 kontrol geçti. Toplam, eşya ölçeği ve sonuç ekranı düzeltmelerinden sonra yeniden çalıştırılan testleri içeriyor. Arena başlangıcına kurulan test sahnesinde altı kahraman gerçek tuş ve fare girişleriyle üç evreyi başlangıç tabancasıyla tamamladı. Ayrı çizim sahnelerinde 970 karakter ve 48 bekçi kare/hiza kontrolü geçti. İkmal atlası önbellekten atıldığında daha önce tutulan 6.292.176 baytlık tam kaynak görüntü serbest bırakılıyor.
+
+Yerel web paketi 0.57.5 `99d8af58a4519ebf`. 13 dosyanın boyutu ve SHA-256 özeti doğrulandı. Chromium’da son evre için hazırlanmış kontrol noktası normal Sürdür düğmesiyle açıldı. Son evre tuş/fareyle tamamlandı. WebAudio çıkışında boss müziği ölçüldü. Dikey pencereye geçiş, bitiş kartı ve skor kaydı doğrulandı. Firefox’ta normal girişten sonra dikey ve yatay dokunmatik ateş ve zıplama geçti. Başlangıçtan yapılan ayrı Chromium koşusu süre sınırında Kırık İskele’deydi. Canlı Pages kontrolünde 0.57.5 `eb9d94d515335102` görünüyordu. Fiziksel telefon ve kol testi ile kullanıcı kabulü bekliyor.
+
 ### Güncel durum · Mission 1 teknik adayı
 
 AIONIA v1.7 bu turda canlı standart belgesinden okundu. Drive’daki 21 Kasım tarihli Neon devam ve oynanış devri temel alındı. Eski 0.48 paketi zaten sürüm ağacında bulunduğu için yeniden aktarılmadı.

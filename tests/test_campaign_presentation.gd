@@ -23,6 +23,13 @@ func run() -> void:
 	check(game.presentation_stage=="boss_reveal" and game.presentation_time==intro_time,"Rotation does not restart the boss presentation")
 	game._input(joy(JOY_BUTTON_A))
 	check(game.presentation_stage=="" and game.world.state=="playing" and game.world.boss.engaged,"Gamepad confirmation skips into the active boss encounter")
+	for locale in ["tr","en"]:
+		game.language=locale;game.menu_kind="outro";game.outro_step=0;game.build_ui()
+		game.buttons.front().pressed.emit()
+		var ending: String="Devam edecek…" if locale=="tr" else "To be continued…"
+		check(game.menu_kind=="outro" and game.buttons.front().text==game.t("report") and game.menu.find_children("*","Label",true,false).any(func(label):return label.text==ending),"Final story page ends in the localized continuation card")
+		game.buttons.front().pressed.emit()
+		check(game.menu_kind=="complete" and game.menu.find_children("*","Label",true,false).any(func(label):return label.text==ending),"Mission report retains the continuation line for "+locale)
 	game.begin_new();check(game.menu_kind=="" and game.presentation_stage=="" and game.world.section=="shore","Restart goes directly to the first encounter")
 	game.world.weapon="heavy";game.world.ammunition=7;game.world.attempts_remaining=2;game.world.rescued.append("shore:keeper")
 	game.update_hud()
@@ -43,6 +50,19 @@ func run() -> void:
 					if kind=="continue_offer":
 						check(game.menu.position==Vector2(12.,12.) and game.menu.size.x<game.view_w*.8 and game.menu.size.y<game.view_h*.5,"Continue stays compact in the top-left")
 					for button in game.buttons:check(area.encloses(button.get_global_rect()),"Actual action fits: "+button.text)
+	# A won run with every optional summary row used to clip the replay button
+	# at 200% on a nearly square window.
+	root.size=Vector2i(700,701);await process_frame;game.resize()
+	game.options.text_scale=2.;game.new_best=true;game.world.completed=true
+	game.world.rescued.assign(["a","b","c","d","e","f"])
+	game.world.score=99999;game.world.awarded["mission:1"]=true;game.menu_kind="complete"
+	for locale in GameText.LANGUAGES:
+		game.language=locale;game.build_ui();await process_frame;await process_frame;await process_frame
+		var area:=Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h))
+		check(area.encloses(game.menu.get_global_rect()),"Full clear fits at 200% in a near-square viewport: "+locale)
+		check(game.report_lines().has(game.result_breakdown()),"Compact summary still exposes the full score breakdown in Details")
+		for button in game.buttons:check(area.encloses(button.get_global_rect()),"Final action fits without scroll: "+button.text)
+	game.world.completed=false;game.world.rescued.clear();game.world.awarded.clear();game.new_best=false
 	# Junctions share the real HUD rather than presenting a choice dialog.
 	for section in CampaignRoutes.FORKS:
 		game.world.load_section(section);game.menu_kind="";game.presentation_stage="";game.build_ui();await process_frame;await process_frame

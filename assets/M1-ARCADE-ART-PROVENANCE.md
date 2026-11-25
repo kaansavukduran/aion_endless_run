@@ -16,3 +16,5 @@ python3 packaging/draw_m1_arcade_art.py /tmp/aion-arcade-cels
 ```
 
 To repack the portrait atlas, add `--portraits OPEN.png HALF.png CLOSED.png` with the three registered 1024 × 1536 source mosaics in reading order. Ordinary builds use the packed atlas.
+
+`campaign-field-supplies.png` contains three original, transparent 32 × 32 cels in one row. From left to right they show a waxed-canvas field dressing, a copper repair case with a wrench, and a purple capacitor for the existing power-shot reward. The same cels appear in the keeper handover and on the ground. The mouth of each keeper's satchel is registered against its original handover cel. The reward lands at the same position used by the collision check.

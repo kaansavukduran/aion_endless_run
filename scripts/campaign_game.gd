@@ -11,7 +11,25 @@ const GRENADE_SOUNDS := {
 	"grenade_blast":preload("res://assets/audio/grenade-blast.wav"),
 	"hero_roll":preload("res://assets/audio/hero-roll.wav"),
 	"hero_tongue":preload("res://assets/audio/hero-tongue.wav"),
-	"hero_contact":preload("res://assets/audio/hero-contact.wav")
+	"hero_contact":preload("res://assets/audio/hero-contact.wav"),
+	"boss_charge_warning":preload("res://assets/audio/root-charge.wav")
+}
+const WEAPON_SOUNDS := {
+	"pistol":preload("res://assets/audio/fire-pistol.wav"),
+	"heavy":preload("res://assets/audio/fire-heavy.wav"),
+	"scatter":preload("res://assets/audio/fire-scatter.wav"),
+	"arc":preload("res://assets/audio/fire-arc.wav"),
+	"beam":preload("res://assets/audio/fire-beam.wav"),
+	"disc":preload("res://assets/audio/fire-disc.wav"),
+	"harpoon":preload("res://assets/audio/fire-harpoon.wav"),
+	"seeker":preload("res://assets/audio/fire-seeker.wav"),
+	"spore":preload("res://assets/audio/fire-spore.wav"),
+	"trap":preload("res://assets/audio/fire-trap.wav"),
+	"nova":preload("res://assets/audio/fire-nova.wav"),
+	"skimmer":preload("res://assets/audio/fire-skimmer.wav"),
+	"wind":preload("res://assets/audio/fire-wind.wav"),
+	"shell":preload("res://assets/audio/fire-shell.wav"),
+	"drill":preload("res://assets/audio/fire-drill.wav")
 }
 var world := AionCampaignWorld.new()
 var impact_hold := 0.
@@ -67,6 +85,7 @@ var audio_enabled := true
 var motion_enabled := true
 var audio_volume := .45
 var voices: Array[AudioStreamPlayer] = []
+var weapon_voice: AudioStreamPlayer
 var sound_cache: Dictionary = {}
 static var ambient_cache: Dictionary = {}
 var ambient: AudioStreamPlayer
@@ -332,35 +351,36 @@ func build_menu() -> void:
 			action(t("restart"),begin_new,true).name="CampaignRestart"
 			action(t("back"),return_main)
 		"complete":
+			var compact: bool=options.text_scale>1.5 and view_h<760.
 			result_score=paragraph("",28)
 			result_score.name="CampaignResultScore";column.add_child(result_score)
 			update_result_score(0.)
 			var rescues:=world.life_rescues()
-			var rescue_points:=rescues*AionCampaignWorld.KEEPER_BONUS
-			var tally_bonus:=AionCampaignWorld.CLEAR_BONUS+rescue_points
-			if world.awarded.has("mission:1") and world.score>=tally_bonus:
-				column.add_child(paragraph(t("field_points")+" %d · "%(world.score-tally_bonus)+t("clear_bonus")+" %d · "%AionCampaignWorld.CLEAR_BONUS+t("rescue_bonus")+" %d"%rescue_points,16))
 			if world.losses==0 and rescues>=3:column.add_child(paragraph(t("rank_perfect" if rescues>=6 else "rank_great"),21))
-			column.add_child(paragraph(t("life_rescues")+" %d · "%world.life_rescues()+t("elapsed")+" "+elapsed_time(world.time)+" · "+t("continue_count")+" %d"%world.continues_used,18))
-			if not world.route.is_empty() and options.text_scale<=1.5:
-				column.add_child(paragraph(t("route")+": "+" → ".join(world.route.map(func(s):return t(s))),16))
-			if new_best:column.add_child(paragraph(t("new_best"),17))
+			if not compact:
+				var tally:=result_breakdown()
+				if not tally.is_empty():column.add_child(paragraph(tally,16))
+				column.add_child(paragraph(t("life_rescues")+" %d · "%rescues+t("elapsed")+" "+elapsed_time(world.time)+" · "+t("continue_count")+" %d"%world.continues_used,18))
+				if not world.route.is_empty() and options.text_scale<=1.5:
+					column.add_child(paragraph(t("route")+": "+" → ".join(world.route.map(func(s):return t(s))),16))
+				if new_best:column.add_child(paragraph(t("new_best"),17))
+			column.add_child(paragraph(t("to_be_continued"),18))
 			var replay:=action(t("restart"),begin_new,true);replay.name="CampaignReplay"
 			var details:=action(t("details"),func():detail_page=0;menu_kind="result_details";build_ui());details.name="CampaignReportDetails"
 			var back:=action(t("back"),return_main);back.name="CampaignReportMain"
-			if not portrait and view_w>=960.:
+			if (not portrait and view_w>=960.) or compact:
 				var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);column.add_child(controls)
-				for button in [replay,details,back]:
+				for button in ([details,back] if portrait else [replay,details,back]):
 					button.reparent(controls);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		"result_details":build_report_details()
 		"settings":build_settings()
 		"outro":
-			var sentences: PackedStringArray=t("won_text").split(". ")
-			var message: String=sentences[clampi(outro_step,0,sentences.size()-1)]
-			column.add_child(paragraph(message))
-			action(t("next"),func():
+			var pages: Array[String]=[t("won_text"),t("to_be_continued")]
+			var last_page:=outro_step>=pages.size()-1
+			column.add_child(paragraph(pages[mini(outro_step,pages.size()-1)],26 if last_page else 20))
+			action(t("report" if last_page else "next"),func():
 				outro_step+=1
-				if outro_step>=sentences.size():
+				if outro_step>=pages.size():
 					menu_kind="complete";result_elapsed=0.;result_tick=-1
 				build_ui(),true)
 			action(t("back"),return_main)
@@ -404,6 +424,12 @@ func menu_back() -> bool:
 func elapsed_time(seconds: float) -> String:
 	return "%02d:%02d"%[int(seconds)/60,int(seconds)%60]
 
+func result_breakdown() -> String:
+	var rescue_points:=world.life_rescues()*AionCampaignWorld.KEEPER_BONUS
+	var tally_bonus:=AionCampaignWorld.CLEAR_BONUS+rescue_points
+	if not world.awarded.has("mission:1") or world.score<tally_bonus:return ""
+	return t("field_points")+" %d · "%(world.score-tally_bonus)+t("clear_bonus")+" %d · "%AionCampaignWorld.CLEAR_BONUS+t("rescue_bonus")+" %d"%rescue_points
+
 func report_lines() -> Array[String]:
 	var gun_names: Array=[]
 	var vehicle_names: Array=[]
@@ -420,6 +446,10 @@ func report_lines() -> Array[String]:
 		t("keepers")+": "+str(world.rescued.size())+" · "+t("arena")+": "+t("won"),
 		old("best")+": %05d"%int(saved.get("best_score",world.score)),
 		t("fastest")+": "+elapsed_time(float(record.get("time",world.time)))+" · "+t("best_rescues")+": "+str(record.get("rescues",world.rescued.size()))]
+	var tally:=result_breakdown()
+	if not tally.is_empty():values.append(tally)
+	values.append(t("life_rescues")+" %d · "%world.life_rescues()+t("continue_count")+" %d"%world.continues_used)
+	if new_best:values.append(t("new_best"))
 	# Long inventories are individual facts, so ten weapons cannot create one
 	# unbounded paragraph at 200% text in a short landscape viewport.
 	for group in [["used_weapons",gun_names],["used_vehicles",vehicle_names],["rescued_roles",roles_text]]:
@@ -990,7 +1020,8 @@ func _process(dt: float) -> void:
 		if event in ["vehicle_impact","vehicle_wreck"]:
 			if event=="vehicle_impact":release_all()
 			sound("hurt" if event=="vehicle_impact" else "blast")
-		if event in ["shot","melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","hive_drop","hive_splash","guardian","boss_attack","boss_port","boss_wave","boss_beam","complete","checkpoint","enemy","armour_hit"]:sound(event)
+		if event.begins_with("shot:"):sound_weapon(event.trim_prefix("shot:"))
+		elif event in ["melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","hive_drop","hive_splash","guardian","boss_attack","boss_port","boss_wave","boss_beam","boss_charge_warning","complete","checkpoint","enemy","armour_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	var old_camera:=Vector2(view.camera_x,view.camera_y)
@@ -1033,6 +1064,7 @@ func update_hud() -> void:
 		var boss_cue: String=""
 		var pattern:=int(world.boss.attack)%3
 		if float(world.boss.get("beam_warning",0.))>0.:boss_cue=" · "+t("boss_beam_move")
+		elif float(world.boss.get("echo_wait",0.))>0.:boss_cue=" · "+t("boss_echo")
 		elif float(world.boss.windup)>0.:
 			if pattern==1:boss_cue=" · "+t("boss_wave_jump")
 			elif pattern==2 and int(world.boss.phase)==3:boss_cue=" · "+t("boss_dash")
@@ -1085,6 +1117,7 @@ func update_touch_context(item: AionCampaignTouch,active_controls: bool) -> void
 func update_ambient() -> void:
 	if not audio_enabled:
 		if ambient_started and is_instance_valid(ambient):ambient.stop()
+		if is_instance_valid(weapon_voice) and weapon_voice.playing:weapon_voice.stop()
 		ambient_started=false
 		return
 	var key: String=world.section if world.section in ["water","roots"] else "forest"
@@ -1104,11 +1137,23 @@ func update_ambient() -> void:
 				track.loop_end=int(track.get_length()*track.mix_rate)
 				ambient_cache[key]=track
 		ambient.stream=ambient_cache[key];ambient_key=key
-	ambient.volume_db=linear_to_db(maxf(.001,audio_volume*.20))
+	var music_gain:=.23 if key=="boss-battle" else .20
+	if world.completed:music_gain*=1.-smoothstep(0.,1.2,world.victory_time)
+	ambient.volume_db=linear_to_db(maxf(.001,audio_volume*music_gain))
 	# Web sample playback does not provide a reliable frame-by-frame playing
 	# signal for a paused/looping source. Start once at a track/unmute boundary.
 	if not ambient_started:ambient.play();ambient_started=true;ambient_starts+=1
 	ambient.stream_paused=menu_kind!="" or world.state not in ["playing","victory"]
+
+func sound_weapon(kind: String) -> void:
+	if not audio_enabled:return
+	if not is_instance_valid(weapon_voice):
+		weapon_voice=AudioStreamPlayer.new()
+		weapon_voice.playback_type=AudioServer.PLAYBACK_TYPE_STREAM
+		add_child(weapon_voice)
+	weapon_voice.stream=WEAPON_SOUNDS.get(kind,WEAPON_SOUNDS.pistol)
+	weapon_voice.volume_db=linear_to_db(maxf(.001,audio_volume*.75))
+	weapon_voice.play()
 
 func sound(event: String) -> void:
 	if not audio_enabled:return
@@ -1122,7 +1167,7 @@ func sound(event: String) -> void:
 		if GRENADE_SOUNDS.has(event):sound_cache[event]=GRENADE_SOUNDS[event]
 		else:
 			var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else (2400 if event in ["enemy","armour_hit"] else 1400)
-			var pitch: float={"shot":520.,"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"gift_drop":780.,"npc_contact":920.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"boss_port":310.,"boss_wave":68.,"boss_beam":424.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.,"continue_tick":385.}.get(event,660.)
+			var pitch: float={"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"gift_drop":780.,"npc_contact":920.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"boss_port":310.,"boss_wave":68.,"boss_beam":424.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.,"continue_tick":385.}.get(event,660.)
 			if event.begins_with("boss_"):count=4500 if event=="boss_wave" else 2800
 			if event=="enemy":pitch=180.
 			elif event=="armour_hit":pitch=1140.
@@ -1131,12 +1176,13 @@ func sound(event: String) -> void:
 			elif event=="hive_drop":pitch=195.;count=2100
 			elif event=="hive_splash":pitch=95.;count=3500
 			elif event=="tally_tick":pitch=990.;count=850
+			bytes.resize(count*2)
 			for i in count:
 				var phase: float=float(i)/22050.;var envelope: float=pow(1.-float(i)/count,2.)
 				var sample:=sin(phase*pitch*TAU*(1.-float(i)/count*.4))*envelope*.22
 				if event=="enemy":sample=(sin(phase*180.*TAU)*.6+sin(phase*73.*TAU)*.4)*envelope*.26
 				elif event=="armour_hit":sample=(sin(phase*1140.*TAU)*.6+sin(phase*1733.*TAU)*.4)*envelope*.20
-				bytes.append_array(PackedByteArray([int(sample*32700.)&255,(int(sample*32700.)>>8)&255]))
+				bytes.encode_s16(i*2,int(sample*32700.))
 			var stream:=AudioStreamWAV.new();stream.format=AudioStreamWAV.FORMAT_16_BITS;stream.mix_rate=22050;stream.data=bytes;sound_cache[event]=stream
 	for voice in voices:
 		if not voice.playing:voice.stream=sound_cache[event];voice.volume_db=linear_to_db(maxf(.001,audio_volume));voice.play();break

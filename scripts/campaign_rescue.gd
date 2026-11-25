@@ -10,13 +10,15 @@ const GIFTS := ["heavy","repair","beam","shield","scatter","points","arc","grena
 const CUT_SECONDS := .6
 const CONTACT := .3
 const WALK_STEP := 13.
+const PRESENT_GIFT := .45
+const DROP_GIFT := .90
 ## Explicit NPC animation/state contract for runtime & Sol 6.2 art handoff.
 const NPC_ANIM_SPEC := {
 	"idle_bound":{"phase":"bound","frames":[0,1],"loop":true,"foot":[0,0],"body":[0,-40],"event":"cut_or_shot"},
 	"rescue_react":{"phase":"free","frames":[2],"loop":false,"until":0.18,"foot":[0,0],"body":[0,-40],"event":"rescue"},
 	"free_roam":{"phase":"free","frames":[6,7,8,9,10,11],"loop":true,"foot":[0,0],"body":[0,-40],"event":"npc_contact"},
-	"salute_thanks":{"phase":"thanks","frames":[4],"loop":false,"until":0.45,"foot":[0,0],"body":[0,-40],"satchel":[22,-52],"event":"npc_contact"},
-	"drop_gift":{"phase":"thanks","frames":[5],"loop":false,"from":0.45,"until":1.7,"foot":[0,0],"body":[0,-40],"satchel":[22,-52],"event":"gift_drop"},
+	"salute_thanks":{"phase":"thanks","frames":[4],"loop":false,"until":PRESENT_GIFT,"foot":[0,0],"body":[0,-40],"event":"npc_contact"},
+	"drop_gift":{"phase":"thanks","frames":[5],"loop":false,"from":PRESENT_GIFT,"until":1.7,"foot":[0,0],"body":[0,-40],"event":"gift_drop"},
 	"depart_run":{"phase":"departed","frames":[6,7,8,9,10,11],"loop":true,"until":4.8,"foot":[0,0],"body":[0,-40],"event":"courier_cover"}
 }
 
@@ -24,7 +26,7 @@ static func clip_name(n: Dictionary) -> String:
 	var phase: String=str(n.get("phase","free" if bool(n.get("freed",false)) else "bound"))
 	if phase=="bound":return "idle_bound"
 	if phase=="free":return "rescue_react" if float(n.get("free_age",0.))<.18 else "free_roam"
-	if phase=="thanks":return "salute_thanks" if float(n.get("thank_age",0.))<.45 else "drop_gift"
+	if phase=="thanks":return "salute_thanks" if float(n.get("thank_age",0.))<PRESENT_GIFT else "drop_gift"
 	return "depart_run"
 
 static func populate(w) -> void:
@@ -139,13 +141,21 @@ static func handover(w,n: Dictionary) -> void:
 	if w.awarded.has(id+":gift") or w.taken.has(id+":supply") or w.gift_drops.has(id):return
 	# A visible bag extraction produces a real item. Thanks/contact alone is
 	# not a weapon/ammunition grant; only touching this pickup claims it.
+	var landing:=gift_landing(w,n)
+	var item: Dictionary={"id":id+":supply","kind":str(n.gift),"x":landing.x,"y":landing.y,"rescue_id":id,"role":str(n.role),"age":0.,"from_bag":true}
+	w.gift_drops[id]=item.duplicate(true);w.pickups.append(item)
+	w.pending_events.append("gift_drop")
+
+static func gift_landing(w,n: Dictionary) -> Vector2:
 	var direction: int=int(n.get("facing",-1))
 	var x: float=float(n.x)+direction*100.
 	if not has_support(w,n,x):x=float(n.x)+direction*75.
 	if not has_support(w,n,x):x=float(n.x)
-	var item: Dictionary={"id":id+":supply","kind":str(n.gift),"x":x,"y":(w.floor_at(x) if str(n.get("secret","")).is_empty() else float(n.y))-25.,"rescue_id":id,"role":str(n.role),"age":0.,"from_bag":true}
-	w.gift_drops[id]=item.duplicate(true);w.pickups.append(item)
-	w.pending_events.append("gift_drop")
+	return Vector2(x,(w.floor_at(x) if str(n.get("secret","")).is_empty() else float(n.y))-25.)
+
+static func gift_arc(bag: Vector2,landing: Vector2,progress: float) -> Vector2:
+	var t:=clampf(progress,0.,1.)
+	return bag.lerp(landing,t)-Vector2(0.,56.*t*(1.-t))
 
 static func on_gift_collected(w,item: Dictionary) -> void:
 	var id: String=str(item.rescue_id)
@@ -195,7 +205,7 @@ static func step(w,dt: float) -> void:
 				w.greeted[str(n.id)]=true;w.pending_events.append("npc_contact")
 		elif phase in ["thanks","departed"]:
 			n.thank_age=float(n.get("thank_age",0.))+dt
-			if phase=="thanks" and float(n.thank_age)>=.9:handover(w,n)
+			if phase=="thanks" and float(n.thank_age)>=DROP_GIFT:handover(w,n)
 			if phase=="thanks" and float(n.thank_age)>1.7:n.phase="departed"
 			if str(n.phase)=="departed" and float(n.thank_age)<4.8:
 				var next: float=float(n.x)-84.*dt

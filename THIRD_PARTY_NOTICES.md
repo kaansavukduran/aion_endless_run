@@ -27,7 +27,7 @@ Lexend, SIL Open Font License 1.1. The unchanged local font and its license rema
 
 Godot Engine 4.6.3, MIT license, https://godotengine.org/license/ . Native and web exports embed the Godot runtime and its third-party components. Full engine copyright/license notices: https://github.com/godotengine/godot/blob/4.6.3-stable/COPYRIGHT.txt and https://github.com/godotengine/godot/blob/4.6.3-stable/LICENSE.txt . A copy is included as `assets/GODOT-COPYRIGHT.txt` and `assets/GODOT-LICENSE.txt` in this source and game resources.
 
-Original procedural scenery and synthesized game sounds are part of this project's MPL-2.0 source. No downloaded audio or paid asset pack is used.
+Original procedural scenery, synthesized sound effects and the Root Engine score are part of this project's MPL-2.0 source. Mission 1 also includes MintoDog's CC0 Forest Stage track. [Mission 1 soundtrack and license](assets/audio/MISSION1-MUSIC.md)
 
 ## Companion runner atlas (0.2.0)
 

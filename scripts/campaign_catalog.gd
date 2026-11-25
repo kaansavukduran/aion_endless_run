@@ -2,15 +2,13 @@ class_name CampaignCatalog
 extends RefCounted
 const DATA=preload("res://assets/CAMPAIGN-EXPANSION-PROVENANCE.json")
 const KEEPERS_WALK=preload("res://assets/KEEPERS-WALK-PROVENANCE.json")
-# 0.39.0: Process-wide shared caches prevent duplicate WebAssembly RAM/CPU spikes on retries & scene switches.
-static var images: Dictionary={}
+# Share isolated poses across retries and scene switches.
 static var cache: Dictionary={}
 func pose(key: String,row: int,frame: int) -> Dictionary:
 	var a: Dictionary=DATA.data.atlases[key]
 	var walking:=key=="rescue-npcs" and frame>=6
 	if walking:a=KEEPERS_WALK.data
 	var source_frame: int=posmod(frame-6,6) if walking else clampi(frame,0,a.frames[row].size()-1)
-	var image_key: String="keepers-walk" if walking else key
 	var id:=key+":"+str(row)+":"+str(frame)
 	if cache.has(id):return cache[id]
 	var sheet_image: Image=RunnerSourcePixels.sheet("res://"+str(a.path))
