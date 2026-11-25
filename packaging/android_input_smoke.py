@@ -93,20 +93,24 @@ for code in ['tr','en']:
  latest('AION_UI ',lambda state:state['page']=='main' and state['language']==code)
  capture('main-'+code)
 enter('eren')
-jump=hold_action('jump',2300)
+# The software emulator can present a state only every few hundred
+# milliseconds. Leave time to sample the charge pose and capture it before
+# the real touch release. The gameplay's one-second hold remains unchanged.
+CHARGE_HOLD_MS=5200
+jump=hold_action('jump',CHARGE_HOLD_MS)
 try:
  arcade_state(lambda state:state['charging'] and state['charge_ratio']>.1 and state['grounded'])
-finally:jump.wait(timeout=8)
+finally:jump.wait(timeout=12)
 arcade_state(lambda state:not state['grounded'] and state['player'][1]<-10)
 capture('eren')
 check(True,'Native Eren charges and releases a real jump')
 main()
 enter('rabbit')
-jump=hold_action('jump',2400)
+jump=hold_action('jump',CHARGE_HOLD_MS)
 try:
  arcade_state(lambda state:state['charging'] and state['charge_ratio']>.1 and state['grounded'])
  capture('rabbit-charge')
-finally:jump.wait(timeout=8)
+finally:jump.wait(timeout=12)
 arcade_state(lambda state:not state['grounded'] and state['player'][1]<-10)
 capture('rabbit-leap')
 check(True,'Native Ayça charges and releases a real jump')
