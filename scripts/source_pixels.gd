@@ -43,7 +43,7 @@ static func decode(path: String) -> Image:
 ## their own full-sheet copies: one decode per sheet, at most SHEET_LIMIT
 ## sheets resident (least recently used is released and decoded again later).
 ## Sheets are read-only for every caller.
-const SHEET_LIMIT := 8
+const SHEET_LIMIT := 12
 static var sheets: Dictionary = {}
 static var recent: Array[String] = []
 static var section_paths: Dictionary = {}
@@ -64,15 +64,82 @@ static func sheet(path: String) -> Image:
 		section_paths[current_section][path]=true
 	return sheets[path]
 
-## Called while a section loads behind the travel fade: decode the sheets this
-## section used before (retry, Continue, replay) so play does not hitch on them.
+const SECTION_SHEETS := "res://assets/SECTION-SHEETS.json"
+static var known_sections: Dictionary = {}
+
+## Hero art is drawn every frame, so it stays resident without warm-up.
+static func hero_sheet(path: String) -> bool:
+	var file: String=path.get_file()
+	return file.begins_with("m1-redraw-") or file.begins_with("m1-body-") or file.begins_with("m1-actions-") or file in ["polish-aion.png","polish-sheep.png"]
+
+## Called while a section loads behind the travel fade: decode the world sheets
+## the section is known to draw (generated list) plus any it used earlier in
+## this session, so the first appearance of an enemy or prop does not hitch.
 static func enter_section(id: String) -> void:
 	current_section=id
-	var used: Dictionary=section_paths.get(id,{})
-	var warm: Array=used.keys().slice(maxi(0,used.size()-SHEET_LIMIT))
-	for path in warm:sheet(path)
+	if known_sections.is_empty() and ResourceLoader.exists(SECTION_SHEETS):
+		var data=load(SECTION_SHEETS).data
+		if data is Dictionary and data.get("sections") is Dictionary:known_sections=data.sections
+	var warm: Array=[]
+	for path in known_sections.get(id,[]):
+		if ResourceLoader.exists(str(path)):warm.append(str(path))
+	for path in section_paths.get(id,{}):
+		if not path in warm:warm.append(path)
+	for path in warm.slice(maxi(0,warm.size()-SHEET_LIMIT)):sheet(path)
 
 static func resident_bytes() -> int:
 	var total:=0
 	for decoded in sheets.values():total+=decoded.get_data_size()
 	return total
+
+## Silhouette runs. In the source tree every frame stores its runs as a JSON
+## list of [y, x, length] triples (the registered, reviewable form). Exported
+## builds store them packed: the export plugin (addons/aion_runs_pack) moves
+## every list into one little-endian uint16 blob per JSON file and leaves a
+## short "FILE.json:offset:count" reference, so startup parses ~9x less JSON.
+## Banks call runs() at the moment a frame is first cut, in either form.
+const RUNS_DIR := "res://assets/"
+const RUNS_SUFFIX := ".runs"
+static var run_blobs: Dictionary = {}
+
+static func runs(frame: Dictionary) -> Array:
+	var value=frame.runs
+	if value is Array:return value
+	var parts: PackedStringArray=str(value).split(":")
+	var file: String=parts[0]
+	if not run_blobs.has(file):run_blobs[file]=FileAccess.get_file_as_bytes(RUNS_DIR+file+RUNS_SUFFIX)
+	var blob: PackedByteArray=run_blobs[file]
+	var at:=int(parts[1]);var result: Array=[];result.resize(int(parts[2]))
+	for i in result.size():
+		var o:=at+i*6;result[i]=[blob.decode_u16(o),blob.decode_u16(o+2),blob.decode_u16(o+4)]
+	return result
+
+## Export-time packing shared by the export plugin and the exactness test.
+## Works on the source text: each "runs" list is cut out and replaced by its
+## reference, every other byte of the file is kept exactly as registered.
+## Returns {"text": shipped JSON text, "blob": PackedByteArray}.
+static func pack_runs(text: String, file: String) -> Dictionary:
+	var blob:=PackedByteArray();var parts:=PackedStringArray();var from:=0
+	while true:
+		var key:=text.find("\"runs\"",from)
+		if key<0:break
+		var open:=key+6
+		while open<text.length() and text[open] in [" ",":","\n","\r","\t"]:open+=1
+		if open>=text.length() or text[open]!="[":
+			parts.append(text.substr(from,open-from));from=open;continue
+		var depth:=0;var close:=open
+		while close<text.length():
+			var c:=text[close]
+			if c=="[":depth+=1
+			elif c=="]":
+				depth-=1
+				if depth==0:break
+			close+=1
+		var list=JSON.parse_string(text.substr(open,close-open+1))
+		var at:=blob.size();blob.resize(at+list.size()*6)
+		for i in list.size():
+			for j in 3:blob.encode_u16(at+i*6+j*2,int(list[i][j]))
+		parts.append(text.substr(from,open-from));parts.append("\"%s:%d:%d\""%[file,at,list.size()])
+		from=close+1
+	parts.append(text.substr(from))
+	return {"text":"".join(parts),"blob":blob}

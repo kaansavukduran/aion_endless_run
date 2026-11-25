@@ -22,7 +22,7 @@ static func texture(items: ForgeItemBank,kind: String) -> Texture2D:
   var variant_sheet: Image=RunnerSourcePixels.sheet(path)
   var canvas: Array=registration.canvas_size;var bounds: Array=registration.bounds
   var isolated:=Image.create_empty(int(canvas[0]),int(canvas[1]),false,Image.FORMAT_RGBA8)
-  for run in registration.runs:
+  for run in RunnerSourcePixels.runs(registration):
    isolated.blit_rect(variant_sheet,Rect2i(int(run[1]),int(run[0]),int(run[2]),1),Vector2i(int(run[1])-int(bounds[0])+2,int(run[0])-int(bounds[1])+2))
   if int(registration.source_facing)<0:isolated.flip_x()
   cache[kind]=ImageTexture.create_from_image(isolated)
