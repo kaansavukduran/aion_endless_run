@@ -55,6 +55,17 @@ func run() -> void:
 	RunnerSourcePixels.enter_section("test_b");RunnerSourcePixels.sheets.clear();RunnerSourcePixels.recent.clear()
 	RunnerSourcePixels.enter_section("test_a")
 	check(RunnerSourcePixels.sheets.size()==RunnerSourcePixels.SHEET_LIMIT and RunnerSourcePixels.sheets.has(paths[RunnerSourcePixels.SHEET_LIMIT+2]),"Entering a known section pre-decodes its recent sheets")
+	# Generated section list: real files, within the limit, hero art excluded, warmed on entry.
+	var listed: Dictionary=load("res://assets/SECTION-SHEETS.json").data.sections
+	for section in AionCampaignWorld.STAGES:
+		check(listed.has(section),"Every Mission 1 section has a warm-up list: "+section)
+		var entries: Array=listed.get(section,[])
+		check(entries.size()<=RunnerSourcePixels.SHEET_LIMIT,"A section's warm-up list fits the resident limit: "+section)
+		for path in entries:check(ResourceLoader.exists(str(path)) and not RunnerSourcePixels.hero_sheet(str(path)),"Listed sheet exists and is world art: "+str(path))
+	RunnerSourcePixels.sheets.clear();RunnerSourcePixels.recent.clear();RunnerSourcePixels.section_paths.clear();RunnerSourcePixels.known_sections={}
+	RunnerSourcePixels.enter_section("water")
+	check(listed.water.all(func(path):return RunnerSourcePixels.sheets.has(str(path))),"Entering water pre-decodes every listed water sheet")
+	check(RunnerSourcePixels.hero_sheet("res://assets/m1-redraw-aion.png") and not RunnerSourcePixels.hero_sheet("res://assets/aionverse-flora.png"),"Hero art is recognised without catching world art named after Aion")
 	RunnerSourcePixels.current_section=""
 	# Loose budget: generous for slower CI runners; catches a return of per-frame scans.
 	w=world("water");w.player.x=w.length()*.8

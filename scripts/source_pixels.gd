@@ -43,7 +43,7 @@ static func decode(path: String) -> Image:
 ## their own full-sheet copies: one decode per sheet, at most SHEET_LIMIT
 ## sheets resident (least recently used is released and decoded again later).
 ## Sheets are read-only for every caller.
-const SHEET_LIMIT := 8
+const SHEET_LIMIT := 12
 static var sheets: Dictionary = {}
 static var recent: Array[String] = []
 static var section_paths: Dictionary = {}
@@ -64,13 +64,28 @@ static func sheet(path: String) -> Image:
 		section_paths[current_section][path]=true
 	return sheets[path]
 
-## Called while a section loads behind the travel fade: decode the sheets this
-## section used before (retry, Continue, replay) so play does not hitch on them.
+const SECTION_SHEETS := "res://assets/SECTION-SHEETS.json"
+static var known_sections: Dictionary = {}
+
+## Hero art is drawn every frame, so it stays resident without warm-up.
+static func hero_sheet(path: String) -> bool:
+	var file: String=path.get_file()
+	return file.begins_with("m1-redraw-") or file.begins_with("m1-body-") or file.begins_with("m1-actions-") or file in ["polish-aion.png","polish-sheep.png"]
+
+## Called while a section loads behind the travel fade: decode the world sheets
+## the section is known to draw (generated list) plus any it used earlier in
+## this session, so the first appearance of an enemy or prop does not hitch.
 static func enter_section(id: String) -> void:
 	current_section=id
-	var used: Dictionary=section_paths.get(id,{})
-	var warm: Array=used.keys().slice(maxi(0,used.size()-SHEET_LIMIT))
-	for path in warm:sheet(path)
+	if known_sections.is_empty() and ResourceLoader.exists(SECTION_SHEETS):
+		var data=load(SECTION_SHEETS).data
+		if data is Dictionary and data.get("sections") is Dictionary:known_sections=data.sections
+	var warm: Array=[]
+	for path in known_sections.get(id,[]):
+		if ResourceLoader.exists(str(path)):warm.append(str(path))
+	for path in section_paths.get(id,{}):
+		if not path in warm:warm.append(path)
+	for path in warm.slice(maxi(0,warm.size()-SHEET_LIMIT)):sheet(path)
 
 static func resident_bytes() -> int:
 	var total:=0
