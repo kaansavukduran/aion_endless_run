@@ -119,7 +119,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           text=Path('build/campaign-render.log').read_text()
-          assert 'RESULT: 961 campaign render checks, 0 failures' in text
+          assert 'RESULT: 970 campaign render checks, 0 failures' in text
           assert 'SCRIPT ERROR' not in text and 'FAIL:' not in text
           PY
       - uses: actions/upload-artifact@v4
