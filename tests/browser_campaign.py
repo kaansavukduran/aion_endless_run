@@ -485,7 +485,9 @@ with sync_playwright() as pw:
                 # the ordinary outro/report actions are reachable.
                 page.wait_for_function('()=>{const d=JSON.parse(document.querySelector("canvas").dataset.campaign);return !(d.presentation || d.presentation_stage) && ["outro","complete"].includes(d.menu)}',timeout=15000)
                 completed=True
-                while data()['menu']=='outro':button(text='Devam')
+                while data()['menu']=='outro':
+                    report_ready=any(b[4]=='Görev raporu' for b in data()['buttons'].values())
+                    button(text='Görev raporu' if report_ready else 'Devam')
                 page.screenshot(path=str(a.evidence/'mission-complete.png'));break
             if d['menu']:
                 keys([])

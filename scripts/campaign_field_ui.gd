@@ -272,8 +272,9 @@ static func compact_panel(host) -> bool:
 	return host.view_h<620. and host.options.text_scale>=1.5
 
 static func prepare_compact(host) -> void:
-	host.column.add_theme_constant_override("separation",6)
-	host.menu.add_theme_stylebox_override("panel",host.options.style("surface","border",10))
+	var short_screen: bool=host.view_h<560.
+	host.column.add_theme_constant_override("separation",4 if short_screen else 6)
+	host.menu.add_theme_stylebox_override("panel",host.options.style("surface","border",6 if short_screen else 10))
 
 static func build_map(host) -> void:
 	var compact:=compact_panel(host)
