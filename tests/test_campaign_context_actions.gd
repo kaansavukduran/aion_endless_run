@@ -155,6 +155,18 @@ func touch_context(g: AionCampaignGame) -> void:
 	for size in [Vector2i(1152,648),Vector2i(393,873)]:
 		root.size=size;g.resize()
 		clean(g,"armadillo")
+		var fire_rect: Rect2 = g.actions.attack.get_global_rect()
+		var jump_rect: Rect2 = g.actions.jump.get_global_rect()
+		var grenade_rect: Rect2 = g.actions.grenade.get_global_rect()
+		var context_rect: Rect2 = g.actions.context.get_global_rect()
+		check(is_equal_approx(fire_rect.get_center().x, jump_rect.get_center().x) and fire_rect.end.y < jump_rect.position.y, "Fire is centred directly above Jump at " + str(size))
+		check(is_equal_approx(context_rect.get_center().x, grenade_rect.get_center().x) and context_rect.end.y < grenade_rect.position.y and not context_rect.intersects(fire_rect), "Visible context sits separately above Grenade at " + str(size))
+		finger(g, 3, fire_rect.get_center(), true)
+		finger(g, 4, jump_rect.get_center(), true)
+		check(g.world.shots == 1 and g.world.jump_held and g.touch_actions.get(3) == "attack" and g.touch_actions.get(4) == "jump", "Aligned Fire and Jump accept two independently held touches at " + str(size))
+		finger(g, 3, fire_rect.get_center(), false)
+		finger(g, 4, jump_rect.get_center(), false)
+		clean(g,"armadillo")
 		g.world.player.y=-80.;g.update_hud()
 		check(g.actions.context.disabled and g.actions.context.caption==g.t("skill_land"),"Airborne Armadillo shows a disabled land state")
 		var disabled_point: Vector2=g.actions.context.global_position+g.actions.context.size*.5
