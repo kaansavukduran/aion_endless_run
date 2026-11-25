@@ -245,8 +245,13 @@ with sync_playwright() as playwright:
         recovered = observe("d.state==='playing' && d.character==='frog' && d.attempts===3")
         check(recovered["continues"] == 1 and recovered["shots"] == picker["shots"] and recovered["grenades"] == 5,
               "One touch buys exactly one Continue with the selected hero and no leaked attack")
-        check(recovered["taken"] == picker["taken"] and recovered["section"] == picker["section"],
-              "Continue preserves the same section and collected items")
+        # Re-entry can land next to unclaimed fruit. Once play resumes the
+        # normal pickup loop may add those claims before our next observation.
+        retained_claims = all(recovered["taken"].get(item_id) == claimed
+                              for item_id, claimed in picker["taken"].items())
+        check(retained_claims and recovered["section"] == picker["section"],
+              "Continue preserves the same section and every existing item claim")
+        evidence["entry_pickups"] = sorted(recovered["taken"].keys() - picker["taken"].keys())
         page.set_viewport_size({"width": 1280, "height": 720})
         observe("d.ui_ready && d.view[0]>d.view[1]")
         lose_three_lives()
