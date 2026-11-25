@@ -1311,7 +1311,7 @@ func update_hud() -> void:
 		var ability: String = text(("touch_ability_" if touch_mode else "ability_") + character)
 		if active_input=="gamepad":
 			ability=text("pad_ability_"+character)
-			if character!="sheep":ability=ability % gamepad.binding_name("boost" if character=="wolf" else "jump")
+			if ability.contains("%s"):ability=ability % gamepad.binding_name("boost" if character=="wolf" else "jump")
 		if portrait and character in World.CHARGE_HEROES and active_input=="gamepad":ability=gamepad.binding_name("jump")+" ↑"
 		if world.frontier.active(): ability = text("boss_hearts") % world.frontier.player_hp
 		elif character == "sheep": ability = text("flock") % world.sheep_count

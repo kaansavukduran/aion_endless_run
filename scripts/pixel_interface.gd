@@ -355,7 +355,10 @@ func characters() -> void:
 			var name_x:=side_width+8.
 			h.position_control(name_label,Vector2(name_x,2.),Vector2(tile_w-name_x-4.,tile_h-4.))
 		else:
-			h.position_control(portrait_art,Vector2(2.,2.),Vector2(tile_w-4.,maxf(2.,name_y)))
+			var art_height:=maxf(2.,name_y)
+			var art_width:=tile_w-4.
+			if not h.portrait:art_width=minf(art_width,floorf(art_height*1.32))
+			h.position_control(portrait_art,Vector2(floorf((tile_w-art_width)*.5),2.),Vector2(art_width,art_height))
 			h.position_control(name_label,Vector2(4.,name_y),Vector2(tile_w-8.,name_h))
 		if story_in_tile:
 			var motive_label:=roster_motivation(motivation,motivation_size,tile_w-16.)

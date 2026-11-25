@@ -882,7 +882,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			else:toggle_pause()
 			get_viewport().set_input_as_handled();return
 		if menu_kind!="":return
-		if event.pressed and event.physical_keycode in [KEY_A,KEY_D,KEY_LEFT,KEY_RIGHT] and not world.fire_held:
+		if event.pressed and event.physical_keycode in [KEY_A,KEY_D,KEY_LEFT,KEY_RIGHT] and not world.fire_held and not down_down:
 			mouse_aim=false
 		match event.physical_keycode:
 			KEY_A,KEY_LEFT:left_down=event.pressed
@@ -1152,6 +1152,8 @@ func update_hud() -> void:
 		elif CampaignBossPressure.core_exposed(world):boss_cue=" · "+t("boss_core")
 		objective=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+boss_cue
 		if world.notice=="boss_supply_taken" and world.notice_time>0.:objective+="\n"+t(world.notice)
+		elif CampaignBossPressure.supply_ready(world) and world.ammunition<=5 and world.player.x>CampaignBossPressure.SUPPLY_X+160.:
+			objective+="\n← "+t("boss_supply_ready")
 	if subtitle.text!=objective:
 		var objective_width:=0.
 		var objective_font:=subtitle.get_theme_font("font")
