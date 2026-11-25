@@ -510,7 +510,11 @@ with sync_playwright() as playwright:
                     # A crow that is winding up dives at the hero's current
                     # spot; a shooter that is winding up is about to fire.
                     # Those are shot first, then the nearest body.
-                    diving = [e for e in threats if e['kind'] == 'crow' and 0 < e['windup'] < .5 and abs(e['x']-x) < 300]
+                    # Crows hover ~115px above the floor; one that is winding
+                    # up, or already below that band, is diving (the dive
+                    # itself runs after the windup has reached zero).
+                    diving = [e for e in threats if e['kind'] == 'crow' and abs(e['x']-x) < 300
+                              and (0 < e['windup'] < .5 or e['y'] > y-92)]
                     charging = [e for e in threats if e['kind'] in ('lantern_scout', 'cap_lobber', 'seed') and e['windup'] > 0]
                     urgent = min(diving+charging, key=lambda e: abs(e['x']-x), default=None)
                     target = urgent or nearest
@@ -546,7 +550,7 @@ with sync_playwright() as playwright:
                     # Gnomes and beetles dash along the ground when their
                     # windup ends; be airborne as the dash arrives.
                     dash = any(e['kind'] in ('gnome', 'beetle', 'slime') and 0 < e['windup'] < .3 and abs(e['x']-x) < 190 for e in threats)
-                    if current['grounded'] and (gap or danger or dash or lower_threat or distance<112) and time_now-last_jump>.65:
+                    if current['grounded'] and (gap or danger or dash or (lower_threat and not dive) or (distance<112 and not dive)) and time_now-last_jump>.65:
                         page.keyboard.press('Space')
                         last_jump=time_now
                     keys(commands)
