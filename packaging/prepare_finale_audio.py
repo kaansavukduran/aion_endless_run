@@ -65,6 +65,18 @@ def render_effects():
     pcm(AUDIO / "root-charge.wav", alert * pulse * curve)
 
 
+def render_sprint():
+    duration = .42
+    t = np.arange(round(RATE * duration)) / RATE
+    rng = np.random.default_rng(143)
+    noise = rng.uniform(-1., 1., len(t))
+    broad = np.convolve(noise, np.ones(18)/18, mode="same")
+    sparks = (noise - np.roll(noise, 1)) * np.maximum(0., np.sin(TAU*34*t+.6))**5
+    swell = np.minimum(1., t/.025) * np.minimum(1., (duration-t)/.12) * np.exp(-3.8*t)
+    body = .19 * chirp(t, 115, -115) + .055 * chirp(t, 289, -380)
+    pcm(AUDIO / "sprint-ignite.wav", swell * (.56*broad + .09*sparks + body))
+
+
 def render_theme():
     # 16 bars at 124 BPM. The half-time B section opens into a denser reprise.
     beat = 60 / 124
@@ -149,4 +161,5 @@ def render_theme():
 
 if __name__ == "__main__":
     render_effects()
+    render_sprint()
     render_theme()

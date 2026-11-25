@@ -12,6 +12,7 @@ const GRENADE_SOUNDS := {
 	"hero_roll":preload("res://assets/audio/hero-roll.wav"),
 	"hero_tongue":preload("res://assets/audio/hero-tongue.wav"),
 	"hero_contact":preload("res://assets/audio/hero-contact.wav"),
+	"sprint_ignite":preload("res://assets/audio/sprint-ignite.wav"),
 	"boss_charge_warning":preload("res://assets/audio/root-charge.wav")
 }
 const WEAPON_SOUNDS := {
@@ -239,6 +240,7 @@ func action(value: String,callback: Callable,primary: bool=false) -> Button:
 	buttons.append(item);column.add_child(item);return item
 
 func build_ui() -> void:
+	ui.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR if options.font_mode=="system" else CanvasItem.TEXTURE_FILTER_NEAREST
 	ui_generation+=1
 	ui_ready=false
 	for child in ui.get_children():
@@ -1021,7 +1023,7 @@ func _process(dt: float) -> void:
 			if event=="vehicle_impact":release_all()
 			sound("hurt" if event=="vehicle_impact" else "blast")
 		if event.begins_with("shot:"):sound_weapon(event.trim_prefix("shot:"))
-		elif event in ["melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","hive_drop","hive_splash","guardian","boss_attack","boss_port","boss_wave","boss_beam","boss_charge_warning","complete","checkpoint","enemy","armour_hit","shield_hit"]:sound(event)
+		elif event in ["melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","sprint_ignite","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","hive_drop","hive_splash","guardian","boss_attack","boss_port","boss_wave","boss_beam","boss_charge_warning","complete","checkpoint","enemy","armour_hit","shield_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	var old_camera:=Vector2(view.camera_x,view.camera_y)

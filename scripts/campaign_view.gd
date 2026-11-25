@@ -193,14 +193,18 @@ func draw_world() -> void:
 	for gate in world.gates:
 		if float(gate.x)<camera_x-100. or float(gate.x)>camera_x+scene_w+100.:continue
 		var p := at(Vector2(float(gate.x),world.floor_at(float(gate.x))))
-		if not world.gate_closed(gate):
-			var frame:=clampi(1+int(float(gate.get("open_age",.4))*13.),1,5)
-			if not host.motion_enabled or host.options.reduced_motion:frame=5
+		var blockers: Array=world.enemies.filter(func(e):return not bool(e.defeated) and str(e.id) in gate.ids)
+		if blockers.is_empty():
+			var frame:=CampaignLockArt.opening_frame(float(gate.get("open_age",.4)),host.motion_enabled and not host.options.reduced_motion)
 			CampaignLockArt.gate(self,p,world.section,frame)
 			continue
 		CampaignLockArt.gate(self,p,world.section,0)
-		var blockers: Array=world.enemies.filter(func(e):return str(e.id) in gate.ids and not bool(e.defeated))
-		caption(host.t("gate_remaining")%blockers.size(),p+Vector2(-74,-202),14)
+		var title: String=host.t("gate_remaining")%blockers.size()
+		var point: int=host.font_size(21 if host.portrait else 16)
+		var width:=font.get_string_size(title,HORIZONTAL_ALIGNMENT_LEFT,-1,point).x
+		var label_p:=Vector2(clampf(p.x-width*.5,12.,scene_w-width-12.),p.y-202.).round()
+		draw_rect(Rect2(label_p+Vector2(-7.,-point),Vector2(width+14.,point+7.)),Color("241d2bdc"))
+		caption(title,label_p,point)
 		if absf(world.player.x-float(gate.x))<180.:
 			blockers.sort_custom(func(a,b):return absf(float(a.x)-world.player.x)<absf(float(b.x)-world.player.x))
 			for enemy in blockers.slice(0,3):
@@ -310,6 +314,7 @@ func draw_world() -> void:
 		var frame: int=int(spec.frame)
 		var type: String=CampaignVehicles.kind(world)
 		var phase: int=2 if CampaignVehicles.stunned(world) else (3 if int(world.mount.hp)<=0 else int(spec.phase))
+		if phase==3:frame=clampi(int(float(world.mount.get("wreck_age",0.))/.8*6.),0,5)
 		var machine: Dictionary=vehicle_art.hull_pose(type,phase,frame,hero_reference_height()*2.) if bool(world.mount.ridden) else vehicle_pose(type,phase,frame)
 		draw_pose(machine,p,vehicle_draw_facing(),float(machine.vehicle_growth))
 		if CampaignVehicles.stunned(world):

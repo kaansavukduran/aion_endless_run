@@ -282,22 +282,7 @@ static func draw_pier(v) -> void:
 
 static func draw_hatch(v) -> void:
 	var w=v.world
-	if not hatch_open(w):
-		# Closed root-locked hatch planks and the yard fence below the deck.
-		var left: Vector2=v.at(Vector2(HATCH_X,0.))
-		v.draw_rect(Rect2(left+Vector2(0,-6),Vector2(YARD_END_X-HATCH_X,8)),Color("8a6a45"))
-		for i in int((YARD_END_X-HATCH_X)/50.):
-			v.draw_rect(Rect2(left+Vector2(i*50.+4.,-6),Vector2(3,8)),Color("4f3b2a"))
-		for i in 5:
-			v.draw_rect(Rect2(left+Vector2(30.+i*95.,-10),Vector2(42,4)),Color("5f7a3c"))
-		var fence: Vector2=v.at(Vector2(YARD_END_X,UPPER_FLOOR+40.))
-		v.draw_rect(Rect2(fence,Vector2(12,-UPPER_FLOOR-40.)),Color("5a4636"))
-		for i in 4:v.draw_rect(Rect2(fence+Vector2(-8,24.+i*34.),Vector2(28,5)),Color("7b5f45"))
-	else:
-		# Broken plank ends hang over the opened root channel.
-		var opened: Vector2=v.at(Vector2(HATCH_X,0.))
-		v.draw_rect(Rect2(opened+Vector2(8,-4),Vector2(30,6)),Color("8a6a45"))
-		v.draw_rect(Rect2(opened+Vector2(14,2),Vector2(6,26)),Color("5f7a3c"))
+	CampaignLockArt.root_hatch(v,v.at(Vector2(HATCH_X,0.)),YARD_END_X-HATCH_X,-UPPER_FLOOR-40.,hatch_open(w))
 
 static func lantern_positions(w) -> Array[Vector2]:
 	var positions: Array[Vector2]=[Vector2(1060.,UPPER_FLOOR),Vector2(1530.,UPPER_FLOOR)]

@@ -158,6 +158,13 @@ func audio_events(g: AionCampaignGame) -> void:
 	for event in ["grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact"]:
 		g.world.pending_events.append(event);g._process(.001)
 		check(g.sound_cache.has(event) and g.sound_cache[event]==g.GRENADE_SOUNDS[event],"Real event dispatch uses authored WAV: "+event)
+	clean(g,"rabbit")
+	for code in [KEY_D,KEY_SHIFT]:
+		var press:=InputEventKey.new();press.physical_keycode=code;press.keycode=code;press.pressed=true
+		g._unhandled_input(press)
+	g._process(.02)
+	check(g.world.sprint_fire>0. and g.sound_cache.get("sprint_ignite")==g.GRENADE_SOUNDS.sprint_ignite,"Ordinary sprint input starts the authored ignition sound in the game")
+	g.release_all()
 	check(g.voices.size()==6,"Authored sounds preserve six-voice allocation")
 	g.audio_enabled=false;var previous: int=g.sound_cache.size();g.sound("muted-test")
 	check(g.sound_cache.size()==previous,"Mute still suppresses sound work")

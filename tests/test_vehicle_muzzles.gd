@@ -49,6 +49,23 @@ func run() -> void:
  check(parked.interact() and parked.vehicle_art_spec().phase==0,'Dismounting immediately clears the vehicle firing pose')
  var view:=AionCampaignView.new()
  var height: float=view.hero_reference_height()*2.
+ for kind in CampaignVehicles.TYPES:
+  var idle:=fresh(kind,1)
+  idle.mount.ridden=false;idle.mount.floor_y=idle.floor_at(float(idle.mount.x))
+  idle.player=Vector2(95.,idle.floor_at(95.))
+  view.world=idle
+  var parked_point:=view.vehicle_draw_position()
+  var still: Dictionary=idle.vehicle_art_spec()
+  for tick in 60:idle.step(.02)
+  check(idle.vehicle_art_spec()==still and view.vehicle_draw_position()==parked_point,'Parked vehicle keeps its exact pose and chassis position: '+kind)
+  check(idle.interact() and idle.vehicle_art_spec()==still,'Entry starts from the same parked cel: '+kind)
+  for tick in 35:idle.step(.02)
+  idle.move_axis=Vector2.RIGHT
+  for tick in 30:idle.step(.02)
+  check(float(idle.mount.x)>parked_point.x+20.,'Player motion drives the mounted vehicle: '+kind)
+  check(idle.interact(),'Vehicle can be parked again: '+kind)
+  for tick in 85:idle.step(.02)
+  check(idle.vehicle_art_spec()==still and not idle.mount.has('park_target'),'Exit stops hull animation and clears the settled physics job: '+kind)
  var directions: Array[Vector2]=[Vector2.RIGHT,Vector2(1,-1).normalized(),Vector2.UP,Vector2(-1,-1).normalized(),Vector2.LEFT,Vector2(-1,1).normalized(),Vector2.DOWN,Vector2(1,1).normalized()]
  # Off-axis values prove aim is continuous instead of eight snapped keyposes.
  for angle in [.17,.37,1.13,2.34,3.89,4.71,5.49]:directions.append(Vector2.from_angle(angle))

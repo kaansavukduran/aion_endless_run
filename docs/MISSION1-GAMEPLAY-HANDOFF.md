@@ -2,6 +2,20 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+### Park pozları, geçitler ve depar alevi · Yerel aday
+
+Çalışma dalı `perf/mission1-visual-motion`. Yerel kalkan ve final değişiklikleri ile güncel `main` `e5dae9669ee22d64e7dfd4fdfdf8247b543045fd` birleştirildi. Birleşim tabanı `5b60d53`. Godot 4.6.3. İnceleme Kod Optimizasyonu ve Yazılım Denetle becerileriyle yapıldı.
+
+| Bulgu | Düzeltme ve doğrulama |
+| --- | --- |
+| M1-V01 · Orta · Park etmiş gövde dünya saatiyle kare değiştiriyordu | Dört araç parktayken sabit kaynak kareyi kullanıyor. Binme sabit gövdeden başlıyor. Havada terk edilen gövde mevcut fizik kurallarıyla zemine oturuyor. Oturduğunda park hareketi sonlanıyor. Aynı kamerada iki zamana ait Skimmer gövdesi örneğinde değişen piksel sayısı 18.415’ten sıfıra indi. |
+| M1-V02 · Düşük · Düz kapı ve tuzak çizimleri arka planla karışıyordu | Üç malzemedeki geçit kapılarında altı kare, kök kapağında kapalı döşeme ve kırık kenar, kristal ile rüzgârda ayrı uyarı ve etkin kareler var. Kapı sayacı koyu zemine alındı. Azaltılmış hareket durumunda iki kapı ailesi açık poza doğrudan geçiyor. |
+| M1-V03 · Düşük · Depar alevi altı bağımsız küçük parçayla çiziliyordu | Ayça ve Eren’in ön ve arka alevi sabit ayak noktasına bağlı sekiz kare kullanıyor. Depar başladığında 420 ms’lik özgün ses bir kez çalıyor. Doku çizimi kare başına 6’dan 2’ye indi. Yedi başsız CPU mikro ölçümünde efekt hazırlama medyanı 11,8 → 3,9 µs/kare. Bu ölçüm GPU veya toplam oyun FPS’ini kapsamaz. |
+| M1-V04 · Orta · Kalkan için yeni süre dört saniye | Eski sekiz saniye sınırındaki kayıtlar açılıyor ve dört saniyenin üstündeki şarj dolu sayılıyor. Doğuş koruması üç saniye sürüyor. Chromium’da hazırlanmış doğuş kaydı, gerçek Sürdür ve ateş girdisiyle açıldı. Kalkan ilk kez toplam 7,02 oyun saniyesinde doldu ve düşman mermisini emdi. |
+| M1-V05 · Düşük · Dar ekranda sistem yazısı köşeli örnekleniyordu | Arayüzde sistem yazısı için yumuşak, isteğe bağlı piksel yazısı ve dünya sprite’ları için keskin örnekleme kullanılıyor. Dikey oyun ve kapı sayacı gerçek çiziciden örneklendi. |
+
+74 Godot test grubunda 52.177 kontrol ve 7 web paketleme testi geçti. Altı kahramanın uçuş pozu ve namlusu ayrı ölçüldü. 970 OpenGL çizim kontrolü de geçti. Chromium’da normal açılış, Ayça seçimi, Shift deparı ve havada ateş geçti. Firefox’ta dokunmatik Zıpla ve Ateş et dikey ve yatay pencerede ayrı ayrı geçti. Yerel web paketi 0.57.7 `e9d752756bc3b2bc` ve 13 manifest dosyası doğrulandı. Canlı Pages paketi `798e982ff580f009`. Fiziksel telefon ve kol testi bekliyor. [Varlık kaynakları](../assets/M1-ARCADE-ART-PROVENANCE.md)
+
 ### Doğuş koruması ve kalkan · Yerel aday
 
 Tek canlı kahramanın doğuş koruması yere bastığı andan itibaren üç aktif oyun saniyesi sürüyor. Ateş, bomba ve özel yetenek süreyi kesmiyor. Koruma bittikten sonra kalkan sekiz hasarsız oyun saniyesinde bir darbe için doluyor. Portre köşesindeki küçük kalkanın içi dolulukla birlikte yükseliyor. Darbe emildiğinde kısa bir toparlanma süresi veriliyor ve şarj yeniden başlıyor.

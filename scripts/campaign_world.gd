@@ -57,6 +57,8 @@ var run_seed := 7719
 var walk_distance := 0.0
 var hp := 1
 const MAX_HP := 1
+# Existing checkpoints stored up to eight seconds of elapsed shield charge.
+const LEGACY_SHIELD_CHARGE_MAX := 8.
 var max_hp: int:
 	get: return MAX_HP
 var attempts_remaining := CampaignLives.ATTEMPTS
@@ -460,6 +462,7 @@ func armed_art_spec() -> Dictionary:
 
 ## Visible vehicle and muzzle use the same pose selection.
 func vehicle_art_spec() -> Dictionary:
+	if not bool(mount.ridden) or mount_transition!="":return {"phase":0,"frame":0}
 	var aim: Vector2=aim_direction.normalized() if aim_direction.length_squared()>.01 else Vector2(facing,0.)
 	var aligned: bool=absf(aim.y)<.005 and aim.x*float(facing)>0.
 	var phase: int=2 if bool(mount.ridden) and float(mount.get("hurt",0.))>0. else (1 if CampaignVehicles.firing(self) and aligned else 0)
@@ -1052,7 +1055,7 @@ func restore(data: Dictionary) -> bool:
 	if not CampaignEncounterSave.valid_number(data.get("frog_cooldown",0.),0.,MissionHeroAbilities.LEGACY_SWALLOW_COOLDOWN):return false
 	if not CampaignEncounterSave.valid_number(data.get("roll_charges",MissionHeroAbilities.ROLL_CHARGES),0,MissionHeroAbilities.ROLL_CHARGES):return false
 	if not CampaignEncounterSave.valid_number(data.get("roll_cooldown",0.),0.,MissionHeroAbilities.ROLL_COOLDOWN):return false
-	if not CampaignEncounterSave.valid_number(data.get("shield_charge",0.),0.,CampaignLives.SHIELD_CHARGE_SECONDS):return false
+	if not CampaignEncounterSave.valid_number(data.get("shield_charge",0.),0.,LEGACY_SHIELD_CHARGE_MAX):return false
 	if not CampaignRecovery.valid(data.get("rally",{}),str(data.checkpoint)):return false
 	for key in ["retry_count","best_chain"]:
 		var value=data.get(key,0)
@@ -1086,6 +1089,6 @@ func restore(data: Dictionary) -> bool:
 		CampaignRecovery.apply(self,rally)
 	else:
 		CampaignEncounterSave.apply(self,data,encounter)
-		if hp>0:shield_charge=float(data.get("shield_charge",0.))
+		if hp>0:shield_charge=minf(float(data.get("shield_charge",0.)),CampaignLives.SHIELD_CHARGE_SECONDS)
 	if completed: state = "complete"; checkpoint_ready = false; boss.active = false
 	return true

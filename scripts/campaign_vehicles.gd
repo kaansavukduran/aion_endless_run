@@ -18,17 +18,25 @@ static func park(w) -> float:
 	var visual_foot: float=w.player.y+42.
 	var contact_foot: float=visual_foot-(24. if float(w.mount.get("dive",0.))>0. else 0.)
 	var support: float=support_below(w,w.player.x,contact_foot)
-	w.mount.x=w.player.x;w.mount.floor_y=visual_foot;w.mount.park_target=support
-	w.mount.park_velocity=maxf(0.,w.velocity.y)
+	w.mount.x=w.player.x;w.mount.floor_y=visual_foot
+	if visual_foot<support:
+		w.mount.park_target=support
+		w.mount.park_velocity=maxf(0.,w.velocity.y)
+	else:
+		settle(w,support)
 	return contact_foot
+
+static func settle(w,support: float) -> void:
+	w.mount.floor_y=support
+	w.mount.erase("park_target")
+	w.mount.erase("park_velocity")
 
 static func step_parked(w,dt: float) -> void:
 	if bool(w.mount.get("ridden",false)) or not w.mount.has("park_target"):return
 	var floor: float=float(w.mount.floor_y);var target: float=float(w.mount.park_target)
-	if floor>=target:
-		w.mount.floor_y=target;w.mount.park_velocity=0.;return
 	w.mount.park_velocity=float(w.mount.get("park_velocity",0.))+1700.*dt
 	w.mount.floor_y=minf(target,floor+float(w.mount.park_velocity)*dt)
+	if float(w.mount.floor_y)>=target:settle(w,target)
 	if float(w.mount.floor_y)>180. and not CampaignGround.has_floor(target):w.mount.available=false
 
 static func stunned(w) -> bool:

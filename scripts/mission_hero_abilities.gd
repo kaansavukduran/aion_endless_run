@@ -132,6 +132,7 @@ static func sprint_contacts(w,previous: Vector2,was_grounded: bool,dt: float) ->
 	elif running and w.sprint_ignition and w.sprint_recovery<=0.:
 		w.sprint_fire=SPRINT_FIRE_TIME
 		w.sprint_ignition=false
+		w.pending_events.append("sprint_ignite")
 	if running:
 		var center: Vector2=w.player_hit_center()
 		var from: Vector2=previous+Vector2(0.,-37.) if was_grounded else center

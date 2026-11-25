@@ -44,4 +44,21 @@ func run() -> void:
      var neutral:=bank.pose("gun-run",bank.hero_row(hero),0);var neutral_body:=largest_body(neutral.texture.get_image());var approved: float=neutral_body.size.y*float(neutral.scale)
      check(body.size.y*float(atlas.scales[row])>approved*.80 and body.size.y*float(atlas.scales[row])<approved*1.17,"Knife body retains approved hero proportions: "+hero+" "+str(frame)+" actual="+str(body.size.y*float(atlas.scales[row]))+" approved="+str(approved))
  check(count==659 and hashes.size()==659,"659 independently sampled, nonidentical usable drawings; one bad connected source cell excluded")
+ var gates:=CampaignLockArt.SHEET.get_image()
+ for row in 3:
+  var cels: Dictionary={}
+  for frame in 6:
+   var cel:=gates.get_region(Rect2i(frame*64,row*96,64,96))
+   cels[hash(cel.get_data())]=true
+   check(cel.get_pixel(12,95).a==1. and cel.get_pixel(51,95).a==1.,"Gate supports remain planted throughout retraction")
+  check(cels.size()==6 and gates.get_pixel(32,row*96+72).a==1. and gates.get_pixel(5*64+32,row*96+72).a==0.,"Original gate cels show a closed leaf and a truly transparent open passage")
+ check(CampaignLockArt.opening_frame(0.,false)==5 and CampaignLockArt.opening_frame(.24,true)==4,"Both gate families honor reduced motion and the real opening clock")
+ var flames:=MissionHeroArt.SPRINT_FIRE.get_image()
+ for row in 2:
+  var frames: Dictionary={}
+  for frame in 8:
+   var cel:=flames.get_region(Rect2i(frame*64,row*36,64,36))
+   frames[hash(cel.get_data())]=true
+   check(cel.get_used_rect().size.x>=40 and cel.get_pixel(63,0).a==0.,"The flame ribbon stays inside its transparent registered cel")
+  check(frames.size()==8,"Each side of the sprint has a complete eight-pose motion cycle")
  print("RESULT: %d campaign expansion art checks, %d failures" % [checks,failures]);quit(1 if failures else 0)

@@ -18,3 +18,7 @@ python3 packaging/draw_m1_arcade_art.py /tmp/aion-arcade-cels
 To repack the portrait atlas, add `--portraits OPEN.png HALF.png CLOSED.png` with the three registered 1024 × 1536 source mosaics in reading order. Ordinary builds use the packed atlas.
 
 `campaign-field-supplies.png` contains three original, transparent 32 × 32 cels in one row. From left to right they show a waxed-canvas field dressing, a copper repair case with a wrench, and a purple capacitor for the existing power-shot reward. The same cels appear in the keeper handover and on the ground. The mouth of each keeper's satchel is registered against its original handover cel. The reward lands at the same position used by the collision check.
+
+The gate cels in `m1-locks-and-traps.png` use copper, canal iron and root-station finishes. The plate stack retracts behind a fixed counterweight and the two feet stay anchored throughout the six cels. `m1-root-hatch.png` contains a repeatable 64 × 14 lid tile, a broken lip and an 80-pixel fence post. `m1-route-hazards.png` uses two rows of five 64 × 72 cels for the terrace gust and crystal emitter. The crystal’s outlet aligns to the projectile height.
+
+`m1-sprint-fire.png` has eight 64 × 36 cels for each of two original flame ribbons. Each cel shares the same foot pivot. The rear ribbon travels behind the hero and the near ribbon passes across the shins. Both layers mirror with travel and use 2× nearest-pixel sampling. Reduced motion uses a single cel for each layer. `packaging/draw_m1_arcade_art.py` generates the PNGs.

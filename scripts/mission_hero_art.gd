@@ -162,12 +162,10 @@ const TONGUE_ROOT := ["........","##......","hrr#####","HHhhrrrh","rrRRrHHH","rR
 const TONGUE_BODY := [".",".","#","h","H","R","R","#","."]
 const TONGUE_TIP := ["...........",".....###...","#####hhh#..","hHHHhhhhh#.","HHHHHhhRr#.","RRRRRRRRrr#","RRRrrRRrrr#","####rrrr##.","....####..."]
 const TONGUE_INK := {"#":"592838","r":"b84562","R":"e07590","h":"f39faa","H":"ffd3c4"}
-const FLAME_INK := {"#":"9c3c30","r":"db5a37","R":"f88e40","h":"ffbf59","H":"fff1a5"}
-const FLAME_CELS := [
-	["......#...",".....#r#..","....#rR#..","....#Rr#..","..#.#RR#..",".#r##Rh#..",".#RrrRhR#.","#rRRRhHR#.","#RRhhHHRr#","#rRhHHHRr#",".#rRRRrr#.","..######.."],
-	["....#.....","...#r#....","...#Rr#...","...##R#...","....#R#.#.","...#rRR#r#","..#rRRrRr#",".#rRhRhhR#",".#RRhHhRR#","..#rHHHrr#","...#rRr##.","....###..."],
-	[".....#....","....#r#...","....#R#...","..#.#Rr#..",".#r##RR#..",".#RrrRh#..",".#RRRhHR#.","#rRhHHHR#.","#RRhHHHRr#",".#rRhHRr#.","..#rRrr#..","...####..."]
-]
+const SPRINT_FIRE=preload("res://assets/m1-sprint-fire.png")
+const SPRINT_CELL := Vector2(64.,36.)
+const SPRINT_RECT := Rect2(-84.,-68.,128.,72.)
+const SPRINT_FRAMES := 8
 static var effect_textures: Dictionary={}
 
 static func effect_texture(id: String,rows: Array,palette: Dictionary) -> Texture2D:
@@ -216,16 +214,12 @@ static func draw_tongue_segment(canvas,origin: Vector2,tip: Vector2) -> void:
 static func draw_sprint_fire(view,front: bool) -> void:
 	var w=view.world
 	if w.sprint_fire<=0. or bool(w.mount.ridden) or w.state not in ["playing","paused"]:return
-	var tick: int=int((MissionHeroAbilities.SPRINT_FIRE_TIME-w.sprint_fire)*13.) if w.pose_motion_enabled else 0
+	var frame:=posmod(int((MissionHeroAbilities.SPRINT_FIRE_TIME-w.sprint_fire)*16.),SPRINT_FRAMES) if w.pose_motion_enabled else 3
 	var direction: float=-1. if w.velocity.x<0. else 1.
-	var foot: Vector2=view.at(w.player)
-	var offsets:=PackedVector2Array([Vector2(27,-9),Vector2(39,-3)]) if front else PackedVector2Array([Vector2(-42,-1),Vector2(-29,-11),Vector2(-18,-22),Vector2(17,-21)])
-	for i in offsets.size():
-		var frame: int=posmod(tick+i,FLAME_CELS.size())
-		var texture:=effect_texture("sprint_fire_"+str(frame),FLAME_CELS[frame],FLAME_INK)
-		var offset: Vector2=offsets[i]*Vector2(direction,1.)
-		var dimensions:=Vector2(20.,24.) if i%2==0 else Vector2(16.,20.)
-		view.draw_texture_rect(texture,Rect2((foot+offset-Vector2(dimensions.x*.5,dimensions.y)).round(),dimensions),false)
+	var cell:=Rect2(Vector2(float(frame),float(int(front)))*SPRINT_CELL,SPRINT_CELL)
+	view.draw_set_transform(view.at(w.player),0.,Vector2(direction,1.))
+	view.draw_texture_rect_region(SPRINT_FIRE,SPRINT_RECT,cell)
+	view.draw_set_transform(Vector2.ZERO)
 
 static func draw_skill_status(view) -> void:
 	var w=view.world

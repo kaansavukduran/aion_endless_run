@@ -5,7 +5,7 @@ const ATTEMPTS := 3
 const OFFER_SECONDS := 10.
 const ENTRY_SECONDS := .62
 const ENTRY_PROTECTION := 3.
-const SHIELD_CHARGE_SECONDS := 8.
+const SHIELD_CHARGE_SECONDS := 4.
 const SHIELD_RECOVERY := .45
 const TRANSITIONS := ["dying","respawn_pending","respawn","continue_offer","dead"]
 

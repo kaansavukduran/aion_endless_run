@@ -82,6 +82,7 @@ func test_sprint_fire() -> void:
 		first.armour=2
 		advance(w,.15)
 		check(first.defeated and w.hp==1 and w.sprint_fire>2.8,"Sprint fire defeats a contact enemy with armour: "+hero)
+		check(w.pending_events.count("sprint_ignite")==1,"The new flame sound triggers only once for the active sprint: "+hero)
 		w.state="paused";var remaining:=w.sprint_fire;advance(w,1.)
 		check(is_equal_approx(w.sprint_fire,remaining),"Pause freezes the visible fire duration")
 		w.state="playing";advance(w,3.)
@@ -94,6 +95,7 @@ func test_sprint_fire() -> void:
 		w.boost_held=false;advance(w,3.1)
 		w.boost_held=true;advance(w,.05)
 		check(w.sprint_fire>2.9,"A fresh sprint reignites after recovery: "+hero)
+		check(w.pending_events.count("sprint_ignite")==2,"A fresh sprint starts one new sound after recovery: "+hero)
 
 func test_air_fire_stability() -> void:
 	for hero in AionCampaignWorld.HEROES:
