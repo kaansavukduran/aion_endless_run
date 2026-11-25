@@ -13,7 +13,7 @@ func pose(kind: String) -> Dictionary:
 	var f: Dictionary=DATA.data.frames[kind]
 	var b: Array=f.bounds
 	var isolated:=Image.create_empty(int(b[2]-b[0])+4,int(b[3]-b[1])+4,false,Image.FORMAT_RGBA8)
-	for run in f.runs:
+	for run in RunnerSourcePixels.runs(f):
 		isolated.blit_rect(source,Rect2i(int(f.rect[0]+run[1]),int(f.rect[1]+run[0]),int(run[2]),1),Vector2i(int(run[1]-b[0])+2,int(run[0]-b[1])+2))
 	var factor: float=f.scale
 	cache[kind]={"texture":ImageTexture.create_from_image(isolated),"offset":-Vector2(isolated.get_size())*.5*factor,"size":isolated.get_size()*factor,"source_key":"forge-items","kind":kind}

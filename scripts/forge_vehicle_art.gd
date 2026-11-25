@@ -93,7 +93,7 @@ func pose(kind: String, phase: int, frame: int, target_height: float = 0.) -> Di
 	var f: Dictionary = data.frames[phase][frame]
 	var b: Array = f.bounds
 	var result := Image.create_empty(int(b[2]) - int(b[0]) + 4, int(b[3]) - int(b[1]) + 4, false, Image.FORMAT_RGBA8)
-	for run in f.runs:
+	for run in RunnerSourcePixels.runs(f):
 		result.blit_rect(sheet_image, Rect2i(int(f.rect[0]) + int(run[1]), int(f.rect[1]) + int(run[0]), int(run[2]), 1), Vector2i(int(run[1]) - int(b[0]) + 2, int(run[0]) - int(b[1]) + 2))
 	var factor: float = metrics.scale
 	cache[key] = {"texture": ImageTexture.create_from_image(result), "offset": Vector2(float(b[0]) - float(f.origin[0]) - 2., float(b[1]) - float(f.origin[1]) - 2.) * factor, "size": result.get_size() * factor, "muzzle_local": metrics.muzzle_local, "pivot_local": metrics.pivot_local, "barrel_length": metrics.barrel_length, "vehicle_growth": 1., "source_key": "forge-vehicle-" + kind, "source_phase": phase, "source_frame": frame}

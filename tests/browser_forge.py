@@ -460,7 +460,7 @@ with sync_playwright() as playwright:
 
                 def rescue_trace(stage, current, selected=None, requested=()):
                     npc = next((n for n in current['npcs'] if selected and n['id'] == selected['id']), None)
-                    packet = {'attempt': attempt, 'stage': stage, 'wall_time': time.monotonic(), 'world_time': current['time'], 'state': current['state'], 'hp': current['hp'], 'player': current['player'], 'requested_keys': list(requested), 'npc': npc, 'greeted': bool(npc and current['greeted'].get(npc['id'])), 'bag_items': [item for item in current['pickups'] if npc and item.get('rescue_id') == npc['id']]}
+                    packet = {'attempt': attempt, 'stage': stage, 'wall_time': time.monotonic(), 'world_time': current['time'], 'state': current['state'], 'hp': current['hp'], 'player': current['player'], 'requested_keys': list(requested), 'near': [[e['kind'], round(e['x']-current['player'][0]), round(e['y']-current['player'][1]), round(e['windup'], 2)] for e in current['enemies'] if abs(e['x']-current['player'][0]) < 260], 'bullets': [[round(b[0]-current['player'][0]), round(b[1]-current['player'][1])] for b in current['bullets'] if abs(b[0]-current['player'][0]) < 260], 'grounded': current['grounded'], 'npc': npc, 'greeted': bool(npc and current['greeted'].get(npc['id'])), 'bag_items': [item for item in current['pickups'] if npc and item.get('rescue_id') == npc['id']]}
                     with (args.evidence/'rescue-attempts.jsonl').open('a') as log:
                         log.write(json.dumps(packet, ensure_ascii=False)+'\n')
                     return packet
@@ -483,6 +483,46 @@ with sync_playwright() as playwright:
                     if label not in checks:
                         check(condition, label)
 
+                GRAVITY = {'lob_seed': 590., 'spore': 180.}
+                aim_at = [None]
+                canvas_box = [None, 0.]
+
+                def campaign_point(current, x, y):
+                    # Same mapping as coords(), from the state already read
+                    # this tick. bounding_box() waits for a frame, so the
+                    # (fixed) canvas box is refreshed only every two seconds.
+                    if canvas_box[0] is None or time.monotonic()-canvas_box[1] > 2.:
+                        canvas_box[0] = canvas.bounding_box(); canvas_box[1] = time.monotonic()
+                    bounds = canvas_box[0]
+                    transform = current['transform']
+                    width, height = current['raw']
+                    xx, yy = x*transform[0]+transform[1], y*transform[0]+transform[2]
+                    return bounds['x']+xx/width*bounds['width'], bounds['y']+yy/height*bounds['height']
+
+                def aim(point):
+                    # A real mouse move waits for a rendered frame (~0.35 s
+                    # under software GL), so only re-aim when the target
+                    # point moved enough to change the shot. This keeps the
+                    # bot reacting several times per second.
+                    last = aim_at[0]
+                    if last is None or math.hypot(point[0]-last[0], point[1]-last[1]) > 36:
+                        page.mouse.move(*point); aim_at[0] = point
+
+                def incoming(current, x, y, horizon=.5):
+                    # Earliest time an enemy projectile passes through the
+                    # hero's body, from its real position and velocity.
+                    soonest = math.inf
+                    for b in current['bullets']:
+                        bx, by, vx, vy = b[0], b[1], b[2], b[3]
+                        g = GRAVITY.get(b[4], 0.) if len(b) > 4 else 0.
+                        t = 0.
+                        while t <= horizon:
+                            px, py = bx+vx*t, by+vy*t+.5*g*t*t
+                            if abs(px-x) < 26 and -78 < py-y < 6:
+                                soonest = min(soonest, t); break
+                            t += .03
+                    return soonest
+
                 def move_and_defend(current, direction, allow_grenade):
                     global last_jump, last_bomb
                     x, y = current['player']
@@ -490,7 +530,17 @@ with sync_playwright() as playwright:
                     forward = 1 if direction == 'd' else -1
                     threats = [e for e in current['enemies'] if abs(e['x']-x)<395]
                     nearest = min(threats, key=lambda e: math.hypot(e['x']-x,e['y']-y), default=None)
-                    target = nearest
+                    # A crow that is winding up dives at the hero's current
+                    # spot; a shooter that is winding up is about to fire.
+                    # Those are shot first, then the nearest body.
+                    # Crows hover ~115px above the floor; one that is winding
+                    # up, or already below that band, is diving (the dive
+                    # itself runs after the windup has reached zero).
+                    diving = [e for e in threats if e['kind'] == 'crow' and abs(e['x']-x) < 300
+                              and (0 < e['windup'] < .5 or e['y'] > y-92)]
+                    charging = [e for e in threats if e['kind'] in ('lantern_scout', 'cap_lobber', 'seed') and e['windup'] > 0]
+                    urgent = min(diving+charging, key=lambda e: abs(e['x']-x), default=None)
+                    target = urgent or nearest
                     if target is None:
                         candidates = [n for n in current['npcs'] if not n['freed'] and not n['secret']
                                       and 65 < (n['x']-x)*forward < 650]
@@ -502,17 +552,28 @@ with sync_playwright() as playwright:
                     else:
                         sx = x-current['camera']+140*forward
                         sy = y+current['ground']-current['camera_y']-42
-                    page.mouse.move(*coords(sx,sy,True))
+                    aim(campaign_point(current, sx, sy))
                     commands = ['f', direction] if direction else ['f']
                     distance = math.hypot(nearest['x']-x,nearest['y']-y) if nearest else math.inf
                     if nearest and (nearest['x']-x)*forward>=-20 and distance<225:
                         # Clear the lane before walking into a charged ground
                         # attacker. Aim is independent of the movement keys.
                         commands = ['f']
+                    dive = min(diving, key=lambda e: abs(e['x']-x), default=None)
+                    if dive:
+                        # A dive locks onto the spot the hero holds when the
+                        # windup ends: never stand still under one, walk
+                        # away from the crow (forward when it is overhead).
+                        away = 'd' if (x-dive['x'] > 0 if abs(dive['x']-x) > 20 else forward > 0) else 'a'
+                        commands = ['f', away]
                     gap = any(0 < pit[0] - x < 160 for pit in current['pits'])
-                    danger = any(math.hypot(b[0] - x, b[1] - (y - 37)) < 105 for b in current['bullets'])
+                    hit_in = incoming(current, x, y)
+                    danger = hit_in < .42 or any(math.hypot(b[0] - x, b[1] - (y - 37)) < 70 for b in current['bullets'])
                     lower_threat = nearest and 75<distance<245 and nearest['y']>y+30
-                    if current['grounded'] and (gap or danger or lower_threat or distance<112) and time_now-last_jump>.65:
+                    # Gnomes and beetles dash along the ground when their
+                    # windup ends; be airborne as the dash arrives.
+                    dash = any(e['kind'] in ('gnome', 'beetle', 'slime') and 0 < e['windup'] < .3 and abs(e['x']-x) < 190 for e in threats)
+                    if current['grounded'] and (gap or danger or dash or (lower_threat and not dive) or (distance<112 and not dive)) and time_now-last_jump>.65:
                         page.keyboard.press('Space')
                         last_jump=time_now
                     keys(commands)
@@ -532,7 +593,8 @@ with sync_playwright() as playwright:
                             current = campaign()
                             require_live(current, 'search', recover=True)
                             x, y = current['player']
-                            move_and_defend(current, 'd', allow_grenade=x<3400.)
+                            wanted = move_and_defend(current, 'd', allow_grenade=x<3400.)
+                            rescue_trace('search_input', current, None, wanted)
                             free = [n for n in current['npcs'] if n['freed'] and n['phase'] == 'free' and not n['secret']
                                     and not current['awarded'].get(n['id']+':gift') and abs(n['y']-y) < 70 and abs(n['x']-x)<500]
                             target = min(free, key=lambda n: abs(n['x']-x), default=None)

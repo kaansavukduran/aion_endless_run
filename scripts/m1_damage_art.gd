@@ -31,7 +31,7 @@ func pose(hero: String,action: String,frame: int=0) -> Dictionary:
 		source=RunnerSourcePixels.sheet("res://"+str(atlas.path))
 	var f: Dictionary=atlas.frames[row][frame];var b: Array=f.bounds
 	var isolated:=Image.create_empty(int(b[2]-b[0])+4,int(b[3]-b[1])+4,false,Image.FORMAT_RGBA8)
-	for run in f.runs:
+	for run in RunnerSourcePixels.runs(f):
 		isolated.blit_rect(source,Rect2i(int(f.rect[0])+int(run[1]),int(f.rect[1])+int(run[0]),int(run[2]),1),Vector2i(int(run[1])-int(b[0])+2,int(run[0])-int(b[1])+2))
 	result.texture=ImageTexture.create_from_image(isolated)
 	cache[key]=result

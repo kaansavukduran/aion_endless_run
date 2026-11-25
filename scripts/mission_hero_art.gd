@@ -62,7 +62,7 @@ static func pose(hero: String,action: String,frame: int=0) -> Dictionary:
 	var f: Dictionary=atlas.rows[int(spec.source_row)][int(spec.source_frame)]
 	var rect: Array=f.rect
 	var crop:=Image.create_empty(int(rect[2])+4,int(rect[3])+4,false,Image.FORMAT_RGBA8)
-	for run in f.runs:
+	for run in RunnerSourcePixels.runs(f):
 		crop.blit_rect(sheet_image,Rect2i(int(rect[0])+int(run[1]),int(rect[1])+int(run[0]),int(run[2]),1),Vector2i(int(run[1])+2,int(run[0])+2))
 	spec.texture=ImageTexture.create_from_image(crop);cache[id]=spec
 	return spec

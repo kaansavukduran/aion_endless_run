@@ -416,3 +416,11 @@ Ortam: bulut Linux, Godot 4.6.3 headless, yerel CPU (web/WASM için kabaca 2–3
 - `RunnerSourcePixels.enter_section`: liste ∪ oturum geçmişi, en fazla `SHEET_LIMIT` (12). Ölçüm (Xvfb, kıyı→rıhtım→çatal→su→çatal→kökler→röle→arena, ilk ziyaret): oyun içi sayfa çözme 19 → 2; geçişlerde toplam 515 ms yerel çözme (kararmış ekranda); tepe çözülmüş sayfa belleği 75,5 MB.
 - Reddedilen: `browser_forge` oynaklığı için sabit QA tohumu. Ölümler her koşuda aynı x konumlarında; tohum değil, yazılımsal GPU altında duvar saatiyle tepki veren bot zamanlaması belirleyici.
 
+## 0.57.7 · Silüet paketleme ve kurtarma botu (25 Kasım 2026)
+
+- `RunnerSourcePixels.runs(frame)`: kaynak ağaçta `runs` listesini olduğu gibi döndürür; dışa aktarılmış yapıda `"DOSYA.json:ofset:adet"` başvurusunu `res://assets/DOSYA.json.runs` (küçük-endian uint16 üçlüler) bloğundan okur. 14 sanat bankası bunu kullanır.
+- `addons/aion_runs_pack` (EditorExportPlugin, `project.godot` içinde etkin, dışa aktarımdan hariç): `assets/*.json` içindeki her `runs` listesini metin düzeyinde keser; dosyanın geri kalan her baytı aynı kalır (yeniden yazmak `full_precision` ile bile iki ondalık sayıyı son basamakta değiştirdiği için reddedildi). Tüm platform dışa aktarımlarına uygulanır.
+- `tests/test_runs_pack.gd` (63 kontrol): 30 dosyanın hepsinde paketlenmiş JSON + blok, kaynakla birebir aynı veriyi ve aralıkları verir.
+- Ölçüm (yerel, başsız, 3 tekrar): 51 JSON dosyasının yüklenmesi paketsiz PCK'da 449–458 ms, paketli PCK'da 46–70 ms. 832.868 aralığın tamamını açmak 170 ms; yalnızca ilk kesilen karelerde, kare başına ~30 µs ödenir. PCK 115.064.176 → 110.512.896 bayt.
+- `tests/browser_forge.py --rescue`: tur süresi 0,57 s → 0,125 s (her turdaki `bounding_box()` ve gerçek fare hareketi bir kare bekliyordu; tuval kutusu 2 s önbellekte, fare yalnızca nişan 36 px'ten fazla değişince hareket eder). Karga hazırlığı ya da süzülme bandının altındaki karga dalış sayılır, bot onun altında durmaz; mermi yolu hız ve yerçekimiyle tahmin edilir; atılmak üzere olan gnom/böcek üstünden zıplanır. Sonuç: eski bot 2/4 (koşu başına 6–9 ölüm), yeni bot 6/6 (en fazla 3 ölüm, bütçe 8). İzleme kaydı (`rescue-attempts.jsonl`) artık yakın düşmanları, mermileri ve basılan tuşları içerir.
+
