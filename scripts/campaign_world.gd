@@ -276,6 +276,8 @@ func spawn_enemy(kind: String, x: float, y: float, index: int, mini: bool = fals
 
 func load_section(id: String) -> void:
 	assert(STAGES.has(id))
+	# Loads run behind the travel fade: pre-decode sheets this section used before.
+	RunnerSourcePixels.enter_section(id)
 	paused_crouch=false
 	CampaignGrenade.cancel(self,true)
 	MissionHeroAbilities.cancel(self)

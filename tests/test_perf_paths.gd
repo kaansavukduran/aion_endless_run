@@ -39,6 +39,23 @@ func run() -> void:
 	check(w.taken.has("test:near") and not w.taken.has("test:far"),"Near pickup is collected, far pickup is not")
 	var far: Array=w.pickups.filter(func(p):return str(p.id)=="test:far")
 	check(not far.is_empty() and float(far[0].age)>0.,"A far pickup still ages every frame")
+	# Shared sheet cache: exact pixels, one decode per sheet, bounded residency, warm-up.
+	RunnerSourcePixels.sheets.clear();RunnerSourcePixels.recent.clear();RunnerSourcePixels.section_paths.clear();RunnerSourcePixels.current_section=""
+	var paths:=[]
+	for name in DirAccess.get_files_at("res://assets"):
+		if name.ends_with(".png"):paths.append("res://assets/"+name)
+	var direct:=RunnerSourcePixels.image(paths[0]);direct.convert(Image.FORMAT_RGBA8)
+	var first:=RunnerSourcePixels.sheet(paths[0]);var decodes:=RunnerSourcePixels.decodes
+	check(first.get_data()==direct.get_data(),"A shared sheet has exactly the directly decoded pixels")
+	check(RunnerSourcePixels.sheet(paths[0])==first and RunnerSourcePixels.decodes==decodes,"A resident sheet is reused without decoding again")
+	RunnerSourcePixels.enter_section("test_a")
+	for i in range(1,RunnerSourcePixels.SHEET_LIMIT+3):RunnerSourcePixels.sheet(paths[i])
+	check(RunnerSourcePixels.sheets.size()==RunnerSourcePixels.SHEET_LIMIT,"Resident sheets never exceed the limit")
+	check(not RunnerSourcePixels.sheets.has(paths[0]),"The least recently used sheet is released")
+	RunnerSourcePixels.enter_section("test_b");RunnerSourcePixels.sheets.clear();RunnerSourcePixels.recent.clear()
+	RunnerSourcePixels.enter_section("test_a")
+	check(RunnerSourcePixels.sheets.size()==RunnerSourcePixels.SHEET_LIMIT and RunnerSourcePixels.sheets.has(paths[RunnerSourcePixels.SHEET_LIMIT+2]),"Entering a known section pre-decodes its recent sheets")
+	RunnerSourcePixels.current_section=""
 	# Loose budget: generous for slower CI runners; catches a return of per-frame scans.
 	w=world("water");w.player.x=w.length()*.8
 	for i in 60:w.move_axis=Vector2.RIGHT;w.fire_held=true;w.step(1./60.);w.pending_events.clear()

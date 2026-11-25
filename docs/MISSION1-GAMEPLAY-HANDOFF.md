@@ -394,3 +394,18 @@ Ortam: bulut Linux, Godot 4.6.3 headless, yerel CPU (web/WASM için kabaca 2–3
 - Regresyon kalkanı: `tests/test_perf_paths.gd` (davranış denkliği + gevşek 2,5 ms kare bütçesi).
 - Ertelenen (Katman 2, ayrı tur): sheet ısınması ve çözülmüş sheet bellek sınırı (önceki ölçüm 15 sheet, 94 MB RAM; ilk görünüşte 27–45 ms çözme).
 - `browser_forge --rescue` kurtarma yaklaşması rastgele çatışmada can bütçesini (8) aşabiliyor; değişikliksiz 0.57.2'de de 5 denemenin 2'sinde düştü. Oynak test olarak kayıtlı.
+
+## 0.57.4 · Paket boyutu ve bellek (25 Kasım 2026)
+
+| Ölçüt | 0.57.3 | 0.57.4 | Not |
+| --- | --- | --- | --- |
+| Web PCK | 212,4 MB | 115,1 MB | CONFIRMED, aynı export yöntemi |
+| Doku verisi (ctex toplamı) | 216,1 MB | 108,3 MB | CONFIRMED |
+| Çözülmüş sheet belleği (kıyı→rıhtım→su→röle→arena akışı) | 17 sheet / 107 MB | 11 sheet / 69 MB | CONFIRMED, Xvfb |
+| İkinci ziyarette oyun içi sheet çözme | 0 (hepsi bellekte, sınırsız) | 0 (geçişte ısınır, sınırlı) | CONFIRMED |
+
+- `assets/*.png.import`: 136 doku `compress/mode=1`, `lossy_quality=0.95`. Kayıpsız kalanlar: `m1-selection-portraits`, `campaign-panorama`, `mission-hero-armadillo-low-throw`, `m1-locks-and-traps`, `mission-hero-frog-low-throw`, `keepers-walk` (PSNR < 37 dB). 142 dokuda ortanca PSNR 41,8 dB.
+- `RunnerSourcePixels.sheet(path)`: paylaşılan, salt okunur RGBA8 sheet önbelleği (`SHEET_LIMIT` 8, en az kullanılan bırakılır). `enter_section(id)` `load_section` başında, kararmış geçişte bölümün önceden kullandığı sheet'leri çözer. İlk ziyaretteki ilk çözme takılması (27–45 ms yerel) sürer.
+- Reddedilen: JSON'u ikili kaynağa çevirmek, yükleme süresini 427 → 1.290 ms'ye çıkarıp boyutu 2,6 katına getirdi. JSON'un %92'si kare silüet aralıkları (`runs`); gerçek çözüm export'ta paketleme ve tembel okuma (büyük değişiklik, öneri).
+- Çözülmedi: `browser_forge --rescue` oynaklığı. Bot geri çekilmesi ve can bütçesi 12 denendi, 7 denemenin 3'ünde yine düştü (13 ölüm; yeni 90 s arama zaman aşımı). Değişiklikler geri alındı. Ölüm nedenleri: karga dalışı, yürüyen düşman teması, x≈1756'daki yer nişancısı mermisi. Önerilen çözüm: QA modunda sabit tohum veya daha akıllı bot.
+

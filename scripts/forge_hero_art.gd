@@ -13,16 +13,12 @@ func pose(key: String, row: int, frame: int) -> Dictionary:
 	frame = clampi(frame, 0, atlas.frames[row].size() - 1)
 	var id := key + ":" + str(row) + ":" + str(frame)
 	if cache.has(id): return cache[id]
-	if not images.has(key):
-		var pixels := RunnerSourcePixels.image("res://" + str(atlas.path))
-		if pixels.is_compressed(): pixels.decompress()
-		pixels.convert(Image.FORMAT_RGBA8)
-		images[key] = pixels
+	var sheet_image: Image=RunnerSourcePixels.sheet("res://" + str(atlas.path))
 	var f: Dictionary = atlas.frames[row][frame]
 	var b: Array = f.bounds
 	var image := Image.create_empty(int(b[2]) - int(b[0]) + 4, int(b[3]) - int(b[1]) + 4, false, Image.FORMAT_RGBA8)
 	for run in f.runs:
-		image.blit_rect(images[key], Rect2i(int(f.rect[0]) + int(run[1]), int(f.rect[1]) + int(run[0]), int(run[2]), 1), Vector2i(int(run[1]) - int(b[0]) + 2, int(run[0]) - int(b[1]) + 2))
+		image.blit_rect(sheet_image, Rect2i(int(f.rect[0]) + int(run[1]), int(f.rect[1]) + int(run[0]), int(run[2]), 1), Vector2i(int(run[1]) - int(b[0]) + 2, int(run[0]) - int(b[1]) + 2))
 	var factor: float = atlas.scales[row]
 	cache[id] = {"texture": ImageTexture.create_from_image(image), "offset": Vector2(float(b[0]) - float(f.origin[0]) - 2., float(b[1]) - float(f.origin[1]) - 2.) * factor, "size": image.get_size() * factor, "source_key": "forge-" + key, "source_row": row, "source_frame": frame, "gun_embedded": key != "embark"}
 	if f.has("muzzle"):

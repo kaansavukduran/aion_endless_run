@@ -28,9 +28,7 @@ func pose(hero: String,action: String,frame: int=0) -> Dictionary:
 	if cache.has(key):return cache[key]
 	var atlas: Dictionary=DATA.data.atlas
 	if source==null:
-		source=RunnerSourcePixels.image("res://"+str(atlas.path))
-		if source.is_compressed():source.decompress()
-		source.convert(Image.FORMAT_RGBA8)
+		source=RunnerSourcePixels.sheet("res://"+str(atlas.path))
 	var f: Dictionary=atlas.frames[row][frame];var b: Array=f.bounds
 	var isolated:=Image.create_empty(int(b[2]-b[0])+4,int(b[3]-b[1])+4,false,Image.FORMAT_RGBA8)
 	for run in f.runs:
