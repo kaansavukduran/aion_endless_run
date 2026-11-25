@@ -34,6 +34,17 @@ static func enemy_draw_direction(kind: String, facing: int) -> int:
 	var source_facing: int=1 if kind in ["drone","seed"] else -1
 	return source_facing*(-1 if facing<0 else 1)
 
+static func enemy_frame(enemy: Dictionary, attacking: bool) -> int:
+	if bool(enemy.defeated):return clampi(int(float(enemy.get("dead_age",0.))/.65*6.),0,5)
+	if float(enemy.windup)>0.:
+		return clampi(int((1.-float(enemy.windup)/(.85 if bool(enemy.mini) else .65))*3.),0,2)
+	if float(enemy.get("flash",0.))>0.:return clampi(3+int((.24-float(enemy.flash))/.24*3.),3,5)
+	var frame:=int(float(enemy.age)*9.)
+	# A flock that enters together shares an age, but each bird has its own wingbeat.
+	# The spawn index survives Continue, so the same crow keeps its own phase.
+	if enemy.kind=="crow" and not attacking:frame+=str(enemy.id).get_slice(":",2).to_int()
+	return posmod(frame,6)
+
 static func npc_draw_direction(facing: int) -> int:
 	# Freed walk/departure sources face left. World velocity never changes
 	# to compensate for a sprite flip.
@@ -125,7 +136,9 @@ func held_gun(hero: String,p: Vector2,direction: int) -> void:
 
 func _draw() -> void:
 	if world==null: return
-	if not CampaignEnvironmentView.background(self):landscape.panorama(self,world.biome(),camera_x,.05)
+	# The camera can move the foreground floor to the bottom of the viewport.
+	# Frame the panorama once for the full height so that it never opens a seam.
+	if not CampaignEnvironmentView.background(self):landscape.panorama(self,world.biome(),camera_x,.05,1.,scene_h)
 	var base_ground:=ground
 	ground-=camera_y
 	draw_world()
@@ -242,10 +255,7 @@ func draw_world() -> void:
 		var recovering: bool = float(e.get("recover",0.))>0. and CampaignEnemies.active_time(e)<=0.
 		var tint := Color("cbd8e8") if recovering and not bool(e.defeated) else Color.WHITE
 		var attack: bool = enemy_attacking(e)
-		var frame: int = posmod(int(float(e.age)*9.),6)
-		if bool(e.defeated):frame=clampi(int(float(e.get("dead_age",0.))/.65*6.),0,5)
-		elif float(e.windup)>0.:frame=clampi(int((1.-float(e.windup)/(.85 if bool(e.mini) else .65))*3.),0,2)
-		elif float(e.get("flash",0.))>0.:frame=clampi(3+int((.24-float(e.flash))/.24*3.),3,5)
+		var frame := enemy_frame(e,attack)
 		if CampaignContent.NEW_ENEMIES.has(str(e.kind)):
 			var spec: Dictionary=CampaignContent.NEW_ENEMIES[str(e.kind)]
 			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if attack and not recovering else 0))

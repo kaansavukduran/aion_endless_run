@@ -96,7 +96,8 @@ static func weapon_metrics(kind: String,crouched: bool=false) -> Dictionary:
  var muzzle:=muzzle_pixel*factor-grip
  return {'kind':kind,'display_source':source_kind,'size':dimensions*factor,'offset':-grip,'muzzle':muzzle,'factor':factor,'grip_pixel':grip_pixel,'muzzle_pixel':muzzle_pixel}
 static func placement(w) -> Dictionary:
- var body:=metrics(w);var spec:=body_spec(w)
+ var spec:=body_spec(w)
+ var body:=M1HeroArt.metrics(str(spec.hero),str(spec.action),int(spec.frame))
  var direction: int=int(spec.mirror)
  var aim: Vector2=Vector2(w.aim_direction).normalized() if Vector2(w.aim_direction).length_squared()>.01 else Vector2(direction,0.)
  var displayed: String=str(w.shot_weapon) if w.shot_flash>0. and not str(w.shot_weapon).is_empty() else str(w.weapon)

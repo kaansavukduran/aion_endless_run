@@ -11,12 +11,12 @@ func prepare() -> void:
 	for region in META.data.panels:
 		panels.append(ImageTexture.create_from_image(image.get_region(Rect2i(region[0],region[1],region[2],region[3]))))
 
-func panorama(host,kind: int,scroll: float,night: float,alpha: float=1.0) -> void:
+func panorama(host,kind: int,scroll: float,night: float,alpha: float=1.0,minimum_height: float=0.) -> void:
 	prepare()
 	var texture: Texture2D=panels[kind]
 	# Uniform scaling preserves the drawings in both orientations. Mirror the
 	# alternating repeat at its shared edge, avoiding a discontinuous atlas seam.
-	var height: float=host.ground
+	var height: float=maxf(host.ground,minimum_height)
 	var width: float=height*texture.get_width()/texture.get_height()
 	var travel: float=scroll*.13
 	var index: int=floori(travel/width)

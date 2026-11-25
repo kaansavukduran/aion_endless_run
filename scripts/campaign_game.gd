@@ -27,7 +27,6 @@ var layer: CanvasLayer
 var ui: Control
 var menu: PanelContainer
 var column: VBoxContainer
-var hud: Label
 var subtitle: Label
 var boss_health: ProgressBar
 var pause_button: Button
@@ -230,7 +229,6 @@ func build_ui() -> void:
 	buttons.clear();actions.clear(); menu=null
 	hud_panel=CampaignHUD.new();hud_panel.host=self;hud_panel.mouse_filter=Control.MOUSE_FILTER_IGNORE;ui.add_child(hud_panel);hud_panel.refresh()
 	var band_height: float=hud_panel.strip_height
-	hud=label("",17);ui.add_child(hud);hud.hide()
 	pause_button=Button.new();pause_button.name="CampaignPause";pause_button.text="II";pause_button.tooltip_text=old("pause");pause_button.add_theme_font_size_override("font_size",font_size(20));ui.add_child(pause_button)
 	pause_button.position=Vector2(view_w-72,4);pause_button.size=Vector2(64,maxf(44.,band_height-8));pause_button.pressed.connect(toggle_pause)
 	subtitle=label("",16);ui.add_child(subtitle);subtitle.position=Vector2(12,band_height+6);subtitle.size=Vector2(view_w-24,90);subtitle.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -244,6 +242,7 @@ func build_ui() -> void:
 	if presentation_stage!="":build_presentation()
 	if menu_kind!="": build_menu()
 	update_hud()
+	view.queue_redraw()
 	finish_layout.call_deferred(ui_generation)
 
 func finish_layout(generation: int) -> void:
@@ -929,7 +928,10 @@ func pointer_aim() -> Vector2:
 	# the pointer and reverse aim again next frame. Use the body centre there.
 	var local_point:=transform.affine_inverse()*mouse_point
 	if absf(local_point.x-view.at(world.player).x)<=absf(offset.x):offset.x=0.
-	var toward:=mouse_point-transform*view.at(world.player+offset)
+	# During _draw the view already subtracts camera_y from its ground line.
+	# Pointer events use the unshifted line, so project the same visible grip.
+	var hand:=world.player+offset-Vector2(0.,view.camera_y)
+	var toward:=mouse_point-transform*view.at(hand)
 	return toward.normalized() if toward.length()>10. else Vector2.ZERO
 
 func _process(dt: float) -> void:
@@ -991,6 +993,7 @@ func _process(dt: float) -> void:
 		if event in ["shot","melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","hive_drop","hive_splash","guardian","boss_attack","boss_port","boss_wave","boss_beam","complete","checkpoint","enemy","armour_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
+	var old_camera:=Vector2(view.camera_x,view.camera_y)
 	if world.state not in CampaignLives.TRANSITIONS:
 		var desired_x:=clampf(world.player.x-view.scene_w*.34,0.,maxf(0.,world.length()-view.scene_w))
 		if world.entry_guard and not options.reduced_motion:
@@ -1001,15 +1004,16 @@ func _process(dt: float) -> void:
 		desired_y=CampaignRoutes.camera_y(world,desired_y)
 		view.camera_y=desired_y if options.reduced_motion else lerpf(view.camera_y,desired_y,1.-exp(-minf(dt,.05)*9.))
 		world.recovery_view=Rect2(view.camera_x,view.camera_y-view.ground,view.scene_w,view.ground+60.)
-	view.queue_redraw();update_hud()
+	if world.state!="paused" or not old_camera.is_equal_approx(Vector2(view.camera_x,view.camera_y)):
+		view.queue_redraw()
+	update_hud()
 	telemetry_clock+=dt
 	if telemetry_clock>.1:telemetry_clock=0.;metadata()
 	last_state=world.state
 
 func update_hud() -> void:
-	if not is_instance_valid(hud):return
+	if not is_instance_valid(hud_panel):return
 	hud_panel.refresh()
-	hud.text="%05d" % world.score+("\n" if portrait or options.text_scale>1. else "  ·  ")+t("reserve_lives")+" %d" % maxi(0,world.attempts_remaining-1)+"  ·  "+t("grenade")+" %d" % world.grenades
 	var region: String=world.section
 	if CampaignContent.SCENES.has(region):region=str(CampaignContent.SCENES[region][clampi(int(world.player.x/world.length()*3.),0,2)])
 	subtitle.text=t("mission")+" · "+t(region)

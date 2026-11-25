@@ -30,6 +30,17 @@ func run():
   for frame in bank.count('enemies',row):
    var pose=bank.pose('enemies',row,frame)
    check(pose.source_key=='polish-enemies' and int(pose.source_row)==row,'Uses visually inspected original left-facing clip')
+ w.enemies.clear()
+ for index in [31,32,33]:w.spawn_enemy('crow',1000.+float(index)*10.,-120.,index)
+ var flight_frames := {}
+ for crow in w.enemies:
+  crow.age=.23
+  var frame:=AionCampaignView.enemy_frame(crow,false)
+  flight_frames[frame]=true
+  check(AionCampaignView.enemy_frame(crow,true)==2,'Crow attack remains tied to the existing action clock')
+  crow.windup=.60
+  check(AionCampaignView.enemy_frame(crow,false)==0,'Crow telegraph has no decorative flight offset')
+ check(flight_frames.size()==3,'Crows with identical ages render distinct flight cels')
  # The approved rescue NPC walking frames are authored LEFT-facing. Check
  # their actual model movement, not the previous mistaken facing==raw-flip
  # assumption. These are isolated physics fixtures, not browser setters.

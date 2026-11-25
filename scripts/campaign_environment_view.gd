@@ -6,7 +6,7 @@ static func background(v) -> bool:
 	var row: int=["water","terrace","roots"].find("terrace" if v.world.section=="fork_two" else v.world.section)
 	if row<0:return false
 	var source_h: float=PANORAMA.get_height()/3.
-	var scale: float=maxf(v.scene_w/PANORAMA.get_width(),v.ground/source_h)*1.1
+	var scale: float=maxf(v.scene_w/PANORAMA.get_width(),v.scene_h/source_h)*1.1
 	var width: float=PANORAMA.get_width()*scale
 	var offset: float=fmod(v.camera_x*.12,width) if v.host.motion_enabled and not v.host.options.reduced_motion else 0.
 	for i in range(-1,ceili(v.scene_w/width)+2):

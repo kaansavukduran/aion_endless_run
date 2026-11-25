@@ -47,6 +47,14 @@ func run() -> void:
 	game.touch_mode=true;game.resize();game.world.state="playing";game.menu_kind="";game.build_ui()
 	for id in ["shore","canopy","water","terrace","roots","relay"]:
 		stage(id,900.);await capture(id)
+	for id in ["shore","water"]:
+		stage(id,140.)
+		game.view.camera_y=-180.
+		var reveal: Image=await capture(id+"-raised-camera")
+		var row: int=roundi((root.get_final_transform()*game.view.get_global_transform_with_canvas()*Vector2(0.,game.view.ground+100.)).y)
+		var colors := {}
+		for x in range(240,1024,7):colors[reveal.get_pixel(x,row)]=true
+		check(colors.size()>24,"A raised camera still reveals continuous panorama above the actual floor: "+id)
 	for junction in CampaignRoutes.FORKS:
 		for upper in [false,true]:
 			if junction=="fork_two" and not upper:
@@ -110,6 +118,25 @@ func run() -> void:
 	# playable owl/wolf bodies inserted into the six-hero animation matrix.
 	game.world.begin("aion");stage("shore",900.);CampaignAssists.summon(game.world,"owl_feather");CampaignAssists.summon(game.world,"wolf_charm")
 	await capture("companion-powers")
+	game.world.begin("aion");stage("shore",140.)
+	game.world.state="playing"
+	game.toggle_pause()
+	var draws := [0]
+	var record_draw := func(): draws[0]+=1
+	game.view.draw.connect(record_draw)
+	game.set_process(true)
+	for i in 5:await process_frame
+	draws[0]=0
+	for i in 10:await process_frame
+	check(draws[0]==0,"A stationary paused field reuses its canvas draw commands")
+	root.size=Vector2i(1100,660)
+	for i in 5:await process_frame
+	check(draws[0]>0,"A paused viewport resize reprojects the scene")
+	game.close_menu()
+	draws[0]=0
+	for i in 10:await process_frame
+	check(draws[0]>0,"Resuming the game redraws the visible action")
+	game.view.draw.disconnect(record_draw)
 	var report:=FileAccess.open(output+"/fixtures.json",FileAccess.WRITE);report.store_string(JSON.stringify(fixture_data,"  "));report.close()
 	game.queue_free();await process_frame
 	print("RESULT: %d campaign render checks, %d failures" % [checks,failures]);quit(1 if failures else 0)

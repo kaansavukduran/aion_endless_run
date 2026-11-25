@@ -74,6 +74,27 @@ func stable_armadillo_aim(g: AionCampaignGame) -> void:
 	var facing_right:=g.pointer_aim()
 	check(facing_left.x>0. and facing_right.x>0. and facing_left.is_equal_approx(facing_right),"Airborne aim stays on the same side when the registered hand mirrors")
 
+func pointer_matches_camera(g: AionCampaignGame) -> void:
+	for hero in AionCampaignWorld.HEROES:
+		clean(g,hero)
+		g.world.player=Vector2(1300.5,-135.5)
+		g.world.velocity.y=150.
+		g.view.camera_x=820.75
+		for height in [-136., 80.]:
+			g.view.camera_y=height
+			for side in [-1., 1.]:
+				g.world.facing=int(side)
+				g.world.aim_direction=Vector2(side,0.)
+				var hand: Vector2=g.world.player+Vector2(M1CombatArt.placement(g.world).grip)
+				var visible_grip:=Vector2(hand.x-g.view.camera_x,hand.y+g.view.ground-height).round()
+				var transform:=g.view.get_global_transform_with_canvas()
+				g.mouse_point=transform*(visible_grip+Vector2(side*180.,0.))
+				check(g.pointer_aim().is_equal_approx(Vector2(side,0.)),"Horizontal aim follows the drawn hand when the vertical camera moves: "+hero)
+				g.mouse_point=transform*(visible_grip+Vector2(side*180.,-135.))
+				check(g.pointer_aim().is_equal_approx(Vector2(side*.8,-.6)),"Diagonal aim keeps the same slope at any camera height: "+hero)
+	g.view.camera_x=0.
+	g.view.camera_y=0.
+
 func compact_inputs(g: AionCampaignGame) -> void:
 	clean(g,"armadillo");g.down_down=true;g.update_arcade_aim()
 	g.set_action("attack","held-before-roll",true)
@@ -205,7 +226,7 @@ func _initialize() -> void:call_deferred("run")
 
 func run() -> void:
 	var g:=AionCampaignGame.new();root.add_child(g);await process_frame;g.set_process(false)
-	context_routes(g);stable_armadillo_aim(g);compact_inputs(g);rescue_context(g);interruptions(g);audio_events(g);touch_context(g)
+	context_routes(g);stable_armadillo_aim(g);pointer_matches_camera(g);compact_inputs(g);rescue_context(g);interruptions(g);audio_events(g);touch_context(g)
 	g.queue_free();await process_frame
 	print("RESULT: %d campaign context checks, %d failures"%[checks,failures])
 	quit(1 if failures else 0)

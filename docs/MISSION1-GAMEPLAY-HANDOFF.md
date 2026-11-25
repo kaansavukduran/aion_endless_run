@@ -409,3 +409,21 @@ Ortam: bulut Linux, Godot 4.6.3 headless, yerel CPU (web/WASM için kabaca 2–3
 - Reddedilen: JSON'u ikili kaynağa çevirmek, yükleme süresini 427 → 1.290 ms'ye çıkarıp boyutu 2,6 katına getirdi. JSON'un %92'si kare silüet aralıkları (`runs`); gerçek çözüm export'ta paketleme ve tembel okuma (büyük değişiklik, öneri).
 - Çözülmedi: `browser_forge --rescue` oynaklığı. Bot geri çekilmesi ve can bütçesi 12 denendi, 7 denemenin 3'ünde yine düştü (13 ölüm; yeni 90 s arama zaman aşımı). Değişiklikler geri alındı. Ölüm nedenleri: karga dalışı, yürüyen düşman teması, x≈1756'daki yer nişancısı mermisi. Önerilen çözüm: QA modunda sabit tohum veya daha akıllı bot.
 
+
+## 0.57.5 · Animasyon, çizim ve doku denetimi
+
+Taban `9ca40b2b228ac58f7c330116aaeda8d4a3e747d4`. Kapsam Mission 1. AIONIA v1.7, AER v1.1 ve referans dizini revizyon 3 incelendi. Motor Godot 4.6.3.
+
+| Bulgu | Onarım ve kabul |
+| --- | --- |
+| M1-D01 · Orta · Kamera yükseldiğinde fare hedefi kayıyordu | Farenin namlu referansına çizimdeki düşey kamera dönüşümü uygulandı. Sabit hedefe yatay atışta sapma yaklaşık 44° idi. Altı kahramanı iki kamera yüksekliğinde ve iki yönde yatay ve eğik nişanda kapsayan regresyon eklendi. Yerel Chromium’da Kurbağa’nın gerçek şarjlı zıplamasıyla nişan doğrulandı. |
+| M1-D02 · Düşük · Yüksek kamerada zeminin üstü boş kalıyordu | Orman ve özgün rota panoramaları görüş alanının tamamına sabit oranla çerçevelendi. Fener Kıyısı ve Su Yolu’nda yüksek kamera anı gerçek OpenGL çiziminden örneklendi. |
+| M1-D03 · Düşük · Karga sürüsü aynı anda aynı kareyi çiziyordu | Uçuş fazı her karganın kalıcı doğuş indeksinden kaydırıldı. Uyarı, saldırı ve ölüm kareleri kendi sürelerini kullanıyor. |
+| M1-D04 · Düşük · Kayıplı doku sıkıştırması ince piksel çizgilerini yumuşatıyordu | Aion, Kurbağa’nın eğilme ve tükürme paftaları, tabanca, ahşap parçalar ve su kapağı için kayıpsız içe aktarma. Altı dokuda alfa kanalı ve belirgin opaklıktaki pikseller özgün kaynakla eşleşiyor. Yerel Web PCK 115,06 MB’tan 116,13 MB’a çıktı. |
+| M1-D05 · Düşük · Durağan duraklatma sahnesi ve atış pozu yinelenen iş oluşturuyordu | Durağan duraklatmada dünya çizim komutları korunuyor, boyut değişimi ve devam çizimi tetikliyor. Görünmez HUD etiketi ve aynı atış pozu için ikinci hesap kaldırıldı. Beş gerçek OpenGL örneğinde 30 motor karesi başına 30 dünya çizimi 0’a indi. Linux Godot mikro ölçümünde izole Kurbağa silah yerleşimi medyanı 129,9 µs’den 95,3 µs’ye düştü. Altı kahramanın altı uçuş evresinde eski ve yeni yerleşim verileri eşleşti. |
+
+73 kaynak paketi ve 51.796 kontrol geçti. 970 gerçek çizim kontrolü kurulu motor sahnelerinde çalıştı. Normal Chromium girdileriyle seçim, yükselen kamerada fareyle atış, eğilmiş pozda duraklatma, dikeye geçiş, çoklu dokunma ve çevrimdışı kayda dönüş doğrulandı. Firefox’ta Ateş et ve Zıpla iki yönde doğru çalıştı. Gamepad kontrolü sanal Gamepad API ile yapıldı. Yerel web paketi `3acf259f3f828065`. Fiziksel Poco ve Xbox kolu test edilmedi. Mikro ölçüm yalnız silah yerleşimine ait.
+
+```text
+Denetimde yeniden üretilen M1-D01–D05 yerel adayda giderildi. Tekrar için python3 packaging/run_source_tests.py çalıştır. Gerçek çizim için tests/render_campaign_review.gd dosyasını Godot 4.6.3 ile OpenGL ortamında aç. Fiziksel telefon doğrulaması için yerel adayı yükle ve Fener Kıyısı’nda şarjlı zıplamayı, duraklatmayı ve yön dönüşünü dene.
+```

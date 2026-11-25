@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/m1-redraw-aion.png-b09c6d4dc54445cab5adeba43d
 
 [params]
 
-compress/mode=1
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.95
 compress/uastc_level=0
