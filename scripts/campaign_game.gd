@@ -256,7 +256,14 @@ func finish_layout(generation: int) -> void:
 func build_touch() -> void:
 	stick=AionCampaignStick.new();stick.name="CampaignJoystick";stick.mouse_filter=Control.MOUSE_FILTER_IGNORE;ui.add_child(stick)
 	stick.position=Vector2(24,view_h-177);stick.size=Vector2(150,150)
-	var points := {"jump":Vector2(view_w-120,view_h-111),"attack":Vector2(view_w-230,view_h-218),"grenade":Vector2(view_w-230,view_h-111),"context":Vector2(view_w-115,view_h-213)}
+	var right_column := view_w - 120.0
+	var left_column := view_w - 230.0
+	var points := {
+		"jump": Vector2(right_column, view_h - 111.0),
+		"attack": Vector2(right_column, view_h - 218.0),
+		"grenade": Vector2(left_column, view_h - 111.0),
+		"context": Vector2(left_column + 5.0, view_h - 213.0),
+	}
 	for key in points:
 		var item:=AionCampaignTouch.new();item.name="Campaign_"+key;item.action="shoot" if key=="attack" else key
 		item.caption={"jump":old("control_jump"),"attack":old("control_shoot"),"grenade":t("grenade")}.get(key,"")
