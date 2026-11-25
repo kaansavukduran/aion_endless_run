@@ -111,12 +111,8 @@ func pose(key: String, row: int, column: int, original_source: bool=false) -> Di
 	var cache_key := "%s:%d:%d" % [key,row,column]
 	if frames.has(cache_key): return frames[cache_key]
 	var f: Dictionary = d.frames[row][column]
-	if not images.has(key):
-		var source := RunnerSourcePixels.image("res://"+str(d.path))
-		if source.is_compressed(): source.decompress()
-		source.convert(Image.FORMAT_RGBA8)
-		images[key] = source
-	var source: Image = images[key]
+	var sheet_image: Image=RunnerSourcePixels.sheet("res://"+str(d.path))
+	var source: Image = sheet_image
 	var b: Array = f.bounds
 	var isolated := Image.create_empty(int(b[2]-b[0])+4,int(b[3]-b[1])+4,false,Image.FORMAT_RGBA8)
 	# Copy only registered silhouette spans. Source files stay unchanged. The

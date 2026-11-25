@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/keepers-walk.png-07f81cfaaa0e0c5900a215feb45f
 
 compress/mode=0
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.95
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

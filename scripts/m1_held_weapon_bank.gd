@@ -4,7 +4,6 @@ extends RefCounted
 const DATA=preload('res://assets/M1-HELD-WEAPONS.json')
 const VARIANTS=preload('res://assets/M1-HELD-VARIANTS.json')
 static var cache: Dictionary={}
-static var variant_sources: Dictionary={}
 
 static func registration(kind: String) -> Dictionary:
  if VARIANTS.data.weapons.has(kind):return VARIANTS.data.weapons[kind]
@@ -20,14 +19,11 @@ static func texture(items: ForgeItemBank,kind: String) -> Texture2D:
  var registration: Dictionary=M1HeldWeaponBank.registration(kind)
  if registration.has('path'):
   var path: String='res://'+str(registration.path)
-  if not variant_sources.has(path):
-   var raw:=RunnerSourcePixels.image(path)
-   if raw.is_compressed():raw.decompress()
-   raw.convert(Image.FORMAT_RGBA8);variant_sources[path]=raw
+  var variant_sheet: Image=RunnerSourcePixels.sheet(path)
   var canvas: Array=registration.canvas_size;var bounds: Array=registration.bounds
   var isolated:=Image.create_empty(int(canvas[0]),int(canvas[1]),false,Image.FORMAT_RGBA8)
   for run in registration.runs:
-   isolated.blit_rect(variant_sources[path],Rect2i(int(run[1]),int(run[0]),int(run[2]),1),Vector2i(int(run[1])-int(bounds[0])+2,int(run[0])-int(bounds[1])+2))
+   isolated.blit_rect(variant_sheet,Rect2i(int(run[1]),int(run[0]),int(run[2]),1),Vector2i(int(run[1])-int(bounds[0])+2,int(run[0])-int(bounds[1])+2))
   if int(registration.source_facing)<0:isolated.flip_x()
   cache[kind]=ImageTexture.create_from_image(isolated)
   return cache[kind]

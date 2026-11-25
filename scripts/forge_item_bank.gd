@@ -9,9 +9,7 @@ func pose(kind: String) -> Dictionary:
 	assert(DATA.data.frames.has(kind),"Unknown actual item: "+kind)
 	if cache.has(kind):return cache[kind]
 	if source==null:
-		source=RunnerSourcePixels.image("res://assets/forge-items.png")
-		if source.is_compressed():source.decompress()
-		source.convert(Image.FORMAT_RGBA8)
+		source=RunnerSourcePixels.sheet("res://assets/forge-items.png")
 	var f: Dictionary=DATA.data.frames[kind]
 	var b: Array=f.bounds
 	var isolated:=Image.create_empty(int(b[2]-b[0])+4,int(b[3]-b[1])+4,false,Image.FORMAT_RGBA8)

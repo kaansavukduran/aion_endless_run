@@ -37,3 +37,42 @@ static func decode(path: String) -> Image:
 	if error != OK or result.is_empty() or result.is_compressed(): return null
 	if result.get_format() != format: result.convert(format)
 	return result
+
+## Shared, bounded cache of decoded RGBA8 source sheets. Banks copy frame runs
+## out of a sheet only when a frame is first needed, so they no longer keep
+## their own full-sheet copies: one decode per sheet, at most SHEET_LIMIT
+## sheets resident (least recently used is released and decoded again later).
+## Sheets are read-only for every caller.
+const SHEET_LIMIT := 8
+static var sheets: Dictionary = {}
+static var recent: Array[String] = []
+static var section_paths: Dictionary = {}
+static var current_section := ""
+static var decodes := 0
+
+static func sheet(path: String) -> Image:
+	if sheets.has(path):
+		recent.erase(path);recent.append(path)
+	else:
+		var decoded := image(path)
+		if decoded.is_compressed():decoded.decompress()
+		decoded.convert(Image.FORMAT_RGBA8)
+		sheets[path]=decoded;recent.append(path);decodes+=1
+		while recent.size()>SHEET_LIMIT:sheets.erase(recent.pop_front())
+	if current_section!="":
+		if not section_paths.has(current_section):section_paths[current_section]={}
+		section_paths[current_section][path]=true
+	return sheets[path]
+
+## Called while a section loads behind the travel fade: decode the sheets this
+## section used before (retry, Continue, replay) so play does not hitch on them.
+static func enter_section(id: String) -> void:
+	current_section=id
+	var used: Dictionary=section_paths.get(id,{})
+	var warm: Array=used.keys().slice(maxi(0,used.size()-SHEET_LIMIT))
+	for path in warm:sheet(path)
+
+static func resident_bytes() -> int:
+	var total:=0
+	for decoded in sheets.values():total+=decoded.get_data_size()
+	return total

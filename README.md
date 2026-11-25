@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.57.4 · Yarı boyutta indirme, daha az bellek
+
+Oynanış değişmedi. Web paketi 212,4 MB'tan 115,1 MB'a indi: 136 sprite sayfası yüksek kaliteli kayıplı WebP ile saklanıyor (ortanca PSNR 41,8 dB); en çok fark edilecek 6 sayfa (seçim portreleri, panorama, iki fırlatma sayfası, kilit/tuzak, bekçi yürüyüşü) kayıpsız kaldı. Kaynak PNG'ler değişmedi. Sanat bankaları çözülmüş sayfaları artık tek, sınırlı (8 sayfa) ortak önbellekte tutuyor: aynı akışta çözülmüş sayfa belleği 107 MB'tan 69 MB'a indi. Bölüm yeniden yüklenirken (ölüm sonrası, devam, tekrar) o bölümde kullanılmış sayfalar kararmış geçişte önceden çözülür; oyun içinde çözme takılması olmaz. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
+
 ## 0.57.3 · Daha hafif oyun döngüsü
 
 Oynanış değişmedi. Görev karesindeki üç sık işlem ölçülerek hafifletildi: mermi başına ip vuruş testi önce ucuz geometriyle eler (37,9 → 4,8 µs), kapı kontrolü düşmanları her kapı için değil karede bir kez tarar, uzak ödüller temas kontrolüne girmez. Su rotası yoğun karesinde oyun mantığı yaklaşık %30 hafifledi. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
