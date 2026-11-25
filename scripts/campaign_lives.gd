@@ -4,7 +4,9 @@ extends RefCounted
 const ATTEMPTS := 3
 const OFFER_SECONDS := 10.
 const ENTRY_SECONDS := .62
-const ENTRY_PROTECTION := 1.25
+const ENTRY_PROTECTION := 3.
+const SHIELD_CHARGE_SECONDS := 8.
+const SHIELD_RECOVERY := .45
 const TRANSITIONS := ["dying","respawn_pending","respawn","continue_offer","dead"]
 
 static func reset(w) -> void:
@@ -14,6 +16,7 @@ static func reset(w) -> void:
 	w.continue_hero=w.character
 	w.entry_clock=0.
 	w.entry_guard=false
+	w.shield_charge=0.
 	w.recovery_view=Rect2()
 
 static func lethal(w,cause: String) -> void:
@@ -27,6 +30,7 @@ static func lethal(w,cause: String) -> void:
 	w.death_cause=cause
 	w.death_time=0.
 	w.entry_guard=false
+	w.shield_charge=0.
 	w.state="dying"
 	w.weapon="pistol"
 	w.ammunition=0
@@ -39,6 +43,21 @@ static func lethal(w,cause: String) -> void:
 	w.rescue_target=""
 	w.stop_inputs()
 	w.pending_events.append("life_changed")
+
+static func step_protection(w,dt: float) -> void:
+	var protected_time:=minf(float(w.invulnerable),dt)
+	w.invulnerable=maxf(0.,float(w.invulnerable)-dt)
+	if is_zero_approx(float(w.invulnerable)):
+		w.invulnerable=0.
+		w.entry_guard=false
+	w.shield_charge=minf(SHIELD_CHARGE_SECONDS,float(w.shield_charge)+dt-protected_time)
+
+static func absorb_hit(w) -> bool:
+	if not w.shield_ready():return false
+	w.shield_charge=0.
+	w.invulnerable=SHIELD_RECOVERY
+	w.pending_events.append("shield_hit")
+	return true
 
 static func impact_duration(cause: String) -> float:
 	match cause:
@@ -164,6 +183,7 @@ static func step_entry(w,dt: float) -> void:
 		w.player=w.entry_to
 		w.velocity=Vector2.ZERO
 		w.hp=1
+		w.hurt_time=0.
 		w.jumps=0
 		w.air_time=0.
 		w.trail.clear()

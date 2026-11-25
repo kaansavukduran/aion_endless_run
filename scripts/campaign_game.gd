@@ -1015,13 +1015,13 @@ func _process(dt: float) -> void:
 			if world.state=="complete":menu_kind="outro";save_checkpoint()
 			build_ui()
 	for event in world.pending_events:
-		if event in ["checkpoint","rescue","rescue_gift","secret","mechanism","life_changed","vehicle_impact","vehicle_wreck"] and menu_kind!="briefing":save_checkpoint()
+		if event in ["checkpoint","rescue","rescue_gift","secret","mechanism","life_changed","vehicle_impact","vehicle_wreck","shield_hit"] and menu_kind!="briefing":save_checkpoint()
 		if event=="enemy" and impact_cooldown<=0. and motion_enabled and not options.reduced_motion and world.state=="playing":impact_hold=.035;impact_cooldown=.18
 		if event in ["vehicle_impact","vehicle_wreck"]:
 			if event=="vehicle_impact":release_all()
 			sound("hurt" if event=="vehicle_impact" else "blast")
 		if event.begins_with("shot:"):sound_weapon(event.trim_prefix("shot:"))
-		elif event in ["melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","hive_drop","hive_splash","guardian","boss_attack","boss_port","boss_wave","boss_beam","boss_charge_warning","complete","checkpoint","enemy","armour_hit"]:sound(event)
+		elif event in ["melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","hive_drop","hive_splash","guardian","boss_attack","boss_port","boss_wave","boss_beam","boss_charge_warning","complete","checkpoint","enemy","armour_hit","shield_hit"]:sound(event)
 	world.pending_events.clear()
 	# Camera movement follows physics, never an atlas bounding box or ear tip.
 	var old_camera:=Vector2(view.camera_x,view.camera_y)
@@ -1176,6 +1176,7 @@ func sound(event: String) -> void:
 			elif event=="hive_drop":pitch=195.;count=2100
 			elif event=="hive_splash":pitch=95.;count=3500
 			elif event=="tally_tick":pitch=990.;count=850
+			elif event=="shield_hit":pitch=875.;count=2600
 			bytes.resize(count*2)
 			for i in count:
 				var phase: float=float(i)/22050.;var envelope: float=pow(1.-float(i)/count,2.)
@@ -1230,6 +1231,7 @@ func metadata() -> void:
 	data.camera_y=view.camera_y;data.ground=view.ground
 	data.travel_active=fade>=0. or world.state=="travel";data.travel_target=world.travel_target
 	data.grounded=world.grounded();data.invulnerable=world.invulnerable;data.aim=[world.aim_direction.x,world.aim_direction.y]
+	data.shield_charge=world.shield_charge;data.shield_ready=world.shield_ready()
 	data.presentation=presentation_stage;data.presentation_time=presentation_time;data.help_step=help_step;data.hud_summary=hud_panel.summary;data.report_lines=report_lines();data.input_kind=active_input;data.mount_transition=world.mount_transition;data.mount_transition_time=world.mount_transition_time
 	# Passive acceptance observations: these mirror real state, never mutate it.
 	data.engine_process_frames=Engine.get_process_frames();data.engine_physics_frames=Engine.get_physics_frames()

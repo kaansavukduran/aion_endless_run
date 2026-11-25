@@ -34,6 +34,11 @@ func run() -> void:
 	game.world.weapon="heavy";game.world.ammunition=7;game.world.attempts_remaining=2;game.world.rescued.append("shore:keeper")
 	game.update_hud()
 	check(game.hud_panel.summary.contains("7") and game.hud_panel.summary.contains(game.t("reserve_lives")+" 1") and game.hud_panel.summary.contains("1"),"HUD responds to actual weapon, reserve and rescue values")
+	var hp_band: float=game.hud_panel.strip_height
+	game.world.shield_charge=CampaignLives.SHIELD_CHARGE_SECONDS;game.update_hud()
+	check(game.hud_panel.shield_fill==4 and game.hud_panel.summary.contains(game.t("shield_ready")) and game.hud_panel.strip_height==hp_band,"Ready shield uses the compact icon without growing the HUD")
+	game.world.shield_charge=0.;game.update_hud()
+	check(game.hud_panel.shield_fill==0 and game.hud_panel.summary.contains(game.t("shield_charging")),"Spent shield updates the icon and accessible status")
 	game.world.mount.ridden=true;game.world.mount.type="shell";game.update_hud();await process_frame
 	check(game.hud_panel.summary.contains("∞") and not game.hud_panel.summary.contains(game.t("heavy")),"Mounted HUD shows the actual unlimited vehicle weapon rather than stowed hero ammunition")
 	game.world.mount.ridden=false

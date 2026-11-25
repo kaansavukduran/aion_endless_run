@@ -14,6 +14,7 @@ var last_health := -1
 var damage_flash := 0.0
 var last_clock := 0.0
 var last_signature := ""
+var shield_fill := 0
 var items: ForgeItemBank
 
 func avatar_pose() -> Dictionary:
@@ -37,10 +38,11 @@ func refresh() -> void:
 	var buff_parts: Array[String]=[]
 	for key in w.buffs:
 		if float(w.buffs[key])>0.:buff_parts.append(host.t(str(key))+" %ds"%ceili(float(w.buffs[key])))
-	var sig: String="%s|%d|%d|%d|%d|%s|%d|%d|%d|%d|%s|%s|%.0f|%d|%s"%[
+	shield_fill=4 if w.shield_ready() else mini(3,floori(w.shield_charge*4./CampaignLives.SHIELD_CHARGE_SECONDS))
+	var sig: String="%s|%d|%d|%d|%d|%s|%d|%d|%d|%d|%s|%s|%.0f|%d|%s|%d"%[
 		w.character,w.score,w.attempts_remaining,w.hp,w.grenades,active_weapon,life_rescued,w.flock,
 		1 if bool(w.mount.ridden) else 0,int(w.mount.hp),
-		",".join(assist_parts),",".join(buff_parts),host.view_w,point_size,host.language]
+		",".join(assist_parts),",".join(buff_parts),host.view_w,point_size,host.language,shield_fill]
 	if sig==last_signature and damage_flash<=0. and prev_flash<=0. and not rows.is_empty():
 		return
 	last_signature=sig
@@ -69,6 +71,7 @@ func refresh() -> void:
 	strip_height=12.+rows.size()*(font.get_height(point_size)+5.)
 	size=Vector2(host.view_w,strip_height)
 	summary=" · ".join(fields)
+	if w.hp>0:summary+=" · "+host.t("shield_ready" if shield_fill==4 else "shield_charging")
 	queue_redraw()
 
 func _draw() -> void:
@@ -116,3 +119,18 @@ func _draw() -> void:
 	var dimensions: Vector2=pose.get("size",pose.texture.get_size()*float(pose.get("scale",1.)))
 	var factor:=minf(36./dimensions.x,36./dimensions.y)
 	draw_texture_rect(pose.texture,Rect2(Vector2(5,5)+(Vector2(36,36)-dimensions*factor)*.5,dimensions*factor),false)
+	if w.hp>0:draw_shield(colors)
+
+func draw_shield(colors: Dictionary) -> void:
+	var origin:=Vector2(33.,29.)
+	var surface:=Color(colors.surface)
+	var rim:=Color(colors.text);rim.a=.75
+	var fill:=Color(colors.text) if shield_fill==4 else rim
+	draw_rect(Rect2(origin-Vector2.ONE,Vector2(14.,14.)),surface)
+	for row in 12:
+		var inset:=maxi(0,row-6)
+		draw_rect(Rect2(origin+Vector2(inset,row),Vector2(12-2*inset,1)),rim)
+	for row in range(1,10):
+		var inset:=maxi(1,row-5)
+		var charge:=row>=10-shield_fill*3
+		draw_rect(Rect2(origin+Vector2(inset,row),Vector2(12-2*inset,1)),fill if charge else surface)

@@ -2,6 +2,12 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+### Doğuş koruması ve kalkan · Yerel aday
+
+Tek canlı kahramanın doğuş koruması yere bastığı andan itibaren üç aktif oyun saniyesi sürüyor. Ateş, bomba ve özel yetenek süreyi kesmiyor. Koruma bittikten sonra kalkan sekiz hasarsız oyun saniyesinde bir darbe için doluyor. Portre köşesindeki küçük kalkanın içi dolulukla birlikte yükseliyor. Darbe emildiğinde kısa bir toparlanma süresi veriliyor ve şarj yeniden başlıyor.
+
+Duraklatma sayaçları donduruyor. Bölge geçişleri ve kontrol noktası şarjı koruyor. Önceki kayıtlar boş kalkanla açılıyor. Yeni hayatta şarj sıfırdan başlıyor. 10 Godot test grubu ve 2.499 kontrol geçti. Gösterge masaüstü ve dikey pencerede çizildi. Yerel web paketi `08b860a5a9e48822` ile Chromium’da doğuş kaydından Sürdür, koruma sırasında klavyeyle ateş ve dolu kalkanın bir düşman mermisini emmesi doğrulandı.
+
 ### Kök Motoru finali · Yerel aday
 
 Taban `8bac305`, çalışma dalı `feat/mission1-finale-polish`, Godot 4.6.3. Kök Motoru’nun üçüncü evresinde kırılmış yuvalardan bağımsız çekirdek salvosu, iki uyarılı dalga ve yönü önceden belirlenen hücum var. Hücum sonrası karşılık verme süresi korunuyor. Geç kısımlardaki yer tohumu mermileri 210’dan 228’e çıktı.

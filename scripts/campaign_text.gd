@@ -52,6 +52,8 @@ const ARCADE_LIFE_TEXT := {
 	"next_hero":["Sonraki kahraman","Next hero"],"previous_hero":["Önceki kahraman","Previous hero"],
 	"game_over":["Oyun bitti","Game over"],"continue_count":["Devam","Continues"],
 	"reserve_lives":["Yedek yaşam","Spare lives"],
+	"shield_ready":["Koruyucu kalkan hazır","Protective shield ready"],
+	"shield_charging":["Koruyucu kalkan doluyor","Protective shield charging"],
 	"restart_mission":["Görevi baştan başlat","Restart mission"],
 	"flock_support":["Sürü · Eşya toplar","Flock · Collects items"],
 	"downed_shot":["Mermi isabeti","Shot down"],

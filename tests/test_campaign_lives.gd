@@ -44,7 +44,7 @@ func test_lives() -> void:
 			w.damage_player()
 			check(w.hp==1 and w.entry_guard,"Visible entry grace protects a fresh body")
 			w.attack_press()
-			check(not w.entry_guard and w.invulnerable==0.,"The first fresh attack ends landing grace")
+			check(w.entry_guard and w.invulnerable>2.9,"Firing keeps the full landing grace")
 	check(w.state=="continue_offer" and w.continue_remaining==10.,"Last life opens a ten-second offer")
 	CampaignLives.tick_offer(w,3.4)
 	w=roundtrip(w)
@@ -74,6 +74,59 @@ func test_legacy() -> void:
 	check(w.attempts_remaining==2 and w.taken.has("quay:fruit:3"),"Reopening new schema never repeats legacy stock")
 	var invalid:=w.snapshot();invalid.encounter=invalid.encounter.substr(1)
 	check(not AionCampaignWorld.new().restore(invalid),"Truncated encounter cannot replace valid progress")
+
+func test_protection() -> void:
+	var w:=AionCampaignWorld.new()
+	w.begin("aion");w.load_section("shore")
+	w.enemies.clear();w.npcs.clear();w.objects.clear();w.hazards.clear();w.gates.clear();w.pickups.clear()
+	w.invulnerable=0.
+	w.damage_player("shot");clock(w,.9)
+	CampaignLives.start_entry(w,Rect2(0.,-420.,1152.,500.));clock(w,.625)
+	check(w.state=="playing" and w.hp==1 and w.invulnerable==3. and w.shield_charge==0.,"One HP returns with a fresh three-second guard and an empty shield")
+	w.attack_press();w.attack_release()
+	check(w.shots==1 and w.throw_grenade() and w.invulnerable==3.,"Fire and grenade work without shortening the guard")
+	w.state="paused";clock(w,.5);w.state="playing"
+	check(w.invulnerable==3.,"Pause does not spend respawn protection")
+	clock(w,2.95);w.damage_player("beam")
+	check(w.hp==1 and w.entry_guard and w.shield_charge==0.,"Late damage is ignored during respawn grace")
+	w=roundtrip(w)
+	check(w.entry_guard and w.invulnerable>.04,"Resume keeps the remaining grace")
+	clock(w,.05)
+	check(not w.entry_guard and is_zero_approx(w.invulnerable),"The full respawn protection expires at three active seconds")
+	clock(w,4.)
+	check(is_equal_approx(w.shield_charge,4.) and not w.shield_ready(),"Four damage-free seconds charge half a shield")
+	w=roundtrip(w)
+	w.state="paused";clock(w,1.);w.state="playing"
+	check(is_equal_approx(w.shield_charge,4.),"The shield's partial charge survives reload and pause")
+	w.load_section("quay")
+	check(is_equal_approx(w.shield_charge,4.),"An ordinary region change carries the partial charge")
+	w.enemies.clear();w.npcs.clear();w.objects.clear();w.hazards.clear();w.gates.clear();w.pickups.clear()
+	w.invulnerable=0.;clock(w,4.)
+	check(w.shield_ready() and w.hp==1,"Eight unprotected seconds arm one shield without adding HP")
+	var full_save:=w.snapshot()
+	var old_save:=full_save.duplicate(true);old_save.erase("shield_charge")
+	var old:=AionCampaignWorld.new()
+	check(old.restore(old_save) and old.shield_charge==0.,"Earlier schema-four saves still load with an empty shield")
+	var invalid:=full_save.duplicate(true);invalid.shield_charge=9.
+	check(not AionCampaignWorld.new().restore(invalid),"Resume rejects impossibly charged shields")
+	var rider:=AionCampaignWorld.new()
+	check(rider.restore(full_save),"A ready shield round-trips alongside the live encounter")
+	rider.mount={"available":true,"ridden":true,"hp":1,"x":rider.player.x,"type":"shell"}
+	rider.damage_player("shot")
+	check(CampaignVehicles.stunned(rider) and rider.shield_ready(),"The vehicle takes its own hit without spending the pilot's shield")
+	var lives:=w.attempts_remaining
+	w.bullets.append({"p":w.player_hit_center(),"v":Vector2.ZERO,"owner":"enemy","age":0.,"kind":"seed"})
+	w.step_bullets(.01)
+	w.damage_player("impact")
+	check(w.hp==1 and w.attempts_remaining==lives and w.shield_charge==0. and w.pending_events.count("shield_hit")==1,"A real projectile consumes the shield once and staggered collisions cannot double-hit")
+	w=roundtrip(w)
+	check(not w.shield_ready() and w.invulnerable>0.,"A spent shield stays spent across reload")
+	clock(w,.5);w.damage_player("shot")
+	check(w.hp==0 and w.attempts_remaining==lives-1 and w.shield_charge==0.,"The next unprotected hit spends the original one life and resets the charge")
+	w=roundtrip(w)
+	check(w.restore(full_save),"A ready shield snapshot remains usable")
+	w.damage_player("pit")
+	check(w.hp==0 and w.death_cause=="pit","The shield cannot keep the actor suspended in a lethal pit")
 
 func test_arena_reentry() -> void:
 	for width in [520.,1152.]:
@@ -164,6 +217,7 @@ func test_clearance_and_support() -> void:
 func run() -> void:
 	test_lives()
 	test_legacy()
+	test_protection()
 	test_arena_reentry()
 	test_arena_drones()
 	test_turret()

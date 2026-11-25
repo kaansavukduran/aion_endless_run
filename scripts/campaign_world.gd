@@ -68,6 +68,7 @@ var entry_from := Vector2.ZERO
 var entry_to := Vector2.ZERO
 var entry_clock := 0.
 var entry_guard := false
+var shield_charge := 0.
 var grenades := 5
 var score := 0
 var kills := 0
@@ -291,7 +292,8 @@ func load_section(id: String) -> void:
 	shot_flash=0.;shot_weapon="";last_shot_mounted=false
 	melee_target="";melee_hit_done=true
 	rescue_time=0.;rescue_target="";rescue_contact=false;rescue_latched=false
-	invulnerable = 1.2; entry_guard=false; hurt_time = 0.; flap_time = 0.
+	if not entry_guard:invulnerable=1.2
+	hurt_time=0.;flap_time=0.
 	enemies.clear(); bullets.clear(); bombs.clear(); blasts.clear(); pickups.clear()
 	platforms.clear(); pits.clear(); crates.clear(); gates.clear(); npcs.clear(); trail.clear()
 	platform_timers.clear();disabled_platforms.clear()
@@ -444,7 +446,6 @@ func close_enemy() -> Dictionary:
 
 func attack_press() -> void:
 	if state != "playing" or CampaignVehicles.stunned(self) or mount_transition!="" or MissionHeroAbilities.compact(self) or not grenade_throw.is_empty(): return
-	end_entry_guard()
 	if not fire_held and CampaignRescue.begin(self):return
 	if rescue_time>0. or rescue_latched:return
 	fire_held = true; melee_latched = false
@@ -509,15 +510,8 @@ func attack() -> void:
 	melee_latched = false
 	CampaignWeapons.fire(self)
 
-func end_entry_guard() -> void:
-	if not entry_guard:return
-	entry_guard=false
-	invulnerable=0.
-
 func throw_grenade() -> bool:
-	if CampaignVehicles.stunned(self) or not CampaignGrenade.press(self):return false
-	end_entry_guard()
-	return true
+	return not CampaignVehicles.stunned(self) and CampaignGrenade.press(self)
 
 func interact() -> bool:
 	if state != "playing" or mount_transition!="" or CampaignVehicles.stunned(self): return false
@@ -527,9 +521,7 @@ func interact() -> bool:
 		CampaignGrenade.cancel(self)
 		MissionHeroAbilities.cancel(self)
 		return true
-	if not MissionHeroAbilities.press(self):return false
-	end_entry_guard()
-	return true
+	return MissionHeroAbilities.press(self)
 
 func award(id: String, points: int) -> void:
 	if awarded.has(id): return
@@ -571,8 +563,12 @@ func enemy_body_hit(enemy: Dictionary) -> void:
 	if MissionHeroAbilities.sprinting(self) and sprint_fire>0. and MissionHeroAbilities.sprint_enemy(self,enemy,player_hit_center(),player_hit_center()):return
 	damage_player()
 
+func shield_ready() -> bool:
+	return is_equal_approx(shield_charge,CampaignLives.SHIELD_CHARGE_SECONDS)
+
 func damage_player(cause: String="enemy") -> void:
 	if state != "playing" or invulnerable > 0. or mount_transition!="" or CampaignVehicles.stunned(self): return
+	if cause!="pit" and not bool(mount.ridden) and CampaignLives.absorb_hit(self):return
 	chain=0;chain_time=0.
 	MissionHeroAbilities.cancel(self)
 	CampaignGrenade.cancel(self)
@@ -891,10 +887,11 @@ func step(dt: float) -> void:
 		return
 	CampaignVehicles.step_damage(self,dt)
 	time += dt
+	CampaignLives.step_protection(self,dt)
 	CampaignStyle.step(self,dt)
 	CampaignRescue.step(self,dt)
 	CampaignContent.step(self,dt);CampaignVehicles.step_parked(self,dt)
-	for property in ["invulnerable","hurt_time","fire_time","shot_flash","melee_time","grenade_time","flap_time","notice_time","drop_through_time"]: set(property,maxf(0.,float(get(property))-dt))
+	for property in ["hurt_time","fire_time","shot_flash","melee_time","grenade_time","flap_time","notice_time","drop_through_time"]: set(property,maxf(0.,float(get(property))-dt))
 	if not melee_hit_done and melee_time<=.14:
 		melee_hit_done=true
 		if melee_target=="boss":
@@ -902,7 +899,6 @@ func step(dt: float) -> void:
 		else:
 			for enemy in enemies:
 				if str(enemy.id)==melee_target and absf(float(enemy.x)-player.x)<125. and absf(float(enemy.y)-player.y)<85.:damage_enemy(enemy,2,"melee")
-	if invulnerable<=0.:entry_guard=false
 	var on_floor := grounded()
 	if on_floor and not CampaignRoutes.low_ceiling(self): coyote_timer = COYOTE_TIME
 	else: coyote_timer = maxf(0., coyote_timer - dt)
@@ -1022,7 +1018,9 @@ func snapshot(include_encounter: bool=true) -> Dictionary:
 	if character=="armadillo" and not completed:
 		data.roll_charges=roll_charges
 		data.roll_cooldown=roll_cooldown if roll_cooldown>0. or roll_charges>0 else MissionHeroAbilities.ROLL_COOLDOWN
-	if include_encounter:CampaignEncounterSave.write(self,data)
+	if include_encounter:
+		data.shield_charge=shield_charge
+		CampaignEncounterSave.write(self,data)
 	return data
 
 func restore(data: Dictionary) -> bool:
@@ -1054,6 +1052,7 @@ func restore(data: Dictionary) -> bool:
 	if not CampaignEncounterSave.valid_number(data.get("frog_cooldown",0.),0.,MissionHeroAbilities.LEGACY_SWALLOW_COOLDOWN):return false
 	if not CampaignEncounterSave.valid_number(data.get("roll_charges",MissionHeroAbilities.ROLL_CHARGES),0,MissionHeroAbilities.ROLL_CHARGES):return false
 	if not CampaignEncounterSave.valid_number(data.get("roll_cooldown",0.),0.,MissionHeroAbilities.ROLL_COOLDOWN):return false
+	if not CampaignEncounterSave.valid_number(data.get("shield_charge",0.),0.,CampaignLives.SHIELD_CHARGE_SECONDS):return false
 	if not CampaignRecovery.valid(data.get("rally",{}),str(data.checkpoint)):return false
 	for key in ["retry_count","best_chain"]:
 		var value=data.get(key,0)
@@ -1087,5 +1086,6 @@ func restore(data: Dictionary) -> bool:
 		CampaignRecovery.apply(self,rally)
 	else:
 		CampaignEncounterSave.apply(self,data,encounter)
+		if hp>0:shield_charge=float(data.get("shield_charge",0.))
 	if completed: state = "complete"; checkpoint_ready = false; boss.active = false
 	return true
