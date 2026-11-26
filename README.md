@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.58.2 · Kahraman seçimi
+
+Kahraman seçimi geniş portreli düzene döndü. Altı kartta portre ve karakter adı gösteriliyor.
+
 ## 0.58.1 · Mission 1 yön tuşları
 
 A/D/W/S ve ok tuşları birlikte kullanıldığında basılı kalan yön korunur. Karşıt yönler birlikte tutulursa kahraman durur. Açık olan yürüme yardımı, yön tuşları bırakıldığında güvenli zeminde yeniden devreye girer.
