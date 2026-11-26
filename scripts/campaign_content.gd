@@ -88,7 +88,7 @@ const MAIN_PLANS := {
 	],
 	"relay": [
 		{"x":2050.,"role":"relay_rejoin","enemies":[["drone",0.,-120.],["beetle",195.,0.],["seed",375.,0.],["drone",520.,-125.]],"platforms":[[110.,-76.,170.],[320.,-132.,165.]],"crate":585.,"fruit":[130.,-116.,3],"gate":true},
-		{"x":4150.,"role":"relay_lanes","enemies":[["seed",0.,0.],["gnome",180.,0.],["drone",330.,-125.],["lantern_scout",720.,-88.],["gnome",610.,0.]],"prop":["planks",220.],"fruit":[405.,-180.,2]},
+		{"x":4150.,"role":"relay_lanes","enemies":[["seed",0.,0.],["gnome",180.,0.],["drone",330.,-125.],["lantern_scout",720.,-88.],["gnome",610.,0.]],"prop":["planks",220.],"fruit":[405.,-180.,3]},
 		{"x":6250.,"role":"relay_patrol_support","enemies":[["beetle",0.,0.],["drone",210.,-125.],["beetle",390.,0.],["drone",540.,-120.]],"platforms":[[95.,-78.,170.],[310.,-132.,170.]],"crate":590.,"fruit":[115.,-118.,3],"gate":false},
 		{"x":8200.,"role":"relay_breach","enemies":[["drone",0.,-125.],["beetle",175.,0.],["seed",335.,0.],["beetle",490.,0.],["drone",615.,-125.]],"platforms":[[105.,-78.,175.],[330.,-134.,175.]],"prop":["turret",310.],"crate":-130.,"fruit":[125.,-118.,3],"gate":true}
 	]

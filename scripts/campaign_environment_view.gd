@@ -49,8 +49,10 @@ static func draw(v) -> void:
 		var z_w: float=float(z.width)
 		if z.kind=="dark":
 			# Subtle shadow veil drawn behind actors/bullets so telegraphs stay crystal-clear.
-			var shade_top: float=v.at(Vector2(float(z.x),-24.)).y if bool(z.get("ground_only",false)) else 0.
-			v.draw_rect(Rect2(z_left,shade_top,z_w,v.scene_h-shade_top),Color(0.04,0.03,0.08,0.34))
+			var ground_only: bool=bool(z.get("ground_only",false))
+			var shade_top: float=v.at(Vector2(float(z.x),-24.)).y if ground_only else 0.
+			var shade_bottom: float=v.scene_h if ground_only else v.ground+12.
+			v.draw_rect(Rect2(z_left,shade_top,z_w,shade_bottom-shade_top),Color(0.04,0.03,0.08,0.34))
 			var lantern: Vector2=v.at(w.player+Vector2(0.,-36.))
 			if lantern.y>=shade_top:
 				v.draw_circle(lantern,110.,Color(1.0,0.84,0.56,0.10))

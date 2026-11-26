@@ -137,6 +137,10 @@ func authored_branch_routes() -> void:
 	CampaignContent.push_current(w,5.)
 	check(w.player==Vector2(6004.,w.floor_at(6004.)),"Current moves the actor along the supported lower lane")
 	w.load_section("relay")
+	for item in w.pickups:
+		if CampaignGround.RELAY_FRUIT.has(item.id):
+			var position: Vector2=CampaignGround.RELAY_FRUIT[item.id]
+			check(Vector2(float(item.x),float(item.y))==position,"Relay fruit has authored lane height independent of basin alignment")
 	var scout: Dictionary=w.enemies.filter(func(e):return e.id==CampaignContent.RELAY_SCOUT)[0]
 	var drone: Dictionary=w.enemies.filter(func(e):return e.id==CampaignContent.RELAY_DRONE)[0]
 	check(scout.kind=="lantern_scout" and bool(scout.roof_perch) and CampaignGround.RELAY_WALKWAYS[-1].has_point(Vector2(float(scout.x),float(scout.y))),"Relay scout stands on the actual final roof deck")

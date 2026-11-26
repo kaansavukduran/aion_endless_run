@@ -7,6 +7,8 @@ const ARENA_WALKWAYS := [Rect2(1840.,-55.,130.,20.),Rect2(2020.,-125.,160.,20.)]
 const RELAY_WALKWAYS := [Rect2(4214.,-102.,145.,18.),Rect2(4385.,-132.,120.,18.),
 	Rect2(4530.,-145.,175.,18.),Rect2(4745.,-88.,185.,18.)]
 const RELAY_AMMO := "relay:roof:ammo"
+const RELAY_FRUIT := {"relay:arc-fruit:1:0":Vector2(4430.,-170.),
+	"relay:arc-fruit:1:1":Vector2(4666.,-183.),"relay:arc-fruit:1:2":Vector2(4540.,58.)}
 const BRANCH_WALKWAYS := {
 	"water":[Rect2(5350.,38.,190.,18.),Rect2(5590.,12.,220.,18.),Rect2(5860.,32.,220.,18.),
 		Rect2(6130.,62.,180.,18.),Rect2(6360.,20.,150.,18.)],
@@ -168,6 +170,11 @@ static func install_walkways(w) -> void:
 	if decks.is_empty():return
 	for deck in decks:
 		if deck not in w.platforms:w.platforms.append(deck)
+	if w.section=="relay":
+		for item in w.pickups:
+			if RELAY_FRUIT.has(item.id):
+				var point: Vector2=RELAY_FRUIT[item.id]
+				item.x=point.x;item.y=point.y
 	var supply: Dictionary={"id":RELAY_AMMO,"x":4608.,"y":-177.,"kind":"pistol_ammo"} if w.section=="relay" else BRANCH_SUPPLIES[w.section]
 	CampaignRoutes.install_pickup(w,supply)
 	var zone: Dictionary=BRANCH_ZONES.get(w.section,{})
