@@ -549,6 +549,6 @@ Denetimde yeniden üretilen M1-D01–D05 yerel adayda giderildi. Tekrar için py
 - Ölçüm düzeltmesi: 0.58.7'de "reddedildi" yazılan ısınma denemesinin ölçümü, dünyanın kendi geçtiği bölüm yüklemelerini de oyun içi sayıyordu; bu turdaki prob bunu ayırır.
 - Yalnız bayt bütçesi (ön-kesimsiz) 8 oyun içi çözme verdi: ikisi birlikte gerekli.
 - `tests/test_perf_paths.gd`: bütçe/tavan, satır şeridi maliyeti, ısınma bütçesi ve ön-kesim sonrası sıfır çözme (ön-kesim olmadan 2 hata verdiği doğrulandı).
-- Denetim düzeltmesi: `CampaignLives.lethal` boş silah tabanını (`EMPTY_RESPAWN_ROUNDS` 6) silah değişiminden sonra denetler. Önce, mermisi kalan özel silah + boş tabanca ile ölen kahraman 0 mermiyle doğuyordu. `tests/test_audit_0589.gd` (eski kodda başarısız).
+- Denetim bulgusu, düzeltilmedi: mermisi kalan özel silah + boş tabancayla ölen kahraman 0 mermiyle doğuyor. Bu kasıtlı: `test_campaign_forge_relay` ("normal loss rule") ve `test_campaign_rhythm` bunu sabitliyor; acil taban yalnız tamamen boş tabancaya verilir.
 - Açık öneri (tasarım): rota levhası ipucu, bölüm girişindeki kontrol noktası bildirimi (2 s) sürerken okunursa sessizce kaydediliyor ve metni hiç görünmüyor; kıyıdaki gibi `arc_checkpoint` bildirimini değiştirmesi önerilir.
 

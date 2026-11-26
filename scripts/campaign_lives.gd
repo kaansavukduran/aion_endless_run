@@ -22,6 +22,7 @@ static func reset(w) -> void:
 	w.recovery_view=Rect2()
 
 static func lethal(w,cause: String) -> void:
+	var depleted: bool=int(w.ammunition)==0 and CampaignWeapons.sidearm_stock(w)==0
 	w.hp=0
 	w.attempts_remaining=maxi(0,w.attempts_remaining-1)
 	w.losses+=1
@@ -35,9 +36,7 @@ static func lethal(w,cause: String) -> void:
 	w.shield_charge=0.
 	w.state="dying"
 	CampaignWeapons.switch_to_sidearm(w)
-	# Checked after the switch: the pistol is what the hero respawns with, so a
-	# special weapon with rounds left over an empty sidearm also gets the floor.
-	if int(w.ammunition)==0 and w.attempts_remaining>0:w.ammunition=EMPTY_RESPAWN_ROUNDS
+	if depleted and w.attempts_remaining>0:w.ammunition=EMPTY_RESPAWN_ROUNDS
 	w.buffs.clear()
 	w.assists.clear()
 	w.melee_hit_done=true
