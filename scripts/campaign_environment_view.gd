@@ -25,6 +25,10 @@ static func draw(v) -> void:
 			v.draw_pose(v.catalogue.pose("environment",7,3),Vector2(float(room.x),float(room.y)))
 		elif float(w.buffs.get("reveal",0.))>0.:
 			v.draw_arc(v.at(Vector2(float(room.x),-140.)),40.,0,TAU,16,Color("f1d98c"),3.)
+	if w.section=="relay":
+		for cover: Rect2 in CampaignContent.RELAY_COVERS:
+			if cover.end.x>=v.camera_x and cover.position.x<=v.camera_x+v.scene_w:
+				CampaignForgePropArt.draw(v,"relay_cover",v.at(Vector2(cover.get_center().x,cover.end.y)))
 	for o in w.objects:
 		if absf(float(o.x)-w.player.x)>v.scene_w:continue
 		var row: int=CampaignContent.OBJECTS.find(str(o.kind))
@@ -33,7 +37,11 @@ static func draw(v) -> void:
 		elif o.kind in ["current","updraft"]:frame=3
 		elif o.kind=="turret" and CampaignContent.turret_warning(o):frame=1
 		if w.completed and o.kind=="lamp":frame=3
-		if o.kind=="gate":
+		if o.kind=="copper_grate":
+			var grate_frame:=3 if bool(o.active) else 2-int(o.hp)
+			if bool(o.active) and animated and float(o.get("changed",9.))<.18:grate_frame=2
+			CampaignForgePropArt.draw(v,"copper_grate",v.at(Vector2(float(o.x),float(o.y))),grate_frame)
+		elif o.kind=="gate":
 			CampaignLockArt.gate(v,v.at(Vector2(float(o.x),float(o.y))),w.section,
 				CampaignLockArt.opening_frame(float(o.get("changed",9.)),animated) if bool(o.active) else 0,.76)
 		elif o.kind=="turret":
@@ -47,6 +55,14 @@ static func draw(v) -> void:
 		var surface: float=w.floor_at(float(z.x))
 		if not CampaignGround.has_floor(surface):surface=0.
 		var z_w: float=float(z.width)
+		var garden: bool=z.id=="terrace:garden-draft"
+		var lifting: bool=not garden or CampaignGround.garden_draft_active(w.time)
+		if garden:
+			var cycle: float=fposmod(w.time,CampaignGround.GARDEN_DRAFT_PERIOD)
+			var pennant:=1 if lifting else (2 if cycle<CampaignGround.GARDEN_DRAFT_WARNING else 0)
+			if lifting and animated and posmod(int(w.time*8.),2)==1:pennant=3
+			for x in [float(z.x)+36.,float(z.x)+230.]:
+				CampaignForgePropArt.draw(v,"wind_pennant",v.at(Vector2(x,w.floor_at(x))),pennant)
 		if z.kind=="dark":
 			# Subtle shadow veil drawn behind actors/bullets so telegraphs stay crystal-clear.
 			var ground_only: bool=bool(z.get("ground_only",false))
@@ -59,7 +75,7 @@ static func draw(v) -> void:
 				v.draw_arc(lantern,110.,0.,TAU,24,Color(1.0,0.84,0.56,0.18),2.)
 			continue
 		var colour:=Color("83c6d5") if z.kind=="current" else Color("bfe8d4")
-		colour.a=.34
+		colour.a=.34 if lifting else .12
 		var phase: float=fmod(w.time*45.,90.) if animated else 0.
 		if z.kind=="current":
 			var zone_end: float=float(z.x)+z_w
@@ -81,9 +97,10 @@ static func draw(v) -> void:
 				var base: float=w.floor_at(x)
 				if not CampaignGround.has_floor(base):continue
 				var p: Vector2=v.at(Vector2(x,base-20.))
-				v.draw_line(p,p+Vector2(30,0),colour,2.5)
-				v.draw_line(p+Vector2(24,-5),p+Vector2(30,0),colour,2.)
-				v.draw_line(p+Vector2(24,5),p+Vector2(30,0),colour,2.)
+				v.draw_rect(Rect2(p,Vector2(24.,2.)),colour)
+				v.draw_rect(Rect2(p+Vector2(22.,-3.),Vector2(9.,2.)),colour)
+				v.draw_rect(Rect2(p+Vector2(29.,0.),Vector2(6.,2.)),colour.lightened(.3))
+				v.draw_rect(Rect2(p+Vector2(22.,3.),Vector2(9.,2.)),colour)
 			elif z.kind=="updraft":
 				var lift: float=fmod(w.time*65.+float(i),130.) if animated else 45.
 				var x: float=float(z.x)+i

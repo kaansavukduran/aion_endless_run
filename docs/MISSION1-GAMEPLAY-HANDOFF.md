@@ -2,6 +2,14 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 0.58.8 · Bölgesel karşılaşmalar ve Kök Motoru
+
+- Bakır Röle’de iki yükseklikteki taş siperler süpürülmüş mermi yolunu keser. Fener Keşifçisi ikinci atıştan sonra en az 0,75 saniye açık kalır ve drone aynı saldırı sırasını paylaşır. Alt çanaktaki isteğe bağlı ızgara silah veya iki yumrukla açılır. İkmal hakkı kayıt, ölüm ve tekrar girişte korunur.
+- Fener Kıyısı’nda ilk karganın saldırı hazırlığı fiziksel sinyal kutusunu çalıştırır ve siperin kestiği dalış temas noktasında görünür. Su Kanalı’nın alt akıntısı zemindeki yayayı taşır, üst tabliye sakindir. Bahçedeki rüzgâr uyarı, kaldırma ve durulma evrelerine sahiptir. Kök Geçidi’nin bakım emri kopyası alt çanaktan keşfedilir ve Harita notlarına eklenir.
+- Su Muhafızı yön değiştirip alçak dalga gönderir. Teras Muhafızı tabliyeden yalnız üst koridoru tarar. Kök Muhafızı zeminde işaretlediği noktaya vurur. Son çarpışmalardaki iki tekrar eden düşman çıkarıldı. Her muhafızın karşılık verme penceresi var ve altı kahraman mermi veya yumrukla karşılık verebilir.
+- Kök Motoru 270 can ve üç evreyi korur. Açık çekirdek çizimle aynı noktadan vurulur. Kök patlaması işaretli zemini hedefler. Son evrenin ikinci dalgası ayrı renk ve ses kullanır. Zaferde fenerler üç adımda yanar ve görev sonuçları mevcut hikâye geçişinden açılır. Mermisi tamamen boş olan oyuncu bir yedek canla döndüğünde tabancasında altı mermi olur.
+- Yeni sahne nesneleri özgün 32 kareli [piksel paftası](../assets/m1-forge-props-PROVENANCE.json) kullanır. Kök Motoru’nun beş yeni sesi [kaynak üreticisinden](../packaging/prepare_m1_finale_forge_audio.py) yeniden üretilebilir. Pafta ilk çizimde yüklenir. Motor denetimi açılışta en fazla 19 doku sınırını doğrular.
+
 ## 0.58.6 · Eğim, tabliye ve karşılık verme
 
 - Kırılabilir nesne ödülü zemine bağlı. Sarmaşık saldırısı ve uyarısı aynı yerel alana bağlı. Sülük hücumunun son konumu ayak desteğini belirliyor. Kök Geçidi’ndeki çıkış uyarısı düşmanın gerçek zemininde. Havada tabliyeye yaklaşan ayak, fiziksel iniş gerçekleşene kadar yerde sayılmıyor.

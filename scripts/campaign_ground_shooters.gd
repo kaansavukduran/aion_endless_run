@@ -9,6 +9,7 @@ const ARC_SECONDS := .86
 const RELEASE_SECONDS := .14
 const FIRST_PREPARATION := .55
 const BURST_SPACING := .20
+const ROOF_REST := .78
 const DATA := preload("res://assets/CAMPAIGN-GROUND-SHOOTERS-PROVENANCE.json")
 const ART := preload("res://assets/campaign-ground-shooters.png")
 const DEFEAT_ART := preload("res://assets/campaign-ground-shooter-defeats.png")
@@ -86,10 +87,13 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 	var spec: Dictionary=ROLES[e.kind]
 	var dx: float=w.player.x-float(e.x)
 	var face:=1 if dx>=0. else -1
+	var perching: bool=e.get("roof_perch",false)
+	var recovery: float=ROOF_REST + BURST_SPACING if perching else float(spec.recover)
 	if float(e.get("recover",0.))>0.:
 		e.recover=maxf(0.,float(e.recover)-dt)
 		e.release=maxf(0.,float(e.get("release",0.))-dt)
-		if bool(e.get("burst_pending",false)) and float(e.recover)<=float(spec.recover)-BURST_SPACING:
+		var second_at: float=e.get("burst_second_at",float(spec.recover)-BURST_SPACING)
+		if bool(e.get("burst_pending",false)) and float(e.recover)<=second_at:
 			e.burst_pending=false
 			if visible_threat(w,e) and dx*int(e.facing)>0. and absf(dx)<=float(spec.ready_range)+55.:
 				release_shot(w,e,spec)
@@ -101,13 +105,14 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 			e.wait=.25;e.burst_pending=false
 			return true
 		release_shot(w,e,spec)
-		e.recover=float(spec.recover);e.wait=.15;e.attacks=int(e.attacks)+1
+		e.burst_second_at=recovery-BURST_SPACING
+		e.recover=recovery;e.wait=.15;e.attacks=int(e.attacks)+1
 		return true
 	e.wait=maxf(0.,float(e.wait)-dt)
 	if float(e.age)>=FIRST_PREPARATION and float(e.wait)<=0. and absf(dx)<=float(spec.ready_range) and absf(w.player.y-float(e.y))<175. and visible_threat(w,e) and not CampaignContent.relay_opening_blocked(w,e):
 		e.windup=float(spec.windup);e.facing=face
 		e.throw_target=w.player+Vector2(0.,-31.)
-		e.burst_pending=e.kind=="lantern_scout" and (bool(e.get("roof_perch",false)) or int(e.attacks)%3!=0)
+		e.burst_pending=e.kind=="lantern_scout" and (perching or int(e.attacks)%3!=0)
 	elif absf(dx)>float(spec.ready_range)*.72:
 		walk(w,e,face,dt)
 	elif absf(dx)<160. and int(e.attacks)>0:
@@ -121,9 +126,15 @@ static func draw(v,e: Dictionary,body: Vector2) -> void:
 	var tint:=Color(str(ROLES[e.kind].colour))
 	var start:=origin(e)
 	if e.kind=="lantern_scout":
+		var peek: bool=e.get("roof_perch",false)
+		if peek:
+			# The close glint marks the actual firing cel before any lane marks.
+			var p: Vector2=v.at(start)
+			v.draw_rect(Rect2(p-Vector2(4.,2.),Vector2(10.,4.)),tint.darkened(.38))
+			v.draw_rect(Rect2(p-Vector2(2.,1.),Vector2(6.,2.)),tint.lightened(.45))
 		for i in range(1,12):
 			var mark:=start+Vector2(int(e.facing)*i*28.,0.)
-			if CampaignGround.touches_ground(v.world,start,mark):break
+			if CampaignGround.touches_ground(v.world,start,mark) or CampaignContent.cover_contact(v.world,start,mark).is_finite():break
 			v.draw_rect(Rect2(v.at(mark),Vector2(6.,2.)),tint)
 			if bool(e.get("burst_pending",false)):
 				v.draw_rect(Rect2(v.at(mark+Vector2(0.,-6.)),Vector2(4.,2.)),tint)

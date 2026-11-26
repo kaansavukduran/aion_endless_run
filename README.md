@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.58.8 · Sönen Fenerler karşılaşmaları
+
+Bakır Röle’de Keşifçi çatıda iki atış yapıp açık veriyor. Alt çanaktaki taş siper mermiyi kesiyor ve cephane ızgarası yumrukla da açılıyor. Su Kanalı, Bahçe Terasları ve Kök Geçidi’nin son muhafızları kendi saldırılarını kullanıyor. Kök Motoru’nun üç evresinde açık çekirdek, kök patlaması ve yönlü hücum var. Zaferde arenanın fenerleri sırayla yanıyor.
+
 ## 0.58.7 · Daha hızlı açılış, iki hata düzeltmesi
 
 Oynanış değişmedi. Ana sahne açılışta artık hiç kullanılmayan 8 dokuyu yüklemiyor: 6 sabit hiçbir yerde okunmuyordu, 2 banka dokuyu yalnızca dosya yolu için yüklüyordu. Ana sahnenin yüklenmesi yerel ölçümde 1.787 ms'den 1.224 ms'ye indi (−%31); açılışta yüklenen doku 29'dan 19'a düştü. Düzeltilen hatalar: Bakır Röle'de dron, nişancı henüz uyanmadan saldırı sırasını kontrol edince betik hatası veriyor ve düşmanları donduruyordu; ilk çataldaki teknisyenin röle parçası hediyesinin çizimi olmadığı için hediye anında sahnenin bir kısmı yarım saniye çizilmiyordu. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).

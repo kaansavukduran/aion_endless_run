@@ -37,6 +37,8 @@ const UPPER_SUPPLY := [
 const CAUSEWAY_PATROL := "causeway_relay_approach"
 const CAUSEWAY_REWARD_ID := "causeway:patrol-bonus"
 const CAUSEWAY_BONUS := 450
+const ROOF_DEFLECTION_SECONDS := .30
+const NOTICE_SECONDS := 2.8
 const SHELTERS := {
 	"shore":[Rect2(1010.,-106.,138.,18.),Rect2(2960.,-68.,180.,18.)],
 	"canopy":[Rect2(1030.,-99.,180.,18.)]
@@ -177,13 +179,24 @@ static func crow_sheltered(w,contact: Vector2) -> bool:
 	return false
 
 static func crow_roof_hit(w,from: Vector2,to: Vector2) -> bool:
-	if to.y<=from.y:return false
+	return crow_roof_contact(w,from,to).is_finite()
+
+static func crow_roof_contact(w,from: Vector2,to: Vector2) -> Vector2:
+	if to.y<=from.y:return Vector2.INF
 	for roof: Rect2 in SHELTERS.get(w.section,[]):
 		var top:=roof.position.y-14.
 		if from.y>top or to.y<top:continue
 		var hit_x:=lerpf(from.x,to.x,inverse_lerp(from.y,to.y,top))
-		if hit_x>=roof.position.x and hit_x<=roof.end.x and not w.disabled_platforms.has(roof.position.x):return true
-	return false
+		if hit_x>=roof.position.x and hit_x<=roof.end.x and not w.disabled_platforms.has(roof.position.x):
+			return Vector2(hit_x,roof.position.y)
+	return Vector2.INF
+
+static func stop_crow_dive_at_roof(w,enemy: Dictionary,to: Vector2) -> bool:
+	var contact:=crow_roof_contact(w,Vector2(enemy.get("dive_last",enemy.dive_start)),to)
+	if not contact.is_finite():return false
+	enemy.roof_deflection=contact
+	enemy.roof_deflection_age=float(enemy.age)
+	return true
 
 static func nearby_open_cage(w) -> Dictionary:
 	for o in w.objects:
@@ -203,7 +216,7 @@ static func context_action(w) -> String:
 
 static func notify(w,message: String) -> void:
 	w.notice=message
-	w.notice_time=2.8
+	w.notice_time=NOTICE_SECONDS
 
 static func use_context(w) -> bool:
 	match context_action(w):
@@ -568,23 +581,36 @@ static func draw_part(v,p: Vector2) -> void:
 	for x in [-7,-3,1,5]:v.draw_rect(Rect2(at+Vector2(x,6),Vector2(2,3)),Color("e6b779"))
 
 static func draw_pump(v) -> void:
-	if PUMP_X+55.<v.camera_x or PUMP_X-22.>v.camera_x+v.scene_w:return
-	var p: Vector2=v.at(Vector2(PUMP_X,LOWER_FLOOR)).round()
-	var opened: bool=pump_open(v.world)
-	var lit:=Color("9bd9af") if opened else (Color("ffd182") if v.world.activated.has(PUMP_PART_ID) else Color("9c7970"))
-	var body:=PackedVector2Array([p+Vector2(-19,0),p+Vector2(-19,-31),p+Vector2(-12,-42),p+Vector2(15,-42),p+Vector2(23,-33),p+Vector2(23,0)])
-	v.draw_colored_polygon(body,Color("322932"))
-	v.draw_rect(Rect2(p+Vector2(-15,-31),Vector2(31,26)),Color("65696a"))
-	v.draw_rect(Rect2(p+Vector2(-13,-29),Vector2(27,3)),Color("a09c82"))
-	v.draw_rect(Rect2(p+Vector2(-9,-36),Vector2(21,15)),Color("36363e"))
-	v.draw_rect(Rect2(p+Vector2(-7,-34),Vector2(17,11)),lit.darkened(.2))
-	v.draw_rect(Rect2(p+Vector2(-5,-33),Vector2(8,2)),lit)
-	for x in [-12,11]:v.draw_rect(Rect2(p+Vector2(x,-17),Vector2(3,3)),Color("e3b477"))
-	for y in [-13,-9]:v.draw_rect(Rect2(p+Vector2(-6,y),Vector2(13,2)),Color("4b484e"))
-	v.draw_rect(Rect2(p+Vector2(-22,-4),Vector2(49,4)),Color("8e775d"))
-	v.draw_rect(Rect2(p+Vector2(23,-13),Vector2(33,8)),Color("3b3e46"))
-	v.draw_rect(Rect2(p+Vector2(24,-12),Vector2(31,3)),Color("927960"))
-	v.draw_rect(Rect2(p+Vector2(51,-10),Vector2(5,10)),Color("ad8c68"))
+	if PUMP_X+48.<v.camera_x or PUMP_X-48.>v.camera_x+v.scene_w:return
+	var w=v.world
+	var animated: bool=v.host.motion_enabled and not v.host.options.reduced_motion
+	CampaignForgePropArt.draw(v,"water_pump",v.at(Vector2(PUMP_X,LOWER_FLOOR)),pump_frame(w,animated))
+	if animated and w.notice=="arc_route_pump_open" and w.notice_time>NOTICE_SECONDS-.8:
+		var progress:=clampf((NOTICE_SECONDS-float(w.notice_time))/.8,0.,1.)
+		var edge: Vector2=v.at(Vector2(DRY_START+2.,LOWER_FLOOR))
+		for i in 4:
+			var drop:=Vector2(4.+i*6.,-7.+float(i%2)*4.+progress*60.)
+			v.draw_rect(Rect2((edge+drop).round(),Vector2(3.,9.+i*2.)),Color("a4e0d3",1.-progress))
+
+static func pump_frame(w,animated: bool) -> int:
+	if pump_open(w):return 2+posmod(floori(w.time*5.),2) if animated else 2
+	return int(w.activated.has(PUMP_PART_ID))
+
+static func draw_crow_deflections(v) -> void:
+	var animated: bool=v.host.motion_enabled and not v.host.options.reduced_motion
+	for crow: Dictionary in v.world.enemies:
+		if crow.kind!="crow" or bool(crow.defeated) or not crow.has("roof_deflection"):continue
+		var age:=float(crow.age)-float(crow.roof_deflection_age)
+		if age>=ROOF_DEFLECTION_SECONDS:continue
+		var point: Vector2=v.at(crow.roof_deflection)
+		if point.x< -28. or point.x>v.scene_w+28.:continue
+		var progression:=age/ROOF_DEFLECTION_SECONDS if animated else .35
+		var offset:=Vector2(4.+progression*18.,7.+progression*17.)
+		for side in [-1.,1.]:
+			var spark: Vector2=(point+Vector2(side*offset.x,-offset.y)).round()
+			v.draw_rect(Rect2(spark-Vector2(3.,2.),Vector2(8.,4.)),Color("6c4637",1.-progression))
+			v.draw_rect(Rect2(spark-Vector2(1.,1.),Vector2(4.,2.)),Color("ffe2a1",1.-progression))
+		v.draw_rect(Rect2(point-Vector2(7.,3.),Vector2(14.,3.)),Color("f5c486",1.-progression))
 
 static func draw_route_sign(v,position: Vector2,vertical: float) -> void:
 	if position.x+16.<v.camera_x or position.x-16.>v.camera_x+v.scene_w:return
@@ -672,6 +698,7 @@ static func draw_cage_front(v) -> void:
 
 static func draw_landmarks(v) -> void:
 	draw_cage_latches(v)
+	if SHELTERS.has(v.world.section):draw_crow_deflections(v)
 	if not is_fork(str(v.world.section)):return
 	for p in lantern_positions(v.world):
 		v.draw_pose(v.catalogue.pose("environment",2,3),p)

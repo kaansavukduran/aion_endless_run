@@ -2,6 +2,7 @@ class_name CampaignLives
 extends RefCounted
 
 const ATTEMPTS := 3
+const EMPTY_RESPAWN_ROUNDS := 6
 const OFFER_SECONDS := 10.
 const ENTRY_SECONDS := .62
 const ENTRY_PROTECTION := 3.
@@ -21,6 +22,7 @@ static func reset(w) -> void:
 	w.recovery_view=Rect2()
 
 static func lethal(w,cause: String) -> void:
+	var depleted: bool=int(w.ammunition)==0 and CampaignWeapons.sidearm_stock(w)==0
 	w.hp=0
 	w.attempts_remaining=maxi(0,w.attempts_remaining-1)
 	w.losses+=1
@@ -34,6 +36,7 @@ static func lethal(w,cause: String) -> void:
 	w.shield_charge=0.
 	w.state="dying"
 	CampaignWeapons.switch_to_sidearm(w)
+	if depleted and w.attempts_remaining>0:w.ammunition=EMPTY_RESPAWN_ROUNDS
 	w.buffs.clear()
 	w.assists.clear()
 	w.melee_hit_done=true

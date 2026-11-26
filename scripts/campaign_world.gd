@@ -374,6 +374,8 @@ func load_section(id: String) -> void:
 	CampaignRhythm.populate(self)
 	CampaignGround.align_world(self)
 	CampaignGround.install_walkways(self)
+	CampaignWardens.install(self)
+	CampaignContent.install_relay_grate(self)
 	CampaignWeapons.populate_sidearm(self)
 	state = "playing"
 	CampaignRecovery.enter(self)
@@ -568,6 +570,7 @@ func award(id: String, points: int) -> void:
 
 func damage_enemy(e: Dictionary, amount: int, style: String="") -> void:
 	if bool(e.defeated): return
+	if CampaignWardens.applies(e) and not CampaignWardens.exposed(e):return
 	if int(e.get("armour",0))>0 and style!="flame_dash":e.armour=int(e.armour)-1;e.flash=.25;pending_events.append("armour_hit");return
 	e.hp = int(e.hp)-amount
 	if int(e.hp) > 0: return
@@ -590,7 +593,7 @@ func damage_boss(amount: int) -> void:
 		hazards.clear()
 		for e in enemies:
 			if not bool(e.defeated): e.defeated = true; e.dead_age = 0.
-		blasts.append({"p":Vector2(float(boss.x),float(boss.y)-80.), "age":0., "radius":130., "color":"ffcf8c"})
+		CampaignBossPressure.begin_victory(self)
 		award("mission:1",CLEAR_BONUS+life_rescues()*KEEPER_BONUS); stop_inputs(); pending_events.append("complete")
 	else:
 		var phase:=CampaignBossPressure.phase_for(int(boss.hp))
@@ -754,7 +757,7 @@ func step_enemies(dt: float) -> void:
 			e.dive=maxf(0.,float(e.dive)-dt)
 			var phase: float=1.-float(e.dive)/float(e.get("dive_duration",.7/.9))
 			var p: Vector2=Vector2(e.dive_start).lerp(Vector2(e.dive_target),minf(1.,phase*2.)) if phase<.5 else Vector2(e.dive_target).lerp(Vector2(float(e.dive_target.x)-65.,float(e.home.y)),(phase-.5)*2.)
-			if str(e.kind)=="crow" and CampaignRoutes.crow_roof_hit(self,Vector2(e.get("dive_last",e.dive_start)),p):
+			if str(e.kind)=="crow" and CampaignRoutes.stop_crow_dive_at_roof(self,e,p):
 				e.dive=0.;e.wait=maxf(float(e.wait),1.35)
 				e.erase("dive_last")
 				continue
@@ -778,49 +781,7 @@ func step_enemies(dt: float) -> void:
 		if float(e.age)>.35 and absf(dx)<35. and absf(float(e.y)-player.y)<55. and float(e.windup)>.03 and float(e.windup)<.27: enemy_body_hit(e)
 
 func step_boss(dt: float) -> void:
-	if not bool(boss.active) or not bool(boss.get("engaged",false)): return
-	CampaignBossPressure.step_supply(self,dt)
-	boss.clock = float(boss.clock)+dt
-	var old_phase: int = int(boss.phase)
-	boss.phase = CampaignBossPressure.phase_for(int(boss.hp))
-	if int(boss.phase) > old_phase and float(boss.clock) > 0.05:
-		CampaignBossPressure.on_phase_change(self, old_phase, int(boss.phase))
-	if CampaignBossPressure.motion(self,dt):return
-	if int(boss.phase)<3:boss.x = length()-420.+sin(float(boss.clock)*.65)*75.
-	boss.y = floor_at(float(boss.x))
-	CampaignBossPressure.step_echo(self,dt)
-	var old_beam_warning: float=float(boss.get("beam_warning",0.))
-	boss.beam_warning=maxf(0.,old_beam_warning-dt)
-	if old_beam_warning>0. and float(boss.beam_warning)<=0.:
-		if absf(player.x-float(boss.get("beam_x",-999.)))<36.:damage_player("beam")
-		blasts.append({"p":Vector2(float(boss.beam_x),floor_at(float(boss.beam_x))-100.),"age":0.,"radius":65.,"color":"efc97e"})
-	if float(boss.windup)>0.:
-		boss.windup = maxf(0.,float(boss.windup)-dt)
-		if float(boss.windup)==0.:
-			var attack: int = int(boss.attack)%3
-			if CampaignBossPressure.attack(self):pending_events.append("boss_attack")
-			elif int(boss.phase)==2 and attack==2:
-				boss.beam_x=player.x;boss.beam_warning=.9
-				pending_events.append("boss_beam")
-			elif attack == 0:
-				pending_events.append("boss_port")
-				for offset in [-.32,-.16,0.,.16,.32]:
-					var ports: Array=boss.get("ports",[3,3])
-					var port_index:=0 if offset<=0. else 1
-					var late: bool=int(boss.phase)==3
-					if not late and int(ports[port_index])<=0:continue
-					var port:=Vector2(float(boss.x),float(boss.y)-75.) if late else CampaignBossPressure.port_point(self,port_index)
-					var aim := (player+Vector2(0,-42)-port).normalized().rotated(offset)
-					bullets.append({"p":port,"v":aim*(265. if late else 230.),"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[],"boss_shot":true})
-			elif attack == 1:
-				CampaignBossPressure.fire_wave(self)
-				if int(boss.phase)==2:platform_timers[2020.]=2.1
-			else:
-				CampaignBossPressure.call_drones(self)
-			boss.attack = int(boss.attack)+1; boss.wait = 2.15-float(int(boss.phase)-1)*.25
-	else:
-		boss.wait = float(boss.wait)-dt
-		if float(boss.wait)<=0.:CampaignBossPressure.arm_warning(self)
+	CampaignBossPressure.step(self,dt)
 
 func step_bullets(dt: float) -> void:
 	var continuing:=state=="continue_offer"
@@ -840,6 +801,11 @@ func step_bullets(dt: float) -> void:
 		if b.has("gravity"):b.v=Vector2(b.v)+Vector2(0,float(b.gravity)*dt)
 		b.age = float(b.age)+dt; b.p = Vector2(b.p)+Vector2(b.v)*dt
 		var rocket: bool=b.kind=="rocket" and b.owner=="hero"
+		var cover:=CampaignContent.cover_contact(self,previous,b.p)
+		if cover.is_finite():
+			if rocket:CampaignWeapons.rocket_impact(self,b,cover)
+			b.age=99.
+			continue
 		if rocket:
 			var contact:=CampaignWeapons.rocket_contact(self,previous,b.p)
 			if contact.is_finite():
@@ -874,7 +840,7 @@ func step_bullets(dt: float) -> void:
 				if CampaignWeapons.beetle_blocks(self,e,b,contact):
 					b.age=99.
 					break
-				if bool(e.mini) and float(e.windup)<=.3 and float(e.get("flash",0.))<=0. and (float(e.get("recover",0.))<=0. or CampaignEnemies.active_time(e)>0.) and int(e.hp)>5:b.age=99.;break
+				if bool(e.mini) and not CampaignWardens.applies(e) and float(e.windup)<=.3 and float(e.get("flash",0.))<=0. and (float(e.get("recover",0.))<=0. or CampaignEnemies.active_time(e)>0.) and int(e.hp)>5:b.age=99.;break
 				if str(e.kind)=="mirror" and float(e.windup)>0.:
 					b.owner="enemy";b.v=-Vector2(b.v);b.age=0.;break
 				if b.kind=="nova":CampaignWeapons.blast(self,b.p,170.,int(b.damage),str(b.colour));b.age=99.;break
@@ -885,7 +851,8 @@ func step_bullets(dt: float) -> void:
 			if rocket:CampaignWeapons.rocket_impact(self,b,b.p,false)
 			b.age=99.
 			continue
-		if bool(boss.active) and Geometry2D.get_closest_point_to_segment(Vector2(float(boss.x),float(boss.y)-75.),previous,b.p).distance_to(Vector2(float(boss.x),float(boss.y)-75.))<105. and not "boss" in b.hit:
+		var core:=CampaignBossPressure.core_point(self)
+		if bool(boss.active) and Geometry2D.get_closest_point_to_segment(core,previous,b.p).distance_to(core)<105. and not "boss" in b.hit:
 			damage_boss(CampaignBossPressure.core_damage(self,b,previous,b.p))
 			if rocket:CampaignWeapons.rocket_impact(self,b,b.p,false)
 			b.hit.append("boss"); b.age = 99.
@@ -942,16 +909,8 @@ func step(dt: float,input_dt: float=-1.) -> void:
 	if state=="victory":
 		dt=clampf(dt,0.,.05)
 		CampaignRescue.step(self,dt)
-		var earlier:=victory_time
-		victory_time+=dt;boss.clock=float(boss.clock)+dt
 		age_blasts(dt)
-		for moment in [.25,.62]:
-			if earlier<moment and victory_time>=moment:
-				var side:=-1. if moment<.4 else 1.
-				var part:=Vector2(float(boss.x)+side*76.,float(boss.y)-48.)
-				blasts.append({"p":part,"age":0.,"radius":55.,"color":"d9a873"})
-				if side>0.:pending_events.append("boss_wave")
-		if victory_time>=1.2:state="complete"
+		CampaignBossPressure.step_victory(self,dt)
 		return
 	if state != "playing": return
 	dt = clampf(dt,0.,.05)
@@ -1172,6 +1131,8 @@ func restore(data: Dictionary) -> bool:
 		CampaignEncounterSave.apply(self,data,encounter)
 		CampaignBossPressure.migrate_saved_state(boss)
 		CampaignRoutes.after_restore(self)
+		CampaignWardens.install(self)
+		CampaignContent.install_relay_grate(self)
 		CampaignWeapons.populate_sidearm(self)
 		if hp>0:shield_charge=minf(float(data.get("shield_charge",0.)),CampaignLives.SHIELD_CHARGE_SECONDS)
 	if completed: state = "complete"; checkpoint_ready = false; boss.active = false
