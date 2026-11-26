@@ -102,7 +102,7 @@ static func relay_opening_blocked(w,e: Dictionary) -> bool:
 	var partner_id:=RELAY_DRONE if e.id==RELAY_SCOUT else RELAY_SCOUT
 	for partner in w.enemies:
 		if partner.id==partner_id and not bool(partner.defeated):
-			return float(partner.windup)>0. or float(partner.flash)>0. or float(partner.get("recover",0.))>0.
+			return float(partner.windup)>0. or float(partner.get("flash",0.))>0. or float(partner.get("recover",0.))>0.
 	return false
 
 static func populate(w) -> void:

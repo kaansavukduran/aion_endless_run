@@ -519,3 +519,14 @@ Denetimde yeniden üretilen M1-D01–D05 yerel adayda giderildi. Tekrar için py
 - `tests/test_runs_pack.gd` (63 kontrol): 30 dosyanın hepsinde paketlenmiş JSON + blok, kaynakla birebir aynı veriyi ve aralıkları verir.
 - Ölçüm (yerel, başsız, 3 tekrar): 51 JSON dosyasının yüklenmesi paketsiz PCK'da 449–458 ms, paketli PCK'da 46–70 ms. 832.868 aralığın tamamını açmak 170 ms; yalnızca ilk kesilen karelerde, kare başına ~30 µs ödenir. PCK 115.064.176 → 110.512.896 bayt.
 - `tests/browser_forge.py --rescue`: tur süresi 0,57 s → 0,125 s (her turdaki `bounding_box()` ve gerçek fare hareketi bir kare bekliyordu; tuval kutusu 2 s önbellekte, fare yalnızca nişan 36 px'ten fazla değişince hareket eder). Karga hazırlığı ya da süzülme bandının altındaki karga dalış sayılır, bot onun altında durmaz; mermi yolu hız ve yerçekimiyle tahmin edilir; atılmak üzere olan gnom/böcek üstünden zıplanır. Sonuç: eski bot 2/4 (koşu başına 6–9 ölüm), yeni bot 6/6 (en fazla 3 ölüm, bütçe 8). İzleme kaydı (`rescue-attempts.jsonl`) artık yakın düşmanları, mermileri ve basılan tuşları içerir.
+
+## 0.58.7 · Açılış dokuları ve denetim düzeltmeleri (26 Kasım 2026)
+
+- Silinen ölü `preload`'lar: `game.gd` `ACTION_SHEET`, `COMBAT_SHEET`, `ROLL_SHEET` ve `RUNNER_SHEETS` içindeki `wolf`/`sheep`; `adventure_view.gd` `ENEMIES`, `ITEMS`; `evolution_view.gd` `GIRLS`. `campaign_art.gd` ve `landscape_view.gd` `SOURCE` artık doku değil dosya yolu (pikseller zaten `RunnerSourcePixels`'tan geliyordu). PNG dosyaları değişmedi.
+- Ölçüm (dışa aktarılmış PCK, yerel başsız, 5 tekrar): `load("res://main.tscn")` medyanı 1.787 → 1.224 ms. Açılışta önbellekte doku 29 → 19. Kalan görev dokularını tembel yüklemek maliyeti oyun içine (takılma) taşıyacağı için yapılmadı.
+- `tests/test_boot_preloads.gd`: kullanılmayan doku `preload`'u ve açılışta 19'dan fazla doku yüklenmesi hata sayılır (eski kodda 6 hata verdiği doğrulandı).
+- Düzeltme: `CampaignContent.relay_opening_blocked` ortağın `flash` anahtarını `get` ile okur; nişancı ilk kez etkinleşmeden dron kontrol yapınca `step_enemies` her karede betik hatasıyla duruyordu.
+- Düzeltme: teknisyenin `relay_part` hediyesi `CampaignRoutes.draw_part` ile çizilir; `ForgeItemBank` karesi olmadığı için `_draw` yarıda kesiliyordu (NPC'lerden sonraki her şey yaklaşık 0,45 s çizilmiyordu). `tests/test_audit_0587.gd` ikisini de kapsar.
+- Denendi, reddedildi: ölüm, NPC yürüyüşü ve kahraman temas sayfalarını bölüm ısınma listesine eklemek. İlk ziyaret turunda oyun içi sayfa çözmeyi azaltmadı (12 → 13–15). Bankalar kesilen kareyi önbelleğe aldığı için LRU kahraman sayfalarının kullanıldığını görmüyor; sınırı 16'ya çıkarmak +24 MB bellekle yine takılmayı gidermedi. Kalıcı çözüm için öneri: bir sayfa çözüldüğünde o atlasın bütün karelerini bir kerede kesmek.
+- Açık soru (tasarım): ölümden sonra tabanca mermisi sıfırsa sıfır mermiyle doğuluyor; yalnızca Devam 36'ya tamamlıyor.
+

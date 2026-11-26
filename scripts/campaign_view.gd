@@ -747,7 +747,9 @@ func draw_npcs(mounted_front: bool) -> void:
 			var bag_at:=Vector2(float(npc.x),float(npc.y))+socket*Vector2(npc_direction,1.)
 			var progress:=inverse_lerp(CampaignRescue.PRESENT_GIFT,CampaignRescue.DROP_GIFT,age)
 			var gift:=CampaignRescue.gift_arc(bag_at,CampaignRescue.gift_landing(world,npc),progress)
-			draw_pose(item_bank.pose(str(npc.gift)),gift,1,lerpf(.6,1.,progress))
+			# The relay part has no item cel; draw it as its ground pickup is drawn.
+			if str(npc.gift)=="relay_part":CampaignRoutes.draw_part(self,gift)
+			else:draw_pose(item_bank.pose(str(npc.gift)),gift,1,lerpf(.6,1.,progress))
 		var p := at(Vector2(float(npc.x),float(npc.y)))
 		var label_top: float=maxf(46.,p.y+minf(-90.,float(npc_pose.offset.y)*growth-12.))
 		if phase=="thanks" and age<2.4:
