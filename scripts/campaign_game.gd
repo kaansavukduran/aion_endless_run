@@ -357,7 +357,7 @@ func build_menu() -> void:
 			pages.append(t("touch") if touch_mode else pad_help() if not Input.get_connected_joypads().is_empty() else t("keys"))
 			pages.append(t("help_rescue"))
 			pages.append(t("help_route"))
-			if world.character in world.CHARGE_HEROES:pages.append(t("rabbit_jump_help" if world.character in world.RABBITS else "special"))
+			if world.character in world.CHARGE_HEROES:pages.append(t("rabbit_jump_help"))
 			if world.character in ["aion","sheep","rabbit","eren","frog","armadillo"]:pages.append(RunnerFrontText.mission_ability(language,world.character))
 			if world.character=="owl":pages.append(t("owl"))
 			column.add_child(paragraph(pages[clampi(help_step,0,pages.size()-1)]))

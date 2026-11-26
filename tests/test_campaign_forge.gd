@@ -35,7 +35,7 @@ func run() -> void:
 			var low := fresh(hero);low.jump_press();low.jump_release()
 			var tap := apex(low,hz)
 			check(absf(tap/reference-1.75)<.04,"Actual tap apex is1.75 Aion: %s/%d" % [hero,hz])
-			var high := fresh(hero);high.jump_press();tick(high,high.charge_duration()+(high.RABBIT_JUMP_HOLD if hero in high.RABBITS else 0.),hz);high.jump_release()
+			var high := fresh(hero);high.jump_press();tick(high,high.RABBIT_JUMP_HOLD+high.charge_duration(),hz);high.jump_release()
 			var charged := apex(high,hz)
 			check(absf(charged/reference-4.)<.12 and charged>tap*2.,"Actual full-charge apex is4 Aion: %s/%d" % [hero,hz])
 		# Archived physics is retained for old source/ability consumers; owl is
