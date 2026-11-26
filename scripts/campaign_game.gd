@@ -65,6 +65,7 @@ var focus_index := 0
 var stick_touch := -1
 var touch_actions: Dictionary = {}
 var held: Dictionary = {}
+var movement_keys := {}
 var left_down := false
 var right_down := false
 var up_down := false
@@ -721,6 +722,7 @@ func release_all() -> void:
 	# settings rebuilds release inputs again, so preservation belongs here.
 	var keep_paused_aim: bool=world.state=="paused"
 	var frozen_aim: Vector2=world.aim_direction
+	movement_keys.clear()
 	held.clear();touch_actions.clear();stick_touch=-1;left_down=false;right_down=false;up_down=false;down_down=false;mouse_stick=false;mouse_axis=Vector2.ZERO;pad_axis=Vector2.ZERO;pad_look=Vector2.ZERO
 	mouse_aim=false;auto_walk_moving=false
 	world.stop_inputs()
@@ -885,10 +887,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.pressed and event.physical_keycode in [KEY_A,KEY_D,KEY_LEFT,KEY_RIGHT] and not world.fire_held and not down_down:
 			mouse_aim=false
 		match event.physical_keycode:
-			KEY_A,KEY_LEFT:left_down=event.pressed
-			KEY_D,KEY_RIGHT:right_down=event.pressed
-			KEY_W,KEY_UP:up_down=event.pressed
-			KEY_S,KEY_DOWN:down_down=event.pressed
+			KEY_A,KEY_LEFT,KEY_D,KEY_RIGHT,KEY_W,KEY_UP,KEY_S,KEY_DOWN:
+				if event.pressed:movement_keys[event.physical_keycode]=true
+				else:movement_keys.erase(event.physical_keycode)
+				left_down=movement_keys.has(KEY_A) or movement_keys.has(KEY_LEFT)
+				right_down=movement_keys.has(KEY_D) or movement_keys.has(KEY_RIGHT)
+				up_down=movement_keys.has(KEY_W) or movement_keys.has(KEY_UP)
+				down_down=movement_keys.has(KEY_S) or movement_keys.has(KEY_DOWN)
 			KEY_SPACE:set_action("jump","keyboard",event.pressed)
 			KEY_F,KEY_J:set_action("attack","key"+str(event.physical_keycode),event.pressed)
 			KEY_G:set_action("grenade","keyboard",event.pressed)
@@ -1007,7 +1012,8 @@ func update_arcade_aim(dt: float=0.) -> void:
 	var move_y:=vertical
 	if world.character=="armadillo" and analog and not down_down and vertical>0. and absf(axis)>=vertical:
 		move_y=0.
-	auto_walk_moving=absf(axis)<.05 and absf(move_y)<.1 and can_assist_walk()
+	var keyboard_direction_held: bool=left_down or right_down or up_down or down_down
+	auto_walk_moving=not keyboard_direction_held and absf(axis)<.05 and absf(move_y)<.1 and can_assist_walk()
 	world.move_axis=Vector2(.66 if auto_walk_moving else axis,move_y)
 	# Mouse aim: any angle toward the pointer, unless a stick, pad or W/S aim is in use.
 	if mouse_aim and not analog and not up_down and (not down_down or world.grounded()) and is_instance_valid(view):

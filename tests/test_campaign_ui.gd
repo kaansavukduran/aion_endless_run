@@ -122,7 +122,21 @@ func run() -> void:
 	check(game.application_active and game.menu_kind=="" and game.auto_walk_moving and game.world.player.x>start,"Returning and resuming restores the existing walk preference")
 	game._unhandled_input(key(KEY_A));game._process(.016)
 	check(not game.auto_walk_moving and game.world.velocity.x<0. and game.world.facing==-1,"Fresh left input overrides assist and turns immediately")
-	game._unhandled_input(key(KEY_A,false));game.auto_walk=false
+	game._unhandled_input(key(KEY_LEFT))
+	game._unhandled_input(key(KEY_A,false));game._process(.016)
+	check(not game.auto_walk_moving and game.world.move_axis.x==-1.,"Releasing A keeps moving left while the left arrow is held")
+	game._unhandled_input(key(KEY_D));game._process(.016)
+	check(not game.auto_walk_moving and game.world.move_axis==Vector2.ZERO,"Holding opposite horizontal directions stops instead of enabling assist")
+	game._unhandled_input(key(KEY_LEFT,false));game._unhandled_input(key(KEY_D,false))
+	game._unhandled_input(key(KEY_W));game._unhandled_input(key(KEY_S));game._process(.016)
+	check(not game.auto_walk_moving and game.world.move_axis==Vector2.ZERO,"Holding opposite vertical directions keeps the player still")
+	game._unhandled_input(key(KEY_W,false));game._unhandled_input(key(KEY_DOWN))
+	game._unhandled_input(key(KEY_S,false));game._process(.016)
+	check(not game.auto_walk_moving and game.world.move_axis.y==1.,"Releasing S keeps crouch while the down arrow is held")
+	game.on_web_page_hidden([]);game.on_web_page_visible([])
+	game._unhandled_input(key(KEY_ESCAPE));game._process(.016)
+	check(game.auto_walk_moving and game.world.move_axis.y==0.,"Focus recovery clears held directions and restores walk assist")
+	game.auto_walk=false
 	game.world.aim_direction=Vector2.RIGHT;game.world.facing=1;game.pad_look=Vector2.RIGHT;game.pad_axis=Vector2.LEFT
 	game._input(event(game.pad.bindings.shoot));game.update_arcade_aim(.016);game.world.step(.016)
 	check(game.world.velocity.x<0. and game.world.facing==1 and game.world.aim_direction.x>.9,"Independent gamepad aim remains locked during actual backwalking fire")

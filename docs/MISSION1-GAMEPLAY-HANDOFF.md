@@ -2,6 +2,12 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 0.58.1 · Yön tuşları ve yürüme yardımı
+
+0.58.0 ana dal kaydı `dfadab0` üzerinde A/D/W/S ve ok tuşlarının basılı durumu fiziksel tuş başına tutuluyor. Aynı yönü veren tuşlardan biri bırakıldığında diğeri çalışmaya devam ediyor. Karşıt yönler birbirini iptal ederken yürüme yardımı bekliyor. Sekme değişiminde ve duraklatmada basılı yönler temizleniyor.
+
+Önceki kodla dört regresyon yeniden üretildi. Düzeltmeyle yedi Godot kaynak paketi, toplam 9.450 kontrol geçti. 0.58.0 Web çıktısında Ayça ile ilk kıyıda A tuşu bırakıldığında sol okun iptal edildiği gerçek Chromium girdisiyle tekrarlandı.
+
 ## 0.58.0 · Sönen Fenerler genişlemesi
 
 Temel `main` kaydı `0e98f3ca7612c2beacb355a76578d3475c0a7794`. Çalışma dalı `forge/mission1-field-expansion`. Başlangıçta GitHub Pages 0.57.8 `b5b1c5e4098fe2e9` sunuyordu. Godot 4.6.3 ile geliştirildi.
