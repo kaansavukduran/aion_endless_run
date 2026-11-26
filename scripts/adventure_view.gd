@@ -1,8 +1,6 @@
 extends Node2D
 
 const META = preload("res://assets/ADVENTURE-PROVENANCE.json")
-const ENEMIES = preload("res://assets/adventure-enemies.png")
-const ITEMS = preload("res://assets/adventure-items.png")
 const EVOLUTION = preload("res://assets/EVOLUTION-PROVENANCE.json")
 
 const FRAGARIA = preload("res://assets/fragaria-strawberry.png")

@@ -1,12 +1,12 @@
 class_name RunnerLandscapeView
 extends RefCounted
-const SOURCE=preload("res://assets/aionverse-landscapes.png")
+const SOURCE := "res://assets/aionverse-landscapes.png" # Path only: pixels come from RunnerSourcePixels.
 const META=preload("res://assets/LANDSCAPE-PROVENANCE.json")
 var panels: Array[Texture2D]=[]
 
 func prepare() -> void:
 	if not panels.is_empty():return
-	var image:=RunnerSourcePixels.image(SOURCE.resource_path)
+	var image:=RunnerSourcePixels.image(SOURCE)
 	if image.is_compressed():image.decompress()
 	for region in META.data.panels:
 		panels.append(ImageTexture.create_from_image(image.get_region(Rect2i(region[0],region[1],region[2],region[3]))))
