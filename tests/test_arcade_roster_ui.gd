@@ -16,6 +16,7 @@ func run():
  check(game.character=='aion' and game.best==731,'Removed saved hero migrates without deleting the record')
  check(game.language==game.default_language() and not game.language_override,'Removed saved locale follows the supported device fallback')
  check(game.character_name('rabbit')=='Ayça','Stable rabbit save key displays the new game identity')
+ check(game.character_name('frog')=='Light' and game.character_name('armadillo')=='Doğukan','Stable hero save keys display the new names')
  for locale in ['tr','tr-TR','TR_tr']:
   check(GameText.language_for_locale(locale)=='tr','Turkish device language: '+locale)
  for locale in ['en-US','cs-CZ','ja','it-IT']:

@@ -133,6 +133,8 @@ var web_visible_callback: JavaScriptObject
 var web_update_callback: JavaScriptObject
 var auto_walk := false
 var auto_walk_moving := false
+var walk_assist_needs_step := false
+const REGION_MUSIC := {"water":"water", "canopy":"terrace", "terrace":"terrace", "roots":"roots", "causeway":"roots", "relay":"roots"}
 var offer_label: Label
 var offered_second := -1
 var picker_preview: RunnerHeroPreview
@@ -355,7 +357,7 @@ func build_menu() -> void:
 			pages.append(t("touch") if touch_mode else pad_help() if not Input.get_connected_joypads().is_empty() else t("keys"))
 			pages.append(t("help_rescue"))
 			pages.append(t("help_route"))
-			if world.character in world.CHARGE_HEROES:pages.append(t("rabbit_jump_help" if world.character in world.RABBITS else "special"))
+			if world.character in world.CHARGE_HEROES:pages.append(t("rabbit_jump_help"))
 			if world.character in ["aion","sheep","rabbit","eren","frog","armadillo"]:pages.append(RunnerFrontText.mission_ability(language,world.character))
 			if world.character=="owl":pages.append(t("owl"))
 			column.add_child(paragraph(pages[clampi(help_step,0,pages.size()-1)]))
@@ -642,7 +644,9 @@ func skip_presentation() -> void:
 
 func begin_new() -> void:
 	release_all()
+	walk_assist_needs_step=false
 	checkpoint_invalid=false;world.begin(selected_hero);world.state="playing";menu_kind=""
+	CampaignStory.opening(world)
 	presentation_stage="";presentation_time=0.
 	help_step=0;help_return="";outro_step=0;boss_announced=false
 	view.camera_x=0.;view.camera_y=0.;impact_hold=0.;complete_presented=false;new_best=false
@@ -651,6 +655,7 @@ func begin_new() -> void:
 func resume_saved() -> void:
 	if not saved_can_resume():return
 	if not world.restore(saved):checkpoint_invalid=true;world.begin(selected_hero);build_ui();return
+	walk_assist_needs_step=world.entry_guard
 	selected_hero=world.character
 	menu_kind="continue_offer" if world.state=="continue_offer" else ""
 	help_step=0;boss_announced=bool(world.boss.get("engaged",false))
@@ -969,7 +974,7 @@ func advance_travel(dt: float) -> void:
 		release_all();fade=-1.;fade_panel.color.a=0.
 
 func can_assist_walk() -> bool:
-	if not auto_walk or not application_active or world.section=="arena" or CampaignRoutes.is_fork(world.section):
+	if not auto_walk or walk_assist_needs_step or not application_active or world.section=="arena" or CampaignRoutes.is_fork(world.section):
 		return false
 	if bool(world.mount.ridden) or world.entry_guard or world.rescue_time>0. or CampaignVehicles.stunned(world) or MissionHeroAbilities.compact(world):
 		return false
@@ -1012,6 +1017,7 @@ func update_arcade_aim(dt: float=0.) -> void:
 	var move_y:=vertical
 	if world.character=="armadillo" and analog and not down_down and vertical>0. and absf(axis)>=vertical:
 		move_y=0.
+	if absf(axis)>.25:walk_assist_needs_step=false
 	var keyboard_direction_held: bool=left_down or right_down or up_down or down_down
 	auto_walk_moving=not keyboard_direction_held and absf(axis)<.05 and absf(move_y)<.1 and can_assist_walk()
 	world.move_axis=Vector2(.66 if auto_walk_moving else axis,move_y)
@@ -1071,6 +1077,8 @@ func _process(dt: float) -> void:
 		if last_state!="travel":release_all()
 		if world.advance_exit(dt):start_travel()
 	if world.state=="respawn_pending" and application_active:
+		release_all()
+		walk_assist_needs_step=true
 		var area:=Rect2(view.camera_x,view.camera_y-view.ground,view.scene_w,view.ground+60.)
 		CampaignLives.start_entry(world,area)
 		view.camera_x=world.recovery_view.position.x
@@ -1200,7 +1208,6 @@ func update_touch_context(item: AionCampaignTouch,active_controls: bool) -> void
 	var skill: Dictionary={}
 	var route_action:=CampaignRoutes.context_action(world)
 	if not route_action.is_empty():item.action=route_action
-	elif not CampaignRhythm.offer(world).is_empty():item.action="swap_weapon"
 	elif bool(world.mount.ridden):item.action="exit_vehicle"
 	elif CampaignVehicles.can_board(world):item.action="board"
 	else:
@@ -1211,7 +1218,7 @@ func update_touch_context(item: AionCampaignTouch,active_controls: bool) -> void
 	item.visible=true
 	item.disabled=not skill.is_empty() and not bool(skill.ready)
 	var status: String=str(skill.get("status_key",""))
-	item.caption=t("context_swap_short" if item.action=="swap_weapon" else (status if item.disabled and status=="skill_land" else item.action))
+	item.caption=t(status if item.disabled and status=="skill_land" else item.action)
 	item.cooldown=float(skill.get("cooldown",0.))
 	var accessible_name: String=t(item.action)
 	if item.accessibility_name!=accessible_name:item.accessibility_name=accessible_name
@@ -1225,22 +1232,16 @@ func update_ambient() -> void:
 		if is_instance_valid(weapon_voice) and weapon_voice.playing:weapon_voice.stop()
 		ambient_started=false
 		return
-	var key: String=world.section if world.section in ["water","roots"] else "forest"
+	var key: String=REGION_MUSIC.get(world.section,"forest")
 	if world.section=="arena" and bool(world.boss.get("engaged",false)):key="boss-battle"
 	if not is_instance_valid(ambient):
 		ambient=AudioStreamPlayer.new();ambient.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(ambient)
 	if ambient_key!=key:
 		ambient.stop();ambient_started=false
 		if not ambient_cache.has(key):
-			if key in ["forest","boss-battle"]:
-				var track: AudioStreamOggVorbis=load("res://assets/audio/mission1-"+key+".ogg").duplicate()
-				track.loop=true
-				ambient_cache[key]=track
-			else:
-				var track: AudioStreamWAV=load("res://assets/audio/campaign-"+key+".wav").duplicate()
-				track.loop_mode=AudioStreamWAV.LOOP_FORWARD
-				track.loop_end=int(track.get_length()*track.mix_rate)
-				ambient_cache[key]=track
+			var track: AudioStreamOggVorbis=load("res://assets/audio/mission1-"+key+".ogg").duplicate()
+			track.loop=true
+			ambient_cache[key]=track
 		ambient.stream=ambient_cache[key];ambient_key=key
 	var music_gain:=.23 if key=="boss-battle" else .20
 	if world.completed:music_gain*=1.-smoothstep(0.,1.2,world.victory_time)
@@ -1248,7 +1249,7 @@ func update_ambient() -> void:
 	# Web sample playback does not provide a reliable frame-by-frame playing
 	# signal for a paused/looping source. Start once at a track/unmute boundary.
 	if not ambient_started:ambient.play();ambient_started=true;ambient_starts+=1
-	ambient.stream_paused=menu_kind!="" or world.state not in ["playing","victory"]
+	ambient.stream_paused=not application_active or menu_kind!="" or world.state in ["briefing","paused","dead","complete"]
 
 func sound_weapon(kind: String) -> void:
 	if not audio_enabled:return
@@ -1349,7 +1350,7 @@ func metadata() -> void:
 	data.sprint_fire=world.sprint_fire;data.sprint_recovery=world.sprint_recovery
 	data.roll_charges=world.roll_charges;data.roll_cooldown=world.roll_cooldown
 	data.rally=world.rally;data.retry_count=world.retry_count;data.chain=world.chain;data.chain_time=world.chain_time;data.best_chain=world.best_chain
-	data.weapon_offer=CampaignRhythm.offer(world);data.bridge_timers=world.bridge_timers;data.boss_ports=world.boss.get("ports",[]);data.boss_dash=world.boss.get("dash",0.)
+	data.bridge_timers=world.bridge_timers;data.boss_ports=world.boss.get("ports",[]);data.boss_dash=world.boss.get("dash",0.)
 	var hit: Vector2=world.player_hit_center()
 	data.player_hit_center=[hit.x,hit.y];data.player_hit_radius=world.player_hit_radius()
 	data.assist_attacks=world.assist_attacks;data.assists=[]

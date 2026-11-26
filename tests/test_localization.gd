@@ -13,7 +13,7 @@ func run() -> void:
 	for pair in [["tr-TR","tr"],["TR_tr","tr"],["en-GB","en"],["cs-CZ","en"],["CS_cz","en"],["de-DE","en"],["fr","en"],["ja-JP","en"],["ko_KR","en"],["zh-Hant-TW","en"],["az-AZ","en"],["es-ES","en"],["it-IT","en"],["cz","en"],["","en"]]:
 		check(Words.language_for_locale(pair[0]) == pair[1], "Current TR/EN locale selection: " + pair[0])
 	check(Words.LANGUAGES==["tr","en"],"Only the explicitly requested Turkish and English are selectable")
-	var names := {"tr":["Aion","Kutsanmış","Ayça","Eren","Armadillo","Kurbağa"],"en":["Aion","Kutsanmış","Ayça","Eren","Armadillo","Frog"]}
+	var names := ["Aion","Kutsanmış","Ayça","Eren","Doğukan","Light"]
 	for lang in Words.LANGUAGES:
 		var table: Dictionary = Words.EXTRA[lang].data if Words.EXTRA.has(lang) else Words.STRINGS[lang]
 		var complete: bool = table.size() == Words.STRINGS.en.size()
@@ -22,7 +22,7 @@ func run() -> void:
 		check(complete, "Complete localized UI with matching numeric placeholders: " + lang)
 		var actual: Array[String] = []
 		for id in AionCampaignWorld.HEROES: actual.append(Words.get_text(lang,"name_"+id))
-		check(actual == names[lang] if names.has(lang) else actual.size()==6 and actual[0]=="Aion", "Exact character names: " + lang)
+		check(actual == names, "Exact character names: " + lang)
 	check(Words.get_text("xx","play") == "Start running", "Unsupported lookup falls back to English")
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)

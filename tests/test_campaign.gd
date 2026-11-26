@@ -43,7 +43,8 @@ func run() -> void:
 	check(w.jumps==2 and w.velocity.y<0.,"Aion retains second airborne jump")
 	w.jump_release();w.jump_press();check(w.jumps==3 and w.velocity.y<0.,"Aion can jump a third time in Mission 1")
 	w.jump_release();w.jump_press();check(w.jumps==3,"The fourth press grants no jump")
-	for hero in ["rabbit","eren"]:
+	var charged_peaks: Array=[]
+	for hero in ["rabbit","eren","frog"]:
 		var short:=fresh(hero);short.move_axis=Vector2.RIGHT;short.jump_press();tick(short,.05)
 		check(short.grounded() and not short.charging and short.velocity.x>230.,hero+" a tap holds the normal movement and pose before release")
 		short.jump_release();var low:=short.velocity.y
@@ -58,6 +59,8 @@ func run() -> void:
 			for step in 220:charged.step(.01);peak=minf(peak,charged.player.y)
 			peaks.append(peak)
 		check(float(peaks[0])-float(peaks[1])>50. and float(peaks[1])-float(peaks[2])>50.,hero+" partial and full charges each raise the actual jump apex")
+		if charged_peaks.is_empty():charged_peaks=peaks
+		else:check(peaks==charged_peaks,hero+" matches Ayça's actual apex at each hold duration")
 	for retired in ["owl","wolf"]:
 		w=fresh(retired);check(w.character=="aion" and retired not in World.HEROES,"Retired helper is no longer a selectable mission hero: "+retired)
 	for hero in World.HEROES:

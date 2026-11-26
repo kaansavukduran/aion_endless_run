@@ -135,6 +135,7 @@ static func after_restore(w) -> void:
 	# Exact older snapshots replace authored arrays after loading the section.
 	# Add only new stable records, retaining visited paths and claimed pickups.
 	if w.section=="fork_one":install_first_fork(w)
+	if w.section=="quay":w.gates.clear()
 	install_shelters(w)
 
 static func is_shelter(section: String,deck: Rect2) -> bool:

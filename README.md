@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.58.3 · Mission 1 hareket ve ikmal
+
+Yeniden doğduktan sonra yürüme yardımı ilk yön girdisini bekler. Özel silahlar temasla kuşanılır. Kırık İskele’deki bekçi kilitleri kaldırıldı. Light, Ayça ve Eren’le aynı zamanlamada güç toplayarak zıplar. Altı kahraman kıyıya geliş nedenini oyun başında söyler. Su Kanalı, Bahçe Terasları ve Kök Geçidi için özgün müzikler eklendi.
+
 ## 0.58.2 · Kahraman seçimi
 
 Kahraman seçimi geniş portreli düzene döndü. Altı kartta portre ve karakter adı gösteriliyor.

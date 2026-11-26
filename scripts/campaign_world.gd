@@ -8,7 +8,6 @@ const MAX_FLOCK := 2
 const AION_JUMPS := 3
 const RABBIT_JUMP_HOLD := 1.0
 const RABBIT_CHARGE_SECONDS := .72
-const RABBITS := ["rabbit", "eren"]
 const HEROES := ["aion", "sheep", "rabbit", "eren", "armadillo", "frog"]
 const COLORS := {"aion":"ef86b7", "sheep":"f5d6a6", "wolf":"aa84d2", "owl":"e8a34f", "rabbit":"f08d55", "eren":"58c4bb", "armadillo":"c49268", "frog":"80bd64"}
 const HERO_ART=preload("res://assets/PIXEL-HEROES-PROVENANCE.json")
@@ -175,7 +174,7 @@ var pending_events: Array[String] = []
 
 func biome() -> int: return int(STAGES[section].biome)
 func length() -> float: return float(STAGES[section].length)
-func charge_duration() -> float: return RABBIT_CHARGE_SECONDS if character in RABBITS else 1.2
+func charge_duration() -> float: return RABBIT_CHARGE_SECONDS
 func charge_ratio() -> float: return clampf(charge_time / charge_duration(), 0., 1.)
 ## y is the support query height; the default asks for the lowest floor.
 func floor_at(x: float,y: float=1e9) -> float:
@@ -432,9 +431,9 @@ func jump_press() -> void:
 		drop_through_time=.25;player.y+=3.;velocity.y=70.;jumps=1;return
 	if CampaignVehicles.jump(self):return
 	if grounded() and character in CHARGE_HEROES and not bool(mount.ridden):
-		waiting_to_charge = character in RABBITS
+		waiting_to_charge = true
 		jump_hold_before_charge = 0.
-		charging = not waiting_to_charge
+		charging = false
 		charge_time = 0.
 		return
 	if grounded() or (coyote_timer > 0. and jumps == 0 and not bool(mount.ridden) and character not in CHARGE_HEROES):
@@ -555,8 +554,6 @@ func throw_grenade() -> bool:
 func interact() -> bool:
 	if state != "playing" or mount_transition!="" or CampaignVehicles.stunned(self): return false
 	if CampaignRoutes.use_context(self):return true
-	var offer: Dictionary=CampaignRhythm.offer(self)
-	if not offer.is_empty():collect(offer);return true
 	if CampaignVehicles.interact(self):
 		CampaignGrenade.cancel(self)
 		MissionHeroAbilities.cancel(self)
@@ -1067,10 +1064,8 @@ func step(dt: float,input_dt: float=-1.) -> void:
 		# No contact rule reaches beyond 160px horizontally (rider rect 92, foot 63).
 		if absf(float(item.x)-player.x)>160.:continue
 		if item.has("secret") and not discovered.has(str(item.secret)):continue
-		if not CampaignRhythm.can_auto_collect(self,item):continue
-		if item.has("rescue_id"):
-			if float(item.age)>=.25 and not taken.has(str(item.id)) and touches_pickup(item):collect(item)
-		elif not taken.has(str(item.id)) and touches_pickup(item): collect(item)
+		if item.has("rescue_id") and float(item.age)<.25:continue
+		if not taken.has(str(item.id)) and touches_pickup(item):collect(item)
 	CampaignRecovery.step(self)
 	trail.append({"p":player,"time":time,"facing":facing,"grounded":grounded(),"crouched":crouching(),"walk_distance":walk_distance,"moving":absf(velocity.x)>1.,"velocity_y":velocity.y,"air_time":air_time})
 	while trail.size()>1 and time-float(trail[0].time)>4.: trail.pop_front()

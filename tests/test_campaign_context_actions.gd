@@ -43,10 +43,15 @@ func context_routes(g: AionCampaignGame) -> void:
 			check(not g.world.hero_skill.is_empty(),"Existing contextual input starts skill: "+hero+" "+source)
 		g.touch_mode=true
 	clean(g,"frog")
+	g.menu_kind="help"
+	g.help_step=ceili(g.t("help").split(". ",false).size()/2.)+3
+	g.build_ui()
+	check(g.column.find_children("*","Label",true,false).any(func(item):return item.text==g.t("rabbit_jump_help")),"Light help explains the same one-second hold as the rabbits")
+	clean(g,"frog")
 	g.world.weapon="arc";g.world.ammunition=10
 	g.world.pickups.append({"id":"context-heavy","kind":"heavy","x":g.world.player.x+30.,"y":-35.})
-	g.update_hud();tap_context(g)
-	check(g.world.weapon=="heavy" and g.world.hero_skill.is_empty(),"Nearby weapon interaction takes priority over skill")
+	g.world.step(.016);g.update_hud()
+	check(g.world.weapon=="heavy" and g.world.hero_skill.is_empty() and g.actions.context.action=="skill_tongue","Weapon contact equips it without consuming the skill action")
 	clean(g,"frog")
 	g.world.mount.available=true;g.world.mount.x=g.world.player.x;g.world.mount.floor_y=0.;g.world.mount.hp=3
 	g.update_hud();tap_context(g)
@@ -219,12 +224,16 @@ func touch_context(g: AionCampaignGame) -> void:
 		finger(g,7,down,false);g.update_arcade_aim()
 		check(g.stick_touch==-1 and g.world.move_axis==Vector2.ZERO,"Releasing both fingers leaves no held direction")
 		clean(g,"frog");g.world.weapon="arc";g.world.ammunition=10
-		g.world.pickups.append({"id":"touch-heavy","kind":"heavy","x":g.world.player.x+30.,"y":-35.});g.update_hud()
+		g.world.pickups.append({"id":"touch-heavy","kind":"heavy","x":g.world.player.x+30.,"y":-35.})
+		g.world.step(.016);g.update_hud()
 		point=g.actions.context.global_position+g.actions.context.size*.5
 		finger(g,0,point,true);finger(g,0,point,true)
-		check(g.world.weapon=="heavy" and g.world.hero_skill.is_empty(),"One context touch swaps only once and cannot become an extra skill press")
+		check(g.world.weapon=="heavy" and g.world.pending_events.count("hero_windup")==1,"After automatic pickup, one context finger starts exactly one skill")
+		for tick in 760:g.world.step(.01)
+		finger(g,0,point,true)
+		check(g.world.hero_skill.is_empty(),"The same finger does not start a second skill after cooldown")
 		finger(g,0,point,false);g.update_hud();finger(g,0,point,true)
-		check(not g.world.hero_skill.is_empty(),"A fresh context touch still activates Frog after the weapon swap")
+		check(not g.world.hero_skill.is_empty(),"A fresh context touch starts an additional skill")
 		g.release_all()
 		check(g.touch_actions.is_empty() and g.stick_touch==-1,"Focus/menu input release clears context ownership too")
 	root.size=Vector2i(1152,648);g.resize()

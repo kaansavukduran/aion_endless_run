@@ -167,6 +167,7 @@ func run() -> void:
 	if current_scene==game:
 		game.free();quit(1);return
 	check(current_scene.world.state=="playing" and current_scene.menu_kind=="" and current_scene.presentation_stage=="","The first mission frame is playable")
+	check(current_scene.world.notice=="story_hero_"+selected,"The chosen hero's opening line is shown during playable Mission 1")
 	for _i in 3:key(KEY_ENTER);key(KEY_ENTER,false)
 	await settle()
 	var campaigns:=0

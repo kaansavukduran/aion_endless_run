@@ -685,8 +685,6 @@ with sync_playwright() as playwright:
                     current = campaign(); require_live(current, 'approach_dropped_item', target)
                     if current['awarded'].get(target['id']+':gift'): break
                     item = next(item for item in current['pickups'] if item.get('rescue_id') == target['id'])
-                    if current.get('weapon_offer',{}).get('id') == item['id']:
-                        keys([]);page.keyboard.press('e');page.wait_for_timeout(150);continue
                     move_and_defend(current, 'd' if item['x'] > current['player'][0] else 'a', allow_grenade=False)
                     page.wait_for_timeout(40)
                 keys([])

@@ -461,7 +461,7 @@ class Probe:
             self.wait(lambda p:p['campaign'].get('crouching'),'actual crouch requirement',alive=True)
         if method=='touch':
             self.wait(lambda p:p['campaign'].get('context_action',{}).get('visible') and not p['campaign']['context_action'].get('disabled',True),'naturally ready contextual skill control',alive=True)
-        before=self.read()['campaign'];self.check(not before.get('weapon_offer') and not before['mounted'],'The contextual action is free for the native skill')
+        before=self.read()['campaign'];self.check(not before['mounted'],'The contextual action is free for the native skill')
         skill_mark=self.mark()
         if method=='pad':
             axes=[0,1 if self.hero=='armadillo' else 0,1,0]
@@ -541,7 +541,7 @@ class Probe:
                 if method=='touch':
                     self.wait(lambda p:p['campaign'].get('context_action',{}).get('visible') and not p['campaign']['context_action'].get('disabled',True),'actual visible context button is ready',alive=True)
                 before=self.read()['campaign'];mark=self.mark();event_mark=self.page.evaluate('sixProbe.events.length')
-                self.check(not before.get('weapon_offer') and not before['mounted'],'The actual context is the native hero skill')
+                self.check(not before['mounted'],'The actual context is the native hero skill')
                 if method=='touch':
                     r=before['context_action']['rect'];point=self.ui_xy(r[0]+r[2]/2,r[1]+r[3]/2)
                     if session:

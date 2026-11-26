@@ -25,6 +25,17 @@ def chirp(t, pitch, drift):
     return np.sin(TAU * t * (pitch + drift * t / 2))
 
 
+def save_loop(name, signal):
+    with tempfile.TemporaryDirectory() as scratch:
+        source = Path(scratch) / "loop.wav"
+        pcm(source, signal)
+        subprocess.run(
+            ["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-i", str(source),
+             "-c:a", "libvorbis", "-q:a", "5", str(AUDIO / f"mission1-{name}.ogg")],
+            check=True,
+        )
+
+
 def render_effects():
     # Length, pitch and slide, body decay, grit, tick pitch and second tone.
     profiles = {
@@ -170,14 +181,52 @@ def render_theme():
 
     signal = np.tanh(mix * 1.32)
     signal *= .85 / np.max(np.abs(signal))
-    with tempfile.TemporaryDirectory() as scratch:
-        source = Path(scratch) / "theme.wav"
-        pcm(source, signal)
-        subprocess.run(
-            ["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-i", str(source),
-             "-c:a", "libvorbis", "-q:a", "5", str(AUDIO / "mission1-boss-battle.ogg")],
-            check=True,
-        )
+    save_loop("boss-battle", signal)
+
+
+def render_regions():
+    # Each route has an eight-bar theme using original MIDI note patterns.
+    # Water uses soft bells, the garden brisk plucked phrases, the roots a low synth pulse.
+    regions = {
+        "water": (88, [50, 45, 48, 43, 50, 45, 55, 48],
+                  [74, 77, 81, 79, 76, 74, 69, 72], [0., 1.5, 3.], .14),
+        "terrace": (112, [55, 57, 52, 50, 55, 57, 59, 50],
+                    [79, 83, 86, 85, 81, 78, 76, 74], [0., .75, 2., 2.75, 3.5], .32),
+        "roots": (100, [48, 44, 41, 43, 48, 46, 44, 43],
+                  [60, 63, 67, 65, 63, 58, 56, 55], [0., .5, 1.75, 3.], .46),
+    }
+    for name, (bpm, roots, motif, rhythm, grit) in regions.items():
+        beat = 60 / bpm
+        length = round(len(roots) * 4 * beat * RATE)
+        mix = np.zeros((length, 2))
+
+        def place(onset, duration, note, pan, gain, sustained=False):
+            t = np.arange(round(duration * beat * RATE)) / RATE
+            hz = 440 * 2 ** ((note - 69) / 12)
+            amp = np.minimum(t / (.17 if sustained else .018), 1.)
+            amp *= np.minimum((duration * beat - t) / (.28 if sustained else .052), 1.)
+            if not sustained:
+                amp *= np.exp(-t * (2.8 + grit * 7))
+            base = np.sin(TAU * hz * t)
+            tone = base + grit * np.sin(TAU * 2 * hz * t) + .09 * np.sin(TAU * 3.01 * hz * t)
+            frames = (round(onset * beat * RATE) + np.arange(len(t))) % length
+            mix[frames] += (amp * tone * gain)[:, None] * np.sqrt([.5 * (1 - pan), .5 * (1 + pan)])
+
+        for bar, root in enumerate(roots):
+            start = bar * 4
+            place(start, 4.12, root - 12, -.18, .32, sustained=True)
+            place(start + .12, 3.88, root + 7, .42, .10, sustained=True)
+            place(start + 1.9, 2.2, root + (3 if name == "roots" else 4), -.44, .13, sustained=True)
+            for i, offset in enumerate(rhythm):
+                gain = .35 if i == 0 else .24
+                note = motif[(bar * 3 + i) % len(motif)]
+                place(start + offset, .85 if name == "terrace" else 1.45, note, (-1) ** i * .28, gain)
+                place(start + offset + .31, .8, note, (-1) ** (i + 1) * .6, gain * .17)
+            if name != "water":
+                place(start, .65, root - 24, 0., .38)
+                place(start + 2.5, .55, root - 24, 0., .24)
+        signal = np.tanh(mix)
+        save_loop(name, signal * (.73 / np.max(np.abs(signal))))
 
 
 if __name__ == "__main__":
@@ -185,3 +234,4 @@ if __name__ == "__main__":
     render_sprint()
     render_rocket()
     render_theme()
+    render_regions()
