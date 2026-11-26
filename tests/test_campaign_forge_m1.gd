@@ -20,7 +20,11 @@ func run() -> void:
 		check(w.length()<=16000.,"Leaf route is compressed to eliminate dead walks: "+leaf)
 		check(w.encounters.size()==8,"Leaf route keeps 8 authored encounters: "+leaf)
 		check(w.encounters.all(func(e):return not str(e.get("role","")).is_empty()),"Every leaf encounter has an authored role: "+leaf)
-		check(w.zones.size()==2 and w.hazards.size()==3,"Leaf route has dual environmental zones and 3 hazards: "+leaf)
+		var zone_ids:=w.zones.map(func(zone):return str(zone.id))
+		var expected: Array=[leaf+":flow",leaf+":flow:late"]
+		if leaf=="terrace":expected.append("terrace:garden-draft")
+		if leaf=="roots":expected.append("roots:hollow-shade")
+		check(zone_ids==expected and w.hazards.size()==3,"Leaf route keeps the original effects and its authored alternate-lane zone: "+leaf)
 		check(w.rooms.size()==2,"Leaf route keeps 2 optional secret rooms: "+leaf)
 
 	# 2. Authored MAIN_PLANS & shore bridge preservation
