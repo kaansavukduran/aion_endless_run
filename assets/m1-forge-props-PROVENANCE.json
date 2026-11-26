@@ -1,0 +1,726 @@
+{
+  "version": 1,
+  "authorship": "Original project-local hand-authored integer-pixel source generator; no external graphics, no generated or duplicated filler frames.",
+  "source": "packaging/draw_m1_forge_props.py",
+  "palette": {
+    "ink": "#29262d",
+    "deep": "#3b3030",
+    "stone_d": "#514f46",
+    "stone": "#777663",
+    "stone_l": "#a5a58b",
+    "stone_h": "#cfcaab",
+    "moss_d": "#3f563c",
+    "moss": "#6c8951",
+    "moss_l": "#9caa61",
+    "copper_d": "#59372b",
+    "copper": "#a56a46",
+    "copper_l": "#dcaa70",
+    "copper_h": "#f2ce94",
+    "iron_d": "#333d3b",
+    "iron": "#586563",
+    "iron_l": "#8d9690",
+    "iron_h": "#c1c2aa",
+    "wood_d": "#45312b",
+    "wood": "#745039",
+    "wood_l": "#aa7c50",
+    "glass_d": "#22494d",
+    "glass": "#3e7d83",
+    "glass_l": "#6fc3c0",
+    "glass_h": "#bee9d6",
+    "amber_d": "#80532f",
+    "amber": "#e9a64f",
+    "amber_l": "#ffe4a1",
+    "red": "#cf6555"
+  },
+  "cell": [
+    64,
+    48
+  ],
+  "origin": [
+    32,
+    46
+  ],
+  "world_scale": 2,
+  "path": "assets/m1-forge-props.png",
+  "sha256": "e245666a4045dfa71bb5259e511412302f11d72d4be45d6e9e1d9afcb5545ddf",
+  "distinct_frames": 32,
+  "total_frames": 32,
+  "entries": {
+    "relay_cover": {
+      "row": 0,
+      "frame_count": 4,
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            8,
+            28,
+            56,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            64,
+            0,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            8,
+            28,
+            56,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            128,
+            0,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            8,
+            28,
+            56,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            192,
+            0,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            8,
+            35,
+            56,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        }
+      ],
+      "visible_world_size": [
+        96,
+        36
+      ]
+    },
+    "copper_grate": {
+      "row": 1,
+      "frame_count": 4,
+      "frames": [
+        {
+          "rect": [
+            0,
+            48,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            8,
+            6,
+            56,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            64,
+            48,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            8,
+            6,
+            56,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            128,
+            48,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            8,
+            6,
+            56,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            192,
+            48,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            8,
+            6,
+            56,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        }
+      ],
+      "visible_world_size": [
+        96,
+        80
+      ]
+    },
+    "ammo_cache": {
+      "row": 2,
+      "frame_count": 4,
+      "frames": [
+        {
+          "rect": [
+            0,
+            96,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            16,
+            24,
+            48,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            64,
+            96,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            16,
+            22,
+            48,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            128,
+            96,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            16,
+            22,
+            48,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            192,
+            96,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            16,
+            22,
+            48,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        }
+      ],
+      "visible_world_size": [
+        64,
+        44
+      ]
+    },
+    "shore_signal": {
+      "row": 3,
+      "frame_count": 4,
+      "frames": [
+        {
+          "rect": [
+            0,
+            144,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            20,
+            10,
+            44,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            64,
+            144,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            20,
+            10,
+            44,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            128,
+            144,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            20,
+            10,
+            44,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            192,
+            144,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            20,
+            10,
+            44,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        }
+      ],
+      "visible_world_size": [
+        48,
+        72
+      ]
+    },
+    "route_water": {
+      "row": 4,
+      "frame_count": 2,
+      "frames": [
+        {
+          "rect": [
+            0,
+            192,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            26,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            64,
+            192,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            26,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        }
+      ],
+      "visible_world_size": [
+        88,
+        40
+      ]
+    },
+    "route_terrace": {
+      "row": 5,
+      "frame_count": 2,
+      "frames": [
+        {
+          "rect": [
+            0,
+            240,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            26,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            64,
+            240,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            26,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        }
+      ],
+      "visible_world_size": [
+        88,
+        40
+      ]
+    },
+    "route_roots": {
+      "row": 6,
+      "frame_count": 2,
+      "frames": [
+        {
+          "rect": [
+            0,
+            288,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            26,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            64,
+            288,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            26,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        }
+      ],
+      "visible_world_size": [
+        88,
+        40
+      ]
+    },
+    "route_root_secret": {
+      "row": 7,
+      "frame_count": 2,
+      "frames": [
+        {
+          "rect": [
+            0,
+            336,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            26,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            64,
+            336,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            26,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        }
+      ],
+      "visible_world_size": [
+        88,
+        40
+      ]
+    },
+    "water_pump": {
+      "row": 8,
+      "frame_count": 4,
+      "frames": [
+        {
+          "rect": [
+            0,
+            384,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            6,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            64,
+            384,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            6,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            128,
+            384,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            6,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        },
+        {
+          "rect": [
+            192,
+            384,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            10,
+            6,
+            54,
+            46
+          ],
+          "origin": [
+            32,
+            46
+          ]
+        }
+      ],
+      "visible_world_size": [
+        88,
+        80
+      ]
+    },
+    "wind_pennant": {
+      "row": 9,
+      "frame_count": 4,
+      "frames": [
+        {
+          "rect": [
+            0,
+            432,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            18,
+            2,
+            46,
+            46
+          ],
+          "origin": [
+            24,
+            46
+          ]
+        },
+        {
+          "rect": [
+            64,
+            432,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            18,
+            2,
+            46,
+            46
+          ],
+          "origin": [
+            24,
+            46
+          ]
+        },
+        {
+          "rect": [
+            128,
+            432,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            18,
+            2,
+            45,
+            46
+          ],
+          "origin": [
+            24,
+            46
+          ]
+        },
+        {
+          "rect": [
+            192,
+            432,
+            64,
+            48
+          ],
+          "visible_bounds": [
+            18,
+            2,
+            46,
+            46
+          ],
+          "origin": [
+            24,
+            46
+          ]
+        }
+      ],
+      "visible_world_size": [
+        56,
+        88
+      ]
+    }
+  }
+}

@@ -1,17 +1,19 @@
 class_name CampaignEffectsArt
 extends RefCounted
 const DATA=preload('res://assets/CAMPAIGN-EFFECTS.json')
+const ROW_SHEETS=preload('res://scripts/campaign_row_sheets.gd')
 const LEGACY=['crow','gnome','moth','slime','beetle','wisp','drone','seed','warden']
 # 0.41.0: Process-wide shared effects & legacy death cache.
-static var images: Dictionary={}
 static var cache: Dictionary={}
 func pose(key: String,row: int,frame: int) -> Dictionary:
  var id:=key+str(row)+str(frame)
  if cache.has(id):return cache[id]
  var bank: Dictionary=DATA.data.banks[key];var f: Dictionary=bank.frames[row][frame];var b: Array=f.bounds
- var sheet_image: Image=RunnerSourcePixels.sheet('res://'+str(bank.path))
+ var source_row: Dictionary=ROW_SHEETS.entry('legacy-deaths',row) if key=='legacy-deaths' else {}
+ var source_origin:=Vector2i(int(source_row.source_crop[0]),int(source_row.source_crop[1])) if key=='legacy-deaths' else Vector2i.ZERO
+ var sheet_image: Image=RunnerSourcePixels.sheet('res://'+str(source_row.path if key=='legacy-deaths' else bank.path))
  var result:=Image.create_empty(int(b[2])-int(b[0])+4,int(b[3])-int(b[1])+4,false,Image.FORMAT_RGBA8)
- for run in RunnerSourcePixels.runs(f):result.blit_rect(sheet_image,Rect2i(int(f.rect[0])+int(run[1]),int(f.rect[1])+int(run[0]),int(run[2]),1),Vector2i(int(run[1])-int(b[0])+2,int(run[0])-int(b[1])+2))
+ for run in RunnerSourcePixels.runs(f):result.blit_rect(sheet_image,Rect2i(int(f.rect[0])+int(run[1])-source_origin.x,int(f.rect[1])+int(run[0])-source_origin.y,int(run[2]),1),Vector2i(int(run[1])-int(b[0])+2,int(run[0])-int(b[1])+2))
  var scale: float=bank.scales[row]
  cache[id]={'texture':ImageTexture.create_from_image(result),'offset':Vector2(float(b[0])-float(f.origin[0])-2.,float(b[1])-float(f.origin[1])-2.)*scale,'size':result.get_size()*scale,'source_key':key,'source_row':row,'source_frame':frame}
  return cache[id]

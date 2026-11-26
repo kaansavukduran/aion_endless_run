@@ -7,7 +7,10 @@ func check(ok: bool,label: String) -> void:
 func _initialize() -> void:call_deferred("run")
 func run() -> void:
 	var view:=AionCampaignView.new()
+	var decoded_before:=RunnerSourcePixels.decodes
 	var reference: float=view.hero_reference_height()
+	check(RunnerSourcePixels.decodes==decoded_before,"Reading Aion's registration does not decode a texture while drawing an NPC")
+	check(is_equal_approx(reference,float(view.frames.pose("gun-run",view.frames.hero_row("aion"),0).height)),"Metadata-only reference exactly matches the drawn silhouette")
 	for row in 8:
 		check(is_equal_approx(view.npc_growth(row)*view.npc_reference_height(row),reference*1.75),"Actual upright NPC body is 1.75 times Aion, excluding padding: "+str(row))
 	for type in CampaignVehicles.TYPES:

@@ -7,6 +7,9 @@ const ARENA_WALKWAYS := [Rect2(1840.,-55.,130.,20.),Rect2(2020.,-125.,160.,20.)]
 const RELAY_WALKWAYS := [Rect2(4214.,-102.,145.,18.),Rect2(4385.,-132.,120.,18.),
 	Rect2(4530.,-145.,175.,18.),Rect2(4745.,-88.,185.,18.)]
 const RELAY_AMMO := "relay:roof:ammo"
+const GARDEN_DRAFT_PERIOD := 2.6
+const GARDEN_DRAFT_WARNING := .65
+const GARDEN_DRAFT_END := 2.05
 const RELAY_FRUIT := {"relay:arc-fruit:1:0":Vector2(4430.,-170.),
 	"relay:arc-fruit:1:1":Vector2(4666.,-183.),"relay:arc-fruit:1:2":Vector2(4540.,58.)}
 const BRANCH_WALKWAYS := {
@@ -58,6 +61,10 @@ const PROFILES := {
 
 static func height(section: String,x: float) -> float:
 	return profile_height(PROFILES.get(section,[]),x)
+
+static func garden_draft_active(time: float) -> bool:
+	var cycle:=fposmod(time,GARDEN_DRAFT_PERIOD)
+	return cycle>=GARDEN_DRAFT_WARNING and cycle<GARDEN_DRAFT_END
 
 static func profile_height(points: Array,x: float) -> float:
 	if points.is_empty() or x<points.front().x or x>points.back().x:return 0.

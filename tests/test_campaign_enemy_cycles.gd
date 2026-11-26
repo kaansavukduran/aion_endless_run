@@ -157,21 +157,23 @@ func leap_continuity() -> void:
 		check(absf(float(e.y))<.001 and active_time(e)<.00001 and float(e.recover)>.49,"Landing ends leap before full recovery begins: "+kind)
 		check(w.hp==w.max_hp,"Landing recovery disables contact damage: "+kind)
 
-func beam_expiration() -> void:
+func eruption_expiration() -> void:
 	for sample in [{"warning":.01,"steps":[.05]},{"warning":.01,"steps":[.004,.006,.05]},{"warning":.9,"steps":[.2,.2,.2,.2,.2]}]:
 		var w:=fresh();w.load_section("arena")
 		w.boss.active=true;w.boss.engaged=true;w.boss.hp=165;w.boss.phase=2
 		w.boss.windup=0.;w.boss.wait=2.;w.boss.beam_x=2180.;w.boss.beam_warning=sample.warning
-		w.player=Vector2(2180.,0.);w.invulnerable=0.
+		w.player=Vector2(2180.,w.floor_at(2180.));w.invulnerable=0.;w.shield_charge=0.
 		var elapsed:=0.
 		var never_early:=true
 		for dt in sample.steps:
 			w.step_boss(float(dt));elapsed+=float(dt)
-			if elapsed<float(sample.warning)-.000001:never_early=never_early and w.hp==w.max_hp and w.blasts.is_empty()
-		check(never_early,"Beam respects complete warning across frame partition: "+str(sample.steps))
-		check(w.hp==w.max_hp-1 and w.blasts.size()==1 and float(w.boss.beam_warning)==0.,"Phase2 beam expires with one impact even when coarse tick crosses zero: "+str(sample.steps))
-		w.invulnerable=0.;w.step_boss(.05);w.step_boss(.05)
-		check(w.hp==w.max_hp-1 and w.blasts.size()==1,"Expired beam never fires a second impact: "+str(sample.steps))
+			if elapsed<float(sample.warning)-.000001:
+				never_early=never_early and w.hp==w.max_hp and not w.pending_events.has("boss_eruption")
+		check(never_early,"Marked ground respects the complete warning across frame partitions: "+str(sample.steps))
+		check(w.hp==w.max_hp-1 and w.pending_events.count("boss_eruption")==1 and float(w.boss.beam_warning)==0.,"Phase 2 eruption ignites once, including ticks that cross zero: "+str(sample.steps))
+		w.hp=w.max_hp;w.invulnerable=0.;w.state="playing"
+		for tick in 7:w.step_boss(.05)
+		check(w.hp==w.max_hp and w.pending_events.count("boss_eruption")==1 and float(w.boss.eruption)==0.,"The spent eruption expires without a second strike or sound: "+str(sample.steps))
 
 func late_burrow_commitment() -> void:
 	var w:=fresh();w.spawn_enemy("burrow",5000.,0.,0)
@@ -210,7 +212,7 @@ func _initialize() -> void:
 	boundary_cycles()
 	mini_recovery_projectile()
 	leap_continuity()
-	beam_expiration()
+	eruption_expiration()
 	late_burrow_commitment()
 	print("RESULT: %d enemy/boss cycle checks, %d failures" % [checks,failures])
 	quit(1 if failures else 0)

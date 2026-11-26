@@ -16,6 +16,13 @@ const GRENADE_SOUNDS := {
 	"sprint_ignite":preload("res://assets/audio/sprint-ignite.wav"),
 	"boss_charge_warning":preload("res://assets/audio/root-charge.wav")
 }
+const FINALE_SOUNDS := {
+	"boss_wave":"res://assets/audio/m1-finale-forge-wave.wav",
+	"boss_wave_echo":"res://assets/audio/m1-finale-forge-echo.wav",
+	"boss_eruption":"res://assets/audio/m1-finale-forge-eruption.wav",
+	"boss_core_open":"res://assets/audio/m1-finale-forge-core.wav",
+	"boss_lantern":"res://assets/audio/m1-finale-forge-lantern.wav"
+}
 const WEAPON_SOUNDS := {
 	"pistol":preload("res://assets/audio/fire-pistol.wav"),
 	"heavy":preload("res://assets/audio/fire-heavy.wav"),
@@ -210,6 +217,7 @@ func t(key: String) -> String:
 	return Words.word(language,key)
 func old(key: String) -> String: return GameText.get_text(language,key)
 func font_size(size: int) -> int: return roundi(size*options.text_scale)
+func world_hud_bottom() -> float: return hud_panel.strip_height
 func menu_title() -> String:
 	if menu_kind in ["map","equipment"]:return CampaignFieldUI.text(self,menu_kind)
 	return t({"briefing":"title","help":"controls","paused":"pause","dead":"game_over","continue_offer":"continue_choose","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
@@ -1113,7 +1121,7 @@ func _process(dt: float) -> void:
 			if event=="vehicle_impact":release_all()
 			sound("hurt" if event=="vehicle_impact" else "blast")
 		if event.begins_with("shot:"):sound_weapon(event.trim_prefix("shot:"))
-		elif event=="rocket_impact":sound(event)
+		elif event=="rocket_impact" or FINALE_SOUNDS.has(event):sound(event)
 		elif event in ["melee","grenade","grenade_bounce","grenade_blast","hero_roll","hero_tongue","hero_contact","sprint_ignite","blast","pickup","rescue","hurt","cut","rescue_gift","gift_drop","npc_contact","secret","mechanism","enemy_shot","scout_shot","lob_throw","hive_drop","hive_splash","guardian","boss_attack","boss_port","boss_wave","boss_beam","boss_charge_warning","complete","checkpoint","enemy","armour_hit","shield_hit"]:sound(event)
 	if checkpoint_dirty and menu_kind!="briefing":save_checkpoint()
 	world.pending_events.clear()
@@ -1156,15 +1164,8 @@ func update_hud() -> void:
 	boss_health.visible=world.section=="arena" and bool(world.boss.active) and menu_kind=="" and presentation_stage==""
 	boss_health.value=world.boss.hp
 	if boss_health.visible:
-		var boss_cue: String=""
-		var pattern:=int(world.boss.attack)%3
-		if float(world.boss.get("beam_warning",0.))>0.:boss_cue=" · "+t("boss_beam_move")
-		elif float(world.boss.get("echo_wait",0.))>0.:boss_cue=" · "+t("boss_echo")
-		elif float(world.boss.windup)>0.:
-			if pattern==1:boss_cue=" · "+t("boss_wave_jump")
-			elif pattern==2 and int(world.boss.phase)==3:boss_cue=" · "+t("boss_dash")
-			else:boss_cue=" · "+t("boss_warning")
-		elif CampaignBossPressure.core_exposed(world):boss_cue=" · "+t("boss_core")
+		var cue:=CampaignBossPressure.hud_cue(world)
+		var boss_cue:= "" if cue.is_empty() else " · "+t(cue)
 		objective=t("arena")+" · "+t("phase")+" "+str(world.boss.phase)+boss_cue
 		if world.notice=="boss_supply_taken" and world.notice_time>0.:objective+="\n"+t(world.notice)
 		elif CampaignBossPressure.supply_ready(world) and world.ammunition<=5 and world.player.x>CampaignBossPressure.SUPPLY_X+160.:
@@ -1272,6 +1273,7 @@ func sound(event: String) -> void:
 			var voice:=AudioStreamPlayer.new();voice.playback_type=AudioServer.PLAYBACK_TYPE_STREAM;add_child(voice);voices.append(voice)
 	if not sound_cache.has(event):
 		if GRENADE_SOUNDS.has(event):sound_cache[event]=GRENADE_SOUNDS[event]
+		elif FINALE_SOUNDS.has(event):sound_cache[event]=load(FINALE_SOUNDS[event])
 		else:
 			var bytes:=PackedByteArray();var count:=3600 if event in ["blast","hurt"] else (2400 if event in ["enemy","armour_hit"] else 1400)
 			var pitch: float={"melee":210.,"grenade":350.,"blast":75.,"pickup":880.,"rescue":660.,"hurt":140.,"cut":1050.,"rescue_gift":990.,"gift_drop":780.,"npc_contact":920.,"secret":740.,"mechanism":320.,"enemy_shot":280.,"guardian":190.,"boss_attack":110.,"boss_port":310.,"boss_wave":68.,"boss_beam":424.,"complete":1040.,"menu_focus":440.,"menu_confirm":730.,"mission_start":620.,"victory":1180.,"checkpoint":820.,"continue_tick":385.}.get(event,660.)

@@ -15,6 +15,8 @@ var options
 var motion_enabled := true
 var scene_w:=1152.
 var scene_h:=648.
+var portrait: bool:
+	get:return scene_h>scene_w
 var ground:=440.
 var camera_x:=0.
 var font: Font
@@ -22,7 +24,10 @@ var modal: Control
 var frozen:=false
 var last_jump:=0.
 const DEMOS := [["aion","shore"],["sheep","water"],["rabbit","terrace"],["eren","arena"]]
+const DEMO_BANNER_HEIGHT := 54.
 func t(key: String) -> String:return AionCampaignText.word(host.language,key)
+func font_size(size: int) -> int:return roundi(size*options.text_scale)
+func world_hud_bottom() -> float:return DEMO_BANNER_HEIGHT
 func copy(key: String) -> String:return RunnerFrontText.word(host.language,key)
 func begin_intro() -> void:
 	stop_demo();intro_time=0.;intro_active=true;idle_time=0.
@@ -138,5 +143,5 @@ func _draw() -> void:
 				draw_texture_rect(pose.texture,Rect2((anchor+Vector2(pose.offset)*factor).round(),pose.get("size",pose.texture.get_size()*factor)),false)
 	elif demo_world!=null:
 		var text: String=copy("demo")
-		draw_rect(Rect2(0,0,width,54),Color("181620"))
+		draw_rect(Rect2(0,0,width,DEMO_BANNER_HEIGHT),Color("181620"))
 		draw_string(host.interface_options.body_font,Vector2(18,34),text,HORIZONTAL_ALIGNMENT_LEFT,width-36,host.ui_size(18),Color("ffcf8c"))

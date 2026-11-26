@@ -21,6 +21,7 @@ var gun_parts: Dictionary = {}
 var hero_marker: Dictionary = {}
 var qa_pose_bounds: Dictionary = {}
 var npc_growth_cache: Dictionary = {}
+var aion_reference_height := 0.
 var item_bank := ForgeItemBank.new()
 var vehicle_art := ForgeVehicleArt.new()
 var forge_art := ForgeHeroArt.new()
@@ -57,7 +58,12 @@ func draw_flag(position: Vector2,growth: float=1.) -> void:
 
 func hero_reference_height() -> float:
 	# Actual alpha silhouette, without texture padding, muzzle/particles or UI.
-	return float(frames.pose("gun-run",frames.hero_row("aion"),0).height)
+	if aion_reference_height<=0.:
+		var spec:=frames.descriptor("gun-run",frames.hero_row("aion"))
+		var row:=int(spec.row)
+		var bounds: Array=spec.data.frames[row][0].bounds
+		aion_reference_height=float(bounds[3]-bounds[1])*float(spec.data.scale[row])
+	return aion_reference_height
 
 func npc_reference_height(row: int) -> float:
 	# The departure walking pose is upright; bound poses intentionally sit lower.
@@ -145,19 +151,6 @@ func _draw() -> void:
 	draw_world()
 	ground=base_ground
 
-func draw_boss_port(point: Vector2,hp: int) -> void:
-	# Stepped bronze casing around a dark vent; lit slats track actual port HP.
-	var edge:=PackedVector2Array([Vector2(-9,-14),Vector2(9,-14),Vector2(9,-10),Vector2(14,-10),Vector2(14,10),Vector2(9,10),Vector2(9,14),Vector2(-9,14),Vector2(-9,10),Vector2(-14,10),Vector2(-14,-10),Vector2(-9,-10)])
-	var points:=PackedVector2Array()
-	for p in edge:points.append(point+p)
-	draw_colored_polygon(points,Color("342c2a"))
-	draw_rect(Rect2(point-Vector2(9,12),Vector2(18,24)),Color("8b6946"))
-	draw_rect(Rect2(point-Vector2(7,10),Vector2(14,20)),Color("393b2d"))
-	draw_rect(Rect2(point-Vector2(9,12),Vector2(18,2)),Color("d0a86b"))
-	for i in 3:
-		draw_rect(Rect2(point+Vector2(-5,-8+i*6),Vector2(10,3)),Color("edbd72") if i<hp else Color("594631"))
-	for side in [-1.,1.]:draw_rect(Rect2(point+Vector2(side*11.-1.,-1.),Vector2(2,2)),Color("bc9d68"))
-
 func draw_world() -> void:
 	terrain.draw_campaign_bank(self,world.biome(),world,camera_x)
 	# Ground props share the exact collision groundline. They are decorative,
@@ -169,6 +162,7 @@ func draw_world() -> void:
 		existing("flora",world.biome(),0 if host.options.reduced_motion or not host.motion_enabled else posmod(int(world.time/.7)+i,3),Vector2(x,floor),1,.74)
 	if not CampaignRoutes.draw_floor(self):terrain.draw_campaign_floor(self,world.biome(),world,camera_x)
 	CampaignEnvironmentView.draw(self)
+	M1FinaleForgeArt.draw_lanterns(self)
 	for pit in world.pits:
 		if pit.y<camera_x or pit.x>camera_x+scene_w:continue
 		var left:=at(Vector2(pit.x,world.floor_at(pit.x)))
@@ -210,7 +204,7 @@ func draw_world() -> void:
 			for enemy in blockers.slice(0,3):
 				var target: Vector2=at(Vector2(float(enemy.x),float(enemy.y)-75.))
 				var arrow: String="◀" if target.x<16. else ("▶" if target.x>scene_w-24. else "▼")
-				target.x=clampf(target.x,16.,scene_w-24.);target.y=maxf(target.y,host.hud_panel.strip_height+55.)
+				target.x=clampf(target.x,16.,scene_w-24.);target.y=maxf(target.y,host.world_hud_bottom()+55.)
 				caption(arrow,target+Vector2(-5,0),16)
 	draw_npcs(false)
 	CampaignRoutes.draw_cage_front(self)
@@ -233,6 +227,8 @@ func draw_world() -> void:
 			draw_pose(support_art.pose(str(item.kind)),p)
 		elif str(item.kind)=="relay_part":
 			CampaignRoutes.draw_part(self,p)
+		elif str(item.kind)=="pistol_ammo":
+			CampaignForgePropArt.draw(self,"ammo_cache",at(p+Vector2(0.,17.)),2)
 		else:
 			# Every actual special weapon/support has its own original silhouette.
 			# This is a registered static drawing, not a fabricated animation count.
@@ -277,6 +273,7 @@ func draw_world() -> void:
 			var phase: int=3 if bool(e.defeated) else (1 if float(e.windup)>0. else (2 if attack and not recovering else 0))
 			var row: int=["current_guard","terrace_guard","drill_guard"].find(str(e.get("mini_role","current_guard")))*4+phase
 			draw_pose(catalogue.pose("mini-bosses",row,frame),p,direction,1.,tint)
+			CampaignWardens.draw_material(self,e)
 		elif str(e.kind) in ["drone","seed","warden"]:
 			var row: int = {"drone":0,"seed":2,"warden":6}[str(e.kind)]+int(attack)
 			draw_pose(art.pose(row,frame),p,direction,1.,tint)
@@ -299,21 +296,8 @@ func draw_world() -> void:
 		if not world.completed and not bool(world.boss.engaged):
 			draw_root_reveal(drawing,pivot)
 		else:
-			draw_pose(drawing,pivot)
-		if bool(world.boss.engaged) and not world.completed and not world.boss_vulnerable():
-			var core:=at(Vector2(float(world.boss.x),float(world.boss.y)-75.))
-			draw_arc(core,48.,0.,TAU,24,Color("efd58a"),3.);caption(host.t("shield"),core+Vector2(-28,-56),16)
-		if bool(world.boss.engaged) and not world.completed and int(world.boss.phase)==1:
-			for i in 2:
-				if int(world.boss.get("ports",[3,3])[i])<=0:continue
-				draw_boss_port(at(CampaignBossPressure.port_point(world,i)),int(world.boss.get("ports",[3,3])[i]))
-		elif not world.completed and CampaignBossPressure.core_exposed(world):
-			var core: Vector2=at(pivot+Vector2(0.,-75.))
-			for side in [-1.,1.]:
-				draw_rect(Rect2(core+Vector2(side*23.-2.,-15.),Vector2(4,30)),Color("f1c681"))
-				draw_rect(Rect2(core+Vector2(-15.,side*23.-2.),Vector2(30,4)),Color("f1c681"))
-		elif not world.completed and phase==2 and attacking:
-			draw_root_core_light(pivot)
+			draw_pose(drawing,pivot,CampaignBossPressure.sprite_facing(world))
+		M1FinaleForgeArt.draw_engine(self)
 	if CampaignVehicles.stunned(world) or (bool(world.mount.available) and int(world.mount.hp)>0) or (int(world.mount.hp)<=0 and float(world.mount.get("wreck_age",9.))<.8 and CampaignGround.has_floor(float(world.mount.get("floor_y",world.floor_at(float(world.mount.x)))))):
 		var p: Vector2=vehicle_draw_position()
 		var spec: Dictionary=world.vehicle_art_spec()
@@ -436,6 +420,7 @@ func draw_world() -> void:
 		var color := Color(str(b.get("colour","e1f5e7"))) if b.owner=="hero" else Color("eeb079")
 		if b.kind=="arc": color=Color("89dbec")
 		if b.kind=="wave":
+			if bool(b.get("echo",false)):color=Color("ace6e5")
 			var crests: Array=[2,4,7,10,8,5,3,2]
 			for i in crests.size():
 				var h: float=crests[i]
@@ -495,7 +480,7 @@ func draw_honey_splash(blast: Dictionary) -> void:
 		draw_rect(Rect2(p+Vector2(x,y),Vector2(5,4)),bright if i%2==0 else honey)
 
 func draw_root_reveal(drawing: Dictionary,pivot: Vector2) -> void:
-	var entering: bool=host.presentation_stage=="boss_reveal"
+	var entering: bool=host.get("presentation_stage")=="boss_reveal"
 	var progress: float=clampf(float(host.presentation_time)/1.25,0.,1.) if entering else 0.
 	if entering and (host.options.reduced_motion or not host.motion_enabled):progress=1.
 	var size: Vector2=drawing.size
@@ -518,33 +503,13 @@ func enemy_attacking(e: Dictionary) -> bool:
 	var recovering: bool=float(e.get("recover",0.))>0. and CampaignEnemies.active_time(e)<=0.
 	return float(e.windup)>0. or (not recovering and (float(e.get("flash",0.))>0. or CampaignEnemies.active_time(e)>0. or float(e.get("dash",0.))>0. or float(e.get("dive",0.))>0.))
 
-func draw_root_core_light(pivot: Vector2) -> void:
-	var core:=at(pivot+Vector2(0.,-75.))
-	var sparks: Array[Vector2]=[Vector2(-22.,8.),Vector2(-15.,-14.),Vector2(7.,-18.),Vector2(22.,-8.),Vector2(19.,17.)]
-	for socket in sparks:
-		var p:=core+socket
-		draw_rect(Rect2(p-Vector2(2.,1.),Vector2(5.,2.)),Color("f49d62"))
-		draw_rect(Rect2(p-Vector2(1.,2.),Vector2(2.,5.)),Color("ffe5a1"))
-	if host.motion_enabled and not host.options.reduced_motion:
-		for i in 5:
-			var rise:=fposmod(float(world.boss.clock)*74.+float(i*13),52.)/52.
-			var ember:=core+sparks[i]+Vector2(float(i-2)*12.,-42.)*rise
-			draw_rect(Rect2(ember.round(),Vector2(3.,4.)),Color(0.97,.57,.31,(1.-rise)*.8))
-		if float(world.boss.get("dash",0.))>0.:
-			var direction: float=world.boss.get("dash_direction",-1.)
-			for i in 5:
-				var x:=pivot.x-direction*float(82+i*18)
-				var p:=at(Vector2(x,world.floor_at(x)-5.-i*3.))
-				draw_rect(Rect2(p,Vector2(18.-i*2.,5.)),Color(.88,.46,.26,.56-i*.09))
-
 func draw_combat_cues() -> void:
 	# Critical intent stays above smoke and impacts; FX never owns attack timing.
-	if world.section=="arena" and float(world.boss.get("beam_warning",0.))>0.:
-		var x: float=world.boss.beam_x
-		var p: Vector2=at(Vector2(x,world.floor_at(x)))
-		draw_rect(Rect2(p-Vector2(36,350),Vector2(72,350)),Color(1.,.7,.3,.18))
-		draw_line(p-Vector2(0,330),p,Color("ebc37f"),3.)
+	M1FinaleForgeArt.draw_floor(self)
 	for e in world.enemies:
+		if CampaignWardens.applies(e):
+			CampaignWardens.draw_threat(self,e)
+			continue
 		if bool(e.defeated) or float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
 		var p:=Vector2(float(e.x),float(e.y))
 		var attack: bool=enemy_attacking(e)
@@ -573,40 +538,6 @@ func draw_combat_cues() -> void:
 			var point := at(p+Vector2(0,-70))
 			draw_circle(point,5,Color("f7bb70")); caption("!",point+Vector2(-3,-10),20)
 			if e.has("shot_lane"):caption(host.t("high_lane" if str(e.shot_lane)=="high" else "low_lane"),point+Vector2(-14,-25),11)
-	if bool(world.boss.active) and not world.completed:
-		if not world.completed and float(world.boss.get("shift_pause",0.))>0.:
-			var sc := at(Vector2(float(world.boss.x),float(world.boss.y)-80.))
-			var sr: float = 72. if host.options.reduced_motion else 54.+(1.-float(world.boss.shift_pause)/.75)*58.
-			draw_arc(sc,sr,0.,TAU,28,Color("ffcf8c"),4.)
-		if not world.completed and float(world.boss.get("recover",0.))>0.:
-			var rc := at(Vector2(float(world.boss.x),float(world.boss.y)-75.))
-			draw_arc(rc,34.,0.,TAU,18,Color("9fe3c8"),3.)
-		var echo: bool=float(world.boss.get("echo_wait",0.))>0.
-		var pattern:=int(world.boss.attack)%3
-		var winding: bool=float(world.boss.windup)>0.
-		var dash_warning: bool=winding and pattern==2 and int(world.boss.phase)==3
-		if echo or dash_warning or (winding and pattern==1):
-			var direction: float=world.boss.get("echo_direction",-1.) if echo else CampaignBossPressure.lane_direction(world)
-			var start: float=float(world.boss.x)
-			start+=direction*CampaignBossPressure.WAVE_OFFSET
-			var finish:=clampf(start+direction*CampaignBossPressure.WAVE_SPEED*CampaignBossPressure.WAVE_LIFE,0.,world.length())
-			if dash_warning:
-				finish=CampaignBossPressure.dash_destination(world,direction)+direction*CampaignBossPressure.DASH_RADIUS
-				start=float(world.boss.x)-direction*CampaignBossPressure.DASH_RADIUS
-			draw_boss_lane(start,finish,Color("fbc976") if echo else Color("f28c6b"),dash_warning)
-
-func draw_boss_lane(start: float,finish: float,colour: Color,is_charge: bool) -> void:
-	var left:=maxf(minf(start,finish),camera_x)
-	var right:=minf(maxf(start,finish),camera_x+scene_w)
-	var first:=ceili(left/18.)
-	var last:=floori(right/18.)
-	for i in range(first,last+1):
-		var x:=float(i*18)
-		var y:=world.floor_at(x)-7.
-		var p:=at(Vector2(x,y)).round()
-		if is_charge:
-			draw_rect(Rect2(p,Vector2(18.,5.)),Color(colour,.30))
-		draw_rect(Rect2(p,Vector2(10.,3.)),colour)
 
 func hero_weapon_visible() -> bool:
 	# The authored throw includes release and follow-through with an open hand.

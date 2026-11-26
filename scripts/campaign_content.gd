@@ -23,6 +23,9 @@ const TURRET_SAFE_RANGE := 140.
 const TURRET_RANGE := 500.
 const RELAY_DRONE := "relay:enemy:312"
 const RELAY_SCOUT := "relay:enemy:313"
+const RELAY_GRATE := "relay:basin:grate"
+const RELAY_GRATE_AMMO := "relay:basin:ammo"
+const RELAY_COVERS := [Rect2(4480.,60.,96.,36.),Rect2(4749.,-124.,96.,36.)]
 
 ## Handcrafted 8-encounter arcs per leaf route (0.31.0).
 ## Each beat pairs a clear cue -> player decision -> counterplay -> reward,
@@ -36,7 +39,7 @@ const LEAF_PLANS := {
 		{"ratio":0.52,"role":"channel_ambush","enemies":[["hopper",0.,0.],["siphon",165.,-130.],["beetle",320.,0.],["leech",470.,0.]],"platforms":[[70.,-78.,170.],[310.,-132.,165.]],"crate":560.},
 		{"ratio":0.63,"role":"heavy_sweeper","enemies":[["siphon",90.,-130.],["leech",260.,0.],["hopper",450.,0.]],"platforms":[[40.,-75.,160.],[290.,-125.,165.]],"crate":-120.,"fruit":[70.,-118.,3]},
 		{"ratio":0.76,"role":"sluice_gauntlet","enemies":[["hopper",0.,0.],["siphon",180.,-135.],["leech",340.,0.],["drone",490.,-125.]],"platforms":[[95.,-80.,165.],[345.,-78.,170.]],"pit":[220.,310.],"crate":580.},
-		{"ratio":0.87,"role":"water_exam","enemies":[["leech",0.,0.],["hopper",165.,0.],["siphon",315.,-130.],["hopper",460.,0.],["siphon",580.,-115.]],"platforms":[[120.,-78.,165.],[360.,-128.,175.]],"crate":-140.,"fruit":[145.,-118.,4]}
+		{"ratio":0.87,"role":"water_exam","enemies":[["leech",0.,0.],["hopper",165.,0.],["siphon",315.,-130.]],"platforms":[[120.,-78.,165.],[360.,-128.,175.]],"crate":-140.,"fruit":[145.,-118.,4]}
 	],
 	"terrace": [
 		{"ratio":0.10,"role":"teach_kite","enemies":[["kite",40.,-125.],["kite",260.,-135.]],"platforms":[[80.,-75.,165.],[265.,-135.,155.]],"crate":360.,"fruit":[95.,-115.,3]},
@@ -46,7 +49,7 @@ const LEAF_PLANS := {
 		{"ratio":0.52,"role":"garden_vantage","enemies":[["mirror",0.,0.],["kite",185.,-135.],["seed",350.,-75.],["vine",495.,0.]],"platforms":[[295.,-75.,155.],[85.,-132.,165.]],"crate":570.},
 		{"ratio":0.63,"role":"heavy_glider","enemies":[["kite",110.,-135.],["vine",290.,0.],["mirror",470.,0.]],"platforms":[[55.,-78.,165.],[260.,-138.,175.]],"crate":-120.,"fruit":[75.,-120.,3]},
 		{"ratio":0.76,"role":"gust_gauntlet","enemies":[["vine",0.,0.],["kite",175.,-135.],["mirror",345.,0.],["drone",500.,-125.]],"platforms":[[105.,-78.,165.],[310.,-140.,165.]],"pit":[220.,315.],"crate":585.},
-		{"ratio":0.87,"role":"terrace_exam","enemies":[["kite",0.,-130.],["mirror",170.,0.],["vine",330.,0.],["kite",470.,-138.],["mirror",590.,0.]],"platforms":[[90.,-78.,165.],[300.,-138.,180.]],"crate":-140.,"fruit":[115.,-118.,4]}
+		{"ratio":0.87,"role":"terrace_exam","enemies":[["kite",0.,-130.],["mirror",170.,0.],["vine",330.,0.]],"platforms":[[90.,-78.,165.],[300.,-138.,180.]],"crate":-140.,"fruit":[115.,-118.,4]}
 	],
 	"roots": [
 		{"ratio":0.10,"role":"teach_burrow","enemies":[["burrow",40.,0.],["burrow",275.,0.]],"platforms":[[110.,-72.,165.]],"crate":370.,"fruit":[130.,-112.,3]},
@@ -56,7 +59,7 @@ const LEAF_PLANS := {
 		{"ratio":0.52,"role":"hollow_ambush","enemies":[["mimic",0.,0.],["burrow",175.,0.],["conductor",350.,0.],["slime",490.,0.]],"platforms":[[85.,-76.,165.],[305.,-126.,165.]],"crate":565.},
 		{"ratio":0.63,"role":"heavy_borer","enemies":[["conductor",100.,0.],["burrow",290.,0.],["mimic",470.,0.]],"platforms":[[45.,-78.,165.],[270.,-128.,170.]],"crate":-120.,"fruit":[65.,-120.,3]},
 		{"ratio":0.76,"role":"crystal_gauntlet","enemies":[["burrow",0.,0.],["mimic",185.,0.],["conductor",365.,0.],["wisp",515.,-125.]],"platforms":[[100.,-76.,165.],[325.,-124.,170.]],"crate":590.},
-		{"ratio":0.87,"role":"roots_exam","enemies":[["burrow",0.,0.],["conductor",175.,0.],["mimic",335.,0.],["burrow",475.,0.],["mimic",600.,0.]],"platforms":[[115.,-76.,165.],[345.,-126.,180.]],"crate":-140.,"fruit":[135.,-118.,4]}
+		{"ratio":0.87,"role":"roots_exam","enemies":[["burrow",0.,0.],["conductor",175.,0.],["mimic",335.,0.]],"platforms":[[115.,-76.,165.],[345.,-126.,180.]],"crate":-140.,"fruit":[135.,-118.,4]}
 	]
 }
 
@@ -98,12 +101,41 @@ static func flying(kind: String) -> bool:
 	return kind in ["crow","moth","drone","wisp","glider",CampaignHive.KIND] or (NEW_ENEMIES.has(kind) and bool(NEW_ENEMIES[kind].flying))
 
 static func relay_opening_blocked(w,e: Dictionary) -> bool:
-	if w.section!="relay" or int(e.attacks)>0 or str(e.id) not in [RELAY_DRONE,RELAY_SCOUT]:return false
+	if w.section!="relay" or str(e.id) not in [RELAY_DRONE,RELAY_SCOUT]:return false
 	var partner_id:=RELAY_DRONE if e.id==RELAY_SCOUT else RELAY_SCOUT
 	for partner in w.enemies:
 		if partner.id==partner_id and not bool(partner.defeated):
 			return float(partner.windup)>0. or float(partner.get("flash",0.))>0. or float(partner.get("recover",0.))>0.
 	return false
+
+static func install_relay_grate(w) -> void:
+	if w.section!="relay":return
+	var open: bool=w.activated.has(RELAY_GRATE)
+	if not w.objects.any(func(o):return o.id==RELAY_GRATE):
+		var x:=4626.
+		w.objects.append({"id":RELAY_GRATE,"kind":"copper_grate","x":x,"y":w.floor_at(x),
+			"hp":0 if open else 2,"active":open,"secret":""})
+	if open:release_relay_ammo(w)
+
+static func release_relay_ammo(w) -> void:
+	if w.taken.has(RELAY_GRATE_AMMO) or w.pickups.any(func(item):return item.id==RELAY_GRATE_AMMO):return
+	var x:=4644.
+	w.pickups.append({"id":RELAY_GRATE_AMMO,"kind":"pistol_ammo","x":x,"y":w.floor_at(x)-35.})
+
+static func cover_contact(w,from: Vector2,to: Vector2) -> Vector2:
+	if w.section!="relay":return Vector2.INF
+	var best:=Vector2.INF
+	for cover: Rect2 in RELAY_COVERS:
+		if maxf(from.x,to.x)<cover.position.x or minf(from.x,to.x)>cover.end.x:continue
+		if cover.has_point(from):return from
+		var ne:=Vector2(cover.end.x,cover.position.y)
+		var sw:=Vector2(cover.position.x,cover.end.y)
+		var previous:=sw
+		for corner: Vector2 in [cover.position,ne,cover.end,sw]:
+			var hit: Variant=Geometry2D.segment_intersects_segment(from,to,previous,corner)
+			if hit is Vector2 and from.distance_squared_to(hit)<from.distance_squared_to(best):best=hit
+			previous=corner
+	return best
 
 static func populate(w) -> void:
 	w.encounters.clear();w.objects.clear();w.zones.clear();w.rooms.clear();w.hazards.clear()
@@ -267,6 +299,7 @@ static func hit_object(w,p: Vector2,damage: int,from: Vector2=Vector2.INF) -> bo
 			if o.kind in ["lamp","panel","relay","turret"] and not w.awarded.has(str(o.id)+":power"):
 				w.buffs["power"]=maxf(6.,float(w.buffs.get("power",0.)));w.award(str(o.id)+":power",0)
 			if o.kind in ["surprise","planks","rock"]:w.pickups.append({"id":str(o.id)+":gift","x":o.x,"y":float(o.y)-35.,"kind":"points"})
+			if o.kind=="copper_grate":release_relay_ammo(w)
 			apply_surface(w,o)
 			if o.kind=="relay":w.notice="arc_maintenance";w.notice_time=3.
 		return true
@@ -330,10 +363,13 @@ static func step(w,dt: float) -> void:
 				elif h.kind not in ["gust","sluice","crystal"] and above<90.:
 					if not (h.kind=="electric" and bool(w.mount.ridden) and float(w.mount.get("dive",0.))>0.):w.damage_player("hazard")
 	if not w.hazards.is_empty():w.hazards=w.hazards.filter(func(h):return not bool(h.get("once",false)) or float(h.clock)<4.2)
+	var current_speed:=0.
 	for z in w.zones:
 		if not active or w.player.x<float(z.x) or w.player.x>float(z.x)+float(z.width):continue
-		if z.kind=="current":push_current(w,36.*dt)
-		if z.kind=="updraft" and w.player.y>float(z.get("ceiling",-INF)) and not w.grounded():w.velocity.y-=1100.*dt
+		if z.kind=="current":current_speed=maxf(current_speed,64. if str(z.id)=="water:flow" else 36.)
+		if z.kind=="updraft" and w.player.y>float(z.get("ceiling",-INF)) and not w.grounded():
+			if str(z.id)!="terrace:garden-draft" or CampaignGround.garden_draft_active(w.time):w.velocity.y-=1100.*dt
+	if current_speed>0.:push_current(w,current_speed*dt)
 	if float(w.buffs.get("magnet",0.))>0.:
 		for p in w.pickups:
 			if not CampaignRoutes.pickup_exposed(w,p):continue

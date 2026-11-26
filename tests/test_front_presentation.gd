@@ -55,7 +55,7 @@ func verify_field_story() -> void:
 		check(CampaignGround.has_floor(floor),"Field plate is grounded in "+section)
 		route.player=Vector2(CampaignStory.PLATE_X,floor)
 		CampaignStory.step(route)
-		var key: String=CampaignStory.ROUTE_CLUES[section]
+		var key: String=CampaignStory.ROUTE_CLUES[section][0]
 		check(route.notice==key and CampaignStory.latest_note(route,"en")==CampaignStory.line("en",key),"Grounded route plate writes the correct map clue for "+section)
 
 func run() -> void:
@@ -81,6 +81,18 @@ func run() -> void:
 	game.front.input(event)
 	check(game.front.demo_world==null and game.menu_layer.visible,"Any input stops attract and returns cleanly")
 	await settle()
+	for scenario in [2,3]:
+		game.front.start_demo(scenario)
+		var demo: AionCampaignWorld=game.front.demo_world
+		if scenario==2:
+			var gate: Dictionary=demo.gates.front()
+			demo.player=Vector2(float(gate.x)-90.,demo.floor_at(float(gate.x)-90.))
+		else:demo.player.x=float(demo.boss.x)-520.
+		game.front.step(1./60.)
+		await settle()
+		check(game.front.demo_world==demo and game.front.demo_view.host==game.front,"The real attract view renders the combat gate or dormant boss: "+demo.section)
+		game.front.stop_demo()
+		await settle()
 	# Reproduce Help -> freshly rebuilt, immediately hidden Main -> Escape.
 	# Browser rAFs do not imply that Godot's hidden containers have sorted.
 	game.show_page("help");await settle()

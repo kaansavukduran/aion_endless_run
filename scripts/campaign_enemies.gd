@@ -21,6 +21,7 @@ const ROLE_TIMING := {
 }
 
 static func timing_for(e: Dictionary) -> Dictionary:
+	if CampaignWardens.applies(e):return CampaignWardens.TIMING[CampaignWardens.role(e)]
 	if bool(e.get("mini",false)):return {"windup":0.90,"recover":0.55}
 	return ROLE_TIMING.get(str(e.get("kind","")),{"windup":0.85,"recover":0.55})
 
@@ -38,6 +39,9 @@ static func vine_sweep(e: Dictionary) -> Rect2:
 	return Rect2(float(e.x)-210.,float(e.y)-85.,420.,140.)
 
 static func attack(w,e: Dictionary) -> void:
+	if CampaignWardens.applies(e):
+		CampaignWardens.release(w,e)
+		return
 	var timing: Dictionary=timing_for(e)
 	e.flash=.45;e.attacks=int(e.attacks)+1;e.recover=float(timing.recover)
 	w.pending_events.append("guardian" if bool(e.mini) else "enemy_shot")
@@ -87,9 +91,13 @@ static func attack(w,e: Dictionary) -> void:
 			shot(w,e,0.,-95. if int(e.attacks)%2==0 else -20.,260.)
 
 static func active_time(e: Dictionary) -> float:
+	if e.has("warden"):return CampaignWardens.active_time(e)
 	return maxf(float(e.get("lunge",0.)),maxf(float(e.get("leap",0.)),float(e.get("sweep",0.))))
 
 static func step(w,e: Dictionary,dt: float) -> bool:
+	if CampaignWardens.applies(e):
+		CampaignWardens.step(w,e,dt)
+		return true
 	var kind: String=e.kind
 	if not CampaignContent.NEW_ENEMIES.has(kind) and kind not in CampaignContent.HEAVIES and not bool(e.mini):return false
 	var spec: Dictionary=CampaignContent.NEW_ENEMIES.get(kind,{"speed":45.,"range":500.})
