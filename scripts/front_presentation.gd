@@ -68,7 +68,7 @@ func refresh() -> void:
 func start_demo(index: int=0) -> void:
 	if intro_active or host.page!="main":return
 	stop_demo();demo_index=posmod(index,DEMOS.size());demo_time=0.;last_jump=0.
-	demo_world=AionCampaignWorld.new();demo_world.begin(DEMOS[demo_index][0]);demo_world.load_section(DEMOS[demo_index][1])
+	demo_world=AionCampaignWorld.new();demo_world.prewarm_art=false;demo_world.begin(DEMOS[demo_index][0]);demo_world.load_section(DEMOS[demo_index][1])
 	demo_view=AionCampaignView.new();demo_view.world=demo_world;demo_view.host=self
 	demo_view.font=host.interface_options.body_font
 	add_child(demo_view);refresh()
