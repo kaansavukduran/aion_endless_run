@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.58.1 · Mission 1 yön tuşları
+
+A/D/W/S ve ok tuşları birlikte kullanıldığında basılı kalan yön korunur. Karşıt yönler birlikte tutulursa kahraman durur. Açık olan yürüme yardımı, yön tuşları bırakıldığında güvenli zeminde yeniden devreye girer.
+
 ## 0.58.0 · Sönen Fenerler genişlemesi
 
 Fener Kıyısı’ndan çıkan üç fiziksel yol Bakır Röle’de birleşir. Kıyı Altı’ndaki pompa servis kanalının derinliğini değiştirir. Duraklatma menüsündeki **Harita** bulunduğun bölgeyi, **Ekipman** silahı, cephaneyi ve toplanan yükseltmeleri gösterir. Otomatik yürüyüş, ayarlarda açabileceğin isteğe bağlı bir destektir.
