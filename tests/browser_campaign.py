@@ -427,8 +427,6 @@ with sync_playwright() as pw:
                 if rescue_presentation(current):continue
                 assert current['state']=='playing',('Dropped item approach interrupted',current['state'],current['menu'])
                 item=next(item for item in current['pickups'] if item.get('rescue_id')==captive['id'])
-                if current.get('weapon_offer',{}).get('id')==item['id']:
-                    keys([]);page.keyboard.press('e');page.wait_for_timeout(150);continue
                 keys(['d'] if item['x']>current['player'][0] else ['a'])
                 page.wait_for_timeout(40)
             keys([])
@@ -591,18 +589,6 @@ with sync_playwright() as pw:
                     page.wait_for_timeout(min(5000,max(0,int(command.get('milliseconds',300)))));keys([])
                     (a.evidence/('guided-input-'+str(steering_id)+'.json')).write_text(json.dumps({'command':command,'state_after':data()},indent=2)+'\n')
                     continue
-            offer=d.get('weapon_offer',{})
-            if offer:
-                keys([])
-                # Held movement can carry the hero off an offer between frames.
-                page.wait_for_timeout(180)
-                settled=data();offer=settled.get('weapon_offer',{})
-                if settled['section']!=section or settled['menu'] or not offer:continue
-                before_weapon=settled['weapon'];page.keyboard.press('e')
-                page.wait_for_function('id=>JSON.parse(document.querySelector("canvas").dataset.campaign).taken[id]===true',arg=offer['id'],timeout=5000)
-                check(data()['weapon']==offer['kind'],'Actual E deliberately swaps a visible special weapon: '+before_weapon+' → '+offer['kind'])
-                with (a.evidence/'weapon-swaps.jsonl').open('a') as swap_log:swap_log.write(json.dumps({'before':before_weapon,'offer':offer,'after':data()})+'\n')
-                continue
             if a.rhythm and float(d.get('rally',{}).get('x',140))>180 and not (a.evidence/'rally-offline.json').exists():
                 keys([]);canvas.focus();page.keyboard.press('Escape')
                 page.wait_for_function('JSON.parse(document.querySelector("canvas").dataset.campaign).menu==="paused"')

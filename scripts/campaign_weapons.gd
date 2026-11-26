@@ -220,8 +220,8 @@ static func start_spider_parade(w,item: Dictionary) -> void:
 static func step_spider_parade(w) -> void:
 	if w.spider_parade.has("started") or w.time<float(w.spider_parade.get("scan_after",0.)):return
 	w.spider_parade.scan_after=w.time+.15
-	# A crate and its eventual pickup share the location. Observation precedes
-	# auto-collect and deliberate swaps, so even a player passing by sees it.
+	# A crate and its eventual pickup share the location. Observation happens
+	# before contact, so even a player passing by sees the walking sprites.
 	for sources in [w.crates,w.pickups]:
 		for item in sources:
 			if item.kind=="rocket" and not w.taken.has(str(item.id)) and absf(float(item.x)-w.player.x)<420. and absf(float(item.y)-w.player.y)<145.:

@@ -762,8 +762,8 @@ const CURRENT := {
 }
 
 static func get_text(language: String, key: String) -> String:
-	if key=="name_armadillo":return "Armadillo"
-	if key=="name_frog":return "Kurbağa" if language=="tr" else "Frog"
+	if key=="name_armadillo":return "Doğukan"
+	if key=="name_frog":return "Light"
 	language=language_for_locale(language)
 	if key=="help":return str(CURRENT[language].motion_help)
 	if CURRENT[language].has(key):return str(CURRENT[language][key])

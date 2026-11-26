@@ -6,6 +6,12 @@ const LANTERN_X := 720.
 const PLATE_X := 720.
 const NOTICE_SECONDS := 4.5
 const WORDS := {
+	"story_hero_aion": ["Aion · Kesik fener hattını izleyeceğim.", "Aion · I’ll trace the cut lantern wire."],
+	"story_hero_sheep": ["Kutsanmış · Sürümü güvene götürmeliyim.", "Kutsanmış · I need to get my flock to safety."],
+	"story_hero_rabbit": ["Ayça · İskele bekçilerine yardıma geldim.", "Ayça · I came to help the quay keepers."],
+	"story_hero_eren": ["Eren · İmdat çağrısı burada kesildi.", "Eren · The distress call cut out here."],
+	"story_hero_armadillo": ["Doğukan · Bakım yolunu açmak bana düştü.", "Doğukan · I’ll reopen the service path."],
+	"story_hero_frog": ["Light · Su kanalında kalanları arıyorum.", "Light · I’m looking for survivors in the canal."],
 	"story_lantern": ["Feneri röleye bağlayan tel kesilmiş.", "Someone cut the wire linking this lantern to the relay."],
 	"story_signal": ["Röle sinyal veriyor. Karga ona tepki verdi.", "The relay is sending a signal. The crow reacted to it."],
 	"story_keeper": ["Bekçi · Al bu ikmali. Kıyıda hâlâ yardım bekleyenler var.", "Keeper · Take these supplies. Others on the coast still need help."],
@@ -40,6 +46,10 @@ static func line(language: String, key: String) -> String:
 
 static func clue_id(key: String) -> String:
 	return "story:" + key.trim_prefix("story_")
+
+static func opening(w) -> void:
+	w.notice = "story_hero_" + str(w.character)
+	w.notice_time = NOTICE_SECONDS
 
 static func latest_note(w, language: String) -> String:
 	for key: String in NOTE_ORDER:
@@ -86,7 +96,7 @@ static func step(w) -> void:
 			if record(w, key):
 				return
 	if section == "shore":
-		var opening_slot: bool = w.notice_time <= .0 or w.notice == "arc_checkpoint"
+		var opening_slot: bool = w.notice_time <= .0 or w.notice == "arc_checkpoint" or w.notice.begins_with("story_hero_")
 		var free_slot: bool = opening_slot or w.notice == "story_lantern"
 		if free_slot and w.player.x >= 680. and w.player.x < 1510. and not w.discovered.has(clue_id("story_signal")) and not signal_crow(w).is_empty():
 			record(w, "story_signal")

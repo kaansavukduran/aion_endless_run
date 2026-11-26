@@ -17,8 +17,6 @@ func claim_gift(w,npc: Dictionary) -> bool:
 	w.attack_release();w.move_axis=Vector2.ZERO;w.velocity=Vector2.ZERO
 	w.player=Vector2(float(items[0].x),float(items[0].y)+25.)
 	tick(w,.3)
-	var offer: Dictionary=CampaignRhythm.offer(w)
-	if str(offer.get("id",""))==id:w.interact()
 	return w.taken.has(id) and w.awarded.has(str(npc.id)+":gift")
 func _initialize() -> void:call_deferred("run")
 func run() -> void:

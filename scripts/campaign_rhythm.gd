@@ -103,22 +103,6 @@ static func restore_shore_bridge(w) -> void:
 			w.velocity.y=0.;w.drop_through_time=0.
 			return
 
-static func can_auto_collect(w,item: Dictionary) -> bool:
-	var kind: String=str(item.kind)
-	return kind not in CampaignWeapons.SPECIAL or w.weapon=="pistol" or w.weapon==kind or bool(w.mount.ridden)
-
-static func offer(w) -> Dictionary:
-	if bool(w.mount.ridden) or w.mount_transition!="":return {}
-	var nearest: Dictionary={};var distance:=INF
-	for item in w.pickups:
-		if str(item.kind) not in CampaignWeapons.SPECIAL or w.taken.has(str(item.id)) or can_auto_collect(w,item):continue
-		if item.has("secret") and not w.discovered.has(str(item.secret)):continue
-		if item.has("rescue_id") and float(item.get("age",0.))<.25:continue
-		if not w.touches_pickup(item):continue
-		var d: float=w.player_hit_center().distance_to(Vector2(float(item.x),float(item.y)))
-		if d<distance:distance=d;nearest=item
-	return nearest
-
 static func lane_shot(w,e: Dictionary) -> bool:
 	if not e.has("shot_lane"):return false
 	var origin:=Vector2(float(e.x),float(e.y)-32.)

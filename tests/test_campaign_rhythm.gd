@@ -14,9 +14,8 @@ func run() -> void:
 	w.collect({"id":"heavy-first","kind":"heavy"})
 	w.pickups.append({"id":"choice","kind":"arc","x":w.player.x,"y":-35.})
 	w.step(.01)
-	check(w.weapon=="heavy" and not w.taken.has("choice"),"Walking into a different special preserves the held gun")
-	check(str(CampaignRhythm.offer(w).get("id",""))=="choice","Reachable gun offers the shared contextual interaction")
-	check(w.interact() and w.weapon=="arc" and w.taken.has("choice"),"Actual interact deliberately claims the selected gun")
+	check(w.weapon=="arc" and w.taken.has("choice") and w.pistol_reserve==CampaignWeapons.PISTOL_START,"Walking into a different special equips it immediately and preserves sidearm stock")
+	check(w.ammunition==int(CampaignWeapons.SPECS.arc.ammo),"The newly touched weapon starts with its authored ammunition")
 	w.ammunition=10;w.collect({"id":"arc-refill","kind":"arc"})
 	check(w.ammunition==46,"Matching supply adds ammunition instead of deleting remaining stock")
 	w.collect({"id":"arc-refill","kind":"arc"});check(w.ammunition==46,"Same supply cannot refill twice")
@@ -24,6 +23,15 @@ func run() -> void:
 	w.mount={"ridden":true,"available":true,"hp":1,"x":w.player.x};w.player.y=-42.
 	w.pickups.append({"id":"mounted","kind":"beam","x":w.player.x+30.,"y":-35.});w.step(.01)
 	check(w.weapon=="beam" and w.taken.has("mounted"),"Vehicle-contact supply collection remains available")
+	w.load_section("quay");w.state="playing"
+	check(w.gates.is_empty() and not w.enemies.is_empty(),"Broken Quay keeps its enemies with no encounter lock gates")
+	for former_gate in [2840.,8640.]:
+		w.player=Vector2(former_gate-24.,w.floor_at(former_gate-24.));w.invulnerable=2.;w.move_axis=Vector2.RIGHT
+		for frame in 32:w.step(.016)
+		check(w.player.x>former_gate+30.,"Normal movement passes the removed Quay lock: "+str(former_gate))
+	w.gates.assign([{"x":2840.,"ids":["quay:enemy:300"]},{"x":8640.,"ids":["quay:enemy:330"]}])
+	var old_quay:=AionCampaignWorld.new()
+	check(old_quay.restore(w.snapshot()) and old_quay.gates.is_empty(),"Existing exact Broken Quay saves cannot restore the removed locks")
 	w=fresh();w.weapon="heavy";w.ammunition=38;w.player=Vector2(2610.,0.)
 	w.score=123;CampaignRecovery.step(w)
 	check(float(w.rally.get("x",0.))==2600. and int(w.rally.ammunition)==38,"Grounded rally point captures real position and stock")
@@ -140,17 +148,16 @@ func run() -> void:
 	game.world.completed=true;game.world.victory_time=1.2;game.update_ambient()
 	check(game.ambient.volume_db<=-59.,"Boss music fades out for the ending")
 	for locale in ["tr","en"]:
-		for key in ["rally","bridge_warning","swap_weapon","gate_remaining","chain_bonus","boss_core","boss_dash"]:
+		for key in ["rally","bridge_warning","gate_remaining","chain_bonus","boss_core","boss_dash"]:
 			check(AionCampaignText.word(locale,key)!=key,"New gameplay feedback is translated: "+locale+"/"+key)
-	game.touch_mode=true;game.menu_kind="";game.world.begin("aion");game.world.state="playing";game.world.weapon="heavy";game.language="tr"
-	game.world.pickups.assign([{"id":"scale-offer","kind":"arc","x":140.,"y":-35.}])
+	game.touch_mode=true;game.menu_kind="";game.world.begin("frog");game.world.state="playing";game.language="tr"
 	for dimensions in [Vector2i(320,568),Vector2i(393,873),Vector2i(844,390),Vector2i(1280,720)]:
 		root.size=dimensions;await process_frame
 		for scale in [1.,1.5,2.]:
 			game.options.text_scale=scale;game.ui.theme=game.options.theme(game.FONT);game.resize();game.update_hud();await process_frame;await process_frame
 			var context_rect: Rect2=game.actions.context.get_global_rect()
 			var label: String=str(dimensions)+"/"+str(scale)
-			check(game.actions.context.visible and game.actions.context.caption==game.t("context_swap_short"),"Actual gun choice is laid out after its translated text: "+label)
+			check(game.actions.context.visible and game.actions.context.caption==game.t("skill_tongue"),"Actual Light skill remains reachable: "+label)
 			check(Rect2(Vector2.ZERO,Vector2(game.view_w,game.view_h)).encloses(context_rect),"Context touch action fits: "+label)
 			check(context_rect.position.x>game.view_w*.5 and context_rect.size==Vector2(90,90),"Compact context action stays on the right: "+label)
 			check(context_rect.position.y>=game.view_h-220. and game.actions.attack.position.y>=game.view_h-220.,"Upper touch row stays below the baseline floor: "+label)

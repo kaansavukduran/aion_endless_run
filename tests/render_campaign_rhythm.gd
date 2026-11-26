@@ -23,9 +23,10 @@ func run() -> void:
 	game.options.theme_mode="dark";game.options.resolve_theme();game.ui.theme=game.options.theme(game.FONT);game.touch_mode=true
 	var w=game.world
 	w.weapon="heavy";w.ammunition=45;w.player=Vector2(900.,0.);game.view.camera_x=600.
-	w.pickups.append({"id":"offer-review","kind":"arc","x":920.,"y":-35.})
-	await snap("weapon-offer")
-	check(game.actions.context.visible and game.actions.context.caption==game.t("context_swap_short"),"Actual context button offers gun choice")
+	w.pickups.append({"id":"pickup-review","kind":"arc","x":920.,"y":-35.})
+	w.step(.016)
+	await snap("weapon-pickup")
+	check(w.weapon=="arc" and w.taken.has("pickup-review") and not game.actions.context.visible,"Touching the arc supply equips it and shows it in the HUD")
 	w.enemies.clear();w.gates.clear();w.player=Vector2(2610.,0.);CampaignRecovery.step(w);w.invulnerable=0.;w.damage_player();game.view.camera_x=2350.
 	for tick in 60:w.step(.02)
 	CampaignLives.start_entry(w,Rect2(2350.,-420.,1152.,600.));w.step(.05)
@@ -45,10 +46,10 @@ func run() -> void:
 	w.boss.phase=3;w.boss.hp=87;w.boss.attack=2;w.boss.windup=.7
 	await snap("boss-charge-warning")
 	root.size=Vector2i(393,873);await process_frame
-	w.load_section("shore");w.weapon="heavy";w.ammunition=45;w.player=Vector2(900.,0.);game.view.camera_x=600.;w.pickups.append({"id":"offer-review","kind":"arc","x":920.,"y":-35.})
-	await snap("portrait-offer")
-	check(Rect2(Vector2.ZERO,Vector2(root.size)).encloses(root.get_final_transform()*game.screen_transform*game.actions.context.get_global_rect()),"Portrait gun choice target is inside viewport: raw="+str(root.size)+" control="+str(game.actions.context.get_global_rect())+" transform="+str(game.screen_transform)+" final="+str(root.get_final_transform()))
+	w.begin("frog");w.state="playing";w.player=Vector2(900.,0.);game.view.camera_x=600.
+	await snap("portrait-skill")
+	check(game.actions.context.visible and Rect2(Vector2.ZERO,Vector2(root.size)).encloses(root.get_final_transform()*game.screen_transform*game.actions.context.get_global_rect()),"Portrait skill target is visible inside the viewport")
 	game.options.text_scale=2.;game.ui.theme=game.options.theme(game.FONT)
-	await snap("portrait-offer-large")
-	check(not game.actions.context.get_global_rect().intersects(game.actions.attack.get_global_rect()),"200 percent actual gun choice stays separate from Fire")
+	await snap("portrait-skill-large")
+	check(not game.actions.context.get_global_rect().intersects(game.actions.attack.get_global_rect()),"At 200 percent, Light's skill still has its own hit target")
 	print("RESULT: %d rhythm render checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

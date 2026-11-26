@@ -70,10 +70,10 @@ const MAIN_PLANS := {
 		{"x":6680.,"role":"shore_finish","enemies":[["beetle",0.,0.],["seed",190.,0.],["crow",330.,-120.],["seed",470.,0.]],"platforms":[[90.,-75.,175.]],"crate":530.,"fruit":[115.,-115.,3],"gate":true}
 	],
 	"quay": [
-		{"x":2150.,"role":"quay_skimmer_intro","enemies":[["gnome",0.,0.],["drone",190.,-120.],["gnome",350.,0.]],"platforms":[[120.,-82.,170.]],"crate":430.,"fruit":[145.,-122.,3],"gate":true},
+		{"x":2150.,"role":"quay_skimmer_intro","enemies":[["gnome",0.,0.],["drone",190.,-120.],["gnome",350.,0.]],"platforms":[[120.,-82.,170.]],"crate":430.,"fruit":[145.,-122.,3],"gate":false},
 		{"x":4100.,"role":"quay_armour_air","enemies":[["beetle",0.,0.],["drone",180.,-125.],["beetle",350.,0.],["drone",510.,-120.]],"platforms":[[95.,-84.,175.],[310.,-136.,165.]],"crate":580.,"fruit":[115.,-124.,3],"gate":false},
 		{"x":6250.,"role":"quay_crossfire","enemies":[["seed",0.,0.],["beetle",205.,0.],["drone",355.,-125.],["seed",505.,0.]],"platforms":[[140.,-82.,175.],[360.,-138.,165.]],"prop":["turret",315.],"crate":565.,"fruit":[380.,-178.,3],"gate":false},
-		{"x":7950.,"role":"quay_approach","enemies":[["drone",40.,-125.],["beetle",200.,0.],["gnome",340.,0.],["beetle",490.,0.],["drone",610.,-120.]],"platforms":[[120.,-84.,175.],[355.,-132.,170.]],"crate":-130.,"fruit":[145.,-124.,3],"gate":true}
+		{"x":7950.,"role":"quay_approach","enemies":[["drone",40.,-125.],["beetle",200.,0.],["gnome",340.,0.],["beetle",490.,0.],["drone",610.,-120.]],"platforms":[[120.,-84.,175.],[355.,-132.,170.]],"crate":-130.,"fruit":[145.,-124.,3],"gate":false}
 	],
 	"canopy": [
 		{"x":1250.,"role":"canopy_high_entry","enemies":[["crow",0.,-120.],["seed",210.,0.],["crow",380.,-130.]],"platforms":[[70.,-74.,165.],[265.,-136.,165.]],"crate":440.,"fruit":[90.,-114.,3],"gate":true},
@@ -233,14 +233,16 @@ static func apply_surface(w,o: Dictionary) -> void:
 	elif o.kind=="planks":w.platforms=w.platforms.filter(func(p):return not is_equal_approx(p.position.x,float(o.x)-80.))
 
 static func hit_object(w,p: Vector2,damage: int,from: Vector2=Vector2.INF) -> bool:
+	var swept:=from.is_finite()
+	var low:=(minf(p.x,from.x) if swept else p.x)-45.
+	var high:=(maxf(p.x,from.x) if swept else p.x)+45.
 	for o in w.objects:
-		if bool(o.active) or str(o.kind) in ["current","updraft"]:continue
-		var low: float=minf(p.x,from.x) if from.is_finite() else p.x
-		var high: float=maxf(p.x,from.x) if from.is_finite() else p.x
-		if float(o.x)<low-45. or float(o.x)>high+45.:continue
-		var target:=Vector2(float(o.x),float(o.y)-35.)
-		var nearest: Vector2=p if not from.is_finite() else Geometry2D.get_closest_point_to_segment(target,from,p)
-		if nearest.distance_to(target)>45.:continue
+		var x:=float(o.x)
+		if x<low or x>high or bool(o.active):continue
+		if o.kind=="current" or o.kind=="updraft":continue
+		var target:=Vector2(x,float(o.y)-35.)
+		var nearest:=Geometry2D.get_closest_point_to_segment(target,from,p) if swept else p
+		if nearest.distance_squared_to(target)>45.*45.:continue
 		o.hp=int(o.hp)-damage
 		if int(o.hp)<=0:
 			o.active=true;w.activated[str(o.id)]=true;w.pending_events.append("mechanism")

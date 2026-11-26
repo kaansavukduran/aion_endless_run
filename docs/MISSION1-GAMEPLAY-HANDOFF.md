@@ -2,6 +2,17 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 0.58.3 · Doğuş, ikmal ve Kırık İskele
+
+- Kırık İskele’nin iki bekçi kilidi kaldırıldı. Eski kaydı yükleyen oyuncu aynı karşılaşma konumundan kovalamacaya devam edebilir. Yükleme sırasında iki kilit temizlenir.
+- Koruma bittiğinde kahraman ilk yatay girdi gelene kadar durur. İlk adımın ardından ayarlardaki yürüme yardımı güvenli zeminde yeniden çalışabilir. Başlangıç tabancası stoğu korunur ve temas edilen son özel silah hemen kuşanılır.
+- Light ve Doğukan adları önceki kahraman kayıtlarıyla eşleşir. Light, Ayça ve Eren’le aynı kısa, kısmi ve tam şarjlı zıplama eğrisini kullanır. Geniş portreli ekranda bir kahraman seçildikten sonra onun giriş satırı ilk oynanabilir karelerde görünür.
+- Su Kanalı, Bahçe Terasları ve Kök Geçidi için üç özgün Vorbis döngüsü var. Kök Geçidi bestesi orta yola ve Bakır Röle’ye de eşlik eder. Müzik yeniden doğuşta devam eder, sekme gizlendiğinde ve duraklatmada durur. [Ses kaynakları](../assets/audio/MISSION1-MUSIC.md)
+- Su Kanalı’nda sabit yedi nesne üzerinden yedi tekrar ve her tekrarda 48.000 süpürülmüş atış sorgusu ile nesne isabet kontrolü ölçüldü. Godot 4.6.3 Linux headless ortancası 5,88 → 2,06 µs, üst örnek 6,04 → 2,59 µs idi. Ölçüm isabet işlevine aittir.
+- Yeni müzikler bağlandıktan sonra eski ortam WAV dosyaları dışa aktarım filtresine alındı. İki yerel Web çıktısında PCK boyutu 110.689.056 → 109.614.220 bayt olarak ölçüldü.
+
+0.58.2 seçim düzeni, 393 × 670 Türkçe Chromium önizlemesinde 0.57.8 ile piksel karşılaştırmasından geçti. GitHub Pages’te bir 0.58.1 oturumu gerçek güncelleme düğmesiyle 0.58.2’ye geçti ve seçili Ayça’yı korudu. [0.58.2 yayın kaydı](https://github.com/kaansavukduran/aion_endless_run/actions/runs/45768745836)
+
 ## 0.58.1 · Yön tuşları ve yürüme yardımı
 
 0.58.0 ana dal kaydı `dfadab0` üzerinde A/D/W/S ve ok tuşlarının basılı durumu fiziksel tuş başına tutuluyor. Aynı yönü veren tuşlardan biri bırakıldığında diğeri çalışmaya devam ediyor. Karşıt yönler birbirini iptal ederken yürüme yardımı bekliyor. Sekme değişiminde ve duraklatmada basılı yönler temizleniyor.

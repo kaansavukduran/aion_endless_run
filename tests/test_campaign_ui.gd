@@ -136,6 +136,17 @@ func run() -> void:
 	game.on_web_page_hidden([]);game.on_web_page_visible([])
 	game._unhandled_input(key(KEY_ESCAPE));game._process(.016)
 	check(game.auto_walk_moving and game.world.move_axis.y==0.,"Focus recovery clears held directions and restores walk assist")
+	game.world.state="respawn_pending"
+	game._process(.016)
+	for frame in 45:game._process(.016)
+	check(game.world.state=="playing" and game.world.entry_guard,"The actual scene lands the revived hero with protection")
+	start=game.world.player.x
+	for frame in 235:game._process(.016)
+	check(game.auto_walk and not game.auto_walk_moving and not game.world.entry_guard and game.world.player.x==start,"The protected hero stays where they landed after the protection expires")
+	game._unhandled_input(key(KEY_D));game._process(.016)
+	check(game.world.player.x>start and not game.auto_walk_moving,"A fresh movement input immediately moves the revived hero")
+	game._unhandled_input(key(KEY_D,false));game._process(.016)
+	check(game.auto_walk_moving,"The enabled preference returns after the first deliberate step")
 	game.auto_walk=false
 	game.world.aim_direction=Vector2.RIGHT;game.world.facing=1;game.pad_look=Vector2.RIGHT;game.pad_axis=Vector2.LEFT
 	game._input(event(game.pad.bindings.shoot));game.update_arcade_aim(.016);game.world.step(.016)
@@ -162,12 +173,18 @@ func run() -> void:
 	game.menu_kind="paused";game.update_ambient();check(game.ambient.stream_paused,"Pause suspends regional ambient playback")
 	var starts:=game.ambient_starts
 	for frame in 400:game.update_ambient()
-	check(game.ambient_starts==starts,"A paused long WAV is never restarted on each update")
+	check(game.ambient_starts==starts,"A paused regional music stream is never restarted on each update")
 	check(game.ambient.playback_type==AudioServer.PLAYBACK_TYPE_STREAM,"Campaign loops use stream playback instead of allocating WebAudio samples repeatedly")
 	game.audio_enabled=false;game.update_ambient();check(not game.ambient.playing,"Existing mute preference really stops new music")
 	game.audio_enabled=true;game.menu_kind="";game.update_ambient();check(game.ambient_starts==starts+1,"Unmuting starts exactly one music stream")
 	for frame in 200:game.update_ambient()
 	check(game.ambient_starts==starts+1,"Ordinary music updates do not restart a running track")
+	for section in ["water","terrace","roots"]:
+		game.world.load_section(section);game.world.state="respawn";game.update_ambient()
+		check(game.ambient_key==section and game.ambient.stream is AudioStreamOggVorbis and game.ambient.stream.loop and not game.ambient.stream_paused,"Regional score continues across re-entry: "+section)
+		game.application_active=false;game.update_ambient()
+		check(game.ambient.stream_paused,"A hidden tab suspends its regional score: "+section)
+		game.application_active=true
 	game.world.load_section("arena");game.world.boss.engaged=true;game.update_ambient()
 	check(game.ambient_key=="boss-battle" and game.ambient.stream is AudioStreamOggVorbis and game.ambient.stream.loop,"New boss soundtrack activates as a looping Vorbis stream")
 	game.world.completed=true;game.world.state="complete";game.world.score=12345
