@@ -602,14 +602,17 @@ static func draw_route_sign(v,position: Vector2,vertical: float) -> void:
 	v.draw_line(end-Vector2(5,-4.+vertical*5.),end,ink,2.)
 
 static func draw_junction_board(v) -> void:
-	const LEFT := 281.
-	const WIDTH := 254.
-	const ROW_HEIGHT := 23.
+	const LEFT := 233.
+	const WIDTH := 400.
+	const ROW_HEIGHT := 33.
+	const TOP_ABOVE_DECK := 222.
 	if LEFT+WIDTH<v.camera_x or LEFT>v.camera_x+v.scene_w:return
-	var p: Vector2=v.at(Vector2(LEFT,WALKWAYS[0].position.y-120.)).round()
-	for x in [22.,211.]:
-		v.draw_rect(Rect2(p+Vector2(x,63.),Vector2(7.,57.)),Color("494044"))
-		v.draw_rect(Rect2(p+Vector2(x+1.,64.),Vector2(2.,55.)),Color("a68160"))
+	var p: Vector2=v.at(Vector2(LEFT,WALKWAYS[0].position.y-TOP_ABOVE_DECK)).round()
+	var post_top:=ROW_HEIGHT*3.-3.
+	var post_height:=TOP_ABOVE_DECK-post_top
+	for x in [64.,264.]:
+		v.draw_rect(Rect2(p+Vector2(x,post_top),Vector2(9.,post_height)),Color("494044"))
+		v.draw_rect(Rect2(p+Vector2(x+2.,post_top+1.),Vector2(2.,post_height-2.)),Color("a68160"))
 	var labels := ["fork_reward_upper","fork_reward_middle","fork_reward_lower"]
 	var arrows := [Vector2.UP,Vector2.RIGHT,Vector2.DOWN]
 	var colors := [Color("f2cf86"),Color("e5a777"),Color("a5dfd3")]
@@ -619,12 +622,12 @@ static func draw_junction_board(v) -> void:
 		v.draw_rect(Rect2(row,Vector2(WIDTH,ROW_HEIGHT-1.)),Color("765844"))
 		v.draw_rect(Rect2(row+Vector2(2,2),Vector2(WIDTH-4.,ROW_HEIGHT-5.)),Color("352f39"))
 		var direction: Vector2=arrows[i]
-		var tip: Vector2=row+Vector2(15,11)+direction*5.
-		var corner: Vector2=direction.orthogonal()*4.
-		v.draw_line(tip-direction*10.,tip,colors[i],2.)
-		v.draw_line(tip-direction*4.+corner,tip,colors[i],2.)
-		v.draw_line(tip-direction*4.-corner,tip,colors[i],2.)
-		v.caption(CampaignFieldUI.text(v.host,labels[i]),row+Vector2(29,16),16)
+		var tip: Vector2=row+Vector2(18,16)+direction*7.
+		var corner: Vector2=direction.orthogonal()*5.
+		v.draw_line(tip-direction*14.,tip,colors[i],2.)
+		v.draw_line(tip-direction*5.+corner,tip,colors[i],2.)
+		v.draw_line(tip-direction*5.-corner,tip,colors[i],2.)
+		v.caption(CampaignFieldUI.text(v.host,labels[i]),row+Vector2(39,23),23)
 
 static func draw_cage_latches(v) -> void:
 	var w=v.world
