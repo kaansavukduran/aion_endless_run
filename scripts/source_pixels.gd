@@ -40,10 +40,13 @@ static func decode(path: String) -> Image:
 
 ## Shared, bounded cache of decoded RGBA8 source sheets. Banks copy frame runs
 ## out of a sheet only when a frame is first needed, so they no longer keep
-## their own full-sheet copies: one decode per sheet, at most SHEET_LIMIT
-## sheets resident (least recently used is released and decoded again later).
+## their own full-sheet copies: one decode per sheet, bounded by decoded bytes
+## (SHEET_BUDGET, the old 12 full sheets) and a count ceiling (SHEET_LIMIT).
+## Small row strips (~0.6 MB) no longer cost a full 6 MB sheet's slot. The
+## least recently used sheet is released and decoded again later.
 ## Sheets are read-only for every caller.
-const SHEET_LIMIT := 12
+const SHEET_BUDGET := 72*1024*1024
+const SHEET_LIMIT := 32
 static var sheets: Dictionary = {}
 static var recent: Array[String] = []
 static var section_paths: Dictionary = {}
@@ -58,7 +61,7 @@ static func sheet(path: String) -> Image:
 		if decoded.is_compressed():decoded.decompress()
 		decoded.convert(Image.FORMAT_RGBA8)
 		sheets[path]=decoded;recent.append(path);decodes+=1
-		while recent.size()>SHEET_LIMIT:sheets.erase(recent.pop_front())
+		while recent.size()>1 and (recent.size()>SHEET_LIMIT or resident_bytes()>SHEET_BUDGET):sheets.erase(recent.pop_front())
 	if current_section!="":
 		if not section_paths.has(current_section):section_paths[current_section]={}
 		section_paths[current_section][path]=true
@@ -85,7 +88,24 @@ static func enter_section(id: String) -> void:
 		if ResourceLoader.exists(str(path)):warm.append(str(path))
 	for path in section_paths.get(id,{}):
 		if not path in warm:warm.append(path)
-	for path in warm.slice(maxi(0,warm.size()-SHEET_LIMIT)):sheet(path)
+	# Warm only what fits: the most recent entries within the byte budget.
+	var keep: Array=[];var bytes:=0
+	for i in range(warm.size()-1,-1,-1):
+		bytes+=sheet_bytes(str(warm[i]))
+		if keep.size()>=SHEET_LIMIT or (bytes>SHEET_BUDGET and not keep.is_empty()):break
+		keep.push_front(warm[i])
+	for path in keep:sheet(path)
+
+## Decoded RGBA8 size from the source dimensions, without decoding.
+static func sheet_bytes(path: String) -> int:
+	if sheets.has(path):return (sheets[path] as Image).get_data_size()
+	var import_file := ConfigFile.new()
+	if import_file.load(path + ".import") == OK:
+		var file := FileAccess.open(str(import_file.get_value("remap", "path", "")), FileAccess.READ)
+		if file != null and file.get_buffer(4).get_string_from_ascii() == "GST2":
+			file.get_32()
+			return file.get_32()*file.get_32()*4
+	return 6*1024*1024
 
 static func resident_bytes() -> int:
 	var total:=0

@@ -49,23 +49,47 @@ func run() -> void:
 	check(first.get_data()==direct.get_data(),"A shared sheet has exactly the directly decoded pixels")
 	check(RunnerSourcePixels.sheet(paths[0])==first and RunnerSourcePixels.decodes==decodes,"A resident sheet is reused without decoding again")
 	RunnerSourcePixels.enter_section("test_a")
-	for i in range(1,RunnerSourcePixels.SHEET_LIMIT+3):RunnerSourcePixels.sheet(paths[i])
-	check(RunnerSourcePixels.sheets.size()==RunnerSourcePixels.SHEET_LIMIT,"Resident sheets never exceed the limit")
+	var used:=mini(paths.size()-1,RunnerSourcePixels.SHEET_LIMIT+2)
+	var within:=true
+	for i in range(1,used+1):
+		RunnerSourcePixels.sheet(paths[i])
+		within=within and RunnerSourcePixels.resident_bytes()<=RunnerSourcePixels.SHEET_BUDGET and RunnerSourcePixels.sheets.size()<=RunnerSourcePixels.SHEET_LIMIT
+	check(within,"Resident sheets never exceed the byte budget or the count ceiling")
 	check(not RunnerSourcePixels.sheets.has(paths[0]),"The least recently used sheet is released")
+	check(RunnerSourcePixels.sheets.has(paths[used]) and RunnerSourcePixels.sheets.has(paths[used-1]),"The most recently used sheets stay resident")
+	var small:="res://assets/campaign-row-sheets/legacy-deaths-01.png";var big:="res://assets/polish-enemies.png"
+	check(RunnerSourcePixels.sheet_bytes(small)*5<RunnerSourcePixels.sheet_bytes(big),"A row strip costs its own bytes, not a full sheet's slot")
 	RunnerSourcePixels.enter_section("test_b");RunnerSourcePixels.sheets.clear();RunnerSourcePixels.recent.clear()
 	RunnerSourcePixels.enter_section("test_a")
-	check(RunnerSourcePixels.sheets.size()==RunnerSourcePixels.SHEET_LIMIT and RunnerSourcePixels.sheets.has(paths[RunnerSourcePixels.SHEET_LIMIT+2]),"Entering a known section pre-decodes its recent sheets")
+	check(RunnerSourcePixels.sheets.has(paths[used]) and RunnerSourcePixels.resident_bytes()<=RunnerSourcePixels.SHEET_BUDGET,"Entering a known section pre-decodes its most recent sheets within the budget")
 	# Generated section list: real files, within the limit, hero art excluded, warmed on entry.
 	var listed: Dictionary=load("res://assets/SECTION-SHEETS.json").data.sections
 	for section in AionCampaignWorld.STAGES:
 		check(listed.has(section),"Every Mission 1 section has a warm-up list: "+section)
 		var entries: Array=listed.get(section,[])
-		check(entries.size()<=RunnerSourcePixels.SHEET_LIMIT,"A section's warm-up list fits the resident limit: "+section)
+		check(entries.size()<=RunnerSourcePixels.SHEET_LIMIT and entries.reduce(func(t,p):return t+RunnerSourcePixels.sheet_bytes(str(p)),0)<=RunnerSourcePixels.SHEET_BUDGET,"A section's warm-up list fits the resident budget: "+section)
 		for path in entries:check(ResourceLoader.exists(str(path)) and not RunnerSourcePixels.hero_sheet(str(path)),"Listed sheet exists and is world art: "+str(path))
 	RunnerSourcePixels.sheets.clear();RunnerSourcePixels.recent.clear();RunnerSourcePixels.section_paths.clear();RunnerSourcePixels.known_sections={}
 	RunnerSourcePixels.enter_section("water")
 	check(listed.water.all(func(path):return RunnerSourcePixels.sheets.has(str(path))),"Entering water pre-decodes every listed water sheet")
 	check(RunnerSourcePixels.hero_sheet("res://assets/m1-redraw-aion.png") and not RunnerSourcePixels.hero_sheet("res://assets/aionverse-flora.png"),"Hero art is recognised without catching world art named after Aion")
+	RunnerSourcePixels.current_section=""
+	# Prewarm: after a section load, its first kill, knife, rescue cut and
+	# captive frames are already cut, so drawing them decodes no sheet.
+	for section in ["shore","fork_one"]:
+		w=world(section)
+		var decodes_before:=RunnerSourcePixels.decodes
+		var effects:=CampaignEffectsArt.new();var catalogue:=CampaignCatalog.new()
+		for e in w.enemies:
+			if not bool(e.mini) and str(e.kind) in CampaignEffectsArt.LEGACY:
+				for frame in 6:effects.death(str(e.kind),frame)
+		for captive in w.npcs:
+			for frame in 12:catalogue.pose("rescue-npcs",int(captive.get("variant",0)),frame)
+		var actions: Array=M1HeroActionArt.CONTACT_ACTIONS+(M1HeroActionArt.TUNNEL_ACTIONS if section=="fork_one" else [])
+		for action in actions:
+			if M1HeroActionArt.supports("aion",action):
+				for frame in int(M1HeroActionArt.clip_spec("aion",action).frames):M1HeroActionArt.pose("aion",action,frame)
+		check(RunnerSourcePixels.decodes==decodes_before,"Section %s: death, knife, rescue and captive frames need no in-play decode"%section)
 	RunnerSourcePixels.current_section=""
 	# Loose budget: generous for slower CI runners; catches a return of per-frame scans.
 	w=world("water");w.player.x=w.length()*.8

@@ -45,6 +45,9 @@ var rescue_target:=""
 var rescue_contact:=false
 var rescue_latched:=false
 var character := "aion"
+## Off for the title demo: it is watched, not played, so first-use frames are
+## cut lazily there as before.
+var prewarm_art := true
 var pose_motion_enabled := true # Ephemeral rendering contract; never saved.
 var paused_crouch := false # Frozen presentation stance; never an input or save field.
 var state := "briefing"
@@ -289,8 +292,7 @@ func spawn_enemy(kind: String, x: float, y: float, index: int, mini: bool = fals
 
 func load_section(id: String) -> void:
 	assert(STAGES.has(id))
-	# Loads run behind the travel fade: pre-decode sheets this section used before.
-	RunnerSourcePixels.enter_section(id)
+	RunnerSourcePixels.current_section=id
 	paused_crouch=false
 	CampaignGrenade.cancel(self,true)
 	MissionHeroAbilities.cancel(self)
@@ -382,6 +384,10 @@ func load_section(id: String) -> void:
 	CampaignRecovery.enter(self)
 	notice = "arc_checkpoint"; notice_time = 2.
 	pending_events.append("checkpoint")
+	# Loads run behind the travel fade: cut the frames this section needs for the
+	# first time, then decode its world sheets last so they stay resident.
+	if prewarm_art:CampaignPrewarm.section(self)
+	RunnerSourcePixels.enter_section(id)
 
 func choose_route(choice: String) -> bool:
 	if state == "fork_one" and choice in ["canopy", "causeway", "water"]:
