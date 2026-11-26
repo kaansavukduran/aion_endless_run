@@ -1,7 +1,7 @@
 class_name AionCampaignArt
 extends RefCounted
 const META = preload("res://assets/ARCADE-MACHINES-PROVENANCE.json")
-const SOURCE = preload("res://assets/arcade-machines.png")
+const SOURCE := "res://assets/arcade-machines.png" # Path only: pixels come from RunnerSourcePixels.
 # 0.41.0: Process-wide shared arcade-machines & melee cache.
 static var source: Image
 static var cache: Dictionary = {}
@@ -26,7 +26,7 @@ func pose(row: int, frame: int) -> Dictionary:
 	var key := Vector2i(row,frame)
 	if cache.has(key): return cache[key]
 	if source==null:
-		source=RunnerSourcePixels.sheet(SOURCE.resource_path)
+		source=RunnerSourcePixels.sheet(SOURCE)
 	var f: Dictionary = META.data.frames[row][frame]
 	var b: Array = f.bounds
 	var image := Image.create_empty(int(b[2])-int(b[0])+4,int(b[3])-int(b[1])+4,false,Image.FORMAT_RGBA8)

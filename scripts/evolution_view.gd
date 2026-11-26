@@ -1,6 +1,5 @@
 extends Node2D
 const META = preload("res://assets/EVOLUTION-PROVENANCE.json")
-const GIRLS = preload("res://assets/evolution-celebrants.png")
 var host
 
 func heart(canvas: Node2D,point: Vector2, size: float, color: Color) -> void:

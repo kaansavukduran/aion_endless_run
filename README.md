@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.58.7 · Daha hızlı açılış, iki hata düzeltmesi
+
+Oynanış değişmedi. Ana sahne açılışta artık hiç kullanılmayan 8 dokuyu yüklemiyor: 6 sabit hiçbir yerde okunmuyordu, 2 banka dokuyu yalnızca dosya yolu için yüklüyordu. Ana sahnenin yüklenmesi yerel ölçümde 1.787 ms'den 1.224 ms'ye indi (−%31); açılışta yüklenen doku 29'dan 19'a düştü. Düzeltilen hatalar: Bakır Röle'de dron, nişancı henüz uyanmadan saldırı sırasını kontrol edince betik hatası veriyor ve düşmanları donduruyordu; ilk çataldaki teknisyenin röle parçası hediyesinin çizimi olmadığı için hediye anında sahnenin bir kısmı yarım saniye çizilmiyordu. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
+
 ## 0.58.6 · Eğimli geçitler ve Bakır Röle
 
 Bakır Röle’de siperli alt çanak ile mermi ikmali olan üst fener geçidi aynı çıkışta birleşir. Bahçe Terasları’nda rüzgâr tabliyesi, Su Kanalı’nda akıntının üstünden geçen geçit ve Kök Geçidi’nde karanlık çanağın üzerinde bir kök kemeri var. Yerdeki ödüller, düşman hücumları ve uyarılar bulundukları eğime göre hizalanır.
