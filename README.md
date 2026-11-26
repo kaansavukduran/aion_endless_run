@@ -2,7 +2,7 @@
 
 ## 0.58.9 · İlk öldürmede, ilk bıçakta takılma yok
 
-Oynanış değişmedi. Bir düşman türünün ilk ölümü, ilk bıçak darbesi, ilk kurtarma kesimi ve ilk tünel artık oyun içinde koca bir sprite sayfası çözmüyor: bu kareler bölüm kararmış geçişte yüklenirken önceden kesiliyor. Çözülmüş sayfa önbelleği sayfa sayısıyla değil bayt bütçesiyle (72 MB) sınırlanıyor; 0,6 MB'lık satır şeritleri artık 6 MB'lık bir sayfanın yerini kaplamıyor. İlk ziyaret turunda oyun içi sayfa çözme 4–5'ten 1–2'ye, tepe bellek 72,0'dan 69,3 MB'a indi. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
+Oynanış değişmedi. Bir düşman türünün ilk ölümü, ilk bıçak darbesi, ilk kurtarma kesimi ve ilk tünel artık oyun içinde koca bir sprite sayfası çözmüyor: bu kareler bölüm kararmış geçişte yüklenirken önceden kesiliyor. Çözülmüş sayfa önbelleği sayfa sayısıyla değil bayt bütçesiyle (72 MB) sınırlanıyor; 0,6 MB'lık satır şeritleri artık 6 MB'lık bir sayfanın yerini kaplamıyor. İlk ziyaret turunda oyun içi sayfa çözme 4–5'ten 1–2'ye, tepe bellek 72,0'dan 69,3 MB'a indi. Düzeltme: mermisi kalan özel silahla ama boş tabancayla ölen kahraman artık boş silahla değil, 6 tabanca mermisiyle doğuyor. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
 
 ## 0.58.8 · Sönen Fenerler karşılaşmaları
 
