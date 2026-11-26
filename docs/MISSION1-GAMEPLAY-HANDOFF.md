@@ -541,3 +541,12 @@ Denetimde yeniden üretilen M1-D01–D05 yerel adayda giderildi. Tekrar için py
 - Denendi, reddedildi: ölüm, NPC yürüyüşü ve kahraman temas sayfalarını bölüm ısınma listesine eklemek. İlk ziyaret turunda oyun içi sayfa çözmeyi azaltmadı (12 → 13–15). Bankalar kesilen kareyi önbelleğe aldığı için LRU kahraman sayfalarının kullanıldığını görmüyor; sınırı 16'ya çıkarmak +24 MB bellekle yine takılmayı gidermedi. Kalıcı çözüm için öneri: bir sayfa çözüldüğünde o atlasın bütün karelerini bir kerede kesmek.
 - Açık soru (tasarım): ölümden sonra tabanca mermisi sıfırsa sıfır mermiyle doğuluyor; yalnızca Devam 36'ya tamamlıyor.
 
+## 0.58.9 · Bayt bütçeli sayfa önbelleği ve ilk kullanım ön-kesimi (26 Kasım 2026)
+
+- `RunnerSourcePixels`: `SHEET_BUDGET` 72 MB (eski 12 tam sayfa) + `SHEET_LIMIT` 32 tavanı. `sheet_bytes(path)` boyutu `.ctex` başlığından okur (çözmeden). Isınma listesi bütçeye sığan en yeni girdilerle sınırlı.
+- `CampaignPrewarm.section(w)` (`load_section` sonunda, dünya sayfaları ısınmadan önce): bölümdeki düşman türlerinin ölüm kareleri, kahramanın `melee`/`rescue_cut` kareleri, NPC'lerin 12 karesi ve `fork_one`'da tünel kareleri. Başlık demosu `prewarm_art=false` ile eski tembel kesimde kalır.
+- Ölçüm (Xvfb, `aion`, ilk ziyaret turu kıyı→rıhtım→kanopi→çatal→su→teras→kökler→röle→arena; yalnız bölüm değişmeyen karelerdeki çözmeler sayılır): oyun içi çözme 4–5 → 1–2; tepe çözülmüş sayfa 72,0 → 69,3 MB. Bedel: bölüm yüklemeleri tur boyunca toplam yaklaşık +440 ms (kıyı ~200 ms, arena ~100–170 ms), hepsi kararmış geçişte.
+- Ölçüm düzeltmesi: 0.58.7'de "reddedildi" yazılan ısınma denemesinin ölçümü, dünyanın kendi geçtiği bölüm yüklemelerini de oyun içi sayıyordu; bu turdaki prob bunu ayırır.
+- Yalnız bayt bütçesi (ön-kesimsiz) 8 oyun içi çözme verdi: ikisi birlikte gerekli.
+- `tests/test_perf_paths.gd`: bütçe/tavan, satır şeridi maliyeti, ısınma bütçesi ve ön-kesim sonrası sıfır çözme (ön-kesim olmadan 2 hata verdiği doğrulandı).
+

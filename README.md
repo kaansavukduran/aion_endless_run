@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.58.9 · İlk öldürmede, ilk bıçakta takılma yok
+
+Oynanış değişmedi. Bir düşman türünün ilk ölümü, ilk bıçak darbesi, ilk kurtarma kesimi ve ilk tünel artık oyun içinde koca bir sprite sayfası çözmüyor: bu kareler bölüm kararmış geçişte yüklenirken önceden kesiliyor. Çözülmüş sayfa önbelleği sayfa sayısıyla değil bayt bütçesiyle (72 MB) sınırlanıyor; 0,6 MB'lık satır şeritleri artık 6 MB'lık bir sayfanın yerini kaplamıyor. İlk ziyaret turunda oyun içi sayfa çözme 4–5'ten 1–2'ye, tepe bellek 72,0'dan 69,3 MB'a indi. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).
+
 ## 0.58.8 · Sönen Fenerler karşılaşmaları
 
 Bakır Röle’de Keşifçi çatıda iki atış yapıp açık veriyor. Alt çanaktaki taş siper mermiyi kesiyor ve cephane ızgarası yumrukla da açılıyor. Su Kanalı, Bahçe Terasları ve Kök Geçidi’nin son muhafızları kendi saldırılarını kullanıyor. Kök Motoru’nun üç evresinde açık çekirdek, kök patlaması ve yönlü hücum var. Zaferde arenanın fenerleri sırayla yanıyor.
