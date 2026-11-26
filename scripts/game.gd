@@ -11,7 +11,7 @@ const ACTION_DATA = preload("res://assets/ACTION-PROVENANCE.json")
 const COMBAT_SHEET = preload("res://assets/evolution-strikes.png")
 const ADVENTURE_DATA = preload("res://assets/ADVENTURE-PROVENANCE.json")
 const COMBAT_ROWS := {"aion":0,"owl":1,"sheep":2,"wolf":3,"rabbit":4,"eren":5}
-const GAME_VERSION = "0.58.1"
+const GAME_VERSION = "0.58.2"
 const ROLL_SHEET = preload("res://assets/evolution-rolls.png")
 const EVOLUTION_DATA = preload("res://assets/EVOLUTION-PROVENANCE.json")
 const COMPANION_RUN_ROWS := {"wolf":1,"sheep":1,"owl":1}
@@ -1350,7 +1350,7 @@ func on_web_page_hidden(_arguments: Array) -> void:
 func canvas_accessibility_label() -> String:
 	if world.state=="ready":
 		if page=="characters":
-			return "Aion. "+RunnerFrontText.word(language,"pick_hero")+". "+character_name(character)+". "+RunnerFrontText.motivation(language,character)
+			return "Aion. "+RunnerFrontText.word(language,"pick_hero")+". "+character_name(character)
 		if page=="help" or (page=="main" and opening_guide):
 			return "Aion. "+RunnerFrontText.word(language,"how")
 		return "Aion. "+AionCampaignText.word(language,"title")

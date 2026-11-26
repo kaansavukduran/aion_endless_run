@@ -293,31 +293,8 @@ func characters() -> void:
 	var footer_h: float=maxf(confirm.get_combined_minimum_size().y,back.get_combined_minimum_size().y)+8.
 	var tile_h:=floorf((height-head-footer_h-row_count*gap)/row_count)
 	if col_count==6:tile_h=minf(tile_h,tile_w+float(h.ui_size(34)))
-	var font: Font=h.ui_theme.default_font
-	var motivation_size: int=h.ui_size(19 if h.portrait or h.touch_mode else 16)
-	var story_height:=0.
-	var summary_height:=0.
-	# Themed labels can reserve more height than bare Font metrics, especially
-	# for wrapped lines in the 200% layout with an alternate system font.
-	var metrics:=roster_motivation("",motivation_size,tile_w-16.)
-	stage.add_child(metrics)
-	for id in h.FRIENDS:
-		metrics.text=RunnerFrontText.motivation(h.language,id)
-		story_height=maxf(story_height,metrics.get_minimum_size().y)
-	metrics.size.x=width-16.
-	for id in h.FRIENDS:
-		metrics.text=RunnerFrontText.motivation(h.language,id)
-		summary_height=maxf(summary_height,metrics.get_minimum_size().y)
-	metrics.free()
-	story_height=ceilf(story_height)+8.
-	summary_height=ceilf(summary_height)+10.
-	var label_height:=ceilf(font.get_height(h.ui_size(21)))+10.
-	var story_in_tile: bool=tile_h-label_height-story_height>=minf(70.,tile_w*.53)
-	var space_for_summary: float=0. if story_in_tile else summary_height
-	if not story_in_tile:
-		tile_h=minf(tile_h,floorf((height-head-footer_h-row_count*gap-space_for_summary)/row_count))
-	var group_top:=floorf(maxf(0.,height-head-footer_h-row_count*(tile_h+gap)-space_for_summary)*.5)
-	var footer_y:=group_top+head+row_count*(tile_h+gap)+space_for_summary
+	var group_top:=floorf(maxf(0.,height-head-footer_h-row_count*(tile_h+gap))*.5)
+	var footer_y:=group_top+head+row_count*(tile_h+gap)
 	h.position_control(heading,Vector2(0.,group_top),Vector2(width,head-12.))
 	var selected: Button
 	for index in h.FRIENDS.size():
@@ -325,8 +302,7 @@ func characters() -> void:
 		var tile: Button=h.button("",func():h.select_character(id),id==h.character)
 		tile.name="Select_"+id
 		tile.accessibility_name=h.character_name(id)
-		var motivation:=RunnerFrontText.motivation(h.language,id)
-		tile.accessibility_description=motivation+" "+RunnerFrontText.ability_summary(h.language,id)
+		tile.accessibility_description=RunnerFrontText.ability_summary(h.language,id)
 		tile.accessibility_name+=" · "+RunnerFrontText.word(h.language,"selected") if id==h.character else ""
 		tile.custom_minimum_size.y=minf(tile.custom_minimum_size.y,tile_h)
 		stage.add_child(tile)
@@ -348,9 +324,9 @@ func characters() -> void:
 		name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tile.add_child(name_label)
 		var name_h: float=ceilf(name_label.get_minimum_size().y)+8.
-		var name_y: float=tile_h-name_h-2.-(story_height if story_in_tile else 0.)
+		var name_y: float=tile_h-name_h-2.
 		var side_width:=minf(tile_h-4.,tile_w-name_label.get_minimum_size().x-16.)
-		if not h.portrait and not story_in_tile and name_y<58. and side_width>=40.:
+		if not h.portrait and name_y<58. and side_width>=40.:
 			h.position_control(portrait_art,Vector2(2.,2.),Vector2(side_width,tile_h-4.))
 			var name_x:=side_width+8.
 			h.position_control(name_label,Vector2(name_x,2.),Vector2(tile_w-name_x-4.,tile_h-4.))
@@ -360,41 +336,13 @@ func characters() -> void:
 			if not h.portrait:art_width=minf(art_width,floorf(art_height*1.32))
 			h.position_control(portrait_art,Vector2(floorf((tile_w-art_width)*.5),2.),Vector2(art_width,art_height))
 			h.position_control(name_label,Vector2(4.,name_y),Vector2(tile_w-8.,name_h))
-		if story_in_tile:
-			var motive_label:=roster_motivation(motivation,motivation_size,tile_w-16.)
-			motive_label.add_theme_color_override("font_color",h.interface_options.color("on_primary" if id==h.character else "muted"))
-			tile.add_child(motive_label)
-			h.position_control(motive_label,Vector2(8.,tile_h-story_height-2.),Vector2(tile_w-16.,story_height-2.))
 		if id==h.character:selected=tile
-	if not story_in_tile:
-		var motive_label:=roster_motivation(RunnerFrontText.motivation(h.language,h.character),motivation_size,width-16.)
-		motive_label.add_theme_color_override("font_outline_color",Color("23202b"))
-		motive_label.add_theme_constant_override("outline_size",4)
-		stage.add_child(motive_label)
-		h.position_control(motive_label,Vector2(8.,footer_y-summary_height),Vector2(width-16.,summary_height-4.))
 	var back_w: float=maxf(112.,back.get_combined_minimum_size().x+12.)
 	stage.move_child(back,-1)
 	stage.move_child(confirm,-1)
 	h.position_control(back,Vector2(0.,footer_y),Vector2(back_w,footer_h))
 	h.position_control(confirm,Vector2(back_w+gap,footer_y),Vector2(width-back_w-gap,footer_h))
 	h.focus_later.call_deferred(selected)
-
-func roster_motivation(value: String, point_size: int, width: float) -> Label:
-	var item:=Label.new()
-	item.name="HeroMotivation"
-	# Width has to be set before shaping. At zero width Godot's initial
-	# wrapped label minimum can otherwise reserve a line for each character.
-	item.size.x=width
-	item.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	item.text=value
-	item.accessibility_name=value
-	item.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR
-	item.add_theme_font_size_override("font_size",point_size)
-	item.add_theme_color_override("font_color",Color("fff0ce"))
-	item.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	item.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	item.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	return item
 
 func tutorial() -> void:
 	var h=host

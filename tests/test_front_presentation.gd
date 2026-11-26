@@ -119,12 +119,7 @@ func run() -> void:
 				game.language=language;game.interface_options.text_scale=scale_value;game.build_theme();game.ui.theme=game.ui_theme;game.show_page("characters")
 				await settle()
 				var selection: Control=game.menu_layer.find_child("HeroSelection",true,false)
-				var written: Array=selection.find_children("HeroMotivation","Label",true,false)
-				var selected_story:=RunnerFrontText.motivation(game.language,game.character)
-				check(written.size() in [1,game.FRIENDS.size()] and written.any(func(item):return item.text==selected_story),"Selected hero motivation is visible at the requested text scale")
-				for item: Label in written:
-					check(item.get_minimum_size().y<=item.size.y+1.,"Motivation has room for all shaped lines "+str(dimensions)+" "+str(scale_value)+" "+language)
-					check(item.get_visible_line_count()==item.get_line_count(),"Motivation does not lose a line during render "+str(dimensions)+" "+str(scale_value)+" "+language)
+				check(selection.find_children("*","Label",true,false).size()==game.FRIENDS.size()+1,"Selection shows a heading and one name per portrait "+str(dimensions)+" "+str(scale_value)+" "+language)
 				for item in game.menu_layer.find_children("*","Control",true,false):
 					if not item.is_visible_in_tree() or not (item is Button or item is Label or item is RunnerHeroPreview):continue
 					var r: Rect2=item.get_global_rect()
