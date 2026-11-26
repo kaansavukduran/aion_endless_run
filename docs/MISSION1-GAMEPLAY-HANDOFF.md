@@ -2,6 +2,13 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 0.58.6 · Eğim, tabliye ve karşılık verme
+
+- Kırılabilir nesne ödülü zemine bağlı. Sarmaşık saldırısı ve uyarısı aynı yerel alana bağlı. Sülük hücumunun son konumu ayak desteğini belirliyor. Kök Geçidi’ndeki çıkış uyarısı düşmanın gerçek zemininde. Havada tabliyeye yaklaşan ayak, fiziksel iniş gerçekleşene kadar yerde sayılmıyor.
+- Bakır Röle’nin üst fener geçidi cephane verir. Alt çanak yamaçla siper sağlar. Yeni Fener Keşifçisi son tabliyeyi tutar ve drone ile açılış saldırılarını sırayla yapar. Altı kahraman iki geçidi de iki yönde normal girdilerle motor denemesinde geçti.
+- Su Kanalı’nda akıntı yalnızca alt zemine basan yayayı taşır. Bahçe Terasları’nda rüzgâr üst tabliyeleri erişilebilir kılar. Kök Geçidi’nde üst kemer ve karanlık çanak farklı görüş ve ikmal sunar. Eski kayıtlar yeni tabliyeleri edinir ve mevcut ödül haklarını korur.
+- Hedefli yerel denetimde 12 Godot test paketi ve 10.465 kontrol geçti. Yoğun Bahçe Terasları sahnesindeki beş Linux başsız ölçümünde kapı ve düşman sorgularının p95 değeri 43–57 µs, dünya adımının p95 değeri 524–703 µs aralığındaydı. Bu ölçüm GPU veya tarayıcı kare süresini kapsamaz.
+
 ## 0.58.5 · İngilizce tabela metni
 
 393 × 740 Chromium oynanışında iki İngilizce satırın çerçeveyi aştığı görüldü. Cümleler aynı ödülü daha kısa anlatsın diye düzenlendi. [Rota ve düşük cephane koşusu](https://github.com/kaansavukduran/aion_endless_run/pull/37)

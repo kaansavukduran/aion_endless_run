@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.58.6 · Eğimli geçitler ve Bakır Röle
+
+Bakır Röle’de siperli alt çanak ile mermi ikmali olan üst fener geçidi aynı çıkışta birleşir. Bahçe Terasları’nda rüzgâr tabliyesi, Su Kanalı’nda akıntının üstünden geçen geçit ve Kök Geçidi’nde karanlık çanağın üzerinde bir kök kemeri var. Yerdeki ödüller, düşman hücumları ve uyarılar bulundukları eğime göre hizalanır.
+
 ## 0.58.5 · Dar ekranda kavşak tabelası
 
 İngilizce üst iskele ve alt kanal satırları, dikey ekranlarda tabela çerçevesine sığacak şekilde kısaltıldı.

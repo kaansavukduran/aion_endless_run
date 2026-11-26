@@ -21,6 +21,8 @@ const TURRET_CYCLE := 3.
 const TURRET_WARNING := .8
 const TURRET_SAFE_RANGE := 140.
 const TURRET_RANGE := 500.
+const RELAY_DRONE := "relay:enemy:312"
+const RELAY_SCOUT := "relay:enemy:313"
 
 ## Handcrafted 8-encounter arcs per leaf route (0.31.0).
 ## Each beat pairs a clear cue -> player decision -> counterplay -> reward,
@@ -86,7 +88,7 @@ const MAIN_PLANS := {
 	],
 	"relay": [
 		{"x":2050.,"role":"relay_rejoin","enemies":[["drone",0.,-120.],["beetle",195.,0.],["seed",375.,0.],["drone",520.,-125.]],"platforms":[[110.,-76.,170.],[320.,-132.,165.]],"crate":585.,"fruit":[130.,-116.,3],"gate":true},
-		{"x":4150.,"role":"relay_lanes","enemies":[["seed",0.,0.],["gnome",180.,0.],["drone",330.,-125.],["seed",480.,0.],["gnome",610.,0.]],"platforms":[[64.,-102.,145.],[380.,-145.,175.]],"prop":["planks",220.],"fruit":[395.,-184.,3],"gate":false},
+		{"x":4150.,"role":"relay_lanes","enemies":[["seed",0.,0.],["gnome",180.,0.],["drone",330.,-125.],["lantern_scout",720.,-88.],["gnome",610.,0.]],"prop":["planks",220.],"fruit":[405.,-180.,2]},
 		{"x":6250.,"role":"relay_patrol_support","enemies":[["beetle",0.,0.],["drone",210.,-125.],["beetle",390.,0.],["drone",540.,-120.]],"platforms":[[95.,-78.,170.],[310.,-132.,170.]],"crate":590.,"fruit":[115.,-118.,3],"gate":false},
 		{"x":8200.,"role":"relay_breach","enemies":[["drone",0.,-125.],["beetle",175.,0.],["seed",335.,0.],["beetle",490.,0.],["drone",615.,-125.]],"platforms":[[105.,-78.,175.],[330.,-134.,175.]],"prop":["turret",310.],"crate":-130.,"fruit":[125.,-118.,3],"gate":true}
 	]
@@ -94,6 +96,14 @@ const MAIN_PLANS := {
 
 static func flying(kind: String) -> bool:
 	return kind in ["crow","moth","drone","wisp","glider",CampaignHive.KIND] or (NEW_ENEMIES.has(kind) and bool(NEW_ENEMIES[kind].flying))
+
+static func relay_opening_blocked(w,e: Dictionary) -> bool:
+	if w.section!="relay" or int(e.attacks)>0 or str(e.id) not in [RELAY_DRONE,RELAY_SCOUT]:return false
+	var partner_id:=RELAY_DRONE if e.id==RELAY_SCOUT else RELAY_SCOUT
+	for partner in w.enemies:
+		if partner.id==partner_id and not bool(partner.defeated):
+			return float(partner.windup)>0. or float(partner.flash)>0. or float(partner.get("recover",0.))>0.
+	return false
 
 static func populate(w) -> void:
 	w.encounters.clear();w.objects.clear();w.zones.clear();w.rooms.clear();w.hazards.clear()
@@ -164,7 +174,12 @@ static func populate(w) -> void:
 			for k in roster.size():
 				var entry: Array=roster[k]
 				var kind: String=str(entry[0])
-				w.spawn_enemy(kind,x+float(entry[1])+(jitter if k>0 else 0.),float(entry[2]),300+i*10+k)
+				var perch: bool=plan.role=="relay_lanes" and kind=="lantern_scout"
+				w.spawn_enemy(kind,x+float(entry[1])+(jitter if k>0 and not perch else 0.),float(entry[2]),300+i*10+k)
+				if perch:
+					var scout: Dictionary=w.enemies.back()
+					scout.roof_perch=true
+					scout.wait=1.35
 				ids.append(w.section+":enemy:"+str(300+i*10+k))
 			if plan.has("crate"):
 				var cx: float=x+float(plan.crate)
@@ -251,7 +266,7 @@ static func hit_object(w,p: Vector2,damage: int,from: Vector2=Vector2.INF) -> bo
 				w.discovered[str(o.secret)]=true;w.award(str(o.secret),250);w.notice="arc_secret";w.notice_time=2.;w.pending_events.append("secret")
 			if o.kind in ["lamp","panel","relay","turret"] and not w.awarded.has(str(o.id)+":power"):
 				w.buffs["power"]=maxf(6.,float(w.buffs.get("power",0.)));w.award(str(o.id)+":power",0)
-			if o.kind in ["surprise","planks","rock"]:w.pickups.append({"id":str(o.id)+":gift","x":o.x,"y":-35.,"kind":"points"})
+			if o.kind in ["surprise","planks","rock"]:w.pickups.append({"id":str(o.id)+":gift","x":o.x,"y":float(o.y)-35.,"kind":"points"})
 			apply_surface(w,o)
 			if o.kind=="relay":w.notice="arc_maintenance";w.notice_time=3.
 		return true
@@ -263,6 +278,14 @@ static func turret_warning(o: Dictionary) -> bool:
 static func turret_muzzle(o: Dictionary) -> Vector2:
 	# Barrel opening in the cannon's resting atlas cel, relative to its base.
 	return Vector2(float(o.x)+float(o.get("facing",1))*39.,float(o.y)-60.)
+
+static func push_current(w,distance: float) -> void:
+	if bool(w.mount.ridden) or not w.grounded():return
+	var floor: float=w.floor_at(w.player.x)
+	if absf(w.player.y-floor)>.1:return
+	var next_x: float=w.player.x+distance
+	var next_floor: float=w.floor_at(next_x)
+	if CampaignGround.has_floor(next_floor):w.player=Vector2(next_x,next_floor)
 
 static func step(w,dt: float) -> void:
 	var active: bool=w.state=="playing"
@@ -285,7 +308,7 @@ static func step(w,dt: float) -> void:
 					w.bullets.append({"p":origin,"v":Vector2(float(o.facing)*200.,0.),"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
 					w.pending_events.append("enemy_shot")
 		if active and o.kind in ["current","updraft"] and absf(w.player.x-float(o.x))<110.:
-			if o.kind=="current" and w.grounded():w.player.x+=32.*dt
+			if o.kind=="current":push_current(w,32.*dt)
 			elif o.kind=="updraft" and not w.grounded():w.velocity.y-=1000.*dt
 	if not bool(w.mount.available):w.mount.wreck_age=float(w.mount.get("wreck_age",0.))+dt
 	for room in w.rooms:
@@ -309,8 +332,8 @@ static func step(w,dt: float) -> void:
 	if not w.hazards.is_empty():w.hazards=w.hazards.filter(func(h):return not bool(h.get("once",false)) or float(h.clock)<4.2)
 	for z in w.zones:
 		if not active or w.player.x<float(z.x) or w.player.x>float(z.x)+float(z.width):continue
-		if z.kind=="current" and w.grounded() and not bool(w.mount.ridden):w.player.x+=36.*dt
-		if z.kind=="updraft" and not w.grounded():w.velocity.y-=1100.*dt
+		if z.kind=="current":push_current(w,36.*dt)
+		if z.kind=="updraft" and w.player.y>float(z.get("ceiling",-INF)) and not w.grounded():w.velocity.y-=1100.*dt
 	if float(w.buffs.get("magnet",0.))>0.:
 		for p in w.pickups:
 			if not CampaignRoutes.pickup_exposed(w,p):continue
