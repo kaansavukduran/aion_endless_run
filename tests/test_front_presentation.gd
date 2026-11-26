@@ -55,7 +55,7 @@ func verify_field_story() -> void:
 		check(CampaignGround.has_floor(floor),"Field plate is grounded in "+section)
 		route.player=Vector2(CampaignStory.PLATE_X,floor)
 		CampaignStory.step(route)
-		var key: String=CampaignStory.ROUTE_CLUES[section]
+		var key: String=CampaignStory.ROUTE_CLUES[section][0]
 		check(route.notice==key and CampaignStory.latest_note(route,"en")==CampaignStory.line("en",key),"Grounded route plate writes the correct map clue for "+section)
 
 func run() -> void:

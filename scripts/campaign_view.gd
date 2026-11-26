@@ -21,6 +21,7 @@ var gun_parts: Dictionary = {}
 var hero_marker: Dictionary = {}
 var qa_pose_bounds: Dictionary = {}
 var npc_growth_cache: Dictionary = {}
+var aion_reference_height := 0.
 var item_bank := ForgeItemBank.new()
 var vehicle_art := ForgeVehicleArt.new()
 var forge_art := ForgeHeroArt.new()
@@ -57,7 +58,12 @@ func draw_flag(position: Vector2,growth: float=1.) -> void:
 
 func hero_reference_height() -> float:
 	# Actual alpha silhouette, without texture padding, muzzle/particles or UI.
-	return float(frames.pose("gun-run",frames.hero_row("aion"),0).height)
+	if aion_reference_height<=0.:
+		var spec:=frames.descriptor("gun-run",frames.hero_row("aion"))
+		var row:=int(spec.row)
+		var bounds: Array=spec.data.frames[row][0].bounds
+		aion_reference_height=float(bounds[3]-bounds[1])*float(spec.data.scale[row])
+	return aion_reference_height
 
 func npc_reference_height(row: int) -> float:
 	# The departure walking pose is upright; bound poses intentionally sit lower.

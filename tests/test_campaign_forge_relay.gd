@@ -102,7 +102,19 @@ func flow_and_respawn() -> void:
 	w.damage_player("shot")
 	check(w.ammunition==0,"The final life does not mint a reserve refill")
 
+func open_quay() -> void:
+	var w:=stage("quay")
+	check(w.gates.is_empty() and not w.objects.any(func(o):return o.kind=="gate"),"The Quay has no leftover scenery gate")
+	var x:=7068.
+	w.objects.append({"id":"quay:object:4","kind":"gate","x":x,"y":w.floor_at(x),"hp":2,"active":false,"secret":""})
+	w.enemies.clear();w.hazards.clear()
+	w.player=Vector2(x-80.,w.floor_at(x-80.))
+	var restored:=AionCampaignWorld.new()
+	check(restored.restore(w.snapshot()),"Earlier exact snapshot before the redundant gate can Continue")
+	restored.move_axis=Vector2.RIGHT;frames(restored,100)
+	check(restored.player.x>x+45.,"Normal walking can pass the old scenery gate after Continue")
+
 func run() -> void:
-	lower_lane();roof_lane();flow_and_respawn()
+	lower_lane();roof_lane();flow_and_respawn();open_quay()
 	print("RESULT: %d Forge Relay checks, %d failures"%[checks,failures])
 	quit(1 if failures>0 else 0)

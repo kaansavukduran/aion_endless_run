@@ -162,11 +162,16 @@ static func install_shelters(w) -> void:
 	for deck in SHELTERS.get(w.section,[]):
 		if deck not in w.platforms:w.platforms.append(deck)
 
+static func clear_open_route_locks(w) -> void:
+	if w.section not in ["quay","causeway"]:return
+	w.gates.clear()
+	w.objects.assign(w.objects.filter(func(o):return o.kind!="gate"))
+
 static func after_restore(w) -> void:
 	# Exact older snapshots replace authored arrays after loading the section.
 	# Add only new stable records, retaining visited paths and claimed pickups.
 	if w.section=="fork_one":install_first_fork(w)
-	if w.section in ["quay","causeway"]:w.gates.clear()
+	clear_open_route_locks(w)
 	install_shelters(w)
 
 static func is_shelter(section: String,deck: Rect2) -> bool:

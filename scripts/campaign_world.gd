@@ -372,6 +372,7 @@ func load_section(id: String) -> void:
 		CampaignContent.populate(self)
 		CampaignRescue.populate(self)
 	CampaignRhythm.populate(self)
+	CampaignRoutes.clear_open_route_locks(self)
 	CampaignGround.align_world(self)
 	CampaignGround.install_walkways(self)
 	CampaignWardens.install(self)
