@@ -195,6 +195,7 @@ func grounded() -> bool:
 		for platform in platforms:
 			if not disabled_platforms.has(platform.position.x) and player.x>=platform.position.x-9. and player.x<=platform.end.x+9. and absf(foot-platform.position.y)<.1 and absf(velocity.y)<1.:return true
 		return false
+	if absf(velocity.y)>=1.:return false
 	if absf(player.y-floor_at(player.x))<.1 and CampaignGround.has_floor(floor_at(player.x)):return true
 	for platform in platforms:
 		if disabled_platforms.has(platform.position.x):continue
@@ -372,6 +373,7 @@ func load_section(id: String) -> void:
 		CampaignRescue.populate(self)
 	CampaignRhythm.populate(self)
 	CampaignGround.align_world(self)
+	CampaignGround.install_walkways(self)
 	CampaignWeapons.populate_sidearm(self)
 	state = "playing"
 	CampaignRecovery.enter(self)
@@ -771,7 +773,7 @@ func step_enemies(dt: float) -> void:
 				e.wait = 1.8 if bool(e.mini) else (1.85 if rapid_seed else 2.2)+float(int(e.attacks)%3)*.25
 		else:
 			e.wait = float(e.wait)-dt
-			if float(e.wait)<=0. and absf(dx)<(150. if e.kind=="gnome" else 600.):
+			if float(e.wait)<=0. and absf(dx)<(150. if e.kind=="gnome" else 600.) and not CampaignContent.relay_opening_blocked(self,e):
 				e.windup = .85 if bool(e.mini) else .65
 		if float(e.age)>.35 and absf(dx)<35. and absf(float(e.y)-player.y)<55. and float(e.windup)>.03 and float(e.windup)<.27: enemy_body_hit(e)
 

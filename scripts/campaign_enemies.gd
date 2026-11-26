@@ -34,6 +34,9 @@ static func shot(w,e: Dictionary,offset: float=0.,height: float=-35.,speed: floa
 	var direction: Vector2=(w.player+Vector2(0,-36)-origin).normalized().rotated(offset)
 	w.bullets.append({"p":origin,"v":direction*speed,"owner":"enemy","age":0.,"kind":"seed","damage":1,"pierce":0,"hit":[]})
 
+static func vine_sweep(e: Dictionary) -> Rect2:
+	return Rect2(float(e.x)-210.,float(e.y)-85.,420.,140.)
+
 static func attack(w,e: Dictionary) -> void:
 	var timing: Dictionary=timing_for(e)
 	e.flash=.45;e.attacks=int(e.attacks)+1;e.recover=float(timing.recover)
@@ -68,7 +71,7 @@ static func attack(w,e: Dictionary) -> void:
 		"mirror":shot(w,e,0.,-25.,185.)
 		"vine":
 			e.sweep=.45
-			if absf(w.player.x-float(e.x))<210. and w.player.y> -85.:w.damage_player()
+			if vine_sweep(e).has_point(CampaignRoutes.foot(w)):w.damage_player()
 		"burrow":e.lunge=.55
 		"conductor":
 			e.buff_pulse=.5
@@ -112,6 +115,9 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 	if absf(dx)>180. and kind not in ["mirror","vine","conductor"] and not is_hidden and not recovering:
 		var candidate: float=float(e.x)+signf(dx)*float(spec.speed)*dt
 		if flying or CampaignGround.has_floor(w.floor_at(candidate)):e.x=candidate
+	if lunge_before>0.:
+		var next: float=float(e.x)+signf(dx)*(230. if kind!="borer" else 270.)*minf(active_dt,lunge_before)
+		if CampaignGround.has_floor(w.floor_at(next)):e.x=next
 	var support: float=w.floor_at(float(e.x))
 	if not flying and CampaignGround.PROFILES.has(w.section) and CampaignGround.has_floor(support):e.y=support
 	if kind=="hopper" and not recovering:e.y=support-absf(sin(float(e.age)*3.))*85.
@@ -119,9 +125,6 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 		var leap_duration: float=float(e.get("leap_duration",.6 if kind=="mimic" else .8))
 		var leap_phase: float=clampf(1.-float(e.leap)/leap_duration,0.,1.)
 		e.y=(support if CampaignGround.has_floor(support) else float(e.home.y))-sin(leap_phase*PI)*100.
-	if lunge_before>0.:
-		var next: float=float(e.x)+signf(dx)*(230. if kind!="borer" else 270.)*minf(active_dt,lunge_before)
-		if CampaignGround.has_floor(w.floor_at(next)):e.x=next
 	if recovering and not flying:e.y=support if CampaignGround.has_floor(support) else float(e.home.y)
 	if is_hidden:e.y=support if CampaignGround.has_floor(support) else float(e.home.y)
 	# Prevent instant spawn-frame contact hits and reward attacking during recovery.

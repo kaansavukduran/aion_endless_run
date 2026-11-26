@@ -27,7 +27,7 @@ static func walkway(v,surface: Rect2) -> void:
 	for x in range(158,width-50,144):supports.append(float(x))
 	for dx in supports:
 		var floor_y: float=v.world.floor_at(surface.position.x+dx+6.)
-		if floor_y>=180.:continue
+		if not CampaignGround.has_floor(floor_y):continue
 		var height: int=roundi(floor_y-surface.position.y)
 		if height<=24:continue
 		var base: Vector2=p+Vector2(dx,height)

@@ -1126,6 +1126,7 @@ func _process(dt: float) -> void:
 		else:view.camera_x=desired_x
 		var desired_y:=minf(0.,world.player.y+clampf(view.scene_h*.27,136.,220.))
 		if CampaignGround.PROFILES.has(world.section):desired_y+=maxf(0.,world.player.y)*.95
+		desired_y=CampaignGround.descent_preview(world,desired_y,portrait)
 		desired_y=CampaignRoutes.camera_y(world,desired_y)
 		view.camera_y=desired_y if options.reduced_motion else lerpf(view.camera_y,desired_y,1.-exp(-minf(dt,.05)*9.))
 		world.recovery_view=Rect2(view.camera_x,view.camera_y-view.ground,view.scene_w,view.ground+60.)

@@ -49,16 +49,30 @@ static func draw(v) -> void:
 		var z_w: float=float(z.width)
 		if z.kind=="dark":
 			# Subtle shadow veil drawn behind actors/bullets so telegraphs stay crystal-clear.
-			v.draw_rect(Rect2(z_left,0.,z_w,v.ground+12.),Color(0.04,0.03,0.08,0.34))
+			var ground_only: bool=bool(z.get("ground_only",false))
+			var shade_top: float=v.at(Vector2(float(z.x),-24.)).y if ground_only else 0.
+			var shade_bottom: float=v.scene_h if ground_only else v.ground+12.
+			v.draw_rect(Rect2(z_left,shade_top,z_w,shade_bottom-shade_top),Color(0.04,0.03,0.08,0.34))
 			var lantern: Vector2=v.at(w.player+Vector2(0.,-36.))
-			v.draw_circle(lantern,110.,Color(1.0,0.84,0.56,0.10))
-			v.draw_arc(lantern,110.,0.,TAU,24,Color(1.0,0.84,0.56,0.18),2.)
+			if lantern.y>=shade_top:
+				v.draw_circle(lantern,110.,Color(1.0,0.84,0.56,0.10))
+				v.draw_arc(lantern,110.,0.,TAU,24,Color(1.0,0.84,0.56,0.18),2.)
 			continue
 		var colour:=Color("83c6d5") if z.kind=="current" else Color("bfe8d4")
 		colour.a=.34
 		var phase: float=fmod(w.time*45.,90.) if animated else 0.
 		if z.kind=="current":
-			v.draw_rect(Rect2(z_left,v.ground+surface-34.,z_w,34.),Color(0.24,0.58,0.70,0.14))
+			var zone_end: float=float(z.x)+z_w
+			var start_x: float=maxf(v.camera_x,float(z.x))
+			var end_x: float=minf(v.camera_x+v.scene_w,zone_end)
+			for left in range(floori(start_x),ceili(end_x),45):
+				var right: float=minf(left+45.,zone_end)
+				var left_floor: float=w.floor_at(left)
+				var right_floor: float=w.floor_at(right)
+				if not CampaignGround.has_floor(left_floor) or not CampaignGround.has_floor(right_floor):continue
+				var a: Vector2=v.at(Vector2(left,left_floor))
+				var b: Vector2=v.at(Vector2(right,right_floor))
+				v.draw_colored_polygon(PackedVector2Array([a-Vector2(0,34),b-Vector2(0,34),b,a]),Color(0.24,0.58,0.70,0.14))
 		else:
 			v.draw_rect(Rect2(z_left,v.ground+surface-175.,z_w,175.),Color(0.55,0.82,0.74,0.10))
 		for i in range(0,int(z.width),90):

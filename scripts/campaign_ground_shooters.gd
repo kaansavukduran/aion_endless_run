@@ -67,6 +67,7 @@ static func velocity(e: Dictionary) -> Vector2:
 	return (point-origin(e))/ARC_SECONDS-Vector2(0.,float(spec.gravity)*ARC_SECONDS*.5)
 
 static func walk(w,e: Dictionary,direction: int,dt: float) -> void:
+	if bool(e.get("roof_perch",false)):return
 	var candidate: float=clampf(float(e.x)+direction*float(ROLES[e.kind].speed)*dt,42.,w.length()-80.)
 	var height: float=w.floor_at(candidate)
 	if not CampaignGround.has_floor(height) or absf(height-float(e.y))>24.:return
@@ -103,10 +104,10 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 		e.recover=float(spec.recover);e.wait=.15;e.attacks=int(e.attacks)+1
 		return true
 	e.wait=maxf(0.,float(e.wait)-dt)
-	if float(e.age)>=FIRST_PREPARATION and float(e.wait)<=0. and absf(dx)<=float(spec.ready_range) and absf(w.player.y-float(e.y))<175. and visible_threat(w,e):
+	if float(e.age)>=FIRST_PREPARATION and float(e.wait)<=0. and absf(dx)<=float(spec.ready_range) and absf(w.player.y-float(e.y))<175. and visible_threat(w,e) and not CampaignContent.relay_opening_blocked(w,e):
 		e.windup=float(spec.windup);e.facing=face
 		e.throw_target=w.player+Vector2(0.,-31.)
-		e.burst_pending=e.kind=="lantern_scout" and int(e.attacks)%3!=0
+		e.burst_pending=e.kind=="lantern_scout" and (bool(e.get("roof_perch",false)) or int(e.attacks)%3!=0)
 	elif absf(dx)>float(spec.ready_range)*.72:
 		walk(w,e,face,dt)
 	elif absf(dx)<160. and int(e.attacks)>0:

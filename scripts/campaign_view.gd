@@ -551,8 +551,9 @@ func draw_combat_cues() -> void:
 		if e.kind==CampaignHive.KIND:
 			if float(e.windup)>0.:CampaignHive.draw_warning(self,e)
 			continue
-		if not bool(e.defeated) and bool(e.get("emerge_warn",false)):
-			var gp := at(Vector2(float(e.x),0.))
+		var emerge_floor: float=world.floor_at(float(e.x)) if bool(e.get("emerge_warn",false)) else CampaignGround.VOID_HEIGHT
+		if CampaignGround.has_floor(emerge_floor):
+			var gp := at(Vector2(float(e.x),emerge_floor))
 			var r: float = 16. if host.options.reduced_motion else 12.+absf(sin(world.time*14.))*10.
 			draw_arc(gp,r,PI,TAU,14,Color("e8a36c"),3.)
 			caption("!",gp+Vector2(-3,-22),16)
@@ -562,6 +563,12 @@ func draw_combat_cues() -> void:
 		if not bool(e.defeated) and str(e.kind)=="mirror" and float(e.windup)>0.:
 			var mp := at(p+Vector2(int(e.facing)*20.,-34.))
 			draw_arc(mp,24.,-PI*.45 if int(e.facing)>0 else PI*.55,PI*.45 if int(e.facing)>0 else PI*1.45,12,Color("9be5f5"),3.)
+		if str(e.kind)=="vine" and (float(e.windup)>0. or float(e.get("sweep",0.))>0.):
+			var sweep:=CampaignEnemies.vine_sweep(e)
+			var sweep_origin:=at(sweep.position)
+			var active: bool=float(e.get("sweep",0.))>0.
+			draw_rect(Rect2(sweep_origin,sweep.size),Color(0.95,0.67,0.35,0.13 if active else 0.07))
+			draw_line(sweep_origin,sweep_origin+Vector2(sweep.size.x,0.),Color("e9aa6a"),2.)
 		if attack and not bool(e.defeated):
 			var point := at(p+Vector2(0,-70))
 			draw_circle(point,5,Color("f7bb70")); caption("!",point+Vector2(-3,-10),20)
