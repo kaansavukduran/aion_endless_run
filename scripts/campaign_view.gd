@@ -204,7 +204,7 @@ func draw_world() -> void:
 			for enemy in blockers.slice(0,3):
 				var target: Vector2=at(Vector2(float(enemy.x),float(enemy.y)-75.))
 				var arrow: String="◀" if target.x<16. else ("▶" if target.x>scene_w-24. else "▼")
-				target.x=clampf(target.x,16.,scene_w-24.);target.y=maxf(target.y,host.hud_panel.strip_height+55.)
+				target.x=clampf(target.x,16.,scene_w-24.);target.y=maxf(target.y,host.world_hud_bottom()+55.)
 				caption(arrow,target+Vector2(-5,0),16)
 	draw_npcs(false)
 	CampaignRoutes.draw_cage_front(self)
@@ -480,7 +480,7 @@ func draw_honey_splash(blast: Dictionary) -> void:
 		draw_rect(Rect2(p+Vector2(x,y),Vector2(5,4)),bright if i%2==0 else honey)
 
 func draw_root_reveal(drawing: Dictionary,pivot: Vector2) -> void:
-	var entering: bool=host.presentation_stage=="boss_reveal"
+	var entering: bool=host.get("presentation_stage")=="boss_reveal"
 	var progress: float=clampf(float(host.presentation_time)/1.25,0.,1.) if entering else 0.
 	if entering and (host.options.reduced_motion or not host.motion_enabled):progress=1.
 	var size: Vector2=drawing.size

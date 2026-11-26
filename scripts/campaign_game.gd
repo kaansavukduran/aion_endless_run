@@ -217,6 +217,7 @@ func t(key: String) -> String:
 	return Words.word(language,key)
 func old(key: String) -> String: return GameText.get_text(language,key)
 func font_size(size: int) -> int: return roundi(size*options.text_scale)
+func world_hud_bottom() -> float: return hud_panel.strip_height
 func menu_title() -> String:
 	if menu_kind in ["map","equipment"]:return CampaignFieldUI.text(self,menu_kind)
 	return t({"briefing":"title","help":"controls","paused":"pause","dead":"game_over","continue_offer":"continue_choose","complete":"report","result_details":"details","outro":"won","settings":"settings"}.get(menu_kind,"title"))
