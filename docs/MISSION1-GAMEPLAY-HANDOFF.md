@@ -2,6 +2,10 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 0.58.5 · İngilizce tabela metni
+
+393 × 740 Chromium oynanışında iki İngilizce satırın çerçeveyi aştığı görüldü. Cümleler aynı ödülü daha kısa anlatsın diye düzenlendi. [Rota ve düşük cephane koşusu](https://github.com/kaansavukduran/aion_endless_run/pull/37)
+
 ## 0.58.4 · Kıyı kavşağı ödülleri
 
 - İlk kavşağın girişinde yön okları ve üç ödül Türkçe ve İngilizce görünür. Duraklatma menüsünün Harita ekranında aynı bilgiler yer alır.

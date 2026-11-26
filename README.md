@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.58.5 · Dar ekranda kavşak tabelası
+
+İngilizce üst iskele ve alt kanal satırları, dikey ekranlarda tabela çerçevesine sığacak şekilde kısaltıldı.
+
 ## 0.58.4 · Kıyı kavşağında üç ödül
 
 Kavşaktaki tabela ve Harita üç yolun ödülünü gösterir. Üst iskelede mermi ve bomba bulunur. Orta yolun son devriyesini dağıtmak 450 ek puan verir. Alt kanaldaki pompa cephane ve bir puan rafı bulunan bakım odasını açar.
