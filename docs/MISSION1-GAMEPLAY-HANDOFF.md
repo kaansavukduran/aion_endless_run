@@ -2,6 +2,13 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 0.58.4 · Kıyı kavşağı ödülleri
+
+- İlk kavşağın girişinde yön okları ve üç ödül Türkçe ve İngilizce görünür. Duraklatma menüsünün Harita ekranında aynı bilgiler yer alır.
+- Üst iskeleye tabanca mermisi ve bomba koyuldu. Orta yolun son devriyesini dağıtan oyuncu 450 ek puan alır ve devriyeyi atlayarak da Bakır Röle’ye gidebilir. Eski kayıtlar açıldığında önceki savaş kapısı temizlenir.
+- Teknisyenin parçasıyla pompa çalıştırıldığında bakım odasında tabanca mermisi ve bir puan rafı açılır. Alt çıkış odanın arkasına taşınır. Alınan ikmal ve ödüller kayıttan geri yüklenince yeniden verilmez.
+- Yerel Godot 4.6.3 üzerinde rota, saha arayüzü, arena, gizli yollar, ritim, görev mantığı ve görev menüsü paketlerinde 2.663 kontrol geçti. Bu paketler geometri ve kayıt senaryoları için doğrudan kurulan oyun durumları da içerir.
+
 ## 0.58.3 · Doğuş, ikmal ve Kırık İskele
 
 - Kırık İskele’nin iki bekçi kilidi kaldırıldı. Eski kaydı yükleyen oyuncu aynı karşılaşma konumundan kovalamacaya devam edebilir. Yükleme sırasında iki kilit temizlenir.

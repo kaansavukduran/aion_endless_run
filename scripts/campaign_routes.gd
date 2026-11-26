@@ -21,12 +21,22 @@ const MIDDLE_FLOOR := 0.
 const MIDDLE_WALKWAYS := [Rect2(1214.,44.,130.,16.),Rect2(1370.,MIDDLE_FLOOR,390.,20.)]
 const DRY_START := 1410.
 const DRY_FLOOR := 162.
+const DRY_EXIT_X := 1700.
+const DRY_CACHE_DECK := Rect2(1520.,104.,132.,16.)
 const PUMP_X := 1360.
 const PUMP_ID := "fork_one:pump"
 const TECHNICIAN_ID := "fork_one:technician"
 const TECHNICIAN_CAGE_ID := "fork_one:technician:cage"
 const PUMP_PART_ID := "fork_one:technician:relay_part"
 const DRY_SUPPLY_ID := "fork_one:pump:service-supply"
+const DRY_CACHE_ID := "fork_one:pump:maintenance-cache"
+const UPPER_SUPPLY := [
+	{"id":"fork_one:upper:ammo","x":930.,"y":UPPER_FLOOR-32.,"kind":"pistol_ammo"},
+	{"id":"fork_one:upper:grenades","x":1280.,"y":UPPER_FLOOR-32.,"kind":"grenade"},
+]
+const CAUSEWAY_PATROL := "causeway_relay_approach"
+const CAUSEWAY_REWARD_ID := "causeway:patrol-bonus"
+const CAUSEWAY_BONUS := 450
 const SHELTERS := {
 	"shore":[Rect2(1010.,-106.,138.,18.),Rect2(2960.,-68.,180.,18.)],
 	"canopy":[Rect2(1030.,-99.,180.,18.)]
@@ -58,7 +68,7 @@ static func pump_open(w) -> bool:
 	return w.activated.has(PUMP_ID)
 
 static func pickup_exposed(w,item: Dictionary) -> bool:
-	if str(item.id)==DRY_SUPPLY_ID:return pump_open(w)
+	if str(item.id) in [DRY_SUPPLY_ID,DRY_CACHE_ID]:return pump_open(w)
 	return w.section!="fork_two" or hatch_open(w) or float(item.y)<=floor_height(w,float(item.x))
 
 static func lower_start(w) -> float:
@@ -105,8 +115,8 @@ static func populate(w) -> void:
 static func install_first_fork(w) -> void:
 	for deck in MIDDLE_WALKWAYS:
 		if deck not in w.platforms:w.platforms.append(deck)
-	if not w.taken.has(DRY_SUPPLY_ID) and not w.pickups.any(func(item):return str(item.id)==DRY_SUPPLY_ID):
-		w.pickups.append({"id":DRY_SUPPLY_ID,"x":1455.,"y":DRY_FLOOR-31.,"kind":"pistol_ammo"})
+	for supply in UPPER_SUPPLY:install_pickup(w,supply)
+	if pump_open(w):install_dry_alcove(w)
 	var freed: bool=w.rescued.has(TECHNICIAN_ID)
 	var shown_gift: bool=w.gift_drops.has(TECHNICIAN_ID)
 	var claimed: bool=w.taken.has(TECHNICIAN_ID+":supply") or w.awarded.has(TECHNICIAN_ID+":gift")
@@ -127,6 +137,25 @@ static func install_first_fork(w) -> void:
 		drop.age=0.
 		w.pickups.append(drop)
 
+static func install_pickup(w, item: Dictionary) -> void:
+	if not w.taken.has(item.id) and not w.pickups.any(func(existing):return existing.id==item.id):
+		w.pickups.append(item.duplicate())
+
+static func install_dry_alcove(w) -> void:
+	if DRY_CACHE_DECK not in w.platforms:w.platforms.append(DRY_CACHE_DECK)
+	install_pickup(w,{"id":DRY_SUPPLY_ID,"x":1455.,"y":DRY_FLOOR-31.,"kind":"pistol_ammo"})
+	install_pickup(w,{"id":DRY_CACHE_ID,"x":1588.,"y":DRY_CACHE_DECK.position.y-30.,"kind":"points"})
+
+static func reward_causeway_patrol(w, defeated_id: String) -> void:
+	if w.section!="causeway" or w.awarded.has(CAUSEWAY_REWARD_ID):return
+	for encounter in w.encounters:
+		if encounter.role!=CAUSEWAY_PATROL or defeated_id not in encounter.enemies:continue
+		if encounter.enemies.all(func(id):return w.awarded.has(id)):
+			w.award(CAUSEWAY_REWARD_ID,CAUSEWAY_BONUS)
+			w.pending_events.append("mechanism")
+			notify(w,"arc_route_patrol_clear")
+		return
+
 static func install_shelters(w) -> void:
 	for deck in SHELTERS.get(w.section,[]):
 		if deck not in w.platforms:w.platforms.append(deck)
@@ -135,7 +164,7 @@ static func after_restore(w) -> void:
 	# Exact older snapshots replace authored arrays after loading the section.
 	# Add only new stable records, retaining visited paths and claimed pickups.
 	if w.section=="fork_one":install_first_fork(w)
-	if w.section=="quay":w.gates.clear()
+	if w.section in ["quay","causeway"]:w.gates.clear()
 	install_shelters(w)
 
 static func is_shelter(section: String,deck: Rect2) -> bool:
@@ -180,6 +209,7 @@ static func use_context(w) -> bool:
 	match context_action(w):
 		"arc_run_pump":
 			w.activated[PUMP_ID]=true
+			install_dry_alcove(w)
 			w.pending_events.append("mechanism")
 			notify(w,"arc_route_pump_open")
 			return true
@@ -285,7 +315,9 @@ static func choice_at(w) -> String:
 	if absf(contact.y-UPPER_FLOOR)<1.:return "canopy" if w.section=="fork_one" else "terrace"
 	if w.section=="fork_one" and absf(contact.y-MIDDLE_FLOOR)<1.:return "causeway"
 	var lower: float=floor_height(w,contact.x)
-	if lower>0. and absf(contact.y-lower)<1.:return "water" if w.section=="fork_one" else "roots"
+	if lower>0. and absf(contact.y-lower)<1.:
+		if w.section=="fork_two":return "roots"
+		if not pump_open(w) or contact.x>=DRY_EXIT_X:return "water"
 	return ""
 
 static func step(w) -> void:
@@ -486,8 +518,9 @@ static func lantern_positions(w) -> Array[Vector2]:
 
 static func exit_flag_positions(w) -> Array[Vector2]:
 	var positions: Array[Vector2]=[Vector2(EXIT_X,UPPER_FLOOR)]
-	var lower_y:=floor_height(w,EXIT_X)
-	if lower_y>0.:positions.append(Vector2(EXIT_X,lower_y))
+	var lower_x:=DRY_EXIT_X if w.section=="fork_one" and pump_open(w) else EXIT_X
+	var lower_y:=floor_height(w,lower_x)
+	if lower_y>0.:positions.append(Vector2(lower_x,lower_y))
 	if w.section=="fork_one":positions.append(Vector2(EXIT_X,MIDDLE_FLOOR))
 	return positions
 
@@ -501,7 +534,7 @@ static func draw_platform(v,deck: Rect2) -> bool:
 			v.draw_rect(Rect2(cap+Vector2(x,2),Vector2(8,2)),Color("b88d58"))
 			v.draw_rect(Rect2(cap+Vector2(x+3,15),Vector2(2,3)),Color("dfb977"))
 		return true
-	if v.world.section!="fork_one" or deck not in MIDDLE_WALKWAYS:return false
+	if v.world.section!="fork_one" or (deck not in MIDDLE_WALKWAYS and deck!=DRY_CACHE_DECK):return false
 	var surface: Vector2=v.at(deck.position)
 	var width: float=deck.size.x
 	var slab: float=deck.size.y
@@ -568,6 +601,34 @@ static func draw_route_sign(v,position: Vector2,vertical: float) -> void:
 	v.draw_line(end-Vector2(5,1.+vertical*5.),end,ink,2.)
 	v.draw_line(end-Vector2(5,-4.+vertical*5.),end,ink,2.)
 
+static func draw_junction_board(v) -> void:
+	const LEFT := 233.
+	const WIDTH := 400.
+	const ROW_HEIGHT := 33.
+	const TOP_ABOVE_DECK := 222.
+	if LEFT+WIDTH<v.camera_x or LEFT>v.camera_x+v.scene_w:return
+	var p: Vector2=v.at(Vector2(LEFT,WALKWAYS[0].position.y-TOP_ABOVE_DECK)).round()
+	var post_top:=ROW_HEIGHT*3.-3.
+	var post_height:=TOP_ABOVE_DECK-post_top
+	for x in [64.,264.]:
+		v.draw_rect(Rect2(p+Vector2(x,post_top),Vector2(9.,post_height)),Color("494044"))
+		v.draw_rect(Rect2(p+Vector2(x+2.,post_top+1.),Vector2(2.,post_height-2.)),Color("a68160"))
+	var labels := ["fork_reward_upper","fork_reward_middle","fork_reward_lower"]
+	var arrows := [Vector2.UP,Vector2.RIGHT,Vector2.DOWN]
+	var colors := [Color("f2cf86"),Color("e5a777"),Color("a5dfd3")]
+	v.draw_rect(Rect2(p-Vector2(2,2),Vector2(WIDTH+4.,ROW_HEIGHT*3.+4.)),Color("342c35"))
+	for i in labels.size():
+		var row: Vector2=p+Vector2(0.,i*ROW_HEIGHT)
+		v.draw_rect(Rect2(row,Vector2(WIDTH,ROW_HEIGHT-1.)),Color("765844"))
+		v.draw_rect(Rect2(row+Vector2(2,2),Vector2(WIDTH-4.,ROW_HEIGHT-5.)),Color("352f39"))
+		var direction: Vector2=arrows[i]
+		var tip: Vector2=row+Vector2(18,16)+direction*7.
+		var corner: Vector2=direction.orthogonal()*5.
+		v.draw_line(tip-direction*14.,tip,colors[i],2.)
+		v.draw_line(tip-direction*5.+corner,tip,colors[i],2.)
+		v.draw_line(tip-direction*5.-corner,tip,colors[i],2.)
+		v.caption(CampaignFieldUI.text(v.host,labels[i]),row+Vector2(39,23),23)
+
 static func draw_cage_latches(v) -> void:
 	var w=v.world
 	for o in w.objects:
@@ -617,6 +678,7 @@ static func draw_landmarks(v) -> void:
 	for p in exit_flag_positions(v.world):
 		v.draw_flag(p,.84)
 	if v.world.section=="fork_one":
+		draw_junction_board(v)
 		draw_route_sign(v,Vector2(532.,0.),-1.)
 		draw_route_sign(v,Vector2(619.,0.),1.)
 		draw_route_sign(v,Vector2(1286.,MIDDLE_WALKWAYS[0].position.y),-1.)
