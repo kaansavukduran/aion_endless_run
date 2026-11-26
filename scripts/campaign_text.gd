@@ -73,6 +73,7 @@ const FIELD_TEXT := {
 	"inspect_pump":["Pompayı incele","Inspect pump"],
 	"relay_part":["Röle parçası","Relay coupler"],
 	"route_pump_open":["Su çekildi. Kuru bakım yolu açıldı.","The water receded. The dry service path is open."],
+	"route_patrol_clear":["Devriye dağıtıldı. +450 puan","Patrol cleared. +450 points"],
 	"route_pump_hint":["Pompa için teknisyenin röle parçasını bul.","Find the technician's relay coupler for the pump."],
 	"route_cage_armed":["Kafes kuruldu.","Cage set."],
 	"route_cage_caught":["Kafes saldırganı yakaladı.","The cage caught the attacker."],

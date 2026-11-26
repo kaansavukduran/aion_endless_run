@@ -79,6 +79,8 @@ func run() -> void:
 	check(CampaignFieldUI.checkpoint(game).contains(CampaignFieldUI.text(game,"checkpoint_flag")),"Last checkpoint reads real supply flag")
 	await activate(game,"CampaignMapPassages")
 	check(CampaignFieldUI.screen_summary(game).contains(CampaignFieldUI.text(game,"visited")),"Map branch status has a textual equivalent")
+	for key in ["fork_reward_upper","fork_reward_middle","fork_reward_lower"]:
+		check(CampaignFieldUI.screen_summary(game).contains(CampaignFieldUI.text(game,key)),"Map lists the same route reward as the junction sign: "+key)
 	check(CampaignFieldUI.screen_summary(game).contains(CampaignStory.latest_note(game.world,game.language)),"Discovered story clue has a textual equivalent")
 	game.world.player.y=CampaignRoutes.LOWER_FLOOR+72.
 	game.world.activated["fork_one:pump"]=true

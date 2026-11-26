@@ -21,6 +21,9 @@ const TEXT := {
 	"upper":["Üst iskele","Upper deck"],
 	"middle":["Orta yol","Causeway"],
 	"lower":["Alt geçit","Lower passage"],
+	"fork_reward_upper":["Üst iskele · Mermi ve bomba","Upper deck · Ammo and grenades"],
+	"fork_reward_middle":["Orta yol · İsteğe bağlı devriye","Causeway · Optional patrol"],
+	"fork_reward_lower":["Alt kanal · Pompayla keşif","Lower channel · Pump to explore"],
 	"dry":["Kuru kanal","Drained channel"],
 	"rumored":["Olası geçit","Possible passage"],
 	"visited":["İzlenen yol","Path taken"],
@@ -179,17 +182,18 @@ static func map_routes(host) -> Array[String]:
 		var hatch: String=text(host,"open" if CampaignRoutes.hatch_open(w) else "locked")
 		rows.append(text(host,"root_hatch")+" · "+hatch)
 	else:
-		rows.append(route_status(host,"upper","canopy",found))
-		if w.STAGES.has("causeway"):rows.append(route_status(host,"middle","causeway",found))
-		rows.append(route_status(host,"lower","water",found))
+		rows.append(route_status(host,"upper","canopy",found,"fork_reward_upper"))
+		rows.append(route_status(host,"middle","causeway",found,"fork_reward_middle"))
+		rows.append(route_status(host,"lower","water",found,"fork_reward_lower"))
 		var pump: bool=w.activated.has("fork_one:pump")
 		if pump or w.activated.has("fork_one:technician:relay_part") or upgrade(w,"insight"):
 			rows.append(text(host,"mechanism")+" · "+text(host,"dry" if pump else "locked"))
 	return rows
 
-static func route_status(host, layer: String, destination: String, found: Dictionary) -> String:
+static func route_status(host, layer: String, destination: String, found: Dictionary, reward: String="") -> String:
 	var status: String=text(host,"visited" if found.has(destination) else "rumored")
-	return text(host,layer)+" · "+host.t(destination)+" · "+status
+	var label: String=text(host,reward) if not reward.is_empty() else text(host,layer)+" · "+host.t(destination)
+	return label+" · "+status
 
 static func equipment_effects(host) -> Array[String]:
 	var w: AionCampaignWorld=host.world

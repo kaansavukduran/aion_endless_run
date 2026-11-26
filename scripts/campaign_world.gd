@@ -571,6 +571,7 @@ func damage_enemy(e: Dictionary, amount: int, style: String="") -> void:
 	if int(e.hp) > 0: return
 	e.defeated = true; e.dead_age = 0.
 	CampaignStyle.defeat(self,e,500 if bool(e.mini) else (400 if bool(e.get("heavy",false)) else 100),style)
+	CampaignRoutes.reward_causeway_patrol(self,str(e.id))
 	if style=="swallow":return
 	blasts.append({"p":Vector2(float(e.x),float(e.y)-25.), "age":0., "radius":40., "color":"85d7c4"})
 	pending_events.append("enemy")
@@ -1075,8 +1076,9 @@ func step(dt: float,input_dt: float=-1.) -> void:
 		var blocked := false
 		for npc in npcs:
 			if str(npc.get("phase",""))=="thanks" and float(npc.get("thank_age",0.))<1.7:blocked=true
-		for e in enemies:
-			if not bool(e.defeated) and (bool(e.mini) or float(e.x)>length()-650.): blocked = true
+		if section!="causeway":
+			for e in enemies:
+				if not bool(e.defeated) and (bool(e.mini) or float(e.x)>length()-650.): blocked = true
 		if not blocked:
 			begin_travel(str(STAGES[section].next))
 

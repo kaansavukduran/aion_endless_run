@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.58.4 · Kıyı kavşağında üç ödül
+
+Kavşaktaki tabela ve Harita üç yolun ödülünü gösterir. Üst iskelede mermi ve bomba bulunur. Orta yolun son devriyesini dağıtmak 450 ek puan verir. Alt kanaldaki pompa cephane ve bir puan rafı bulunan bakım odasını açar.
+
 ## 0.58.3 · Mission 1 hareket ve ikmal
 
 Yeniden doğduktan sonra yürüme yardımı ilk yön girdisini bekler. Özel silahlar temasla kuşanılır. Kırık İskele’deki bekçi kilitleri kaldırıldı. Light, Ayça ve Eren’le aynı zamanlamada güç toplayarak zıplar. Altı kahraman kıyıya geliş nedenini oyun başında söyler. Su Kanalı, Bahçe Terasları ve Kök Geçidi için özgün müzikler eklendi.

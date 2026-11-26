@@ -192,6 +192,7 @@ func hatch_landmarks_and_rewards() -> void:
 func pump_and_cage() -> void:
 	var w:=fresh()
 	w.enemies.clear()
+	check(CampaignRoutes.DRY_CACHE_DECK not in w.platforms and not w.pickups.any(func(item):return item.id==CampaignRoutes.DRY_CACHE_ID),"The service shelf and cache are absent before draining")
 	var cage: Dictionary=w.objects.filter(func(o):return str(o.id)==CampaignRoutes.TECHNICIAN_CAGE_ID)[0]
 	var keeper: Dictionary=w.npcs.filter(func(n):return str(n.id)==CampaignRoutes.TECHNICIAN_ID)[0]
 	w.player=Vector2(1224.,90.)
@@ -214,7 +215,15 @@ func pump_and_cage() -> void:
 	w.player=Vector2(CampaignRoutes.PUMP_X,90.)
 	check(CampaignRoutes.context_action(w)=="arc_run_pump" and w.interact() and CampaignRoutes.pump_open(w),"The context action activates the lower pump after collecting its part")
 	check(w.floor_at(CampaignRoutes.DRY_START+5.)==CampaignRoutes.DRY_FLOOR,"The open pump reveals the deeper supported dry floor")
-	check(Vector2(CampaignRoutes.EXIT_X,CampaignRoutes.DRY_FLOOR) in CampaignRoutes.exit_flag_positions(w),"The lower route flag follows the drained floor")
+	check(Vector2(CampaignRoutes.DRY_EXIT_X,CampaignRoutes.DRY_FLOOR) in CampaignRoutes.exit_flag_positions(w),"The lower route flag moves behind the drained alcove")
+	w.player=Vector2(CampaignRoutes.EXIT_X+10.,CampaignRoutes.DRY_FLOOR)
+	check(CampaignRoutes.choice_at(w).is_empty(),"The wet exit does not skip the open service room")
+	w.player=Vector2(1588.,CampaignRoutes.DRY_CACHE_DECK.position.y)
+	var cache_score:=w.score
+	w.step(1./60.)
+	check(w.grounded() and w.taken.has(CampaignRoutes.DRY_CACHE_ID) and w.score==cache_score+500,"Landing on the dry shelf collects its points by contact")
+	w.player=Vector2(CampaignRoutes.DRY_EXIT_X+10.,CampaignRoutes.DRY_FLOOR)
+	check(CampaignRoutes.choice_at(w)=="water","The drained passage still leads onward to the water route")
 	check(not w.interact(),"An already running pump cannot award a second interaction")
 	w.player=Vector2(float(cage.x)+35.,90.)
 	check(CampaignRoutes.context_action(w)=="arc_arm_cage" and w.interact(),"The freed cage accepts one visible trap setup")
@@ -224,6 +233,7 @@ func pump_and_cage() -> void:
 	check(w.enemies[0].defeated and not w.enemies[1].defeated and w.activated.has(CampaignRoutes.TECHNICIAN_CAGE_ID+":trap-spent"),"The cage catches one eligible ground enemy and is spent")
 	var restored:=AionCampaignWorld.new()
 	check(restored.restore(w.snapshot()) and CampaignRoutes.pump_open(restored) and restored.activated.has(CampaignRoutes.TECHNICIAN_CAGE_ID+":trap-spent"),"Pump and spent cage survive actual snapshot restore")
+	check(CampaignRoutes.DRY_CACHE_DECK in restored.platforms and restored.taken.has(CampaignRoutes.DRY_CACHE_ID) and not restored.pickups.any(func(item):return item.id==CampaignRoutes.DRY_CACHE_ID),"The dry shelf survives restoration and its claimed cache stays claimed")
 	var old:=fresh()
 	for deck in CampaignRoutes.MIDDLE_WALKWAYS:old.platforms.erase(deck)
 	old.npcs.clear()
@@ -234,6 +244,41 @@ func pump_and_cage() -> void:
 	check(bool(vacant.active) and vacant.x==990. and causeway.npcs.all(func(n):return n.get("cage","")!=vacant.id),"An authored empty cage stays beside its Causeway approach and holds no NPC")
 	causeway.player=Vector2(958.,causeway.floor_at(958.))
 	check(causeway.interact() and causeway.activated.has(vacant.id+":trap-set"),"The empty Causeway cage can be set by the ordinary action while grounded in the basin")
+
+func junction_rewards() -> void:
+	var w:=fresh()
+	w.enemies.clear()
+	w.ammunition=5
+	w.grenades=1
+	w.player=Vector2(930.,CampaignRoutes.UPPER_FLOOR)
+	w.step(1./60.)
+	w.player=Vector2(1280.,CampaignRoutes.UPPER_FLOOR)
+	w.step(1./60.)
+	check(w.ammunition>5 and w.grenades>1 and CampaignRoutes.UPPER_SUPPLY.all(func(item):return w.taken.has(item.id)),"The upper deck pays out real ammunition and grenades on contact")
+	var restored:=AionCampaignWorld.new()
+	check(restored.restore(w.snapshot()) and CampaignRoutes.UPPER_SUPPLY.all(func(item):return restored.taken.has(item.id)),"Upper supply claims persist through Continue")
+	check(not restored.pickups.any(func(item):return item.id.begins_with("fork_one:upper:")),"The upper supplies do not reappear after claiming them")
+	w.load_section("causeway")
+	var patrol: Array=w.encounters.filter(func(encounter):return encounter.role==CampaignRoutes.CAUSEWAY_PATROL)[0].enemies
+	w.gates.append({"x":3020.,"ids":patrol})
+	check(restored.restore(w.snapshot()) and restored.gates.is_empty(),"Continuing an old Causeway encounter removes its former fight lock")
+	var members: Array=restored.enemies.filter(func(enemy):return enemy.id in patrol)
+	for i in members.size():
+		var enemy: Dictionary=members[i]
+		for hit in int(enemy.armour)+1:restored.damage_enemy(enemy,999)
+		check(restored.awarded.has(CampaignRoutes.CAUSEWAY_REWARD_ID)==(i==members.size()-1),"Causeway bonus requires all patrol members")
+	var score:=restored.score
+	CampaignRoutes.reward_causeway_patrol(restored,str(members[-1].id))
+	check(restored.score==score and restored.notice=="arc_route_patrol_clear","The patrol bonus appears once with clear feedback")
+	check(restored.restore(restored.snapshot()) and restored.awarded.has(CampaignRoutes.CAUSEWAY_REWARD_ID),"Causeway bonus ownership survives save/continue")
+	w.gates.clear()
+	w.player=Vector2(w.length()-220.,w.floor_at(w.length()-220.))
+	w.invulnerable=10.
+	w.move_axis=Vector2.RIGHT
+	for frame in 80:
+		if w.state!="playing":break
+		w.step(1./60.)
+	check(w.travel_target=="relay" and w.enemies.any(func(enemy):return enemy.id in patrol and not enemy.defeated),"The Causeway can be crossed with the optional patrol still active")
 
 func shelter_route() -> void:
 	var w:=fresh();w.load_section("shore")
@@ -323,6 +368,7 @@ func run() -> void:
 	route_structures()
 	hatch_landmarks_and_rewards()
 	pump_and_cage()
+	junction_rewards()
 	shelter_route()
 	var snap:=w.snapshot();var restored:=AionCampaignWorld.new();check(restored.restore(snap) and restored.section=="fork_one" and restored.state=="playing","A junction checkpoint restores into gameplay")
 	var game:=AionCampaignGame.new();root.add_child(game);await process_frame;game.set_process(false)
