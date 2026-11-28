@@ -132,8 +132,9 @@ static func goal_key(w) -> String:
 			return "shore_goal"
 		"quay":return "fork_one_goal"
 		"fork_one":
-			if not w.activated.has("fork_one:pump"):
-				if w.activated.has("fork_one:technician:relay_part") or upgrade(w,"insight"):return "pump_hint"
+			if not CampaignRoutes.pump_open(w):
+				if w.activated.has(CampaignRoutes.PUMP_PART_ID):return "pump_hint"
+				if upgrade(w,"insight"):return "arc_route_pump_hint"
 			return "fork_goal"
 		"fork_two":return "fork_goal"
 		"relay":return "relay_goal"

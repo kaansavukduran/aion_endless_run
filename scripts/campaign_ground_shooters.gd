@@ -10,6 +10,9 @@ const RELEASE_SECONDS := .14
 const FIRST_PREPARATION := .55
 const BURST_SPACING := .20
 const ROOF_REST := .78
+const ROOF_PEEK_INSET := 14.
+const SHOT_LIFE := 2.
+const LANE_MARK_SPACING := 28.
 const DATA := preload("res://assets/CAMPAIGN-GROUND-SHOOTERS-PROVENANCE.json")
 const ART := preload("res://assets/campaign-ground-shooters.png")
 const DEFEAT_ART := preload("res://assets/campaign-ground-shooter-defeats.png")
@@ -76,9 +79,35 @@ static func walk(w,e: Dictionary,direction: int,dt: float) -> void:
 		e.stride=float(e.get("stride",0.))+absf(candidate-float(e.x))
 		e.x=candidate;e.y=height;e.facing=direction
 
+static func roof_peek_side(w) -> int:
+	var cover: Rect2=CampaignContent.RELAY_COVERS[1]
+	if w.player.x<cover.position.x:return -1
+	if w.player.x>cover.end.x:return 1
+	return 0
+
+static func roof_bore_clear(w,e: Dictionary) -> bool:
+	var muzzle:=origin(e)
+	return not CampaignContent.cover_contact(w,muzzle,muzzle+Vector2(float(e.facing)*LANE_MARK_SPACING,0.)).is_finite()
+
+static func step_roof_peek(w,e: Dictionary,direction: int,dt: float) -> bool:
+	var cover: Rect2=CampaignContent.RELAY_COVERS[1]
+	var here: float=e.x
+	var target:=cover.position.x+ROOF_PEEK_INSET if direction<0 else cover.end.x-ROOF_PEEK_INSET
+	var candidate:=move_toward(here,target,float(ROLES[e.kind].speed)*dt)
+	var supported: bool=w.platforms.any(func(deck: Rect2):
+		return candidate>=deck.position.x and candidate<=deck.end.x and is_equal_approx(float(e.y),deck.position.y) and not w.disabled_platforms.has(deck.position.x))
+	if not supported:return false
+	if not is_equal_approx(here,candidate):
+		e.facing=-1 if candidate<here else 1
+		e.stride=float(e.get("stride",0.))+absf(candidate-here)
+		e.x=candidate
+	if candidate!=target:return false
+	e.facing=direction
+	return roof_bore_clear(w,e)
+
 static func release_shot(w,e: Dictionary,spec: Dictionary) -> void:
 	w.bullets.append({"p":origin(e),"v":velocity(e),"owner":"enemy","kind":str(spec.kind),
-		"colour":str(spec.colour),"gravity":float(spec.gravity),"age":0.,"damage":1,"pierce":0,"hit":[],"life":2.})
+		"colour":str(spec.colour),"gravity":float(spec.gravity),"age":0.,"damage":1,"pierce":0,"hit":[],"life":SHOT_LIFE})
 	e.release=RELEASE_SECONDS
 	w.pending_events.append("scout_shot" if e.kind=="lantern_scout" else "lob_throw")
 
@@ -95,13 +124,13 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 		var second_at: float=e.get("burst_second_at",float(spec.recover)-BURST_SPACING)
 		if bool(e.get("burst_pending",false)) and float(e.recover)<=second_at:
 			e.burst_pending=false
-			if visible_threat(w,e) and dx*int(e.facing)>0. and absf(dx)<=float(spec.ready_range)+55.:
+			if visible_threat(w,e) and dx*int(e.facing)>0. and absf(dx)<=float(spec.ready_range)+55. and (not perching or roof_bore_clear(w,e)):
 				release_shot(w,e,spec)
 		return true
 	if float(e.windup)>0.:
 		e.windup=maxf(0.,float(e.windup)-dt)
 		if float(e.windup)>0.:return true
-		if not visible_threat(w,e) or absf(dx)>float(spec.ready_range)+55.:
+		if not visible_threat(w,e) or absf(dx)>float(spec.ready_range)+55. or (perching and not roof_bore_clear(w,e)):
 			e.wait=.25;e.burst_pending=false
 			return true
 		release_shot(w,e,spec)
@@ -110,6 +139,9 @@ static func step(w,e: Dictionary,dt: float) -> bool:
 		return true
 	e.wait=maxf(0.,float(e.wait)-dt)
 	if float(e.age)>=FIRST_PREPARATION and float(e.wait)<=0. and absf(dx)<=float(spec.ready_range) and absf(w.player.y-float(e.y))<175. and visible_threat(w,e) and not CampaignContent.relay_opening_blocked(w,e):
+		if perching:
+			face=roof_peek_side(w)
+			if face==0 or not step_roof_peek(w,e,face,dt):return true
 		e.windup=float(spec.windup);e.facing=face
 		e.throw_target=w.player+Vector2(0.,-31.)
 		e.burst_pending=e.kind=="lantern_scout" and (perching or int(e.attacks)%3!=0)
@@ -132,12 +164,16 @@ static func draw(v,e: Dictionary,body: Vector2) -> void:
 			var p: Vector2=v.at(start)
 			v.draw_rect(Rect2(p-Vector2(4.,2.),Vector2(10.,4.)),tint.darkened(.38))
 			v.draw_rect(Rect2(p-Vector2(2.,1.),Vector2(6.,2.)),tint.lightened(.45))
-		for i in range(1,12):
-			var mark:=start+Vector2(int(e.facing)*i*28.,0.)
-			if CampaignGround.touches_ground(v.world,start,mark) or CampaignContent.cover_contact(v.world,start,mark).is_finite():break
-			v.draw_rect(Rect2(v.at(mark),Vector2(6.,2.)),tint)
-			if bool(e.get("burst_pending",false)):
-				v.draw_rect(Rect2(v.at(mark+Vector2(0.,-6.)),Vector2(4.,2.)),tint)
+		var reach: float=float(ROLES[e.kind].speed_px)*SHOT_LIFE
+		var previous:=start
+		for i in range(1,ceili(reach/LANE_MARK_SPACING)+1):
+			var mark:=start+Vector2(int(e.facing)*minf(i*LANE_MARK_SPACING,reach),0.)
+			if CampaignGround.touches_ground(v.world,previous,mark) or CampaignContent.cover_contact(v.world,previous,mark).is_finite() or CampaignRoutes.solid_at(v.world,mark):break
+			if mark.x>=v.camera_x-8. and mark.x<=v.camera_x+v.scene_w+8.:
+				v.draw_rect(Rect2(v.at(mark),Vector2(6.,2.)),tint)
+				if bool(e.get("burst_pending",false)):
+					v.draw_rect(Rect2(v.at(mark+Vector2(0.,-6.)),Vector2(4.,2.)),tint)
+			previous=mark
 	else:
 		var direction:=velocity(e)
 		for i in range(1,8):

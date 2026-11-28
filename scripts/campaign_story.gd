@@ -122,7 +122,7 @@ static func step(w) -> void:
 		return
 	var route_clue: Array = ROUTE_CLUES.get(section, [])
 	if not route_clue.is_empty() and reads_ground_plate(w, PLATE_X, 130.):
-		record(w, route_clue[0], w.notice_time <= .0)
+		record(w, route_clue[0], w.notice_time <= .0 or w.notice == "arc_checkpoint")
 
 static func draw(v) -> void:
 	var w = v.world

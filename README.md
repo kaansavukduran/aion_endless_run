@@ -1,5 +1,9 @@
 # Aion Endless Run
 
+## 0.58.10 · Karga dalışı ve Bakır Röle
+
+Karganın dalış izi hazırlık başladığında görünür. İşaretli hattan adım atarak çıkabilir veya ahşap çatının altına sığınabilirsin. Bakır Röle’de Fener Keşifçisi siperin iki kenarından ateş eder ve iki atıştan sonra açık verir. Yakın dövüş veya ip kesme anında yön değiştirirsen güncel nişan kullanılır. Rota levhaları da kontrol noktasına vardığında okunur. [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md)
+
 ## 0.58.9 · İlk öldürmede, ilk bıçakta takılma yok
 
 Oynanış değişmedi. Bir düşman türünün ilk ölümü, ilk bıçak darbesi, ilk kurtarma kesimi ve ilk tünel artık oyun içinde koca bir sprite sayfası çözmüyor: bu kareler bölüm kararmış geçişte yüklenirken önceden kesiliyor. Çözülmüş sayfa önbelleği sayfa sayısıyla değil bayt bütçesiyle (72 MB) sınırlanıyor; 0,6 MB'lık satır şeritleri artık 6 MB'lık bir sayfanın yerini kaplamıyor. İlk ziyaret turunda oyun içi sayfa çözme 4–5'ten 1–2'ye, tepe bellek 72,0'dan 69,3 MB'a indi. Ayrıntı: [Mission 1 oynanış devri](docs/MISSION1-GAMEPLAY-HANDOFF.md).

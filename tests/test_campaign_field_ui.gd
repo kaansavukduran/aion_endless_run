@@ -62,6 +62,17 @@ func run() -> void:
 	game.audio_enabled=false
 	game.begin_new()
 	game.world.load_section("fork_one")
+	game.world.rescued.append("shore:keeper")
+	game.world.state="paused"
+	check(CampaignUpgrades.choose(game.world,"insight"),"A rescued keeper unlocks the actual Insight option")
+	var starting_language:=game.language
+	for locale in ["tr","en"]:
+		game.language=locale
+		check(CampaignFieldUI.objective(game).ends_with(game.t("arc_route_pump_hint")),"Insight points to the missing coupler before asking to use the pump: "+locale)
+	game.language=starting_language
+	game.world.activated.erase(CampaignUpgrades.KEY_PREFIX+"insight")
+	game.world.rescued.pop_back()
+	game.world.state="playing"
 	game.world.player=Vector2(1430.,CampaignRoutes.UPPER_FLOOR)
 	game.world.activated["fork_one:technician:relay_part"]=true
 	game.world.discovered[CampaignStory.clue_id("story_pump")]=true

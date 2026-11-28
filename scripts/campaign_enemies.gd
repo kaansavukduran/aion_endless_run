@@ -1,6 +1,67 @@
 class_name CampaignEnemies
 extends RefCounted
 
+const CROW_DIVE_SECONDS := .70 / .9
+const CROW_DIVE_OFFSET := Vector2(0., -25.)
+const CROW_DIVE_RADIUS := 35.
+
+static func aim_crow_dive(w, e: Dictionary) -> void:
+	e.dive_aim = w.player + CROW_DIVE_OFFSET
+	e.facing = -1 if Vector2(e.dive_aim).x < float(e.x) else 1
+
+static func start_crow_dive(w, e: Dictionary) -> void:
+	e.dive = CROW_DIVE_SECONDS
+	e.dive_duration = CROW_DIVE_SECONDS
+	e.dive_start = Vector2(float(e.x), float(e.y))
+	e.dive_target = e.get("dive_aim", w.player + CROW_DIVE_OFFSET)
+	e.erase("dive_aim")
+
+static func crow_set_position(e: Dictionary, point: Vector2) -> void:
+	var dx := point.x - float(e.x)
+	if absf(dx) > .05: e.facing = -1 if dx < 0. else 1
+	e.x = point.x
+	e.y = point.y
+
+static func flight_height(e: Dictionary) -> float:
+	return float(e.home.y) + sin(float(e.age) * 2.2) * 20.
+
+static func step_crow_rebound(e: Dictionary) -> bool:
+	var contact: Vector2 = e.get("roof_deflection", Vector2.INF)
+	var elapsed := float(e.age) - float(e.get("roof_deflection_age", -10.))
+	if not contact.is_finite() or elapsed > CampaignRoutes.ROOF_DEFLECTION_SECONDS: return false
+	var progress := clampf(elapsed / CampaignRoutes.ROOF_DEFLECTION_SECONDS, 0., 1.)
+	var from := contact - Vector2(0., 14.)
+	var direction := -1. if Vector2(e.dive_target).x > Vector2(e.dive_start).x else 1.
+	var retreat := Vector2(contact.x + direction * 56., flight_height(e))
+	crow_set_position(e, from.lerp(retreat, smoothstep(0., 1., progress)))
+	return true
+
+static func step_crow_dive(w, e: Dictionary, dt: float) -> void:
+	var duration: float = e.get("dive_duration", CROW_DIVE_SECONDS)
+	var inbound := float(e.dive) > duration * .5
+	var from: Vector2 = e.get("dive_last", e.dive_start)
+	var target: Vector2 = e.dive_target
+	e.dive = maxf(0., float(e.dive) - dt)
+	var phase := 1. - float(e.dive) / duration
+	var direction := -1. if target.x > Vector2(e.dive_start).x else 1.
+	var retreat := Vector2(target.x + direction * 65., flight_height(e))
+	var hit_end := Vector2(e.dive_start).lerp(target, minf(1., phase * 2.))
+	var point := hit_end if phase < .5 else target.lerp(retreat, (phase - .5) * 2.)
+	if inbound and CampaignRoutes.stop_crow_dive_at_roof(w, e, hit_end):
+		var contact: Vector2 = e.roof_deflection
+		hit_end = contact - Vector2(0., 14.)
+		point = hit_end
+		e.dive = 0.
+		e.wait = maxf(float(e.wait), 1.35)
+	crow_set_position(e, point)
+	if e.dive > 0.: e.dive_last = point
+	else: e.erase("dive_last")
+	if inbound and w.state == "playing" and not CampaignRoutes.crow_sheltered(w, w.player):
+		var centre: Vector2 = w.player + CROW_DIVE_OFFSET
+		var closest := Geometry2D.get_closest_point_to_segment(centre, from, hit_end)
+		if closest.distance_squared_to(centre) < CROW_DIVE_RADIUS * CROW_DIVE_RADIUS:
+			w.enemy_body_hit(e)
+
 ## New roles retain one normal HP. Armoured machines and guardians are separate.
 ## 0.32.0: Explicit 4-stage readability cycle (telegraph -> active -> recovery -> reposition).
 ## Timings are rule constants; Sol 6.2 art must match these windows rather than alter them.

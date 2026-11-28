@@ -503,6 +503,33 @@ func enemy_attacking(e: Dictionary) -> bool:
 	var recovering: bool=float(e.get("recover",0.))>0. and CampaignEnemies.active_time(e)<=0.
 	return float(e.windup)>0. or (not recovering and (float(e.get("flash",0.))>0. or CampaignEnemies.active_time(e)>0. or float(e.get("dash",0.))>0. or float(e.get("dive",0.))>0.))
 
+func draw_crow_warning(e: Dictionary) -> void:
+	if float(e.windup) <= 0. or not e.has("dive_aim"): return
+	var bird := Vector2(float(e.x), float(e.y))
+	var target: Vector2 = e.dive_aim
+	var roof := CampaignRoutes.crow_roof_contact(world, bird, target)
+	var blocked := roof.is_finite()
+	if blocked: target = roof
+	var mark := at(target)
+	var ink := Color("ffe9a7")
+	var shade := Color("403044")
+	# Sparse path marks remain visible when the bird is beyond the viewport.
+	for i in range(1, 6):
+		var dash := at(bird.lerp(target, float(i) / 6.))
+		if dash.x < -8. or dash.x > scene_w + 8.: continue
+		draw_rect(Rect2(dash - Vector2(4., 3.), Vector2(8., 6.)), shade)
+		draw_rect(Rect2(dash - Vector2(2., 1.), Vector2(4., 2.)), ink)
+	if mark.x < -42. or mark.x > scene_w + 42.: return
+	if blocked:
+		draw_rect(Rect2(mark - Vector2(13., 5.), Vector2(26., 7.)), shade)
+		draw_rect(Rect2(mark - Vector2(10., 4.), Vector2(20., 3.)), Color("c3e5bd"))
+		return
+	for side in [-1., 1.]:
+		var edge := mark + Vector2(side * CampaignEnemies.CROW_DIVE_RADIUS, 13.)
+		var corner := PackedVector2Array([edge - Vector2(0., 10.), edge, edge - Vector2(side * 13., 0.)])
+		draw_polyline(corner, shade, 6.)
+		draw_polyline(corner, ink, 2.)
+
 func draw_combat_cues() -> void:
 	# Critical intent stays above smoke and impacts; FX never owns attack timing.
 	M1FinaleForgeArt.draw_floor(self)
@@ -510,7 +537,9 @@ func draw_combat_cues() -> void:
 		if CampaignWardens.applies(e):
 			CampaignWardens.draw_threat(self,e)
 			continue
-		if bool(e.defeated) or float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
+		if bool(e.defeated) or bool(e.get("swallowed",false)):continue
+		if e.kind == "crow":draw_crow_warning(e)
+		if float(e.x)<camera_x-210. or float(e.x)>camera_x+scene_w+210.:continue
 		var p:=Vector2(float(e.x),float(e.y))
 		var attack: bool=enemy_attacking(e)
 		if e.kind==CampaignHive.KIND:
