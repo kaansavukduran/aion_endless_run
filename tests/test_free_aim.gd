@@ -18,6 +18,48 @@ func pointer_check(game,angle: float) -> float:
 	return game.world.aim_direction.distance_to((game.mouse_point-hand_origin(game)).normalized())
 func primary(v: Vector2) -> bool:
 	return absf(v.x)<.02 or absf(v.y)<.02 or absf(absf(v.x)-absf(v.y))<.02
+func click_attack(game: AionCampaignGame, toward: int) -> void:
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = hand_origin(game) + Vector2(250. * toward, 0.)
+	game._unhandled_input(click)
+
+func face_before_click(game: AionCampaignGame, direction: int) -> void:
+	game.release_all()
+	game.world.facing = direction
+	game.world.aim_direction = Vector2(direction, 0.)
+	game.world.enemies.clear()
+	game.world.bullets.clear()
+	game.world.fire_time = 0.
+	game.world.melee_time = 0.
+	game.world.shots = 0
+
+func check_fast_reversal(game: AionCampaignGame) -> void:
+	game.set_process(false)
+	game.world.prewarm_art = false
+	game.begin_new()
+	game.world.player = Vector2(420., 0.)
+	game.world.npcs.clear()
+	game.view.camera_x = 0.
+	game.view.camera_y = 0.
+	for initial in [-1, 1]:
+		face_before_click(game, initial)
+		game.world.spawn_enemy("gnome", 420. + initial * 60., 0., 901)
+		click_attack(game, -initial)
+		check(game.world.shots == 1 and game.world.melee_time == 0. and not game.world.bullets.is_empty() and float(game.world.bullets[0].v.x) * initial < 0., "A same-frame turn and click fires past the enemy behind the new aim")
+		face_before_click(game, initial)
+		game.world.spawn_enemy("gnome", 420. - initial * 60., 0., 902)
+		click_attack(game, -initial)
+		check(game.world.shots == 0 and game.world.melee_target == "shore:enemy:902" and game.world.melee_time > 0., "A same-frame turn and click strikes the enemy in the new aim direction")
+		face_before_click(game, initial)
+		game.world.npcs = [{"id":"captive","x":420. - initial * 60.,"y":0.,"freed":false,"secret":""}]
+		click_attack(game, -initial)
+		check(game.world.shots == 0 and game.world.rescue_target == "captive" and game.world.rescue_time > 0., "A same-frame turn and click cuts the rope in the new aim direction")
+		game.world.rescue_time = 0.
+		game.world.rescue_target = ""
+		game.world.npcs.clear()
+
 func _initialize() -> void:call_deferred("run")
 func run() -> void:
 	var game=AionCampaignGame.new();game.world.begin("aion");game.world.state="playing"
@@ -53,4 +95,5 @@ func run() -> void:
 	game.world.fire_time=0.;CampaignWeapons.fire(game.world)
 	var shot: Dictionary=game.world.bullets[-1]
 	check(game.world.shots==before+1 and Vector2(shot.v).normalized().distance_to(wanted)<.001 and not primary(wanted),"The real projectile flies toward the mouse at a free angle")
+	check_fast_reversal(game)
 	print("RESULT: %d free aim checks, %d failures"%[checks,failures]);quit(1 if failures else 0)

@@ -2,6 +2,12 @@
 
 Bu belge Mission 1 oynanış çalışmasının tek devir defteridir. [M1-DELIVERY.md](M1-DELIVERY.md) tarihsel teslim kaydıdır; bu çalışmanın güncel durumu buradadır. Mission 2 geliştirmesi kullanıcı Mission 1'i kabul edene kadar başlamaz; Mission 1 sonucu oyuncuyu Mission 2'ye göndermez.
 
+## 0.58.10 · Okunabilir dalış ve siper çatışması
+
+- Karga hazırlıkta dalış noktasını kilitler. Piksel izleri gidiş hattını, iki köşe ucu vuruş alanını gösterir. Gerçek ahşap çatı hattı kesiyorsa iz çatıda sonlanır. Kuş aynı temas noktasından sekerek yükselir. Hasar iniş boyunca süpürülür ve yükseliş sırasında oyuncu karşılık verebilir. Eski bir kayıt hazırlığın ortasında açılırsa hedef ilk karede sabitlenir.
+- Bakır Röle’de Keşifçi tabliyenin iki ucuna ayağı destekli biçimde yürür. Namlu taşı geçince uyarı başlar ve mermiyle aynı hizada görünür. Önceden soldaki ilk kaya teması namludan 1,44 piksel uzaktaydı. Siperin arkasına geçen oyuncu hâlâ korunur. Atışlar ve açık verme süreleri mevcut döngüyü kullanır.
+- Fareyle tek girdide yön değiştirip tıklama, ateş, yumruk ve ip kesme seçimini güncel nişana göre yapar. Bölge levhası kontrol noktası bildirimini devralır ve tam okuma süresi boyunca görünür. Zekâ yükseltmesinin kanal hedefi, pompa parçası bulunana kadar teknisyeni işaret eder.
+
 ## 0.58.8 · Bölgesel karşılaşmalar ve Kök Motoru
 
 - Bakır Röle’de iki yükseklikteki taş siperler süpürülmüş mermi yolunu keser. Fener Keşifçisi ikinci atıştan sonra en az 0,75 saniye açık kalır ve drone aynı saldırı sırasını paylaşır. Alt çanaktaki isteğe bağlı ızgara silah veya iki yumrukla açılır. İkmal hakkı kayıt, ölüm ve tekrar girişte korunur.

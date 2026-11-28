@@ -715,7 +715,8 @@ func enemy_shot(e: Dictionary, fan: bool = false) -> void:
 		e.dash=.45 if e.kind=="gnome" else .65
 		e.dash_direction=signf(player.x-float(e.x));return
 	if e.kind=="crow":
-		e.dive=.70/.9;e.dive_duration=.70/.9;e.dive_start=Vector2(float(e.x),float(e.y));e.dive_target=player+Vector2(0,-25.);return
+		CampaignEnemies.start_crow_dive(self,e)
+		return
 	var origin := Vector2(float(e.x),float(e.y)-32.)
 	if e.kind=="moth":
 		bullets.append({"p":origin,"v":Vector2(signf(player.x-origin.x)*80.,50.),"owner":"enemy","age":0.,"kind":"spore","damage":1,"pierce":0,"hit":[],"gravity":180.});return
@@ -736,16 +737,25 @@ func step_enemies(dt: float) -> void:
 		e.flash=maxf(0.,float(e.get("flash",0.))-dt)
 		if CampaignGroundShooters.step(self,e,dt):continue
 		CampaignWeapons.step_shell(e,dt)
-		e.facing = CampaignWeapons.beetle_facing(e,-1 if float(e.x)>player.x else 1)
+		var crow: bool = e.kind == "crow"
+		if not crow or (float(e.windup) <= 0. and float(e.get("dive",0.)) <= 0.):
+			e.facing = CampaignWeapons.beetle_facing(e,-1 if float(e.x)>player.x else 1)
 		if e.kind==CampaignHive.KIND:
 			CampaignHive.step(self,e,dt)
 			continue
 		if CampaignEnemies.step(self,e,dt):continue
+		if crow and float(e.get("dive",0.)) > 0.:
+			e.wait = float(e.wait) - dt
+			CampaignEnemies.step_crow_dive(self,e,dt)
+			continue
+		if crow and CampaignEnemies.step_crow_rebound(e):
+			e.wait = float(e.wait) - dt
+			continue
 		var dx: float = player.x-float(e.x)
 		var flying: bool = e.kind in ["crow","moth","drone","wisp"]
 		if flying:
-			e.y = float(e.home.y)+sin(float(e.age)*2.2)*20.
-			if absf(dx)>240.: e.x = float(e.x)+signf(dx)*82.*dt
+			e.y = CampaignEnemies.flight_height(e)
+			if absf(dx)>240. and (not crow or float(e.windup)<=0.): e.x = float(e.x)+signf(dx)*82.*dt
 		elif absf(dx)>155. and e.kind != "seed":
 			var candidate: float = clampf(float(e.x)+signf(dx)*(58. if bool(e.mini) else 76.)*dt,60.,length()-80.)
 			if CampaignGround.has_floor(floor_at(candidate)):e.x=candidate
@@ -760,22 +770,10 @@ func step_enemies(dt: float) -> void:
 			if state=="playing" and absf(player.x-float(e.x))<34. and absf(player.y-float(e.y))<55.:
 				enemy_body_hit(e)
 				if state!="playing":break
-		if float(e.get("dive",0.))>0.:
-			e.dive=maxf(0.,float(e.dive)-dt)
-			var phase: float=1.-float(e.dive)/float(e.get("dive_duration",.7/.9))
-			var p: Vector2=Vector2(e.dive_start).lerp(Vector2(e.dive_target),minf(1.,phase*2.)) if phase<.5 else Vector2(e.dive_target).lerp(Vector2(float(e.dive_target.x)-65.,float(e.home.y)),(phase-.5)*2.)
-			if str(e.kind)=="crow" and CampaignRoutes.stop_crow_dive_at_roof(self,e,p):
-				e.dive=0.;e.wait=maxf(float(e.wait),1.35)
-				e.erase("dive_last")
-				continue
-			e.x=p.x;e.y=p.y
-			if e.dive>0.:e.dive_last=p
-			else:e.erase("dive_last")
-			if state=="playing" and p.distance_to(player+Vector2(0,-25.))<35. and not (str(e.kind)=="crow" and CampaignRoutes.crow_sheltered(self,player)):
-				enemy_body_hit(e)
-				if state!="playing":break
 		if not flying and e.kind!="slime" and CampaignGround.has_floor(floor_at(float(e.x))) and str(e.kind)!="seed":e.y=floor_at(float(e.x))
 		if float(e.windup)>0.:
+			# Older saved windups had no fixed target. Register it at the first resumed tick.
+			if crow and not e.has("dive_aim"):CampaignEnemies.aim_crow_dive(self,e)
 			e.windup = maxf(0.,float(e.windup)-dt)
 			if float(e.windup)==0.:
 				enemy_shot(e,bool(e.mini)); e.attacks = int(e.attacks)+1
@@ -785,7 +783,8 @@ func step_enemies(dt: float) -> void:
 			e.wait = float(e.wait)-dt
 			if float(e.wait)<=0. and absf(dx)<(150. if e.kind=="gnome" else 600.) and not CampaignContent.relay_opening_blocked(self,e):
 				e.windup = .85 if bool(e.mini) else .65
-		if float(e.age)>.35 and absf(dx)<35. and absf(float(e.y)-player.y)<55. and float(e.windup)>.03 and float(e.windup)<.27: enemy_body_hit(e)
+				if crow:CampaignEnemies.aim_crow_dive(self,e)
+		if not crow and float(e.age)>.35 and absf(dx)<35. and absf(float(e.y)-player.y)<55. and float(e.windup)>.03 and float(e.windup)<.27: enemy_body_hit(e)
 
 func step_boss(dt: float) -> void:
 	CampaignBossPressure.step(self,dt)

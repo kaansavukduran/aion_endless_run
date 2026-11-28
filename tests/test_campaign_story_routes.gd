@@ -45,6 +45,9 @@ func first_signal() -> void:
 	first.home = Vector2(hit_x, -185.)
 	first.x = hit_x
 	first.y = -185.
+	first.windup = 0.
+	first.wait = 0.
+	w.step_enemies(1. / 60.)
 	for i in 90:
 		w.step_enemies(1. / 60.)
 		if first.has("roof_deflection"):
@@ -52,15 +55,64 @@ func first_signal() -> void:
 	var contact: Vector2 = first.get("roof_deflection", Vector2.INF)
 	check(contact.is_finite() and is_equal_approx(contact.y, shelter.position.y), "The physical deflection emits a cue at the exact collision deck")
 	check(is_zero_approx(float(first.dive)) and CampaignStory.signal_crow(w).is_empty(), "Deflection stops the real attack and extinguishes the active cabinet signal")
+	var deflection_y: float = first.y
+	w.step_enemies(1. / 60.)
+	check(float(first.y) < deflection_y and absf(deflection_y - float(first.y)) < 8., "The deflected crow rebounds from the roof without snapping back to flight height")
+
+func committed_dive() -> void:
+	var w := world_in("shore")
+	w.enemies.clear()
+	w.spawn_enemy("crow", 980., -185., 941)
+	var crow: Dictionary = w.enemies.front()
+	var initial := Vector2(820., w.floor_at(820.))
+	w.player = initial
+	w.invulnerable = 0.
+	w.shield_charge = 0.
+	crow.wait = 0.
+	w.step_enemies(1. / 60.)
+	var mark := initial + CampaignEnemies.CROW_DIVE_OFFSET
+	check(crow.get("dive_aim") == mark and int(crow.facing) == -1, "Windup commits to the original target and faces down the marked line")
+	var restored := AionCampaignWorld.new()
+	check(restored.restore(w.snapshot()) and restored.enemies.front().get("dive_aim") == mark, "An exact Continue keeps the warned dive location")
+
+	w.player = Vector2(690., w.floor_at(690.))
+	for frame in 44:
+		w.step_enemies(1. / 60.)
+	check(crow.get("dive_target") == mark and int(crow.facing) == -1, "Moving away after the warning does not redirect the live dive")
+	for frame in 24:
+		w.step_enemies(1. / 60.)
+	check(w.state == "playing" and w.hp == 1 and float(crow.dive) < CampaignEnemies.CROW_DIVE_SECONDS * .5, "Stepping out of the marked lane dodges the descending strike")
+	w.player = Vector2(float(crow.x), float(crow.y)) - CampaignEnemies.CROW_DIVE_OFFSET
+	for frame in 19:
+		w.step_enemies(1. / 60.)
+	check(w.state == "playing" and w.hp == 1, "The retreat arc gives the player a safe counterattack window")
+
+	var saved_crow: Dictionary = restored.enemies.front()
+	saved_crow.erase("dive_aim")
+	restored.player = initial
+	restored.invulnerable = 0.
+	restored.shield_charge = 0.
+	restored.step_enemies(1. / 60.)
+	check(saved_crow.get("dive_aim") == mark, "A 0.58.9 windup without a cue acquires its aim on resume")
+	for frame in 90:
+		restored.step_enemies(1. / 60.)
+		if restored.state == "dying": break
+	check(restored.state == "dying" and restored.hp == 0, "Standing inside the marked strike still takes the real hit")
 
 func lower_copy() -> void:
 	var w := world_in("canopy")
 	w.player = Vector2(CampaignStory.PLATE_X, w.floor_at(CampaignStory.PLATE_X))
+	w.notice = "arc_checkpoint"
+	w.notice_time = 1.
 	CampaignStory.step(w)
+	check(w.notice == "story_top" and w.notice_time == CampaignStory.NOTICE_SECONDS, "A read plate replaces the brief checkpoint line and displays for its full reading time")
 	w.load_section("terrace")
 	w.player = Vector2(CampaignStory.PLATE_X, w.floor_at(CampaignStory.PLATE_X))
+	w.notice = "story_pump"
+	w.notice_time = 1.
 	CampaignStory.step(w)
 	check(w.discovered.has("story:top") and w.discovered.has("story:terrace"), "Canopy and Terrace plates save distinct messages")
+	check(w.notice == "story_pump", "Reading a plate does not interrupt a live keeper message")
 	w.load_section("roots")
 	w.player = Vector2(CampaignStory.PLATE_X, w.floor_at(CampaignStory.PLATE_X))
 	CampaignStory.step(w)
@@ -103,6 +155,7 @@ func pump_retry() -> void:
 
 func run() -> void:
 	first_signal()
+	committed_dive()
 	lower_copy()
 	pump_retry()
 	print("RESULT: %d campaign story and route checks, %d failures" % [checks, failures])

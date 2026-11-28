@@ -763,6 +763,8 @@ func set_action(key: String,source: String,down: bool,canceled: bool=false) -> v
 		"attack":
 			if after:
 				update_arcade_aim()
+				# Target selection runs before the next physics frame applies the aim facing.
+				if absf(world.aim_direction.x)>.15:world.facing=1 if world.aim_direction.x>0. else -1
 				world.attack_press()
 			else:world.attack_release()
 		"grenade":
